@@ -20,7 +20,6 @@
     "clsx": "^2.1.1",
     "tailwind-merge": "^2.3.0",
     "lucide-react": "^0.378.0",
-    "playfair-display": "^1.0.0",
     "date-fns": "^3.6.0",
     "zod": "^3.23.0",
     "react-hook-form": "^7.51.0",
