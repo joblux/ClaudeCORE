@@ -1,0 +1,454 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── JOBLUX DESIGN SYSTEM ─────────────────────────── */
+
+@layer base {
+  :root {
+    --color-gold:        #c8960c;
+    --color-gold-light:  #e4b042;
+    --color-gold-dark:   #9a6f0a;
+    --color-black:       #0a0a0a;
+    --color-dark:        #1a1a1a;
+    --color-border:      #e8e2d8;
+    --color-cream:       #fafaf5;
+    --font-serif:        'Playfair Display', Georgia, 'Times New Roman', serif;
+    --font-sans:         'Inter', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    color: var(--color-dark);
+    background: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--color-dark);
+  }
+
+  p {
+    line-height: 1.7;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  ::selection {
+    background-color: #c8960c22;
+    color: var(--color-dark);
+  }
+}
+
+@layer components {
+
+  /* ── TYPOGRAPHY ──────────────────────────────────── */
+
+  .jl-overline {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #888;
+  }
+
+  .jl-overline-gold {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+  }
+
+  .jl-serif {
+    font-family: var(--font-serif);
+  }
+
+  .jl-sans {
+    font-family: var(--font-sans);
+  }
+
+  /* ── LAYOUT ──────────────────────────────────────── */
+
+  .jl-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .jl-container-sm {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .jl-container-xs {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* ── DIVIDERS ─────────────────────────────────────── */
+
+  .jl-divider {
+    border: none;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .jl-divider-dark {
+    border: none;
+    border-top: 2px solid var(--color-dark);
+  }
+
+  .jl-divider-gold {
+    border: none;
+    border-top: 1px solid var(--color-gold);
+  }
+
+  /* ── SECTION LABEL ────────────────────────────────── */
+
+  .jl-section-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .jl-section-label span {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    white-space: nowrap;
+  }
+
+  .jl-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+  }
+
+  /* ── BUTTONS ──────────────────────────────────────── */
+
+  .jl-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.75rem 1.5rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .jl-btn-primary {
+    background: var(--color-dark);
+    color: var(--color-gold);
+    border-color: var(--color-dark);
+  }
+
+  .jl-btn-primary:hover {
+    background: #000;
+    border-color: #000;
+  }
+
+  .jl-btn-gold {
+    background: var(--color-gold);
+    color: var(--color-dark);
+    border-color: var(--color-gold);
+  }
+
+  .jl-btn-gold:hover {
+    background: var(--color-gold-dark);
+    border-color: var(--color-gold-dark);
+  }
+
+  .jl-btn-outline {
+    background: transparent;
+    color: var(--color-dark);
+    border-color: var(--color-dark);
+  }
+
+  .jl-btn-outline:hover {
+    background: var(--color-dark);
+    color: #fff;
+  }
+
+  .jl-btn-ghost {
+    background: transparent;
+    color: var(--color-gold);
+    border-color: var(--color-gold);
+  }
+
+  .jl-btn-ghost:hover {
+    background: var(--color-gold);
+    color: var(--color-dark);
+  }
+
+  /* ── SEARCH ───────────────────────────────────────── */
+
+  .jl-search {
+    display: flex;
+    border: 1px solid var(--color-dark);
+    overflow: hidden;
+    max-width: 600px;
+    width: 100%;
+  }
+
+  .jl-search input {
+    flex: 1;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    font-family: var(--font-serif);
+    border: none;
+    outline: none;
+    color: var(--color-dark);
+    background: #fff;
+  }
+
+  .jl-search input::placeholder {
+    color: #bbb;
+    font-style: italic;
+  }
+
+  .jl-search button {
+    background: var(--color-dark);
+    color: var(--color-gold);
+    padding: 0 1.5rem;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+
+  .jl-search button:hover {
+    background: #000;
+  }
+
+  /* ── CARDS ────────────────────────────────────────── */
+
+  .jl-card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    padding: 1.25rem;
+    transition: border-color 0.2s;
+  }
+
+  .jl-card:hover {
+    border-color: var(--color-gold);
+  }
+
+  .jl-card-dark {
+    background: var(--color-dark);
+    color: #fff;
+    padding: 1.5rem;
+  }
+
+  /* ── BADGES ───────────────────────────────────────── */
+
+  .jl-badge {
+    display: inline-block;
+    font-family: var(--font-sans);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.6rem;
+    background: var(--color-dark);
+    color: var(--color-gold);
+  }
+
+  .jl-badge-gold {
+    background: var(--color-gold);
+    color: var(--color-dark);
+  }
+
+  .jl-badge-outline {
+    background: transparent;
+    color: var(--color-dark);
+    border: 1px solid var(--color-border);
+  }
+
+  /* ── FORMS ────────────────────────────────────────── */
+
+  .jl-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    border: 1px solid var(--color-border);
+    outline: none;
+    background: #fff;
+    color: var(--color-dark);
+    transition: border-color 0.2s;
+  }
+
+  .jl-input:focus {
+    border-color: var(--color-dark);
+  }
+
+  .jl-label {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 0.4rem;
+  }
+
+  .jl-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    border: 1px solid var(--color-border);
+    outline: none;
+    background: #fff;
+    color: var(--color-dark);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+  }
+
+  /* ── ARTICLE CONTENT ──────────────────────────────── */
+
+  .jl-prose h2 {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--color-dark);
+    margin: 2rem 0 0.75rem;
+  }
+
+  .jl-prose h3 {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--color-dark);
+    margin: 1.5rem 0 0.5rem;
+  }
+
+  .jl-prose p {
+    font-size: 1.0625rem;
+    line-height: 1.8;
+    color: #333;
+    margin-bottom: 1.25rem;
+  }
+
+  .jl-prose blockquote {
+    border-left: 2px solid var(--color-gold);
+    padding: 0.75rem 1.25rem;
+    margin: 1.5rem 0;
+    background: var(--color-cream);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 1.125rem;
+    color: #555;
+  }
+
+  .jl-prose a {
+    color: var(--color-gold);
+    text-decoration: underline;
+    text-decoration-color: #e4b04240;
+    text-underline-offset: 3px;
+  }
+
+  .jl-prose a:hover {
+    text-decoration-color: var(--color-gold);
+  }
+
+  /* ── TICKER ───────────────────────────────────────── */
+
+  .jl-ticker {
+    background: var(--color-dark);
+    padding: 0.5rem 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .jl-ticker-inner {
+    display: inline-flex;
+    gap: 3rem;
+    animation: ticker 45s linear infinite;
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    color: #888;
+    letter-spacing: 0.04em;
+  }
+
+  .jl-ticker-inner em {
+    color: var(--color-gold);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  @keyframes ticker {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ── UTILITIES ────────────────────────────────────── */
+
+  .jl-text-gold { color: var(--color-gold); }
+  .jl-text-dark { color: var(--color-dark); }
+  .jl-text-muted { color: #888; }
+  .jl-bg-cream { background: var(--color-cream); }
+  .jl-bg-dark { background: var(--color-dark); }
+  .jl-border { border: 1px solid var(--color-border); }
+  .jl-border-dark { border: 1px solid var(--color-dark); }
+  .jl-border-gold { border: 1px solid var(--color-gold); }
+
+  /* ── RESPONSIVE HELPERS ───────────────────────────── */
+
+  .jl-hide-mobile {
+    @apply hidden md:block;
+  }
+
+  .jl-show-mobile {
+    @apply block md:hidden;
+  }
+}
