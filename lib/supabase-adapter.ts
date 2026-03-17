@@ -1,4 +1,4 @@
-import { Adapter, AdapterUser, AdapterSession, AdapterAccount } from "next-auth/adapters";
+import { Adapter, AdapterUser } from "next-auth/adapters";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 /**
@@ -16,7 +16,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
   return {
     // ── Create User ──
-    async createUser(user) {
+    async createUser(user: Omit<AdapterUser, "id">): Promise<AdapterUser> {
       // When someone signs in for the first time via OAuth or magic link,
       // create a minimal member record with status "new"
       const { data, error } = await supabase
@@ -52,7 +52,7 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
     },
 
     // ── Get User by ID ──
-    async getUser(id) {
+    async getUser(id: string): Promise<AdapterUser | null> {
       const { data, error } = await supabase
         .from("members")
         .select()
@@ -64,7 +64,7 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
     },
 
     // ── Get User by Email ──
-    async getUserByEmail(email) {
+    async getUserByEmail(email: string): Promise<AdapterUser | null> {
       const { data, error } = await supabase
         .from("members")
         .select()
@@ -76,7 +76,13 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
     },
 
     // ── Get User by Account ──
-    async getUserByAccount({ providerAccountId, provider }) {
+    async getUserByAccount({
+      providerAccountId,
+      provider,
+    }: {
+      providerAccountId: string;
+      provider: string;
+    }): Promise<AdapterUser | null> {
       const { data: account, error: accountError } = await supabase
         .from("nextauth_accounts")
         .select("member_id")
@@ -97,7 +103,9 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
     },
 
     // ── Update User ──
-    async updateUser(user) {
+    async updateUser(
+      user: Partial<AdapterUser> & Pick<AdapterUser, "id">
+    ): Promise<AdapterUser> {
       const updates: Record<string, unknown> = {};
       if (user.name) {
         updates.first_name = user.name.split(" ")[0];
@@ -118,7 +126,7 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
     },
 
     // ── Delete User ──
-    async deleteUser(userId) {
+    async deleteUser(userId: string): Promise<void> {
       await supabase.from("nextauth_accounts").delete().eq("member_id", userId);
       await supabase
         .from("nextauth_verification_tokens")
@@ -128,7 +136,19 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
     },
 
     // ── Link Account ──
-    async linkAccount(account) {
+    async linkAccount(account: {
+      userId: string;
+      type: string;
+      provider: string;
+      providerAccountId: string;
+      refresh_token?: string | null;
+      access_token?: string | null;
+      expires_at?: number | null;
+      token_type?: string | null;
+      scope?: string | null;
+      id_token?: string | null;
+      session_state?: string | null;
+    }): Promise<void> {
       const { error } = await supabase.from("nextauth_accounts").insert({
         member_id: account.userId,
         type: account.type,
@@ -140,14 +160,20 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
         token_type: account.token_type,
         scope: account.scope,
         id_token: account.id_token,
-        session_state: account.session_state as string | null,
+        session_state: account.session_state,
       });
 
       if (error) throw error;
     },
 
     // ── Unlink Account ──
-    async unlinkAccount({ providerAccountId, provider }) {
+    async unlinkAccount({
+      providerAccountId,
+      provider,
+    }: {
+      providerAccountId: string;
+      provider: string;
+    }): Promise<void> {
       await supabase
         .from("nextauth_accounts")
         .delete()
@@ -156,7 +182,11 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
     },
 
     // ── Verification Tokens (for magic link) ──
-    async createVerificationToken(token) {
+    async createVerificationToken(token: {
+      identifier: string;
+      token: string;
+      expires: Date;
+    }) {
       const { data, error } = await supabase
         .from("nextauth_verification_tokens")
         .insert({
@@ -169,13 +199,19 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
 
       if (error) throw error;
       return {
-        identifier: data.identifier,
-        token: data.token,
-        expires: new Date(data.expires),
+        identifier: data.identifier as string,
+        token: data.token as string,
+        expires: new Date(data.expires as string),
       };
     },
 
-    async useVerificationToken({ identifier, token }) {
+    async useVerificationToken({
+      identifier,
+      token,
+    }: {
+      identifier: string;
+      token: string;
+    }) {
       const { data, error } = await supabase
         .from("nextauth_verification_tokens")
         .delete()
@@ -186,23 +222,27 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
 
       if (error || !data) return null;
       return {
-        identifier: data.identifier,
-        token: data.token,
-        expires: new Date(data.expires),
+        identifier: data.identifier as string,
+        token: data.token as string,
+        expires: new Date(data.expires as string),
       };
     },
 
     // ── Sessions (not used with JWT strategy, but required by interface) ──
-    async createSession(session) {
-      return session as AdapterSession;
+    async createSession(session: {
+      sessionToken: string;
+      userId: string;
+      expires: Date;
+    }) {
+      return { ...session, id: session.sessionToken };
     },
-    async getSessionAndUser(sessionToken) {
+    async getSessionAndUser() {
       return null;
     },
-    async updateSession(session) {
-      return session as AdapterSession;
+    async updateSession(session: { sessionToken: string }) {
+      return { ...session, userId: "", expires: new Date(), id: "" };
     },
-    async deleteSession(sessionToken) {
+    async deleteSession() {
       // No-op with JWT strategy
     },
   };
@@ -218,7 +258,8 @@ function mapMemberToAdapterUser(member: Record<string, unknown>): AdapterUser {
     emailVerified: member.email_verified
       ? new Date(member.email_verified as string)
       : null,
-    name: [member.first_name, member.last_name].filter(Boolean).join(" ") || null,
+    name:
+      [member.first_name, member.last_name].filter(Boolean).join(" ") || null,
     image: (member.avatar_url as string) || null,
   };
 }
