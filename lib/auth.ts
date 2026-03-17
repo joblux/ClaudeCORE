@@ -15,9 +15,14 @@ const supabaseAdmin = createClient(
 );
 
 // ─────────────────────────────────────────────
-// Resend client for magic link emails
+// Resend client for magic link emails (lazy init)
 // ─────────────────────────────────────────────
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error("RESEND_API_KEY is not set");
+  }
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 // ─────────────────────────────────────────────
 // NextAuth Configuration
@@ -65,7 +70,7 @@ export const authOptions: NextAuthOptions = {
       from: process.env.EMAIL_FROM || "JOBLUX <noreply@luxuryrecruiter.com>",
       sendVerificationRequest: async ({ identifier: email, url }) => {
         try {
-          await resend.emails.send({
+          await getResend().emails.send({
             from:
               process.env.EMAIL_FROM || "JOBLUX <noreply@luxuryrecruiter.com>",
             to: email,
