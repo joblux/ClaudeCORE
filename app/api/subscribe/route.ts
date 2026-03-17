@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
     // Upsert subscriber
     const { error } = await supabase
-      .from('subscribers')
+      .from('brief_subscribers')
       .upsert(
         { email: email.toLowerCase().trim(), subscribed: true },
         { onConflict: 'email' }
