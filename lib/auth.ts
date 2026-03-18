@@ -96,7 +96,6 @@ export const authOptions: NextAuthOptions = {
     signIn: "/members",
     error: "/members",
     verifyRequest: "/members/check-email",
-    newUser: "/members/register",
   },
 
   // ── Callbacks ──
@@ -124,18 +123,18 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
-      // New user — redirect to registration
-      // Store OAuth info temporarily so registration can use it
+      // New user — allow sign-in (adapter creates them)
       return true;
     },
 
     async jwt({ token, user, account, trigger }) {
-      if (user) {
-        // First sign-in: fetch member data from Supabase
+      // Always refresh member data from Supabase on every token creation
+      const email = user?.email || token.email;
+      if (email) {
         const { data: member } = await supabaseAdmin
           .from("members")
           .select("id, role, member_type, status, first_name, last_name")
-          .eq("email", user.email!)
+          .eq("email", email)
           .single();
 
         if (member) {
@@ -146,26 +145,7 @@ export const authOptions: NextAuthOptions = {
           token.firstName = member.first_name;
           token.lastName = member.last_name;
         } else {
-          // New user — not yet registered
           token.status = "new";
-        }
-      }
-
-      // Re-fetch on session update (e.g., after approval)
-      if (trigger === "update") {
-        const { data: member } = await supabaseAdmin
-          .from("members")
-          .select("id, role, member_type, status, first_name, last_name")
-          .eq("email", token.email!)
-          .single();
-
-        if (member) {
-          token.memberId = member.id;
-          token.role = member.role;
-          token.memberType = member.member_type;
-          token.status = member.status;
-          token.firstName = member.first_name;
-          token.lastName = member.last_name;
         }
       }
 
