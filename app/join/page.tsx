@@ -7,9 +7,9 @@ import { useRouter } from "next/navigation";
 type MemberType = "candidate" | "employer" | "influencer" | null;
 
 const TYPE_OPTIONS = [
-  { value: "candidate" as const, label: "Candidate", description: "Luxury professional seeking new opportunities" },
-  { value: "employer" as const, label: "Employer", description: "Maison or brand looking to hire top talent" },
-  { value: "influencer" as const, label: "Insider", description: "Media, content or intelligence professional in luxury" },
+  { value: "candidate" as const, label: "Candidate", description: "Manager level and above — access intelligence, tools, coaching and confidential career opportunities" },
+  { value: "employer" as const, label: "Employer", description: "Luxury maisons and brands — place confidential mandates globally and consult with our experts" },
+  { value: "influencer" as const, label: "Insider", description: "Executives, journalists and creators — share expertise, verified data and industry knowledge" },
 ];
 
 export default function JoinPage() {
