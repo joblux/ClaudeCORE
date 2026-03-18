@@ -13,24 +13,6 @@ export default withAuth(
       }
     }
 
-    // ── Protected member routes: require approved status ──
-    if (
-      pathname.startsWith("/dashboard") ||
-      pathname.startsWith("/profile") ||
-      pathname.startsWith("/jobs/all") ||
-      pathname.startsWith("/salaries/full")
-    ) {
-      if (token?.status === "new") {
-        return NextResponse.redirect(new URL("/join", req.url));
-      }
-      if (token?.status === "pending") {
-        return NextResponse.redirect(new URL("/members/pending", req.url));
-      }
-      if (token?.status !== "approved" && token?.role !== "admin") {
-        return NextResponse.redirect(new URL("/members", req.url));
-      }
-    }
-
     return NextResponse.next();
   },
   {
