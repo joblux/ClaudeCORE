@@ -55,7 +55,7 @@ export default function HomePage() {
             Join 100,000+ luxury professionals on the world's most exclusive recruitment intelligence platform.
           </p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
-            <Link href="/members/request-access" className="jl-btn jl-btn-gold">
+            <Link href="/join" className="jl-btn jl-btn-gold">
               Request Access
             </Link>
             <Link href="/about" className="jl-btn jl-btn-ghost">

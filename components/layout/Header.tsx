@@ -35,7 +35,7 @@ export function Header() {
           <div className="md:hidden jl-overline">Paris · London · Dubai</div>
           <div className="flex items-center gap-4">
             <Link href="/members" className="jl-overline hover:text-[#1a1a1a] transition-colors">Sign In</Link>
-            <Link href="/members/request-access" className="jl-btn jl-btn-primary py-1.5 px-3 text-[0.6rem]">Request Access</Link>
+            <Link href="/join" className="jl-btn jl-btn-primary py-1.5 px-3 text-[0.6rem]">Request Access</Link>
           </div>
         </div>
       </div>

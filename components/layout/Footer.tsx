@@ -17,7 +17,7 @@ const footerLinks = {
   ],
   Members: [
     { label: 'Sign In',         href: '/members'                  },
-    { label: 'Request Access',  href: '/members/request-access'   },
+    { label: 'Request Access',  href: '/join'   },
     { label: 'Candidates',      href: '/members/candidates'       },
     { label: 'Employers',       href: '/members/employers'        },
     { label: 'Influencers',     href: '/members/influencers'      },

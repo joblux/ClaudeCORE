@@ -115,7 +115,7 @@ export default function JobsPage() {
               <p className="font-sans text-xs text-[#666] leading-relaxed mb-3">
                 Submit a confidential hiring brief. JOBLUX presents pre-screened candidates.
               </p>
-              <Link href="/members/request-access?type=employer" className="jl-btn jl-btn-primary w-full justify-center text-[0.6rem] py-2">
+              <Link href="/join?type=employer" className="jl-btn jl-btn-primary w-full justify-center text-[0.6rem] py-2">
                 Submit a Brief
               </Link>
             </div>
@@ -164,7 +164,7 @@ export default function JobsPage() {
               </p>
               <div className="flex items-center justify-center gap-3">
                 <Link href="/members" className="jl-btn jl-btn-primary">Sign In</Link>
-                <Link href="/members/request-access" className="jl-btn jl-btn-outline">Request Access</Link>
+                <Link href="/join" className="jl-btn jl-btn-outline">Request Access</Link>
               </div>
             </div>
           </div>
