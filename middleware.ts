@@ -21,7 +21,7 @@ export default withAuth(
       pathname.startsWith("/salaries/full")
     ) {
       if (token?.status === "new") {
-        return NextResponse.redirect(new URL("/members/register", req.url));
+        return NextResponse.redirect(new URL("/join", req.url));
       }
       if (token?.status === "pending") {
         return NextResponse.redirect(new URL("/members/pending", req.url));
