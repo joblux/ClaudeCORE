@@ -14,7 +14,7 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
           last_name: user.name?.split(" ").slice(1).join(" ") || null,
           avatar_url: user.image || null,
           status: "pending",
-          role: "candidate",
+          role: "rising",
         })
         .select()
         .single();
