@@ -110,8 +110,7 @@ export const authOptions: NextAuthOptions = {
         .eq("email", user.email)
         .single();
 
-      console.log("JWT_DEBUG member:", JSON.stringify(member));
-        if (member) {
+      if (member) {
         // Existing member — allow sign-in only if approved or admin
         if (member.status === "approved" || member.role === "admin") {
           return true;
@@ -131,7 +130,6 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account, trigger }) {
       // Always refresh member data from Supabase on every token creation
       const email = user?.email || token.email;
-      console.log("JWT_DEBUG email:", email);
       if (email) {
         const { data: member } = await supabaseAdmin
           .from("members")
@@ -139,7 +137,6 @@ export const authOptions: NextAuthOptions = {
           .eq("email", email)
           .single();
 
-        console.log("JWT_DEBUG member:", JSON.stringify(member));
         if (member) {
           token.memberId = member.id;
           token.role = member.role;
