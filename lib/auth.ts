@@ -96,6 +96,7 @@ export const authOptions: NextAuthOptions = {
     signIn: "/members",
     error: "/members",
     verifyRequest: "/members/check-email",
+    newUser: "/members/register",
   },
 
   // ── Callbacks ──
