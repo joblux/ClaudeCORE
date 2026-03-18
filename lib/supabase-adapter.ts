@@ -1,85 +1,53 @@
 import { Adapter, AdapterUser } from "next-auth/adapters";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-/**
- * Custom Supabase Adapter for JOBLUX
- *
- * Maps NextAuth's adapter interface to our existing `members` table
- * rather than creating separate NextAuth-specific tables.
- *
- * Key differences from default adapter:
- * - Users map to `members` table
- * - New sign-ups get status "new" (not yet registered)
- * - Sessions use JWT strategy (no sessions table needed)
- * - Accounts & verification tokens use dedicated NextAuth tables
- */
 export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
   return {
-    // ── Create User ──
     async createUser(user: Omit<AdapterUser, "id">): Promise<AdapterUser> {
-      // When someone signs in for the first time via OAuth or magic link,
-      // create a minimal member record with status "new"
+      const fullName = user.name || user.email.split("@")[0];
       const { data, error } = await supabase
         .from("members")
         .insert({
           email: user.email,
+          full_name: fullName,
           first_name: user.name?.split(" ")[0] || null,
           last_name: user.name?.split(" ").slice(1).join(" ") || null,
           avatar_url: user.image || null,
-          status: "new", // Not yet registered — needs to complete registration
-          role: "member",
+          status: "pending",
+          role: "candidate",
         })
         .select()
         .single();
 
       if (error) {
-        // If member already exists (e.g., pre-seeded by admin), fetch them
         if (error.code === "23505") {
           const { data: existing } = await supabase
             .from("members")
             .select()
             .eq("email", user.email)
             .single();
-
-          if (existing) {
-            return mapMemberToAdapterUser(existing);
-          }
+          if (existing) return mapMemberToAdapterUser(existing);
         }
         throw error;
       }
-
       return mapMemberToAdapterUser(data);
     },
 
-    // ── Get User by ID ──
     async getUser(id: string): Promise<AdapterUser | null> {
       const { data, error } = await supabase
-        .from("members")
-        .select()
-        .eq("id", id)
-        .single();
-
+        .from("members").select().eq("id", id).single();
       if (error || !data) return null;
       return mapMemberToAdapterUser(data);
     },
 
-    // ── Get User by Email ──
     async getUserByEmail(email: string): Promise<AdapterUser | null> {
       const { data, error } = await supabase
-        .from("members")
-        .select()
-        .eq("email", email)
-        .single();
-
+        .from("members").select().eq("email", email).single();
       if (error || !data) return null;
       return mapMemberToAdapterUser(data);
     },
 
-    // ── Get User by Account ──
-    async getUserByAccount({
-      providerAccountId,
-      provider,
-    }: {
+    async getUserByAccount({ providerAccountId, provider }: {
       providerAccountId: string;
       provider: string;
     }): Promise<AdapterUser | null> {
@@ -89,65 +57,40 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
         .eq("provider", provider)
         .eq("provider_account_id", providerAccountId)
         .single();
-
       if (accountError || !account) return null;
-
       const { data: member, error: memberError } = await supabase
-        .from("members")
-        .select()
-        .eq("id", account.member_id)
-        .single();
-
+        .from("members").select().eq("id", account.member_id).single();
       if (memberError || !member) return null;
       return mapMemberToAdapterUser(member);
     },
 
-    // ── Update User ──
-    async updateUser(
-      user: Partial<AdapterUser> & Pick<AdapterUser, "id">
-    ): Promise<AdapterUser> {
+    async updateUser(user: Partial<AdapterUser> & Pick<AdapterUser, "id">): Promise<AdapterUser> {
       const updates: Record<string, unknown> = {};
       if (user.name) {
+        updates.full_name = user.name;
         updates.first_name = user.name.split(" ")[0];
         updates.last_name = user.name.split(" ").slice(1).join(" ");
       }
       if (user.image) updates.avatar_url = user.image;
       if (user.email) updates.email = user.email;
-
       const { data, error } = await supabase
-        .from("members")
-        .update(updates)
-        .eq("id", user.id)
-        .select()
-        .single();
-
+        .from("members").update(updates).eq("id", user.id).select().single();
       if (error) throw error;
       return mapMemberToAdapterUser(data);
     },
 
-    // ── Delete User ──
     async deleteUser(userId: string): Promise<void> {
       await supabase.from("nextauth_accounts").delete().eq("member_id", userId);
-      await supabase
-        .from("nextauth_verification_tokens")
-        .delete()
-        .eq("identifier", userId);
+      await supabase.from("nextauth_verification_tokens").delete().eq("identifier", userId);
       await supabase.from("members").delete().eq("id", userId);
     },
 
-    // ── Link Account ──
     async linkAccount(account: {
-      userId: string;
-      type: string;
-      provider: string;
-      providerAccountId: string;
-      refresh_token?: string | null;
-      access_token?: string | null;
-      expires_at?: number | null;
-      token_type?: string | null;
-      scope?: string | null;
-      id_token?: string | null;
-      session_state?: string | null;
+      userId: string; type: string; provider: string;
+      providerAccountId: string; refresh_token?: string | null;
+      access_token?: string | null; expires_at?: number | null;
+      token_type?: string | null; scope?: string | null;
+      id_token?: string | null; session_state?: string | null;
     }): Promise<void> {
       const { error } = await supabase.from("nextauth_accounts").insert({
         member_id: account.userId,
@@ -162,30 +105,19 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
         id_token: account.id_token,
         session_state: account.session_state,
       });
-
       if (error) throw error;
     },
 
-    // ── Unlink Account ──
-    async unlinkAccount({
-      providerAccountId,
-      provider,
-    }: {
-      providerAccountId: string;
-      provider: string;
+    async unlinkAccount({ providerAccountId, provider }: {
+      providerAccountId: string; provider: string;
     }): Promise<void> {
-      await supabase
-        .from("nextauth_accounts")
-        .delete()
+      await supabase.from("nextauth_accounts").delete()
         .eq("provider", provider)
         .eq("provider_account_id", providerAccountId);
     },
 
-    // ── Verification Tokens (for magic link) ──
     async createVerificationToken(token: {
-      identifier: string;
-      token: string;
-      expires: Date;
+      identifier: string; token: string; expires: Date;
     }) {
       const { data, error } = await supabase
         .from("nextauth_verification_tokens")
@@ -193,10 +125,7 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
           identifier: token.identifier,
           token: token.token,
           expires: token.expires.toISOString(),
-        })
-        .select()
-        .single();
-
+        }).select().single();
       if (error) throw error;
       return {
         identifier: data.identifier as string,
@@ -205,21 +134,13 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
       };
     },
 
-    async useVerificationToken({
-      identifier,
-      token,
-    }: {
-      identifier: string;
-      token: string;
+    async useVerificationToken({ identifier, token }: {
+      identifier: string; token: string;
     }) {
       const { data, error } = await supabase
-        .from("nextauth_verification_tokens")
-        .delete()
-        .eq("identifier", identifier)
-        .eq("token", token)
-        .select()
-        .single();
-
+        .from("nextauth_verification_tokens").delete()
+        .eq("identifier", identifier).eq("token", token)
+        .select().single();
       if (error || !data) return null;
       return {
         identifier: data.identifier as string,
@@ -228,29 +149,17 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
       };
     },
 
-    // ── Sessions (not used with JWT strategy, but required by interface) ──
-    async createSession(session: {
-      sessionToken: string;
-      userId: string;
-      expires: Date;
-    }) {
+    async createSession(session: { sessionToken: string; userId: string; expires: Date }) {
       return { ...session, id: session.sessionToken };
     },
-    async getSessionAndUser() {
-      return null;
-    },
+    async getSessionAndUser() { return null; },
     async updateSession(session: { sessionToken: string }) {
       return { ...session, userId: "", expires: new Date(), id: "" };
     },
-    async deleteSession() {
-      // No-op with JWT strategy
-    },
+    async deleteSession() {},
   };
 }
 
-// ─────────────────────────────────────────────
-// Helper: Map Supabase member row → NextAuth user
-// ─────────────────────────────────────────────
 function mapMemberToAdapterUser(member: Record<string, unknown>): AdapterUser {
   return {
     id: member.id as string,
@@ -258,7 +167,7 @@ function mapMemberToAdapterUser(member: Record<string, unknown>): AdapterUser {
     emailVerified: member.email_verified
       ? new Date(member.email_verified as string)
       : null,
-    name:
+    name: (member.full_name as string) ||
       [member.first_name, member.last_name].filter(Boolean).join(" ") || null,
     image: (member.avatar_url as string) || null,
   };
