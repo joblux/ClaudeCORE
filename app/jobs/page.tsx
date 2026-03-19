@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title:       'Confidential Luxury Positions — JOBLUX',
-  description: 'Confidential executive search mandates in luxury. Manager to Executive level, €100K+. Fashion, watches, hospitality, beauty and more.',
+  description: 'Confidential executive search briefs in luxury. Manager to Executive level, €100K+. Fashion, watches, hospitality, beauty and more.',
 }
 
 const jobs = [
@@ -77,7 +77,7 @@ export default function JobsPage() {
         <div className="jl-container">
           <div className="jl-overline-gold mb-3">Confidential Positions</div>
           <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a] mb-3">
-            Executive Search Mandates
+            Executive Search Briefs
           </h1>
           <p className="font-sans text-sm text-[#888] max-w-xl mb-4">
             Manager to Executive level · €100K+ · All positions are handled with full discretion by the JOBLUX team. Salary always shown.

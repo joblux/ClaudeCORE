@@ -185,7 +185,7 @@ export default function JobDetailPage() {
             {job.is_confidential && (
               <div className="p-4 bg-[#fafaf5] border border-[#e8e2d8] mb-10">
                 <p className="font-sans text-xs text-[#888] leading-relaxed">
-                  <strong className="text-[#1a1a1a]">Confidential mandate.</strong> The maison name will be disclosed after initial screening. All applications are handled with full discretion by the JOBLUX team.
+                  <strong className="text-[#1a1a1a]">Confidential brief.</strong> The maison name will be disclosed after initial screening. All applications are handled with full discretion by the JOBLUX team.
                 </p>
               </div>
             )}

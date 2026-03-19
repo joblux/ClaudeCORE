@@ -94,7 +94,7 @@ export default function TheBriefPage() {
             {[
               { n: '01', title: 'Industry Moves',      desc: 'Who moved where. Senior appointments, departures and promotions across the major maisons.' },
               { n: '02', title: 'Salary Intelligence',  desc: 'One role, one market, detailed compensation breakdown. Real data from JOBLUX placements.' },
-              { n: '03', title: 'New Positions',        desc: 'The week\'s most interesting confidential mandates. Manager to Executive, €100K+.' },
+              { n: '03', title: 'New Positions',        desc: 'The week\'s most interesting confidential briefs. Manager to Executive, €100K+.' },
               { n: '04', title: 'WikiLux Spotlight',    desc: 'One brand in depth. History, culture, what they look for in candidates.' },
               { n: '05', title: 'Market Intelligence',  desc: 'Hiring trends by market. Where luxury is growing, where it\'s contracting.' },
               { n: '06', title: 'Travel & Lifestyle',   desc: 'One luxury destination or experience. The world through the JOBLUX lens.' },

@@ -1,8 +1,63 @@
 import { requireApproved } from "@/lib/auth-server";
 import Link from "next/link";
 
+const TIER_LABELS: Record<string, string> = {
+  rising: 'Rising Member',
+  pro: 'Pro Member',
+  professional: 'Pro+ Member',
+  executive: 'Executive Member',
+  business: 'Business Member',
+  insider: 'Insider Member',
+  admin: 'Administrator',
+}
+
+interface DashCard {
+  num: string
+  title: string
+  desc: string
+  href: string
+  gold?: boolean
+}
+
 export default async function DashboardPage() {
   const member = await requireApproved();
+  const role = member.role || 'professional'
+  const tierLabel = TIER_LABELS[role] || 'Member'
+  const isAdmin = member.isAdmin
+  const isSenior = ['professional', 'executive', 'insider'].includes(role)
+  const isBusiness = role === 'business'
+
+  // Base cards for all members
+  const cards: DashCard[] = [
+    { num: '01', title: 'Job Briefs', desc: 'Browse open positions in luxury. Manager to Executive level.', href: '/jobs' },
+    { num: '02', title: 'WikiLux', desc: '500+ luxury brand encyclopedias. History, culture, hiring insights.', href: '/wikilux' },
+    { num: '03', title: 'Contribute', desc: 'Share your intelligence, earn points for the community.', href: '/contribute' },
+    { num: '04', title: 'My Profile', desc: 'Edit your profile and settings.', href: '/profile' },
+    { num: '05', title: 'Invite Colleagues', desc: 'Grow the JOBLUX community with your referral link.', href: '/invite' },
+  ]
+
+  // Senior tiers get extra cards
+  if (isSenior) {
+    cards.push(
+      { num: '06', title: 'Confidential Briefs', desc: 'Executive-level positions handled with full discretion.', href: '/jobs?confidential=true' },
+      { num: '07', title: 'Salary Intelligence', desc: 'Compensation benchmarks across markets and roles.', href: '/salaries' },
+    )
+  }
+
+  // Business gets post brief
+  if (isBusiness) {
+    cards.push(
+      { num: '06', title: 'Post a Brief', desc: 'Create a new hiring assignment on the JOBLUX platform.', href: '/admin/briefs/new' },
+    )
+  }
+
+  // Admin cards
+  const adminCards: DashCard[] = isAdmin ? [
+    { num: 'A1', title: 'Admin Panel', desc: 'Review members, manage platform settings.', href: '/admin', gold: true },
+    { num: 'A2', title: 'Post a Brief', desc: 'Create a new hiring assignment.', href: '/admin/briefs/new', gold: true },
+    { num: 'A3', title: 'Review Contributions', desc: 'Approve member contributions.', href: '/admin/contributions', gold: true },
+    { num: 'A4', title: 'Manage Articles', desc: 'Bloglux editorial and publishing.', href: '/admin/articles', gold: true },
+  ] : []
 
   return (
     <div>
@@ -13,39 +68,40 @@ export default async function DashboardPage() {
             Welcome back, {member.firstName || member.name || "Member"}
           </h1>
           <p className="font-sans text-sm text-[#888]">
-            {member.isAdmin ? "Administrator" : "Approved Member"} · JOBLUX Intelligence Platform
+            {tierLabel} &middot; JOBLUX Intelligence Platform
           </p>
         </div>
       </div>
 
       <div className="jl-container py-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Link href="/jobs" className="jl-card group">
-            <div className="jl-serif text-3xl font-light text-[#e8e2d8] mb-4">01</div>
-            <h3 className="font-sans text-sm font-semibold text-[#1a1a1a] mb-2 group-hover:text-[#a58e28] transition-colors">Confidential Positions</h3>
-            <p className="font-sans text-xs text-[#888] leading-relaxed">Browse executive search mandates. Manager to Executive level.</p>
-          </Link>
 
-          <Link href="/wikilux" className="jl-card group">
-            <div className="jl-serif text-3xl font-light text-[#e8e2d8] mb-4">02</div>
-            <h3 className="font-sans text-sm font-semibold text-[#1a1a1a] mb-2 group-hover:text-[#a58e28] transition-colors">WikiLux Intelligence</h3>
-            <p className="font-sans text-xs text-[#888] leading-relaxed">500+ luxury brand encyclopedias. History, culture, hiring insights.</p>
-          </Link>
-
-          <Link href="/salaries" className="jl-card group">
-            <div className="jl-serif text-3xl font-light text-[#e8e2d8] mb-4">03</div>
-            <h3 className="font-sans text-sm font-semibold text-[#1a1a1a] mb-2 group-hover:text-[#a58e28] transition-colors">Salary Intelligence</h3>
-            <p className="font-sans text-xs text-[#888] leading-relaxed">Compensation benchmarks across markets, roles and maisons.</p>
-          </Link>
-
-          {member.isAdmin && (
-            <Link href="/admin" className="jl-card group border-[#a58e28]">
-              <div className="jl-serif text-3xl font-light text-[#a58e28] mb-4">A</div>
-              <h3 className="font-sans text-sm font-semibold text-[#a58e28] mb-2">Admin Panel</h3>
-              <p className="font-sans text-xs text-[#888] leading-relaxed">Review pending members, manage mandates, platform settings.</p>
+        {/* Member cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          {cards.map((card) => (
+            <Link key={card.num} href={card.href} className="jl-card group">
+              <div className="jl-serif text-3xl font-light text-[#e8e2d8] mb-4">{card.num}</div>
+              <h3 className="font-sans text-sm font-semibold text-[#1a1a1a] mb-2 group-hover:text-[#a58e28] transition-colors">{card.title}</h3>
+              <p className="font-sans text-xs text-[#888] leading-relaxed">{card.desc}</p>
             </Link>
-          )}
+          ))}
         </div>
+
+        {/* Admin section */}
+        {adminCards.length > 0 && (
+          <>
+            <div className="jl-section-label"><span>Administration</span></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {adminCards.map((card) => (
+                <Link key={card.num} href={card.href} className="jl-card group border-[#a58e28]">
+                  <div className="jl-serif text-2xl font-light text-[#a58e28] mb-3">{card.num}</div>
+                  <h3 className="font-sans text-sm font-semibold text-[#a58e28] mb-2">{card.title}</h3>
+                  <p className="font-sans text-xs text-[#888] leading-relaxed">{card.desc}</p>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+
       </div>
     </div>
   );
