@@ -5,16 +5,6 @@ import Link from 'next/link'
 import UserMenu from '@/components/UserMenu'
 import { useMember } from '@/lib/auth-hooks'
 
-const markets = [
-  { label: 'Paris', href: '/?market=paris' },
-  { label: 'London', href: '/?market=london' },
-  { label: 'New York', href: '/?market=new_york' },
-  { label: 'Dubai', href: '/?market=dubai' },
-  { label: 'Singapore', href: '/?market=singapore' },
-  { label: 'Milan', href: '/?market=milan' },
-  { label: 'Tokyo', href: '/?market=tokyo' },
-]
-
 const navItems = [
   { label: 'WikiLux', href: '/wikilux' },
   { label: 'Jobs', href: '/jobs' },
@@ -27,23 +17,10 @@ const navItems = [
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const { isAuthenticated } = useMember()
   return (
     <header className="border-b border-[#e8e2d8]">
-      <div className="jl-container">
-        <div className="flex items-center justify-between py-1 border-b border-[#e8e2d8]">
-          <div className="hidden md:flex items-center gap-4">
-            {markets.map((m) => (<Link key={m.label} href={m.href} className="jl-overline hover:text-[#1a1a1a] transition-colors">{m.label}</Link>))}
-          </div>
-          <div className="md:hidden jl-overline">Paris · London · Dubai</div>
-          <div className="flex items-center gap-4">
-            <UserMenu />
-            {!isAuthenticated && (
-              <Link href="/join" className="jl-btn jl-btn-primary py-1.5 px-3 text-[0.6rem]">Request Access</Link>
-            )}
-          </div>
-        </div>
-      </div>
       <div className="jl-container">
         <div className="py-3 text-center border-b-2 border-[#1a1a1a]">
           <Link href="/" className="inline-block">
@@ -53,13 +30,39 @@ export function Header() {
         </div>
       </div>
       <div className="jl-container hidden md:block">
-        <nav className="flex items-center justify-center border-b border-[#e8e2d8]">
+        <nav className="flex items-center justify-center border-b border-[#e8e2d8] relative">
           {navItems.map((item) => (<Link key={item.label} href={item.href} className="px-3 py-2 jl-overline hover:text-[#1a1a1a] border-b-2 border-transparent hover:border-[#1a1a1a] transition-all">{item.label}</Link>))}
+          <div className="absolute right-0 flex items-center gap-3">
+            <button
+              onClick={() => setSearchOpen(!searchOpen)}
+              className="px-3 py-2 text-[#888] hover:text-[#1a1a1a] transition-colors"
+              aria-label="Search"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </button>
+            <UserMenu />
+            {!isAuthenticated && (
+              <Link href="/join" className="jl-btn jl-btn-primary py-1.5 px-3 text-[0.6rem]">Request Access</Link>
+            )}
+          </div>
         </nav>
       </div>
       <div className="md:hidden jl-container">
         <div className="flex items-center justify-between py-2">
           <button onClick={() => setMobileOpen(!mobileOpen)} className="jl-overline flex items-center gap-2"><span className="text-lg">{mobileOpen ? '\u2715' : '\u2630'}</span>Menu</button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSearchOpen(!searchOpen)}
+              className="text-[#888] hover:text-[#1a1a1a] transition-colors"
+              aria-label="Search"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </button>
+            <UserMenu />
+            {!isAuthenticated && (
+              <Link href="/join" className="jl-btn jl-btn-primary py-1.5 px-3 text-[0.6rem]">Request Access</Link>
+            )}
+          </div>
         </div>
         {mobileOpen && (
           <nav className="pb-4 border-b border-[#e8e2d8]">
