@@ -1,4 +1,5 @@
 import { requireApproved } from "@/lib/auth-server";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 
 const TIER_LABELS: Record<string, string> = {
@@ -21,6 +22,7 @@ interface DashCard {
 
 export default async function DashboardPage() {
   const member = await requireApproved();
+  if (member.isAdmin) redirect("/admin/dashboard");
   const role = member.role || 'professional'
   const tierLabel = TIER_LABELS[role] || 'Member'
   const isAdmin = member.isAdmin
