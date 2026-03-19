@@ -36,7 +36,7 @@ export function SalarySnapshot() {
 
       <Link
         href="/salaries"
-        className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#c8960c] hover:text-[#9a6f0a] transition-colors"
+        className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors"
       >
         Full salary guide →
       </Link>
@@ -74,7 +74,7 @@ export function LatestJobs() {
 
       <Link
         href="/jobs"
-        className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#c8960c] hover:text-[#9a6f0a] transition-colors"
+        className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors"
       >
         All positions →
       </Link>
@@ -105,25 +105,25 @@ export function WikiLuxPreview() {
             href={`/wikilux/${brand.slug}`}
             className="flex items-center gap-3 py-2.5 border-b border-[#f5f0e8] last:border-0 group"
           >
-            <div className="w-8 h-8 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0 group-hover:bg-[#c8960c] transition-colors">
-              <span className="jl-serif text-sm text-[#c8960c] group-hover:text-[#1a1a1a]">
+            <div className="w-8 h-8 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0 group-hover:bg-[#a58e28] transition-colors">
+              <span className="jl-serif text-sm text-[#a58e28] group-hover:text-[#1a1a1a]">
                 {brand.initial}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-sans text-xs font-medium text-[#1a1a1a] group-hover:text-[#c8960c] transition-colors">
+              <div className="font-sans text-xs font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors">
                 {brand.name}
               </div>
               <div className="font-sans text-[0.65rem] text-[#aaa] truncate">{brand.detail}</div>
             </div>
-            <span className="text-[#e8e2d8] group-hover:text-[#c8960c] transition-colors text-sm">→</span>
+            <span className="text-[#e8e2d8] group-hover:text-[#a58e28] transition-colors text-sm">→</span>
           </Link>
         ))}
       </div>
 
       <Link
         href="/wikilux"
-        className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#c8960c] hover:text-[#9a6f0a] transition-colors"
+        className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors"
       >
         All 500+ maisons →
       </Link>

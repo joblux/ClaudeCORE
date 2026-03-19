@@ -57,7 +57,7 @@ export function SearchHero() {
             <button
               key={s.label}
               onClick={() => handlePopular(s.q)}
-              className="font-sans text-[0.7rem] text-[#777] border border-[#e8e2d8] px-3 py-1.5 hover:border-[#c8960c] hover:text-[#c8960c] transition-all"
+              className="font-sans text-[0.7rem] text-[#777] border border-[#e8e2d8] px-3 py-1.5 hover:border-[#a58e28] hover:text-[#a58e28] transition-all"
             >
               {s.label}
             </button>

@@ -58,7 +58,7 @@ export default function AboutPage() {
               { n: '5',      l: 'Global markets'      },
             ].map((s) => (
               <div key={s.l} className="text-center">
-                <div className="jl-serif text-3xl font-light text-[#c8960c]">{s.n}</div>
+                <div className="jl-serif text-3xl font-light text-[#a58e28]">{s.n}</div>
                 <div className="jl-overline mt-2">{s.l}</div>
               </div>
             ))}
@@ -108,15 +108,15 @@ export default function AboutPage() {
             <div className="space-y-2">
               <div className="font-sans text-xs text-[#888]">
                 <span className="font-semibold text-[#1a1a1a]">Executive Search:</span>{' '}
-                <a href="mailto:search@joblux.com" className="text-[#c8960c] hover:underline">search@joblux.com</a>
+                <a href="mailto:search@joblux.com" className="text-[#a58e28] hover:underline">search@joblux.com</a>
               </div>
               <div className="font-sans text-xs text-[#888]">
                 <span className="font-semibold text-[#1a1a1a]">Press:</span>{' '}
-                <a href="mailto:press@joblux.com" className="text-[#c8960c] hover:underline">press@joblux.com</a>
+                <a href="mailto:press@joblux.com" className="text-[#a58e28] hover:underline">press@joblux.com</a>
               </div>
               <div className="font-sans text-xs text-[#888]">
                 <span className="font-semibold text-[#1a1a1a]">General:</span>{' '}
-                <a href="mailto:hello@joblux.com" className="text-[#c8960c] hover:underline">hello@joblux.com</a>
+                <a href="mailto:hello@joblux.com" className="text-[#a58e28] hover:underline">hello@joblux.com</a>
               </div>
             </div>
           </div>

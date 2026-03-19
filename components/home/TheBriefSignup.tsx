@@ -42,7 +42,7 @@ export function TheBriefSignup() {
       </p>
 
       {status === 'success' ? (
-        <p className="font-sans text-xs text-[#c8960c]">{message}</p>
+        <p className="font-sans text-xs text-[#a58e28]">{message}</p>
       ) : (
         <form onSubmit={handleSubmit}>
           <div className="flex border border-[#333]">
@@ -57,7 +57,7 @@ export function TheBriefSignup() {
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="bg-[#c8960c] text-[#1a1a1a] px-4 font-sans text-[0.6rem] font-bold tracking-widest uppercase hover:bg-[#e4b042] transition-colors disabled:opacity-50"
+              className="bg-[#a58e28] text-[#1a1a1a] px-4 font-sans text-[0.6rem] font-bold tracking-widest uppercase hover:bg-[#e4b042] transition-colors disabled:opacity-50"
             >
               {status === 'loading' ? '...' : 'Join'}
             </button>

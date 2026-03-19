@@ -56,7 +56,7 @@ export function FeaturedContent() {
           {/* Lead text */}
           <div>
             <div className="jl-overline-gold mb-3">{lead.category}</div>
-            <h2 className="jl-serif text-2xl font-light text-[#1a1a1a] leading-snug mb-3 hover:text-[#c8960c] transition-colors">
+            <h2 className="jl-serif text-2xl font-light text-[#1a1a1a] leading-snug mb-3 hover:text-[#a58e28] transition-colors">
               <Link href={lead.href}>{lead.title}</Link>
             </h2>
             <p className="font-sans text-sm text-[#666] leading-relaxed mb-3">
@@ -70,7 +70,7 @@ export function FeaturedContent() {
           {/* Lead visual — brand mark placeholder */}
           <div className="bg-[#fafaf5] border border-[#e8e2d8] flex items-center justify-center min-h-[180px]">
             <div className="text-center">
-              <div className="jl-serif text-3xl font-light tracking-[0.2em] text-[#c8960c] uppercase">
+              <div className="jl-serif text-3xl font-light tracking-[0.2em] text-[#a58e28] uppercase">
                 Intelligence
               </div>
               <div className="jl-overline mt-2">JOBLUX · 2026 Report</div>
@@ -93,7 +93,7 @@ export function FeaturedContent() {
             >
               <div className="flex-1">
                 <div className="jl-overline-gold mb-1.5">{article.category}</div>
-                <h3 className="jl-serif text-base font-light text-[#1a1a1a] leading-snug mb-1.5 hover:text-[#c8960c] transition-colors">
+                <h3 className="jl-serif text-base font-light text-[#1a1a1a] leading-snug mb-1.5 hover:text-[#a58e28] transition-colors">
                   <Link href={article.href}>{article.title}</Link>
                 </h3>
                 <div className="jl-overline">
@@ -109,7 +109,7 @@ export function FeaturedContent() {
 
         <Link
           href="/bloglux"
-          className="inline-block mt-4 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#c8960c] hover:text-[#9a6f0a] transition-colors"
+          className="inline-block mt-4 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors"
         >
           More from Bloglux →
         </Link>
@@ -122,10 +122,10 @@ export function FeaturedContent() {
         </div>
 
         <Link href={featuredInterview.href} className="block group">
-          <div className="flex items-start gap-4 p-5 border border-[#e8e2d8] hover:border-[#c8960c] transition-colors">
+          <div className="flex items-start gap-4 p-5 border border-[#e8e2d8] hover:border-[#a58e28] transition-colors">
             {/* Avatar */}
             <div className="w-14 h-14 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
-              <span className="jl-serif text-lg text-[#c8960c]">
+              <span className="jl-serif text-lg text-[#a58e28]">
                 {featuredInterview.initials}
               </span>
             </div>
@@ -145,7 +145,7 @@ export function FeaturedContent() {
 
         <Link
           href="/interviews"
-          className="inline-block mt-4 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#c8960c] hover:text-[#9a6f0a] transition-colors"
+          className="inline-block mt-4 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors"
         >
           More interviews →
         </Link>

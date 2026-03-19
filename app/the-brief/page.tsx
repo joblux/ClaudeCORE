@@ -52,7 +52,7 @@ export default function TheBriefPage() {
           </p>
 
           {status === 'success' ? (
-            <div className="bg-[#c8960c] text-[#1a1a1a] px-8 py-4 inline-block">
+            <div className="bg-[#a58e28] text-[#1a1a1a] px-8 py-4 inline-block">
               <p className="font-sans text-sm font-semibold">{message}</p>
             </div>
           ) : (
@@ -69,7 +69,7 @@ export default function TheBriefPage() {
                 <button
                   type="submit"
                   disabled={status === 'loading'}
-                  className="bg-[#c8960c] text-[#1a1a1a] px-6 font-sans text-[0.7rem] font-bold tracking-widest uppercase hover:bg-[#e4b042] transition-colors disabled:opacity-50"
+                  className="bg-[#a58e28] text-[#1a1a1a] px-6 font-sans text-[0.7rem] font-bold tracking-widest uppercase hover:bg-[#e4b042] transition-colors disabled:opacity-50"
                 >
                   {status === 'loading' ? '...' : 'Subscribe'}
                 </button>

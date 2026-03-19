@@ -136,7 +136,7 @@ export default function JobsPage() {
                         <span className="jl-overline-gold">{job.maison}</span>
                         <span className="jl-badge text-[0.55rem]">{job.badge}</span>
                       </div>
-                      <h3 className="jl-serif text-lg font-light text-[#1a1a1a] mb-2 group-hover:text-[#c8960c] transition-colors">
+                      <h3 className="jl-serif text-lg font-light text-[#1a1a1a] mb-2 group-hover:text-[#a58e28] transition-colors">
                         {job.title}
                       </h3>
                       <div className="flex flex-wrap gap-4">

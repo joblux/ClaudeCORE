@@ -51,7 +51,7 @@ export default function WikiLuxPage() {
               { n: '12',   l: 'Categories'},
             ].map((s) => (
               <div key={s.l} className="text-center">
-                <div className="jl-serif text-2xl font-light text-[#c8960c]">{s.n}</div>
+                <div className="jl-serif text-2xl font-light text-[#a58e28]">{s.n}</div>
                 <div className="jl-overline mt-1">{s.l}</div>
               </div>
             ))}
@@ -80,12 +80,12 @@ export default function WikiLuxPage() {
                 className="jl-card flex items-center justify-between group"
               >
                 <div>
-                  <div className="font-sans text-xs font-medium text-[#1a1a1a] group-hover:text-[#c8960c] transition-colors">
+                  <div className="font-sans text-xs font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors">
                     {cat.label}
                   </div>
                   <div className="font-sans text-[0.65rem] text-[#aaa] mt-0.5">{cat.count} brands</div>
                 </div>
-                <span className="text-[#e8e2d8] group-hover:text-[#c8960c] transition-colors">→</span>
+                <span className="text-[#e8e2d8] group-hover:text-[#a58e28] transition-colors">→</span>
               </Link>
             ))}
           </div>
@@ -101,19 +101,19 @@ export default function WikiLuxPage() {
                 href={`/wikilux/${brand.slug}`}
                 className="jl-card flex items-start gap-4 group"
               >
-                <div className="w-10 h-10 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0 group-hover:bg-[#c8960c] transition-colors">
-                  <span className="jl-serif text-base text-[#c8960c] group-hover:text-[#1a1a1a]">
+                <div className="w-10 h-10 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0 group-hover:bg-[#a58e28] transition-colors">
+                  <span className="jl-serif text-base text-[#a58e28] group-hover:text-[#1a1a1a]">
                     {brand.name[0]}
                   </span>
                 </div>
                 <div>
-                  <div className="font-sans text-sm font-medium text-[#1a1a1a] group-hover:text-[#c8960c] transition-colors">
+                  <div className="font-sans text-sm font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors">
                     {brand.name}
                   </div>
                   <div className="font-sans text-[0.65rem] text-[#aaa] mt-0.5">
                     {brand.sector} · {brand.country} · Est. {brand.founded}
                   </div>
-                  <div className="font-sans text-[0.6rem] text-[#c8960c] mt-1 tracking-wide">
+                  <div className="font-sans text-[0.6rem] text-[#a58e28] mt-1 tracking-wide">
                     EN · FR · AR · ZH · JA · RU · IT · ES · DE
                   </div>
                 </div>
@@ -127,7 +127,7 @@ export default function WikiLuxPage() {
           <p className="font-sans text-sm text-[#888]">
             Full A–Z directory of 500+ luxury brands available.
             <br />
-            <Link href="/wikilux/all" className="text-[#c8960c] hover:underline">
+            <Link href="/wikilux/all" className="text-[#a58e28] hover:underline">
               Browse all maisons →
             </Link>
           </p>

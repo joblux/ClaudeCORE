@@ -41,7 +41,7 @@ export function Footer() {
           {/* Brand column */}
           <div className="col-span-2 md:col-span-1">
             <div className="jl-serif text-xl font-light tracking-[0.15em] text-[#1a1a1a] uppercase mb-3">
-              JOB<span className="text-[#c8960c]">LUX</span>
+              JOB<span className="text-[#a58e28]">LUX</span>
             </div>
             <p className="font-sans text-xs text-[#888] leading-relaxed mb-4">
               Luxury Talents Intelligence.<br />

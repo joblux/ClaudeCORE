@@ -8,7 +8,7 @@
 
 @layer base {
   :root {
-    --color-gold:        #c8960c;
+    --color-gold:        #a58e28;
     --color-gold-light:  #e4b042;
     --color-gold-dark:   #9a6f0a;
     --color-black:       #0a0a0a;
@@ -58,7 +58,7 @@
   }
 
   ::selection {
-    background-color: #c8960c22;
+    background-color: #a58e2822;
     color: var(--color-dark);
   }
 }
