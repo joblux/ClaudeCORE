@@ -19,9 +19,9 @@ const statusColor: Record<string, string> = {
 }
 
 export default function AdminBriefsPage() {
-  const { isAdmin, loading } = useRequireAdmin()
+  const { isAdmin, isLoading } = useRequireAdmin()
 
-  if (loading || !isAdmin) {
+  if (isLoading || !isAdmin) {
     return (
       <div style={{ fontFamily: 'Inter, system-ui, sans-serif', padding: '60px 20px', textAlign: 'center', color: '#888', fontSize: 14 }}>
         Loading...
