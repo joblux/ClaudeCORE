@@ -1,11 +1,11 @@
 import Link from "next/link";
 
-export default function CareersPage() {
+export default function CoachingPage() {
   return (
     <div>
       <div className="border-b-2 border-[#1a1a1a] py-10">
         <div className="jl-container">
-          <div className="jl-overline-gold mb-3">Career Intelligence</div>
+          <div className="jl-overline-gold mb-3">Coaching</div>
           <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a] mb-3">
             Your Luxury Career, Decoded
           </h1>
