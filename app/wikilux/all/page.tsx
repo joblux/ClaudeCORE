@@ -1,15 +1,13 @@
+'use client'
+
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import type { Metadata } from 'next'
-import { BRANDS } from '@/lib/wikilux-brands'
+import { BRANDS, type Brand } from '@/lib/wikilux-brands'
 
-export const metadata: Metadata = {
-  title: 'All Maisons A–Z — WikiLux by JOBLUX',
-  description: `Browse all ${BRANDS.length} luxury brands in the WikiLux encyclopedia. Fashion, watches, jewellery, automotive, hospitality, beauty and more.`,
-}
+const sectors = ['All', ...Array.from(new Set(BRANDS.map((b) => b.sector))).sort()]
 
-// Group brands by first letter
-function groupByLetter(brands: typeof BRANDS) {
-  const groups: Record<string, typeof BRANDS> = {}
+function groupByLetter(brands: Brand[]) {
+  const groups: Record<string, Brand[]> = {}
   for (const brand of brands) {
     const letter = brand.name[0].toUpperCase()
     if (!groups[letter]) groups[letter] = []
@@ -18,12 +16,17 @@ function groupByLetter(brands: typeof BRANDS) {
   return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b))
 }
 
-// Get unique sectors
-const sectors = Array.from(new Set(BRANDS.map((b) => b.sector))).sort()
-
 export default function WikiLuxAllPage() {
-  const sorted = [...BRANDS].sort((a, b) => a.name.localeCompare(b.name))
-  const grouped = groupByLetter(sorted)
+  const [activeSector, setActiveSector] = useState('All')
+
+  const filtered = useMemo(() => {
+    const list = activeSector === 'All'
+      ? BRANDS
+      : BRANDS.filter((b) => b.sector === activeSector)
+    return [...list].sort((a, b) => a.name.localeCompare(b.name))
+  }, [activeSector])
+
+  const grouped = useMemo(() => groupByLetter(filtered), [filtered])
 
   return (
     <div>
@@ -33,7 +36,7 @@ export default function WikiLuxAllPage() {
           <Link href="/wikilux" className="jl-overline text-[#a58e28] hover:underline mb-4 inline-block">&larr; WikiLux</Link>
           <div className="jl-overline-gold mb-3">WikiLux Encyclopedia</div>
           <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a] mb-3">
-            All {BRANDS.length} Maisons
+            {activeSector === 'All' ? `All ${BRANDS.length} Maisons` : `${activeSector} — ${filtered.length} Maisons`}
           </h1>
           <p className="font-sans text-sm text-[#888] max-w-xl">
             The complete A&ndash;Z directory of luxury brands across fashion, watches, jewellery, automotive, hospitality, beauty, spirits, aviation and art.
@@ -43,12 +46,20 @@ export default function WikiLuxAllPage() {
 
       <div className="jl-container py-10">
 
-        {/* Sector filter legend */}
+        {/* Sector filter pills */}
         <div className="flex flex-wrap gap-2 mb-8">
           {sectors.map((sector) => (
-            <span key={sector} className="font-sans text-[0.6rem] text-[#888] border border-[#e8e2d8] px-2.5 py-1 tracking-wider uppercase">
-              {sector} ({BRANDS.filter((b) => b.sector === sector).length})
-            </span>
+            <button
+              key={sector}
+              onClick={() => setActiveSector(sector)}
+              className={`font-sans text-[0.65rem] font-medium tracking-wider uppercase px-3 py-1.5 border transition-colors ${
+                activeSector === sector
+                  ? 'border-[#a58e28] text-[#a58e28] bg-[#a58e28]/5'
+                  : 'border-[#e8e2d8] text-[#888] hover:border-[#aaa] hover:text-[#555]'
+              }`}
+            >
+              {sector === 'All' ? `All (${BRANDS.length})` : `${sector} (${BRANDS.filter((b) => b.sector === sector).length})`}
+            </button>
           ))}
         </div>
 
@@ -66,39 +77,43 @@ export default function WikiLuxAllPage() {
         </div>
 
         {/* A–Z Groups */}
-        {grouped.map(([letter, brands]) => (
-          <div key={letter} id={`letter-${letter}`} className="mb-10">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="jl-serif text-3xl font-light text-[#a58e28]">{letter}</span>
-              <div className="flex-1 h-px bg-[#e8e2d8]" />
-              <span className="font-sans text-[0.6rem] text-[#aaa]">{brands.length} brand{brands.length !== 1 ? 's' : ''}</span>
-            </div>
+        {grouped.length === 0 ? (
+          <p className="font-sans text-sm text-[#888] py-8 text-center">No brands found in this category.</p>
+        ) : (
+          grouped.map(([letter, brands]) => (
+            <div key={letter} id={`letter-${letter}`} className="mb-10">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="jl-serif text-3xl font-light text-[#a58e28]">{letter}</span>
+                <div className="flex-1 h-px bg-[#e8e2d8]" />
+                <span className="font-sans text-[0.6rem] text-[#aaa]">{brands.length} brand{brands.length !== 1 ? 's' : ''}</span>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {brands.map((brand) => (
-                <Link
-                  key={brand.slug}
-                  href={`/wikilux/${brand.slug}`}
-                  className="flex items-center gap-3 p-3 border border-[#f0ece4] hover:border-[#a58e28] transition-colors group"
-                >
-                  <div className="w-9 h-9 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0 group-hover:bg-[#a58e28] transition-colors">
-                    <span className="jl-serif text-sm text-[#a58e28] group-hover:text-[#1a1a1a]">
-                      {brand.name[0]}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-sans text-sm font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors">
-                      {brand.name}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {brands.map((brand) => (
+                  <Link
+                    key={brand.slug}
+                    href={`/wikilux/${brand.slug}`}
+                    className="flex items-center gap-3 p-3 border border-[#f0ece4] hover:border-[#a58e28] transition-colors group"
+                  >
+                    <div className="w-9 h-9 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0 group-hover:bg-[#a58e28] transition-colors">
+                      <span className="jl-serif text-sm text-[#a58e28] group-hover:text-[#1a1a1a]">
+                        {brand.name[0]}
+                      </span>
                     </div>
-                    <div className="font-sans text-[0.6rem] text-[#aaa] truncate">
-                      {brand.sector} &middot; {brand.country} &middot; Est. {brand.founded}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-sans text-sm font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors">
+                        {brand.name}
+                      </div>
+                      <div className="font-sans text-[0.6rem] text-[#aaa] truncate">
+                        {brand.sector} &middot; {brand.country} &middot; Est. {brand.founded}
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
 
         {/* Back to top */}
         <div className="text-center pt-6 border-t border-[#e8e2d8]">
