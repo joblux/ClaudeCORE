@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import UserMenu from '@/components/UserMenu'
+import SearchOverlay from '@/components/SearchOverlay'
 import { useMember } from '@/lib/auth-hooks'
 
 const navItems = [
@@ -63,6 +64,7 @@ export function Header() {
         )}
       </div>
 
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   )
 }
