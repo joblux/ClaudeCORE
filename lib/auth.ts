@@ -119,6 +119,7 @@ export const authOptions: NextAuthOptions = {
       session.user.status = token.status as string | undefined;
       session.user.firstName = token.firstName as string | undefined;
       session.user.lastName = token.lastName as string | undefined;
+      session.user.registrationCompleted = token.registrationCompleted as boolean | undefined;
       return session;
     },
 
