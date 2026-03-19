@@ -25,8 +25,8 @@ export function LatestJobs() {
           </div>
         ))}
       </div>
-      <Link href="/jobs" className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors">
-        All positions →
+      <Link href="/opportunities" className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors">
+        All opportunities →
       </Link>
     </div>
   )

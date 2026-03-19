@@ -8,11 +8,11 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// Shared select query for applications with joined member and job_brief data
+// Shared select query for applications with joined member and search_assignment data
 const APPLICATION_SELECT = `
   *,
   member:members!member_id(id, full_name, email, avatar_url, job_title, maison, city, country, headline, seniority, years_in_luxury),
-  job_brief:job_briefs!job_brief_id(id, title, maison, is_confidential, city, country, reference_number, status)
+  search_assignment:search_assignments!search_assignment_id(id, title, maison, is_confidential, city, country, reference_number, status)
 `
 
 /**
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url)
-  const jobBriefId = searchParams.get('job_brief_id')
+  const searchAssignmentId = searchParams.get('search_assignment_id')
   const stage = searchParams.get('stage')
   const memberId = searchParams.get('member_id')
   const source = searchParams.get('source')
@@ -41,8 +41,8 @@ export async function GET(req: NextRequest) {
       .select(APPLICATION_SELECT, { count: 'exact' })
 
     // Apply filters
-    if (jobBriefId) {
-      query = query.eq('job_brief_id', jobBriefId)
+    if (searchAssignmentId) {
+      query = query.eq('search_assignment_id', searchAssignmentId)
     }
     if (stage) {
       // Support comma-separated stages: "applied,screening,shortlisted"
@@ -118,43 +118,43 @@ export async function POST(req: NextRequest) {
 
     // Determine application fields based on role
     let memberId: string
-    let jobBriefId: string
+    let searchAssignmentId: string
     let applicationSource: string
     let assignedRecruiter: string | null = null
     let initialNote: string | null = null
 
     if (isAdmin) {
       // Admin can create applications for any member
-      if (!body.member_id || !body.job_brief_id) {
+      if (!body.member_id || !body.search_assignment_id) {
         return NextResponse.json(
-          { error: 'member_id and job_brief_id are required' },
+          { error: 'member_id and search_assignment_id are required' },
           { status: 400 }
         )
       }
       memberId = body.member_id
-      jobBriefId = body.job_brief_id
+      searchAssignmentId = body.search_assignment_id
       applicationSource = body.source || 'sourced_by_recruiter'
       assignedRecruiter = body.assigned_recruiter || null
       initialNote = body.note || null
     } else {
       // Non-admin: self-apply only
-      if (!body.job_brief_id) {
+      if (!body.search_assignment_id) {
         return NextResponse.json(
-          { error: 'job_brief_id is required' },
+          { error: 'search_assignment_id is required' },
           { status: 400 }
         )
       }
       memberId = session.user.memberId
-      jobBriefId = body.job_brief_id
+      searchAssignmentId = body.search_assignment_id
       applicationSource = 'self_applied'
     }
 
-    // Check for duplicate application (same member + same brief)
+    // Check for duplicate application (same member + same assignment)
     const { data: existing } = await supabase
       .from('applications')
       .select('id')
       .eq('member_id', memberId)
-      .eq('job_brief_id', jobBriefId)
+      .eq('search_assignment_id', searchAssignmentId)
       .maybeSingle()
 
     if (existing) {
@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
       .from('applications')
       .insert({
         member_id: memberId,
-        job_brief_id: jobBriefId,
+        search_assignment_id: searchAssignmentId,
         source: applicationSource,
         current_stage: 'applied',
         assigned_recruiter: assignedRecruiter,

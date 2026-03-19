@@ -31,7 +31,7 @@ export default async function DashboardPage() {
 
   // Base cards for all members
   const cards: DashCard[] = [
-    { num: '01', title: 'Job Briefs', desc: 'Browse open positions in luxury. Manager to Executive level.', href: '/jobs' },
+    { num: '01', title: 'Opportunities', desc: 'Browse open positions in luxury. Manager to Executive level.', href: '/opportunities' },
     { num: '02', title: 'WikiLux', desc: '500+ luxury brand encyclopedias. History, culture, hiring insights.', href: '/wikilux' },
     { num: '03', title: 'Contribute', desc: 'Share your intelligence, earn points for the community.', href: '/contribute' },
     { num: '04', title: 'My Profile', desc: 'Edit your profile and settings.', href: '/profile' },
@@ -41,7 +41,7 @@ export default async function DashboardPage() {
   // Senior tiers get extra cards
   if (isSenior) {
     cards.push(
-      { num: '06', title: 'Confidential Briefs', desc: 'Executive-level positions handled with full discretion.', href: '/jobs?confidential=true' },
+      { num: '06', title: 'Confidential Opportunities', desc: 'Executive-level positions handled with full discretion.', href: '/opportunities?confidential=true' },
       { num: '07', title: 'Salary Intelligence', desc: 'Compensation benchmarks across markets and roles.', href: '/salaries' },
     )
   }

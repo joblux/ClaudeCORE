@@ -9,10 +9,10 @@ const supabase = createClient(
 )
 
 /**
- * POST /api/jobs/apply
- * Self-apply to a job brief as an authenticated member.
+ * POST /api/opportunities/apply
+ * Self-apply to a search assignment as an authenticated member.
  *
- * Body: { jobId: string } — the search_assignment_id to apply to
+ * Body: { jobId: string } — the search_assignment id to apply to
  * Returns: { success: true, application_id: string }
  */
 export async function POST(req: NextRequest) {
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
           { status: 409 }
         )
       }
-      console.error('[POST /api/jobs/apply] Insert error:', insertError)
+      console.error('[POST /api/opportunities/apply] Insert error:', insertError)
       return NextResponse.json({ error: insertError.message }, { status: 500 })
     }
 
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
       })
 
     if (historyError) {
-      console.error('[POST /api/jobs/apply] Stage history insert error:', historyError)
+      console.error('[POST /api/opportunities/apply] Stage history insert error:', historyError)
     }
 
     return NextResponse.json({
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
       application_id: application.id,
     })
   } catch (err) {
-    console.error('[POST /api/jobs/apply] Unexpected error:', err)
+    console.error('[POST /api/opportunities/apply] Unexpected error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

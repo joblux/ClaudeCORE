@@ -53,7 +53,7 @@ function getSourceLabel(val: string): string {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Brief type (light)                                                 */
+/*  Assignment type (light)                                            */
 /* ------------------------------------------------------------------ */
 interface BriefOption {
   id: string
@@ -65,7 +65,7 @@ interface BriefOption {
 /* ------------------------------------------------------------------ */
 /*  Sort helpers for Table view                                        */
 /* ------------------------------------------------------------------ */
-type SortKey = 'name' | 'brief' | 'maison' | 'stage' | 'rating' | 'applied' | 'days' | 'source' | 'recruiter' | 'city'
+type SortKey = 'name' | 'assignment' | 'maison' | 'stage' | 'rating' | 'applied' | 'days' | 'source' | 'recruiter' | 'city'
 type SortDir = 'asc' | 'desc'
 
 function sortApplications(apps: Application[], key: SortKey, dir: SortDir): Application[] {
@@ -78,13 +78,13 @@ function sortApplications(apps: Application[], key: SortKey, dir: SortDir): Appl
         va = a.member?.full_name ?? ''
         vb = b.member?.full_name ?? ''
         break
-      case 'brief':
-        va = a.job_brief?.title ?? ''
-        vb = b.job_brief?.title ?? ''
+      case 'assignment':
+        va = a.search_assignment?.title ?? ''
+        vb = b.search_assignment?.title ?? ''
         break
       case 'maison':
-        va = a.job_brief?.maison ?? ''
-        vb = b.job_brief?.maison ?? ''
+        va = a.search_assignment?.maison ?? ''
+        vb = b.search_assignment?.maison ?? ''
         break
       case 'stage':
         va = getStageLabel(a.current_stage)
@@ -162,13 +162,13 @@ export default function AdminATSPage() {
   const [addSubmitting, setAddSubmitting] = useState(false)
 
   /* ---------------------------------------------------------------- */
-  /*  Fetch briefs                                                     */
+  /*  Fetch assignments                                                 */
   /* ---------------------------------------------------------------- */
   useEffect(() => {
     if (!isAdmin) return
-    fetch('/api/briefs')
+    fetch('/api/assignments')
       .then((r) => r.json())
-      .then((d) => setBriefs(d.briefs ?? []))
+      .then((d) => setBriefs(d.assignments ?? []))
       .catch(() => setBriefs([]))
   }, [isAdmin])
 
@@ -179,7 +179,7 @@ export default function AdminATSPage() {
     if (!isAdmin) return
     setLoading(true)
     const params = new URLSearchParams({ limit: '200' })
-    if (briefFilter) params.set('job_brief_id', briefFilter)
+    if (briefFilter) params.set('search_assignment_id', briefFilter)
     fetch(`/api/applications?${params}`)
       .then((r) => r.json())
       .then((d) => setApplications(d.applications ?? d.data ?? []))
@@ -240,7 +240,7 @@ export default function AdminATSPage() {
       filtered = filtered.filter(
         (a) =>
           (a.member?.full_name ?? '').toLowerCase().includes(q) ||
-          (a.job_brief?.title ?? '').toLowerCase().includes(q)
+          (a.search_assignment?.title ?? '').toLowerCase().includes(q)
       )
     }
     if (tableStageFilter.length > 0) {
@@ -331,7 +331,7 @@ export default function AdminATSPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           member_id: foundMember.id,
-          job_brief_id: addBriefId,
+          search_assignment_id: addBriefId,
           source: 'sourced_by_recruiter',
           notes: addNote || undefined,
         }),
@@ -475,7 +475,7 @@ export default function AdminATSPage() {
 
           {/* Controls row */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            {/* Brief selector */}
+            {/* Assignment selector */}
             <select
               value={briefFilter}
               onChange={(e) => setBriefFilter(e.target.value)}
@@ -491,7 +491,7 @@ export default function AdminATSPage() {
                 cursor: 'pointer',
               }}
             >
-              <option value="">All Briefs</option>
+              <option value="">All Assignments</option>
               {briefs.map((b) => (
                 <option key={b.id} value={b.id}>
                   {b.title}{b.maison ? ` \u2014 ${b.maison}` : ''}
@@ -706,10 +706,10 @@ export default function AdminATSPage() {
                           </div>
                         </div>
 
-                        {/* Brief title (when viewing all briefs) */}
-                        {!briefFilter && app.job_brief?.title && (
+                        {/* Assignment title (when viewing all assignments) */}
+                        {!briefFilter && app.search_assignment?.title && (
                           <div style={{ fontSize: 11, color: GOLD, fontWeight: 600, marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {app.job_brief.title}
+                            {app.search_assignment.title}
                           </div>
                         )}
 
@@ -908,7 +908,7 @@ export default function AdminATSPage() {
             {/* Search */}
             <input
               type="text"
-              placeholder="Search by name or brief..."
+              placeholder="Search by name or assignment..."
               value={tableSearch}
               onChange={(e) => setTableSearch(e.target.value)}
               className="jl-input"
@@ -963,7 +963,7 @@ export default function AdminATSPage() {
                 <tr style={{ borderBottom: `2px solid ${BORDER}` }}>
                   {([
                     { key: 'name' as SortKey, label: 'Candidate' },
-                    { key: 'brief' as SortKey, label: 'Brief' },
+                    { key: 'assignment' as SortKey, label: 'Assignment' },
                     { key: 'maison' as SortKey, label: 'Maison' },
                     { key: 'stage' as SortKey, label: 'Stage' },
                     { key: 'rating' as SortKey, label: 'Rating' },
@@ -1027,13 +1027,13 @@ export default function AdminATSPage() {
                         </div>
                       </div>
                     </td>
-                    {/* Brief */}
+                    {/* Assignment */}
                     <td style={{ padding: '10px 12px', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {app.job_brief?.title ?? '\u2014'}
+                      {app.search_assignment?.title ?? '\u2014'}
                     </td>
                     {/* Maison */}
                     <td style={{ padding: '10px 12px', color: '#666' }}>
-                      {app.job_brief?.maison ?? '\u2014'}
+                      {app.search_assignment?.maison ?? '\u2014'}
                     </td>
                     {/* Stage */}
                     <td style={{ padding: '10px 12px' }}>
@@ -1104,7 +1104,7 @@ export default function AdminATSPage() {
               Add Candidate
             </h2>
             <p style={{ fontSize: 13, color: '#888', margin: '0 0 24px' }}>
-              Add an existing member to a job brief pipeline.
+              Add an existing member to an assignment pipeline.
             </p>
 
             {/* Member email search */}
@@ -1160,7 +1160,7 @@ export default function AdminATSPage() {
 
             {/* Brief */}
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#666', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-              Job Brief
+              Search Assignment
             </label>
             <select
               value={addBriefId}
@@ -1178,9 +1178,9 @@ export default function AdminATSPage() {
                 cursor: 'pointer',
               }}
             >
-              <option value="">Select a brief...</option>
+              <option value="">Select an assignment...</option>
               {briefs
-                .filter((b) => b.status === 'published')
+                .filter((b) => b.status === 'active')
                 .map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.title}{b.maison ? ` \u2014 ${b.maison}` : ''}

@@ -76,10 +76,10 @@ export async function GET(req: NextRequest) {
         .gte('updated_at', monthStart)
         .lte('updated_at', monthEnd),
 
-      // Top 5 briefs by application count
+      // Top 5 assignments by application count
       supabase
         .from('applications')
-        .select('job_brief_id, job_brief:job_briefs!job_brief_id(title, maison)'),
+        .select('search_assignment_id, search_assignment:search_assignments!search_assignment_id(title, maison)'),
     ])
 
     // Aggregate by_stage counts from raw rows
@@ -106,24 +106,24 @@ export async function GET(req: NextRequest) {
       .map(([source, count]) => ({ source, count }))
       .sort((a, b) => b.count - a.count)
 
-    // Aggregate top briefs
-    const briefCounts: Record<string, { count: number; title: string; maison: string | null }> = {}
+    // Aggregate top assignments
+    const assignmentCounts: Record<string, { count: number; title: string; maison: string | null }> = {}
     if (topBriefsResult.data) {
       for (const row of topBriefsResult.data) {
-        const briefId = row.job_brief_id as string
-        const brief = row.job_brief as unknown as { title: string; maison: string | null } | null
-        if (!briefCounts[briefId]) {
-          briefCounts[briefId] = {
+        const assignmentId = row.search_assignment_id as string
+        const assignment = row.search_assignment as unknown as { title: string; maison: string | null } | null
+        if (!assignmentCounts[assignmentId]) {
+          assignmentCounts[assignmentId] = {
             count: 0,
-            title: brief?.title || 'Unknown',
-            maison: brief?.maison || null,
+            title: assignment?.title || 'Unknown',
+            maison: assignment?.maison || null,
           }
         }
-        briefCounts[briefId].count += 1
+        assignmentCounts[assignmentId].count += 1
       }
     }
-    const topBriefs = Object.entries(briefCounts)
-      .map(([id, data]) => ({ job_brief_id: id, ...data }))
+    const topBriefs = Object.entries(assignmentCounts)
+      .map(([id, data]) => ({ search_assignment_id: id, ...data }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5)
 

@@ -1,6 +1,7 @@
 /**
  * Types and constants for the Applicant Tracking System (ATS).
  * Covers the full recruitment pipeline from application to placement.
+ * Applications reference search_assignments (formerly job_briefs).
  */
 
 export const PIPELINE_STAGES = [
@@ -76,7 +77,7 @@ export const NOTE_TYPES = [
 export interface Application {
   id: string
   member_id: string
-  job_brief_id: string
+  search_assignment_id: string
   current_stage: PipelineStage
   source: string
   rating: number | null
@@ -119,7 +120,7 @@ export interface Application {
     seniority: string | null
     years_in_luxury: number | null
   }
-  job_brief?: {
+  search_assignment?: {
     id: string
     title: string
     maison: string | null

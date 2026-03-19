@@ -1960,9 +1960,9 @@ export default function ProfileClient({ email }: { email: string }) {
                 </h3>
                 <p className="font-sans text-xs text-[#888] mt-1">Back to your dashboard</p>
               </Link>
-              <Link href="/jobs" className="jl-card group">
+              <Link href="/opportunities" className="jl-card group">
                 <h3 className="font-sans text-sm font-semibold text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors">
-                  Job Briefs
+                  Opportunities
                 </h3>
                 <p className="font-sans text-xs text-[#888] mt-1">Browse confidential assignments</p>
               </Link>

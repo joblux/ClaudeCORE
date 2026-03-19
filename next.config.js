@@ -11,6 +11,12 @@ const nextConfig = {
       { protocol: 'https', hostname: 'media.licdn.com' },
     ],
   },
+  async redirects() {
+    return [
+      { source: '/jobs', destination: '/opportunities', permanent: true },
+      { source: '/jobs/:path*', destination: '/opportunities/:path*', permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

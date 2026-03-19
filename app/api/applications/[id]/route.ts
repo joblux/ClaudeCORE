@@ -11,7 +11,7 @@ const supabase = createClient(
 const APPLICATION_SELECT = `
   *,
   member:members!member_id(id, full_name, email, avatar_url, job_title, maison, city, country, headline, seniority, years_in_luxury),
-  job_brief:job_briefs!job_brief_id(id, title, maison, is_confidential, city, country, reference_number, status)
+  search_assignment:search_assignments!search_assignment_id(id, title, maison, is_confidential, city, country, reference_number, status)
 `
 
 /**
@@ -30,7 +30,7 @@ export async function GET(
   const { id } = await params
 
   try {
-    // Fetch application with joined member and job_brief
+    // Fetch application with joined member and search_assignment
     const { data: application, error } = await supabase
       .from('applications')
       .select(APPLICATION_SELECT)

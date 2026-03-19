@@ -93,9 +93,9 @@ export default function AdminDashboardPage() {
   }
   if (overview.publishedBriefs === 0) {
     actions.push({
-      label: 'No active job briefs — post one to attract talent',
+      label: 'No active assignments — create one to attract talent',
       count: 0,
-      href: '/admin/briefs/new',
+      href: '/admin/assignments/new',
       urgent: false,
     })
   }
@@ -160,9 +160,9 @@ export default function AdminDashboardPage() {
             </p>
           </Link>
           <div className="bg-white border border-[#e8e2d8] rounded-sm p-5">
-            <p className="text-xs text-[#999] uppercase tracking-wide">Active Briefs</p>
+            <p className="text-xs text-[#999] uppercase tracking-wide">Active Assignments</p>
             <p className="jl-serif text-3xl text-[#1a1a1a] mt-1">{overview.publishedBriefs}</p>
-            <p className="text-xs text-[#999] mt-1">{overview.totalBriefs} total</p>
+            <p className="text-xs text-[#999] mt-1">{overview.totalBriefs} total assignments</p>
           </div>
         </div>
 
@@ -323,13 +323,13 @@ export default function AdminDashboardPage() {
                 </div>
               </Link>
               <Link
-                href="/admin/briefs/new"
+                href="/admin/assignments/new"
                 className="flex items-center gap-3 p-3 border border-[#e8e2d8] rounded-sm hover:border-[#a58e28] transition-colors"
               >
-                <span className="w-8 h-8 flex items-center justify-center bg-[#1a1a1a] text-[#a58e28] text-xs rounded-sm">B</span>
+                <span className="w-8 h-8 flex items-center justify-center bg-[#1a1a1a] text-[#a58e28] text-xs rounded-sm">A</span>
                 <div>
-                  <p className="text-sm font-medium text-[#1a1a1a]">Post a Brief</p>
-                  <p className="text-xs text-[#999]">Create a new job assignment</p>
+                  <p className="text-sm font-medium text-[#1a1a1a]">New Assignment</p>
+                  <p className="text-xs text-[#999]">Create a new search assignment</p>
                 </div>
               </Link>
               <Link

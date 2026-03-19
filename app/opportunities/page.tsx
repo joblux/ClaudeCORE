@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { DEPARTMENTS, SENIORITY_LEVELS, CONTRACT_TYPES, REMOTE_POLICIES, CURRENCY_SYMBOLS } from '@/lib/job-brief-options'
-import type { JobBrief } from '@/types/job-brief'
+import { DEPARTMENTS, SENIORITY_LEVELS, CONTRACT_TYPES, REMOTE_POLICIES, CURRENCY_SYMBOLS } from '@/lib/assignment-options'
+import type { SearchAssignment } from '@/types/search-assignment'
 
 /** Format a salary number to a readable string (e.g. 120000 → "120K") */
 function formatSalary(amount: number): string {
@@ -26,20 +26,20 @@ function timeAgo(dateStr: string | null): string {
 }
 
 /** Build salary display string */
-function salaryDisplay(brief: JobBrief): string | null {
-  if (brief.salary_display !== 'true') return null
-  if (!brief.salary_min && !brief.salary_max) return null
-  const sym = CURRENCY_SYMBOLS[brief.salary_currency || 'EUR'] || brief.salary_currency || ''
-  if (brief.salary_min && brief.salary_max) {
-    return `${sym}${formatSalary(brief.salary_min)}–${sym}${formatSalary(brief.salary_max)}`
+function salaryDisplay(assignment: SearchAssignment): string | null {
+  if (assignment.salary_display !== 'true') return null
+  if (!assignment.salary_min && !assignment.salary_max) return null
+  const sym = CURRENCY_SYMBOLS[assignment.salary_currency || 'EUR'] || assignment.salary_currency || ''
+  if (assignment.salary_min && assignment.salary_max) {
+    return `${sym}${formatSalary(assignment.salary_min)}–${sym}${formatSalary(assignment.salary_max)}`
   }
-  if (brief.salary_min) return `From ${sym}${formatSalary(brief.salary_min)}`
-  if (brief.salary_max) return `Up to ${sym}${formatSalary(brief.salary_max)}`
+  if (assignment.salary_min) return `From ${sym}${formatSalary(assignment.salary_min)}`
+  if (assignment.salary_max) return `Up to ${sym}${formatSalary(assignment.salary_max)}`
   return null
 }
 
-export default function JobsPage() {
-  const [briefs, setBriefs] = useState<JobBrief[]>([])
+export default function OpportunitiesPage() {
+  const [opportunities, setOpportunities] = useState<SearchAssignment[]>([])
   const [loading, setLoading] = useState(true)
 
   // Filter state
@@ -50,27 +50,27 @@ export default function JobsPage() {
   const [contractFilter, setContractFilter] = useState('')
   const [remoteFilter, setRemoteFilter] = useState('')
 
-  // Fetch all published briefs once on mount
+  // Fetch all active opportunities once on mount
   useEffect(() => {
-    fetch('/api/briefs?limit=100')
+    fetch('/api/opportunities?limit=100')
       .then((res) => res.json())
-      .then((data) => setBriefs(data.briefs || []))
-      .catch(() => setBriefs([]))
+      .then((data) => setOpportunities(data.opportunities || []))
+      .catch(() => setOpportunities([]))
       .finally(() => setLoading(false))
   }, [])
 
-  // Get unique locations from briefs for the filter dropdown
+  // Get unique locations from opportunities for the filter dropdown
   const uniqueLocations = useMemo(() => {
     const locs = new Set<string>()
-    briefs.forEach((b) => {
+    opportunities.forEach((b) => {
       if (b.city) locs.add(b.city)
     })
     return Array.from(locs).sort()
-  }, [briefs])
+  }, [opportunities])
 
   // Client-side filtering
   const filtered = useMemo(() => {
-    return briefs.filter((b) => {
+    return opportunities.filter((b) => {
       // Search — match title, maison, or city
       if (searchQuery) {
         const q = searchQuery.toLowerCase()
@@ -87,16 +87,16 @@ export default function JobsPage() {
       if (remoteFilter && b.remote_policy !== remoteFilter) return false
       return true
     })
-  }, [briefs, searchQuery, deptFilter, seniorityFilter, locationFilter, contractFilter, remoteFilter])
+  }, [opportunities, searchQuery, deptFilter, seniorityFilter, locationFilter, contractFilter, remoteFilter])
 
   return (
     <div>
       {/* ── Page header ────────────────────────────────────────────── */}
       <div className="border-b-2 border-[#1a1a1a] py-10">
         <div className="jl-container">
-          <div className="jl-overline-gold mb-3">Current Openings</div>
+          <div className="jl-overline-gold mb-3">Current Opportunities</div>
           <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a] mb-3">
-            Job Briefs
+            Opportunities
           </h1>
           <p className="font-sans text-sm text-[#888] max-w-xl">
             Confidential and exclusive assignments across luxury. All positions are handled with full discretion by the JOBLUX team.
@@ -169,15 +169,15 @@ export default function JobsPage() {
           </span>
         </div>
 
-        {/* ── Job cards ──────────────────────────────────────────── */}
+        {/* ── Opportunity cards ───────────────────────────────────── */}
         {loading ? (
           <p className="text-sm text-[#888] text-center py-10">Loading positions...</p>
         ) : filtered.length === 0 ? (
           /* Empty state */
           <div className="text-center py-16 px-6">
-            <p className="jl-serif text-xl text-[#1a1a1a] mb-3">No current openings match your criteria.</p>
+            <p className="jl-serif text-xl text-[#1a1a1a] mb-3">No current opportunities match your criteria.</p>
             <p className="text-sm text-[#888] mb-6">
-              Check back soon or join JOBLUX to be notified of new opportunities.
+              Join JOBLUX to be notified when new positions become available.
             </p>
             <div className="flex items-center justify-center gap-3">
               <Link href="/join" className="jl-btn jl-btn-primary">Join JOBLUX</Link>
@@ -194,16 +194,16 @@ export default function JobsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {filtered.map((brief) => {
-              const salary = salaryDisplay(brief)
-              const displayMaison = brief.is_confidential
+            {filtered.map((assignment) => {
+              const salary = salaryDisplay(assignment)
+              const displayMaison = assignment.is_confidential
                 ? 'Confidential — Leading Luxury Maison'
-                : brief.maison
+                : assignment.maison
 
               return (
                 <Link
-                  key={brief.id}
-                  href={`/jobs/${brief.slug || brief.id}`}
+                  key={assignment.id}
+                  href={`/opportunities/${assignment.slug || assignment.id}`}
                   className="block"
                 >
                   <div className="jl-card group cursor-pointer">
@@ -212,43 +212,43 @@ export default function JobsPage() {
                         {/* Maison name */}
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
                           <span className="jl-overline-gold">{displayMaison}</span>
-                          {brief.is_confidential && (
+                          {assignment.is_confidential && (
                             <span className="jl-badge text-[0.55rem]">Confidential</span>
                           )}
                         </div>
 
-                        {/* Job title */}
+                        {/* Position title */}
                         <h3 className="jl-serif text-lg font-light text-[#1a1a1a] mb-2 group-hover:text-[#a58e28] transition-colors">
-                          {brief.title}
+                          {assignment.title}
                         </h3>
 
                         {/* Details row */}
                         <div className="flex flex-wrap items-center gap-3 mb-2">
                           {/* Location */}
-                          {(brief.city || brief.country) && (
+                          {(assignment.city || assignment.country) && (
                             <span className="font-sans text-xs text-[#888]">
-                              {[brief.city, brief.country].filter(Boolean).join(', ')}
+                              {[assignment.city, assignment.country].filter(Boolean).join(', ')}
                             </span>
                           )}
 
                           {/* Remote policy badge */}
-                          {brief.remote_policy && (
-                            <span className="jl-badge-outline text-[0.55rem]">{brief.remote_policy}</span>
+                          {assignment.remote_policy && (
+                            <span className="jl-badge-outline text-[0.55rem]">{assignment.remote_policy}</span>
                           )}
 
                           {/* Department badge */}
-                          {brief.department && (
-                            <span className="jl-badge text-[0.55rem]">{brief.department}</span>
+                          {assignment.department && (
+                            <span className="jl-badge text-[0.55rem]">{assignment.department}</span>
                           )}
 
                           {/* Seniority badge */}
-                          {brief.seniority && (
-                            <span className="jl-badge-outline text-[0.55rem]">{brief.seniority}</span>
+                          {assignment.seniority && (
+                            <span className="jl-badge-outline text-[0.55rem]">{assignment.seniority}</span>
                           )}
 
                           {/* Contract type */}
-                          {brief.contract_type && (
-                            <span className="font-sans text-xs text-[#888]">{brief.contract_type}</span>
+                          {assignment.contract_type && (
+                            <span className="font-sans text-xs text-[#888]">{assignment.contract_type}</span>
                           )}
                         </div>
 
@@ -256,11 +256,11 @@ export default function JobsPage() {
                         <div className="flex items-center gap-4">
                           {salary && (
                             <span className="font-sans text-xs font-semibold text-[#1a1a1a]">
-                              {salary}{brief.salary_period && brief.salary_period !== 'Annual' ? ` / ${brief.salary_period.toLowerCase()}` : ''}
+                              {salary}{assignment.salary_period && assignment.salary_period !== 'Annual' ? ` / ${assignment.salary_period.toLowerCase()}` : ''}
                             </span>
                           )}
                           <span className="font-sans text-xs text-[#bbb]">
-                            {timeAgo(brief.activated_at)}
+                            {timeAgo(assignment.activated_at)}
                           </span>
                         </div>
                       </div>

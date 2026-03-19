@@ -29,7 +29,7 @@ const VALID_STAGES = [
 const APPLICATION_SELECT = `
   *,
   member:members!member_id(id, full_name, email, avatar_url, job_title, maison, city, country, headline, seniority, years_in_luxury),
-  job_brief:job_briefs!job_brief_id(id, title, maison, is_confidential, city, country, reference_number, status)
+  search_assignment:search_assignments!search_assignment_id(id, title, maison, is_confidential, city, country, reference_number, status)
 `
 
 /**

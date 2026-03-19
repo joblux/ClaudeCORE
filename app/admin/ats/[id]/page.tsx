@@ -437,7 +437,7 @@ export default function ApplicationDetailPage() {
   }
 
   const member = app.member;
-  const brief = app.job_brief;
+  const brief = app.search_assignment;
 
   // -----------------------------------------------------------------------
   // Render
@@ -710,11 +710,11 @@ export default function ApplicationDetailPage() {
                 )}
                 {brief && (
                   <a
-                    href={`/admin/briefs/new?id=${brief.id}`}
+                    href={`/admin/assignments/new?id=${brief.id}`}
                     className="jl-link"
                     style={{ ...btnOutline, textDecoration: "none", fontSize: 12, padding: "6px 14px" }}
                   >
-                    View Brief
+                    View Assignment
                   </a>
                 )}
                 {member && (
