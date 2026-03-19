@@ -32,10 +32,10 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="border-t-2 border-[#1a1a1a] mt-16">
+    <footer className="border-t-2 border-[#1a1a1a] mt-8">
 
       {/* MAIN FOOTER */}
-      <div className="jl-container py-10">
+      <div className="jl-container py-6">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
 
           {/* Brand column */}
@@ -76,7 +76,7 @@ export function Footer() {
 
       {/* BOTTOM BAR */}
       <div className="border-t border-[#e8e2d8]">
-        <div className="jl-container py-4 flex flex-col md:flex-row items-center justify-between gap-3">
+        <div className="jl-container py-2 flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="font-sans text-xs text-[#bbb] tracking-wide">
             © {new Date().getFullYear()} JOBLUX &nbsp;·&nbsp; Luxury Talents Intelligence &nbsp;·&nbsp; Est. Paris 2006
           </p>

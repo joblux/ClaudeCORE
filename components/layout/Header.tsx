@@ -31,7 +31,7 @@ export function Header() {
   return (
     <header className="border-b border-[#e8e2d8]">
       <div className="jl-container">
-        <div className="flex items-center justify-between py-2 border-b border-[#e8e2d8]">
+        <div className="flex items-center justify-between py-1 border-b border-[#e8e2d8]">
           <div className="hidden md:flex items-center gap-4">
             {markets.map((m) => (<Link key={m.label} href={m.href} className="jl-overline hover:text-[#1a1a1a] transition-colors">{m.label}</Link>))}
           </div>
@@ -45,17 +45,16 @@ export function Header() {
         </div>
       </div>
       <div className="jl-container">
-        <div className="py-6 text-center border-b-2 border-[#1a1a1a]">
+        <div className="py-3 text-center border-b-2 border-[#1a1a1a]">
           <Link href="/" className="inline-block">
-            <div className="text-[2.75rem] md:text-[3.5rem] font-semibold text-[#1a1a1a] leading-none" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</div>
+            <div className="text-[2.75rem] md:text-[2.5rem] font-semibold text-[#1a1a1a] leading-none" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</div>
           </Link>
           <div className="jl-overline mt-2 tracking-[0.2em]">Luxury Talents Intelligence</div>
-          <div className="font-sans text-[0.6rem] text-[#bbb] mt-1 tracking-wider">Est. Paris 2006 &nbsp;·&nbsp; Paris · London · New York · Dubai · Singapore</div>
         </div>
       </div>
       <div className="jl-container hidden md:block">
         <nav className="flex items-center justify-center border-b border-[#e8e2d8]">
-          {navItems.map((item) => (<Link key={item.label} href={item.href} className="px-4 py-3 jl-overline hover:text-[#1a1a1a] border-b-2 border-transparent hover:border-[#1a1a1a] transition-all">{item.label}</Link>))}
+          {navItems.map((item) => (<Link key={item.label} href={item.href} className="px-3 py-2 jl-overline hover:text-[#1a1a1a] border-b-2 border-transparent hover:border-[#1a1a1a] transition-all">{item.label}</Link>))}
         </nav>
       </div>
       <div className="md:hidden jl-container">
