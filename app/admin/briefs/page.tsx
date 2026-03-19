@@ -1,27 +1,71 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRequireAdmin } from '@/lib/auth-hooks'
+import { BRIEF_STATUSES } from '@/lib/job-brief-options'
+import type { JobBrief } from '@/types/job-brief'
 
-const jobs = [
-  { id: '1', maison: 'Major French Fashion Maison', title: 'Store Director — Paris Flagship', market: 'Paris · France', salary: '€110–140K + bonus', status: 'Open' },
-  { id: '2', maison: 'Swiss Watch Group — Richemont', title: 'Regional Director — Gulf & Levant', market: 'Dubai · UAE', salary: 'AED 380–450K + package', status: 'Open' },
-  { id: '3', maison: 'LVMH Group Brand', title: 'HR Director — Asia Pacific', market: 'Singapore', salary: 'SGD 200–250K', status: 'Open' },
-  { id: '4', maison: 'Italian Leather Goods Maison', title: 'Buying Director — RTW & Accessories', market: 'Milan · Italy', salary: '€95–120K + bonus', status: 'Filled' },
-  { id: '5', maison: 'Ultra Luxury Hotel Group', title: 'General Manager — New Property', market: 'London · UK', salary: '£130–160K + benefits', status: 'Open' },
-  { id: '6', maison: 'French Jewellery Maison', title: 'Country Manager — UK & Ireland', market: 'London · UK', salary: '£110–135K + bonus', status: 'Closed' },
-]
+// Status badge colours
+const statusColors: Record<string, { bg: string; text: string }> = {
+  draft:     { bg: '#f5f4f0', text: '#888' },
+  published: { bg: '#1a1a1a', text: '#a58e28' },
+  on_hold:   { bg: '#fff8e6', text: '#c97a2a' },
+  closed:    { bg: '#f5f4f0', text: '#555' },
+  filled:    { bg: '#e8f5e9', text: '#2a7a3c' },
+}
 
-const statusColor: Record<string, string> = {
-  Open: '#a58e28',
-  Filled: '#555',
-  Closed: '#999',
+// Priority badge colours
+const priorityColors: Record<string, string> = {
+  low: '#999',
+  normal: '#666',
+  high: '#c97a2a',
+  urgent: '#d32f2f',
+}
+
+/** Format a date string to "Mar 19, 2026" */
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return '—'
+  const d = new Date(dateStr)
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 export default function AdminBriefsPage() {
-  const { isAdmin, isLoading } = useRequireAdmin()
+  const { isAdmin, isLoading: authLoading } = useRequireAdmin()
+  const [briefs, setBriefs] = useState<JobBrief[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(true)
 
-  if (isLoading || !isAdmin) {
+  // Filters
+  const [statusFilter, setStatusFilter] = useState('')
+  const [search, setSearch] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+
+  // Fetch briefs when filters change
+  useEffect(() => {
+    if (!isAdmin) return
+
+    setLoading(true)
+    const params = new URLSearchParams()
+    if (statusFilter) params.set('status', statusFilter)
+    if (search) params.set('search', search)
+
+    fetch(`/api/briefs?${params.toString()}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setBriefs(data.briefs || [])
+        setTotal(data.total || 0)
+      })
+      .catch(() => setBriefs([]))
+      .finally(() => setLoading(false))
+  }, [isAdmin, statusFilter, search])
+
+  // Debounced search — submit on Enter or after typing stops
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') setSearch(searchInput)
+  }
+
+  if (authLoading || !isAdmin) {
     return (
       <div style={{ fontFamily: 'Inter, system-ui, sans-serif', padding: '60px 20px', textAlign: 'center', color: '#888', fontSize: 14 }}>
         Loading...
@@ -50,13 +94,15 @@ export default function AdminBriefsPage() {
       </div>
 
       {/* Content */}
-      <div style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px' }}>
+      <div style={{ maxWidth: 1060, margin: '0 auto', padding: '32px 24px' }}>
 
         {/* Header row */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 600, color: '#1a1a1a', margin: 0 }}>Job Briefs</h1>
-            <p style={{ fontSize: 12, color: '#888', marginTop: 4 }}>{jobs.length} positions</p>
+            <p style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
+              {total} {total === 1 ? 'position' : 'positions'}
+            </p>
           </div>
           <Link
             href="/admin/briefs/new"
@@ -71,43 +117,117 @@ export default function AdminBriefsPage() {
           </Link>
         </div>
 
-        {/* Table */}
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid #1a1a1a' }}>
-              {['Title', 'Maison', 'Market', 'Salary', 'Status'].map((h) => (
-                <th key={h} style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#888' }}>
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {jobs.map((job) => (
-              <tr key={job.id} style={{ borderBottom: '1px solid #f0ece4' }}>
-                <td style={{ padding: '12px 12px' }}>
-                  <Link href={`/jobs/${job.id}`} style={{ color: '#1a1a1a', textDecoration: 'none', fontWeight: 500 }}>
-                    {job.title}
-                  </Link>
-                </td>
-                <td style={{ padding: '12px 12px', color: '#888', fontSize: 12 }}>{job.maison}</td>
-                <td style={{ padding: '12px 12px', color: '#888', fontSize: 12 }}>{job.market}</td>
-                <td style={{ padding: '12px 12px', fontWeight: 600, fontSize: 12 }}>{job.salary}</td>
-                <td style={{ padding: '12px 12px' }}>
-                  <span style={{
-                    display: 'inline-block', fontSize: 10, fontWeight: 600,
-                    letterSpacing: '0.08em', textTransform: 'uppercase' as const,
-                    padding: '3px 10px', background: job.status === 'Open' ? '#1a1a1a' : '#f5f4f0',
-                    color: statusColor[job.status] || '#888',
-                  }}>
-                    {job.status}
-                  </span>
-                </td>
-              </tr>
+        {/* Filter bar */}
+        <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            style={{
+              padding: '8px 12px', fontSize: 13, border: '1px solid #e8e2d8',
+              background: '#fff', color: '#1a1a1a', minWidth: 140,
+            }}
+          >
+            <option value="">All Statuses</option>
+            {BRIEF_STATUSES.map((s) => (
+              <option key={s.value} value={s.value}>{s.label}</option>
             ))}
-          </tbody>
-        </table>
+          </select>
 
+          <input
+            type="text"
+            placeholder="Search title or maison..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            onBlur={() => setSearch(searchInput)}
+            style={{
+              padding: '8px 12px', fontSize: 13, border: '1px solid #e8e2d8',
+              background: '#fff', color: '#1a1a1a', flex: 1, minWidth: 200,
+            }}
+          />
+        </div>
+
+        {/* Loading state */}
+        {loading ? (
+          <p style={{ fontSize: 13, color: '#888', textAlign: 'center', padding: 40 }}>Loading briefs...</p>
+        ) : briefs.length === 0 ? (
+          <p style={{ fontSize: 13, color: '#888', textAlign: 'center', padding: 40 }}>No briefs found.</p>
+        ) : (
+          /* Table */
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid #1a1a1a' }}>
+                  {['Ref #', 'Title', 'Maison', 'Status', 'Priority', 'City', 'Created'].map((h) => (
+                    <th key={h} style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#888' }}>
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {briefs.map((brief) => {
+                  const sc = statusColors[brief.status] || statusColors.draft
+                  const pc = priorityColors[brief.priority] || '#666'
+
+                  return (
+                    <tr key={brief.id} style={{ borderBottom: '1px solid #f0ece4' }}>
+                      {/* Reference number */}
+                      <td style={{ padding: '12px 12px', color: '#888', fontSize: 11, fontFamily: 'monospace' }}>
+                        {brief.reference_number || '—'}
+                      </td>
+
+                      {/* Title — links to edit */}
+                      <td style={{ padding: '12px 12px' }}>
+                        <Link
+                          href={`/admin/briefs/new?id=${brief.id}`}
+                          style={{ color: '#1a1a1a', textDecoration: 'none', fontWeight: 500 }}
+                        >
+                          {brief.title}
+                        </Link>
+                      </td>
+
+                      {/* Maison — show "Confidential" if is_confidential */}
+                      <td style={{ padding: '12px 12px', color: '#888', fontSize: 12 }}>
+                        {brief.is_confidential ? (
+                          <span style={{ fontStyle: 'italic', color: '#a58e28' }}>Confidential</span>
+                        ) : (
+                          brief.maison || '—'
+                        )}
+                      </td>
+
+                      {/* Status badge */}
+                      <td style={{ padding: '12px 12px' }}>
+                        <span style={{
+                          display: 'inline-block', fontSize: 10, fontWeight: 600,
+                          letterSpacing: '0.08em', textTransform: 'uppercase' as const,
+                          padding: '3px 10px', background: sc.bg, color: sc.text,
+                        }}>
+                          {brief.status.replace('_', ' ')}
+                        </span>
+                      </td>
+
+                      {/* Priority */}
+                      <td style={{ padding: '12px 12px', fontSize: 11, fontWeight: 600, color: pc, textTransform: 'capitalize' as const }}>
+                        {brief.priority}
+                      </td>
+
+                      {/* City */}
+                      <td style={{ padding: '12px 12px', color: '#888', fontSize: 12 }}>
+                        {brief.city || '—'}
+                      </td>
+
+                      {/* Created date */}
+                      <td style={{ padding: '12px 12px', color: '#888', fontSize: 12 }}>
+                        {formatDate(brief.created_at)}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   )

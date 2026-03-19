@@ -8,172 +8,214 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// Helper: generate slug from title + maison
-function generateSlug(title: string, maison: string): string {
-  const base = `${maison}-${title}`
-  return base
+// ---------------------------------------------------------------------------
+// Helper: generate a URL-friendly slug from a title
+// ---------------------------------------------------------------------------
+function generateSlug(title: string): string {
+  return title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
+    .replace(/^-+|-+$/g, '')
 }
 
+// ---------------------------------------------------------------------------
+// Helper: coerce a value to an array of strings, or null
+// ---------------------------------------------------------------------------
+function toArray(val: unknown): string[] | null {
+  if (Array.isArray(val)) return val
+  if (typeof val === 'string' && val.trim()) {
+    return val.split(',').map((s: string) => s.trim())
+  }
+  return null
+}
+
+// ---------------------------------------------------------------------------
+// Helper: coerce a value to a boolean, or null
+// ---------------------------------------------------------------------------
+function toBool(val: unknown): boolean | null {
+  if (val === true || val === 'true') return true
+  if (val === false || val === 'false') return false
+  return null
+}
+
+// ---------------------------------------------------------------------------
 // GET /api/briefs — list briefs
-// Admin: sees all briefs (draft, published, closed)
-// Public: sees only published non-confidential
-// Professional+: sees published including confidential
+//   Query params: status, search, page (default 1), limit (default 20)
+//   Admin  → all briefs, optionally filtered by status, ordered by created_at DESC
+//   Public → published briefs with open closing date, ordered by published_at DESC
+// ---------------------------------------------------------------------------
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions)
-  const isAdmin = (session?.user as any)?.role === 'admin'
-  const memberStatus = (session?.user as any)?.status
-  const memberRole = (session?.user as any)?.role
+  try {
+    const session = await getServerSession(authOptions)
+    const isAdmin = (session?.user as any)?.role === 'admin'
 
-  const { searchParams } = new URL(req.url)
-  const status = searchParams.get('status')
-  const page = parseInt(searchParams.get('page') || '1')
-  const limit = parseInt(searchParams.get('limit') || '20')
-  const offset = (page - 1) * limit
+    const { searchParams } = new URL(req.url)
+    const status = searchParams.get('status')
+    const search = searchParams.get('search')
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
+    const limit = Math.max(1, Math.min(100, parseInt(searchParams.get('limit') || '20', 10)))
+    const offset = (page - 1) * limit
 
-  let query = supabase
-    .from('job_briefs')
-    .select('*', { count: 'exact' })
-    .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1)
+    // Build query
+    let query = supabase.from('job_briefs').select('*', { count: 'exact' })
 
-  if (isAdmin) {
-    // Admin sees everything, optionally filtered by status
-    if (status) {
-      query = query.eq('status', status)
+    if (isAdmin) {
+      // Admin can filter by status; default ordering is created_at DESC
+      if (status) {
+        query = query.eq('status', status)
+      }
+      query = query.order('created_at', { ascending: false })
+    } else {
+      // Non-admin: only published briefs whose closing date is null or in the future
+      query = query.eq('status', 'published')
+      query = query.or('closing_date.is.null,closing_date.gt.now()')
+      query = query.order('published_at', { ascending: false })
     }
-  } else if (memberStatus === 'approved' && ['candidate', 'employer', 'influencer'].includes(memberRole)) {
-    // Approved Professional+ / Business / Insider — see published including confidential
-    query = query.eq('status', 'published')
-  } else {
-    // Public or Rising — only published non-confidential
-    query = query.eq('status', 'published').eq('is_confidential', false)
+
+    // Search by title or maison (case-insensitive)
+    if (search) {
+      query = query.or(`title.ilike.%${search}%,maison.ilike.%${search}%`)
+    }
+
+    // Pagination
+    query = query.range(offset, offset + limit - 1)
+
+    const { data: briefs, count, error } = await query
+
+    if (error) {
+      console.error('Error fetching briefs:', error)
+      return NextResponse.json({ error: 'Failed to fetch briefs' }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      briefs: briefs || [],
+      total: count || 0,
+      page,
+      limit,
+    })
+  } catch (err) {
+    console.error('Unexpected error in GET /api/briefs:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-
-  const { data, error, count } = await query
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-
-  return NextResponse.json({
-    briefs: data,
-    total: count,
-    page,
-    limit,
-  })
 }
 
-// POST /api/briefs — create new brief (admin only)
+// ---------------------------------------------------------------------------
+// POST /api/briefs — create a new brief (admin only)
+//   Accepts ALL fields from the job brief form.
+//   Auto-generates slug, seo_title, seo_description when not provided.
+//   Handles numeric, array, boolean, and text coercion.
+// ---------------------------------------------------------------------------
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions)
-  const isAdmin = (session?.user as any)?.role === 'admin'
-
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
   try {
+    // ---- Authentication & authorisation ----
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    if ((session.user as any).role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const body = await req.json()
 
-    const {
-      title,
-      maison,
-      location,
-      city,
-      country,
-      remote_policy,
-      contract_type,
-      seniority,
-      department,
-      reports_to,
-      description,
-      responsibilities,
-      requirements,
-      qualifications,
-      salary_min,
-      salary_max,
-      salary_currency,
-      salary_display,
-      is_confidential,
-      status,
+    // ---- Slug (auto-generate from title if not provided) ----
+    let slug = body.slug?.trim()
+      ? generateSlug(body.slug)
+      : generateSlug(body.title || 'untitled')
+
+    // ---- Auto-generated SEO fields ----
+    const seo_title =
+      body.seo_title?.trim() ||
+      `${body.title || ''}${body.maison ? ' at ' + body.maison : ''}${body.city ? ' — ' + body.city : ''}`
+
+    const seo_description =
+      body.seo_description?.trim() ||
+      (body.description ? body.description.substring(0, 160) : null)
+
+    // ---- Numeric fields (parse to int or null) ----
+    const salary_min =
+      body.salary_min != null && body.salary_min !== ''
+        ? parseInt(String(body.salary_min), 10)
+        : null
+    const salary_max =
+      body.salary_max != null && body.salary_max !== ''
+        ? parseInt(String(body.salary_max), 10)
+        : null
+
+    // ---- salary_display (text in DB — store string or null) ----
+    const salary_display =
+      body.salary_display != null && body.salary_display !== ''
+        ? String(body.salary_display)
+        : null
+
+    // ---- Array fields ----
+    const benefits = toArray(body.benefits)
+    const product_category = toArray(body.product_category)
+    const languages_required = toArray(body.languages_required)
+
+    // ---- Boolean fields ----
+    const is_confidential = toBool(body.is_confidential)
+    const relocation_offered = toBool(body.relocation_offered)
+    const visa_sponsorship = toBool(body.visa_sponsorship)
+    const clienteling_experience = toBool(body.clienteling_experience)
+
+    // ---- published_at: set to now when status is "published" ----
+    const published_at =
+      body.status === 'published' ? new Date().toISOString() : body.published_at || null
+
+    // ---- Build the insert payload ----
+    // Spread the original body first so every form field is captured,
+    // then overwrite the fields we explicitly processed above.
+    const briefData: Record<string, unknown> = {
+      ...body,
+      slug,
       seo_title,
       seo_description,
-      seo_keywords,
-    } = body
-
-    // Validate required fields
-    if (!title || !maison || !location || !contract_type || !seniority || !description) {
-      return NextResponse.json(
-        { error: 'Missing required fields: title, maison, location, contract_type, seniority, description' },
-        { status: 400 }
-      )
+      salary_min,
+      salary_max,
+      salary_display,
+      benefits,
+      product_category,
+      languages_required,
+      is_confidential,
+      relocation_offered,
+      visa_sponsorship,
+      clienteling_experience,
+      published_at,
     }
 
-    const slug = generateSlug(title, maison)
-    const memberId = (session?.user as any)?.memberId
-
-    const briefData: any = {
-      title,
-      slug,
-      maison,
-      location,
-      city: city || null,
-      country: country || null,
-      remote_policy: remote_policy || null,
-      contract_type,
-      seniority,
-      department: department || null,
-      reports_to: reports_to || null,
-      description,
-      responsibilities: responsibilities || null,
-      requirements: requirements || null,
-      qualifications: qualifications || null,
-      salary_min: salary_min ? parseInt(salary_min) : null,
-      salary_max: salary_max ? parseInt(salary_max) : null,
-      salary_currency: salary_currency || 'EUR',
-      salary_display: salary_display || null,
-      is_confidential: is_confidential || false,
-      status: status || 'draft',
-      seo_title: seo_title || null,
-      seo_description: seo_description || null,
-      seo_keywords: seo_keywords || null,
-      posted_by: memberId || null,
-    }
-
-    // If publishing, set published_at
-    if (status === 'published') {
-      briefData.published_at = new Date().toISOString()
-    }
-
-    const { data, error } = await supabase
+    // ---- Insert into DB ----
+    const { data: brief, error } = await supabase
       .from('job_briefs')
       .insert(briefData)
       .select()
       .single()
 
-    if (error) {
-      // Handle duplicate slug
-      if (error.code === '23505') {
-        briefData.slug = `${slug}-${Date.now()}`
-        const { data: retryData, error: retryError } = await supabase
-          .from('job_briefs')
-          .insert(briefData)
-          .select()
-          .single()
+    // Handle duplicate slug by appending a timestamp
+    if (error && error.code === '23505' && error.message?.includes('slug')) {
+      briefData.slug = `${slug}-${Date.now()}`
+      const retry = await supabase
+        .from('job_briefs')
+        .insert(briefData)
+        .select()
+        .single()
 
-        if (retryError) {
-          return NextResponse.json({ error: retryError.message }, { status: 500 })
-        }
-        return NextResponse.json(retryData, { status: 201 })
+      if (retry.error) {
+        console.error('Error creating brief (retry):', retry.error)
+        return NextResponse.json({ error: 'Failed to create brief' }, { status: 500 })
       }
-      return NextResponse.json({ error: error.message }, { status: 500 })
+
+      return NextResponse.json(retry.data, { status: 201 })
     }
 
-    return NextResponse.json(data, { status: 201 })
+    if (error) {
+      console.error('Error creating brief:', error)
+      return NextResponse.json({ error: 'Failed to create brief' }, { status: 500 })
+    }
+
+    return NextResponse.json(brief, { status: 201 })
   } catch (err) {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    console.error('Unexpected error in POST /api/briefs:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
