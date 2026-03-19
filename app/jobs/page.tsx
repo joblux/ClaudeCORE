@@ -79,8 +79,11 @@ export default function JobsPage() {
           <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a] mb-3">
             Executive Search Mandates
           </h1>
-          <p className="font-sans text-sm text-[#888] max-w-xl">
+          <p className="font-sans text-sm text-[#888] max-w-xl mb-4">
             Manager to Executive level · €100K+ · All positions are handled with full discretion by the JOBLUX team. Salary always shown.
+          </p>
+          <p className="font-sans text-[0.65rem] text-[#aaa] tracking-wide">
+            All positions handled with full discretion. Salary always shown.
           </p>
         </div>
       </div>
