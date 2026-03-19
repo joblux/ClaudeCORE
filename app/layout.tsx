@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   title: "JOBLUX — Luxury Talents Intelligence",
   description:
     "Executive search, brand intelligence, and luxury career advisory. Paris · London · New York · Dubai · Singapore.",
+  icons: { icon: '/favicon.svg' },
 };
 
 export default function RootLayout({
