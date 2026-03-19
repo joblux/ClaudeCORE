@@ -40,7 +40,7 @@ export default function TheBriefPage() {
   return (
     <div>
       {/* HERO */}
-      <div className="bg-[#1a1a1a] py-16">
+      <div className="bg-[#222222] py-16">
         <div className="jl-container-xs text-center">
           <div className="jl-overline-gold mb-4">Weekly Newsletter</div>
           <h1 className="jl-serif text-4xl md:text-5xl font-light text-white mb-4">

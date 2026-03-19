@@ -34,7 +34,7 @@ export default function WikiLuxPage() {
   return (
     <div>
       {/* HERO */}
-      <div className="bg-[#1a1a1a] py-14">
+      <div className="bg-[#222222] py-14">
         <div className="jl-container-sm text-center">
           <div className="jl-overline-gold mb-4">WikiLux by JOBLUX</div>
           <h1 className="jl-serif text-4xl md:text-5xl font-light text-white mb-4">

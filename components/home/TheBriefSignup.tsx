@@ -32,7 +32,7 @@ export function TheBriefSignup() {
   }
 
   return (
-    <div className="bg-[#1a1a1a] p-5">
+    <div className="bg-[#222222] p-5">
       <div className="jl-overline-gold mb-3">The Brief</div>
       <h3 className="jl-serif text-base font-light text-white mb-2">
         The JOBLUX Weekly

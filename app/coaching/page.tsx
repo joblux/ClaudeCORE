@@ -105,7 +105,7 @@ export default function CareerIntelligencePage() {
           </div>
 
           {/* MEMBERS GATE */}
-          <div className="p-6 bg-[#1a1a1a] text-center">
+          <div className="p-6 bg-[#222222] text-center">
             <div className="jl-overline-gold mb-2">Members Only</div>
             <p className="font-sans text-sm text-[#888] mb-4">
               Full career guides, interview prep kits, salary data and recruiter insights. Available to approved JOBLUX members.
