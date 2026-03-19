@@ -81,8 +81,9 @@ export const authOptions: NextAuthOptions = {
         .eq("email", user.email)
         .single();
       if (member) {
+        // Allow approved, admin, and pending members to sign in (creates session)
         if (member.status === "approved" || member.role === "admin") return true;
-        if (member.status === "pending") return "/members/pending";
+        if (member.status === "pending") return true;
         if (member.status === "rejected") return "/members?error=rejected";
       }
       return true;
