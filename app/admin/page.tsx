@@ -29,6 +29,7 @@ type Member = {
   created_at: string;
   approved_at: string | null;
   last_login: string | null;
+  profile_completeness: number | null;
 };
 
 type Counts = {
@@ -86,7 +87,7 @@ export default function AdminPage() {
     setLoading(true);
     let query = supabase
       .from("members")
-      .select("id, email, full_name, first_name, last_name, role, status, city, country, bio, avatar_url, auth_provider, created_at, approved_at, last_login", { count: "exact" })
+      .select("id, email, full_name, first_name, last_name, role, status, city, country, bio, avatar_url, auth_provider, created_at, approved_at, last_login, profile_completeness", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
 
@@ -277,6 +278,7 @@ export default function AdminPage() {
                 <th style={thStyle}>Role</th>
                 <th style={thStyle}>Status</th>
                 <th style={thStyle}>Location</th>
+                <th style={thStyle}>Profile</th>
                 <th style={thStyle}>Provider</th>
                 <th style={thStyle}>Joined</th>
                 <th style={{ ...thStyle, textAlign: "right" }}>Actions</th>
@@ -284,9 +286,9 @@ export default function AdminPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={9} style={{ padding: 40, textAlign: "center", color: "#999" }}>Loading…</td></tr>
+                <tr><td colSpan={10} style={{ padding: 40, textAlign: "center", color: "#999" }}>Loading…</td></tr>
               ) : members.length === 0 ? (
-                <tr><td colSpan={9} style={{ padding: 40, textAlign: "center", color: "#999" }}>No members found.</td></tr>
+                <tr><td colSpan={10} style={{ padding: 40, textAlign: "center", color: "#999" }}>No members found.</td></tr>
               ) : (
                 members.map((m) => {
                   const busy = acting.has(m.id);
@@ -308,6 +310,11 @@ export default function AdminPage() {
                       </td>
                       <td style={{ ...tdStyle, fontSize: 12, color: "#888" }}>
                         {[m.city, m.country].filter(Boolean).join(", ") || "—"}
+                      </td>
+                      <td style={tdStyle}>
+                        <a href={`/admin/members/${m.id}`} style={{ fontSize: 11, color: GOLD, textDecoration: "none", fontWeight: 500, letterSpacing: 0.5 }}>
+                          {m.profile_completeness ?? 0}% ›
+                        </a>
                       </td>
                       <td style={{ ...tdStyle, fontSize: 11, color: "#aaa", textTransform: "capitalize" }}>{m.auth_provider ?? "—"}</td>
                       <td style={{ ...tdStyle, fontSize: 11, color: "#aaa" }}>{new Date(m.created_at).toLocaleDateString()}</td>
