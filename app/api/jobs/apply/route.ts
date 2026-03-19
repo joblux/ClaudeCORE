@@ -1,47 +1,94 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { createClient } from "@supabase/supabase-js";
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
-const supabaseAdmin = createClient(
+const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+)
 
-export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
+/**
+ * POST /api/jobs/apply
+ * Self-apply to a job brief as an authenticated member.
+ *
+ * Body: { jobId: string } — the job_brief_id to apply to
+ * Returns: { success: true, application_id: string }
+ */
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions)
   if (!session?.user?.email || !session.user.memberId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { jobId } = await req.json();
-  if (!jobId) {
-    return NextResponse.json({ error: "jobId is required" }, { status: 400 });
+  try {
+    const { jobId } = await req.json()
+
+    if (!jobId) {
+      return NextResponse.json({ error: 'jobId is required' }, { status: 400 })
+    }
+
+    const memberId = session.user.memberId
+
+    // Check for existing application (same member + same brief)
+    const { data: existing } = await supabase
+      .from('applications')
+      .select('id')
+      .eq('member_id', memberId)
+      .eq('job_brief_id', jobId)
+      .maybeSingle()
+
+    if (existing) {
+      return NextResponse.json(
+        { error: 'You have already expressed interest in this position' },
+        { status: 409 }
+      )
+    }
+
+    // Insert the application
+    const { data: application, error: insertError } = await supabase
+      .from('applications')
+      .insert({
+        member_id: memberId,
+        job_brief_id: jobId,
+        source: 'self_applied',
+        current_stage: 'applied',
+      })
+      .select('id')
+      .single()
+
+    if (insertError) {
+      // Handle unique constraint violation at DB level
+      if (insertError.code === '23505') {
+        return NextResponse.json(
+          { error: 'You have already expressed interest in this position' },
+          { status: 409 }
+        )
+      }
+      console.error('[POST /api/jobs/apply] Insert error:', insertError)
+      return NextResponse.json({ error: insertError.message }, { status: 500 })
+    }
+
+    // Record the initial stage transition in history
+    const { error: historyError } = await supabase
+      .from('application_stage_history')
+      .insert({
+        application_id: application.id,
+        from_stage: null,
+        to_stage: 'applied',
+        moved_by: session.user.email,
+      })
+
+    if (historyError) {
+      console.error('[POST /api/jobs/apply] Stage history insert error:', historyError)
+    }
+
+    return NextResponse.json({
+      success: true,
+      application_id: application.id,
+    })
+  } catch (err) {
+    console.error('[POST /api/jobs/apply] Unexpected error:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-
-  // Check for existing application
-  const { data: existing } = await supabaseAdmin
-    .from("applications")
-    .select("id")
-    .eq("mandate_id", jobId)
-    .eq("candidate_id", session.user.memberId)
-    .single();
-
-  if (existing) {
-    return NextResponse.json({ error: "You have already expressed interest in this position" }, { status: 409 });
-  }
-
-  const { error } = await supabaseAdmin
-    .from("applications")
-    .insert({
-      mandate_id: jobId,
-      candidate_id: session.user.memberId,
-      status: "applied",
-    });
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ success: true });
 }

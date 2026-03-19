@@ -87,6 +87,9 @@ export default function AdminBriefsPage() {
           <Link href="/admin/dashboard" style={{ fontSize: 12, color: '#a58e28', textDecoration: 'none', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontWeight: 500 }}>
             Command Centre
           </Link>
+          <Link href="/admin/ats" style={{ fontSize: 12, color: '#888', textDecoration: 'none', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontWeight: 500 }}>
+            Pipeline
+          </Link>
           <Link href="/admin" style={{ fontSize: 12, color: '#888', textDecoration: 'none', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontWeight: 500 }}>
             Members
           </Link>

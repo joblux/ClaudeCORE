@@ -3,6 +3,19 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
+// Pipeline stage labels and colours for the ATS widget
+const STAGE_DISPLAY: Record<string, { label: string; color: string }> = {
+  applied: { label: 'Applied', color: '#6B7280' },
+  screening: { label: 'Screening', color: '#3B82F6' },
+  shortlisted: { label: 'Shortlisted', color: '#8B5CF6' },
+  submitted_to_client: { label: 'Submitted', color: '#F59E0B' },
+  client_reviewing: { label: 'Reviewing', color: '#F97316' },
+  interview_1: { label: 'Interview 1', color: '#EC4899' },
+  interview_2: { label: 'Interview 2', color: '#EC4899' },
+  interview_final: { label: 'Final', color: '#EC4899' },
+  offer_made: { label: 'Offer', color: '#10B981' },
+}
+
 const TIER_COLORS: Record<string, string> = {
   rising: '#94a3b8',
   pro: '#60a5fa',
@@ -20,12 +33,18 @@ const CONTRIB_LABELS: Record<string, string> = {
 
 export default function AdminDashboardPage() {
   const [data, setData] = useState<any>(null)
+  const [atsStats, setAtsStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/admin/dashboard')
-      .then((res) => res.json())
-      .then(setData)
+    Promise.all([
+      fetch('/api/admin/dashboard').then((r) => r.json()),
+      fetch('/api/applications/stats').then((r) => r.json()).catch(() => null),
+    ])
+      .then(([dashData, stats]) => {
+        setData(dashData)
+        setAtsStats(stats)
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])
@@ -147,7 +166,7 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* ─── Members by Tier ─── */}
           <div className="bg-white border border-[#e8e2d8] rounded-sm p-6">
             <div className="flex items-center justify-between mb-4">
@@ -219,12 +238,80 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
+          {/* ─── Pipeline Overview (ATS Widget) ─── */}
+          <div className="bg-white border border-[#e8e2d8] rounded-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xs font-medium tracking-widest uppercase text-[#a58e28]">
+                Pipeline Overview
+              </h2>
+              <Link href="/admin/ats" className="text-xs text-[#a58e28] hover:text-[#1a1a1a]">
+                View Pipeline →
+              </Link>
+            </div>
+            {atsStats ? (
+              <>
+                {/* Key metrics */}
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="text-center">
+                    <p className="jl-serif text-2xl text-[#1a1a1a]">{atsStats.active_candidates ?? 0}</p>
+                    <p className="text-[0.6rem] text-[#999] uppercase tracking-wider">Active</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="jl-serif text-2xl text-[#a58e28]">{atsStats.this_month ?? 0}</p>
+                    <p className="text-[0.6rem] text-[#999] uppercase tracking-wider">New this month</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="jl-serif text-2xl text-[#059669]">{atsStats.placements_this_month ?? 0}</p>
+                    <p className="text-[0.6rem] text-[#999] uppercase tracking-wider">Placements</p>
+                  </div>
+                </div>
+                {/* Stage breakdown */}
+                {atsStats.by_stage && atsStats.by_stage.length > 0 ? (
+                  <div className="space-y-2">
+                    {atsStats.by_stage
+                      .filter((s: any) => STAGE_DISPLAY[s.stage])
+                      .map((s: any) => {
+                        const display = STAGE_DISPLAY[s.stage]
+                        const maxCount = Math.max(...atsStats.by_stage.map((x: any) => x.count), 1)
+                        return (
+                          <div key={s.stage} className="flex items-center gap-2">
+                            <span className="text-xs text-[#888] w-20 flex-shrink-0 truncate">{display.label}</span>
+                            <div className="flex-1 h-2 bg-[#f0ece4] rounded-full overflow-hidden">
+                              <div
+                                className="h-full rounded-full transition-all"
+                                style={{ width: `${(s.count / maxCount) * 100}%`, backgroundColor: display.color }}
+                              />
+                            </div>
+                            <span className="text-xs font-medium text-[#1a1a1a] w-6 text-right">{s.count}</span>
+                          </div>
+                        )
+                      })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-[#999]">No candidates in pipeline yet.</p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-[#999]">No pipeline data yet.</p>
+            )}
+          </div>
+
           {/* ─── Quick Actions ─── */}
           <div className="bg-white border border-[#e8e2d8] rounded-sm p-6">
             <h2 className="text-xs font-medium tracking-widest uppercase text-[#a58e28] mb-4">
               Quick Actions
             </h2>
             <div className="space-y-2">
+              <Link
+                href="/admin/ats"
+                className="flex items-center gap-3 p-3 border border-[#e8e2d8] rounded-sm hover:border-[#a58e28] transition-colors"
+              >
+                <span className="w-8 h-8 flex items-center justify-center bg-[#a58e28] text-[#1a1a1a] text-xs font-bold rounded-sm">P</span>
+                <div>
+                  <p className="text-sm font-medium text-[#1a1a1a]">Pipeline / ATS</p>
+                  <p className="text-xs text-[#999]">Track candidates through the pipeline</p>
+                </div>
+              </Link>
               <Link
                 href="/admin"
                 className="flex items-center gap-3 p-3 border border-[#e8e2d8] rounded-sm hover:border-[#a58e28] transition-colors"
