@@ -9,6 +9,7 @@ declare module "next-auth" {
       status?: string;
       firstName?: string;
       lastName?: string;
+      registrationCompleted?: boolean;
     } & DefaultSession["user"];
   }
   interface User extends DefaultUser {
@@ -24,5 +25,6 @@ declare module "next-auth/jwt" {
     status?: string;
     firstName?: string;
     lastName?: string;
+    registrationCompleted?: boolean;
   }
 }
