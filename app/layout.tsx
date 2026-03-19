@@ -18,8 +18,30 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: "JOBLUX — Luxury Talents Intelligence",
   description:
-    "Executive search, brand intelligence, and luxury career advisory. Paris · London · New York · Dubai · Singapore.",
+    "The intelligence platform for luxury professionals. Salary data, brand insights, executive search, and career intelligence across 150+ maisons. Free against contribution — no ads, no noise.",
   icons: { icon: '/favicon.svg' },
+  openGraph: {
+    title: "JOBLUX — Luxury Talents Intelligence",
+    description: "The intelligence platform for luxury professionals. Salary data, brand insights, executive search across 150+ maisons.",
+    url: "https://www.luxuryrecruiter.com",
+    siteName: "JOBLUX",
+    locale: "en_US",
+    type: "website",
+    images: [
+      {
+        url: "https://www.luxuryrecruiter.com/api/og",
+        width: 1200,
+        height: 630,
+        alt: "JOBLUX — Luxury Talents Intelligence",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "JOBLUX — Luxury Talents Intelligence",
+    description: "The intelligence platform for luxury professionals.",
+    images: ["https://www.luxuryrecruiter.com/api/og"],
+  },
 };
 
 export default function RootLayout({
