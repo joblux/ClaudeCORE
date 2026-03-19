@@ -17,19 +17,19 @@ export default function HomePage() {
     <div>
 
       {/* ── Hero ── */}
-      <section className="w-full px-4 sm:px-6 lg:px-8 pt-14 sm:pt-20 pb-10 sm:pb-16 text-center">
+      <section className="w-full px-4 sm:px-6 lg:px-8 pt-14 sm:pt-20 pb-10 sm:pb-14 text-center border-b-2 border-[#1a1a1a]">
         <div className="max-w-3xl mx-auto">
 
           <p className="text-[11px] tracking-[0.16em] uppercase text-[#a58e28] font-medium mb-5">
             Luxury Talents Intelligence &middot; Est. Paris 2006
           </p>
 
-          <h1 className="font-playfair font-normal text-white mb-6">
+          <h1 className="font-playfair font-normal text-[#1a1a1a] mb-6">
             The intelligence platform<br className="hidden sm:block" />
             for luxury professionals.
           </h1>
 
-          <p className="text-white/55 text-base sm:text-lg leading-relaxed max-w-xl mx-auto mb-10">
+          <p className="text-[#888] text-base sm:text-lg leading-relaxed max-w-xl mx-auto mb-10">
             WikiLux. Bloglux. Salary intelligence. Executive search.
             Free against contribution — no ads, no noise.
           </p>
@@ -37,16 +37,16 @@ export default function HomePage() {
           <div className="flex flex-col xs:flex-row gap-3 justify-center items-stretch xs:items-center">
             <Link
               href="/join"
-              className="px-8 py-3 bg-[#a58e28] text-[#1a1a1a] text-sm font-medium rounded-lg
-                         hover:bg-[#c4aa3a] active:scale-[0.98] transition-all duration-200
+              className="px-8 py-3 bg-[#1a1a1a] text-[#a58e28] text-sm font-medium
+                         hover:bg-[#000] active:scale-[0.98] transition-all duration-200
                          text-center whitespace-nowrap"
             >
-              Request access
+              Request Access
             </Link>
             <Link
               href="/wikilux"
-              className="px-8 py-3 border border-white/20 text-white text-sm font-medium rounded-lg
-                         hover:border-[#a58e28] hover:text-[#a58e28] active:scale-[0.98]
+              className="px-8 py-3 border border-[#1a1a1a] text-[#1a1a1a] text-sm font-medium
+                         hover:bg-[#1a1a1a] hover:text-[#a58e28] active:scale-[0.98]
                          transition-all duration-200 text-center whitespace-nowrap"
             >
               Explore WikiLux
@@ -79,15 +79,15 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* SUBTLE PRE-FOOTER CTA */}
-      <div className="border-t border-[#a58e28] mt-8">
+      {/* PRE-FOOTER CTA */}
+      <div className="border-t border-[#e8e2d8] mt-8">
         <div className="jl-container py-6 text-center">
           <p className="font-sans text-xs text-[#888] tracking-wide">
             JOBLUX &mdash; The private intelligence platform for luxury professionals. Est. Paris 2006.
           </p>
           <div className="flex items-center justify-center gap-6 mt-3">
-            <Link href="/join" className="font-sans text-[0.65rem] text-[#a58e28] tracking-wider uppercase hover:text-white transition-colors">Request Access</Link>
-            <Link href="/about" className="font-sans text-[0.65rem] text-[#a58e28] tracking-wider uppercase hover:text-white transition-colors">Learn More</Link>
+            <Link href="/join" className="font-sans text-[0.65rem] text-[#a58e28] tracking-wider uppercase hover:text-[#1a1a1a] transition-colors">Request Access</Link>
+            <Link href="/about" className="font-sans text-[0.65rem] text-[#a58e28] tracking-wider uppercase hover:text-[#1a1a1a] transition-colors">Learn More</Link>
           </div>
         </div>
       </div>

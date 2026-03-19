@@ -20,7 +20,7 @@ export function Ticker() {
           <span key={i} className="flex items-center gap-3">
             <em>{item.type}</em>
             <span>{item.text}</span>
-            <span className="text-[#333]">&middot;</span>
+            <span className="text-[#555]">&middot;</span>
           </span>
         ))}
       </div>
