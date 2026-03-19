@@ -36,7 +36,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body className={`${inter.variable} ${playfair.variable} bg-[#1a1a1a] text-white antialiased overflow-x-hidden min-h-screen`}>
+      <body className={`${inter.variable} ${playfair.variable} antialiased overflow-x-hidden min-h-screen`}>
         <AuthProvider>
           <Header />
           {children}

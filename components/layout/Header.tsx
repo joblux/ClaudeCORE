@@ -21,7 +21,7 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false)
   const { isAuthenticated } = useMember()
   return (
-    <header className="border-b border-white/10">
+    <header className="border-b border-[#e8e2d8]">
 
       {/* Single header bar */}
       <div className="w-full px-4 sm:px-6 lg:px-8">
@@ -29,16 +29,16 @@ export function Header() {
 
           {/* Logo */}
           <Link href="/" className="inline-block flex-shrink-0">
-            <div className="text-2xl sm:text-3xl font-semibold text-white leading-none" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</div>
+            <div className="text-2xl sm:text-3xl font-semibold text-[#1a1a1a] leading-none" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</div>
           </Link>
 
           {/* Desktop nav links — hidden on mobile */}
-          <nav className="hidden md:flex items-center gap-6 text-sm text-white/70">
+          <nav className="hidden md:flex items-center gap-6 text-sm text-[#1a1a1a]/70">
             {navItems.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
-                className="hover:text-white transition-colors text-[0.8rem] tracking-wide"
+                className="hover:text-[#1a1a1a] transition-colors text-[0.8rem] tracking-wide"
               >
                 {item.label}
               </Link>
@@ -49,7 +49,7 @@ export function Header() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="flex items-center justify-center w-9 h-9 text-white/50 hover:text-white transition-colors"
+              className="flex items-center justify-center w-9 h-9 text-[#888] hover:text-[#1a1a1a] transition-colors"
               aria-label="Search"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -67,7 +67,7 @@ export function Header() {
             {/* Mobile hamburger — visible only on mobile */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden flex items-center justify-center w-11 h-11 text-white/70 hover:text-white"
+              className="md:hidden flex items-center justify-center w-11 h-11 text-[#555] hover:text-[#1a1a1a]"
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             >
               {mobileOpen ? '\u2715' : '\u2630'}
@@ -79,7 +79,7 @@ export function Header() {
 
       {/* Mobile nav drawer */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-white/10">
+        <div className="md:hidden border-t border-[#e8e2d8]">
           <nav className="w-full px-4 sm:px-6 py-4">
             <div className="max-w-[1200px] mx-auto space-y-1">
               {navItems.map((item) => (
@@ -87,7 +87,7 @@ export function Header() {
                   key={item.label}
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
-                  className="block py-3 text-sm text-white/70 hover:text-[#a58e28] transition-colors border-b border-white/5 last:border-0"
+                  className="block py-3 text-sm text-[#555] hover:text-[#a58e28] transition-colors border-b border-[#f0ece4] last:border-0"
                 >
                   {item.label}
                 </Link>
