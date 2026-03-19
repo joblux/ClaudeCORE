@@ -19,7 +19,7 @@ const navItems = [
   { label: 'WikiLux', href: '/wikilux' },
   { label: 'Jobs', href: '/jobs' },
   { label: 'Salaries', href: '/salaries' },
-  { label: 'Interviews', href: '/interviews' },
+  { label: 'Coaching', href: '/coaching' },
   { label: 'Bloglux', href: '/bloglux' },
   { label: 'Travel', href: '/travel' },
   { label: 'The Brief', href: '/the-brief' },

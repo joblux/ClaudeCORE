@@ -4,7 +4,7 @@ const footerLinks = {
   Intelligence: [
     { label: 'WikiLux',       href: '/wikilux'       },
     { label: 'Salary Guides', href: '/salaries'      },
-    { label: 'Interviews',    href: '/interviews'    },
+    { label: 'Coaching',      href: '/coaching'      },
     { label: 'Bloglux',       href: '/bloglux'       },
     { label: 'Travel',        href: '/travel'        },
     { label: 'The Brief',     href: '/the-brief'     },
