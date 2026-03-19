@@ -93,7 +93,7 @@ export const authOptions: NextAuthOptions = {
       if (email) {
         const { data: member, error } = await supabaseAdmin
           .from("members")
-          .select("id, role, status, first_name, last_name")
+          .select("id, role, status, first_name, last_name, registration_completed")
           .eq("email", email)
           .single();
         if (error) {
@@ -105,6 +105,7 @@ export const authOptions: NextAuthOptions = {
           token.status = member.status;
           token.firstName = member.first_name;
           token.lastName = member.last_name;
+          token.registrationCompleted = member.registration_completed;
         } else {
           token.status = "new";
         }
