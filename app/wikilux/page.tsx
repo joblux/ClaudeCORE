@@ -1,34 +1,47 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { BRANDS } from '@/lib/wikilux-brands'
 
 export const metadata: Metadata = {
   title:       'WikiLux — Luxury Brand Encyclopedia',
-  description: '500+ luxury brand encyclopedias in 9 languages. Fashion, watches, jewellery, automotive, hospitality, beauty and more. By JOBLUX.',
+  description: `${BRANDS.length}+ luxury brand encyclopedias in 9 languages. Fashion, watches, jewellery, automotive, hospitality, beauty and more. By JOBLUX.`,
 }
 
-const categories = [
-  { label: 'Fashion & Leather',    slug: 'fashion',      count: 120 },
-  { label: 'Watches',              slug: 'watches',      count: 60  },
-  { label: 'Jewellery',            slug: 'jewellery',    count: 40  },
-  { label: 'Automotive',           slug: 'automotive',   count: 25  },
-  { label: 'Hospitality',          slug: 'hospitality',  count: 50  },
-  { label: 'Beauty & Fragrance',   slug: 'beauty',       count: 60  },
-  { label: 'Spirits & Fine Dining',slug: 'spirits',      count: 40  },
-  { label: 'Aviation & Yachting',  slug: 'aviation',     count: 20  },
-  { label: 'Retail',               slug: 'retail',       count: 20  },
-  { label: 'Real Estate',          slug: 'real-estate',  count: 15  },
-  { label: 'Art & Collectibles',   slug: 'art',          count: 20  },
-  { label: 'Education',            slug: 'education',    count: 10  },
-]
+// Build categories from real data
+const sectorLabels: Record<string, string> = {
+  'Fashion': 'Fashion & Leather',
+  'Watches & Jewellery': 'Watches & Jewellery',
+  'Automotive': 'Automotive',
+  'Hospitality': 'Hospitality & Travel',
+  'Beauty & Fragrance': 'Beauty & Fragrance',
+  'Spirits & Dining': 'Spirits & Fine Dining',
+  'Aviation & Yachting': 'Aviation & Yachting',
+  'Art & Culture': 'Art & Collectibles',
+}
 
-const featuredBrands = [
-  { name: 'Chanel',        country: 'France',      sector: 'Fashion',    founded: 1910, slug: 'chanel'        },
-  { name: 'Hermès',        country: 'France',      sector: 'Leather',    founded: 1837, slug: 'hermes'        },
-  { name: 'Rolex',         country: 'Switzerland', sector: 'Watches',    founded: 1905, slug: 'rolex'         },
-  { name: 'Ferrari',       country: 'Italy',       sector: 'Automotive', founded: 1947, slug: 'ferrari'       },
-  { name: 'Louis Vuitton', country: 'France',      sector: 'Fashion',    founded: 1854, slug: 'louis-vuitton' },
-  { name: 'Cartier',       country: 'France',      sector: 'Jewellery',  founded: 1847, slug: 'cartier'       },
-]
+const sectorSlugs: Record<string, string> = {
+  'Fashion': 'fashion',
+  'Watches & Jewellery': 'watches-jewellery',
+  'Automotive': 'automotive',
+  'Hospitality': 'hospitality',
+  'Beauty & Fragrance': 'beauty',
+  'Spirits & Dining': 'spirits',
+  'Aviation & Yachting': 'aviation',
+  'Art & Culture': 'art',
+}
+
+const sectorCounts = BRANDS.reduce<Record<string, number>>((acc, b) => {
+  acc[b.sector] = (acc[b.sector] || 0) + 1
+  return acc
+}, {})
+
+const categories = Object.entries(sectorCounts).map(([sector, count]) => ({
+  label: sectorLabels[sector] || sector,
+  slug: sectorSlugs[sector] || sector.toLowerCase().replace(/\s+/g, '-'),
+  count,
+}))
+
+const featuredBrands = BRANDS.slice(0, 6)
 
 export default function WikiLuxPage() {
   return (
@@ -41,14 +54,14 @@ export default function WikiLuxPage() {
             The Luxury Brand Encyclopedia
           </h1>
           <p className="font-sans text-sm text-[#888] mb-8 max-w-lg mx-auto">
-            500+ maisons · 9 languages · Fashion · Watches · Jewellery · Automotive · Hospitality · Beauty
+            {BRANDS.length}+ maisons &middot; 9 languages &middot; Fashion &middot; Watches &middot; Jewellery &middot; Automotive &middot; Hospitality &middot; Beauty
           </p>
           <div className="flex items-center justify-center gap-8 flex-wrap">
             {[
-              { n: '500+', l: 'Brands'    },
-              { n: '9',    l: 'Languages' },
-              { n: '4,500',l: 'Pages'     },
-              { n: '12',   l: 'Categories'},
+              { n: `${BRANDS.length}+`, l: 'Brands' },
+              { n: '9',                 l: 'Languages' },
+              { n: `${BRANDS.length * 30}+`, l: 'Pages' },
+              { n: String(categories.length), l: 'Categories' },
             ].map((s) => (
               <div key={s.l} className="text-center">
                 <div className="jl-serif text-2xl font-light text-[#a58e28]">{s.n}</div>
@@ -85,7 +98,7 @@ export default function WikiLuxPage() {
                   </div>
                   <div className="font-sans text-[0.65rem] text-[#aaa] mt-0.5">{cat.count} brands</div>
                 </div>
-                <span className="text-[#e8e2d8] group-hover:text-[#a58e28] transition-colors">→</span>
+                <span className="text-[#e8e2d8] group-hover:text-[#a58e28] transition-colors">&rarr;</span>
               </Link>
             ))}
           </div>
@@ -111,10 +124,10 @@ export default function WikiLuxPage() {
                     {brand.name}
                   </div>
                   <div className="font-sans text-[0.65rem] text-[#aaa] mt-0.5">
-                    {brand.sector} · {brand.country} · Est. {brand.founded}
+                    {brand.sector} &middot; {brand.country} &middot; Est. {brand.founded}
                   </div>
                   <div className="font-sans text-[0.6rem] text-[#a58e28] mt-1 tracking-wide">
-                    EN · FR · AR · ZH · JA · RU · IT · ES · DE
+                    EN &middot; FR &middot; AR &middot; ZH &middot; JA &middot; RU &middot; IT &middot; ES &middot; DE
                   </div>
                 </div>
               </Link>
@@ -125,10 +138,10 @@ export default function WikiLuxPage() {
         {/* A-Z NOTE */}
         <div className="text-center py-8 border-t border-[#e8e2d8]">
           <p className="font-sans text-sm text-[#888]">
-            Full A–Z directory of 500+ luxury brands available.
+            Full A&ndash;Z directory of {BRANDS.length}+ luxury brands available.
             <br />
             <Link href="/wikilux/all" className="text-[#a58e28] hover:underline">
-              Browse all maisons →
+              Browse all {BRANDS.length} maisons &rarr;
             </Link>
           </p>
         </div>
