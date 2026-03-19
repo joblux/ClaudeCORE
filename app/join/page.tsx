@@ -10,6 +10,14 @@ function SignInContent() {
   const [emailSent, setEmailSent] = useState(false);
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const ref = searchParams.get("ref");
+
+  // Store referral code in sessionStorage
+  useState(() => {
+    if (ref && typeof window !== "undefined") {
+      sessionStorage.setItem("joblux_ref", ref);
+    }
+  });
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,6 +26,15 @@ function SignInContent() {
     try {
       await signIn("email", { email, redirect: false });
       setEmailSent(true);
+      // Submit referral if present
+      const refCode = typeof window !== "undefined" ? sessionStorage.getItem("joblux_ref") : null;
+      if (refCode) {
+        fetch("/api/invite/accept", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refCode, newMemberEmail: email }),
+        }).then(() => sessionStorage.removeItem("joblux_ref")).catch(() => {});
+      }
     } catch {
       // Error handled by NextAuth
     } finally {

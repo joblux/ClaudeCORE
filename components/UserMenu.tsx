@@ -82,6 +82,13 @@ export default function UserMenu() {
               >
                 Profile
               </Link>
+              <Link
+                href="/invite"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2 text-sm text-[#1a1a1a] hover:bg-[#f5f4f0] transition-colors"
+              >
+                Invite
+              </Link>
             </>
           )}
           {isAdmin && (
