@@ -11,32 +11,20 @@ export default withAuth(
       if (token?.role !== "admin") {
         return NextResponse.redirect(new URL("/", req.url));
       }
-      return NextResponse.next();
     }
 
-    // Allow these paths for any authenticated user (including pending)
-    if (
-      pathname.startsWith("/members/complete-registration") ||
-      pathname.startsWith("/members/pending")
-    ) {
-      return NextResponse.next();
-    }
-
-    // Protected member routes: /dashboard, /profile, /invite, /contribute
+    // Protected routes — approved or admin only
     if (
       pathname.startsWith("/dashboard") ||
       pathname.startsWith("/profile") ||
       pathname.startsWith("/invite") ||
       pathname.startsWith("/contribute")
     ) {
-      if (token?.status === "new") {
-        return NextResponse.redirect(new URL("/join", req.url));
-      }
       if (token?.status === "pending") {
         return NextResponse.redirect(new URL("/members/pending", req.url));
       }
       if (token?.status !== "approved" && token?.role !== "admin") {
-        return NextResponse.redirect(new URL("/members", req.url));
+        return NextResponse.redirect(new URL("/join", req.url));
       }
     }
 
@@ -56,7 +44,5 @@ export const config = {
     "/admin/:path*",
     "/invite/:path*",
     "/contribute/:path*",
-    "/members/complete-registration/:path*",
-    "/members/pending/:path*",
   ],
 };
