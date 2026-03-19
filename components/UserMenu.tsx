@@ -92,13 +92,22 @@ export default function UserMenu() {
             </>
           )}
           {isAdmin && (
+            <>
+            <Link
+              href="/admin/dashboard"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2 text-sm text-[#a58e28] hover:bg-[#f5f4f0] transition-colors"
+            >
+              Command Centre
+            </Link>
             <Link
               href="/admin"
               onClick={() => setOpen(false)}
               className="block px-4 py-2 text-sm text-[#a58e28] hover:bg-[#f5f4f0] transition-colors"
             >
-              Admin
+              Members
             </Link>
+            </>
           )}
           <div className="border-t border-[#e8e6df] my-1" />
           <button

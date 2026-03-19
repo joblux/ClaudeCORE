@@ -165,7 +165,10 @@ export default function AdminPage() {
           <span style={{ color: GOLD, fontFamily: "serif", fontSize: 18, fontWeight: 300, letterSpacing: 2 }}>JOBLUX</span>
           <span style={{ color: "#666", fontSize: 11, letterSpacing: 3, textTransform: "uppercase" }}>Admin</span>
         </div>
-        <a href="/dashboard" style={{ color: "#888", fontSize: 11, textDecoration: "none", letterSpacing: 1, textTransform: "uppercase" }}>← Dashboard</a>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <a href="/admin/dashboard" style={{ color: GOLD, fontSize: 11, textDecoration: "none", letterSpacing: 1, textTransform: "uppercase" }}>Command Centre</a>
+          <a href="/dashboard" style={{ color: "#888", fontSize: 11, textDecoration: "none", letterSpacing: 1, textTransform: "uppercase" }}>&larr; Dashboard</a>
+        </div>
       </div>
 
       {/* Analytics strip */}

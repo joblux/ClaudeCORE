@@ -53,7 +53,7 @@ export default async function DashboardPage() {
 
   // Admin cards
   const adminCards: DashCard[] = isAdmin ? [
-    { num: 'A1', title: 'Admin Panel', desc: 'Review members, manage platform settings.', href: '/admin', gold: true },
+    { num: 'A1', title: 'Admin Panel', desc: 'Command centre — stats, notifications, overview.', href: '/admin/dashboard', gold: true },
     { num: 'A2', title: 'Post a Brief', desc: 'Create a new hiring assignment.', href: '/admin/briefs/new', gold: true },
     { num: 'A3', title: 'Review Contributions', desc: 'Approve member contributions.', href: '/admin/contributions', gold: true },
     { num: 'A4', title: 'Manage Articles', desc: 'Bloglux editorial and publishing.', href: '/admin/articles', gold: true },

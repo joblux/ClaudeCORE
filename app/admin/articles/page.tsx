@@ -62,9 +62,14 @@ export default function AdminArticlesPage() {
           <span style={{ color: '#ccc', fontSize: 14 }}>/</span>
           <span style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>Articles</span>
         </div>
-        <Link href="/admin" style={{ fontSize: 12, color: '#a58e28', textDecoration: 'none', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontWeight: 500 }}>
-          &larr; Back to Admin
-        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <Link href="/admin/dashboard" style={{ fontSize: 12, color: '#a58e28', textDecoration: 'none', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontWeight: 500 }}>
+            Command Centre
+          </Link>
+          <Link href="/admin" style={{ fontSize: 12, color: '#888', textDecoration: 'none', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontWeight: 500 }}>
+            Members
+          </Link>
+        </div>
       </div>
 
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px' }}>
