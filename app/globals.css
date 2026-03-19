@@ -1,89 +1,147 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ── JOBLUX DESIGN SYSTEM ─────────────────────────── */
+/* ── Fonts ── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
 
-@layer base {
-  :root {
-    --color-gold:        #a58e28;
-    --color-gold-light:  #e4b042;
-    --color-gold-dark:   #9a6f0a;
-    --color-black:       #0a0a0a;
-    --color-dark:        #1a1a1a;
-    --color-border:      #e8e2d8;
-    --color-cream:       #fafaf5;
-    --color-dark-section: #222222;
-    --font-serif:        'Playfair Display', Georgia, 'Times New Roman', serif;
-    --font-sans:         'Inter', 'Helvetica Neue', Arial, sans-serif;
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
-  html {
-    font-family: var(--font-sans);
-    color: var(--color-dark);
-    background: #ffffff;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    scroll-behavior: smooth;
-  }
-
-  body {
-    min-height: 100vh;
-  }
-
-  h1, h2 {
-    font-family: var(--font-serif);
-    font-weight: 400;
-    line-height: 1.2;
-    color: var(--color-dark);
-  }
-
-  h3, h4, h5, h6 {
-    font-family: var(--font-sans);
-    font-weight: 600;
-    line-height: 1.2;
-    color: var(--color-dark);
-  }
-
-  nav a {
-    font-family: var(--font-sans);
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  p {
-    line-height: 1.7;
-  }
-
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  img {
-    max-width: 100%;
-    height: auto;
-  }
-
-  ::selection {
-    background-color: #a58e2822;
-    color: var(--color-dark);
-  }
+/* ── Universal box model ── */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
+
+/* ── Root — mobile viewport fix (iOS Safari + Android Chrome) ── */
+html {
+  height: -webkit-fill-available;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scrollbar-gutter: stable;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+/* ── Playfair Display ── */
+.font-playfair,
+[class*="font-playfair"] {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+}
+
+/* ── Responsive type scale — clamp so it works on any screen ── */
+h1 { font-size: clamp(1.8rem, 5vw, 3.5rem); line-height: 1.15; }
+h2 { font-size: clamp(1.4rem, 3.5vw, 2.25rem); line-height: 1.2; }
+h3 { font-size: clamp(1.1rem, 2.5vw, 1.5rem); line-height: 1.3; }
+
+/* ── Images always responsive ── */
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+svg {
+  overflow: visible;
+}
+
+/* ── Cross-browser form reset ── */
+input, textarea, select, button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0;
+}
+
+/* ── Minimum tap target size — mobile accessibility ── */
+button,
+a,
+[role="button"],
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+label[for] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* ── Remove iOS tap flash ── */
+a, button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* ── Focus — visible for keyboard users, clean for mouse ── */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid #a58e28;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ── No horizontal scroll anywhere ── */
+section, header, footer, main, nav, aside, div {
+  max-width: 100%;
+}
+
+/* ── Links ── */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ── Selection colour ── */
+::selection {
+  background: rgba(165, 142, 40, 0.3);
+  color: inherit;
+}
+
+/* ── Scrollbar — webkit browsers ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(165, 142, 40, 0.35);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(165, 142, 40, 0.6);
+}
+
+/* ── Safe area insets — iPhone X+ notch ── */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+.pt-safe { padding-top: env(safe-area-inset-top); }
+.pl-safe { padding-left: env(safe-area-inset-left); }
+.pr-safe { padding-right: env(safe-area-inset-right); }
+
+/* ── Utility colours ── */
+.text-gold   { color: #a58e28; }
+.bg-gold     { background-color: #a58e28; }
+.border-gold { border-color: #a58e28; }
+
+/* ══════════════════════════════════════════════════════
+   JOBLUX DESIGN SYSTEM — Component Classes
+   ══════════════════════════════════════════════════════ */
 
 @layer components {
 
   /* ── TYPOGRAPHY ──────────────────────────────────── */
 
   .jl-overline {
-    font-family: var(--font-sans);
+    font-family: 'Inter', system-ui, sans-serif;
     font-size: 0.6875rem;
     font-weight: 500;
     letter-spacing: 0.12em;
@@ -92,20 +150,20 @@
   }
 
   .jl-overline-gold {
-    font-family: var(--font-sans);
+    font-family: 'Inter', system-ui, sans-serif;
     font-size: 0.6875rem;
     font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--color-gold);
+    color: #a58e28;
   }
 
   .jl-serif {
-    font-family: var(--font-serif);
+    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
   }
 
   .jl-sans {
-    font-family: var(--font-sans);
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
   /* ── LAYOUT ──────────────────────────────────────── */
@@ -132,17 +190,17 @@
 
   .jl-divider {
     border: none;
-    border-top: 1px solid var(--color-border);
+    border-top: 1px solid #e8e2d8;
   }
 
   .jl-divider-dark {
     border: none;
-    border-top: 2px solid var(--color-dark);
+    border-top: 2px solid #1a1a1a;
   }
 
   .jl-divider-gold {
     border: none;
-    border-top: 1px solid var(--color-gold);
+    border-top: 1px solid #a58e28;
   }
 
   /* ── SECTION LABEL ────────────────────────────────── */
@@ -155,12 +213,12 @@
   }
 
   .jl-section-label span {
-    font-family: var(--font-sans);
+    font-family: 'Inter', system-ui, sans-serif;
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--color-gold);
+    color: #a58e28;
     white-space: nowrap;
   }
 
@@ -168,7 +226,7 @@
     content: '';
     flex: 1;
     height: 1px;
-    background: var(--color-border);
+    background: #e8e2d8;
   }
 
   /* ── BUTTONS ──────────────────────────────────────── */
@@ -178,7 +236,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    font-family: var(--font-sans);
+    font-family: 'Inter', system-ui, sans-serif;
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -191,9 +249,9 @@
   }
 
   .jl-btn-primary {
-    background: var(--color-dark);
-    color: var(--color-gold);
-    border-color: var(--color-dark);
+    background: #1a1a1a;
+    color: #a58e28;
+    border-color: #1a1a1a;
   }
 
   .jl-btn-primary:hover {
@@ -202,43 +260,43 @@
   }
 
   .jl-btn-gold {
-    background: var(--color-gold);
-    color: var(--color-dark);
-    border-color: var(--color-gold);
+    background: #a58e28;
+    color: #1a1a1a;
+    border-color: #a58e28;
   }
 
   .jl-btn-gold:hover {
-    background: var(--color-gold-dark);
-    border-color: var(--color-gold-dark);
+    background: #9a6f0a;
+    border-color: #9a6f0a;
   }
 
   .jl-btn-outline {
     background: transparent;
-    color: var(--color-dark);
-    border-color: var(--color-dark);
+    color: #1a1a1a;
+    border-color: #1a1a1a;
   }
 
   .jl-btn-outline:hover {
-    background: var(--color-dark);
+    background: #1a1a1a;
     color: #fff;
   }
 
   .jl-btn-ghost {
     background: transparent;
-    color: var(--color-gold);
-    border-color: var(--color-gold);
+    color: #a58e28;
+    border-color: #a58e28;
   }
 
   .jl-btn-ghost:hover {
-    background: var(--color-gold);
-    color: var(--color-dark);
+    background: #a58e28;
+    color: #1a1a1a;
   }
 
   /* ── SEARCH ───────────────────────────────────────── */
 
   .jl-search {
     display: flex;
-    border: 1px solid var(--color-dark);
+    border: 1px solid #1a1a1a;
     overflow: hidden;
     max-width: 600px;
     width: 100%;
@@ -248,10 +306,10 @@
     flex: 1;
     padding: 1rem 1.25rem;
     font-size: 1rem;
-    font-family: var(--font-serif);
+    font-family: 'Playfair Display', Georgia, serif;
     border: none;
     outline: none;
-    color: var(--color-dark);
+    color: #1a1a1a;
     background: #fff;
   }
 
@@ -261,12 +319,12 @@
   }
 
   .jl-search button {
-    background: var(--color-dark);
-    color: var(--color-gold);
+    background: #1a1a1a;
+    color: #a58e28;
     padding: 0 1.5rem;
     border: none;
     cursor: pointer;
-    font-family: var(--font-sans);
+    font-family: 'Inter', system-ui, sans-serif;
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -283,17 +341,17 @@
 
   .jl-card {
     background: #fff;
-    border: 1px solid var(--color-border);
+    border: 1px solid #e8e2d8;
     padding: 1rem;
     transition: border-color 0.2s;
   }
 
   .jl-card:hover {
-    border-color: var(--color-gold);
+    border-color: #a58e28;
   }
 
   .jl-card-dark {
-    background: var(--color-dark);
+    background: #1a1a1a;
     color: #fff;
     padding: 1.5rem;
   }
@@ -302,25 +360,25 @@
 
   .jl-badge {
     display: inline-block;
-    font-family: var(--font-sans);
+    font-family: 'Inter', system-ui, sans-serif;
     font-size: 0.6rem;
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     padding: 0.2rem 0.6rem;
-    background: var(--color-dark);
-    color: var(--color-gold);
+    background: #1a1a1a;
+    color: #a58e28;
   }
 
   .jl-badge-gold {
-    background: var(--color-gold);
-    color: var(--color-dark);
+    background: #a58e28;
+    color: #1a1a1a;
   }
 
   .jl-badge-outline {
     background: transparent;
-    color: var(--color-dark);
-    border: 1px solid var(--color-border);
+    color: #1a1a1a;
+    border: 1px solid #e8e2d8;
   }
 
   /* ── FORMS ────────────────────────────────────────── */
@@ -328,22 +386,22 @@
   .jl-input {
     width: 100%;
     padding: 0.75rem 1rem;
-    font-family: var(--font-sans);
+    font-family: 'Inter', system-ui, sans-serif;
     font-size: 0.875rem;
-    border: 1px solid var(--color-border);
+    border: 1px solid #e8e2d8;
     outline: none;
     background: #fff;
-    color: var(--color-dark);
+    color: #1a1a1a;
     transition: border-color 0.2s;
   }
 
   .jl-input:focus {
-    border-color: var(--color-dark);
+    border-color: #1a1a1a;
   }
 
   .jl-label {
     display: block;
-    font-family: var(--font-sans);
+    font-family: 'Inter', system-ui, sans-serif;
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -355,12 +413,12 @@
   .jl-select {
     width: 100%;
     padding: 0.75rem 1rem;
-    font-family: var(--font-sans);
+    font-family: 'Inter', system-ui, sans-serif;
     font-size: 0.875rem;
-    border: 1px solid var(--color-border);
+    border: 1px solid #e8e2d8;
     outline: none;
     background: #fff;
-    color: var(--color-dark);
+    color: #1a1a1a;
     cursor: pointer;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
@@ -372,18 +430,18 @@
   /* ── ARTICLE CONTENT ──────────────────────────────── */
 
   .jl-prose h2 {
-    font-family: var(--font-serif);
+    font-family: 'Playfair Display', Georgia, serif;
     font-size: 1.5rem;
     font-weight: 500;
-    color: var(--color-dark);
+    color: #1a1a1a;
     margin: 2rem 0 0.75rem;
   }
 
   .jl-prose h3 {
-    font-family: var(--font-serif);
+    font-family: 'Playfair Display', Georgia, serif;
     font-size: 1.25rem;
     font-weight: 400;
-    color: var(--color-dark);
+    color: #1a1a1a;
     margin: 1.5rem 0 0.5rem;
   }
 
@@ -395,31 +453,31 @@
   }
 
   .jl-prose blockquote {
-    border-left: 2px solid var(--color-gold);
+    border-left: 2px solid #a58e28;
     padding: 0.75rem 1.25rem;
     margin: 1.5rem 0;
-    background: var(--color-cream);
-    font-family: var(--font-serif);
+    background: #fafaf5;
+    font-family: 'Playfair Display', Georgia, serif;
     font-style: italic;
     font-size: 1.125rem;
     color: #555;
   }
 
   .jl-prose a {
-    color: var(--color-gold);
+    color: #a58e28;
     text-decoration: underline;
-    text-decoration-color: #e4b04240;
+    text-decoration-color: rgba(228, 176, 66, 0.25);
     text-underline-offset: 3px;
   }
 
   .jl-prose a:hover {
-    text-decoration-color: var(--color-gold);
+    text-decoration-color: #a58e28;
   }
 
   /* ── TICKER ───────────────────────────────────────── */
 
   .jl-ticker {
-    background: var(--color-dark);
+    background: #1a1a1a;
     padding: 0.5rem 0;
     overflow: hidden;
     white-space: nowrap;
@@ -429,14 +487,14 @@
     display: inline-flex;
     gap: 3rem;
     animation: ticker 45s linear infinite;
-    font-family: var(--font-sans);
+    font-family: 'Inter', system-ui, sans-serif;
     font-size: 0.6875rem;
     color: #888;
     letter-spacing: 0.04em;
   }
 
   .jl-ticker-inner em {
-    color: var(--color-gold);
+    color: #a58e28;
     font-style: normal;
     font-weight: 600;
   }
@@ -448,14 +506,14 @@
 
   /* ── UTILITIES ────────────────────────────────────── */
 
-  .jl-text-gold { color: var(--color-gold); }
-  .jl-text-dark { color: var(--color-dark); }
+  .jl-text-gold { color: #a58e28; }
+  .jl-text-dark { color: #1a1a1a; }
   .jl-text-muted { color: #888; }
-  .jl-bg-cream { background: var(--color-cream); }
-  .jl-bg-dark { background: var(--color-dark); }
-  .jl-border { border: 1px solid var(--color-border); }
-  .jl-border-dark { border: 1px solid var(--color-dark); }
-  .jl-border-gold { border: 1px solid var(--color-gold); }
+  .jl-bg-cream { background: #fafaf5; }
+  .jl-bg-dark { background: #1a1a1a; }
+  .jl-border { border: 1px solid #e8e2d8; }
+  .jl-border-dark { border: 1px solid #1a1a1a; }
+  .jl-border-gold { border: 1px solid #a58e28; }
 
   /* ── RESPONSIVE HELPERS ───────────────────────────── */
 
@@ -470,7 +528,7 @@
   /* ── EDITORIAL ───────────────────────────────────── */
 
   .jl-editorial {
-    font-family: var(--font-serif);
+    font-family: 'Playfair Display', Georgia, serif;
     font-size: 0.9rem;
     font-style: italic;
     color: #555;
