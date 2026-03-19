@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import UserMenu from '@/components/UserMenu'
+import { useMember } from '@/lib/auth-hooks'
 
 const markets = [
   { label: 'Paris', href: '/?market=paris' },
@@ -26,6 +27,7 @@ const navItems = [
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { isAuthenticated } = useMember()
   return (
     <header className="border-b border-[#e8e2d8]">
       <div className="jl-container">
@@ -36,6 +38,9 @@ export function Header() {
           <div className="md:hidden jl-overline">Paris · London · Dubai</div>
           <div className="flex items-center gap-4">
             <UserMenu />
+            {!isAuthenticated && (
+              <Link href="/join" className="jl-btn jl-btn-primary py-1.5 px-3 text-[0.6rem]">Request Access</Link>
+            )}
           </div>
         </div>
       </div>
@@ -60,9 +65,6 @@ export function Header() {
         {mobileOpen && (
           <nav className="pb-4 border-b border-[#e8e2d8]">
             {navItems.map((item) => (<Link key={item.label} href={item.href} onClick={() => setMobileOpen(false)} className="block py-2.5 jl-overline hover:text-[#a58e28] transition-colors border-b border-[#f5f0e8] last:border-0">{item.label}</Link>))}
-            <div className="mt-3 flex gap-2">
-              {markets.slice(0, 4).map((m) => (<Link key={m.label} href={m.href} className="jl-overline hover:text-[#a58e28]">{m.label}</Link>))}
-            </div>
           </nav>
         )}
       </div>
