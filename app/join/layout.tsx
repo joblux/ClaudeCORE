@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://www.luxuryrecruiter.com/api/og",
+        url: "https://www.luxuryrecruiter.com/og-image.png",
         width: 1200,
         height: 630,
         alt: "JOBLUX — Luxury Talents Intelligence",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     title: "You've been invited to JOBLUX",
     description:
       "Join the intelligence platform for luxury professionals.",
-    images: ["https://www.luxuryrecruiter.com/api/og"],
+    images: ["https://www.luxuryrecruiter.com/og-image.png"],
   },
 };
 
