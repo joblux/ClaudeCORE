@@ -82,7 +82,7 @@ export const authOptions: NextAuthOptions = {
         .single();
       if (member) {
         if (member.status === "approved" || member.role === "admin") return true;
-        if (member.status === "pending") return "/members?error=pending";
+        if (member.status === "pending") return "/members/pending";
         if (member.status === "rejected") return "/members?error=rejected";
       }
       return true;
