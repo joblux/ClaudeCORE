@@ -1,7 +1,38 @@
-import { requireAuth } from "@/lib/auth-server";
+'use client'
 
-export default async function PendingPage() {
-  const member = await requireAuth();
+import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+
+export default function PendingPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [checked, setChecked] = useState(false)
+
+  useEffect(() => {
+    if (status !== 'authenticated' || !session?.user?.email) return
+
+    fetch(`/api/members/profile?email=${encodeURIComponent(session.user.email)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.member && !data.member.registration_completed) {
+          router.replace('/members/complete-registration')
+        } else {
+          setChecked(true)
+        }
+      })
+      .catch(() => setChecked(true))
+  }, [status, session, router])
+
+  if (status === 'loading' || !checked) {
+    return (
+      <main className="min-h-screen bg-[#f5f4f0] flex items-center justify-center">
+        <p className="text-sm text-[#888]">Loading...</p>
+      </main>
+    )
+  }
+
+  const firstName = session?.user?.firstName || session?.user?.name?.split(' ')[0] || 'there'
 
   return (
     <main className="min-h-screen bg-[#f5f4f0] flex items-center justify-center px-4">
@@ -43,7 +74,7 @@ export default async function PendingPage() {
             Pending Approval
           </h2>
           <p className="text-sm text-[#777] leading-relaxed mb-4">
-            Thank you for registering, {member.firstName || member.name || "there"}.
+            Thank you for registering, {firstName}.
             Your membership is under review.
           </p>
           <p className="text-xs text-[#999] leading-relaxed">
@@ -56,9 +87,9 @@ export default async function PendingPage() {
           href="/"
           className="inline-block mt-6 text-xs text-[#a58e28] hover:text-[#1a1a1a] transition-colors"
         >
-          ← Return to homepage
+          &larr; Return to homepage
         </a>
       </div>
     </main>
-  );
+  )
 }
