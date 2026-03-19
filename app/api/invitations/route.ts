@@ -132,22 +132,20 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Update invite count
-    await supabase.rpc('increment_invite_count', { member_id: memberId, count: results.filter(r => r.status === 'sent').length })
-      .then(() => {})
-      .catch(() => {
-        // If RPC doesn't exist, update directly
-        supabase
-          .from('members')
-          .select('invite_count')
-          .eq('id', memberId)
-          .single()
-          .then(({ data: m }) => {
-            const current = m?.invite_count || 0
-            const sent = results.filter(r => r.status === 'sent').length
-            supabase.from('members').update({ invite_count: current + sent }).eq('id', memberId)
-          })
-      })
+    // Update invite count directly
+    const { data: memberData } = await supabase
+      .from('members')
+      .select('invite_count')
+      .eq('id', memberId)
+      .single()
+
+    const currentCount = memberData?.invite_count || 0
+    const sentCount = results.filter(r => r.status === 'sent').length
+
+    await supabase
+      .from('members')
+      .update({ invite_count: currentCount + sentCount })
+      .eq('id', memberId)
 
     return NextResponse.json({
       success: true,
