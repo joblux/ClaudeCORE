@@ -468,6 +468,11 @@ export default function ContributePage() {
 
             {/* ─── Interview Experience Form ─── */}
             {activeTab === 'interview' && (
+              <div className="space-y-4">
+              <div className="bg-[#fafaf5] border border-[#a58e28] rounded-sm p-4 flex items-center justify-between">
+                <p className="text-xs text-[#888]">See what others have shared about their interviews at luxury maisons.</p>
+                <a href="/interviews" className="text-xs text-[#a58e28] hover:text-[#1a1a1a] transition-colors tracking-wide whitespace-nowrap ml-4">View Interview Intelligence &rarr;</a>
+              </div>
               <div className="bg-white border border-[#e8e2d8] rounded-sm p-6 space-y-4">
                 <div>
                   <label className="jl-label">Maison <span className="text-red-500">*</span></label>
@@ -562,6 +567,7 @@ export default function ContributePage() {
                   <input type="checkbox" checked={interview.is_anonymous} onChange={(e) => setInterview({ ...interview, is_anonymous: e.target.checked })} className="accent-[#a58e28]" />
                   <span className="text-sm text-[#666]">Post anonymously</span>
                 </label>
+              </div>
               </div>
             )}
 

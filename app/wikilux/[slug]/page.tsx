@@ -336,6 +336,24 @@ export default function BrandPage() {
             </div>
           )}
 
+          {/* ── INTERVIEW EXPERIENCES CROSS-LINK ──────────── */}
+          <div className="border-t border-[#e8e2d8]">
+            <div className="jl-container py-8">
+              <Link
+                href={`/interviews/${brand.slug}`}
+                className="jl-card group flex items-center justify-between border-[#a58e28] bg-[#fafaf5]"
+              >
+                <div>
+                  <div className="jl-overline-gold mb-1">Interview Intelligence</div>
+                  <div className="font-sans text-sm font-semibold text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors">
+                    Interview experiences at {brand.name} &rarr;
+                  </div>
+                </div>
+                <span className="jl-badge-gold text-[0.6rem] hidden sm:inline-block">View</span>
+              </Link>
+            </div>
+          </div>
+
           {/* ── SECTION 7: EXPLORE MORE ──────────────────── */}
           {related.length > 0 && (
             <div className="border-t border-[#e8e2d8]">
