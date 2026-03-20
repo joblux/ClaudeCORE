@@ -169,6 +169,7 @@ export default function AdminPage() {
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <a href="/admin/dashboard" style={{ color: GOLD, fontSize: 11, textDecoration: "none", letterSpacing: 1, textTransform: "uppercase" }}>Command Centre</a>
           <a href="/admin/ats" style={{ color: "#888", fontSize: 11, textDecoration: "none", letterSpacing: 1, textTransform: "uppercase" }}>Pipeline</a>
+          <a href="/admin/messages" style={{ color: "#888", fontSize: 11, textDecoration: "none", letterSpacing: 1, textTransform: "uppercase" }}>Messages</a>
           <a href="/dashboard" style={{ color: "#888", fontSize: 11, textDecoration: "none", letterSpacing: 1, textTransform: "uppercase" }}>&larr; Dashboard</a>
         </div>
       </div>

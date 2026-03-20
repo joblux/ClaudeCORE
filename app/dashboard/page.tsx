@@ -34,15 +34,16 @@ export default async function DashboardPage() {
     { num: '01', title: 'Opportunities', desc: 'Browse open positions in luxury. Manager to Executive level.', href: '/opportunities' },
     { num: '02', title: 'WikiLux', desc: '500+ luxury brand encyclopedias. History, culture, hiring insights.', href: '/wikilux' },
     { num: '03', title: 'Contribute', desc: 'Share your intelligence, earn points for the community.', href: '/contribute' },
-    { num: '04', title: 'My Profile', desc: 'Edit your profile and settings.', href: '/profile' },
-    { num: '05', title: 'Invite Colleagues', desc: 'Grow the JOBLUX community with your referral link.', href: '/invite' },
+    { num: '04', title: 'Messages', desc: 'View messages from the JOBLUX recruitment team.', href: '/dashboard/messages' },
+    { num: '05', title: 'My Profile', desc: 'Edit your profile and settings.', href: '/profile' },
+    { num: '06', title: 'Invite Colleagues', desc: 'Grow the JOBLUX community with your referral link.', href: '/invite' },
   ]
 
   // Senior tiers get extra cards
   if (isSenior) {
     cards.push(
-      { num: '06', title: 'Confidential Opportunities', desc: 'Executive-level positions handled with full discretion.', href: '/opportunities?confidential=true' },
-      { num: '07', title: 'Salary Intelligence', desc: 'Compensation benchmarks across markets and roles.', href: '/salaries' },
+      { num: '07', title: 'Confidential Opportunities', desc: 'Executive-level positions handled with full discretion.', href: '/opportunities?confidential=true' },
+      { num: '08', title: 'Salary Intelligence', desc: 'Compensation benchmarks across markets and roles.', href: '/salaries' },
     )
   }
 
