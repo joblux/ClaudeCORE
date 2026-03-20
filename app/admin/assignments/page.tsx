@@ -107,17 +107,30 @@ export default function AdminAssignmentsPage() {
               {total} {total === 1 ? 'position' : 'positions'}
             </p>
           </div>
-          <Link
-            href="/admin/assignments/new"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: '#1a1a1a', color: '#a58e28', fontSize: 11, fontWeight: 600,
-              letterSpacing: '0.1em', textTransform: 'uppercase' as const,
-              padding: '10px 20px', textDecoration: 'none', border: 'none', cursor: 'pointer',
-            }}
-          >
-            + New Assignment
-          </Link>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Link
+              href="/admin/assignments/import"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: '#fff', color: '#1a1a1a', fontSize: 11, fontWeight: 600,
+                letterSpacing: '0.1em', textTransform: 'uppercase' as const,
+                padding: '10px 20px', textDecoration: 'none', border: '1px solid #1a1a1a', cursor: 'pointer',
+              }}
+            >
+              Import
+            </Link>
+            <Link
+              href="/admin/assignments/new"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: '#1a1a1a', color: '#a58e28', fontSize: 11, fontWeight: 600,
+                letterSpacing: '0.1em', textTransform: 'uppercase' as const,
+                padding: '10px 20px', textDecoration: 'none', border: 'none', cursor: 'pointer',
+              }}
+            >
+              + New Assignment
+            </Link>
+          </div>
         </div>
 
         {/* Filter bar */}
