@@ -17,9 +17,7 @@ const publicNavItems = [
   { label: 'The Brief', href: '/the-brief' },
 ]
 
-const authOnlyNavItems = [
-  { label: 'Directory', href: '/directory' },
-]
+const authOnlyNavItems: { label: string; href: string }[] = []
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)

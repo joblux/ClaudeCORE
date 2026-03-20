@@ -32,6 +32,14 @@ type Member = {
   profile_completeness: number | null;
 };
 
+type AIReview = {
+  member_id: string;
+  confidence: string;
+  reasoning: string;
+  recommendation: string;
+  auto_approved: boolean;
+};
+
 type Counts = {
   total: number;
   pending: number;
@@ -54,12 +62,9 @@ export default function AdminPage() {
   const [totalRows, setTotalRows] = useState(0);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [acting, setActing] = useState<Set<string>>(new Set());
-
-  // Maintenance mode state
-  const [maintenanceOn, setMaintenanceOn] = useState(false);
-  const [maintenanceLoading, setMaintenanceLoading] = useState(true);
-  const [toggling, setToggling] = useState(false);
-  const [showMaintenanceConfirm, setShowMaintenanceConfirm] = useState(false);
+  const [aiReviews, setAiReviews] = useState<Map<string, AIReview>>(new Map());
+  const [confidenceFilter, setConfidenceFilter] = useState("all");
+  const [reassessing, setReassessing] = useState<Set<string>>(new Set());
 
   const displayName = (m: Member) =>
     m.full_name || [m.first_name, m.last_name].filter(Boolean).join(" ") || m.email;
@@ -89,36 +94,6 @@ export default function AdminPage() {
     });
   }, []);
 
-  const fetchMaintenance = useCallback(async () => {
-    try {
-      const res = await fetch("/api/admin/maintenance");
-      const data = await res.json();
-      setMaintenanceOn(data.maintenance_mode);
-    } catch {
-      // ignore
-    } finally {
-      setMaintenanceLoading(false);
-    }
-  }, []);
-
-  const toggleMaintenance = async () => {
-    setToggling(true);
-    try {
-      const res = await fetch("/api/admin/maintenance", { method: "POST" });
-      const data = await res.json();
-      if (data.error) {
-        alert("Failed to toggle: " + data.error);
-      } else {
-        setMaintenanceOn(data.maintenance_mode);
-      }
-    } catch {
-      alert("Failed to toggle maintenance mode");
-    } finally {
-      setToggling(false);
-      setShowMaintenanceConfirm(false);
-    }
-  };
-
   const fetchMembers = useCallback(async () => {
     setLoading(true);
     let query = supabase
@@ -140,12 +115,37 @@ export default function AdminPage() {
     setLoading(false);
   }, [page, statusFilter, roleFilter, search]);
 
+  const fetchAIReviews = useCallback(async () => {
+    const { data } = await supabase
+      .from("member_ai_reviews")
+      .select("member_id, confidence, reasoning, recommendation, auto_approved");
+    if (data) {
+      const map = new Map<string, AIReview>();
+      data.forEach((r: any) => map.set(r.member_id, r));
+      setAiReviews(map);
+    }
+  }, []);
+
+  const reassess = async (memberId: string) => {
+    setReassessing((s) => new Set(s).add(memberId));
+    try {
+      await fetch("/api/admin/members/ai-review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ member_id: memberId }),
+      });
+      await fetchAIReviews();
+      await fetchMembers();
+    } catch {}
+    setReassessing((s) => { const n = new Set(s); n.delete(memberId); return n; });
+  };
+
   useEffect(() => {
     if (!isAdmin) return;
     fetchCounts();
     fetchMembers();
-    fetchMaintenance();
-  }, [isAdmin, fetchCounts, fetchMembers, fetchMaintenance]);
+    fetchAIReviews();
+  }, [isAdmin, fetchCounts, fetchMembers, fetchAIReviews]);
 
   useEffect(() => { setPage(0); setSelected(new Set()); }, [search, statusFilter, roleFilter]);
 
@@ -197,67 +197,10 @@ export default function AdminPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#fafaf5", fontFamily: "sans-serif" }}>
-      {/* Top bar */}
-      <div style={{ background: BLACK, padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ color: GOLD, fontFamily: "serif", fontSize: 18, fontWeight: 300, letterSpacing: 2 }}>JOBLUX</span>
-          <span style={{ color: "#666", fontSize: 11, letterSpacing: 3, textTransform: "uppercase" }}>Admin</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <a href="/admin/dashboard" style={{ color: GOLD, fontSize: 11, textDecoration: "none", letterSpacing: 1, textTransform: "uppercase" }}>Command Centre</a>
-          <a href="/admin/ats" style={{ color: "#888", fontSize: 11, textDecoration: "none", letterSpacing: 1, textTransform: "uppercase" }}>Pipeline</a>
-          <a href="/admin/messages" style={{ color: "#888", fontSize: 11, textDecoration: "none", letterSpacing: 1, textTransform: "uppercase" }}>Messages</a>
-          <a href="/dashboard" style={{ color: "#888", fontSize: 11, textDecoration: "none", letterSpacing: 1, textTransform: "uppercase" }}>&larr; Dashboard</a>
-        </div>
-      </div>
-
-      {/* Maintenance mode bar */}
-      <div style={{
-        background: maintenanceOn ? "#2a2208" : "#0a1a0a",
-        borderBottom: `1px solid ${maintenanceOn ? "#3d3010" : "#1a331a"}`,
-        padding: "10px 24px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            background: maintenanceOn ? GOLD : "#22c55e",
-            boxShadow: maintenanceOn ? `0 0 6px ${GOLD}80` : "0 0 6px #22c55e80",
-            animation: maintenanceOn ? "maintenance-pulse 2s ease-in-out infinite" : "none",
-          }} />
-          <span style={{
-            fontSize: 10,
-            fontWeight: 600,
-            letterSpacing: 2,
-            textTransform: "uppercase",
-            color: maintenanceOn ? GOLD : "#22c55e",
-          }}>
-            {maintenanceLoading ? "Loading..." : maintenanceOn ? "SITE OFFLINE" : "SITE LIVE"}
-          </span>
-        </div>
-        <button
-          onClick={() => setShowMaintenanceConfirm(true)}
-          disabled={maintenanceLoading || toggling}
-          style={{
-            padding: "5px 14px",
-            fontSize: 10,
-            fontWeight: 600,
-            letterSpacing: 1,
-            textTransform: "uppercase",
-            fontFamily: "sans-serif",
-            background: maintenanceOn ? "#22c55e" : GOLD,
-            color: maintenanceOn ? "#fff" : BLACK,
-            border: "none",
-            cursor: maintenanceLoading || toggling ? "not-allowed" : "pointer",
-            opacity: maintenanceLoading || toggling ? 0.5 : 1,
-          }}
-        >
-          {toggling ? "Updating..." : maintenanceOn ? "Go Live" : "Go Offline"}
-        </button>
+      {/* Page header */}
+      <div style={{ background: "#fff", borderBottom: "1px solid #e8e2d8", padding: "20px 24px" }}>
+        <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: GOLD, fontWeight: 500, marginBottom: 4 }}>Society</div>
+        <h1 style={{ fontFamily: "serif", fontSize: 24, fontWeight: 400, color: BLACK, margin: 0 }}>Members</h1>
       </div>
 
       {/* Analytics strip */}
@@ -333,6 +276,19 @@ export default function AdminPage() {
           <option value="admin">Admin</option>
         </select>
 
+        <select
+          value={confidenceFilter}
+          onChange={(e) => setConfidenceFilter(e.target.value)}
+          style={{ padding: "8px 12px", fontSize: 12, border: "1px solid #ddd", background: "#fff", cursor: "pointer" }}
+        >
+          <option value="all">All AI Scores</option>
+          <option value="high">High Confidence</option>
+          <option value="medium">Medium Confidence</option>
+          <option value="low">Low Confidence</option>
+          <option value="auto_approved">Auto-Approved</option>
+          <option value="none">No AI Review</option>
+        </select>
+
         {selected.size > 0 && (
           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
             <span style={{ fontSize: 11, color: "#888" }}>{selected.size} selected</span>
@@ -365,9 +321,9 @@ export default function AdminPage() {
                 <th style={thStyle}>Email</th>
                 <th style={thStyle}>Role</th>
                 <th style={thStyle}>Status</th>
+                <th style={thStyle}>AI Review</th>
                 <th style={thStyle}>Location</th>
                 <th style={thStyle}>Profile</th>
-                <th style={thStyle}>Provider</th>
                 <th style={thStyle}>Joined</th>
                 <th style={{ ...thStyle, textAlign: "right" }}>Actions</th>
               </tr>
@@ -378,8 +334,16 @@ export default function AdminPage() {
               ) : members.length === 0 ? (
                 <tr><td colSpan={10} style={{ padding: 40, textAlign: "center", color: "#999" }}>No members found.</td></tr>
               ) : (
-                members.map((m) => {
+                members.filter((m) => {
+                  if (confidenceFilter === "all") return true;
+                  const review = aiReviews.get(m.id);
+                  if (confidenceFilter === "none") return !review;
+                  if (confidenceFilter === "auto_approved") return review?.auto_approved;
+                  return review?.confidence === confidenceFilter;
+                }).map((m) => {
                   const busy = acting.has(m.id);
+                  const review = aiReviews.get(m.id);
+                  const confidenceColors: Record<string, string> = { high: "#22c55e", medium: "#f59e0b", low: "#ef4444" };
                   return (
                     <tr key={m.id} style={{ borderBottom: "1px solid #f0ece4", opacity: busy ? 0.5 : 1 }}>
                       <td style={{ padding: "10px 12px" }}>
@@ -387,7 +351,6 @@ export default function AdminPage() {
                       </td>
                       <td style={tdStyle}>
                         <div style={{ fontWeight: 500, color: BLACK }}>{displayName(m)}</div>
-                        {m.bio && <div style={{ fontSize: 11, color: "#999", marginTop: 2, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.bio}</div>}
                       </td>
                       <td style={{ ...tdStyle, fontSize: 12, color: "#666" }}>{m.email}</td>
                       <td style={tdStyle}>
@@ -395,6 +358,38 @@ export default function AdminPage() {
                       </td>
                       <td style={tdStyle}>
                         <StatusBadge status={m.status} />
+                      </td>
+                      <td style={tdStyle}>
+                        {review ? (
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <span
+                              style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: confidenceColors[review.confidence] || "#999", display: "inline-block" }}
+                              title={review.reasoning}
+                            />
+                            <span style={{ fontSize: 10, color: "#888", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                              {review.auto_approved ? "Auto" : review.recommendation === "approve" ? "Approve" : "Review"}
+                            </span>
+                            {m.status === "pending" && (
+                              <button
+                                onClick={() => reassess(m.id)}
+                                disabled={reassessing.has(m.id)}
+                                style={{ fontSize: 9, color: GOLD, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", padding: 0, minHeight: "auto", minWidth: "auto" }}
+                              >
+                                {reassessing.has(m.id) ? "..." : "Re-assess"}
+                              </button>
+                            )}
+                          </div>
+                        ) : m.status === "pending" ? (
+                          <button
+                            onClick={() => reassess(m.id)}
+                            disabled={reassessing.has(m.id)}
+                            style={{ fontSize: 10, color: GOLD, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", padding: 0, minHeight: "auto", minWidth: "auto" }}
+                          >
+                            {reassessing.has(m.id) ? "Assessing..." : "Run AI Review"}
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: 11, color: "#ccc" }}>—</span>
+                        )}
                       </td>
                       <td style={{ ...tdStyle, fontSize: 12, color: "#888" }}>
                         {[m.city, m.country].filter(Boolean).join(", ") || "—"}
@@ -404,7 +399,6 @@ export default function AdminPage() {
                           {m.profile_completeness ?? 0}% ›
                         </a>
                       </td>
-                      <td style={{ ...tdStyle, fontSize: 11, color: "#aaa", textTransform: "capitalize" }}>{m.auth_provider ?? "—"}</td>
                       <td style={{ ...tdStyle, fontSize: 11, color: "#aaa" }}>{new Date(m.created_at).toLocaleDateString()}</td>
                       <td style={{ ...tdStyle, textAlign: "right", whiteSpace: "nowrap" }}>
                         {m.status !== "approved" && (
@@ -466,80 +460,6 @@ export default function AdminPage() {
           </div>
         </div>
       </div>
-
-      {/* Maintenance confirmation dialog */}
-      {showMaintenanceConfirm && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.6)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 999,
-          }}
-          onClick={() => setShowMaintenanceConfirm(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{ background: "#fff", border: "1px solid #e8e2d8", padding: "28px", maxWidth: "420px", width: "90%" }}
-          >
-            <h3 style={{ fontFamily: "serif", fontSize: 18, fontWeight: 400, color: BLACK, marginTop: 0 }}>
-              {maintenanceOn ? "Go Live?" : "Go Offline?"}
-            </h3>
-            <p style={{ fontSize: 13, color: "#666", lineHeight: 1.6 }}>
-              {maintenanceOn
-                ? "This will make the site live again. All visitors will see the full site."
-                : "This will show the offline page to all visitors. Admins will still have access. Continue?"}
-            </p>
-            <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
-              <button
-                onClick={() => setShowMaintenanceConfirm(false)}
-                style={{
-                  flex: 1,
-                  padding: "8px",
-                  fontSize: 11,
-                  fontWeight: 600,
-                  letterSpacing: 1,
-                  textTransform: "uppercase",
-                  background: "#fff",
-                  color: "#888",
-                  border: "1px solid #ddd",
-                  cursor: "pointer",
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={toggleMaintenance}
-                disabled={toggling}
-                style={{
-                  flex: 1,
-                  padding: "8px",
-                  fontSize: 11,
-                  fontWeight: 600,
-                  letterSpacing: 1,
-                  textTransform: "uppercase",
-                  background: maintenanceOn ? "#22c55e" : GOLD,
-                  color: maintenanceOn ? "#fff" : BLACK,
-                  border: "none",
-                  cursor: toggling ? "not-allowed" : "pointer",
-                }}
-              >
-                {toggling ? "Updating..." : "Confirm"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes maintenance-pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.4; }
-        }
-      `}} />
     </div>
   );
 }

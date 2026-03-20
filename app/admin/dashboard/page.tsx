@@ -2,456 +2,377 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { createClient } from '@supabase/supabase-js'
+import { useRequireAdmin } from '@/lib/auth-hooks'
 
-// Pipeline stage labels and colours for the ATS widget
-const STAGE_DISPLAY: Record<string, { label: string; color: string }> = {
-  applied: { label: 'Applied', color: '#6B7280' },
-  screening: { label: 'Screening', color: '#3B82F6' },
-  shortlisted: { label: 'Shortlisted', color: '#8B5CF6' },
-  submitted_to_client: { label: 'Submitted', color: '#F59E0B' },
-  client_reviewing: { label: 'Reviewing', color: '#F97316' },
-  interview_1: { label: 'Interview 1', color: '#EC4899' },
-  interview_2: { label: 'Interview 2', color: '#EC4899' },
-  interview_final: { label: 'Final', color: '#EC4899' },
-  offer_made: { label: 'Offer', color: '#10B981' },
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+const GOLD = '#a58e28'
+
+const STAGE_COLORS: Record<string, string> = {
+  applied: '#6B7280',
+  screening: '#3B82F6',
+  shortlisted: '#8B5CF6',
+  submitted_to_client: '#F59E0B',
+  client_reviewing: '#F97316',
+  interview_1: '#EC4899',
+  interview_2: '#EC4899',
+  interview_final: '#EC4899',
+  offer_made: '#10B981',
 }
 
-const TIER_COLORS: Record<string, string> = {
-  rising: '#94a3b8',
-  pro: '#60a5fa',
-  professional: '#a58e28',
-  executive: '#1a1a1a',
-  business: '#059669',
-  insider: '#7c3aed',
-}
-
-const CONTRIB_LABELS: Record<string, string> = {
-  wikilux_insight: 'WikiLux Insights',
-  salary_data: 'Salary Data',
-  interview_experience: 'Interviews',
+const STAGE_LABELS: Record<string, string> = {
+  applied: 'Applied',
+  screening: 'Screening',
+  shortlisted: 'Shortlisted',
+  submitted_to_client: 'Submitted',
+  client_reviewing: 'Reviewing',
+  interview_1: 'Interview 1',
+  interview_2: 'Interview 2',
+  interview_final: 'Final',
+  offer_made: 'Offer',
 }
 
 export default function AdminDashboardPage() {
+  const { isAdmin, isLoading: authLoading } = useRequireAdmin()
   const [data, setData] = useState<any>(null)
   const [atsStats, setAtsStats] = useState<any>(null)
+  const [weeklyGrowth, setWeeklyGrowth] = useState<{ week: string; count: number }[]>([])
+  const [activityFeed, setActivityFeed] = useState<any[]>([])
+  const [autoApproved, setAutoApproved] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!isAdmin) return
+
     Promise.all([
-      fetch('/api/admin/dashboard').then((r) => r.json()),
-      fetch('/api/applications/stats').then((r) => r.json()).catch(() => null),
+      fetch('/api/admin/dashboard').then(r => r.json()).catch(() => null),
+      fetch('/api/applications/stats').then(r => r.json()).catch(() => null),
+    ]).then(([dashData, stats]) => {
+      setData(dashData)
+      setAtsStats(stats)
+    }).finally(() => setLoading(false))
+
+    fetchWeeklyGrowth()
+    fetchActivityFeed()
+    fetchAutoApproved()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin])
+
+  async function fetchWeeklyGrowth() {
+    const weeks: { week: string; count: number }[] = []
+    const now = new Date()
+    for (let i = 11; i >= 0; i--) {
+      const weekStart = new Date(now)
+      weekStart.setDate(weekStart.getDate() - (i + 1) * 7)
+      const weekEnd = new Date(weekStart)
+      weekEnd.setDate(weekEnd.getDate() + 7)
+      const { count } = await supabase
+        .from('members')
+        .select('id', { count: 'exact', head: true })
+        .neq('role', 'admin')
+        .gte('created_at', weekStart.toISOString())
+        .lt('created_at', weekEnd.toISOString())
+      const label = weekStart.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+      weeks.push({ week: label, count: count ?? 0 })
+    }
+    setWeeklyGrowth(weeks)
+  }
+
+  async function fetchActivityFeed() {
+    const [members, contributions] = await Promise.all([
+      supabase
+        .from('members')
+        .select('id, full_name, email, status, role, created_at')
+        .neq('role', 'admin')
+        .order('created_at', { ascending: false })
+        .limit(10),
+      supabase
+        .from('contributions')
+        .select('id, contribution_type, brand_name, status, created_at')
+        .order('created_at', { ascending: false })
+        .limit(10),
     ])
-      .then(([dashData, stats]) => {
-        setData(dashData)
-        setAtsStats(stats)
+
+    const items: any[] = []
+    for (const m of members.data || []) {
+      items.push({
+        type: 'member',
+        text: `${m.full_name || m.email} registered as ${m.role}`,
+        status: m.status,
+        date: m.created_at,
+        href: `/admin/members/${m.id}`,
       })
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [])
+    }
+    for (const c of contributions.data || []) {
+      items.push({
+        type: 'contribution',
+        text: `New ${c.contribution_type?.replace('_', ' ')} for ${c.brand_name || 'Unknown'}`,
+        status: c.status,
+        date: c.created_at,
+        href: '/admin/contributions',
+      })
+    }
+    items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    setActivityFeed(items.slice(0, 20))
+  }
 
-  const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: 'short',
-    })
+  async function fetchAutoApproved() {
+    const { data } = await supabase
+      .from('member_ai_reviews')
+      .select('member_id, confidence, created_at')
+      .eq('auto_approved', true)
+      .order('created_at', { ascending: false })
+      .limit(20)
 
-  if (loading) {
+    if (!data || data.length === 0) {
+      setAutoApproved([])
+      return
+    }
+
+    // Fetch member details for these
+    const memberIds = data.map(d => d.member_id)
+    const { data: members } = await supabase
+      .from('members')
+      .select('id, full_name, role, maison')
+      .in('id', memberIds)
+
+    const memberMap = new Map((members || []).map(m => [m.id, m]))
+    setAutoApproved(data.map(d => ({
+      ...d,
+      member: memberMap.get(d.member_id),
+    })))
+  }
+
+  function relativeTime(dateStr: string) {
+    const diff = Date.now() - new Date(dateStr).getTime()
+    const mins = Math.floor(diff / 60000)
+    if (mins < 1) return 'just now'
+    if (mins < 60) return `${mins}m ago`
+    const hrs = Math.floor(mins / 60)
+    if (hrs < 24) return `${hrs}h ago`
+    const days = Math.floor(hrs / 24)
+    return `${days}d ago`
+  }
+
+  if (authLoading || loading) {
     return (
-      <main className="min-h-screen bg-[#fafaf5] flex items-center justify-center">
-        <p className="text-sm text-[#999]">Loading dashboard…</p>
-      </main>
+      <div className="min-h-screen bg-[#fafaf5] flex items-center justify-center">
+        <p className="text-sm text-[#999]">Loading dashboard...</p>
+      </div>
     )
   }
 
   if (!data) {
     return (
-      <main className="min-h-screen bg-[#fafaf5] flex items-center justify-center">
+      <div className="min-h-screen bg-[#fafaf5] flex items-center justify-center">
         <p className="text-sm text-red-500">Failed to load dashboard data.</p>
-      </main>
+      </div>
     )
   }
 
-  const { overview, membersByTier, contributionsByType, recentMembers, recentContributions } = data
+  const { overview } = data
 
-  // Build action items
-  const actions: { label: string; count: number; href: string; urgent: boolean }[] = []
-  if (overview.pendingApprovals > 0) {
-    actions.push({
-      label: `${overview.pendingApprovals} member${overview.pendingApprovals > 1 ? 's' : ''} waiting for approval`,
-      count: overview.pendingApprovals,
-      href: '/admin',
-      urgent: true,
-    })
-  }
-  if (overview.pendingContributions > 0) {
-    actions.push({
-      label: `${overview.pendingContributions} contribution${overview.pendingContributions > 1 ? 's' : ''} pending review`,
-      count: overview.pendingContributions,
-      href: '/admin/contributions',
-      urgent: true,
-    })
-  }
-  if (overview.publishedBriefs === 0) {
-    actions.push({
-      label: 'No active assignments — create one to attract talent',
-      count: 0,
-      href: '/admin/assignments/new',
-      urgent: false,
-    })
-  }
+  const kpis = [
+    { label: 'Total Members', value: overview.totalMembers, trend: overview.newThisWeek > 0 ? `+${overview.newThisWeek} this week` : null },
+    { label: 'Pending Approvals', value: overview.pendingApprovals, highlight: overview.pendingApprovals > 0 },
+    { label: 'Active Assignments', value: overview.publishedBriefs },
+    { label: 'Open Applications', value: atsStats?.active_candidates ?? 0 },
+    { label: 'Unread Messages', value: 0 },
+    { label: 'Pending Contributions', value: overview.pendingContributions, highlight: overview.pendingContributions > 0 },
+  ]
+
+  const maxWeekly = Math.max(...weeklyGrowth.map(w => w.count), 1)
+  const stages = atsStats?.by_stage || []
+  const maxStage = Math.max(...stages.map((s: any) => s.count), 1)
 
   return (
-    <main className="min-h-screen bg-[#fafaf5]">
-      {/* Header */}
-      <section className="border-b border-[#e8e2d8] bg-white">
-        <div className="max-w-6xl mx-auto px-6 py-6">
-          <p className="jl-overline-gold mb-1">Administration</p>
-          <h1 className="jl-serif text-2xl text-[#1a1a1a]">Command Centre</h1>
-        </div>
-      </section>
+    <div className="min-h-screen bg-[#fafaf5]">
+      <div className="bg-white border-b border-[#e8e2d8] px-6 py-5">
+        <p className="jl-overline-gold mb-1">Administration</p>
+        <h1 className="jl-serif text-2xl text-[#1a1a1a]">Command Centre</h1>
+      </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        {/* ─── Action Items ─── */}
-        {actions.length > 0 && (
-          <div className="mb-8 space-y-2">
-            {actions.map((action, i) => (
-              <Link
-                key={i}
-                href={action.href}
-                className={`flex items-center justify-between p-4 rounded-sm border transition-colors ${
-                  action.urgent
-                    ? 'bg-[#a58e28]/5 border-[#a58e28]/30 hover:border-[#a58e28]'
-                    : 'bg-white border-[#e8e2d8] hover:border-[#a58e28]'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      action.urgent ? 'bg-[#a58e28]' : 'bg-[#ccc]'
-                    }`}
-                  />
-                  <span className="text-sm text-[#1a1a1a]">{action.label}</span>
-                </div>
-                <span className="text-xs text-[#a58e28]">Review →</span>
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {/* ─── Key Metrics ─── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white border border-[#e8e2d8] rounded-sm p-5">
-            <p className="text-xs text-[#999] uppercase tracking-wide">Total Members</p>
-            <p className="jl-serif text-3xl text-[#1a1a1a] mt-1">{overview.totalMembers}</p>
-            {overview.newThisWeek > 0 && (
-              <p className="text-xs text-[#a58e28] mt-1">+{overview.newThisWeek} this week</p>
-            )}
-          </div>
-          <Link href="/admin" className="bg-white border border-[#e8e2d8] rounded-sm p-5 hover:border-[#a58e28] transition-colors">
-            <p className="text-xs text-[#999] uppercase tracking-wide">Pending Approval</p>
-            <p className={`jl-serif text-3xl mt-1 ${overview.pendingApprovals > 0 ? 'text-[#a58e28]' : 'text-[#1a1a1a]'}`}>
-              {overview.pendingApprovals}
-            </p>
-          </Link>
-          <Link href="/admin/contributions" className="bg-white border border-[#e8e2d8] rounded-sm p-5 hover:border-[#a58e28] transition-colors">
-            <p className="text-xs text-[#999] uppercase tracking-wide">Pending Contributions</p>
-            <p className={`jl-serif text-3xl mt-1 ${overview.pendingContributions > 0 ? 'text-[#a58e28]' : 'text-[#1a1a1a]'}`}>
-              {overview.pendingContributions}
-            </p>
-          </Link>
-          <div className="bg-white border border-[#e8e2d8] rounded-sm p-5">
-            <p className="text-xs text-[#999] uppercase tracking-wide">Active Assignments</p>
-            <p className="jl-serif text-3xl text-[#1a1a1a] mt-1">{overview.publishedBriefs}</p>
-            <p className="text-xs text-[#999] mt-1">{overview.totalBriefs} total assignments</p>
-          </div>
+      <div className="p-6 max-w-[1400px] mx-auto">
+        {/* Row 1 — KPI Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+          {kpis.map((kpi) => (
+            <div
+              key={kpi.label}
+              className={`bg-white border rounded-sm p-4 ${kpi.highlight ? 'border-[#a58e28]' : 'border-[#e8e2d8]'}`}
+            >
+              <p className="text-[0.6rem] text-[#999] uppercase tracking-wider mb-1">{kpi.label}</p>
+              <p className={`jl-serif text-2xl ${kpi.highlight ? 'text-[#a58e28]' : 'text-[#1a1a1a]'}`}>
+                {kpi.value}
+              </p>
+              {kpi.trend && <p className="text-[0.65rem] text-[#a58e28] mt-0.5">{kpi.trend}</p>}
+            </div>
+          ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* ─── Members by Tier ─── */}
-          <div className="bg-white border border-[#e8e2d8] rounded-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xs font-medium tracking-widest uppercase text-[#a58e28]">
-                Members by Tier
-              </h2>
-              <Link href="/admin" className="text-xs text-[#a58e28] hover:text-[#1a1a1a]">
-                View all →
-              </Link>
-            </div>
-            <div className="space-y-3">
-              {membersByTier.map((tier: any) => (
-                <div key={tier.tier} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="w-3 h-3 rounded-sm"
-                      style={{ backgroundColor: TIER_COLORS[tier.tier] || '#ccc' }}
-                    />
-                    <span className="text-sm text-[#1a1a1a]">{tier.label}</span>
-                  </div>
-                  <span className="text-sm font-medium text-[#1a1a1a]">{tier.count}</span>
-                </div>
-              ))}
-              <div className="pt-2 border-t border-[#e8e2d8] flex justify-between">
-                <span className="text-xs text-[#999]">Total</span>
-                <span className="text-xs font-medium text-[#1a1a1a]">{overview.totalMembers}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* ─── Contributions Overview ─── */}
-          <div className="bg-white border border-[#e8e2d8] rounded-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xs font-medium tracking-widest uppercase text-[#a58e28]">
-                Contributions
-              </h2>
-              <Link href="/admin/contributions" className="text-xs text-[#a58e28] hover:text-[#1a1a1a]">
-                Review →
-              </Link>
-            </div>
-            {Object.keys(contributionsByType).length === 0 ? (
-              <p className="text-sm text-[#999]">No contributions yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {Object.entries(contributionsByType).map(([type, stats]: [string, any]) => (
-                  <div key={type}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-[#1a1a1a]">{CONTRIB_LABELS[type] || type}</span>
-                      <span className="text-[#999]">{stats.total}</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-[#e8e2d8] rounded-full overflow-hidden">
+        {/* Row 2 — Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Member Growth Chart */}
+          <div className="bg-[#1a1a1a] border border-[#333] rounded-sm p-5">
+            <h2 className="text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-[#a58e28] mb-4">
+              Member Growth (12 weeks)
+            </h2>
+            {weeklyGrowth.length > 0 ? (
+              <div>
+                <div className="flex items-end gap-1 h-[140px]">
+                  {weeklyGrowth.map((w, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
                       <div
-                        className="h-full bg-[#a58e28] rounded-full"
+                        className="w-full rounded-t-sm transition-all"
                         style={{
-                          width: stats.total > 0 ? `${(stats.approved / stats.total) * 100}%` : '0%',
+                          height: `${Math.max((w.count / maxWeekly) * 100, 2)}%`,
+                          backgroundColor: GOLD,
+                          opacity: 0.7 + (i / weeklyGrowth.length) * 0.3,
                         }}
                       />
                     </div>
-                    <p className="text-xs text-[#999] mt-0.5">
-                      {stats.approved} approved · {stats.pending} pending
-                    </p>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                <div className="flex gap-1 mt-2">
+                  {weeklyGrowth.map((w, i) => (
+                    <div key={i} className="flex-1 text-center">
+                      <div className="text-[0.45rem] text-[#666] truncate">{w.week}</div>
+                      <div className="text-[0.5rem] text-[#a58e28]">{w.count}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            )}
-            <div className="pt-3 mt-3 border-t border-[#e8e2d8] flex justify-between">
-              <span className="text-xs text-[#999]">Total</span>
-              <span className="text-xs font-medium text-[#1a1a1a]">{overview.totalContributions}</span>
-            </div>
-          </div>
-
-          {/* ─── Pipeline Overview (ATS Widget) ─── */}
-          <div className="bg-white border border-[#e8e2d8] rounded-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xs font-medium tracking-widest uppercase text-[#a58e28]">
-                Pipeline Overview
-              </h2>
-              <Link href="/admin/ats" className="text-xs text-[#a58e28] hover:text-[#1a1a1a]">
-                View Pipeline →
-              </Link>
-            </div>
-            {atsStats ? (
-              <>
-                {/* Key metrics */}
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                  <div className="text-center">
-                    <p className="jl-serif text-2xl text-[#1a1a1a]">{atsStats.active_candidates ?? 0}</p>
-                    <p className="text-[0.6rem] text-[#999] uppercase tracking-wider">Active</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="jl-serif text-2xl text-[#a58e28]">{atsStats.this_month ?? 0}</p>
-                    <p className="text-[0.6rem] text-[#999] uppercase tracking-wider">New this month</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="jl-serif text-2xl text-[#059669]">{atsStats.placements_this_month ?? 0}</p>
-                    <p className="text-[0.6rem] text-[#999] uppercase tracking-wider">Placements</p>
-                  </div>
-                </div>
-                {/* Stage breakdown */}
-                {atsStats.by_stage && atsStats.by_stage.length > 0 ? (
-                  <div className="space-y-2">
-                    {atsStats.by_stage
-                      .filter((s: any) => STAGE_DISPLAY[s.stage])
-                      .map((s: any) => {
-                        const display = STAGE_DISPLAY[s.stage]
-                        const maxCount = Math.max(...atsStats.by_stage.map((x: any) => x.count), 1)
-                        return (
-                          <div key={s.stage} className="flex items-center gap-2">
-                            <span className="text-xs text-[#888] w-20 flex-shrink-0 truncate">{display.label}</span>
-                            <div className="flex-1 h-2 bg-[#f0ece4] rounded-full overflow-hidden">
-                              <div
-                                className="h-full rounded-full transition-all"
-                                style={{ width: `${(s.count / maxCount) * 100}%`, backgroundColor: display.color }}
-                              />
-                            </div>
-                            <span className="text-xs font-medium text-[#1a1a1a] w-6 text-right">{s.count}</span>
-                          </div>
-                        )
-                      })}
-                  </div>
-                ) : (
-                  <p className="text-sm text-[#999]">No candidates in pipeline yet.</p>
-                )}
-              </>
             ) : (
-              <p className="text-sm text-[#999]">No pipeline data yet.</p>
+              <p className="text-sm text-[#666]">Loading chart data...</p>
             )}
           </div>
 
-          {/* ─── Quick Actions ─── */}
-          <div className="bg-white border border-[#e8e2d8] rounded-sm p-6">
-            <h2 className="text-xs font-medium tracking-widest uppercase text-[#a58e28] mb-4">
-              Quick Actions
+          {/* Application Pipeline */}
+          <div className="bg-white border border-[#e8e2d8] rounded-sm p-5">
+            <h2 className="text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-[#a58e28] mb-4">
+              Application Pipeline
             </h2>
-            <div className="space-y-2">
-              <Link
-                href="/admin/ats"
-                className="flex items-center gap-3 p-3 border border-[#e8e2d8] rounded-sm hover:border-[#a58e28] transition-colors"
-              >
-                <span className="w-8 h-8 flex items-center justify-center bg-[#a58e28] text-[#1a1a1a] text-xs font-bold rounded-sm">P</span>
-                <div>
-                  <p className="text-sm font-medium text-[#1a1a1a]">Pipeline / ATS</p>
-                  <p className="text-xs text-[#999]">Track candidates through the pipeline</p>
-                </div>
-              </Link>
-              <Link
-                href="/admin"
-                className="flex items-center gap-3 p-3 border border-[#e8e2d8] rounded-sm hover:border-[#a58e28] transition-colors"
-              >
-                <span className="w-8 h-8 flex items-center justify-center bg-[#1a1a1a] text-[#a58e28] text-xs rounded-sm">M</span>
-                <div>
-                  <p className="text-sm font-medium text-[#1a1a1a]">Manage Members</p>
-                  <p className="text-xs text-[#999]">Approve, reject, search members</p>
-                </div>
-              </Link>
-              <Link
-                href="/admin/assignments/new"
-                className="flex items-center gap-3 p-3 border border-[#e8e2d8] rounded-sm hover:border-[#a58e28] transition-colors"
-              >
-                <span className="w-8 h-8 flex items-center justify-center bg-[#1a1a1a] text-[#a58e28] text-xs rounded-sm">A</span>
-                <div>
-                  <p className="text-sm font-medium text-[#1a1a1a]">New Assignment</p>
-                  <p className="text-xs text-[#999]">Create a new search assignment</p>
-                </div>
-              </Link>
-              <Link
-                href="/admin/contributions"
-                className="flex items-center gap-3 p-3 border border-[#e8e2d8] rounded-sm hover:border-[#a58e28] transition-colors"
-              >
-                <span className="w-8 h-8 flex items-center justify-center bg-[#1a1a1a] text-[#a58e28] text-xs rounded-sm">C</span>
-                <div>
-                  <p className="text-sm font-medium text-[#1a1a1a]">Review Contributions</p>
-                  <p className="text-xs text-[#999]">Approve member submissions</p>
-                </div>
-              </Link>
-              <Link
-                href="/admin/articles"
-                className="flex items-center gap-3 p-3 border border-[#e8e2d8] rounded-sm hover:border-[#a58e28] transition-colors"
-              >
-                <span className="w-8 h-8 flex items-center justify-center bg-[#1a1a1a] text-[#a58e28] text-xs rounded-sm">A</span>
-                <div>
-                  <p className="text-sm font-medium text-[#1a1a1a]">Manage Articles</p>
-                  <p className="text-xs text-[#999]">Bloglux editorial</p>
-                </div>
-              </Link>
-            </div>
+            {stages.length > 0 ? (
+              <div className="space-y-2.5">
+                {stages
+                  .filter((s: any) => STAGE_LABELS[s.stage])
+                  .map((s: any) => (
+                    <div key={s.stage} className="flex items-center gap-3">
+                      <span className="text-xs text-[#888] w-20 flex-shrink-0 truncate">
+                        {STAGE_LABELS[s.stage]}
+                      </span>
+                      <div className="flex-1 h-5 bg-[#f0ece4] rounded overflow-hidden">
+                        <div
+                          className="h-full rounded transition-all flex items-center pl-2"
+                          style={{
+                            width: `${Math.max((s.count / maxStage) * 100, 8)}%`,
+                            backgroundColor: STAGE_COLORS[s.stage] || '#999',
+                          }}
+                        >
+                          <span className="text-[0.6rem] text-white font-semibold">{s.count}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <p className="text-sm text-[#999]">No candidates in pipeline yet.</p>
+            )}
           </div>
         </div>
 
-        {/* ─── Recent Activity ─── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Members */}
-          <div className="bg-white border border-[#e8e2d8] rounded-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xs font-medium tracking-widest uppercase text-[#a58e28]">
-                Recent Members
-              </h2>
-              <Link href="/admin" className="text-xs text-[#a58e28] hover:text-[#1a1a1a]">
-                View all →
-              </Link>
-            </div>
-            {recentMembers.length === 0 ? (
-              <p className="text-sm text-[#999]">No members yet.</p>
+        {/* Row 3 — Activity + Auto-Approved */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Activity Feed */}
+          <div className="bg-white border border-[#e8e2d8] rounded-sm p-5">
+            <h2 className="text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-[#a58e28] mb-4">
+              Recent Activity
+            </h2>
+            {activityFeed.length === 0 ? (
+              <p className="text-sm text-[#999]">No recent activity.</p>
             ) : (
-              <div className="space-y-3">
-                {recentMembers.map((m: any) => (
-                  <div key={m.id} className="flex items-center justify-between">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-[#1a1a1a] truncate">
-                        {m.full_name || m.email}
-                      </p>
-                      <p className="text-xs text-[#999] truncate">
-                        {m.job_title && m.maison
-                          ? `${m.job_title} at ${m.maison}`
-                          : m.city && m.country
-                          ? `${m.city}, ${m.country}`
-                          : m.email}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-sm ${
-                          m.status === 'pending'
-                            ? 'bg-yellow-50 text-yellow-700'
-                            : m.status === 'approved'
-                            ? 'bg-green-50 text-green-700'
-                            : 'bg-red-50 text-red-700'
-                        }`}
-                      >
-                        {m.status}
+              <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                {activityFeed.map((item, i) => (
+                  <Link key={i} href={item.href} className="flex items-start gap-3 group">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                      item.type === 'member' ? 'bg-[#1a1a1a]' : 'bg-[#a58e28]/10'
+                    }`}>
+                      <span className="text-[0.5rem] font-bold text-[#a58e28]">
+                        {item.type === 'member' ? 'M' : 'C'}
                       </span>
-                      <span className="text-xs text-[#999]">{formatDate(m.created_at)}</span>
                     </div>
-                  </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors truncate">
+                        {item.text}
+                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className={`text-[0.6rem] px-1.5 py-0.5 rounded-sm ${
+                          item.status === 'pending' ? 'bg-yellow-50 text-yellow-700' :
+                          item.status === 'approved' ? 'bg-green-50 text-green-700' :
+                          'bg-gray-50 text-gray-600'
+                        }`}>{item.status}</span>
+                        <span className="text-[0.6rem] text-[#ccc]">{relativeTime(item.date)}</span>
+                      </div>
+                    </div>
+                  </Link>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Recent Contributions */}
-          <div className="bg-white border border-[#e8e2d8] rounded-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xs font-medium tracking-widest uppercase text-[#a58e28]">
-                Recent Contributions
-              </h2>
-              <Link href="/admin/contributions" className="text-xs text-[#a58e28] hover:text-[#1a1a1a]">
-                View all →
-              </Link>
-            </div>
-            {recentContributions.length === 0 ? (
-              <p className="text-sm text-[#999]">No contributions yet.</p>
+          {/* Recently Auto-Approved */}
+          <div className="bg-white border border-[#e8e2d8] rounded-sm p-5">
+            <h2 className="text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-[#a58e28] mb-4">
+              Recently Auto-Approved by AI
+            </h2>
+            {autoApproved.length === 0 ? (
+              <p className="text-sm text-[#999]">No auto-approved members yet.</p>
             ) : (
-              <div className="space-y-3">
-                {recentContributions.map((c: any) => (
-                  <div key={c.id} className="flex items-center justify-between">
+              <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                {autoApproved.map((item, i) => (
+                  <Link key={i} href={`/admin/members/${item.member_id}`} className="flex items-center justify-between group">
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-[#1a1a1a] truncate">
-                        {c.brand_name || 'Unknown brand'}
+                      <p className="text-xs text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors truncate">
+                        {item.member?.full_name || 'Unknown'}
                       </p>
-                      <p className="text-xs text-[#999]">
-                        {CONTRIB_LABELS[c.contribution_type] || c.contribution_type} ·{' '}
-                        {c.is_anonymous ? 'Anonymous' : c.members?.full_name || 'Unknown'}
+                      <p className="text-[0.6rem] text-[#999]">
+                        {item.member?.role} · {item.member?.maison || 'N/A'}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-sm ${
-                          c.status === 'pending'
-                            ? 'bg-yellow-50 text-yellow-700'
-                            : c.status === 'approved'
-                            ? 'bg-green-50 text-green-700'
-                            : 'bg-red-50 text-red-700'
-                        }`}
-                      >
-                        {c.status}
-                      </span>
-                      <span className="text-xs text-[#999]">{formatDate(c.created_at)}</span>
+                      <span className="w-2 h-2 rounded-full bg-[#22c55e]" title="High confidence" />
+                      <span className="text-[0.6rem] text-[#ccc]">{relativeTime(item.created_at)}</span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
           </div>
+        </div>
+
+        {/* Row 4 — Quick Actions */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Link href="/admin" className="bg-white border border-[#e8e2d8] rounded-sm p-4 hover:border-[#a58e28] transition-colors text-center">
+            <p className="text-sm font-medium text-[#1a1a1a]">Review Pending Members</p>
+            <p className="text-[0.6rem] text-[#999] mt-1">Approve or reject applications</p>
+          </Link>
+          <Link href="/admin/contributions" className="bg-white border border-[#e8e2d8] rounded-sm p-4 hover:border-[#a58e28] transition-colors text-center">
+            <p className="text-sm font-medium text-[#1a1a1a]">Review Contributions</p>
+            <p className="text-[0.6rem] text-[#999] mt-1">Approve member submissions</p>
+          </Link>
+          <Link href="/admin/assignments/new" className="bg-white border border-[#e8e2d8] rounded-sm p-4 hover:border-[#a58e28] transition-colors text-center">
+            <p className="text-sm font-medium text-[#1a1a1a]">Create Assignment</p>
+            <p className="text-[0.6rem] text-[#999] mt-1">New search assignment</p>
+          </Link>
+          <Link href="/admin/messages" className="bg-white border border-[#e8e2d8] rounded-sm p-4 hover:border-[#a58e28] transition-colors text-center">
+            <p className="text-sm font-medium text-[#1a1a1a]">Compose Message</p>
+            <p className="text-[0.6rem] text-[#999] mt-1">Send to members or clients</p>
+          </Link>
         </div>
       </div>
-    </main>
+    </div>
   )
 }

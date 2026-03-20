@@ -41,12 +41,12 @@ export default async function DashboardPage() {
     { num: '07', title: 'Invite Colleagues', desc: 'Grow the JOBLUX community with your referral link.', href: '/invite' },
   ]
 
-  // Directory access for higher tiers
-  if (hasDirectoryAccess) {
-    cards.push(
-      { num: String(cards.length + 1).padStart(2, '0'), title: 'Member Directory', desc: 'Browse and connect with luxury professionals across the network.', href: '/directory' },
-    )
-  }
+  // Directory access — hidden until launch
+  // if (hasDirectoryAccess) {
+  //   cards.push(
+  //     { num: String(cards.length + 1).padStart(2, '0'), title: 'Member Directory', desc: 'Browse and connect with luxury professionals across the network.', href: '/directory' },
+  //   )
+  // }
 
   // Senior tiers get extra cards
   if (isSenior) {

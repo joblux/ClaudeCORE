@@ -22,10 +22,11 @@ const BLACK = "#1a1a1a";
 const CREAM = "#fafaf5";
 const BORDER = "#e8e2d8";
 
-type Tab = "overview" | "experience" | "skills" | "documents" | "preferences" | "notes";
+type Tab = "overview" | "experience" | "skills" | "documents" | "preferences" | "notes" | "ai_review";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "overview", label: "Overview" },
+  { key: "ai_review", label: "AI Assessment" },
   { key: "experience", label: "Experience" },
   { key: "skills", label: "Skills" },
   { key: "documents", label: "Documents" },
@@ -178,6 +179,8 @@ export default function MemberProfilePage() {
   const [notes, setNotes] = useState("");
   const [notesSaving, setNotesSaving] = useState(false);
   const [notesSaved, setNotesSaved] = useState(false);
+  const [aiReview, setAiReview] = useState<any>(null);
+  const [reassessing, setReassessing] = useState(false);
 
   const fetchProfile = useCallback(async () => {
     setLoading(true);
@@ -215,6 +218,14 @@ export default function MemberProfilePage() {
 
       setMember(profile);
       setNotes((m as any).notes ?? "");
+
+      // Fetch AI review
+      const { data: reviewData } = await supabase
+        .from("member_ai_reviews")
+        .select("*")
+        .eq("member_id", memberId)
+        .single();
+      if (reviewData) setAiReview(reviewData);
     } catch {
       setError(true);
     }
@@ -234,6 +245,24 @@ export default function MemberProfilePage() {
     await supabase.from("members").update(update).eq("id", member.id);
     await fetchProfile();
     setActing(false);
+  };
+
+  const runAiReview = async () => {
+    if (!member) return;
+    setReassessing(true);
+    try {
+      const res = await fetch("/api/admin/members/ai-review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ member_id: member.id }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAiReview({ ...data, created_at: new Date().toISOString() });
+        if (data.auto_approved) await fetchProfile();
+      }
+    } catch {}
+    setReassessing(false);
   };
 
   const saveNotes = async () => {
@@ -260,16 +289,10 @@ export default function MemberProfilePage() {
   // ---- Data loading ----
   if (loading) {
     return (
-      <div style={{ minHeight: "100vh", background: CREAM, fontFamily: "sans-serif" }}>
-        <div style={{ background: BLACK, padding: "14px 24px" }}>
-          <span style={{ color: GOLD, fontFamily: "serif", fontSize: 18, fontWeight: 300, letterSpacing: 2 }}>JOBLUX</span>
-          <span style={{ color: "#666", fontSize: 11, letterSpacing: 3, textTransform: "uppercase", marginLeft: 10 }}>Admin</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ width: 32, height: 32, border: `2px solid ${BORDER}`, borderTopColor: GOLD, borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 16px" }} />
-            <div style={{ fontSize: 14, color: "#888" }}>Loading member profile...</div>
-          </div>
+      <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", background: CREAM, fontFamily: "sans-serif" }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ width: 32, height: 32, border: `2px solid ${BORDER}`, borderTopColor: GOLD, borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 16px" }} />
+          <div style={{ fontSize: 14, color: "#888" }}>Loading member profile...</div>
         </div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -279,33 +302,27 @@ export default function MemberProfilePage() {
   // ---- Error / not found ----
   if (error || !member) {
     return (
-      <div style={{ minHeight: "100vh", background: CREAM, fontFamily: "sans-serif" }}>
-        <div style={{ background: BLACK, padding: "14px 24px" }}>
-          <span style={{ color: GOLD, fontFamily: "serif", fontSize: 18, fontWeight: 300, letterSpacing: 2 }}>JOBLUX</span>
-          <span style={{ color: "#666", fontSize: 11, letterSpacing: 3, textTransform: "uppercase", marginLeft: 10 }}>Admin</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontFamily: "serif", fontSize: 24, color: BLACK, marginBottom: 8 }}>Member not found</div>
-            <div style={{ fontSize: 13, color: "#999", marginBottom: 24 }}>The member profile could not be loaded.</div>
-            <a
-              href="/admin"
-              style={{
-                display: "inline-block",
-                padding: "10px 28px",
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: 1.5,
-                textTransform: "uppercase",
-                background: GOLD,
-                color: "#fff",
-                textDecoration: "none",
-                border: "none",
-              }}
-            >
-              Back to Admin
-            </a>
-          </div>
+      <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", background: CREAM, fontFamily: "sans-serif" }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontFamily: "serif", fontSize: 24, color: BLACK, marginBottom: 8 }}>Member not found</div>
+          <div style={{ fontSize: 13, color: "#999", marginBottom: 24 }}>The member profile could not be loaded.</div>
+          <a
+            href="/admin"
+            style={{
+              display: "inline-block",
+              padding: "10px 28px",
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: 1.5,
+              textTransform: "uppercase",
+              background: GOLD,
+              color: "#fff",
+              textDecoration: "none",
+              border: "none",
+            }}
+          >
+            Back to Admin
+          </a>
         </div>
       </div>
     );
@@ -316,13 +333,9 @@ export default function MemberProfilePage() {
 
   return (
     <div style={{ minHeight: "100vh", background: CREAM, fontFamily: "sans-serif" }}>
-      {/* Top bar */}
-      <div style={{ background: BLACK, padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ color: GOLD, fontFamily: "serif", fontSize: 18, fontWeight: 300, letterSpacing: 2 }}>JOBLUX</span>
-          <span style={{ color: "#666", fontSize: 11, letterSpacing: 3, textTransform: "uppercase" }}>Admin</span>
-        </div>
-        <a href="/admin" style={{ color: "#888", fontSize: 11, textDecoration: "none", letterSpacing: 1, textTransform: "uppercase" }}>
+      {/* Back link */}
+      <div style={{ padding: "16px 32px 0" }}>
+        <a href="/admin" style={{ fontSize: 12, color: GOLD, textDecoration: "none", letterSpacing: 0.5 }}>
           &larr; Back to Members
         </a>
       </div>
@@ -465,6 +478,13 @@ export default function MemberProfilePage() {
       {/* Tab content */}
       <div style={{ padding: "24px 32px", maxWidth: 960, margin: "0 auto" }}>
         {activeTab === "overview" && <OverviewTab member={member} />}
+        {activeTab === "ai_review" && (
+          <AIReviewTab
+            review={aiReview}
+            reassessing={reassessing}
+            onReassess={runAiReview}
+          />
+        )}
         {activeTab === "experience" && <ExperienceTab member={member} />}
         {activeTab === "skills" && <SkillsTab member={member} />}
         {activeTab === "documents" && <DocumentsTab member={member} />}
@@ -1021,6 +1041,128 @@ function NotesTab({
             <span style={{ fontSize: 12, color: "#2e7d32", fontWeight: 500 }}>Notes saved.</span>
           )}
         </div>
+      </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Tab: AI Assessment
+// ---------------------------------------------------------------------------
+
+function AIReviewTab({
+  review,
+  reassessing,
+  onReassess,
+}: {
+  review: any;
+  reassessing: boolean;
+  onReassess: () => void;
+}) {
+  const confidenceColors: Record<string, { bg: string; fg: string }> = {
+    high: { bg: "#dcfce7", fg: "#22c55e" },
+    medium: { bg: "#fef3c7", fg: "#f59e0b" },
+    low: { bg: "#fee2e2", fg: "#ef4444" },
+  };
+
+  return (
+    <>
+      <SectionLabel>AI Smart Review</SectionLabel>
+      <div style={{ background: "#fff", border: `1px solid ${BORDER}`, padding: "24px 28px", marginBottom: 20 }}>
+        {review ? (
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: "50%",
+                    backgroundColor: confidenceColors[review.confidence]?.fg || "#999",
+                    display: "inline-block",
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    letterSpacing: 1,
+                    textTransform: "uppercase",
+                    padding: "4px 10px",
+                    background: confidenceColors[review.confidence]?.bg || "#f5f5f5",
+                    color: confidenceColors[review.confidence]?.fg || "#999",
+                    borderRadius: 2,
+                  }}
+                >
+                  {review.confidence} confidence
+                </span>
+              </div>
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 500,
+                  letterSpacing: 1,
+                  textTransform: "uppercase",
+                  color: review.recommendation === "approve" ? "#22c55e" : GOLD,
+                }}
+              >
+                Recommend: {review.recommendation}
+              </span>
+            </div>
+
+            <InfoRow label="Reasoning" value={review.reasoning} />
+            <InfoRow label="Auto-Approved" value={review.auto_approved ? "Yes" : "No"} />
+            <InfoRow label="Model" value={review.model_used || "claude-sonnet-4-20250514"} />
+            <InfoRow
+              label="Assessed At"
+              value={review.created_at ? new Date(review.created_at).toLocaleString() : "—"}
+            />
+
+            <div style={{ marginTop: 20 }}>
+              <button
+                onClick={onReassess}
+                disabled={reassessing}
+                style={{
+                  padding: "8px 20px",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: 1.5,
+                  textTransform: "uppercase",
+                  background: reassessing ? "#eee" : "#fff",
+                  color: BLACK,
+                  border: `1px solid ${BORDER}`,
+                  cursor: reassessing ? "wait" : "pointer",
+                }}
+              >
+                {reassessing ? "Re-assessing..." : "Re-assess"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div style={{ textAlign: "center", padding: "20px 0" }}>
+            <p style={{ fontSize: 13, color: "#999", marginBottom: 16 }}>
+              No AI assessment has been run for this member yet.
+            </p>
+            <button
+              onClick={onReassess}
+              disabled={reassessing}
+              style={{
+                padding: "10px 28px",
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: 1.5,
+                textTransform: "uppercase",
+                background: GOLD,
+                color: "#fff",
+                border: "none",
+                cursor: reassessing ? "wait" : "pointer",
+                opacity: reassessing ? 0.6 : 1,
+              }}
+            >
+              {reassessing ? "Running AI Review..." : "Run AI Review"}
+            </button>
+          </div>
+        )}
       </div>
     </>
   );
