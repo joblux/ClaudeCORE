@@ -105,6 +105,28 @@ export async function PUT(
           .eq('id', contribution.member_id)
       }
 
+      // Smart refresh: if this is a wikilux_insight, check if brand page needs regeneration
+      if (contribution.contribution_type === 'wikilux_insight' && contribution.brand_slug) {
+        const { data: brandContent } = await supabase
+          .from('wikilux_content')
+          .select('last_regenerated_at, updated_at')
+          .eq('slug', contribution.brand_slug)
+          .single()
+
+        if (brandContent) {
+          const lastRegen = brandContent.last_regenerated_at || brandContent.updated_at
+          const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+          if (!lastRegen || new Date(lastRegen).getTime() < sevenDaysAgo) {
+            // Trigger background regeneration (fire-and-forget)
+            fetch(`${process.env.NEXTAUTH_URL || 'https://www.luxuryrecruiter.com'}/api/wikilux/regenerate`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ slug: contribution.brand_slug }),
+            }).catch(() => {})
+          }
+        }
+      }
+
       return NextResponse.json({
         success: true,
         message: `Contribution approved. ${points} points awarded.`,

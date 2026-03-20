@@ -21,11 +21,11 @@ export async function POST(req: Request) {
   // Check cache first
   const { data: cached } = await supabaseAdmin
     .from("wikilux_content")
-    .select("content")
+    .select("content, updated_at, editorial_notes")
     .eq("slug", slug)
     .single();
 
-  if (cached) return NextResponse.json({ content: cached.content, cached: true });
+  if (cached) return NextResponse.json({ content: cached.content, cached: true, updated_at: cached.updated_at, editorial_notes: cached.editorial_notes });
 
   // Generate with Claude
   const message = await anthropic.messages.create({
