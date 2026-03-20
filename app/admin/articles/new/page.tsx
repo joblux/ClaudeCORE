@@ -6,13 +6,14 @@ import Link from 'next/link'
 import { useRequireAdmin } from '@/lib/auth-hooks'
 
 const CATEGORIES = [
-  { value: 'bloglux', label: 'Bloglux' },
-  { value: 'interview', label: 'Interview' },
-  { value: 'career', label: 'Career' },
-  { value: 'markets', label: 'Markets' },
-  { value: 'industry', label: 'Industry' },
-  { value: 'travel', label: 'Travel' },
-  { value: 'salary', label: 'Salary' },
+  { value: 'industry-news', label: 'Industry News' },
+  { value: 'career-intelligence', label: 'Career Intelligence' },
+  { value: 'maison-profiles', label: 'Maison Profiles' },
+  { value: 'salary-compensation', label: 'Salary & Compensation' },
+  { value: 'interview-insights', label: 'Interview Insights' },
+  { value: 'market-trends', label: 'Market Trends' },
+  { value: 'lifestyle-culture', label: 'Lifestyle & Culture' },
+  { value: 'joblux-view', label: 'The JOBLUX View' },
 ]
 
 type ImportTab = 'write' | 'url' | 'wordpress' | 'csv' | 'paste' | 'markdown'
@@ -41,8 +42,10 @@ export default function NewArticlePage() {
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<ImportTab>('write')
   const [form, setForm] = useState({
-    title: '', category: 'bloglux', author_name: 'JOBLUX Editorial',
+    title: '', category: 'industry-news', author_name: 'Mohammed M\'zaour',
     excerpt: '', tags: '', content: '', cover_image: '', published: false,
+    hero_image_url: '', hero_image_alt: '', meta_description: '', is_featured: false,
+    author_title: 'Founder, JOBLUX',
   })
 
   // Import states

@@ -15,7 +15,9 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 
   const body = await req.json();
-  const { title, excerpt, content, category, author_name, cover_image, published, tags } = body;
+  const { title, excerpt, content, category, author_name, cover_image, published, tags,
+    hero_image_url, hero_image_alt, hero_image_caption, hero_image_source,
+    author_title, author_avatar_url, is_featured, meta_description, og_image_url } = body;
 
   const read_time = content ? Math.max(1, Math.round(content.split(/\s+/).length / 200)) : undefined;
 
@@ -35,6 +37,15 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
   if (tags !== undefined) updateData.tags = tags;
   if (read_time !== undefined) updateData.read_time = read_time;
+  if (hero_image_url !== undefined) updateData.hero_image_url = hero_image_url?.trim() || null;
+  if (hero_image_alt !== undefined) updateData.hero_image_alt = hero_image_alt?.trim() || null;
+  if (hero_image_caption !== undefined) updateData.hero_image_caption = hero_image_caption?.trim() || null;
+  if (hero_image_source !== undefined) updateData.hero_image_source = hero_image_source || null;
+  if (author_title !== undefined) updateData.author_title = author_title?.trim() || null;
+  if (author_avatar_url !== undefined) updateData.author_avatar_url = author_avatar_url?.trim() || null;
+  if (is_featured !== undefined) updateData.is_featured = !!is_featured;
+  if (meta_description !== undefined) updateData.meta_description = meta_description?.trim() || null;
+  if (og_image_url !== undefined) updateData.og_image_url = og_image_url?.trim() || null;
 
   const { data, error } = await supabaseAdmin
     .from("articles")

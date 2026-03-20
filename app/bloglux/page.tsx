@@ -1,15 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@supabase/supabase-js'
+import { BLOGLUX_CATEGORIES, getCategoryLabel } from '@/lib/bloglux-options'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
-
-const categories = ['All', 'Fashion', 'Watches', 'Hospitality', 'Career', 'Markets', 'Industry']
 
 interface Article {
   id: string
@@ -21,17 +22,31 @@ interface Article {
   published_at: string | null
   read_time: number | null
   tags: string[]
+  hero_image_url: string | null
+  hero_image_alt: string | null
+  is_featured: boolean
+  views_count: number | null
 }
 
 export default function BlogluxPage() {
+  return (
+    <Suspense fallback={<div className="jl-container py-20 text-center"><div className="inline-block w-8 h-8 border-2 border-[#e8e2d8] border-t-[#a58e28] rounded-full animate-spin" /></div>}>
+      <BlogluxContent />
+    </Suspense>
+  )
+}
+
+function BlogluxContent() {
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeCategory, setActiveCategory] = useState('All')
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const activeCategory = searchParams.get('category') || 'All'
 
   useEffect(() => {
     supabase
       .from('articles')
-      .select('id, title, slug, excerpt, category, author_name, published_at, read_time, tags')
+      .select('id, title, slug, excerpt, category, author_name, published_at, read_time, tags, hero_image_url, hero_image_alt, is_featured, views_count')
       .eq('published', true)
       .order('published_at', { ascending: false })
       .then(({ data }) => {
@@ -40,17 +55,35 @@ export default function BlogluxPage() {
       })
   }, [])
 
+  const handleCategoryChange = (cat: string) => {
+    if (cat === 'All') {
+      router.push('/bloglux')
+    } else {
+      router.push(`/bloglux?category=${encodeURIComponent(cat)}`)
+    }
+  }
+
   const filtered = activeCategory === 'All'
     ? articles
-    : articles.filter((a) => a.category.toLowerCase() === activeCategory.toLowerCase())
+    : articles.filter((a) => a.category === activeCategory)
+
+  // Determine the featured/hero article
+  const featuredArticle = filtered.find((a) => a.is_featured) || filtered[0] || null
+  const remainingArticles = filtered.filter((a) => a.id !== featuredArticle?.id)
 
   const formatDate = (d: string | null) => {
     if (!d) return ''
     return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
   }
 
+  const truncate = (text: string, max: number) => {
+    if (text.length <= max) return text
+    return text.slice(0, max).trimEnd() + '...'
+  }
+
   return (
     <div>
+      {/* Page header */}
       <div className="border-b-2 border-[#1a1a1a] py-10">
         <div className="jl-container">
           <div className="jl-overline-gold mb-3">Bloglux</div>
@@ -64,20 +97,29 @@ export default function BlogluxPage() {
       </div>
 
       <div className="jl-container py-10">
-
-        {/* Category pills */}
+        {/* Category filter pills */}
         <div className="flex items-center gap-2 mb-8 flex-wrap">
-          {categories.map((cat) => (
+          <button
+            onClick={() => handleCategoryChange('All')}
+            className={`font-sans text-[0.65rem] font-medium tracking-wider uppercase px-3 py-1.5 border transition-colors ${
+              activeCategory === 'All'
+                ? 'border-[#a58e28] text-[#a58e28]'
+                : 'border-[#e8e2d8] text-[#888] hover:border-[#aaa] hover:text-[#555]'
+            }`}
+          >
+            All
+          </button>
+          {BLOGLUX_CATEGORIES.map((cat) => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
+              key={cat.value}
+              onClick={() => handleCategoryChange(cat.value)}
               className={`font-sans text-[0.65rem] font-medium tracking-wider uppercase px-3 py-1.5 border transition-colors ${
-                activeCategory === cat
+                activeCategory === cat.value
                   ? 'border-[#a58e28] text-[#a58e28]'
                   : 'border-[#e8e2d8] text-[#888] hover:border-[#aaa] hover:text-[#555]'
               }`}
             >
-              {cat}
+              {cat.label}
             </button>
           ))}
         </div>
@@ -92,34 +134,106 @@ export default function BlogluxPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((article) => (
+          <>
+            {/* Featured hero section */}
+            {featuredArticle && (
               <Link
-                key={article.id}
-                href={`/bloglux/${article.slug}`}
-                className="jl-card group flex flex-col"
+                href={`/bloglux/${featuredArticle.slug}`}
+                className="block mb-10 group"
               >
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="jl-overline-gold">{article.category}</span>
-                  {article.read_time && (
-                    <span className="font-sans text-[0.6rem] text-[#bbb]">{article.read_time} min read</span>
+                <div className="relative w-full aspect-[16/7] overflow-hidden">
+                  {featuredArticle.hero_image_url ? (
+                    <>
+                      <Image
+                        src={featuredArticle.hero_image_url}
+                        alt={featuredArticle.hero_image_alt || featuredArticle.title}
+                        fill
+                        className="object-cover"
+                        priority
+                      />
+                      <div className="absolute inset-0 bg-black/45" />
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 bg-[#1a1a1a]" />
                   )}
-                </div>
-                <h2 className="jl-serif text-lg font-light text-[#1a1a1a] mb-2 group-hover:text-[#a58e28] transition-colors leading-snug">
-                  {article.title}
-                </h2>
-                {article.excerpt && (
-                  <p className="font-sans text-xs text-[#888] leading-relaxed mb-4 flex-1">
-                    {article.excerpt}
-                  </p>
-                )}
-                <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#f0ece4]">
-                  <span className="font-sans text-[0.6rem] text-[#aaa]">{article.author_name}</span>
-                  <span className="font-sans text-[0.6rem] text-[#aaa]">{formatDate(article.published_at)}</span>
+                  <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-10">
+                    <span className="jl-badge bg-[#a58e28] text-white text-[0.6rem] uppercase tracking-widest px-3 py-1 w-fit mb-3">
+                      {getCategoryLabel(featuredArticle.category)}
+                    </span>
+                    <h2
+                      className="jl-serif text-2xl md:text-4xl lg:text-5xl font-light text-white mb-3 leading-tight max-w-3xl group-hover:text-[#d4c06a] transition-colors"
+                      style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
+                      {featuredArticle.title}
+                    </h2>
+                    {featuredArticle.excerpt && (
+                      <p className="font-sans text-sm text-white/80 max-w-2xl mb-4 leading-relaxed">
+                        {featuredArticle.excerpt}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-4 text-white/60 font-sans text-[0.65rem] tracking-wide">
+                      <span>{featuredArticle.author_name}</span>
+                      {featuredArticle.read_time && (
+                        <span>{featuredArticle.read_time} min read</span>
+                      )}
+                      <span>{formatDate(featuredArticle.published_at)}</span>
+                    </div>
+                  </div>
                 </div>
               </Link>
-            ))}
-          </div>
+            )}
+
+            {/* Article grid */}
+            {remainingArticles.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {remainingArticles.map((article) => (
+                  <Link
+                    key={article.id}
+                    href={`/bloglux/${article.slug}`}
+                    className="jl-card group flex flex-col overflow-hidden"
+                  >
+                    {/* Thumbnail */}
+                    <div className="relative w-full aspect-[16/9] overflow-hidden mb-4">
+                      {article.hero_image_url ? (
+                        <Image
+                          src={article.hero_image_url}
+                          alt={article.hero_image_alt || article.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-[#f5f0e8]" />
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex flex-col flex-1 px-1">
+                      <span className="jl-badge text-[0.6rem] uppercase tracking-widest text-[#a58e28] border border-[#a58e28] px-2 py-0.5 w-fit mb-3">
+                        {getCategoryLabel(article.category)}
+                      </span>
+                      <h3 className="jl-serif text-lg font-light text-[#1a1a1a] mb-2 group-hover:text-[#a58e28] transition-colors leading-snug">
+                        {article.title}
+                      </h3>
+                      {article.excerpt && (
+                        <p className="font-sans text-xs text-[#888] leading-relaxed mb-4 flex-1">
+                          {truncate(article.excerpt, 120)}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#f0ece4]">
+                        <span className="font-sans text-[0.6rem] text-[#aaa]">{article.author_name}</span>
+                        <div className="flex items-center gap-3">
+                          {article.read_time && (
+                            <span className="font-sans text-[0.6rem] text-[#bbb]">{article.read_time} min read</span>
+                          )}
+                          <span className="font-sans text-[0.6rem] text-[#aaa]">{formatDate(article.published_at)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

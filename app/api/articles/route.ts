@@ -32,7 +32,9 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { title, excerpt, content, category, author_name, cover_image, published, tags } = body;
+  const { title, excerpt, content, category, author_name, cover_image, published, tags,
+    hero_image_url, hero_image_alt, hero_image_caption, hero_image_source,
+    author_title, author_avatar_url, is_featured, meta_description, og_image_url } = body;
 
   if (!title?.trim() || !content?.trim()) {
     return NextResponse.json({ error: "title and content are required" }, { status: 400 });
@@ -40,6 +42,7 @@ export async function POST(req: Request) {
 
   const slug = slugify(title);
   const read_time = Math.max(1, Math.round(content.split(/\s+/).length / 200));
+  const autoMeta = meta_description?.trim() || content.trim().slice(0, 155);
 
   const { data, error } = await supabaseAdmin
     .from("articles")
@@ -48,13 +51,22 @@ export async function POST(req: Request) {
       slug,
       excerpt: excerpt?.trim() || null,
       content: content.trim(),
-      category: category || "bloglux",
-      author_name: author_name?.trim() || "JOBLUX Editorial",
-      cover_image: cover_image?.trim() || null,
+      category: category || "industry-news",
+      author_name: author_name?.trim() || "Mohammed M'zaour",
+      cover_image: cover_image?.trim() || hero_image_url?.trim() || null,
       published: !!published,
       published_at: published ? new Date().toISOString() : null,
       read_time,
       tags: tags || [],
+      hero_image_url: hero_image_url?.trim() || null,
+      hero_image_alt: hero_image_alt?.trim() || null,
+      hero_image_caption: hero_image_caption?.trim() || null,
+      hero_image_source: hero_image_source || null,
+      author_title: author_title?.trim() || 'Founder, JOBLUX',
+      author_avatar_url: author_avatar_url?.trim() || null,
+      is_featured: !!is_featured,
+      meta_description: autoMeta,
+      og_image_url: og_image_url?.trim() || null,
     })
     .select()
     .single();
