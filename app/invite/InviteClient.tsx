@@ -60,7 +60,7 @@ export default function InviteClient() {
                 />
                 <button
                   onClick={handleCopy}
-                  className="px-5 bg-[#1a1a1a] text-[#a58e28] font-sans text-[0.65rem] font-bold tracking-widest uppercase hover:bg-[#000] transition-colors flex-shrink-0"
+                  className="px-5 bg-[#1a1a1a] text-[#a58e28] font-sans text-[0.65rem] font-bold tracking-widest uppercase hover:bg-[#111111] transition-colors flex-shrink-0"
                 >
                   {copied ? 'Copied!' : 'Copy Link'}
                 </button>

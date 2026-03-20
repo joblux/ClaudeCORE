@@ -32,7 +32,7 @@ export function wrapInEmailTemplate({
         <!-- Header -->
         <tr><td style="background:#1a1a1a;padding:20px 32px;text-align:center;">
           <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;color:#a58e28;letter-spacing:3px;">JOBLUX</div>
-          <div style="font-size:9px;color:#666;letter-spacing:3px;margin-top:2px;text-transform:uppercase;">Luxury Talents Intelligence</div>
+          <div style="font-size:9px;color:#666;letter-spacing:3px;margin-top:2px;text-transform:uppercase;">Luxury Talents Society</div>
         </td></tr>
         <!-- Body -->
         <tr><td style="padding:32px;">
@@ -43,7 +43,7 @@ export function wrapInEmailTemplate({
         </td></tr>
         <!-- Footer -->
         <tr><td style="padding:20px 32px;border-top:1px solid #e8e2d8;text-align:center;">
-          <p style="font-size:11px;color:#999;margin:0;">This message was sent via JOBLUX — Luxury Talents Intelligence</p>
+          <p style="font-size:11px;color:#999;margin:0;">This message was sent via JOBLUX — Luxury Talents Society</p>
           <p style="font-size:10px;color:#bbb;margin:4px 0 0;">Paris · London · Dubai · Singapore</p>
         </td></tr>
       </table>

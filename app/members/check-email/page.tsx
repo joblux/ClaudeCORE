@@ -11,7 +11,7 @@ export default function CheckEmailPage() {
             JOBLUX
           </h1>
           <p className="text-[11px] text-[#a58e28] tracking-[4px] uppercase mt-1">
-            Luxury Talents Intelligence
+            Luxury Talents Society
           </p>
         </div>
 

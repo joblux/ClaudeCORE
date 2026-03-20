@@ -255,8 +255,8 @@ a {
   }
 
   .jl-btn-primary:hover {
-    background: #000;
-    border-color: #000;
+    background: #111111;
+    border-color: #111111;
   }
 
   .jl-btn-gold {
@@ -334,7 +334,7 @@ a {
   }
 
   .jl-search button:hover {
-    background: #000;
+    background: #111111;
   }
 
   /* ── CARDS ────────────────────────────────────────── */

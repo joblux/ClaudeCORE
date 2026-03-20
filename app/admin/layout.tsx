@@ -7,7 +7,7 @@ import { useRequireAdmin } from '@/lib/auth-hooks'
 import {
   LayoutDashboard, BarChart3, Briefcase, Kanban, MessageSquare,
   Users, Star, Send, FileText, BookOpen, DollarSign, FileCode,
-  Menu, X, LogOut
+  Menu, X, LogOut, Power
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
@@ -55,6 +55,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [counts, setCounts] = useState<Record<string, number>>({})
+  const [maintenanceMode, setMaintenanceMode] = useState(false)
+  const [maintenanceLoading, setMaintenanceLoading] = useState(false)
 
   // Fetch counts for badges (unread messages, pending contributions)
   useEffect(() => {
@@ -62,7 +64,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       .then(r => r.ok ? r.json() : {})
       .then(data => setCounts(data))
       .catch(() => {})
+    // Fetch maintenance mode status
+    fetch('/api/admin/maintenance')
+      .then(r => r.ok ? r.json() : {})
+      .then((data: any) => { if (data.maintenance_mode !== undefined) setMaintenanceMode(data.maintenance_mode) })
+      .catch(() => {})
   }, [])
+
+  const toggleMaintenance = async () => {
+    setMaintenanceLoading(true)
+    try {
+      const res = await fetch('/api/admin/maintenance', { method: 'POST' })
+      const data = await res.json()
+      if (data.maintenance_mode !== undefined) setMaintenanceMode(data.maintenance_mode)
+    } catch {}
+    setMaintenanceLoading(false)
+  }
 
   if (isLoading) {
     return (
@@ -126,6 +143,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         ))}
       </nav>
+
+      {/* Offline Mode Toggle */}
+      <div className="px-4 py-3 border-t border-[#2a2a2a]">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Power size={14} className={maintenanceMode ? 'text-red-400' : 'text-green-400'} />
+            <span className="text-[0.65rem] text-[#999] uppercase tracking-wider">
+              {maintenanceMode ? 'Offline' : 'Live'}
+            </span>
+          </div>
+          <button
+            onClick={toggleMaintenance}
+            disabled={maintenanceLoading}
+            className={`relative w-9 h-5 rounded-full transition-colors ${
+              maintenanceMode ? 'bg-red-500/60' : 'bg-green-500/60'
+            } ${maintenanceLoading ? 'opacity-50' : ''}`}
+            title={maintenanceMode ? 'Site is offline — click to go live' : 'Site is live — click to go offline'}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                maintenanceMode ? 'translate-x-4' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
+      </div>
 
       {/* Bottom -- admin info + exit */}
       <div className="px-4 py-4 border-t border-[#2a2a2a]">

@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 
 export default function UserMenu() {
-  const { isAuthenticated, isLoading, name, firstName, image, isAdmin, isApproved } =
+  const { isAuthenticated, isLoading, name, firstName, image, isApproved } =
     useMember();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -89,24 +89,6 @@ export default function UserMenu() {
               >
                 Invite
               </Link>
-            </>
-          )}
-          {isAdmin && (
-            <>
-            <Link
-              href="/admin/dashboard"
-              onClick={() => setOpen(false)}
-              className="block px-4 py-2 text-sm text-[#a58e28] hover:bg-[#f5f4f0] transition-colors"
-            >
-              Command Centre
-            </Link>
-            <Link
-              href="/admin"
-              onClick={() => setOpen(false)}
-              className="block px-4 py-2 text-sm text-[#a58e28] hover:bg-[#f5f4f0] transition-colors"
-            >
-              Members
-            </Link>
             </>
           )}
           <div className="border-t border-[#e8e6df] my-1" />

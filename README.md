@@ -1,4 +1,4 @@
-# JOBLUX — Luxury Talents Intelligence
+# JOBLUX — Luxury Talents Society
 
 > The private intelligence platform for luxury industry professionals.
 > Est. Paris 2006 · Paris · London · New York · Dubai · Singapore
@@ -216,4 +216,4 @@ For code questions and updates — continue the conversation with Claude.
 
 ---
 
-*JOBLUX — Luxury Talents Intelligence — Est. Paris 2006*
+*JOBLUX — Luxury Talents Society — Est. Paris 2006*

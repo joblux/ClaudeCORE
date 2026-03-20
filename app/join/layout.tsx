@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Join JOBLUX — Luxury Talents Intelligence",
+  title: "Join JOBLUX — Luxury Talents Society",
   description:
     "Join the intelligence platform for luxury professionals. Free access to salary data, brand insights, and executive positions across 150+ maisons.",
   openGraph: {
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
         url: "https://www.luxuryrecruiter.com/og-image.png",
         width: 1200,
         height: 630,
-        alt: "JOBLUX — Luxury Talents Intelligence",
+        alt: "JOBLUX — Luxury Talents Society",
       },
     ],
   },

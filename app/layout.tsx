@@ -16,12 +16,12 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "JOBLUX — Luxury Talents Intelligence",
+  title: "JOBLUX — Luxury Talents Society",
   description:
     "The intelligence platform for luxury professionals. Salary data, brand insights, executive search, and career intelligence across 150+ maisons. Free against contribution — no ads, no noise.",
   icons: { icon: '/favicon.svg' },
   openGraph: {
-    title: "JOBLUX — Luxury Talents Intelligence",
+    title: "JOBLUX — Luxury Talents Society",
     description: "The intelligence platform for luxury professionals. Salary data, brand insights, executive search across 150+ maisons.",
     url: "https://www.luxuryrecruiter.com",
     siteName: "JOBLUX",
@@ -32,13 +32,13 @@ export const metadata: Metadata = {
         url: "https://www.luxuryrecruiter.com/og-image.png",
         width: 1200,
         height: 630,
-        alt: "JOBLUX — Luxury Talents Intelligence",
+        alt: "JOBLUX — Luxury Talents Society",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "JOBLUX — Luxury Talents Intelligence",
+    title: "JOBLUX — Luxury Talents Society",
     description: "The intelligence platform for luxury professionals.",
     images: ["https://www.luxuryrecruiter.com/og-image.png"],
   },

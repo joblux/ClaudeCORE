@@ -37,7 +37,7 @@ export async function GET() {
             textTransform: 'uppercase',
           }}
         >
-          Luxury Talents Intelligence
+          Luxury Talents Society
         </div>
         <div
           style={{
