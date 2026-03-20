@@ -55,6 +55,12 @@ export default function AdminPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [acting, setActing] = useState<Set<string>>(new Set());
 
+  // Maintenance mode state
+  const [maintenanceOn, setMaintenanceOn] = useState(false);
+  const [maintenanceLoading, setMaintenanceLoading] = useState(true);
+  const [toggling, setToggling] = useState(false);
+  const [showMaintenanceConfirm, setShowMaintenanceConfirm] = useState(false);
+
   const displayName = (m: Member) =>
     m.full_name || [m.first_name, m.last_name].filter(Boolean).join(" ") || m.email;
 
@@ -83,6 +89,36 @@ export default function AdminPage() {
     });
   }, []);
 
+  const fetchMaintenance = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/maintenance");
+      const data = await res.json();
+      setMaintenanceOn(data.maintenance_mode);
+    } catch {
+      // ignore
+    } finally {
+      setMaintenanceLoading(false);
+    }
+  }, []);
+
+  const toggleMaintenance = async () => {
+    setToggling(true);
+    try {
+      const res = await fetch("/api/admin/maintenance", { method: "POST" });
+      const data = await res.json();
+      if (data.error) {
+        alert("Failed to toggle: " + data.error);
+      } else {
+        setMaintenanceOn(data.maintenance_mode);
+      }
+    } catch {
+      alert("Failed to toggle maintenance mode");
+    } finally {
+      setToggling(false);
+      setShowMaintenanceConfirm(false);
+    }
+  };
+
   const fetchMembers = useCallback(async () => {
     setLoading(true);
     let query = supabase
@@ -108,7 +144,8 @@ export default function AdminPage() {
     if (!isAdmin) return;
     fetchCounts();
     fetchMembers();
-  }, [isAdmin, fetchCounts, fetchMembers]);
+    fetchMaintenance();
+  }, [isAdmin, fetchCounts, fetchMembers, fetchMaintenance]);
 
   useEffect(() => { setPage(0); setSelected(new Set()); }, [search, statusFilter, roleFilter]);
 
@@ -172,6 +209,55 @@ export default function AdminPage() {
           <a href="/admin/messages" style={{ color: "#888", fontSize: 11, textDecoration: "none", letterSpacing: 1, textTransform: "uppercase" }}>Messages</a>
           <a href="/dashboard" style={{ color: "#888", fontSize: 11, textDecoration: "none", letterSpacing: 1, textTransform: "uppercase" }}>&larr; Dashboard</a>
         </div>
+      </div>
+
+      {/* Maintenance mode bar */}
+      <div style={{
+        background: maintenanceOn ? "#2a2208" : "#0a1a0a",
+        borderBottom: `1px solid ${maintenanceOn ? "#3d3010" : "#1a331a"}`,
+        padding: "10px 24px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            background: maintenanceOn ? GOLD : "#22c55e",
+            boxShadow: maintenanceOn ? `0 0 6px ${GOLD}80` : "0 0 6px #22c55e80",
+            animation: maintenanceOn ? "maintenance-pulse 2s ease-in-out infinite" : "none",
+          }} />
+          <span style={{
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: 2,
+            textTransform: "uppercase",
+            color: maintenanceOn ? GOLD : "#22c55e",
+          }}>
+            {maintenanceLoading ? "Loading..." : maintenanceOn ? "SITE OFFLINE" : "SITE LIVE"}
+          </span>
+        </div>
+        <button
+          onClick={() => setShowMaintenanceConfirm(true)}
+          disabled={maintenanceLoading || toggling}
+          style={{
+            padding: "5px 14px",
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: 1,
+            textTransform: "uppercase",
+            fontFamily: "sans-serif",
+            background: maintenanceOn ? "#22c55e" : GOLD,
+            color: maintenanceOn ? "#fff" : BLACK,
+            border: "none",
+            cursor: maintenanceLoading || toggling ? "not-allowed" : "pointer",
+            opacity: maintenanceLoading || toggling ? 0.5 : 1,
+          }}
+        >
+          {toggling ? "Updating..." : maintenanceOn ? "Go Live" : "Go Offline"}
+        </button>
       </div>
 
       {/* Analytics strip */}
@@ -380,6 +466,80 @@ export default function AdminPage() {
           </div>
         </div>
       </div>
+
+      {/* Maintenance confirmation dialog */}
+      {showMaintenanceConfirm && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 999,
+          }}
+          onClick={() => setShowMaintenanceConfirm(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ background: "#fff", border: "1px solid #e8e2d8", padding: "28px", maxWidth: "420px", width: "90%" }}
+          >
+            <h3 style={{ fontFamily: "serif", fontSize: 18, fontWeight: 400, color: BLACK, marginTop: 0 }}>
+              {maintenanceOn ? "Go Live?" : "Go Offline?"}
+            </h3>
+            <p style={{ fontSize: 13, color: "#666", lineHeight: 1.6 }}>
+              {maintenanceOn
+                ? "This will make the site live again. All visitors will see the full site."
+                : "This will show the offline page to all visitors. Admins will still have access. Continue?"}
+            </p>
+            <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
+              <button
+                onClick={() => setShowMaintenanceConfirm(false)}
+                style={{
+                  flex: 1,
+                  padding: "8px",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: 1,
+                  textTransform: "uppercase",
+                  background: "#fff",
+                  color: "#888",
+                  border: "1px solid #ddd",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={toggleMaintenance}
+                disabled={toggling}
+                style={{
+                  flex: 1,
+                  padding: "8px",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: 1,
+                  textTransform: "uppercase",
+                  background: maintenanceOn ? "#22c55e" : GOLD,
+                  color: maintenanceOn ? "#fff" : BLACK,
+                  border: "none",
+                  cursor: toggling ? "not-allowed" : "pointer",
+                }}
+              >
+                {toggling ? "Updating..." : "Confirm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes maintenance-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
+        }
+      `}} />
     </div>
   );
 }
