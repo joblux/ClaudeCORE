@@ -424,6 +424,20 @@ export default function ProfileClient({ email }: { email: string }) {
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // ── Photo Upload ───────────────────────────────────────────────
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const avatarInputRef = useRef<HTMLInputElement>(null)
+
+  // ── Résumé Settings ────────────────────────────────────────────
+  const [resumePublic, setResumePublic] = useState(false)
+  const [resumeSlug, setResumeSlug] = useState<string | null>(null)
+  const [resumeHeadline, setResumeHeadline] = useState('')
+  const [resumeShowEmail, setResumeShowEmail] = useState(false)
+  const [resumeShowPhone, setResumeShowPhone] = useState(false)
+  const [savingResume, setSavingResume] = useState(false)
+  const [resumeCopied, setResumeCopied] = useState(false)
+
   // ══════════════════════════════════════════════════════════════════
   // Toast helper
   // ══════════════════════════════════════════════════════════════════
@@ -489,6 +503,9 @@ export default function ProfileClient({ email }: { email: string }) {
           setDesiredLocations(m.desired_locations || [])
           setDesiredContractTypes(m.desired_contract_types || [])
           setDesiredDepartments(m.desired_departments || [])
+
+          // Avatar
+          setAvatarUrl((m as any).avatar_url || null)
         }
 
         // Related records
@@ -504,7 +521,66 @@ export default function ProfileClient({ email }: { email: string }) {
     }
 
     load()
+
+    // Load résumé settings
+    fetch('/api/members/resume').then(r => r.json()).then(data => {
+      if (data.resume_slug !== undefined) setResumeSlug(data.resume_slug)
+      if (data.resume_public !== undefined) setResumePublic(data.resume_public)
+      if (data.resume_headline !== undefined) setResumeHeadline(data.resume_headline || '')
+      if (data.resume_show_email !== undefined) setResumeShowEmail(data.resume_show_email)
+      if (data.resume_show_phone !== undefined) setResumeShowPhone(data.resume_show_phone)
+    }).catch(() => {})
   }, [email])
+
+  // ══════════════════════════════════════════════════════════════════
+  // Avatar Upload
+  // ══════════════════════════════════════════════════════════════════
+
+  const handleAvatarUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) { showToast('Max 5MB'); return }
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { showToast('JPG, PNG or WebP only'); return }
+    setUploadingAvatar(true)
+    const form = new FormData()
+    form.append('file', file)
+    try {
+      const res = await fetch('/api/members/avatar', { method: 'POST', body: form })
+      const data = await res.json()
+      if (data.avatar_url) { setAvatarUrl(data.avatar_url); showToast('Photo uploaded') }
+    } catch { showToast('Upload failed') }
+    setUploadingAvatar(false)
+  }
+
+  const handleRemoveAvatar = async () => {
+    await fetch('/api/members/avatar', { method: 'DELETE' })
+    setAvatarUrl(null)
+    showToast('Photo removed')
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  // Résumé Settings
+  // ══════════════════════════════════════════════════════════════════
+
+  const handleSaveResume = async () => {
+    setSavingResume(true)
+    try {
+      const res = await fetch('/api/members/resume', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          resume_public: resumePublic,
+          resume_headline: resumeHeadline,
+          resume_show_email: resumeShowEmail,
+          resume_show_phone: resumeShowPhone,
+        }),
+      })
+      const data = await res.json()
+      if (data.resume_slug) setResumeSlug(data.resume_slug)
+      showToast('Résumé settings saved')
+    } catch { showToast('Failed to save') }
+    setSavingResume(false)
+  }
 
   // ══════════════════════════════════════════════════════════════════
   // Save Profile (Sections 1, 2, 5-skills, 6, 7)
@@ -1949,6 +2025,123 @@ export default function ProfileClient({ email }: { email: string }) {
               </button>
             </div>
           </div>
+
+          {/* ════════════════════════════════════════════════════ */}
+          {/* Photo Upload                                         */}
+          {/* ════════════════════════════════════════════════════ */}
+          <FormSection title="Profile Photo">
+            <div className="flex items-center gap-6">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Profile" className="w-24 h-32 object-cover rounded-xl border-2 border-[#a58e28]" />
+              ) : (
+                <div className="w-24 h-32 bg-[#3a3a3a] rounded-xl border-2 border-[#a58e28] flex items-center justify-center">
+                  <span className="jl-serif text-2xl text-[#a58e28]">{firstName?.[0] || '?'}{lastName?.[0] || ''}</span>
+                </div>
+              )}
+              <div className="space-y-2">
+                <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarUpload} />
+                <button onClick={() => avatarInputRef.current?.click()} disabled={uploadingAvatar} className="jl-btn jl-btn-outline text-xs">
+                  {uploadingAvatar ? 'Uploading...' : 'Upload Photo'}
+                </button>
+                {avatarUrl && (
+                  <button onClick={handleRemoveAvatar} className="block text-xs text-[#888] hover:text-red-500 transition-colors">Remove</button>
+                )}
+                <p className="text-[0.6rem] text-[#aaa]">JPG, PNG or WebP. Max 5MB.</p>
+              </div>
+            </div>
+          </FormSection>
+
+          {/* ════════════════════════════════════════════════════ */}
+          {/* Shareable Résumé                                     */}
+          {/* ════════════════════════════════════════════════════ */}
+          <FormSection title="Shareable Résumé">
+            <div className="space-y-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-sans text-sm font-medium text-[#1a1a1a]">Enable résumé</div>
+                  <div className="font-sans text-[0.65rem] text-[#888]">Make your résumé page visible to anyone with the link</div>
+                </div>
+                <button
+                  onClick={() => setResumePublic(!resumePublic)}
+                  className={`relative w-10 h-5 rounded-full transition-colors ${resumePublic ? 'bg-[#a58e28]' : 'bg-[#e8e2d8]'}`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${resumePublic ? 'translate-x-5' : ''}`} />
+                </button>
+              </div>
+
+              {resumePublic && (
+                <>
+                  {resumeSlug && (
+                    <div>
+                      <label className="jl-label">Your Résumé URL</label>
+                      <div className="flex gap-2">
+                        <input className="jl-input flex-1 text-xs bg-[#fafaf5]" readOnly value={`luxuryrecruiter.com/r/${resumeSlug}`} />
+                        <button
+                          onClick={() => { navigator.clipboard.writeText(`https://www.luxuryrecruiter.com/r/${resumeSlug}`); setResumeCopied(true); setTimeout(() => setResumeCopied(false), 2000) }}
+                          className="jl-btn jl-btn-outline text-xs"
+                        >
+                          {resumeCopied ? 'Copied!' : 'Copy'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="jl-label">Headline</label>
+                    <textarea
+                      className="jl-input w-full min-h-[80px] resize-y"
+                      value={resumeHeadline}
+                      onChange={(e) => setResumeHeadline(e.target.value)}
+                      maxLength={300}
+                      placeholder="Tell the world about your luxury career in a few lines"
+                    />
+                    <span className="text-[0.6rem] text-[#ccc]">{resumeHeadline.length}/300</span>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-sans text-xs text-[#888]">Show my email on résumé</span>
+                      <button
+                        onClick={() => setResumeShowEmail(!resumeShowEmail)}
+                        className={`relative w-8 h-4 rounded-full transition-colors ${resumeShowEmail ? 'bg-[#a58e28]' : 'bg-[#e8e2d8]'}`}
+                      >
+                        <span className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${resumeShowEmail ? 'translate-x-4' : ''}`} />
+                      </button>
+                    </div>
+                    {phone && (
+                      <div className="flex items-center justify-between">
+                        <span className="font-sans text-xs text-[#888]">Show my phone on résumé</span>
+                        <button
+                          onClick={() => setResumeShowPhone(!resumeShowPhone)}
+                          className={`relative w-8 h-4 rounded-full transition-colors ${resumeShowPhone ? 'bg-[#a58e28]' : 'bg-[#e8e2d8]'}`}
+                        >
+                          <span className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${resumeShowPhone ? 'translate-x-4' : ''}`} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <p className="font-sans text-[0.65rem] text-[#aaa] leading-relaxed">
+                    Your résumé is yours. Share it wherever you like — LinkedIn, WhatsApp, email. You control what&rsquo;s visible.
+                  </p>
+
+                  {/* Share buttons */}
+                  {resumeSlug && (
+                    <div className="flex items-center gap-3">
+                      <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent('https://www.luxuryrecruiter.com/r/' + resumeSlug)}`} target="_blank" rel="noopener noreferrer" className="text-xs text-[#888] hover:text-[#a58e28]">LinkedIn</a>
+                      <a href={`https://wa.me/?text=${encodeURIComponent('My JOBLUX Résumé: https://www.luxuryrecruiter.com/r/' + resumeSlug)}`} target="_blank" rel="noopener noreferrer" className="text-xs text-[#888] hover:text-[#a58e28]">WhatsApp</a>
+                      <a href={`mailto:?subject=${encodeURIComponent('My JOBLUX Résumé')}&body=${encodeURIComponent('https://www.luxuryrecruiter.com/r/' + resumeSlug)}`} className="text-xs text-[#888] hover:text-[#a58e28]">Email</a>
+                      <a href={`/r/${resumeSlug}`} target="_blank" rel="noopener noreferrer" className="text-xs text-[#a58e28] hover:underline">Preview &rarr;</a>
+                    </div>
+                  )}
+                </>
+              )}
+
+              <button onClick={handleSaveResume} disabled={savingResume} className="jl-btn jl-btn-primary text-xs">
+                {savingResume ? 'Saving...' : 'Save Résumé Settings'}
+              </button>
+            </div>
+          </FormSection>
 
           {/* Quick links */}
           <div className="mt-10">
