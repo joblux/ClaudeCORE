@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <g stroke="#a58e28" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Hull -->
+    <path d="M18 120 Q20 126 30 130 Q60 140 100 142 Q140 140 160 136 Q172 132 178 124 Q182 118 180 114"/>
+    <!-- Deck line -->
+    <path d="M22 118 Q30 112 50 106 Q70 100 90 98 Q110 96 130 98 Q150 102 164 108 Q174 114 180 114"/>
+    <!-- Bow -->
+    <path d="M18 120 Q16 118 18 116 L22 118"/>
+    <!-- Cabin structure -->
+    <path d="M62 98 L62 82 Q62 78 66 78 L120 78 Q124 78 124 82 L124 98"/>
+    <!-- Cabin windows -->
+    <line x1="72" y1="86" x2="78" y2="86" stroke-width="1"/>
+    <line x1="84" y1="86" x2="90" y2="86" stroke-width="1"/>
+    <line x1="96" y1="86" x2="102" y2="86" stroke-width="1"/>
+    <line x1="108" y1="86" x2="114" y2="86" stroke-width="1"/>
+    <!-- Mast -->
+    <line x1="80" y1="78" x2="80" y2="58"/>
+    <!-- Flag -->
+    <path d="M80 58 L94 62 L80 66" stroke-width="1"/>
+    <circle cx="80" cy="56" r="1.5" fill="#a58e28" stroke="none"/>
+    <!-- Waterline -->
+    <path d="M30 138 Q50 142 80 144 Q120 144 160 138" stroke-width="0.75" stroke-dasharray="4 4" opacity="0.4"/>
+    <!-- Stern detail -->
+    <path d="M170 110 L176 108 Q180 112 178 118" stroke-width="1"/>
+  </g>
+</svg>

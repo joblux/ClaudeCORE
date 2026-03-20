@@ -3,6 +3,22 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Career Intelligence — JOBLUX",
+  openGraph: {
+    title: "Career Intelligence — JOBLUX",
+    images: [
+      {
+        url: "https://www.luxuryrecruiter.com/api/og?title=Career+Intelligence&subtitle=Luxury+Industry+Careers&type=page",
+        width: 1200,
+        height: 630,
+        alt: "Career Intelligence | JOBLUX",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Career Intelligence — JOBLUX",
+    images: ["https://www.luxuryrecruiter.com/api/og?title=Career+Intelligence&subtitle=Luxury+Industry+Careers&type=page"],
+  },
 };
 
 const salaryData = [

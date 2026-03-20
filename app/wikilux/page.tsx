@@ -1,13 +1,25 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Metadata } from 'next'
 import { BRANDS } from '@/lib/wikilux-brands'
+import { WIKILUX_CATEGORY_ICONS } from '@/lib/sector-icons'
 
 export const metadata: Metadata = {
-  title:       'WikiLux — Luxury Brand Encyclopedia',
-  description: `${BRANDS.length}+ luxury brand encyclopedias in 9 languages. Fashion, watches, jewellery, automotive, hospitality, beauty and more. By JOBLUX.`,
+  title: 'WikiLux — Luxury Brand Encyclopedia | JOBLUX',
+  description: `${BRANDS.length}+ luxury brand encyclopedias. Fashion, watches, jewellery, automotive, hospitality, beauty and more. By JOBLUX.`,
+  openGraph: {
+    title: 'WikiLux — The Luxury Encyclopedia',
+    description: `${BRANDS.length}+ luxury brand profiles with hiring intelligence, salary data and interview insights.`,
+    images: [{ url: 'https://www.luxuryrecruiter.com/api/og?title=WikiLux&subtitle=The+Luxury+Encyclopedia&type=brand', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'WikiLux — The Luxury Encyclopedia | JOBLUX',
+    description: `${BRANDS.length}+ luxury brand profiles with hiring intelligence.`,
+    images: ['https://www.luxuryrecruiter.com/api/og?title=WikiLux&subtitle=The+Luxury+Encyclopedia&type=brand'],
+  },
 }
 
-// Build categories from real data
 const sectorLabels: Record<string, string> = {
   'Fashion': 'Fashion & Leather',
   'Watches & Jewellery': 'Watches & Jewellery',
@@ -36,9 +48,11 @@ const sectorCounts = BRANDS.reduce<Record<string, number>>((acc, b) => {
 }, {})
 
 const categories = Object.entries(sectorCounts).map(([sector, count]) => ({
+  sector,
   label: sectorLabels[sector] || sector,
   slug: sectorSlugs[sector] || sector.toLowerCase().replace(/\s+/g, '-'),
   count,
+  icon: WIKILUX_CATEGORY_ICONS[sector],
 }))
 
 const featuredBrands = BRANDS.slice(0, 6)
@@ -54,12 +68,11 @@ export default function WikiLuxPage() {
             The Luxury Brand Encyclopedia
           </h1>
           <p className="font-sans text-sm text-[#888] mb-8 max-w-lg mx-auto">
-            {BRANDS.length}+ maisons &middot; 9 languages &middot; Fashion &middot; Watches &middot; Jewellery &middot; Automotive &middot; Hospitality &middot; Beauty
+            {BRANDS.length}+ maisons &middot; Fashion &middot; Watches &middot; Jewellery &middot; Automotive &middot; Hospitality &middot; Beauty
           </p>
           <div className="flex items-center justify-center gap-8 flex-wrap">
             {[
               { n: `${BRANDS.length}+`, l: 'Brands' },
-              { n: '9',                 l: 'Languages' },
               { n: `${BRANDS.length * 30}+`, l: 'Pages' },
               { n: String(categories.length), l: 'Categories' },
             ].map((s) => (
@@ -89,10 +102,15 @@ export default function WikiLuxPage() {
             {categories.map((cat) => (
               <Link
                 key={cat.slug}
-                href={`/wikilux?category=${cat.slug}`}
-                className="jl-card flex items-center justify-between group"
+                href={`/wikilux/all?sector=${cat.slug}`}
+                className="jl-card flex items-center gap-3 group"
               >
-                <div>
+                {cat.icon && (
+                  <div className="w-8 h-8 flex-shrink-0 opacity-50 group-hover:opacity-100 transition-opacity">
+                    <Image src={cat.icon} alt={cat.label} width={32} height={32} />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
                   <div className="font-sans text-xs font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors">
                     {cat.label}
                   </div>
@@ -124,10 +142,7 @@ export default function WikiLuxPage() {
                     {brand.name}
                   </div>
                   <div className="font-sans text-[0.65rem] text-[#aaa] mt-0.5">
-                    {brand.sector} &middot; {brand.country} &middot; Est. {brand.founded}
-                  </div>
-                  <div className="font-sans text-[0.6rem] text-[#a58e28] mt-1 tracking-wide">
-                    EN &middot; FR &middot; AR &middot; ZH &middot; JA &middot; RU &middot; IT &middot; ES &middot; DE
+                    {brand.sector} &middot; {brand.country}
                   </div>
                 </div>
               </Link>

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <g stroke="#a58e28" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left page -->
+    <path d="M22 40 L22 164 Q22 168 26 168 L98 168 L98 40 Q98 38 96 38 L24 38 Q22 38 22 40Z"/>
+    <!-- Right page -->
+    <path d="M102 40 L102 168 L174 168 Q178 168 178 164 L178 40 Q178 38 176 38 L104 38 Q102 38 102 40Z"/>
+    <!-- Spine -->
+    <line x1="98" y1="38" x2="98" y2="168" stroke-width="0.75"/>
+    <line x1="102" y1="38" x2="102" y2="168" stroke-width="0.75"/>
+    <!-- Left page text lines -->
+    <line x1="32" y1="54" x2="88" y2="54" stroke-width="0.75" opacity="0.5"/>
+    <line x1="32" y1="62" x2="88" y2="62" stroke-width="0.75" opacity="0.5"/>
+    <line x1="32" y1="70" x2="72" y2="70" stroke-width="0.75" opacity="0.5"/>
+    <!-- Left page image placeholder -->
+    <rect x="32" y="82" width="56" height="40" rx="1" stroke-width="0.75" opacity="0.4"/>
+    <!-- Left page more text -->
+    <line x1="32" y1="132" x2="88" y2="132" stroke-width="0.75" opacity="0.5"/>
+    <line x1="32" y1="140" x2="88" y2="140" stroke-width="0.75" opacity="0.5"/>
+    <line x1="32" y1="148" x2="66" y2="148" stroke-width="0.75" opacity="0.5"/>
+    <!-- Right page headline -->
+    <line x1="112" y1="54" x2="168" y2="54" stroke-width="2" opacity="0.6"/>
+    <line x1="112" y1="62" x2="154" y2="62" stroke-width="2" opacity="0.6"/>
+    <!-- Right page text -->
+    <line x1="112" y1="78" x2="168" y2="78" stroke-width="0.75" opacity="0.5"/>
+    <line x1="112" y1="86" x2="168" y2="86" stroke-width="0.75" opacity="0.5"/>
+    <line x1="112" y1="94" x2="168" y2="94" stroke-width="0.75" opacity="0.5"/>
+    <line x1="112" y1="102" x2="168" y2="102" stroke-width="0.75" opacity="0.5"/>
+    <line x1="112" y1="110" x2="148" y2="110" stroke-width="0.75" opacity="0.5"/>
+    <!-- Right page pull quote -->
+    <line x1="120" y1="126" x2="160" y2="126" stroke-width="1" opacity="0.7"/>
+    <line x1="126" y1="134" x2="154" y2="134" stroke-width="1" opacity="0.7"/>
+    <!-- Quote mark accent -->
+    <circle cx="114" cy="124" r="1.5" fill="#a58e28" stroke="none"/>
+  </g>
+</svg>

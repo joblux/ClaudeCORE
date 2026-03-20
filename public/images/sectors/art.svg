@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <g stroke="#a58e28" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Outer frame -->
+    <rect x="32" y="36" width="136" height="128" rx="2"/>
+    <!-- Inner frame border -->
+    <rect x="40" y="44" width="120" height="112" rx="1"/>
+    <!-- Inner mat opening -->
+    <rect x="54" y="58" width="92" height="84" rx="0"/>
+    <!-- Corner ornaments - top left -->
+    <path d="M40 44 Q44 48 40 52" stroke-width="1"/>
+    <path d="M40 44 Q44 44 48 44" stroke-width="1" opacity="0.6"/>
+    <!-- Corner ornaments - top right -->
+    <path d="M160 44 Q156 48 160 52" stroke-width="1"/>
+    <path d="M160 44 Q156 44 152 44" stroke-width="1" opacity="0.6"/>
+    <!-- Corner ornaments - bottom left -->
+    <path d="M40 156 Q44 152 40 148" stroke-width="1"/>
+    <path d="M40 156 Q44 156 48 156" stroke-width="1" opacity="0.6"/>
+    <!-- Corner ornaments - bottom right -->
+    <path d="M160 156 Q156 152 160 148" stroke-width="1"/>
+    <path d="M160 156 Q156 156 152 156" stroke-width="1" opacity="0.6"/>
+    <!-- Top centre ornament -->
+    <path d="M92 44 Q96 38 100 36 Q104 38 108 44" stroke-width="1"/>
+    <circle cx="100" cy="36" r="1.5" fill="#a58e28" stroke="none"/>
+    <!-- Decorative side moulding -->
+    <line x1="46" y1="70" x2="46" y2="130" stroke-width="0.75" opacity="0.4"/>
+    <line x1="154" y1="70" x2="154" y2="130" stroke-width="0.75" opacity="0.4"/>
+    <!-- Bottom centre detail -->
+    <circle cx="100" cy="156" r="1.5" fill="#a58e28" stroke="none"/>
+  </g>
+</svg>

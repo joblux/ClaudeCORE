@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { BRANDS } from '@/lib/wikilux-brands'
 import { useMember } from '@/lib/auth-hooks'
+import { WIKILUX_CATEGORY_ICONS } from '@/lib/sector-icons'
 
 interface WikiContent {
   tagline?: string
@@ -27,6 +29,16 @@ interface WikiContent {
   error?: string
 }
 
+interface BrandImage {
+  id: string
+  url: string
+  thumb: string
+  alt: string | null
+  photographer: string
+  photographer_url: string
+  unsplash_url: string
+}
+
 export default function BrandPage() {
   const params = useParams()
   const slug = params.slug as string
@@ -34,6 +46,7 @@ export default function BrandPage() {
   const { isAuthenticated } = useMember()
   const [content, setContent] = useState<WikiContent | null>(null)
   const [loading, setLoading] = useState(true)
+  const [images, setImages] = useState<BrandImage[]>([])
 
   const related = useMemo(() => {
     if (!brand) return []
@@ -61,6 +74,12 @@ export default function BrandPage() {
       .then((data) => setContent(data.content))
       .catch(() => setContent({ error: 'Failed to load' }))
       .finally(() => setLoading(false))
+
+    // Fetch images
+    fetch(`/api/wikilux/images?brand=${encodeURIComponent(brand.name)}&sector=${encodeURIComponent(brand.sector)}`)
+      .then((r) => r.json())
+      .then((data) => setImages(data.images || []))
+      .catch(() => {})
   }, [brand])
 
   if (!brand) {
@@ -73,34 +92,78 @@ export default function BrandPage() {
   }
 
   const knownForTags = brand.known_for.split(',').map((t) => t.trim())
+  const heroImage = images[0]
+  const galleryImages = images.slice(1, 4)
+  const sectorIcon = WIKILUX_CATEGORY_ICONS[brand.sector]
 
   return (
     <div>
 
       {/* ── SECTION 1: HERO ──────────────────────────────── */}
-      <div className="bg-[#222222] py-14 border-b-2 border-[#a58e28]">
-        <div className="jl-container">
+      <div className="bg-[#222222] border-b-2 border-[#a58e28] relative overflow-hidden">
+        {/* Hero background image */}
+        {heroImage && (
+          <div className="absolute inset-0">
+            <Image
+              src={heroImage.url + '&w=1400&q=80&fm=webp'}
+              alt={heroImage.alt || `${brand.name} luxury`}
+              fill
+              className="object-cover opacity-20"
+              priority
+              sizes="100vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#222222] via-[#222222]/80 to-[#222222]/60" />
+          </div>
+        )}
+
+        <div className="jl-container py-14 relative z-10">
           <div className="flex items-center gap-2 mb-6">
             <Link href="/wikilux" className="jl-overline text-[#888] hover:text-[#a58e28] transition-colors">WikiLux</Link>
             <span className="text-[#555] text-xs">/</span>
             <span className="jl-overline text-[#a58e28]">{brand.name}</span>
           </div>
 
-          <h1 className="jl-serif text-[2.5rem] md:text-[4rem] font-light text-white mb-3 leading-tight">
-            {brand.name}
-          </h1>
+          <div className="flex items-start gap-6">
+            {/* Sector icon fallback */}
+            {sectorIcon && !heroImage && (
+              <div className="hidden md:flex w-16 h-16 items-center justify-center flex-shrink-0 opacity-40">
+                <Image src={sectorIcon} alt={brand.sector} width={48} height={48} />
+              </div>
+            )}
+            <div>
+              <h1 className="jl-serif text-[2.5rem] md:text-[4rem] font-light text-white mb-3 leading-tight">
+                {brand.name}
+              </h1>
 
-          {content?.tagline && (
-            <p className="jl-editorial text-[#a58e28] mb-6 max-w-2xl">{content.tagline}</p>
-          )}
+              {content?.tagline && (
+                <p className="jl-editorial text-[#a58e28] mb-6 max-w-2xl">{content.tagline}</p>
+              )}
 
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="font-sans text-[0.65rem] text-[#999] border border-[#444] px-3 py-1.5 tracking-wider uppercase">Est. {brand.founded}</span>
-            <span className="font-sans text-[0.65rem] text-[#999] border border-[#444] px-3 py-1.5 tracking-wider uppercase">{brand.country}</span>
-            <span className="font-sans text-[0.65rem] text-[#999] border border-[#444] px-3 py-1.5 tracking-wider uppercase">{brand.sector}</span>
-            <span className="font-sans text-[0.65rem] text-[#a58e28] border border-[#a58e28] px-3 py-1.5 tracking-wider uppercase">{brand.group}</span>
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="font-sans text-[0.65rem] text-[#999] border border-[#444] px-3 py-1.5 tracking-wider uppercase">Est. {brand.founded}</span>
+                <span className="font-sans text-[0.65rem] text-[#999] border border-[#444] px-3 py-1.5 tracking-wider uppercase">{brand.country}</span>
+                <span className="font-sans text-[0.65rem] text-[#999] border border-[#444] px-3 py-1.5 tracking-wider uppercase">{brand.sector}</span>
+                <span className="font-sans text-[0.65rem] text-[#a58e28] border border-[#a58e28] px-3 py-1.5 tracking-wider uppercase">{brand.group}</span>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Hero image attribution */}
+        {heroImage && (
+          <div className="absolute bottom-2 right-4 z-10">
+            <span className="text-[0.55rem] text-[#666]">
+              Photo by{' '}
+              <a href={heroImage.photographer_url + '?utm_source=joblux&utm_medium=referral'} target="_blank" rel="noopener noreferrer" className="text-[#888] hover:text-[#a58e28]">
+                {heroImage.photographer}
+              </a>{' '}
+              on{' '}
+              <a href={heroImage.unsplash_url + '?utm_source=joblux&utm_medium=referral'} target="_blank" rel="noopener noreferrer" className="text-[#888] hover:text-[#a58e28]">
+                Unsplash
+              </a>
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Loading state */}
@@ -125,6 +188,36 @@ export default function BrandPage() {
 
       {content && !content.error && !loading && (
         <>
+          {/* ── IMAGE GALLERY ──────────────────────────────── */}
+          {galleryImages.length > 0 && (
+            <div className="jl-container py-8">
+              <div className={`grid gap-3 ${galleryImages.length === 1 ? 'grid-cols-1 max-w-lg' : galleryImages.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                {galleryImages.map((img) => (
+                  <div key={img.id} className="relative group">
+                    <div className="aspect-[4/3] relative overflow-hidden">
+                      <Image
+                        src={img.url + '&w=600&q=80&fm=webp'}
+                        alt={img.alt || `${brand.name}`}
+                        fill
+                        className="object-cover"
+                        loading="lazy"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                    </div>
+                    <div className="mt-1">
+                      <span className="text-[0.55rem] text-[#bbb]">
+                        Photo by{' '}
+                        <a href={img.photographer_url + '?utm_source=joblux&utm_medium=referral'} target="_blank" rel="noopener noreferrer" className="text-[#aaa] hover:text-[#a58e28]">
+                          {img.photographer}
+                        </a>{' '}on Unsplash
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* ── SECTION 2: BRAND DNA + SIDEBAR ───────────── */}
           <div className="jl-container py-10">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -141,7 +234,6 @@ export default function BrandPage() {
               </div>
 
               <div className="space-y-6">
-                {/* Key Facts */}
                 {content.facts && content.facts.length > 0 && (
                   <div className="border border-[#e8e2d8] p-5">
                     <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-4">Key Facts</span>
@@ -156,7 +248,6 @@ export default function BrandPage() {
                   </div>
                 )}
 
-                {/* Stock info */}
                 {content.stock && (
                   <div className="border border-[#e8e2d8] p-5">
                     <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-3">Corporate</span>
@@ -175,7 +266,6 @@ export default function BrandPage() {
                   </div>
                 )}
 
-                {/* Key Markets */}
                 {content.presence?.key_markets && (
                   <div className="border border-[#e8e2d8] p-5">
                     <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-3">Key Markets</span>
@@ -190,7 +280,6 @@ export default function BrandPage() {
                   </div>
                 )}
 
-                {/* Known For */}
                 <div className="border border-[#e8e2d8] p-5">
                   <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-3">Known For</span>
                   <div className="flex flex-wrap gap-2">

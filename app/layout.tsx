@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://www.luxuryrecruiter.com/og-image.png",
+        url: "https://www.luxuryrecruiter.com/api/og?title=JOBLUX&subtitle=Luxury+Talents+Society",
         width: 1200,
         height: 630,
         alt: "JOBLUX — Luxury Talents Society",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "JOBLUX — Luxury Talents Society",
     description: "The intelligence platform for luxury professionals.",
-    images: ["https://www.luxuryrecruiter.com/og-image.png"],
+    images: ["https://www.luxuryrecruiter.com/api/og?title=JOBLUX&subtitle=Luxury+Talents+Society"],
   },
 };
 

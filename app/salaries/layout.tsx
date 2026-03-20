@@ -7,6 +7,20 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Salary Intelligence | JOBLUX',
     description: 'Luxury industry compensation data across 150+ maisons worldwide.',
+    images: [
+      {
+        url: 'https://www.luxuryrecruiter.com/api/og?title=Salary+Intelligence&subtitle=Luxury+Industry+Compensation&type=page',
+        width: 1200,
+        height: 630,
+        alt: 'Salary Intelligence | JOBLUX',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Salary Intelligence | JOBLUX',
+    description: 'Luxury industry compensation data across 150+ maisons worldwide.',
+    images: ['https://www.luxuryrecruiter.com/api/og?title=Salary+Intelligence&subtitle=Luxury+Industry+Compensation&type=page'],
   },
 }
 

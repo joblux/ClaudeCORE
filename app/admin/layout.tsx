@@ -7,7 +7,7 @@ import { useRequireAdmin } from '@/lib/auth-hooks'
 import {
   LayoutDashboard, BarChart3, Briefcase, Kanban, MessageSquare,
   Users, Star, Send, FileText, BookOpen, DollarSign, FileCode,
-  Menu, X, LogOut, Power
+  Menu, X, LogOut, Power, Images
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
@@ -40,6 +40,7 @@ const NAV_SECTIONS = [
       { label: 'BlogLux', href: '/admin/articles', icon: FileText },
       { label: 'WikiLux', href: '/admin/wikilux', icon: BookOpen },
       { label: 'Salary Data', href: '/salaries', icon: DollarSign },
+      { label: 'Media Library', href: '/admin/media', icon: Images },
     ],
   },
   {

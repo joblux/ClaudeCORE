@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <g stroke="#a58e28" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Building outline -->
+    <rect x="40" y="48" width="120" height="126" rx="0"/>
+    <!-- Pediment / cornice -->
+    <line x1="36" y1="48" x2="164" y2="48"/>
+    <line x1="36" y1="44" x2="164" y2="44"/>
+    <!-- Left column -->
+    <line x1="56" y1="52" x2="56" y2="174"/>
+    <line x1="60" y1="52" x2="60" y2="174"/>
+    <!-- Right column -->
+    <line x1="140" y1="52" x2="140" y2="174"/>
+    <line x1="144" y1="52" x2="144" y2="174"/>
+    <!-- Column capitals -->
+    <line x1="52" y1="52" x2="64" y2="52"/>
+    <line x1="136" y1="52" x2="148" y2="52"/>
+    <!-- Column bases -->
+    <line x1="52" y1="174" x2="64" y2="174"/>
+    <line x1="136" y1="174" x2="148" y2="174"/>
+    <!-- Central archway -->
+    <path d="M82 174 L82 120 Q82 100 100 100 Q118 100 118 120 L118 174"/>
+    <!-- Keystone accent -->
+    <circle cx="100" cy="100" r="2" fill="#a58e28" stroke="none"/>
+    <!-- Upper windows -->
+    <rect x="78" y="60" width="16" height="24" rx="8"/>
+    <rect x="106" y="60" width="16" height="24" rx="8"/>
+    <!-- Balustrade above arch -->
+    <line x1="82" y1="94" x2="118" y2="94"/>
+    <line x1="88" y1="94" x2="88" y2="100" stroke-width="0.75"/>
+    <line x1="100" y1="94" x2="100" y2="98" stroke-width="0.75"/>
+    <line x1="112" y1="94" x2="112" y2="100" stroke-width="0.75"/>
+    <!-- Ground line -->
+    <line x1="30" y1="174" x2="170" y2="174"/>
+  </g>
+</svg>

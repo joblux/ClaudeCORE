@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <g stroke="#a58e28" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Diamond / gem outline -->
+    <!-- Crown (top) -->
+    <path d="M100 28 L140 72 L100 172 L60 72 Z"/>
+    <!-- Table facet (top flat) -->
+    <line x1="74" y1="72" x2="126" y2="72"/>
+    <!-- Crown facets -->
+    <line x1="100" y1="28" x2="74" y2="72"/>
+    <line x1="100" y1="28" x2="126" y2="72"/>
+    <!-- Pavilion facets -->
+    <line x1="74" y1="72" x2="100" y2="172"/>
+    <line x1="126" y1="72" x2="100" y2="172"/>
+    <!-- Internal facet lines -->
+    <line x1="84" y1="52" x2="60" y2="72" stroke-width="0.75" opacity="0.5"/>
+    <line x1="116" y1="52" x2="140" y2="72" stroke-width="0.75" opacity="0.5"/>
+    <line x1="74" y1="72" x2="100" y2="92" stroke-width="0.75" opacity="0.4"/>
+    <line x1="126" y1="72" x2="100" y2="92" stroke-width="0.75" opacity="0.4"/>
+    <!-- Circuit traces from gem -->
+    <path d="M60 72 L44 72 L44 84" stroke-width="0.75" opacity="0.4"/>
+    <path d="M140 72 L156 72 L156 84" stroke-width="0.75" opacity="0.4"/>
+    <path d="M68 120 L52 136 L52 148" stroke-width="0.75" opacity="0.4"/>
+    <path d="M132 120 L148 136 L148 148" stroke-width="0.75" opacity="0.4"/>
+    <!-- Circuit nodes -->
+    <circle cx="44" cy="86" r="2" fill="#a58e28" stroke="none" opacity="0.5"/>
+    <circle cx="156" cy="86" r="2" fill="#a58e28" stroke="none" opacity="0.5"/>
+    <circle cx="52" cy="150" r="2" fill="#a58e28" stroke="none" opacity="0.5"/>
+    <circle cx="148" cy="150" r="2" fill="#a58e28" stroke="none" opacity="0.5"/>
+    <!-- Small horizontal circuit ticks -->
+    <line x1="40" y1="84" x2="48" y2="84" stroke-width="0.75" opacity="0.4"/>
+    <line x1="152" y1="84" x2="160" y2="84" stroke-width="0.75" opacity="0.4"/>
+    <!-- Centre brilliance dot -->
+    <circle cx="100" cy="86" r="2" fill="#a58e28" stroke="none" opacity="0.6"/>
+  </g>
+</svg>

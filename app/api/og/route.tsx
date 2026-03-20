@@ -1,8 +1,14 @@
 import { ImageResponse } from 'next/og'
+import { NextRequest } from 'next/server'
 
 export const runtime = 'edge'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const { searchParams } = req.nextUrl
+  const title = searchParams.get('title') || 'JOBLUX'
+  const subtitle = searchParams.get('subtitle') || 'Luxury Talents Society'
+  const type = searchParams.get('type') || 'page'
+
   return new ImageResponse(
     (
       <div
@@ -13,51 +19,111 @@ export async function GET() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#1a1a1a',
+          backgroundColor: '#222222',
+          position: 'relative',
         }}
       >
+        {/* Gold accent line at top */}
         <div
           style={{
-            fontSize: 72,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 3,
+            backgroundColor: '#a58e28',
+          }}
+        />
+
+        {/* Logo */}
+        <div
+          style={{
+            fontSize: 24,
             fontWeight: 600,
-            color: '#ffffff',
+            color: '#a58e28',
             letterSpacing: 6,
             fontFamily: 'sans-serif',
+            marginBottom: 40,
           }}
         >
           JOBLUX.
         </div>
+
+        {/* Title */}
         <div
           style={{
-            fontSize: 18,
-            fontWeight: 500,
-            color: '#a58e28',
-            letterSpacing: 8,
-            marginTop: 20,
-            textTransform: 'uppercase',
+            fontSize: title.length > 40 ? 36 : 48,
+            fontWeight: 400,
+            color: '#ffffff',
+            fontFamily: 'serif',
+            textAlign: 'center',
+            maxWidth: '80%',
+            lineHeight: 1.2,
           }}
         >
-          Luxury Talents Society
+          {title}
         </div>
+
+        {/* Divider */}
         <div
           style={{
-            width: 200,
+            width: 120,
             height: 1,
             backgroundColor: '#a58e28',
-            opacity: 0.5,
-            marginTop: 30,
+            opacity: 0.6,
+            marginTop: 28,
+            marginBottom: 28,
           }}
         />
+
+        {/* Subtitle */}
         <div
           style={{
-            fontSize: 11,
-            color: '#555555',
-            letterSpacing: 3,
-            marginTop: 16,
+            fontSize: 16,
+            fontWeight: 500,
+            color: '#a58e28',
+            letterSpacing: 4,
+            textTransform: 'uppercase',
+            fontFamily: 'sans-serif',
           }}
         >
-          PARIS · LONDON · NEW YORK · DUBAI · SINGAPORE
+          {subtitle}
         </div>
+
+        {/* Bottom branding */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 24,
+            right: 32,
+            fontSize: 11,
+            color: '#555555',
+            letterSpacing: 2,
+            fontFamily: 'sans-serif',
+          }}
+        >
+          luxuryrecruiter.com
+        </div>
+
+        {/* Type badge */}
+        {type !== 'page' && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 24,
+              right: 32,
+              fontSize: 10,
+              color: '#a58e28',
+              letterSpacing: 3,
+              textTransform: 'uppercase',
+              border: '1px solid rgba(165, 142, 40, 0.3)',
+              padding: '4px 12px',
+              fontFamily: 'sans-serif',
+            }}
+          >
+            {type === 'brand' ? 'WikiLux' : type === 'article' ? 'BlogLux' : type}
+          </div>
+        )}
       </div>
     ),
     {
