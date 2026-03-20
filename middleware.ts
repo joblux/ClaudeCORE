@@ -19,7 +19,8 @@ export default withAuth(
       pathname.startsWith("/profile") ||
       pathname.startsWith("/invite") ||
       pathname.startsWith("/contribute") ||
-      pathname.startsWith("/directory")
+      pathname.startsWith("/directory") ||
+      pathname.startsWith("/salaries")
     ) {
       if (token?.status === "pending") {
         return NextResponse.redirect(new URL("/members/pending", req.url));
@@ -46,5 +47,6 @@ export const config = {
     "/invite/:path*",
     "/contribute/:path*",
     "/directory/:path*",
+    "/salaries/:path*",
   ],
 };

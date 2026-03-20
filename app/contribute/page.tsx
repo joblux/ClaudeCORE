@@ -375,6 +375,11 @@ export default function ContributePage() {
 
             {/* ─── Salary Data Form ─── */}
             {activeTab === 'salary' && (
+              <div className="space-y-4">
+              <div className="bg-[#fafaf5] border border-[#a58e28] rounded-sm p-4 flex items-center justify-between">
+                <p className="text-xs text-[#888]">See how your data helps the community understand luxury compensation.</p>
+                <a href="/salaries" className="text-xs text-[#a58e28] hover:text-[#1a1a1a] transition-colors tracking-wide whitespace-nowrap ml-4">View Salary Intelligence &rarr;</a>
+              </div>
               <div className="bg-white border border-[#e8e2d8] rounded-sm p-6 space-y-4">
                 <p className="text-xs text-[#999] mb-2">All salary data is displayed anonymously by default. Your identity is never shared.</p>
                 <div>
@@ -463,6 +468,7 @@ export default function ContributePage() {
                     <input type="number" className="jl-input w-full" placeholder="e.g. 8" value={salary.years_experience} onChange={(e) => setSalary({ ...salary, years_experience: e.target.value })} />
                   </div>
                 </div>
+              </div>
               </div>
             )}
 

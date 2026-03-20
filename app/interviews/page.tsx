@@ -315,6 +315,14 @@ export default function InterviewsPage() {
                 </li>
               </ol>
             </div>
+
+            {/* Salary cross-link */}
+            <div className="jl-card bg-[#fafaf5] border-[#e8e2d8]">
+              <p className="text-xs text-[#888] mb-2">Wondering about compensation?</p>
+              <a href="/salaries" className="text-xs text-[#a58e28] hover:text-[#1a1a1a] transition-colors tracking-wide">
+                See Salary Intelligence &rarr;
+              </a>
+            </div>
           </aside>
         </div>
       </div>
