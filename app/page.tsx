@@ -9,7 +9,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'JOBLUX — Luxury Talents Society',
-  description: 'The private intelligence platform for luxury industry professionals. Executive search, salary intelligence, WikiLux brand encyclopedia and industry insights. Est. Paris 2006.',
+  description: 'The private intelligence platform for luxury industry professionals. Executive search, salary intelligence, WikiLux brand encyclopedia and industry insights.',
 }
 
 export default function HomePage() {
@@ -21,7 +21,7 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto">
 
           <p className="text-[11px] tracking-[0.16em] uppercase text-[#a58e28] font-medium mb-5">
-            Luxury Talents Society &middot; Est. Paris 2006
+            Luxury Talents Society
           </p>
 
           <h1 className="font-playfair font-normal text-[#1a1a1a] mb-6">
@@ -83,7 +83,7 @@ export default function HomePage() {
       <div className="border-t border-[#e8e2d8] mt-8">
         <div className="jl-container py-6 text-center">
           <p className="font-sans text-xs text-[#888] tracking-wide">
-            JOBLUX &mdash; The private intelligence platform for luxury professionals. Est. Paris 2006.
+            JOBLUX &mdash; The private intelligence platform for luxury professionals.
           </p>
           <div className="flex items-center justify-center gap-6 mt-3">
             <Link href="/join" className="font-sans text-[0.65rem] text-[#a58e28] tracking-wider uppercase hover:text-[#1a1a1a] transition-colors">Request Access</Link>

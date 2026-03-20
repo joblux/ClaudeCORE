@@ -10,8 +10,7 @@ export function Footer() {
           {/* Left — Brand */}
           <div>
             <div className="text-lg font-semibold text-[#1a1a1a] tracking-[0.1em] mb-2" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</div>
-            <p className="font-sans text-xs text-[#888] leading-relaxed mb-1">Luxury Talents Society</p>
-            <p className="font-sans text-xs text-[#888] leading-relaxed mb-3">Est. Paris 2006</p>
+            <p className="font-sans text-xs text-[#888] leading-relaxed mb-3">Luxury Talents Society</p>
             <p className="font-sans text-[0.65rem] text-[#bbb]">Paris &middot; London &middot; New York &middot; Dubai &middot; Singapore</p>
           </div>
 

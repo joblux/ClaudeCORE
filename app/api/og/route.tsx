@@ -50,16 +50,6 @@ export async function GET() {
         />
         <div
           style={{
-            fontSize: 13,
-            color: '#666666',
-            letterSpacing: 4,
-            marginTop: 24,
-          }}
-        >
-          EST. PARIS 2006
-        </div>
-        <div
-          style={{
             fontSize: 11,
             color: '#555555',
             letterSpacing: 3,

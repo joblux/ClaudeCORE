@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Our Story | JOBLUX — Luxury Talents Society',
   description:
-    'From a Paris boutique and a London flat — twenty years building the luxury industry\'s intelligence layer. The story of JOBLUX, est. 2006.',
+    'From a Paris boutique and a London flat — twenty years building the luxury industry\'s intelligence layer. The story of JOBLUX.',
 }
 
 export default function AboutPage() {
@@ -103,10 +103,10 @@ export default function AboutPage() {
               <line x1="156" y1="147" x2="156" y2="173" stroke="#a58e28" strokeWidth="0.6" opacity="0.4"/>
               {/* Sign */}
               <rect x="124" y="133" width="72" height="11" rx="1" fill="#a58e28" opacity="0.18"/>
-              <text x="160" y="141" textAnchor="middle" fontSize="5.5" fill="#a58e28" fontFamily="sans-serif" fontWeight="500" opacity="0.9">JOBLUX &middot; EST. 2006</text>
+              <text x="160" y="141" textAnchor="middle" fontSize="5.5" fill="#a58e28" fontFamily="sans-serif" fontWeight="500" opacity="0.9">JOBLUX</text>
               {/* Ground */}
               <line x1="10" y1="180" x2="310" y2="180" stroke="white" strokeWidth="0.4" opacity="0.1"/>
-              <text x="160" y="194" textAnchor="middle" fontSize="9" fill="#a58e28" fontFamily="sans-serif" opacity="0.5">Paris, 2006</text>
+              <text x="160" y="194" textAnchor="middle" fontSize="9" fill="#a58e28" fontFamily="sans-serif" opacity="0.5">Paris</text>
             </svg>
           </div>
           {/* Text */}
