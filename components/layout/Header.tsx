@@ -6,7 +6,7 @@ import UserMenu from '@/components/UserMenu'
 import SearchOverlay from '@/components/SearchOverlay'
 import { useMember } from '@/lib/auth-hooks'
 
-const navItems = [
+const publicNavItems = [
   { label: 'WikiLux', href: '/wikilux' },
   { label: 'Opportunities', href: '/opportunities' },
   { label: 'Interviews', href: '/interviews' },
@@ -17,10 +17,15 @@ const navItems = [
   { label: 'The Brief', href: '/the-brief' },
 ]
 
+const authOnlyNavItems = [
+  { label: 'Directory', href: '/directory' },
+]
+
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const { isAuthenticated } = useMember()
+  const navItems = [...publicNavItems, ...(isAuthenticated ? authOnlyNavItems : [])]
   return (
     <header className="border-b border-[#e8e2d8]">
 

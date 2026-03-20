@@ -28,6 +28,7 @@ export default async function DashboardPage() {
   const isAdmin = member.isAdmin
   const isSenior = ['professional', 'executive', 'insider'].includes(role)
   const isBusiness = role === 'business'
+  const hasDirectoryAccess = ['business', 'insider', 'executive'].includes(role)
 
   // Base cards for all members
   const cards: DashCard[] = [
@@ -39,6 +40,13 @@ export default async function DashboardPage() {
     { num: '06', title: 'My Profile', desc: 'Edit your profile and settings.', href: '/profile' },
     { num: '07', title: 'Invite Colleagues', desc: 'Grow the JOBLUX community with your referral link.', href: '/invite' },
   ]
+
+  // Directory access for higher tiers
+  if (hasDirectoryAccess) {
+    cards.push(
+      { num: String(cards.length + 1).padStart(2, '0'), title: 'Member Directory', desc: 'Browse and connect with luxury professionals across the network.', href: '/directory' },
+    )
+  }
 
   // Senior tiers get extra cards
   if (isSenior) {
