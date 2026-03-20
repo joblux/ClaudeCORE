@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { BRANDS, type Brand } from '@/lib/wikilux-brands'
 
@@ -17,14 +18,45 @@ function groupByLetter(brands: Brand[]) {
 }
 
 export default function WikiLuxAllPage() {
-  const [activeSector, setActiveSector] = useState('All')
+  return (
+    <Suspense fallback={<div className="jl-container py-20 text-center"><div className="inline-block w-8 h-8 border-2 border-[#e8e2d8] border-t-[#a58e28] rounded-full animate-spin" /></div>}>
+      <WikiLuxAllContent />
+    </Suspense>
+  )
+}
+
+function WikiLuxAllContent() {
+  const searchParams = useSearchParams()
+  const initialSearch = searchParams.get('search') || ''
+  const initialSector = searchParams.get('sector') || 'All'
+
+  const [activeSector, setActiveSector] = useState(() => {
+    if (initialSector === 'All') return 'All'
+    // Match sector slug to sector name
+    const match = BRANDS.find(b => b.sector.toLowerCase().replace(/\s+/g, '-').replace(/&/g, '') === initialSector.replace(/&/g, ''))
+    return match ? match.sector : 'All'
+  })
+  const [search, setSearch] = useState(initialSearch)
 
   const filtered = useMemo(() => {
-    const list = activeSector === 'All'
+    let list = activeSector === 'All'
       ? BRANDS
       : BRANDS.filter((b) => b.sector === activeSector)
+
+    if (search.trim()) {
+      const q = search.toLowerCase().trim()
+      list = list.filter(
+        (b) =>
+          b.name.toLowerCase().includes(q) ||
+          b.sector.toLowerCase().includes(q) ||
+          b.country.toLowerCase().includes(q) ||
+          b.group.toLowerCase().includes(q) ||
+          b.known_for.toLowerCase().includes(q)
+      )
+    }
+
     return [...list].sort((a, b) => a.name.localeCompare(b.name))
-  }, [activeSector])
+  }, [activeSector, search])
 
   const grouped = useMemo(() => groupByLetter(filtered), [filtered])
 
@@ -45,6 +77,17 @@ export default function WikiLuxAllPage() {
       </div>
 
       <div className="jl-container py-10">
+
+        {/* Search */}
+        <div className="mb-6">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by brand, sector, country..."
+            className="jl-input w-full max-w-md"
+          />
+        </div>
 
         {/* Sector filter pills */}
         <div className="flex flex-wrap gap-2 mb-8">

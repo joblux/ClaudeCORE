@@ -1,8 +1,8 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import type { Metadata } from 'next'
 import { BRANDS } from '@/lib/wikilux-brands'
 import { WIKILUX_CATEGORY_ICONS } from '@/lib/sector-icons'
+import WikiLuxSearch from './WikiLuxSearch'
 
 export const metadata: Metadata = {
   title: 'WikiLux — Luxury Brand Encyclopedia | JOBLUX',
@@ -55,8 +55,6 @@ const categories = Object.entries(sectorCounts).map(([sector, count]) => ({
   icon: WIKILUX_CATEGORY_ICONS[sector],
 }))
 
-const featuredBrands = BRANDS.slice(0, 6)
-
 export default function WikiLuxPage() {
   return (
     <div>
@@ -87,68 +85,7 @@ export default function WikiLuxPage() {
 
       <div className="jl-container py-10">
 
-        {/* SEARCH */}
-        <div className="mb-10 text-center">
-          <div className="jl-search mx-auto" style={{ maxWidth: 480 }}>
-            <input type="text" placeholder="Search brands — Chanel, Rolex, Aman..." />
-            <button>Search</button>
-          </div>
-        </div>
-
-        {/* CATEGORIES */}
-        <div className="mb-10">
-          <div className="jl-section-label"><span>Browse by Category</span></div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {categories.map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/wikilux/all?sector=${cat.slug}`}
-                className="jl-card flex items-center gap-3 group"
-              >
-                {cat.icon && (
-                  <div className="w-8 h-8 flex-shrink-0 opacity-50 group-hover:opacity-100 transition-opacity">
-                    <Image src={cat.icon} alt={cat.label} width={32} height={32} />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="font-sans text-xs font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors">
-                    {cat.label}
-                  </div>
-                  <div className="font-sans text-[0.65rem] text-[#aaa] mt-0.5">{cat.count} brands</div>
-                </div>
-                <span className="text-[#e8e2d8] group-hover:text-[#a58e28] transition-colors">&rarr;</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* FEATURED BRANDS */}
-        <div className="mb-10">
-          <div className="jl-section-label"><span>Featured Maisons</span></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {featuredBrands.map((brand) => (
-              <Link
-                key={brand.slug}
-                href={`/wikilux/${brand.slug}`}
-                className="jl-card flex items-start gap-4 group"
-              >
-                <div className="w-10 h-10 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0 group-hover:bg-[#a58e28] transition-colors">
-                  <span className="jl-serif text-base text-[#a58e28] group-hover:text-[#1a1a1a]">
-                    {brand.name[0]}
-                  </span>
-                </div>
-                <div>
-                  <div className="font-sans text-sm font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors">
-                    {brand.name}
-                  </div>
-                  <div className="font-sans text-[0.65rem] text-[#aaa] mt-0.5">
-                    {brand.sector} &middot; {brand.country}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+        <WikiLuxSearch brands={BRANDS} categories={categories} />
 
         {/* A-Z NOTE */}
         <div className="text-center py-8 border-t border-[#e8e2d8]">
