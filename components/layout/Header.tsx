@@ -60,12 +60,20 @@ export function Header() {
             </button>
             <UserMenu />
             {!isAuthenticated && (
-              <Link
-                href="/join"
-                className="hidden sm:inline-flex px-4 py-2 bg-[#a58e28] text-[#1a1a1a] text-[0.7rem] font-semibold tracking-wider uppercase rounded-md hover:bg-[#c4aa3a] transition-colors"
-              >
-                Join
-              </Link>
+              <div className="hidden sm:flex items-center gap-4">
+                <Link
+                  href="/members"
+                  className="text-[0.8rem] tracking-wide text-[#1a1a1a]/70 hover:text-[#1a1a1a] transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/join"
+                  className="text-[0.8rem] tracking-wide text-[#a58e28] hover:text-[#1a1a1a] transition-colors"
+                >
+                  Join
+                </Link>
+              </div>
             )}
 
             {/* Mobile hamburger — visible only on mobile */}
