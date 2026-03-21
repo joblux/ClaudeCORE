@@ -43,6 +43,7 @@ const PUBLIC_FIELDS = [
   'team_size',
   'seo_title',
   'seo_description',
+  'location',
   'reference_number',
   'activated_at',
   'closing_date',
@@ -71,7 +72,7 @@ export async function GET(req: NextRequest) {
     let query = supabase
       .from('search_assignments')
       .select(PUBLIC_FIELDS, { count: 'exact' })
-      .eq('status', 'active')
+      .eq('status', 'published')
       .or('closing_date.is.null,closing_date.gt.now()')
 
     // Search by title or maison (case-insensitive)

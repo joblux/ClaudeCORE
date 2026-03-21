@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { DEPARTMENTS, SENIORITY_LEVELS, CONTRACT_TYPES, REMOTE_POLICIES, CURRENCY_SYMBOLS } from '@/lib/assignment-options'
+import { CURRENCY_SYMBOLS } from '@/lib/assignment-options'
 import type { SearchAssignment } from '@/types/search-assignment'
 
 /** Format a salary number to a readable string (e.g. 120000 → "120K") */
@@ -59,13 +59,37 @@ export default function OpportunitiesPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  // Get unique locations from opportunities for the filter dropdown
+  // Build dynamic filter options from actual data
   const uniqueLocations = useMemo(() => {
     const locs = new Set<string>()
     opportunities.forEach((b) => {
       if (b.city) locs.add(b.city)
     })
     return Array.from(locs).sort()
+  }, [opportunities])
+
+  const uniqueDepartments = useMemo(() => {
+    const vals = new Set<string>()
+    opportunities.forEach((b) => { if (b.department) vals.add(b.department) })
+    return Array.from(vals).sort()
+  }, [opportunities])
+
+  const uniqueSeniority = useMemo(() => {
+    const vals = new Set<string>()
+    opportunities.forEach((b) => { if (b.seniority) vals.add(b.seniority) })
+    return Array.from(vals).sort()
+  }, [opportunities])
+
+  const uniqueContractTypes = useMemo(() => {
+    const vals = new Set<string>()
+    opportunities.forEach((b) => { if (b.contract_type) vals.add(b.contract_type) })
+    return Array.from(vals).sort()
+  }, [opportunities])
+
+  const uniqueRemotePolicies = useMemo(() => {
+    const vals = new Set<string>()
+    opportunities.forEach((b) => { if (b.remote_policy) vals.add(b.remote_policy) })
+    return Array.from(vals).sort()
   }, [opportunities])
 
   // Client-side filtering
@@ -121,13 +145,13 @@ export default function OpportunitiesPage() {
           {/* Department */}
           <select className="jl-input" value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}>
             <option value="">All Departments</option>
-            {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
+            {uniqueDepartments.map((d) => <option key={d} value={d}>{d}</option>)}
           </select>
 
           {/* Seniority */}
           <select className="jl-input" value={seniorityFilter} onChange={(e) => setSeniorityFilter(e.target.value)}>
             <option value="">All Seniority</option>
-            {SENIORITY_LEVELS.map((s) => <option key={s} value={s}>{s}</option>)}
+            {uniqueSeniority.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
 
           {/* Location */}
@@ -139,13 +163,13 @@ export default function OpportunitiesPage() {
           {/* Contract Type */}
           <select className="jl-input" value={contractFilter} onChange={(e) => setContractFilter(e.target.value)}>
             <option value="">All Contract Types</option>
-            {CONTRACT_TYPES.map((ct) => <option key={ct} value={ct}>{ct}</option>)}
+            {uniqueContractTypes.map((ct) => <option key={ct} value={ct}>{ct}</option>)}
           </select>
 
           {/* Remote Policy */}
           <select className="jl-input" value={remoteFilter} onChange={(e) => setRemoteFilter(e.target.value)}>
             <option value="">All Work Models</option>
-            {REMOTE_POLICIES.map((r) => <option key={r} value={r}>{r}</option>)}
+            {uniqueRemotePolicies.map((r) => <option key={r} value={r}>{r}</option>)}
           </select>
 
           {/* Clear filters */}
