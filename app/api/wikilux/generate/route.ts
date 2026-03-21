@@ -12,7 +12,7 @@ const supabaseAdmin = createClient(
 );
 
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+  apiKey: process.env.WIKILUX_API_KEY!,
 });
 
 export async function POST(req: Request) {

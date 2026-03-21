@@ -9,7 +9,7 @@ const supabase = createClient(
 )
 
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+  apiKey: process.env.WIKILUX_API_KEY!,
 })
 
 function buildPrompt(brand: Brand) {

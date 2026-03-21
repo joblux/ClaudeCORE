@@ -14,7 +14,7 @@ const supabase = createClient(
 )
 
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+  apiKey: process.env.WIKILUX_API_KEY!,
 })
 
 const RICH_CONTENT_KEYS = ["history", "founder", "signature_products", "creative_directors", "brand_dna", "careers"]

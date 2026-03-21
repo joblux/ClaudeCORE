@@ -76,7 +76,7 @@ export default async function TranslatedBrandPageRoute({
   // If translation doesn't exist, generate it on-demand
   if (!translatedContent) {
     try {
-      const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
+      const anthropic = new Anthropic({ apiKey: process.env.WIKILUX_API_KEY! })
       const langName = LANG_NAMES[lang] || lang
 
       const message = await anthropic.messages.create({

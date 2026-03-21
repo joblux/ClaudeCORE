@@ -6,13 +6,13 @@ import { BRANDS } from '../lib/wikilux-brands'
 import { buildTranslationPrompt, SUPPORTED_LANGUAGES } from '../lib/wikilux-prompt'
 
 // Verify env
-const required = ['ANTHROPIC_API_KEY', 'NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY']
+const required = ['WIKILUX_API_KEY', 'NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY']
 for (const key of required) {
   if (!process.env[key]) { console.error(`Missing env var: ${key}`); process.exit(1) }
 }
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
+const anthropic = new Anthropic({ apiKey: process.env.WIKILUX_API_KEY! })
 
 const TARGET_LANGS = SUPPORTED_LANGUAGES.filter((l) => l.code !== 'en')
 
