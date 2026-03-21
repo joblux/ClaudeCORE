@@ -35,13 +35,8 @@ export default function HomePage() {
       <section className="w-full bg-[#1a1a1a] px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8 text-center">
         <div className="max-w-3xl mx-auto">
 
-          <p className="text-[11px] tracking-[0.16em] uppercase text-[#a58e28] font-medium mb-3">
+          <p className="text-sm sm:text-base tracking-[0.14em] uppercase text-[#a58e28] font-medium mb-6">
             Luxury Talents Society
-          </p>
-
-          <p className="text-white/50 text-sm sm:text-base leading-relaxed max-w-xl mx-auto mb-6">
-            WikiLux. Bloglux. Salary intelligence. Executive search.
-            Free against contribution — no ads, no noise.
           </p>
 
           <div className="flex flex-row gap-2 justify-center items-center">
