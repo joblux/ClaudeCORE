@@ -4,97 +4,185 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { useRequireAdmin } from '@/lib/auth-hooks'
+import {
+  Briefcase, PenLine, UserCheck, Download, Send,
+  ExternalLink, CheckCircle2, Circle
+} from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-const GOLD = '#a58e28'
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
-const STAGE_COLORS: Record<string, string> = {
-  applied: '#6B7280',
-  screening: '#3B82F6',
-  shortlisted: '#8B5CF6',
-  submitted_to_client: '#F59E0B',
-  client_reviewing: '#F97316',
-  interview_1: '#EC4899',
-  interview_2: '#EC4899',
-  interview_final: '#EC4899',
-  offer_made: '#10B981',
+function getGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Good morning'
+  if (hour < 18) return 'Good afternoon'
+  return 'Good evening'
 }
 
-const STAGE_LABELS: Record<string, string> = {
-  applied: 'Applied',
-  screening: 'Screening',
-  shortlisted: 'Shortlisted',
-  submitted_to_client: 'Submitted',
-  client_reviewing: 'Reviewing',
-  interview_1: 'Interview 1',
-  interview_2: 'Interview 2',
-  interview_final: 'Final',
-  offer_made: 'Offer',
+function getFormattedDate(): string {
+  return new Date().toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
 }
+
+function relativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  const days = Math.floor(hrs / 24)
+  return `${days}d ago`
+}
+
+// ── ATS stage config ─────────────────────────────────────────────────────────
+
+const PIPELINE_STAGES = [
+  { key: 'applied', label: 'Sourced', color: 'bg-blue-100 text-blue-700' },
+  { key: 'screening', label: 'Screening', color: 'bg-amber-100 text-amber-700' },
+  { key: 'shortlisted', label: 'Interview', color: 'bg-[#a58e28]/15 text-[#a58e28]' },
+  { key: 'offer_made', label: 'Placed', color: 'bg-green-100 text-green-700' },
+]
+
+// ── Launch checklist ─────────────────────────────────────────────────────────
+
+const LAUNCH_CHECKLIST = [
+  { label: 'Set Vercel spend cap', done: true },
+  { label: 'Rotate Anthropic API key', done: true },
+  { label: 'Seed all content', done: true },
+  { label: 'Sentry monitoring live', done: true },
+  { label: 'Rotate GitHub PAT', done: false },
+  { label: 'Set up Cloudflare', done: false },
+  { label: 'Update NEXTAUTH_URL', done: false },
+  { label: 'Update OAuth callbacks', done: false },
+  { label: 'Update email domain', done: false },
+  { label: 'Set 301 redirects', done: false },
+  { label: 'Update meta/OG/canonical URLs', done: false },
+  { label: 'Set up GA4 + Search Console', done: false },
+  { label: 'Toggle offline mode off (launch!)', done: false },
+]
+
+const CHECKLIST_DONE = LAUNCH_CHECKLIST.filter(c => c.done).length
+const CHECKLIST_VISIBLE = 8
+
+// ── System status (TODO: pull from Vercel/Sentry/Supabase APIs in future) ──
+
+const SYSTEM_STATUS = [
+  { service: 'Vercel', detail: 'Live · Last deploy 2h ago', status: 'green' as const },
+  { service: 'Supabase', detail: 'Healthy · Free tier', status: 'green' as const },
+  { service: 'Sentry', detail: '0 errors today', status: 'green' as const },
+  { service: 'Anthropic credit', detail: '~$10 remaining', status: 'amber' as const },
+  { service: 'WikiLux', detail: 'Celine gen failed', status: 'amber' as const },
+]
+
+// ── Main component ───────────────────────────────────────────────────────────
 
 export default function AdminDashboardPage() {
-  const { isAdmin, isLoading: authLoading } = useRequireAdmin()
-  const [data, setData] = useState<any>(null)
-  const [atsStats, setAtsStats] = useState<any>(null)
-  const [weeklyGrowth, setWeeklyGrowth] = useState<{ week: string; count: number }[]>([])
-  const [activityFeed, setActivityFeed] = useState<any[]>([])
-  const [autoApproved, setAutoApproved] = useState<any[]>([])
+  const { isAdmin, isLoading: authLoading, name } = useRequireAdmin()
+
   const [loading, setLoading] = useState(true)
+  const [kpis, setKpis] = useState({
+    members: 0, pendingMembers: 0,
+    assignments: 0, activeAssignments: 0,
+    articles: 0,
+    brands: 0, failedBrands: 0,
+    salaries: 0,
+    interviews: 0, houses: 0,
+  })
+  const [pipelineData, setPipelineData] = useState<Record<string, number>>({})
+  const [activityFeed, setActivityFeed] = useState<any[]>([])
+  const [showAllChecklist, setShowAllChecklist] = useState(false)
 
   useEffect(() => {
     if (!isAdmin) return
 
     Promise.all([
-      fetch('/api/admin/dashboard').then(r => r.json()).catch(() => null),
-      fetch('/api/applications/stats').then(r => r.json()).catch(() => null),
-    ]).then(([dashData, stats]) => {
-      setData(dashData)
-      setAtsStats(stats)
-    }).finally(() => setLoading(false))
-
-    fetchWeeklyGrowth()
-    fetchActivityFeed()
-    fetchAutoApproved()
+      fetchKPIs(),
+      fetchPipeline(),
+      fetchActivity(),
+    ]).finally(() => setLoading(false))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin])
 
-  async function fetchWeeklyGrowth() {
-    const weeks: { week: string; count: number }[] = []
-    const now = new Date()
-    for (let i = 11; i >= 0; i--) {
-      const weekStart = new Date(now)
-      weekStart.setDate(weekStart.getDate() - (i + 1) * 7)
-      const weekEnd = new Date(weekStart)
-      weekEnd.setDate(weekEnd.getDate() + 7)
-      const { count } = await supabase
-        .from('members')
-        .select('id', { count: 'exact', head: true })
-        .neq('role', 'admin')
-        .gte('created_at', weekStart.toISOString())
-        .lt('created_at', weekEnd.toISOString())
-      const label = weekStart.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-      weeks.push({ week: label, count: count ?? 0 })
-    }
-    setWeeklyGrowth(weeks)
+  async function fetchKPIs() {
+    const [
+      totalMembers, pendingMembers,
+      totalAssignments, activeAssignments,
+      totalArticles,
+      totalBrands,
+      totalSalaries,
+      totalInterviews,
+    ] = await Promise.all([
+      supabase.from('members').select('id', { count: 'exact', head: true }),
+      supabase.from('members').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('search_assignments').select('id', { count: 'exact', head: true }),
+      supabase.from('search_assignments').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+      supabase.from('articles').select('id', { count: 'exact', head: true }),
+      supabase.from('wikilux_brands').select('id', { count: 'exact', head: true }),
+      supabase.from('salary_benchmarks').select('id', { count: 'exact', head: true }),
+      supabase.from('interview_experiences').select('id', { count: 'exact', head: true }),
+    ])
+
+    // Count unique houses from interviews
+    const { data: houseData } = await supabase
+      .from('interview_experiences')
+      .select('company')
+
+    const uniqueHouses = new Set((houseData || []).map(h => h.company).filter(Boolean)).size
+
+    // Count failed WikiLux brands (if any have error status)
+    // TODO: Add error tracking column to wikilux_brands table
+    const failedBrands = 0
+
+    setKpis({
+      members: totalMembers.count ?? 0,
+      pendingMembers: pendingMembers.count ?? 0,
+      assignments: totalAssignments.count ?? 0,
+      activeAssignments: activeAssignments.count ?? 0,
+      articles: totalArticles.count ?? 0,
+      brands: totalBrands.count ?? 0,
+      failedBrands,
+      salaries: totalSalaries.count ?? 0,
+      interviews: totalInterviews.count ?? 0,
+      houses: uniqueHouses,
+    })
   }
 
-  async function fetchActivityFeed() {
+  async function fetchPipeline() {
+    try {
+      const res = await fetch('/api/applications/stats')
+      const data = await res.json()
+      const byStage: Record<string, number> = {}
+      for (const s of data?.by_stage || []) {
+        byStage[s.stage] = s.count
+      }
+      setPipelineData(byStage)
+    } catch {
+      setPipelineData({})
+    }
+  }
+
+  async function fetchActivity() {
     const [members, contributions] = await Promise.all([
       supabase
         .from('members')
         .select('id, full_name, email, status, role, created_at')
         .neq('role', 'admin')
         .order('created_at', { ascending: false })
-        .limit(10),
+        .limit(6),
       supabase
         .from('contributions')
         .select('id, contribution_type, brand_name, status, created_at')
         .order('created_at', { ascending: false })
-        .limit(10),
+        .limit(6),
     ])
 
     const items: any[] = []
@@ -117,260 +205,260 @@ export default function AdminDashboardPage() {
       })
     }
     items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    setActivityFeed(items.slice(0, 20))
-  }
-
-  async function fetchAutoApproved() {
-    const { data } = await supabase
-      .from('member_ai_reviews')
-      .select('member_id, confidence, created_at')
-      .eq('auto_approved', true)
-      .order('created_at', { ascending: false })
-      .limit(20)
-
-    if (!data || data.length === 0) {
-      setAutoApproved([])
-      return
-    }
-
-    // Fetch member details for these
-    const memberIds = data.map(d => d.member_id)
-    const { data: members } = await supabase
-      .from('members')
-      .select('id, full_name, role, maison')
-      .in('id', memberIds)
-
-    const memberMap = new Map((members || []).map(m => [m.id, m]))
-    setAutoApproved(data.map(d => ({
-      ...d,
-      member: memberMap.get(d.member_id),
-    })))
-  }
-
-  function relativeTime(dateStr: string) {
-    const diff = Date.now() - new Date(dateStr).getTime()
-    const mins = Math.floor(diff / 60000)
-    if (mins < 1) return 'just now'
-    if (mins < 60) return `${mins}m ago`
-    const hrs = Math.floor(mins / 60)
-    if (hrs < 24) return `${hrs}h ago`
-    const days = Math.floor(hrs / 24)
-    return `${days}d ago`
+    setActivityFeed(items.slice(0, 8))
   }
 
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-[#fafaf5] flex items-center justify-center">
-        <p className="text-sm text-[#999]">Loading dashboard...</p>
+        <p className="text-sm text-gray-400">Loading dashboard...</p>
       </div>
     )
   }
 
-  if (!data) {
-    return (
-      <div className="min-h-screen bg-[#fafaf5] flex items-center justify-center">
-        <p className="text-sm text-red-500">Failed to load dashboard data.</p>
-      </div>
-    )
-  }
+  const firstName = name?.split(' ')[0] || 'Mo'
+  const pipelineTotal = PIPELINE_STAGES.reduce((sum, s) => sum + (pipelineData[s.key] || 0), 0)
+  const visibleChecklist = showAllChecklist ? LAUNCH_CHECKLIST : LAUNCH_CHECKLIST.slice(0, CHECKLIST_VISIBLE)
+  const hiddenCount = LAUNCH_CHECKLIST.length - CHECKLIST_VISIBLE
 
-  const { overview } = data
-
-  const kpis = [
-    { label: 'Total Members', value: overview.totalMembers, trend: overview.newThisWeek > 0 ? `+${overview.newThisWeek} this week` : null },
-    { label: 'Pending Approvals', value: overview.pendingApprovals, highlight: overview.pendingApprovals > 0 },
-    { label: 'Active Assignments', value: overview.publishedBriefs },
-    { label: 'Open Applications', value: atsStats?.active_candidates ?? 0 },
-    { label: 'Unread Messages', value: 0 },
-    { label: 'Pending Contributions', value: overview.pendingContributions, highlight: overview.pendingContributions > 0 },
+  const kpiCards = [
+    {
+      label: 'MEMBERS',
+      value: kpis.members,
+      sub: kpis.pendingMembers > 0 ? `+${kpis.pendingMembers} pending` : 'All reviewed',
+      subColor: kpis.pendingMembers > 0 ? 'text-green-600' : 'text-gray-400',
+    },
+    {
+      label: 'ASSIGNMENTS',
+      value: kpis.assignments,
+      sub: kpis.activeAssignments > 0 ? `${kpis.activeAssignments} active` : 'No active',
+      subColor: kpis.activeAssignments > 0 ? 'text-green-600' : 'text-gray-400',
+    },
+    {
+      label: 'BLOGLUX',
+      value: kpis.articles,
+      sub: 'articles',
+      subColor: 'text-gray-400',
+    },
+    {
+      label: 'WIKILUX',
+      value: kpis.brands,
+      sub: kpis.failedBrands > 0 ? `${kpis.failedBrands} failed` : 'All cached',
+      subColor: kpis.failedBrands > 0 ? 'text-amber-600' : 'text-green-600',
+    },
+    {
+      label: 'SALARY DATA',
+      value: kpis.salaries,
+      sub: 'All seeded',
+      subColor: 'text-green-600',
+    },
+    {
+      label: 'INTERVIEWS',
+      value: kpis.interviews,
+      sub: `${kpis.houses} houses`,
+      subColor: 'text-gray-400',
+    },
   ]
-
-  const maxWeekly = Math.max(...weeklyGrowth.map(w => w.count), 1)
-  const stages = atsStats?.by_stage || []
-  const maxStage = Math.max(...stages.map((s: any) => s.count), 1)
 
   return (
     <div className="min-h-screen bg-[#fafaf5]">
-      <div className="bg-white border-b border-[#e8e2d8] px-6 py-5">
-        <p className="jl-overline-gold mb-1">Administration</p>
-        <h1 className="jl-serif text-2xl text-[#1a1a1a]">Command Centre</h1>
-      </div>
+      <div className="px-5 py-4 lg:px-6">
 
-      <div className="p-6 max-w-[1400px] mx-auto">
-        {/* Row 1 — KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-          {kpis.map((kpi) => (
-            <div
-              key={kpi.label}
-              className={`bg-white border rounded-sm p-4 ${kpi.highlight ? 'border-[#a58e28]' : 'border-[#e8e2d8]'}`}
-            >
-              <p className="text-[0.6rem] text-[#999] uppercase tracking-wider mb-1">{kpi.label}</p>
-              <p className={`jl-serif text-2xl ${kpi.highlight ? 'text-[#a58e28]' : 'text-[#1a1a1a]'}`}>
-                {kpi.value}
-              </p>
-              {kpi.trend && <p className="text-[0.65rem] text-[#a58e28] mt-0.5">{kpi.trend}</p>}
+        {/* ── Welcome + date ── */}
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-lg font-medium text-[#1a1a1a]">
+            {getGreeting()}, {firstName}
+          </h1>
+          <span className="text-xs text-gray-400 hidden sm:block">{getFormattedDate()}</span>
+        </div>
+
+        {/* ── KPI row — 6 metrics ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-4">
+          {kpiCards.map((kpi) => (
+            <div key={kpi.label} className="bg-gray-50 rounded-lg p-3">
+              <div className="text-[10px] uppercase tracking-wide text-gray-400 font-medium mb-1">{kpi.label}</div>
+              <div className="text-xl font-medium text-[#1a1a1a]">{kpi.value}</div>
+              <div className={`text-[10px] mt-0.5 ${kpi.subColor}`}>{kpi.sub}</div>
             </div>
           ))}
         </div>
 
-        {/* Row 2 — Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Member Growth Chart */}
-          <div className="bg-[#1a1a1a] border border-[#333] rounded-sm p-5">
-            <h2 className="text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-[#a58e28] mb-4">
-              Member Growth (12 weeks)
-            </h2>
-            {weeklyGrowth.length > 0 ? (
-              <div>
-                <div className="flex items-end gap-1 h-[140px]">
-                  {weeklyGrowth.map((w, i) => (
-                    <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
+        {/* ── Middle row — Pipeline / Quick Actions / System Status ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_0.8fr_0.8fr] gap-3 mb-4">
+
+          {/* Column 1: ATS Pipeline overview */}
+          <div className="border border-gray-200 rounded-xl p-4 bg-white">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] uppercase tracking-wide text-gray-400 font-medium">ATS Pipeline</span>
+              <Link href="/admin/ats" className="text-[11px] text-[#a58e28] hover:text-[#8a7622] font-medium transition-colors">
+                View pipeline →
+              </Link>
+            </div>
+
+            {pipelineTotal > 0 ? (
+              <>
+                <div className="flex gap-1.5 mb-3">
+                  {PIPELINE_STAGES.map((stage) => {
+                    const count = pipelineData[stage.key] || 0
+                    if (count === 0) return null
+                    return (
                       <div
-                        className="w-full rounded-t-sm transition-all"
-                        style={{
-                          height: `${Math.max((w.count / maxWeekly) * 100, 2)}%`,
-                          backgroundColor: GOLD,
-                          opacity: 0.7 + (i / weeklyGrowth.length) * 0.3,
-                        }}
-                      />
-                    </div>
-                  ))}
+                        key={stage.key}
+                        className={`rounded-lg px-3 py-2 ${stage.color}`}
+                        style={{ flex: Math.max(count, 1) }}
+                      >
+                        <div className="text-[10px] font-medium">{stage.label}</div>
+                        <div className="text-base font-medium">{count}</div>
+                      </div>
+                    )
+                  })}
                 </div>
-                <div className="flex gap-1 mt-2">
-                  {weeklyGrowth.map((w, i) => (
-                    <div key={i} className="flex-1 text-center">
-                      <div className="text-[0.45rem] text-[#666] truncate">{w.week}</div>
-                      <div className="text-[0.5rem] text-[#a58e28]">{w.count}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                <p className="text-xs text-gray-400">{pipelineTotal} candidates across {kpis.activeAssignments} active assignment{kpis.activeAssignments !== 1 ? 's' : ''}</p>
+              </>
             ) : (
-              <p className="text-sm text-[#666]">Loading chart data...</p>
+              <div className="py-6 text-center">
+                <p className="text-xs text-gray-400">No active assignments yet.</p>
+                <p className="text-[10px] text-gray-300 mt-1">Pipeline populates when you create search assignments.</p>
+              </div>
             )}
           </div>
 
-          {/* Application Pipeline */}
-          <div className="bg-white border border-[#e8e2d8] rounded-sm p-5">
-            <h2 className="text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-[#a58e28] mb-4">
-              Application Pipeline
-            </h2>
-            {stages.length > 0 ? (
-              <div className="space-y-2.5">
-                {stages
-                  .filter((s: any) => STAGE_LABELS[s.stage])
-                  .map((s: any) => (
-                    <div key={s.stage} className="flex items-center gap-3">
-                      <span className="text-xs text-[#888] w-20 flex-shrink-0 truncate">
-                        {STAGE_LABELS[s.stage]}
-                      </span>
-                      <div className="flex-1 h-5 bg-[#f0ece4] rounded overflow-hidden">
-                        <div
-                          className="h-full rounded transition-all flex items-center pl-2"
-                          style={{
-                            width: `${Math.max((s.count / maxStage) * 100, 8)}%`,
-                            backgroundColor: STAGE_COLORS[s.stage] || '#999',
-                          }}
-                        >
-                          <span className="text-[0.6rem] text-white font-semibold">{s.count}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            ) : (
-              <p className="text-sm text-[#999]">No candidates in pipeline yet.</p>
-            )}
+          {/* Column 2: Quick Actions */}
+          <div className="border border-gray-200 rounded-xl p-4 bg-white">
+            <span className="text-[10px] uppercase tracking-wide text-gray-400 font-medium block mb-3">Quick Actions</span>
+            <div className="space-y-1.5">
+              {[
+                { label: 'New search assignment', href: '/admin/assignments/new', icon: Briefcase },
+                { label: 'Write BlogLux article', href: '/admin/articles/new', icon: PenLine },
+                ...(kpis.pendingMembers > 0 ? [{ label: `Review pending member (${kpis.pendingMembers})`, href: '/admin', icon: UserCheck }] : []),
+                { label: 'Import content', href: '/admin/assignments/import', icon: Download },
+                { label: 'Invite members', href: '/admin/invitations', icon: Send },
+              ].map((action) => {
+                const Icon = action.icon
+                return (
+                  <Link
+                    key={action.label}
+                    href={action.href}
+                    className="flex items-center gap-2.5 bg-gray-50 rounded-lg px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 transition-colors group"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#a58e28] flex-shrink-0" />
+                    <Icon size={13} className="text-gray-400 group-hover:text-[#a58e28] transition-colors flex-shrink-0" />
+                    <span className="truncate">{action.label}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Column 3: System Status */}
+          <div className="border border-gray-200 rounded-xl p-4 bg-white">
+            <span className="text-[10px] uppercase tracking-wide text-gray-400 font-medium block mb-3">System Status</span>
+            <div className="space-y-2.5">
+              {SYSTEM_STATUS.map((item) => (
+                <div key={item.service} className="flex items-start gap-2.5">
+                  <span className={`w-2 h-2 rounded-full mt-1 flex-shrink-0 ${
+                    item.status === 'green' ? 'bg-green-500' :
+                    item.status === 'amber' ? 'bg-amber-500' :
+                    'bg-red-500'
+                  }`} />
+                  <div className="min-w-0">
+                    <div className="text-xs text-[#1a1a1a] font-medium">{item.service}</div>
+                    <div className="text-[10px] text-gray-400">{item.detail}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* TODO: Pull real data from Vercel, Sentry, Supabase, Anthropic APIs */}
           </div>
         </div>
 
-        {/* Row 3 — Activity + Auto-Approved */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Activity Feed */}
-          <div className="bg-white border border-[#e8e2d8] rounded-sm p-5">
-            <h2 className="text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-[#a58e28] mb-4">
-              Recent Activity
-            </h2>
+        {/* ── Bottom row — Activity + Launch Checklist ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+
+          {/* Column 1: Recent Activity */}
+          <div className="border border-gray-200 rounded-xl p-4 bg-white">
+            <span className="text-[10px] uppercase tracking-wide text-gray-400 font-medium block mb-3">Recent Activity</span>
             {activityFeed.length === 0 ? (
-              <p className="text-sm text-[#999]">No recent activity.</p>
+              <p className="text-xs text-gray-400 py-4 text-center">No recent activity.</p>
             ) : (
-              <div className="space-y-3 max-h-[400px] overflow-y-auto">
+              <div className="divide-y divide-gray-100">
                 {activityFeed.map((item, i) => (
-                  <Link key={i} href={item.href} className="flex items-start gap-3 group">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                      item.type === 'member' ? 'bg-[#1a1a1a]' : 'bg-[#a58e28]/10'
-                    }`}>
-                      <span className="text-[0.5rem] font-bold text-[#a58e28]">
-                        {item.type === 'member' ? 'M' : 'C'}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors truncate">
-                        {item.text}
-                      </p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className={`text-[0.6rem] px-1.5 py-0.5 rounded-sm ${
-                          item.status === 'pending' ? 'bg-yellow-50 text-yellow-700' :
-                          item.status === 'approved' ? 'bg-green-50 text-green-700' :
-                          'bg-gray-50 text-gray-600'
-                        }`}>{item.status}</span>
-                        <span className="text-[0.6rem] text-[#ccc]">{relativeTime(item.date)}</span>
+                  <Link
+                    key={i}
+                    href={item.href}
+                    className="flex items-center justify-between py-2 group first:pt-0 last:pb-0"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        item.type === 'member' ? 'bg-[#1a1a1a]' : 'bg-[#a58e28]/10'
+                      }`}>
+                        <span className="text-[7px] font-bold text-[#a58e28]">
+                          {item.type === 'member' ? 'M' : 'C'}
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors truncate">
+                          {item.text}
+                        </p>
                       </div>
                     </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Recently Auto-Approved */}
-          <div className="bg-white border border-[#e8e2d8] rounded-sm p-5">
-            <h2 className="text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-[#a58e28] mb-4">
-              Recently Auto-Approved by AI
-            </h2>
-            {autoApproved.length === 0 ? (
-              <p className="text-sm text-[#999]">No auto-approved members yet.</p>
-            ) : (
-              <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                {autoApproved.map((item, i) => (
-                  <Link key={i} href={`/admin/members/${item.member_id}`} className="flex items-center justify-between group">
-                    <div className="min-w-0">
-                      <p className="text-xs text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors truncate">
-                        {item.member?.full_name || 'Unknown'}
-                      </p>
-                      <p className="text-[0.6rem] text-[#999]">
-                        {item.member?.role} · {item.member?.maison || 'N/A'}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="w-2 h-2 rounded-full bg-[#22c55e]" title="High confidence" />
-                      <span className="text-[0.6rem] text-[#ccc]">{relativeTime(item.created_at)}</span>
+                    <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                      <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded ${
+                        item.status === 'pending' ? 'bg-amber-50 text-amber-700' :
+                        item.status === 'approved' ? 'bg-green-50 text-green-700' :
+                        'bg-gray-50 text-gray-500'
+                      }`}>
+                        {item.status}
+                      </span>
+                      <span className="text-[10px] text-gray-300 min-w-[45px] text-right">{relativeTime(item.date)}</span>
                     </div>
                   </Link>
                 ))}
               </div>
             )}
           </div>
-        </div>
 
-        {/* Row 4 — Quick Actions */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Link href="/admin" className="bg-white border border-[#e8e2d8] rounded-sm p-4 hover:border-[#a58e28] transition-colors text-center">
-            <p className="text-sm font-medium text-[#1a1a1a]">Review Pending Members</p>
-            <p className="text-[0.6rem] text-[#999] mt-1">Approve or reject applications</p>
-          </Link>
-          <Link href="/admin/contributions" className="bg-white border border-[#e8e2d8] rounded-sm p-4 hover:border-[#a58e28] transition-colors text-center">
-            <p className="text-sm font-medium text-[#1a1a1a]">Review Contributions</p>
-            <p className="text-[0.6rem] text-[#999] mt-1">Approve member submissions</p>
-          </Link>
-          <Link href="/admin/assignments/new" className="bg-white border border-[#e8e2d8] rounded-sm p-4 hover:border-[#a58e28] transition-colors text-center">
-            <p className="text-sm font-medium text-[#1a1a1a]">Create Assignment</p>
-            <p className="text-[0.6rem] text-[#999] mt-1">New search assignment</p>
-          </Link>
-          <Link href="/admin/messages" className="bg-white border border-[#e8e2d8] rounded-sm p-4 hover:border-[#a58e28] transition-colors text-center">
-            <p className="text-sm font-medium text-[#1a1a1a]">Compose Message</p>
-            <p className="text-[0.6rem] text-[#999] mt-1">Send to members or clients</p>
-          </Link>
+          {/* Column 2: Launch Checklist */}
+          <div className="border border-gray-200 rounded-xl p-4 bg-white">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] uppercase tracking-wide text-gray-400 font-medium">Launch Checklist</span>
+              <span className="text-[11px] font-medium text-[#a58e28]">{CHECKLIST_DONE}/{LAUNCH_CHECKLIST.length} done</span>
+            </div>
+
+            {/* Progress bar */}
+            <div className="w-full h-1.5 bg-gray-100 rounded-full mb-3 overflow-hidden">
+              <div
+                className="h-full bg-[#a58e28] rounded-full transition-all"
+                style={{ width: `${(CHECKLIST_DONE / LAUNCH_CHECKLIST.length) * 100}%` }}
+              />
+            </div>
+
+            <div className="space-y-1">
+              {visibleChecklist.map((item, i) => (
+                <div key={i} className="flex items-center gap-2 py-1">
+                  {item.done ? (
+                    <CheckCircle2 size={14} className="text-green-500 flex-shrink-0" />
+                  ) : (
+                    <Circle size={14} className="text-gray-300 flex-shrink-0" />
+                  )}
+                  <span className={`text-xs ${item.done ? 'text-gray-400 line-through' : 'text-[#1a1a1a]'}`}>
+                    {item.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {!showAllChecklist && hiddenCount > 0 && (
+              <button
+                onClick={() => setShowAllChecklist(true)}
+                className="text-[11px] text-[#a58e28] hover:text-[#8a7622] font-medium mt-2 transition-colors"
+              >
+                +{hiddenCount} more items →
+              </button>
+            )}
+
+            {/* TODO: Move checklist to Supabase table for persistence & editability */}
+          </div>
         </div>
       </div>
     </div>
