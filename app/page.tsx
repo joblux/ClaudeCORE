@@ -76,7 +76,7 @@ export default function HomePage() {
             <span className="inline-block text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-[#a58e28] border border-[#a58e28]/30 px-3 py-1 w-fit mb-6">
               Featured
             </span>
-            <h2 className="font-serif text-[1.65rem] xl:text-[1.85rem] font-light text-white leading-snug mb-4">
+            <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-white leading-snug mb-4">
               The Hybrid Luxury Executive: What Maisons Are Hiring in 2026
             </h2>
             <p className="font-sans text-sm text-[#888] leading-relaxed mb-6 max-w-lg">
@@ -111,7 +111,7 @@ export default function HomePage() {
             {['All', 'Careers', 'Salary Data', 'Interviews', 'WikiLux', 'BlogLux'].map((tab, i) => (
               <button
                 key={tab}
-                className={`text-xs tracking-[0.12em] uppercase font-medium pb-2 border-b-2 transition-colors ${
+                className={`text-[0.65rem] tracking-[0.12em] uppercase font-semibold pb-2 border-b-2 transition-colors ${
                   i === 0
                     ? 'border-[#a58e28] text-[#a58e28]'
                     : 'border-transparent text-gray-400 hover:text-[#a58e28]'
@@ -129,7 +129,7 @@ export default function HomePage() {
 
         {/* ── Latest from the Society (Desktop: asymmetric two-col) ── */}
         <div className="mb-12 lg:mb-16">
-          <p className="text-xs tracking-[0.15em] text-gray-400 uppercase mb-6">Latest from the Society</p>
+          <p className="text-[0.65rem] font-semibold tracking-[0.12em] text-[#999] uppercase mb-6">Latest from the Society</p>
           <div className="lg:hidden">
             {/* Mobile: stacked layout — reuse existing */}
             <FeaturedContent />
@@ -142,7 +142,7 @@ export default function HomePage() {
               </div>
               <div className="p-6">
                 <span className="text-[0.6rem] font-semibold tracking-[0.12em] uppercase text-[#a58e28] mb-2 block">Intelligence · Talent Moves</span>
-                <h3 className="font-serif text-xl font-light text-[#1a1a1a] leading-snug mb-3 group-hover:text-[#a58e28] transition-colors">
+                <h3 className="font-sans text-lg lg:text-xl font-medium text-[#1a1a1a] leading-snug mb-3 group-hover:text-[#a58e28] transition-colors">
                   <Link href="/bloglux/hybrid-luxury-executive-2026">
                     The Hybrid Luxury Executive: What Maisons Are Hiring in 2026
                   </Link>
@@ -184,7 +184,7 @@ export default function HomePage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <span className="text-[0.6rem] font-semibold tracking-[0.12em] uppercase text-[#a58e28] block mb-1">{item.category}</span>
-                    <h4 className="font-serif text-sm font-light text-[#1a1a1a] leading-snug group-hover:text-[#a58e28] transition-colors line-clamp-2 mb-2">
+                    <h4 className="font-sans text-sm font-medium text-[#1a1a1a] leading-snug group-hover:text-[#a58e28] transition-colors line-clamp-2 mb-2">
                       {item.title}
                     </h4>
                     <span className="font-sans text-[0.6rem] text-[#aaa]">{item.date} · {item.readTime}</span>
@@ -198,7 +198,7 @@ export default function HomePage() {
         {/* ── Open Opportunities ── */}
         <div className="mb-12 lg:mb-16">
           <div className="flex items-center justify-between mb-6">
-            <p className="text-xs tracking-[0.15em] text-gray-400 uppercase">Open Opportunities</p>
+            <p className="text-[0.65rem] font-semibold tracking-[0.12em] text-[#999] uppercase">Open Opportunities</p>
             <Link href="/opportunities" className="font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors">
               View all →
             </Link>
@@ -215,7 +215,7 @@ export default function HomePage() {
             ].map((job, i) => (
               <div key={i} className="bg-white border border-gray-200/60 rounded-xl p-5 hover:border-[#a58e28] transition-colors">
                 <span className="text-[0.6rem] font-semibold tracking-[0.12em] uppercase text-[#a58e28] block mb-2">{job.city}</span>
-                <h4 className="font-serif text-base font-light text-[#1a1a1a] mb-1">{job.title}</h4>
+                <h4 className="font-sans text-base font-medium text-[#1a1a1a] mb-1">{job.title}</h4>
                 <p className="font-sans text-xs text-[#888] mb-3">{job.maison}</p>
                 <span className="jl-badge text-[0.55rem]">{job.badge}</span>
               </div>
@@ -226,7 +226,7 @@ export default function HomePage() {
         {/* ── Explore WikiLux brand strip ── */}
         <div className="mb-12 lg:mb-16">
           <div className="flex items-center justify-between mb-6">
-            <p className="text-xs tracking-[0.15em] text-gray-400 uppercase">Explore WikiLux</p>
+            <p className="text-[0.65rem] font-semibold tracking-[0.12em] text-[#999] uppercase">Explore WikiLux</p>
             <Link href="/wikilux" className="font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors">
               All 500+ brands →
             </Link>
@@ -274,7 +274,7 @@ export default function HomePage() {
           {/* LEFT: The Brief newsletter signup — dark panel */}
           <div className="bg-[#1a1a1a] rounded-xl p-8 xl:p-10 flex flex-col justify-center">
             <span className="text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-[#a58e28] mb-4 block">The Brief</span>
-            <h3 className="font-serif text-xl font-light text-white mb-3">
+            <h3 className="font-sans text-lg lg:text-xl font-medium text-white mb-3">
               The Brief
             </h3>
             <p className="font-sans text-sm text-[#888] leading-relaxed mb-6">
@@ -301,7 +301,7 @@ export default function HomePage() {
           {/* RIGHT: B2B value prop card */}
           <div className="bg-white border border-gray-200/60 rounded-xl p-8 xl:p-10 flex flex-col justify-center">
             <span className="text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-[#a58e28] mb-4 block">For Luxury Brands</span>
-            <h3 className="font-serif text-xl font-light text-[#1a1a1a] mb-3">
+            <h3 className="font-sans text-lg lg:text-xl font-medium text-[#1a1a1a] mb-3">
               Executive Search & Talent Solutions
             </h3>
             <p className="font-sans text-sm text-[#666] leading-relaxed mb-6">

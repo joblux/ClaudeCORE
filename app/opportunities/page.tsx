@@ -95,10 +95,10 @@ export default function OpportunitiesPage() {
       <div className="bg-white border-b border-gray-200/60 py-8 lg:py-10">
         <div className="jl-container">
           <div className="jl-overline-gold mb-3">Current Opportunities</div>
-          <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a] mb-3">
+          <h1 className="font-['Playfair_Display'] text-4xl lg:text-5xl font-light text-[#1a1a1a] mb-3">
             Opportunities
           </h1>
-          <p className="font-sans text-sm text-[#888] max-w-xl">
+          <p className="font-sans text-sm lg:text-base font-normal text-[#555] leading-relaxed max-w-xl">
             Confidential and exclusive assignments across luxury. All positions are handled with full discretion by the JOBLUX team.
           </p>
         </div>
@@ -179,7 +179,7 @@ export default function OpportunitiesPage() {
         ) : filtered.length === 0 ? (
           /* Empty state */
           <div className="bg-white border border-gray-200/60 rounded-xl text-center py-16 px-6">
-            <p className="jl-serif text-xl text-[#1a1a1a] mb-3">No current opportunities match your criteria.</p>
+            <p className="font-sans text-lg lg:text-xl font-medium text-[#1a1a1a] mb-3">No current opportunities match your criteria.</p>
             <p className="text-sm text-[#888] mb-6">
               Join JOBLUX to be notified when new positions become available.
             </p>
@@ -222,7 +222,7 @@ export default function OpportunitiesPage() {
                         </div>
 
                         {/* Position title */}
-                        <h3 className="jl-serif text-lg font-light text-[#1a1a1a] mb-2 group-hover:text-[#a58e28] transition-colors">
+                        <h3 className="font-sans text-lg lg:text-xl font-medium text-[#1a1a1a] mb-2 group-hover:text-[#a58e28] transition-colors">
                           {assignment.title}
                         </h3>
 
@@ -280,7 +280,7 @@ export default function OpportunitiesPage() {
         {/* ── Employer CTA ───────────────────────────────────────── */}
         <div className="mt-10 bg-white border border-gray-200/60 rounded-xl p-6 lg:p-8 text-center">
           <div className="jl-overline-gold mb-2">For Employers</div>
-          <p className="font-sans text-sm text-[#666] mb-4">
+          <p className="font-sans text-sm lg:text-base font-normal text-[#555] leading-relaxed mb-4">
             Submit a confidential hiring brief. JOBLUX presents pre-screened candidates from our vetted network.
           </p>
           <div className="flex items-center justify-center gap-3">

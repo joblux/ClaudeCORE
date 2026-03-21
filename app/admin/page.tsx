@@ -251,8 +251,8 @@ export default function AdminPage() {
               }}
               className="bg-white border border-gray-200 rounded-xl p-3 text-center hover:border-[#a58e28]/30 transition-colors"
             >
-              <div className="text-2xl font-light text-[#a58e28]" style={{ fontFamily: "serif" }}>{val}</div>
-              <div className="text-[9px] tracking-[0.15em] uppercase text-gray-400 mt-1">{label}</div>
+              <div className="text-2xl font-light text-[#a58e28]">{val}</div>
+              <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mt-1">{label}</div>
             </button>
           ))}
         </div>

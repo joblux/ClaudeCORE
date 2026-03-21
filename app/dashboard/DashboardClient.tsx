@@ -72,41 +72,47 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
   const tierLabel = TIER_LABELS[role] || role
   const tierSubtitle = TIER_SUBTITLES[role] || 'Professional account'
   const isBusiness = ['business', 'insider'].includes(role)
-  const isProfessional = ['rising', 'pro', 'professional', 'executive'].includes(role)
 
-  // ── State ────────────────────────────────────────────────────────
   const [opportunities, setOpportunities] = useState<SearchAssignment[]>([])
+  const [assignments, setAssignments] = useState<any[]>([])
   const [profileCompleteness, setProfileCompleteness] = useState(0)
   const [completenessHint, setCompletenessHint] = useState('')
   const [contributionPoints, setContributionPoints] = useState(0)
   const [applicationCount, setApplicationCount] = useState(0)
+  const [internshipCount, setInternshipCount] = useState(0)
   const [loading, setLoading] = useState(true)
 
-  // ── Data loading ─────────────────────────────────────────────────
   useEffect(() => {
     async function load() {
       try {
-        const oppRes = await fetch('/api/opportunities?limit=5')
-        const oppData = await oppRes.json()
-        setOpportunities(oppData.opportunities || [])
+        if (isBusiness) {
+          // Business: fetch assignments instead of opportunities
+          try {
+            const res = await fetch('/api/assignments?status=active')
+            const data = await res.json()
+            setAssignments(data.assignments || [])
+          } catch { /* silent */ }
+        } else {
+          // Professional: fetch opportunities
+          const oppRes = await fetch('/api/opportunities?limit=5')
+          const oppData = await oppRes.json()
+          setOpportunities(oppData.opportunities || [])
+        }
 
         const profileRes = await fetch(`/api/members/profile?email=${encodeURIComponent(email)}`)
         const profileData = await profileRes.json()
         if (profileData.member) {
           const m = profileData.member
 
-          // Tier-aware profile completeness
           let score = 0
           let total = 0
           if (isBusiness) {
-            // Business/Insider: company name, sector, description, contact info
             total = 4
             if (m.company_name || m.maison) score++
             if (m.sector || m.department) score++
             if (m.bio || m.headline) score++
             if (m.email || m.phone) score++
           } else {
-            // Pro/Rising/Executive: headline, experience, CV, location, contact preference
             total = 5
             if (m.headline) score++
             if (profileData.workExperiences?.length > 0) score++
@@ -116,12 +122,11 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
           }
           setProfileCompleteness(Math.round((score / total) * 100))
 
-          // Tier-aware completeness hints
           if (isBusiness) {
             if (!m.company_name && !m.maison) setCompletenessHint('Add your company name to get started')
             else if (!m.bio && !m.headline) setCompletenessHint('Add a company description')
             else if (score < total) setCompletenessHint('Complete more sections to improve visibility')
-            else setCompletenessHint('Your profile is complete!')
+            else setCompletenessHint('Your company profile is complete!')
           } else {
             if (!m.headline) setCompletenessHint('Add a headline to stand out')
             else if (profileData.documents?.length === 0) setCompletenessHint('Upload your CV to unlock full opportunity matching')
@@ -133,146 +138,265 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
           setContributionPoints(m.contribution_points || 0)
         }
 
-        try {
-          const appRes = await fetch('/api/opportunities/applications')
-          if (appRes.ok) {
-            const appData = await appRes.json()
-            setApplicationCount(Array.isArray(appData) ? appData.length : appData.count || 0)
-          }
-        } catch { /* silent */ }
+        if (!isBusiness) {
+          try {
+            const appRes = await fetch('/api/opportunities/applications')
+            if (appRes.ok) {
+              const appData = await appRes.json()
+              setApplicationCount(Array.isArray(appData) ? appData.length : appData.count || 0)
+            }
+          } catch { /* silent */ }
+        }
       } catch { /* silent */ }
       setLoading(false)
     }
     load()
   }, [email, isBusiness])
 
-  // ── Tier-specific quick actions ────────────────────────────────
-  const quickActions: { label: string; href: string; desc: string }[] = []
+  // ══════════════════════════════════════════════════════════════════
+  // SHARED: Welcome strip
+  // ══════════════════════════════════════════════════════════════════
 
-  if (isAdmin) {
-    quickActions.push(
-      { label: 'Open Command Centre', href: '/admin/dashboard', desc: 'Admin dashboard' },
-      { label: 'Review pending applications', href: '/admin', desc: 'Approve or reject' },
-      { label: 'Write BlogLux article', href: '/admin/articles/new', desc: 'Create content' },
-      { label: 'Import content', href: '/admin/assignments/import', desc: 'Bulk import' },
-    )
-  } else if (isBusiness) {
-    quickActions.push(
+  const welcomeStrip = (
+    <div className="bg-white border-b border-[#e8e2d8]">
+      <div className="max-w-[1400px] mx-auto px-4 lg:px-8 xl:px-16 py-10 lg:py-12">
+        <div className="lg:flex lg:justify-between lg:items-end">
+          <div>
+            <h1 className="font-['Playfair_Display'] text-3xl lg:text-4xl font-light text-[#1a1a1a] mb-2">
+              Welcome back, {firstName}
+            </h1>
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="inline-flex items-center px-2.5 py-1 bg-[#a58e28]/10 text-[#a58e28] text-[0.65rem] font-semibold tracking-[0.12em] uppercase rounded-full">
+                {tierLabel}
+              </span>
+              <span className="text-sm text-[#555]">{tierSubtitle}</span>
+              {contributionPoints > 0 && !isBusiness && (
+                <span className="text-[0.6rem] text-[#aaa]">{contributionPoints} points</span>
+              )}
+            </div>
+            {isAdmin && (
+              <Link
+                href="/admin/dashboard"
+                className="inline-flex items-center gap-1 text-sm text-[#a58e28] hover:text-[#7a6a1e] font-medium transition-colors mt-3"
+              >
+                Open Command Centre →
+              </Link>
+            )}
+          </div>
+          <div className="mt-4 lg:mt-0">
+            <Link
+              href="/profile"
+              className="inline-flex items-center gap-1 text-sm text-[#a58e28] hover:text-[#7a6a1e] font-medium transition-colors"
+            >
+              Edit profile <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  // ══════════════════════════════════════════════════════════════════
+  // BUSINESS / INSIDER DASHBOARD
+  // ══════════════════════════════════════════════════════════════════
+
+  if (isBusiness) {
+    const businessKpis = [
+      { label: 'Active Assignments', value: String(assignments.length), gold: false },
+      { label: 'Internships Posted', value: String(internshipCount), gold: false },
+      { label: 'Candidates Viewed', value: '—', gold: false },
+      { label: 'Messages', value: '—', gold: false },
+    ]
+
+    const businessActions = [
       { label: 'Post a free internship', href: '/dashboard/internships/new', desc: 'Reach luxury professionals' },
-      { label: 'Submit a search request', href: '/admin/briefs/new', desc: 'Create a hiring assignment' },
+      { label: 'Submit a search request', href: '/admin/briefs/new', desc: 'Find exceptional talent' },
       { label: 'Browse WikiLux', href: '/wikilux', desc: '500+ brand encyclopedias' },
-      { label: 'View your assignments', href: '/admin/assignments', desc: 'Track open positions' },
-    )
-  } else {
-    // Pro / Pro+ / Rising / Executive
-    quickActions.push(
-      { label: 'Browse opportunities', href: '/opportunities', desc: 'Matched positions' },
-      { label: 'Upload CV', href: '/profile', desc: 'Improve your match rate' },
-      { label: 'Share your profile', href: '/profile', desc: 'Increase visibility' },
-      { label: 'Contribute an insight', href: '/contribute', desc: 'Earn contribution points' },
-      { label: 'Browse WikiLux', href: '/wikilux', desc: '500+ brand encyclopedias' },
+      { label: 'Contact JOBLUX team', href: '/contact', desc: 'Get in touch with us' },
+    ]
+
+    return (
+      <div className="bg-[#f8f7f4] min-h-screen">
+        {welcomeStrip}
+
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-8 xl:px-16 py-10 lg:py-12">
+
+          {/* KPI Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-10">
+            {businessKpis.map((kpi) => (
+              <div key={kpi.label} className="bg-white border border-gray-200/60 rounded-xl p-4 lg:p-5">
+                <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-1.5">{kpi.label}</div>
+                <div className="text-2xl font-medium text-[#1a1a1a]">{loading ? '…' : kpi.value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Main: Two columns */}
+          <div className="lg:grid lg:grid-cols-[1.6fr_1fr] gap-6 mb-10">
+
+            {/* LEFT: Your Search Assignments */}
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-[#1a1a1a]">
+                  Your Search Assignments
+                </h2>
+              </div>
+
+              {loading ? (
+                <div className="bg-white border border-gray-200/60 rounded-xl p-8 text-center">
+                  <p className="text-sm text-[#555]">Loading assignments...</p>
+                </div>
+              ) : assignments.length === 0 ? (
+                <div className="bg-white border border-gray-200/60 rounded-xl p-10 text-center">
+                  <p className="text-base font-medium text-[#1a1a1a] mb-2">No active search assignments</p>
+                  <p className="text-sm text-[#555] leading-relaxed mb-6">
+                    Submit your first search request to find exceptional talent through the JOBLUX network.
+                  </p>
+                  <Link href="/admin/briefs/new" className="inline-flex px-6 py-2.5 bg-[#a58e28] text-white text-[0.7rem] font-semibold tracking-wider uppercase rounded-md hover:bg-[#8a7622] transition-colors">
+                    Submit Search Request
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {assignments.slice(0, 5).map((a: any) => (
+                    <Link key={a.id} href={`/admin/assignments/new?id=${a.id}`} className="block group">
+                      <div className="bg-white border border-gray-200/60 rounded-xl p-4 lg:p-5 hover:border-[#a58e28]/40 transition-all">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[0.6rem] uppercase tracking-[0.12em] text-[#a58e28] font-semibold mb-0.5">
+                              {a.maison || 'Confidential'}
+                            </div>
+                            <h3 className="text-base font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors truncate">
+                              {a.title}
+                            </h3>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-sm text-[#555]">{a.city || '—'}</span>
+                              <span className={`text-[0.6rem] font-semibold uppercase tracking-[0.12em] px-2 py-0.5 rounded ${
+                                a.status === 'active' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-[#999]'
+                              }`}>{a.status}</span>
+                            </div>
+                          </div>
+                          <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-[#a58e28] transition-colors flex-shrink-0" />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* RIGHT: Sidebar */}
+            <div className="mt-6 lg:mt-0 space-y-4">
+
+              {/* Company Profile Completeness */}
+              <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999]">Company Profile</h4>
+                  <span className="text-lg font-medium text-[#a58e28]">{loading ? '…' : `${profileCompleteness}%`}</span>
+                </div>
+                <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
+                  <div className="h-full bg-[#a58e28] rounded-full transition-all duration-700" style={{ width: `${profileCompleteness}%` }} />
+                </div>
+                {completenessHint && <p className="text-sm text-[#555]">{completenessHint}</p>}
+                {profileCompleteness < 100 && (
+                  <Link href="/profile" className="inline-flex items-center gap-1 text-sm text-[#a58e28] font-medium mt-2 hover:text-[#7a6a1e] transition-colors">
+                    Complete profile <ArrowRight className="w-3 h-3" />
+                  </Link>
+                )}
+              </div>
+
+              {/* Quick Actions */}
+              <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
+                <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-3">Quick Actions</h4>
+                <div className="divide-y divide-gray-100">
+                  {businessActions.map((action) => (
+                    <Link key={action.label} href={action.href} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0 group">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#a58e28] flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors font-medium">{action.label}</span>
+                        <span className="hidden lg:inline text-[0.6rem] text-[#aaa] ml-2">{action.desc}</span>
+                      </div>
+                      <ArrowRight className="w-3 h-3 text-gray-300 group-hover:text-[#a58e28] transition-colors flex-shrink-0" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* Messages */}
+              <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999]">Messages</h4>
+                  <Link href="/dashboard/messages" className="text-sm text-[#a58e28] hover:text-[#7a6a1e] font-medium transition-colors">View all</Link>
+                </div>
+                <p className="text-sm text-[#555]">Messages from the JOBLUX recruitment team.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     )
   }
 
-  // ── KPI data ─────────────────────────────────────────────────
-  const kpis = [
+  // ══════════════════════════════════════════════════════════════════
+  // PRO / RISING / EXECUTIVE DASHBOARD (+ Admin overlay)
+  // ══════════════════════════════════════════════════════════════════
+
+  const proKpis = [
     { label: 'Matched Opportunities', value: String(opportunities.length), gold: false },
     { label: 'Applications', value: String(applicationCount), gold: false },
     { label: 'Profile Views', value: '—', gold: false },
     { label: 'Contribution Points', value: String(contributionPoints), gold: true },
   ]
 
-  // ══════════════════════════════════════════════════════════════════
-  // RENDER
-  // ══════════════════════════════════════════════════════════════════
+  const proActions = [
+    { label: 'Browse opportunities', href: '/opportunities', desc: 'Matched positions' },
+    { label: 'Upload CV', href: '/profile', desc: 'Improve your match rate' },
+    { label: 'Share your profile', href: '/profile', desc: 'Increase visibility' },
+    { label: 'Contribute an insight', href: '/contribute', desc: 'Earn contribution points' },
+    { label: 'Browse WikiLux', href: '/wikilux', desc: '500+ brand encyclopedias' },
+  ]
 
   return (
     <div className="bg-[#f8f7f4] min-h-screen">
+      {welcomeStrip}
 
-      {/* ── Welcome Strip ──────────────────────────────────────────── */}
-      <div className="bg-white border-b border-gray-200/60">
-        <div className="jl-container py-8 lg:py-10">
-          <div className="lg:flex lg:justify-between lg:items-end">
-            <div>
-              <h1 className="jl-serif text-2xl md:text-3xl lg:text-[22px] font-medium text-[#1a1a1a] mb-1.5">
-                Welcome back, {firstName}
-              </h1>
-              <div className="flex items-center gap-3 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#a58e28]/10 text-[#a58e28] text-[0.65rem] font-semibold tracking-wider uppercase rounded-full">
-                  {tierLabel}
-                </span>
-                <span className="text-xs text-gray-500">{tierSubtitle}</span>
-                {contributionPoints > 0 && (
-                  <span className="text-xs text-gray-400">{contributionPoints} points</span>
-                )}
-              </div>
-              {isAdmin && (
-                <Link
-                  href="/admin/dashboard"
-                  className="inline-flex items-center gap-1 text-sm text-[#a58e28] hover:text-[#7a6a1e] font-medium transition-colors mt-2"
-                >
-                  Open Command Centre →
-                </Link>
-              )}
-            </div>
-            <div className="mt-4 lg:mt-0">
-              <Link
-                href="/profile"
-                className="inline-flex items-center gap-1 text-sm text-[#a58e28] hover:text-[#7a6a1e] font-medium transition-colors"
-              >
-                Edit profile
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div className="max-w-[1400px] mx-auto px-4 lg:px-8 xl:px-16 py-10 lg:py-12">
 
-      <div className="jl-container py-8 lg:py-10">
-
-        {/* ── KPI Metric Cards ───────────────────────────────────── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-          {kpis.map((kpi) => (
-            <div
-              key={kpi.label}
-              className="bg-white border border-gray-200/60 rounded-xl p-4 lg:p-5"
-            >
-              <div className="text-[0.65rem] uppercase tracking-wider text-gray-400 mb-1.5">
-                {kpi.label}
-              </div>
-              <div className={`text-2xl font-medium ${kpi.gold ? 'text-[#a58e28]' : 'text-gray-900'}`}>
+        {/* KPI Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-10">
+          {proKpis.map((kpi) => (
+            <div key={kpi.label} className="bg-white border border-gray-200/60 rounded-xl p-4 lg:p-5">
+              <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-1.5">{kpi.label}</div>
+              <div className={`text-2xl font-medium ${kpi.gold ? 'text-[#a58e28]' : 'text-[#1a1a1a]'}`}>
                 {loading ? '…' : kpi.value}
               </div>
             </div>
           ))}
         </div>
 
-        {/* ── Main Content — Two Columns on Desktop ──────────────── */}
-        <div className="lg:grid lg:grid-cols-[1.6fr_1fr] gap-6 mb-8">
+        {/* Main: Two columns */}
+        <div className="lg:grid lg:grid-cols-[1.6fr_1fr] gap-6 mb-10">
 
-          {/* LEFT — Matched Opportunities ─────────────────────────── */}
+          {/* LEFT: Matched Opportunities */}
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-[#1a1a1a] tracking-wide uppercase">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-[#1a1a1a]">
                 Matched Opportunities
               </h2>
-              <Link
-                href="/opportunities"
-                className="text-sm text-[#a58e28] hover:text-[#7a6a1e] font-medium transition-colors flex items-center gap-1"
-              >
+              <Link href="/opportunities" className="text-sm text-[#a58e28] hover:text-[#7a6a1e] font-medium transition-colors flex items-center gap-1">
                 View all <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
             {loading ? (
               <div className="bg-white border border-gray-200/60 rounded-xl p-8 text-center">
-                <p className="text-sm text-gray-400">Loading opportunities...</p>
+                <p className="text-sm text-[#555]">Loading opportunities...</p>
               </div>
             ) : opportunities.length === 0 ? (
-              <div className="bg-white border border-gray-200/60 rounded-xl p-8 text-center">
-                <p className="text-sm text-gray-500 mb-3">No matched opportunities yet.</p>
-                <p className="text-xs text-gray-400 mb-4">Complete your profile to improve matching.</p>
-                <Link href="/profile" className="jl-btn jl-btn-gold text-xs">
+              <div className="bg-white border border-gray-200/60 rounded-xl p-10 text-center">
+                <p className="text-base font-medium text-[#1a1a1a] mb-2">No matched opportunities yet</p>
+                <p className="text-sm text-[#555] leading-relaxed mb-6">Complete your profile to improve matching.</p>
+                <Link href="/profile" className="inline-flex px-6 py-2.5 bg-[#a58e28] text-white text-[0.7rem] font-semibold tracking-wider uppercase rounded-md hover:bg-[#8a7622] transition-colors">
                   Complete Profile
                 </Link>
               </div>
@@ -280,44 +404,24 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
               <div className="space-y-2">
                 {opportunities.slice(0, 5).map((opp) => {
                   const salary = salaryDisplay(opp)
-                  const displayMaison = opp.is_confidential
-                    ? 'Confidential'
-                    : opp.maison
+                  const displayMaison = opp.is_confidential ? 'Confidential' : opp.maison
                   return (
-                    <Link
-                      key={opp.id}
-                      href={`/opportunities/${opp.slug || opp.id}`}
-                      className="block group"
-                    >
+                    <Link key={opp.id} href={`/opportunities/${opp.slug || opp.id}`} className="block group">
                       <div className="bg-white border border-gray-200/60 rounded-xl p-4 lg:p-5 hover:border-[#a58e28]/40 transition-all duration-200">
                         <div className="flex items-center justify-between gap-4">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              {displayMaison && (
-                                <span className="text-[0.6rem] uppercase tracking-wider text-[#a58e28] font-medium">
-                                  {displayMaison}
-                                </span>
-                              )}
-                            </div>
-                            <h3 className="font-medium text-sm text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors truncate">
-                              {opp.title}
-                            </h3>
-                            <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                              {(opp.city || opp.country) && (
-                                <span className="text-xs text-gray-500">
-                                  {[opp.city, opp.country].filter(Boolean).join(', ')}
-                                </span>
-                              )}
-                              {salary && (
-                                <span className="text-xs text-gray-500">{salary}</span>
-                              )}
-                              <span className="text-xs text-gray-400">{timeAgo(opp.activated_at)}</span>
+                            {displayMaison && (
+                              <div className="text-[0.6rem] uppercase tracking-[0.12em] text-[#a58e28] font-semibold mb-0.5">{displayMaison}</div>
+                            )}
+                            <h3 className="text-base font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors truncate">{opp.title}</h3>
+                            <div className="flex flex-wrap items-center gap-2 mt-1">
+                              {(opp.city || opp.country) && <span className="text-sm text-[#555]">{[opp.city, opp.country].filter(Boolean).join(', ')}</span>}
+                              {salary && <span className="text-sm text-[#555]">{salary}</span>}
+                              <span className="text-[0.6rem] text-[#aaa]">{timeAgo(opp.activated_at)}</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-3 flex-shrink-0">
-                            <span className="hidden sm:inline-flex items-center px-2.5 py-1 bg-[#a58e28]/10 text-[#a58e28] text-[0.6rem] font-semibold rounded-full">
-                              Match
-                            </span>
+                            <span className="hidden sm:inline-flex items-center px-2.5 py-1 bg-[#a58e28]/10 text-[#a58e28] text-[0.6rem] font-semibold rounded-full">Match</span>
                             <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-[#a58e28] transition-colors" />
                           </div>
                         </div>
@@ -329,58 +433,36 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
             )}
           </div>
 
-          {/* RIGHT — Sidebar Stack ────────────────────────────────── */}
+          {/* RIGHT: Sidebar */}
           <div className="mt-6 lg:mt-0 space-y-4">
 
-            {/* Card 1: Profile Completeness */}
+            {/* Profile Completeness */}
             <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider">
-                  Profile Completeness
-                </h3>
-                <span className="text-lg font-medium text-[#a58e28]">
-                  {loading ? '…' : `${profileCompleteness}%`}
-                </span>
+                <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999]">Profile Completeness</h4>
+                <span className="text-lg font-medium text-[#a58e28]">{loading ? '…' : `${profileCompleteness}%`}</span>
               </div>
               <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
-                <div
-                  className="h-full bg-[#a58e28] rounded-full transition-all duration-700"
-                  style={{ width: `${profileCompleteness}%` }}
-                />
+                <div className="h-full bg-[#a58e28] rounded-full transition-all duration-700" style={{ width: `${profileCompleteness}%` }} />
               </div>
-              {completenessHint && (
-                <p className="text-xs text-gray-500">{completenessHint}</p>
-              )}
+              {completenessHint && <p className="text-sm text-[#555]">{completenessHint}</p>}
               {profileCompleteness < 100 && (
-                <Link
-                  href="/profile"
-                  className="inline-flex items-center gap-1 text-xs text-[#a58e28] font-medium mt-2 hover:text-[#7a6a1e] transition-colors"
-                >
+                <Link href="/profile" className="inline-flex items-center gap-1 text-sm text-[#a58e28] font-medium mt-2 hover:text-[#7a6a1e] transition-colors">
                   Complete profile <ArrowRight className="w-3 h-3" />
                 </Link>
               )}
             </div>
 
-            {/* Card 2: Quick Actions */}
+            {/* Quick Actions */}
             <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
-              <h3 className="text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">
-                Quick Actions
-              </h3>
+              <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-3">Quick Actions</h4>
               <div className="divide-y divide-gray-100">
-                {quickActions.map((action) => (
-                  <Link
-                    key={action.label}
-                    href={action.href}
-                    className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0 group"
-                  >
+                {proActions.map((action) => (
+                  <Link key={action.label} href={action.href} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0 group">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#a58e28] flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <span className="text-sm text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors font-medium">
-                        {action.label}
-                      </span>
-                      <span className="hidden lg:inline text-xs text-gray-400 ml-2">
-                        {action.desc}
-                      </span>
+                      <span className="text-sm text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors font-medium">{action.label}</span>
+                      <span className="hidden lg:inline text-[0.6rem] text-[#aaa] ml-2">{action.desc}</span>
                     </div>
                     <ArrowRight className="w-3 h-3 text-gray-300 group-hover:text-[#a58e28] transition-colors flex-shrink-0" />
                   </Link>
@@ -388,125 +470,62 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
               </div>
             </div>
 
-            {/* Card 3: Messages */}
+            {/* Messages */}
             <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider">
-                  Messages
-                </h3>
-                <Link
-                  href="/dashboard/messages"
-                  className="text-xs text-[#a58e28] hover:text-[#7a6a1e] font-medium transition-colors"
-                >
-                  View all
-                </Link>
+                <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999]">Messages</h4>
+                <Link href="/dashboard/messages" className="text-sm text-[#a58e28] hover:text-[#7a6a1e] font-medium transition-colors">View all</Link>
               </div>
-              <p className="text-xs text-gray-400">Check messages from the JOBLUX recruitment team.</p>
+              <p className="text-sm text-[#555]">Messages from the JOBLUX recruitment team.</p>
             </div>
           </div>
         </div>
 
-        {/* ── Bottom Row — Two Columns ──────────────────────────────── */}
-        <div className="lg:grid lg:grid-cols-2 gap-6 mb-8">
-
-          {/* LEFT: Recent Activity */}
-          <div className="mb-6 lg:mb-0">
-            <h2 className="text-sm font-semibold text-[#1a1a1a] tracking-wide uppercase mb-4">
-              Recent Activity
-            </h2>
-            <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <span className="mt-1.5 w-2 h-2 rounded-full bg-[#a58e28] flex-shrink-0" />
-                  <div>
-                    <p className="text-sm text-[#1a1a1a]">Profile updated</p>
-                    <p className="text-xs text-gray-400">Recently</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="mt-1.5 w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm text-[#1a1a1a]">Joined JOBLUX</p>
-                    <p className="text-xs text-gray-400">Since joining</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT: Recommended for You */}
-          <div>
-            <h2 className="text-sm font-semibold text-[#1a1a1a] tracking-wide uppercase mb-4">
-              Recommended for You
-            </h2>
-            <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
-              <div className="space-y-4">
-                <Link href="/wikilux" className="flex items-start gap-4 group">
-                  <div className="w-16 h-16 lg:w-20 lg:h-20 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-[0.55rem] uppercase tracking-wider text-gray-400">WikiLux</span>
-                  </div>
-                  <div>
-                    <span className="text-[0.55rem] uppercase tracking-wider text-[#a58e28] font-medium">Brand Intelligence</span>
-                    <h4 className="text-sm font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors mt-0.5">
-                      Explore 500+ luxury brand encyclopedias
-                    </h4>
-                    <p className="text-xs text-gray-400 mt-1">History, culture, hiring insights</p>
-                  </div>
-                </Link>
-                <Link href="/salaries" className="flex items-start gap-4 group">
-                  <div className="w-16 h-16 lg:w-20 lg:h-20 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-[0.55rem] uppercase tracking-wider text-gray-400">Salaries</span>
-                  </div>
-                  <div>
-                    <span className="text-[0.55rem] uppercase tracking-wider text-[#a58e28] font-medium">Career Intelligence</span>
-                    <h4 className="text-sm font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors mt-0.5">
-                      Salary benchmarks across luxury
-                    </h4>
-                    <p className="text-xs text-gray-400 mt-1">Compare compensation by role and market</p>
-                  </div>
-                </Link>
-                <Link href="/interviews" className="flex items-start gap-4 group">
-                  <div className="w-16 h-16 lg:w-20 lg:h-20 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-[0.55rem] uppercase tracking-wider text-gray-400">Interviews</span>
-                  </div>
-                  <div>
-                    <span className="text-[0.55rem] uppercase tracking-wider text-[#a58e28] font-medium">Interview Intelligence</span>
-                    <h4 className="text-sm font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors mt-0.5">
-                      Real interview experiences from 150+ maisons
-                    </h4>
-                    <p className="text-xs text-gray-400 mt-1">Prepare with insider knowledge</p>
-                  </div>
-                </Link>
-              </div>
-            </div>
+        {/* Bottom: Recommended */}
+        <div className="border-t border-[#e8e2d8] pt-10 lg:pt-12">
+          <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-[#1a1a1a] mb-6 lg:mb-8">
+            Recommended for You
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+            <Link href="/wikilux" className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6 group hover:border-[#a58e28]/40 transition-all">
+              <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#a58e28] mb-2">Brand Intelligence</div>
+              <h3 className="text-lg font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors mb-1">WikiLux</h3>
+              <p className="text-sm text-[#555] leading-relaxed">Explore 500+ luxury brand encyclopedias</p>
+            </Link>
+            <Link href="/salaries" className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6 group hover:border-[#a58e28]/40 transition-all">
+              <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#a58e28] mb-2">Career Intelligence</div>
+              <h3 className="text-lg font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors mb-1">Salary Benchmarks</h3>
+              <p className="text-sm text-[#555] leading-relaxed">Compare compensation by role and market</p>
+            </Link>
+            <Link href="/interviews" className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6 group hover:border-[#a58e28]/40 transition-all">
+              <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#a58e28] mb-2">Interview Intelligence</div>
+              <h3 className="text-lg font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors mb-1">Inside the Maisons</h3>
+              <p className="text-sm text-[#555] leading-relaxed">Real interview experiences from 150+ houses</p>
+            </Link>
           </div>
         </div>
 
-        {/* ── Admin Section (if admin) ──────────────────────────────── */}
+        {/* Admin Section */}
         {isAdmin && (
-          <div className="mt-4">
-            <div className="jl-section-label mb-4"><span>Administration</span></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="border-t border-[#e8e2d8] pt-10 lg:pt-12 mt-10">
+            <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-[#1a1a1a] mb-6 lg:mb-8">
+              Administration
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
               {[
-                { num: 'A1', title: 'Admin Panel', desc: 'Command centre — stats, notifications, overview.', href: '/admin/dashboard' },
-                { num: 'A2', title: 'Post a Brief', desc: 'Create a new hiring assignment.', href: '/admin/briefs/new' },
-                { num: 'A3', title: 'Review Contributions', desc: 'Approve contributions.', href: '/admin/contributions' },
-                { num: 'A4', title: 'Manage Articles', desc: 'BlogLux editorial and publishing.', href: '/admin/articles' },
+                { title: 'Command Centre', desc: 'Stats, pipeline, system status.', href: '/admin/dashboard' },
+                { title: 'Post a Brief', desc: 'Create a new hiring assignment.', href: '/admin/briefs/new' },
+                { title: 'Review Contributions', desc: 'Approve contributions.', href: '/admin/contributions' },
+                { title: 'Manage Articles', desc: 'BlogLux editorial and publishing.', href: '/admin/articles' },
               ].map((card) => (
-                <Link
-                  key={card.num}
-                  href={card.href}
-                  className="bg-white border border-[#a58e28]/30 rounded-xl p-5 group hover:border-[#a58e28] transition-all duration-200"
-                >
-                  <div className="jl-serif text-2xl font-light text-[#a58e28] mb-3">{card.num}</div>
-                  <h3 className="font-sans text-sm font-semibold text-[#a58e28] mb-2">{card.title}</h3>
-                  <p className="font-sans text-xs text-gray-500 leading-relaxed">{card.desc}</p>
+                <Link key={card.title} href={card.href} className="bg-white border border-[#a58e28]/30 rounded-xl p-5 group hover:border-[#a58e28] transition-all">
+                  <h3 className="text-lg font-medium text-[#a58e28] mb-2">{card.title}</h3>
+                  <p className="text-sm text-[#555] leading-relaxed">{card.desc}</p>
                 </Link>
               ))}
             </div>
           </div>
         )}
-
       </div>
     </div>
   )

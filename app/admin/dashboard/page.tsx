@@ -276,9 +276,9 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-4">
           {kpiCards.map((kpi) => (
             <div key={kpi.label} className="bg-gray-50 rounded-lg p-3">
-              <div className="text-[10px] uppercase tracking-wide text-gray-400 font-medium mb-1">{kpi.label}</div>
+              <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-1">{kpi.label}</div>
               <div className="text-xl font-medium text-[#1a1a1a]">{kpi.value}</div>
-              <div className={`text-[10px] mt-0.5 ${kpi.subColor}`}>{kpi.sub}</div>
+              <div className={`text-[0.6rem] font-normal mt-0.5 ${kpi.subColor}`}>{kpi.sub}</div>
             </div>
           ))}
         </div>
@@ -289,7 +289,7 @@ export default function AdminDashboardPage() {
           {/* Column 1: ATS Pipeline overview */}
           <div className="border border-gray-200 rounded-xl p-4 bg-white">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] uppercase tracking-wide text-gray-400 font-medium">ATS Pipeline</span>
+              <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999]">ATS Pipeline</span>
               <Link href="/admin/ats" className="text-[11px] text-[#a58e28] hover:text-[#8a7622] font-medium transition-colors">
                 View pipeline →
               </Link>
@@ -307,7 +307,7 @@ export default function AdminDashboardPage() {
                         className={`rounded-lg px-3 py-2 ${stage.color}`}
                         style={{ flex: Math.max(count, 1) }}
                       >
-                        <div className="text-[10px] font-medium">{stage.label}</div>
+                        <div className="text-[0.6rem] font-medium">{stage.label}</div>
                         <div className="text-base font-medium">{count}</div>
                       </div>
                     )
@@ -318,14 +318,14 @@ export default function AdminDashboardPage() {
             ) : (
               <div className="py-6 text-center">
                 <p className="text-xs text-gray-400">No active assignments yet.</p>
-                <p className="text-[10px] text-gray-300 mt-1">Pipeline populates when you create search assignments.</p>
+                <p className="text-[0.6rem] font-normal text-[#aaa] mt-1">Pipeline populates when you create search assignments.</p>
               </div>
             )}
           </div>
 
           {/* Column 2: Quick Actions */}
           <div className="border border-gray-200 rounded-xl p-4 bg-white">
-            <span className="text-[10px] uppercase tracking-wide text-gray-400 font-medium block mb-3">Quick Actions</span>
+            <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] block mb-3">Quick Actions</span>
             <div className="space-y-1.5">
               {[
                 { label: 'New search assignment', href: '/admin/assignments/new', icon: Briefcase },
@@ -352,7 +352,7 @@ export default function AdminDashboardPage() {
 
           {/* Column 3: System Status */}
           <div className="border border-gray-200 rounded-xl p-4 bg-white">
-            <span className="text-[10px] uppercase tracking-wide text-gray-400 font-medium block mb-3">System Status</span>
+            <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] block mb-3">System Status</span>
             <div className="space-y-2.5">
               {SYSTEM_STATUS.map((item) => (
                 <div key={item.service} className="flex items-start gap-2.5">
@@ -363,7 +363,7 @@ export default function AdminDashboardPage() {
                   }`} />
                   <div className="min-w-0">
                     <div className="text-xs text-[#1a1a1a] font-medium">{item.service}</div>
-                    <div className="text-[10px] text-gray-400">{item.detail}</div>
+                    <div className="text-[0.6rem] font-normal text-[#aaa]">{item.detail}</div>
                   </div>
                 </div>
               ))}
@@ -377,7 +377,7 @@ export default function AdminDashboardPage() {
 
           {/* Column 1: Recent Activity */}
           <div className="border border-gray-200 rounded-xl p-4 bg-white">
-            <span className="text-[10px] uppercase tracking-wide text-gray-400 font-medium block mb-3">Recent Activity</span>
+            <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] block mb-3">Recent Activity</span>
             {activityFeed.length === 0 ? (
               <p className="text-xs text-gray-400 py-4 text-center">No recent activity.</p>
             ) : (
@@ -410,7 +410,7 @@ export default function AdminDashboardPage() {
                       }`}>
                         {item.status}
                       </span>
-                      <span className="text-[10px] text-gray-300 min-w-[45px] text-right">{relativeTime(item.date)}</span>
+                      <span className="text-[0.6rem] font-normal text-[#aaa] min-w-[45px] text-right">{relativeTime(item.date)}</span>
                     </div>
                   </Link>
                 ))}
@@ -421,7 +421,7 @@ export default function AdminDashboardPage() {
           {/* Column 2: Launch Checklist */}
           <div className="border border-gray-200 rounded-xl p-4 bg-white">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] uppercase tracking-wide text-gray-400 font-medium">Launch Checklist</span>
+              <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999]">Launch Checklist</span>
               <span className="text-[11px] font-medium text-[#a58e28]">{CHECKLIST_DONE}/{LAUNCH_CHECKLIST.length} done</span>
             </div>
 

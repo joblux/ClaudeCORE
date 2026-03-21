@@ -149,17 +149,17 @@ a {
 
   .jl-overline {
     font-family: 'Inter', system-ui, sans-serif;
-    font-size: 0.6875rem;
-    font-weight: 500;
+    font-size: 0.65rem;
+    font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #888;
+    color: #999;
   }
 
   .jl-overline-gold {
     font-family: 'Inter', system-ui, sans-serif;
-    font-size: 0.6875rem;
-    font-weight: 500;
+    font-size: 0.65rem;
+    font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: #a58e28;
@@ -183,7 +183,7 @@ a {
 
   @media (min-width: 1024px) {
     .jl-container {
-      max-width: 1280px;
+      max-width: 1400px;
       padding: 0 2rem;
     }
   }

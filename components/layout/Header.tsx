@@ -27,15 +27,15 @@ export function Header() {
 
       {/* Single header bar */}
       <div className="w-full px-4 sm:px-6 lg:px-16 xl:px-24">
-        <div className="flex items-center justify-between h-16 lg:h-[72px] max-w-[1400px] mx-auto">
+        <div className="flex items-center justify-between h-16 lg:h-20 max-w-[1400px] mx-auto">
 
           {/* Logo */}
           <Link href="/" className="inline-block flex-shrink-0">
-            <span className="text-xl font-medium tracking-[2px] text-[#a58e28]" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</span>
+            <span className="text-2xl lg:text-[1.75rem] font-medium tracking-[3px] text-[#a58e28]" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</span>
           </Link>
 
           {/* Desktop nav links — hidden on mobile */}
-          <nav className="hidden lg:flex items-center gap-8 ml-12">
+          <nav className="hidden lg:flex items-center gap-10 lg:gap-12 ml-12">
             {navItems.map((item) => (
               <Link
                 key={item.label}
@@ -63,13 +63,13 @@ export function Header() {
               <>
                 <Link
                   href="/members"
-                  className="hidden lg:inline-flex px-5 py-2 border border-[#a58e28] text-[#a58e28] text-[0.7rem] font-semibold tracking-wider uppercase rounded-md hover:bg-[#a58e28] hover:text-white transition-colors"
+                  className="hidden lg:inline-flex px-6 py-2.5 border border-[#a58e28] text-[#a58e28] text-[0.7rem] font-semibold tracking-wider uppercase rounded-md hover:bg-[#a58e28] hover:text-white transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/join"
-                  className="hidden lg:inline-flex px-5 py-2 bg-[#a58e28] text-white text-[0.7rem] font-semibold tracking-wider uppercase rounded-md hover:bg-[#9a6f0a] transition-colors"
+                  className="hidden lg:inline-flex px-6 py-2.5 bg-[#a58e28] text-white text-[0.7rem] font-semibold tracking-wider uppercase rounded-md hover:bg-[#9a6f0a] transition-colors"
                 >
                   Join the Society
                 </Link>

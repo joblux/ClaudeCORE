@@ -51,11 +51,11 @@ export default function SalariesPage() {
       {/* Hero */}
       <section className="bg-[#222222] py-14 md:py-20">
         <div className="jl-container text-center">
-          <div className="jl-overline-gold mb-4 tracking-[0.2em]">Salary Intelligence</div>
-          <h1 className="jl-serif text-4xl md:text-5xl lg:text-6xl font-light text-white mb-5">
+          <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#a58e28] mb-4">Salary Intelligence</div>
+          <h1 className="font-['Playfair_Display'] text-4xl lg:text-5xl font-light text-white mb-5">
             Know Your Worth
           </h1>
-          <p className="font-sans text-sm md:text-base text-[#bbb] max-w-2xl mx-auto leading-relaxed">
+          <p className="font-sans text-sm lg:text-base font-normal text-[#bbb] max-w-2xl mx-auto leading-relaxed">
             Salary benchmarks, comparisons, and personalised estimates across the world&rsquo;s most prestigious maisons.
           </p>
         </div>
@@ -72,9 +72,9 @@ export default function SalariesPage() {
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`flex items-center gap-1.5 px-5 py-3.5 text-xs tracking-wide border-b-2 transition-colors whitespace-nowrap ${
+                  className={`flex items-center gap-1.5 px-5 py-3.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] border-b-2 transition-colors whitespace-nowrap ${
                     isActive
-                      ? 'border-[#a58e28] text-[#a58e28] font-semibold'
+                      ? 'border-[#a58e28] text-[#a58e28]'
                       : 'border-transparent text-[#888] hover:text-[#555]'
                   }`}
                 >
@@ -225,7 +225,7 @@ function BrowseTab({ accessLevel }: { accessLevel: string }) {
           ))}</div>
         ) : entries.length === 0 ? (
           <div className="text-center py-16">
-            <p className="jl-serif text-xl text-[#1a1a1a] mb-2">
+            <p className="text-lg lg:text-xl font-medium text-[#1a1a1a] mb-2">
               {hasFilters ? 'No salary data matches your search' : 'Salary Intelligence is building'}
             </p>
             <p className="text-sm text-[#888] mb-4">
@@ -252,12 +252,12 @@ function BrowseTab({ accessLevel }: { accessLevel: string }) {
 
       <aside className="hidden lg:block space-y-6">
         <div className="jl-card border-[#a58e28]">
-          <h3 className="jl-serif text-lg text-[#1a1a1a] mb-2">Contribute Your Salary</h3>
+          <h3 className="text-lg lg:text-xl font-medium text-[#1a1a1a] mb-2">Contribute Your Salary</h3>
           <p className="text-xs text-[#888] leading-relaxed mb-4">Share your compensation data anonymously and earn 10 points towards unlocking advanced tools.</p>
           <Link href="/contribute" className="jl-btn-gold w-full text-center">Contribute</Link>
         </div>
         <div className="jl-card">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-[#1a1a1a] mb-3">How It Works</h3>
+          <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-3">How It Works</h3>
           <ol className="space-y-2 text-xs text-[#666] leading-relaxed">
             <li className="flex gap-2"><span className="text-[#a58e28] font-semibold flex-shrink-0">01</span>AI-generated benchmarks from market data</li>
             <li className="flex gap-2"><span className="text-[#a58e28] font-semibold flex-shrink-0">02</span>Enriched with web research and industry reports</li>
@@ -266,7 +266,7 @@ function BrowseTab({ accessLevel }: { accessLevel: string }) {
           </ol>
         </div>
         <div className="jl-card">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-[#1a1a1a] mb-3">Access Tiers</h3>
+          <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-3">Access Tiers</h3>
           <AccessTierLadder currentLevel={accessLevel} />
         </div>
       </aside>
@@ -337,7 +337,7 @@ function BenchmarkTab() {
 
   return (
     <div className="max-w-3xl">
-      <h2 className="jl-serif text-2xl text-[#1a1a1a] mb-1">Salary Benchmark</h2>
+      <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-[#1a1a1a] mb-1">Salary Benchmark</h2>
       <p className="text-sm text-[#888] mb-6">See how your salary compares to the market.</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div><label className="jl-label">Job Title <span className="text-red-500">*</span></label><input className="jl-input w-full" placeholder="e.g. Store Director" value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} /></div>
@@ -352,7 +352,7 @@ function BenchmarkTab() {
       {result && (
         <div className="space-y-6">
           <div className="jl-card">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#1a1a1a] mb-1">{result.role} in {result.city}</h3>
+            <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-1">{result.role} in {result.city}</h3>
             <p className="text-[0.65rem] text-[#999] mb-4">{result.data_points} data points &middot; {result.confidence}</p>
             <div className="mb-4">
               <SalaryRangeBar min={result.salary_min} max={result.salary_max} median={result.salary_median} percentile25={result.percentile_25} percentile75={result.percentile_75} userSalary={currentSalary ? parseInt(currentSalary) : null} currency={result.currency} height={12} />
@@ -370,7 +370,7 @@ function BenchmarkTab() {
           </div>
           {result.other_cities.length > 0 && (
             <div className="jl-card">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-[#1a1a1a] mb-4">Same Role in Other Cities</h3>
+              <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-4">Same Role in Other Cities</h3>
               <SalaryComparisonChart items={result.other_cities.map(c => ({ label: c.city, min: Math.round(c.median * 0.8), max: Math.round(c.median * 1.2), median: c.median, currency: c.currency }))} />
             </div>
           )}
@@ -411,7 +411,7 @@ function CompareTab() {
 
   return (
     <div className="max-w-3xl">
-      <h2 className="jl-serif text-2xl text-[#1a1a1a] mb-1">Compare Salaries</h2>
+      <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-[#1a1a1a] mb-1">Compare Salaries</h2>
       <p className="text-sm text-[#888] mb-6">Side-by-side comparison across cities or brands.</p>
       <div className="flex gap-2 mb-4">
         <button onClick={() => { setCompareType('city'); setSelectedItems(['']) }} className={`jl-btn text-xs ${compareType === 'city' ? 'jl-btn-primary' : 'jl-btn-outline'}`}>Compare Cities</button>
@@ -443,7 +443,7 @@ function CompareTab() {
       {result && result.items && (
         <div className="space-y-6">
           <div className="jl-card">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#1a1a1a] mb-4">{result.role} — {result.compare_type === 'city' ? 'City' : 'Brand'} Comparison</h3>
+            <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-4">{result.role} — {result.compare_type === 'city' ? 'City' : 'Brand'} Comparison</h3>
             <SalaryComparisonChart items={result.items.filter(i => i.data_points > 0).map(i => ({ label: i.label, min: i.salary_min, max: i.salary_max, median: i.salary_median, currency: i.currency, costIndex: i.cost_index }))} showCostIndex={result.compare_type === 'city'} />
           </div>
           <div className="jl-card overflow-x-auto">
@@ -500,7 +500,7 @@ function CalculatorTab() {
 
   return (
     <div className="max-w-3xl">
-      <h2 className="jl-serif text-2xl text-[#1a1a1a] mb-1">Salary Calculator</h2>
+      <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-[#1a1a1a] mb-1">Salary Calculator</h2>
       <p className="text-sm text-[#888] mb-6">Get a personalised salary estimate based on your profile.</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div><label className="jl-label">Job Title <span className="text-red-500">*</span></label><input className="jl-input w-full" placeholder="e.g. Retail Director" value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} /></div>
@@ -524,8 +524,8 @@ function CalculatorTab() {
         <div className="space-y-6">
           <div className="jl-card bg-[#222222] text-white border-[#a58e28]">
             <div className="text-center py-4">
-              <div className="jl-overline-gold mb-2">Your Estimated Salary Range</div>
-              <div className="jl-serif text-3xl md:text-4xl font-light mb-2">{formatSalaryFull(result.estimated_low, result.currency)} — {formatSalaryFull(result.estimated_high, result.currency)}</div>
+              <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#a58e28] mb-2">Your Estimated Salary Range</div>
+              <div className="font-['Playfair_Display'] text-3xl md:text-4xl font-light mb-2">{formatSalaryFull(result.estimated_low, result.currency)} — {formatSalaryFull(result.estimated_high, result.currency)}</div>
               <div className="text-sm text-[#a58e28]">Mid-point: {formatSalaryFull(result.estimated_mid, result.currency)}</div>
               <div className="text-xs text-[#888] mt-2">{result.data_points} data points &middot; {result.confidence}</div>
             </div>
@@ -537,13 +537,13 @@ function CalculatorTab() {
           </div>
           {result.factors.length > 0 && (
             <div className="jl-card">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-[#1a1a1a] mb-3">What Affects Your Estimate</h3>
+              <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-3">What Affects Your Estimate</h3>
               <ul className="space-y-2">{result.factors.map((f, i) => <li key={i} className="flex items-start gap-2 text-xs text-[#555]"><span className="text-[#a58e28] mt-0.5 flex-shrink-0">&bull;</span>{f}</li>)}</ul>
             </div>
           )}
           {result.recommendations.length > 0 && (
             <div className="jl-card border-[#a58e28] bg-[#fafaf5]">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-[#1a1a1a] mb-3">To Increase Your Earning Potential</h3>
+              <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-3">To Increase Your Earning Potential</h3>
               <ul className="space-y-2">{result.recommendations.map((r, i) => <li key={i} className="flex items-start gap-2 text-xs text-[#555]"><span className="text-[#a58e28] font-semibold flex-shrink-0">{String(i + 1).padStart(2, '0')}</span>{r}</li>)}</ul>
             </div>
           )}
@@ -572,11 +572,11 @@ function SalaryTeaser() {
       {/* Hero */}
       <section className="bg-[#222222] py-14 md:py-20">
         <div className="jl-container text-center">
-          <div className="jl-overline-gold mb-4 tracking-[0.2em]">Salary Intelligence</div>
-          <h1 className="jl-serif text-4xl md:text-5xl lg:text-6xl font-light text-white mb-5">
+          <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#a58e28] mb-4">Salary Intelligence</div>
+          <h1 className="font-['Playfair_Display'] text-4xl lg:text-5xl font-light text-white mb-5">
             Know Your Worth
           </h1>
-          <p className="font-sans text-sm md:text-base text-[#bbb] max-w-2xl mx-auto leading-relaxed">
+          <p className="font-sans text-sm lg:text-base font-normal text-[#bbb] max-w-2xl mx-auto leading-relaxed">
             Salary benchmarks, comparisons, and personalised estimates across the world&rsquo;s most prestigious maisons.
           </p>
         </div>
@@ -612,7 +612,7 @@ function SalaryTeaser() {
               {/* CTA overlay */}
               <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-white via-white/90 to-transparent">
                 <div className="text-center max-w-lg px-6">
-                  <h2 className="jl-serif text-2xl text-[#1a1a1a] mb-3">
+                  <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-[#1a1a1a] mb-3">
                     Sign in to see all {total} salary benchmarks across 8 luxury markets
                   </h2>
                   <p className="text-sm text-[#888] mb-6">
@@ -657,7 +657,7 @@ function LockedTab({ tool, points, level }: { tool: string; points: number; leve
           <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-[#1a1a1a] flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a58e28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
-          <h2 className="jl-serif text-2xl text-[#1a1a1a] mb-2">Salary {tool}</h2>
+          <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-[#1a1a1a] mb-2">Salary {tool}</h2>
           <p className="text-sm text-[#888] leading-relaxed mb-6">Earn {points} points to unlock the {tool} tool. Reach {level} access by contributing salary data, interview experiences, or brand insights.</p>
           <Link href="/contribute" className="jl-btn-primary">Contribute to Earn Points</Link>
         </div>

@@ -61,8 +61,8 @@ export default function WikiLuxPage() {
       {/* HERO */}
       <div className="bg-[#222222] py-14">
         <div className="jl-container-sm text-center">
-          <div className="jl-overline-gold mb-4">WikiLux by JOBLUX</div>
-          <h1 className="jl-serif text-4xl md:text-5xl font-light text-white mb-4">
+          <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#a58e28] mb-4">WikiLux by JOBLUX</div>
+          <h1 className="font-['Playfair_Display'] text-4xl lg:text-5xl font-light text-white mb-4">
             The Luxury Brand Encyclopedia
           </h1>
           <p className="font-sans text-sm text-[#888] mb-8 max-w-lg mx-auto">
@@ -75,7 +75,7 @@ export default function WikiLuxPage() {
               { n: String(categories.length), l: 'Categories' },
             ].map((s) => (
               <div key={s.l} className="text-center">
-                <div className="jl-serif text-2xl font-light text-[#a58e28]">{s.n}</div>
+                <div className="text-2xl font-light text-[#a58e28]">{s.n}</div>
                 <div className="jl-overline mt-1">{s.l}</div>
               </div>
             ))}
