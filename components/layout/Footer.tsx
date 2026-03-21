@@ -14,8 +14,8 @@ export function Footer() {
             <p className="font-sans text-[0.65rem] text-[#bbb]">Paris &middot; London &middot; New York &middot; Dubai &middot; Singapore</p>
           </div>
 
-          {/* Right — Two sub-columns */}
-          <div className="flex gap-16">
+          {/* Right — Three sub-columns */}
+          <div className="flex gap-12 md:gap-16 flex-wrap">
             <div>
               <h4 className="jl-overline text-[#1a1a1a] mb-3">Platform</h4>
               <ul className="space-y-2">
@@ -27,11 +27,19 @@ export function Footer() {
               </ul>
             </div>
             <div>
-              <h4 className="jl-overline text-[#1a1a1a] mb-3">Members</h4>
+              <h4 className="jl-overline text-[#1a1a1a] mb-3">Society</h4>
               <ul className="space-y-2">
                 <li><Link href="/members" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Sign In</Link></li>
                 <li><Link href="/join" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Request Access</Link></li>
                 <li><Link href="/about" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">About</Link></li>
+                <li><Link href="/faq" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">FAQ</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="jl-overline text-[#1a1a1a] mb-3">Legal</h4>
+              <ul className="space-y-2">
+                <li><Link href="/terms" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Terms of Service</Link></li>
+                <li><Link href="/privacy" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Privacy Policy</Link></li>
               </ul>
             </div>
           </div>
