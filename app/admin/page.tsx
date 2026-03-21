@@ -141,7 +141,7 @@ export default function AdminPage() {
       });
       await fetchAIReviews();
       await fetchMembers();
-    } catch {}
+    } catch { /* AI review request may fail */ }
     setReassessing((s) => { const n = new Set(s); n.delete(memberId); return n; });
   };
 

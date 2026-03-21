@@ -7,7 +7,7 @@ import { useRequireAdmin } from '@/lib/auth-hooks'
 import {
   LayoutDashboard, BarChart3, Briefcase, Kanban, MessageSquare,
   Users, Star, Send, FileText, BookOpen, DollarSign, FileCode,
-  Menu, X, LogOut, Power, Images, PenLine, MessageCircle, GraduationCap, Mail, Settings
+  Menu, X, LogOut, Power, Images, PenLine, MessageCircle, GraduationCap, Mail
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
@@ -75,7 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       const res = await fetch('/api/admin/maintenance', { method: 'POST' })
       const data = await res.json()
       if (data.maintenance_mode !== undefined) setMaintenanceMode(data.maintenance_mode)
-    } catch {}
+    } catch { /* toggle may fail if API is unreachable */ }
     setMaintenanceLoading(false)
   }
 
@@ -119,7 +119,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-2 px-1.5">
-        {NAV_SECTIONS.map((section, si) => (
+        {NAV_SECTIONS.map((section) => (
           <div key={section.label} className={isDashboard ? 'mb-2' : 'mb-4'}>
             {/* Divider before SETTINGS section */}
             {section.label === 'SETTINGS' && <div className="border-t border-gray-100 my-2" />}

@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js'
 import { useRequireAdmin } from '@/lib/auth-hooks'
 import {
   Briefcase, PenLine, UserCheck, Download, Send,
-  ExternalLink, CheckCircle2, Circle
+  CheckCircle2, Circle
 } from 'lucide-react'
 
 const supabase = createClient(
