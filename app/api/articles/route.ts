@@ -16,13 +16,32 @@ function slugify(text: string): string {
 }
 
 export async function GET() {
+  // Try bloglux_articles first (actual table name)
   const { data, error } = await supabaseAdmin
+    .from("bloglux_articles")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (!error && data) {
+    // Map to expected shape for admin pages
+    const articles = data.map((a: any) => ({
+      ...a,
+      published: a.status === 'published',
+      read_time: a.read_time_minutes,
+      hero_image_url: a.cover_image_url,
+      content: a.body,
+    }));
+    return NextResponse.json({ articles });
+  }
+
+  // Fallback: try legacy 'articles' table
+  const { data: legacy, error: legacyError } = await supabaseAdmin
     .from("articles")
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ articles: data });
+  if (legacyError) return NextResponse.json({ error: legacyError.message }, { status: 500 });
+  return NextResponse.json({ articles: legacy });
 }
 
 export async function POST(req: Request) {

@@ -26,6 +26,10 @@ interface Article {
   hero_image_alt: string | null
   is_featured: boolean
   views_count: number | null
+  // bloglux_articles column aliases
+  read_time_minutes?: number | null
+  cover_image_url?: string | null
+  status?: string
 }
 
 export default function BlogluxPage() {
@@ -45,27 +49,37 @@ function BlogluxContent() {
 
   useEffect(() => {
     async function fetchArticles() {
-      // Try direct Supabase first
+      // Query bloglux_articles table (the actual table name in Supabase)
       const { data, error } = await supabase
+        .from('bloglux_articles')
+        .select('id, title, slug, excerpt, category, author_name, published_at, read_time_minutes, tags, cover_image_url, status')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+
+      if (!error && data && data.length > 0) {
+        // Map bloglux_articles columns to the Article interface
+        setArticles(data.map((a: any) => ({
+          ...a,
+          read_time: a.read_time_minutes,
+          hero_image_url: a.cover_image_url,
+          hero_image_alt: a.title,
+          is_featured: false,
+          views_count: null,
+        })))
+        setLoading(false)
+        return
+      }
+
+      // Fallback: try legacy 'articles' table name
+      const { data: legacyData } = await supabase
         .from('articles')
         .select('id, title, slug, excerpt, category, author_name, published_at, read_time, tags, hero_image_url, hero_image_alt, is_featured, views_count')
         .eq('published', true)
         .order('published_at', { ascending: false })
 
-      if (!error && data && data.length > 0) {
-        setArticles(data)
-        setLoading(false)
-        return
+      if (legacyData && legacyData.length > 0) {
+        setArticles(legacyData)
       }
-
-      // Fallback: try API route
-      try {
-        const res = await fetch('/api/articles')
-        if (res.ok) {
-          const json = await res.json()
-          setArticles((json.articles || []).filter((a: any) => a.published))
-        }
-      } catch { /* silent */ }
       setLoading(false)
     }
     fetchArticles()

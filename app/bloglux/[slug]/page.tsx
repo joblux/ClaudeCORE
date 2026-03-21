@@ -8,23 +8,55 @@ import ArticleInteractions from './ArticleInteractions'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
 interface Props { params: { slug: string } }
 
 async function getArticle(slug: string) {
+  // Try bloglux_articles first (actual table name)
   const { data } = await supabaseAdmin
+    .from('bloglux_articles')
+    .select('*')
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .single()
+  if (data) {
+    // Map columns to expected shape
+    return {
+      ...data,
+      published: true,
+      read_time: data.read_time_minutes,
+      hero_image_url: data.cover_image_url,
+      hero_image_alt: data.title,
+      content: data.body,
+    }
+  }
+  // Fallback: try legacy 'articles' table
+  const { data: legacy } = await supabaseAdmin
     .from('articles')
     .select('*')
     .eq('slug', slug)
     .eq('published', true)
     .single()
-  return data
+  return legacy
 }
 
 async function getRelatedArticles(article: any) {
+  // Try bloglux_articles first
   const { data } = await supabaseAdmin
+    .from('bloglux_articles')
+    .select('id, title, slug, excerpt, category, author_name, published_at, read_time_minutes, cover_image_url')
+    .eq('status', 'published')
+    .neq('slug', article.slug)
+    .eq('category', article.category)
+    .order('published_at', { ascending: false })
+    .limit(3)
+  if (data && data.length > 0) {
+    return data.map((a: any) => ({ ...a, read_time: a.read_time_minutes, hero_image_url: a.cover_image_url }))
+  }
+  // Fallback
+  const { data: legacy } = await supabaseAdmin
     .from('articles')
     .select('id, title, slug, excerpt, category, author_name, published_at, read_time, hero_image_url')
     .eq('published', true)
@@ -32,7 +64,7 @@ async function getRelatedArticles(article: any) {
     .eq('category', article.category)
     .order('published_at', { ascending: false })
     .limit(3)
-  return data || []
+  return legacy || []
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
