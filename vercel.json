@@ -1,4 +1,12 @@
 {
+  "functions": {
+    "app/api/wikilux/**/*.ts": {
+      "maxDuration": 60
+    },
+    "app/api/cron/**/*.ts": {
+      "maxDuration": 60
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/wikilux-refresh",

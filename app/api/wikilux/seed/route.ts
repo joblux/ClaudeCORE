@@ -6,6 +6,8 @@ import Anthropic from "@anthropic-ai/sdk"
 import { BRANDS, Brand } from "@/lib/wikilux-brands"
 import { buildRichPrompt } from "@/lib/wikilux-prompt"
 
+export const maxDuration = 60
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
