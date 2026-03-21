@@ -228,9 +228,9 @@ export default function OpportunityDetailPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div>
+      <div className="bg-[#f8f7f4] min-h-screen">
         {/* ── Header section ──────────────────────────────────────── */}
-        <div className="border-b-2 border-[#1a1a1a] py-10">
+        <div className="bg-white border-b border-gray-200/60 py-8 lg:py-10">
           <div className="jl-container">
             <Link href="/opportunities" className="jl-overline text-[#a58e28] hover:underline mb-4 inline-block">
               &larr; All Opportunities
@@ -296,15 +296,15 @@ export default function OpportunityDetailPage() {
         </div>
 
         {/* ── Main content ────────────────────────────────────────── */}
-        <div className="jl-container py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <div className="jl-container py-8 lg:py-10">
+          <div className="lg:grid lg:grid-cols-[1fr_360px] gap-8">
 
             {/* Left column — description sections */}
-            <div className="lg:col-span-2">
+            <div>
 
               {/* Salary section */}
               {salary && (
-                <div className="p-5 bg-[#fafaf5] border border-[#e8e2d8] mb-8">
+                <div className="p-5 bg-white border border-gray-200/60 rounded-xl mb-8">
                   <div className="jl-overline-gold mb-2">Compensation</div>
                   <p className="jl-serif text-2xl text-[#1a1a1a]">{salary}</p>
                   {assignment.salary_period && assignment.salary_period !== 'Annual' && (
@@ -383,7 +383,7 @@ export default function OpportunityDetailPage() {
 
               {/* Confidential notice */}
               {assignment.is_confidential && (
-                <div className="p-4 bg-[#fafaf5] border border-[#e8e2d8] mb-10">
+                <div className="p-4 bg-white border border-gray-200/60 rounded-xl mb-10">
                   <p className="font-sans text-xs text-[#888] leading-relaxed">
                     <strong className="text-[#1a1a1a]">Confidential opportunity.</strong> The maison name will be disclosed after initial screening. All applications are handled with full discretion by the JOBLUX team.
                   </p>
@@ -392,9 +392,9 @@ export default function OpportunityDetailPage() {
             </div>
 
             {/* ── Right sidebar ─────────────────────────────────────── */}
-            <div>
+            <div className="lg:sticky lg:top-[88px] lg:self-start">
               {/* Details panel */}
-              <div className="border border-[#e8e2d8] p-5 mb-6">
+              <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6 mb-6">
                 <div className="space-y-4">
                   {/* Benefits */}
                   {assignment.benefits && assignment.benefits.length > 0 && (
@@ -476,7 +476,7 @@ export default function OpportunityDetailPage() {
               {/* ── Call to Action ──────────────────────────────────── */}
               {isAuthenticated ? (
                 applied ? (
-                  <div className="p-4 bg-[#fafaf5] border border-[#a58e28] text-center">
+                  <div className="p-5 bg-white border border-[#a58e28] rounded-xl text-center">
                     <p className="font-sans text-sm text-[#a58e28] font-medium">Interest submitted</p>
                     <p className="font-sans text-xs text-[#888] mt-1">The JOBLUX team will be in touch.</p>
                   </div>
@@ -485,7 +485,7 @@ export default function OpportunityDetailPage() {
                     <button
                       onClick={handleApply}
                       disabled={applying}
-                      className="jl-btn jl-btn-gold w-full justify-center disabled:opacity-50"
+                      className="jl-btn jl-btn-gold w-full justify-center disabled:opacity-50 py-3 text-sm"
                     >
                       {applying ? 'Submitting...' : 'Express Interest'}
                     </button>
@@ -498,7 +498,7 @@ export default function OpportunityDetailPage() {
                   </div>
                 )
               ) : (
-                <div className="p-4 bg-[#222222] text-center">
+                <div className="p-5 bg-[#1a1a1a] text-center rounded-xl">
                   <div className="jl-overline-gold mb-2">Members Only</div>
                   <p className="font-sans text-xs text-[#888] mb-3">
                     Sign in to view full details and express interest.

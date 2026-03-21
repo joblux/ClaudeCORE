@@ -1026,25 +1026,53 @@ export default function ProfileClient({ email }: { email: string }) {
   // ══════════════════════════════════════════════════════════════════
 
   return (
-    <div>
+    <div className="bg-[#f8f7f4] min-h-screen">
       {/* ── Header ─────────────────────────────────────────────── */}
-      <div className="border-b-2 border-[#1a1a1a] py-10">
+      <div className="bg-white border-b border-gray-200/60 py-8 lg:py-10">
         <div className="jl-container">
-          <div className="jl-overline-gold mb-3">Your Profile</div>
-          <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a]">
-            {firstName || lastName ? `${firstName} ${lastName}`.trim() : 'Complete Your Profile'}
-          </h1>
-          {headline && (
-            <p className="font-sans text-sm text-[#666] mt-2">{headline}</p>
-          )}
+          <div className="lg:flex lg:items-end lg:justify-between">
+            <div>
+              <div className="jl-overline-gold mb-2">Your Profile</div>
+              <div className="flex items-center gap-4">
+                {/* Avatar circle */}
+                <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-full bg-[#a58e28]/10 flex items-center justify-center flex-shrink-0">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="" className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    <span className="text-xl lg:text-2xl font-medium text-[#a58e28]">
+                      {(firstName || 'J')[0]}{(lastName || 'L')[0]}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <h1 className="jl-serif text-2xl md:text-3xl font-light text-[#1a1a1a]">
+                    {firstName || lastName ? `${firstName} ${lastName}`.trim() : 'Complete Your Profile'}
+                  </h1>
+                  {headline && (
+                    <p className="font-sans text-sm text-[#666] mt-1">{headline}</p>
+                  )}
+                  {(city || country) && (
+                    <p className="font-sans text-xs text-[#999] mt-0.5">{[city, country].filter(Boolean).join(', ')}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 lg:mt-0">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-1 text-sm text-[#a58e28] hover:text-[#7a6a1e] font-medium transition-colors"
+              >
+                &larr; Dashboard
+              </Link>
+            </div>
+          </div>
 
-          {/* Profile Completeness Bar */}
-          <div className="mt-6 max-w-lg">
+          {/* Mobile: Profile Completeness Bar (hidden on desktop — moves to sidebar) */}
+          <div className="mt-6 lg:hidden">
             <div className="flex items-center justify-between mb-2">
               <span className="font-sans text-xs font-medium text-[#1a1a1a]">
-                Your profile is {completeness}% complete
+                {completeness}% complete
               </span>
-              <span className="font-sans text-xs text-[#888]">{completeness}/100</span>
             </div>
             <div className="h-2 bg-[#e8e2d8] rounded-full overflow-hidden">
               <div
@@ -1059,9 +1087,11 @@ export default function ProfileClient({ email }: { email: string }) {
         </div>
       </div>
 
-      {/* ── Main Content ───────────────────────────────────────── */}
-      <div className="jl-container py-10">
-        <div className="max-w-3xl">
+      {/* ── Main Content — Two columns on desktop ──────────────── */}
+      <div className="jl-container py-8 lg:py-10">
+        <div className="lg:grid lg:grid-cols-[1fr_340px] gap-8">
+        {/* LEFT — Profile form sections */}
+        <div>
 
           {/* ════════════════════════════════════════════════════ */}
           {/* Section 1 — Personal Information                    */}
@@ -2063,7 +2093,7 @@ export default function ProfileClient({ email }: { email: string }) {
           {/* Save Profile Button                                 */}
           {/* ════════════════════════════════════════════════════ */}
           <div className="border-t-2 border-[#1a1a1a] pt-8 mt-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <p className="font-sans text-xs text-[#888]">
                   Saves personal info, professional summary, skills, luxury profile, and preferences.
@@ -2076,7 +2106,7 @@ export default function ProfileClient({ email }: { email: string }) {
                 type="button"
                 onClick={handleSaveProfile}
                 disabled={saving || !firstName || !lastName}
-                className="jl-btn jl-btn-primary disabled:opacity-40"
+                className="jl-btn jl-btn-gold disabled:opacity-40 flex-shrink-0"
               >
                 {saving ? 'Saving...' : 'Save Profile'}
               </button>
@@ -2274,8 +2304,8 @@ export default function ProfileClient({ email }: { email: string }) {
             </div>
           </FormSection>
 
-          {/* Quick links */}
-          <div className="mt-10">
+          {/* Quick links — mobile only (sidebar has these on desktop) */}
+          <div className="mt-10 lg:hidden">
             <div className="jl-section-label"><span>Quick Links</span></div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Link href="/dashboard" className="jl-card group">
@@ -2293,7 +2323,114 @@ export default function ProfileClient({ email }: { email: string }) {
             </div>
           </div>
 
-        </div>
+        </div>{/* END left column */}
+
+        {/* RIGHT — Sidebar (desktop only) */}
+        <div className="hidden lg:block space-y-4">
+
+          {/* Profile Completeness */}
+          <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6 sticky top-[88px]">
+            <div className="space-y-4">
+
+              {/* Completeness card */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider">
+                    Profile Completeness
+                  </h3>
+                  <span className="text-lg font-medium text-[#a58e28]">{completeness}%</span>
+                </div>
+                <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
+                  <div
+                    className="h-full bg-[#a58e28] rounded-full transition-all duration-700"
+                    style={{ width: `${completeness}%` }}
+                  />
+                </div>
+                {completenessHint && (
+                  <p className="text-xs text-gray-500">{completenessHint}</p>
+                )}
+              </div>
+
+              <div className="border-t border-gray-100 pt-4">
+                <h3 className="text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">
+                  Profile Visibility
+                </h3>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500">Public résumé</span>
+                  <span className={`text-xs font-medium ${resumePublic ? 'text-[#a58e28]' : 'text-gray-400'}`}>
+                    {resumePublic ? 'Visible' : 'Hidden'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Shareable link */}
+              {resumeSlug && resumePublic && (
+                <div className="border-t border-gray-100 pt-4">
+                  <h3 className="text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-2">
+                    Shareable Link
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <input
+                      className="jl-input text-xs flex-1 bg-gray-50"
+                      value={`luxuryrecruiter.com/r/${resumeSlug}`}
+                      readOnly
+                      onClick={(e) => (e.target as HTMLInputElement).select()}
+                    />
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(`https://www.luxuryrecruiter.com/r/${resumeSlug}`)
+                        setResumeCopied(true)
+                        setTimeout(() => setResumeCopied(false), 2000)
+                      }}
+                      className="text-xs text-[#a58e28] hover:text-[#7a6a1e] font-medium whitespace-nowrap"
+                    >
+                      {resumeCopied ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Contribution stats */}
+              {member && (
+                <div className="border-t border-gray-100 pt-4">
+                  <h3 className="text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">
+                    Contribution Stats
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">Points earned</span>
+                    <span className="text-sm font-medium text-[#a58e28]">
+                      {(member as any).contribution_points || 0}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Quick nav */}
+              <div className="border-t border-gray-100 pt-4">
+                <h3 className="text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">
+                  Quick Links
+                </h3>
+                <div className="space-y-2">
+                  <Link href="/dashboard" className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#a58e28] transition-colors">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#a58e28]" />
+                    Dashboard
+                  </Link>
+                  <Link href="/opportunities" className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#a58e28] transition-colors">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#a58e28]" />
+                    Opportunities
+                  </Link>
+                  <Link href="/invite" className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#a58e28] transition-colors">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#a58e28]" />
+                    Invite Colleagues
+                  </Link>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>{/* END sidebar */}
+        </div>{/* END two-column grid */}
       </div>
 
       {/* ── Toast Notification ─────────────────────────────────── */}
