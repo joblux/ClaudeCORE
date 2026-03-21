@@ -41,15 +41,6 @@ export default function SalariesPage() {
     )
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="jl-container py-20 text-center">
-        <h1 className="jl-serif text-2xl text-[#1a1a1a] mb-3">Sign in to access Salary Intelligence</h1>
-        <Link href="/join" className="jl-btn-primary">Request Access</Link>
-      </div>
-    )
-  }
-
   const tabs: { key: TabKey; label: string; requiredRank: number; points: number }[] = [
     { key: 'browse', label: 'Browse', requiredRank: 0, points: 0 },
     { key: 'benchmark', label: 'Benchmark', requiredRank: 1, points: 10 },
@@ -266,14 +257,18 @@ function BrowseTab({ accessLevel }: { accessLevel: string }) {
                 {(filters.brands || []).map((b: string) => <option key={b} value={b}>{b}</option>)}
               </select>
             )}
-            <select value={filterDept} onChange={(e) => { setFilterDept(e.target.value); setPage(1) }} className="jl-select text-xs min-w-[130px]">
-              <option value="">All Departments</option>
-              {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
-            </select>
-            <select value={filterSeniority} onChange={(e) => { setFilterSeniority(e.target.value); setPage(1) }} className="jl-select text-xs min-w-[130px]">
-              <option value="">All Levels</option>
-              {SENIORITY_LEVELS.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+            {(filters.departments || []).length > 0 && (
+              <select value={filterDept} onChange={(e) => { setFilterDept(e.target.value); setPage(1) }} className="jl-select text-xs min-w-[130px]">
+                <option value="">All Departments</option>
+                {(filters.departments || []).map((d: string) => <option key={d} value={d}>{d}</option>)}
+              </select>
+            )}
+            {(filters.seniority_levels || []).length > 0 && (
+              <select value={filterSeniority} onChange={(e) => { setFilterSeniority(e.target.value); setPage(1) }} className="jl-select text-xs min-w-[130px]">
+                <option value="">All Levels</option>
+                {(filters.seniority_levels || []).map((s: string) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            )}
             {(filters.cities || []).length > 0 && (
               <select value={filterCity} onChange={(e) => { setFilterCity(e.target.value); setPage(1) }} className="jl-select text-xs min-w-[120px]">
                 <option value="">All Cities</option>

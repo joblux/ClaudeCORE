@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { useMember } from '@/lib/auth-hooks'
-import { DEPARTMENTS, SENIORITY_LEVELS } from '@/lib/assignment-options'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,6 +17,8 @@ export default function InterviewsPage() {
   const [experiences, setExperiences] = useState<InterviewExperienceListItem[]>([])
   const [stats, setStats] = useState<InterviewStats | null>(null)
   const [brands, setBrands] = useState<{ name: string; slug: string }[]>([])
+  const [uniqueDepartments, setUniqueDepartments] = useState<string[]>([])
+  const [uniqueSeniority, setUniqueSeniority] = useState<string[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
@@ -36,21 +37,13 @@ export default function InterviewsPage() {
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      // Direct Supabase query with contributions join
+      // Direct Supabase query — simple query first, then try contributions join
       const offset = (page - 1) * limit
       let query = supabase
         .from('interview_experiences')
-        .select(`
-          id, job_title, department, seniority, location,
-          interview_year, number_of_rounds, interview_format,
-          difficulty, overall_experience, outcome, created_at,
-          contributions!inner ( brand_name, brand_slug, is_anonymous, status, contribution_type )
-        `, { count: 'exact' })
-        .eq('contributions.status', 'approved')
-        .eq('contributions.contribution_type', 'interview_experience')
+        .select('*', { count: 'exact' })
         .order('created_at', { ascending: false })
 
-      if (filterBrand) query = query.eq('contributions.brand_slug', filterBrand)
       if (filterDepartment) query = query.eq('department', filterDepartment)
       if (filterSeniority) query = query.eq('seniority', filterSeniority)
       if (filterYear) query = query.eq('interview_year', parseInt(filterYear))
@@ -61,63 +54,59 @@ export default function InterviewsPage() {
 
       if (error) {
         console.error('Interview fetch error:', error.message)
-        // Fallback: simple query without join
-        const { data: simple, count: simpleCount } = await supabase
-          .from('interview_experiences')
-          .select('*', { count: 'exact' })
-          .order('created_at', { ascending: false })
-          .range(offset, offset + limit - 1)
-
-        setExperiences((simple || []).map((e: any) => ({
-          ...e, brand_name: '', brand_slug: '', is_anonymous: true,
-        })))
-        setTotal(simpleCount ?? 0)
-        setStats({ total_experiences: simpleCount ?? 0, unique_brands: 0, difficulty_distribution: {}, common_formats: {} })
+        setExperiences([])
+        setTotal(0)
+        setStats({ total_experiences: 0, unique_brands: 0, difficulty_distribution: {}, common_formats: {} })
         setBrands([])
         setLoading(false)
         return
       }
 
-      const mapped = (rawData || []).map((exp: any) => {
-        const c = Array.isArray(exp.contributions) ? exp.contributions[0] : exp.contributions
-        return {
-          id: exp.id,
-          brand_name: c?.brand_name || '',
-          brand_slug: c?.brand_slug || '',
-          job_title: exp.job_title,
-          department: exp.department,
-          seniority: exp.seniority,
-          location: exp.location,
-          interview_year: exp.interview_year,
-          number_of_rounds: exp.number_of_rounds,
-          interview_format: exp.interview_format,
-          difficulty: exp.difficulty,
-          overall_experience: exp.overall_experience,
-          outcome: exp.outcome,
-          is_anonymous: c?.is_anonymous ?? true,
-          created_at: exp.created_at,
-        }
-      })
+      const mapped = (rawData || []).map((exp: any) => ({
+        id: exp.id,
+        brand_name: exp.brand_name || exp.company || '',
+        brand_slug: exp.brand_slug || '',
+        job_title: exp.job_title,
+        department: exp.department,
+        seniority: exp.seniority,
+        location: exp.location,
+        interview_year: exp.interview_year,
+        number_of_rounds: exp.number_of_rounds,
+        interview_format: exp.interview_format,
+        difficulty: exp.difficulty,
+        overall_experience: exp.overall_experience,
+        outcome: exp.outcome,
+        is_anonymous: true,
+        created_at: exp.created_at,
+      }))
 
-      setExperiences(mapped)
-      setTotal(count ?? mapped.length)
+      // Apply brand filter client-side (brand_name is on the row directly)
+      const filtered = filterBrand
+        ? mapped.filter(e => e.brand_slug === filterBrand)
+        : mapped
 
-      // Build brand list + stats from all approved experiences
+      setExperiences(filtered)
+      setTotal(filterBrand ? filtered.length : (count ?? mapped.length))
+
+      // Build brand list + stats + dynamic filter options from all experiences
       const { data: allData } = await supabase
         .from('interview_experiences')
-        .select('difficulty, contributions!inner ( brand_name, brand_slug, status, contribution_type )')
-        .eq('contributions.status', 'approved')
-        .eq('contributions.contribution_type', 'interview_experience')
+        .select('difficulty, brand_name, brand_slug, department, seniority')
 
       const brandSlugs = new Set<string>()
       const brandMap = new Map<string, string>()
+      const deptSet = new Set<string>()
+      const senioritySet = new Set<string>()
       ;(allData || []).forEach((e: any) => {
-        const c = Array.isArray(e.contributions) ? e.contributions[0] : e.contributions
-        if (c?.brand_slug) {
-          brandSlugs.add(c.brand_slug)
-          brandMap.set(c.brand_slug, c.brand_name)
+        if (e.brand_slug) {
+          brandSlugs.add(e.brand_slug)
+          brandMap.set(e.brand_slug, e.brand_name || e.brand_slug)
         }
+        if (e.department) deptSet.add(e.department)
+        if (e.seniority) senioritySet.add(e.seniority)
       })
+      setUniqueDepartments(Array.from(deptSet).sort())
+      setUniqueSeniority(Array.from(senioritySet).sort())
 
       setBrands(Array.from(brandSlugs).map(slug => ({
         name: brandMap.get(slug) || slug, slug
@@ -204,7 +193,7 @@ export default function InterviewsPage() {
               className="jl-select text-xs min-w-[150px]"
             >
               <option value="">All Departments</option>
-              {DEPARTMENTS.map(d => (
+              {uniqueDepartments.map(d => (
                 <option key={d} value={d}>{d}</option>
               ))}
             </select>
@@ -215,7 +204,7 @@ export default function InterviewsPage() {
               className="jl-select text-xs min-w-[150px]"
             >
               <option value="">All Levels</option>
-              {SENIORITY_LEVELS.map(s => (
+              {uniqueSeniority.map(s => (
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
@@ -298,7 +287,7 @@ export default function InterviewsPage() {
           <div className="lg:col-span-3">
             {loading ? (
               <LoadingSkeleton />
-            ) : stats && stats.total_experiences === 0 ? (
+            ) : experiences.length === 0 && !hasFilters ? (
               <EmptyStateLaunch />
             ) : experiences.length === 0 && hasFilters ? (
               <div className="text-center py-16">
