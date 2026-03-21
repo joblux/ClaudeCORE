@@ -55,16 +55,29 @@ export async function GET(request: NextRequest) {
 
     const images = (result.response?.results || []).map(mapUnsplashPhoto)
 
-    // Cache results in Supabase (upsert by slug)
-    const { error: upsertError } = await supabase
-      .from('wikilux_brands')
-      .upsert(
-        { slug, brand_name: brand, images },
-        { onConflict: 'slug' }
-      )
+    // Cache images — try wikilux_brands first, fall back silently
+    try {
+      // First try to update an existing row (avoids column mismatch on insert)
+      const { error: updateError } = await supabase
+        .from('wikilux_brands')
+        .update({ images })
+        .eq('slug', slug)
 
-    if (upsertError) {
-      console.error('[wikilux/images] Failed to cache images:', JSON.stringify(upsertError))
+      if (updateError) {
+        // Row may not exist — try upsert with minimal columns
+        const { error: upsertError } = await supabase
+          .from('wikilux_brands')
+          .upsert(
+            { slug, brand_name: brand, images },
+            { onConflict: 'slug' }
+          )
+        if (upsertError) {
+          console.error('[wikilux/images] Cache write failed:', JSON.stringify(upsertError))
+        }
+      }
+    } catch (e) {
+      // Never block image delivery due to cache failure
+      console.error('[wikilux/images] Cache write exception:', e)
     }
 
     return NextResponse.json({ images })
