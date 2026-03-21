@@ -2,8 +2,14 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
+import { createClient } from '@supabase/supabase-js'
 import { useMember } from '@/lib/auth-hooks'
 import { DEPARTMENTS, SENIORITY_LEVELS, CURRENCY_SYMBOLS, COMMON_CITIES } from '@/lib/assignment-options'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 import { ACCESS_RANK, LUXURY_SKILLS } from '@/types/salary'
 import type { SalaryRangeData, BenchmarkResult, CompareResult, CalculatorResult } from '@/types/salary'
 import SalaryRangeBar, { formatSalaryFull } from '@/components/salary/SalaryRangeBar'
@@ -142,24 +148,90 @@ function BrowseTab({ accessLevel }: { accessLevel: string }) {
 
   const fetchData = useCallback(async () => {
     setLoading(true)
-    const params = new URLSearchParams()
-    params.set('page', String(page))
-    params.set('limit', String(limit))
-    if (debouncedSearch) params.set('brand', debouncedSearch)
-    if (filterBrand) params.set('brand', filterBrand)
-    if (filterDept) params.set('department', filterDept)
-    if (filterSeniority) params.set('seniority', filterSeniority)
-    if (filterCity) params.set('city', filterCity)
-    if (filterCurrency) params.set('currency', filterCurrency)
-
     try {
-      const res = await fetch(`/api/salaries?${params}`)
-      if (!res.ok) { setLoading(false); return }
-      const data = await res.json()
-      setEntries(data.entries || [])
-      setTotal(data.total || 0)
-      setStats(data.stats)
-      setFilters(data.filters || {})
+      // Direct Supabase query — bypasses API route for reliability
+      let query = supabase
+        .from('salary_benchmarks')
+        .select('*', { count: 'exact' })
+
+      const brandSearch = filterBrand || debouncedSearch
+      if (brandSearch) query = query.ilike('brand_name', `%${brandSearch}%`)
+      if (filterDept) query = query.eq('department', filterDept)
+      if (filterSeniority) query = query.eq('seniority', filterSeniority)
+      if (filterCity) query = query.eq('city', filterCity)
+      if (filterCurrency) query = query.eq('currency', filterCurrency)
+
+      const offset = (page - 1) * limit
+      query = query.order('brand_name').range(offset, offset + limit - 1)
+
+      const { data, count, error } = await query
+
+      if (error) {
+        console.error('Salary fetch error:', error.message)
+        setEntries([])
+        setLoading(false)
+        return
+      }
+
+      const mapped: SalaryRangeData[] = (data || []).map((b: any) => ({
+        id: b.id,
+        brand_name: b.brand_name,
+        brand_slug: b.brand_slug,
+        job_title: b.job_title,
+        department: b.department,
+        seniority: b.seniority,
+        city: b.city,
+        country: b.country,
+        currency: b.currency,
+        salary_min: b.salary_min,
+        salary_max: b.salary_max,
+        salary_median: b.salary_median ?? Math.round((b.salary_min + b.salary_max) / 2),
+        bonus_min: b.bonus_min,
+        bonus_max: b.bonus_max,
+        total_comp_min: b.total_comp_min,
+        total_comp_max: b.total_comp_max,
+        data_points: 1,
+        confidence: b.confidence || 'benchmark',
+        sources: { benchmark: 1, contribution: 0 },
+      }))
+
+      setEntries(mapped)
+      setTotal(count ?? mapped.length)
+
+      // Build filter options from all benchmarks (unfiltered)
+      const { data: allBenchmarks } = await supabase
+        .from('salary_benchmarks')
+        .select('brand_name, department, seniority, city, country, currency')
+
+      if (allBenchmarks) {
+        const brands = new Set<string>()
+        const depts = new Set<string>()
+        const seniorities = new Set<string>()
+        const cities = new Set<string>()
+        const countries = new Set<string>()
+        const currencies = new Set<string>()
+        allBenchmarks.forEach((b: any) => {
+          if (b.brand_name) brands.add(b.brand_name)
+          if (b.department) depts.add(b.department)
+          if (b.seniority) seniorities.add(b.seniority)
+          if (b.city) cities.add(b.city)
+          if (b.country) countries.add(b.country)
+          if (b.currency) currencies.add(b.currency)
+        })
+        setFilters({
+          brands: Array.from(brands).sort(),
+          departments: Array.from(depts).sort(),
+          seniority_levels: Array.from(seniorities).sort(),
+          cities: Array.from(cities).sort(),
+          countries: Array.from(countries).sort(),
+          currencies: Array.from(currencies).sort(),
+        })
+        setStats({
+          total_data_points: allBenchmarks.length,
+          unique_brands: brands.size,
+          unique_cities: cities.size,
+        })
+      }
     } catch { setEntries([]) } finally { setLoading(false) }
   }, [page, debouncedSearch, filterBrand, filterDept, filterSeniority, filterCity, filterCurrency])
 

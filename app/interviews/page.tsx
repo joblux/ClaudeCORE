@@ -2,8 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import { createClient } from '@supabase/supabase-js'
 import { useMember } from '@/lib/auth-hooks'
 import { DEPARTMENTS, SENIORITY_LEVELS } from '@/lib/assignment-options'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 import { DIFFICULTY_OPTIONS, DIFFICULTY_SCALE, EXPERIENCE_SENTIMENT, OUTCOME_LABELS } from '@/types/interview'
 import type { InterviewExperienceListItem, InterviewStats } from '@/types/interview'
 
@@ -29,22 +35,100 @@ export default function InterviewsPage() {
 
   const fetchData = useCallback(async () => {
     setLoading(true)
-    const params = new URLSearchParams()
-    params.set('page', String(page))
-    params.set('limit', String(limit))
-    if (filterBrand) params.set('brand', filterBrand)
-    if (filterDepartment) params.set('department', filterDepartment)
-    if (filterSeniority) params.set('seniority', filterSeniority)
-    if (filterYear) params.set('year', filterYear)
-    if (filterDifficulty) params.set('difficulty', filterDifficulty)
-
     try {
-      const res = await fetch(`/api/interviews?${params}`)
-      const data = await res.json()
-      setExperiences(data.experiences || [])
-      setStats(data.stats || null)
-      setBrands(data.brands || [])
-      setTotal(data.total || 0)
+      // Direct Supabase query with contributions join
+      const offset = (page - 1) * limit
+      let query = supabase
+        .from('interview_experiences')
+        .select(`
+          id, job_title, department, seniority, location,
+          interview_year, number_of_rounds, interview_format,
+          difficulty, overall_experience, outcome, created_at,
+          contributions!inner ( brand_name, brand_slug, is_anonymous, status, contribution_type )
+        `, { count: 'exact' })
+        .eq('contributions.status', 'approved')
+        .eq('contributions.contribution_type', 'interview_experience')
+        .order('created_at', { ascending: false })
+
+      if (filterBrand) query = query.eq('contributions.brand_slug', filterBrand)
+      if (filterDepartment) query = query.eq('department', filterDepartment)
+      if (filterSeniority) query = query.eq('seniority', filterSeniority)
+      if (filterYear) query = query.eq('interview_year', parseInt(filterYear))
+      if (filterDifficulty) query = query.eq('difficulty', filterDifficulty)
+
+      query = query.range(offset, offset + limit - 1)
+      const { data: rawData, count, error } = await query
+
+      if (error) {
+        console.error('Interview fetch error:', error.message)
+        // Fallback: simple query without join
+        const { data: simple, count: simpleCount } = await supabase
+          .from('interview_experiences')
+          .select('*', { count: 'exact' })
+          .order('created_at', { ascending: false })
+          .range(offset, offset + limit - 1)
+
+        setExperiences((simple || []).map((e: any) => ({
+          ...e, brand_name: '', brand_slug: '', is_anonymous: true,
+        })))
+        setTotal(simpleCount ?? 0)
+        setStats({ total_experiences: simpleCount ?? 0, unique_brands: 0, difficulty_distribution: {}, common_formats: {} })
+        setBrands([])
+        setLoading(false)
+        return
+      }
+
+      const mapped = (rawData || []).map((exp: any) => {
+        const c = Array.isArray(exp.contributions) ? exp.contributions[0] : exp.contributions
+        return {
+          id: exp.id,
+          brand_name: c?.brand_name || '',
+          brand_slug: c?.brand_slug || '',
+          job_title: exp.job_title,
+          department: exp.department,
+          seniority: exp.seniority,
+          location: exp.location,
+          interview_year: exp.interview_year,
+          number_of_rounds: exp.number_of_rounds,
+          interview_format: exp.interview_format,
+          difficulty: exp.difficulty,
+          overall_experience: exp.overall_experience,
+          outcome: exp.outcome,
+          is_anonymous: c?.is_anonymous ?? true,
+          created_at: exp.created_at,
+        }
+      })
+
+      setExperiences(mapped)
+      setTotal(count ?? mapped.length)
+
+      // Build brand list + stats from all approved experiences
+      const { data: allData } = await supabase
+        .from('interview_experiences')
+        .select('difficulty, contributions!inner ( brand_name, brand_slug, status, contribution_type )')
+        .eq('contributions.status', 'approved')
+        .eq('contributions.contribution_type', 'interview_experience')
+
+      const brandSlugs = new Set<string>()
+      const brandMap = new Map<string, string>()
+      ;(allData || []).forEach((e: any) => {
+        const c = Array.isArray(e.contributions) ? e.contributions[0] : e.contributions
+        if (c?.brand_slug) {
+          brandSlugs.add(c.brand_slug)
+          brandMap.set(c.brand_slug, c.brand_name)
+        }
+      })
+
+      setBrands(Array.from(brandSlugs).map(slug => ({
+        name: brandMap.get(slug) || slug, slug
+      })).sort((a, b) => a.name.localeCompare(b.name)))
+
+      setStats({
+        total_experiences: (allData || []).length,
+        unique_brands: brandSlugs.size,
+        difficulty_distribution: {},
+        common_formats: {},
+      })
     } catch {
       setExperiences([])
     } finally {

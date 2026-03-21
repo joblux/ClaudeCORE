@@ -56,13 +56,11 @@ export function Ticker() {
     <div className="jl-ticker">
       <div className="jl-ticker-track">
         {items.map((item, i) => (
-          <span key={i} className="contents">
-            <Link href={`/bloglux/${item.slug}`} className="jl-ticker-item">
-              <em>{item.category}</em>
-              <span>{item.title}</span>
-            </Link>
+          <Link key={i} href={`/bloglux/${item.slug}`} className="jl-ticker-item">
+            <em>{item.category}</em>
+            <span>{item.title}</span>
             <span className="jl-ticker-dot">&middot;</span>
-          </span>
+          </Link>
         ))}
       </div>
     </div>
