@@ -1,33 +1,70 @@
-import Link from 'next/link'
+'use client'
 
-const salaryData = [
-  { role: 'Store Director',   city: 'Paris Flagship', range: '€95–130K', change: '+6%'  },
-  { role: 'Buying Director',  city: 'RTW · Paris',    range: '€80–110K', change: '+8%'  },
-  { role: 'Regional Director',city: 'Dubai',          range: 'AED 350K', change: '+11%' },
-  { role: 'HR Director',      city: 'Group Level',    range: '€110–150K',change: '+9%'  },
-  { role: 'Client Advisor',   city: 'Flagship Paris', range: '€32–45K',  change: '+5%'  },
-]
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { createClient } from '@supabase/supabase-js'
+import { CURRENCY_SYMBOLS } from '@/lib/assignment-options'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+interface SalaryRow {
+  job_title: string
+  city: string | null
+  currency: string | null
+  salary_min: number | null
+  salary_max: number | null
+}
+
+function formatK(n: number): string {
+  if (n >= 1000) return `${Math.round(n / 1000)}K`
+  return String(n)
+}
+
+function buildRange(row: SalaryRow): string {
+  const sym = CURRENCY_SYMBOLS[row.currency || 'EUR'] || row.currency || ''
+  if (row.salary_min && row.salary_max) return `${sym}${formatK(row.salary_min)}–${formatK(row.salary_max)}`
+  if (row.salary_min) return `From ${sym}${formatK(row.salary_min)}`
+  if (row.salary_max) return `Up to ${sym}${formatK(row.salary_max)}`
+  return ''
+}
 
 export function SalarySnapshot() {
+  const [salaries, setSalaries] = useState<SalaryRow[]>([])
+
+  useEffect(() => {
+    supabase
+      .from('salary_benchmarks')
+      .select('job_title, city, currency, salary_min, salary_max')
+      .order('salary_max', { ascending: false })
+      .limit(5)
+      .then(({ data }) => setSalaries(data || []))
+  }, [])
+
+  if (salaries.length === 0) return null
+
   return (
     <div>
       <div className="jl-section-label">
-        <span>Salary Snapshot · Q1 2026</span>
+        <span>Salary Snapshot</span>
       </div>
 
       <div className="space-y-0">
-        {salaryData.map((item) => (
+        {salaries.map((item, i) => (
           <div
-            key={item.role}
+            key={i}
             className="flex items-center justify-between py-2.5 border-b border-[#f5f0e8] last:border-0"
           >
             <div>
-              <div className="font-sans text-xs font-medium text-[#1a1a1a]">{item.role}</div>
-              <div className="font-sans text-[0.65rem] text-[#aaa] mt-0.5">{item.city}</div>
+              <div className="font-sans text-xs font-medium text-[#1a1a1a]">{item.job_title}</div>
+              {item.city && (
+                <div className="font-sans text-[0.65rem] text-[#aaa] mt-0.5">{item.city}</div>
+              )}
             </div>
             <div className="text-right">
-              <div className="font-sans text-xs font-semibold text-[#1a1a1a]">{item.range}</div>
-              <div className="font-sans text-[0.65rem] text-green-600 mt-0.5">{item.change}</div>
+              <div className="font-sans text-xs font-semibold text-[#1a1a1a]">{buildRange(item)}</div>
             </div>
           </div>
         ))}
