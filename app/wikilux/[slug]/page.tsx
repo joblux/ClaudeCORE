@@ -7,17 +7,34 @@ import { useParams } from 'next/navigation'
 import { BRANDS } from '@/lib/wikilux-brands'
 import { useMember } from '@/lib/auth-hooks'
 import { WIKILUX_CATEGORY_ICONS } from '@/lib/sector-icons'
+import { SUPPORTED_LANGUAGES } from '@/lib/wikilux-prompt'
 
 interface WikiContent {
   tagline?: string
   history?: string
-  founder?: { name: string; birth: string; portrait: string; legacy: string }
+  founder?: string | { name: string; birth: string; portrait: string; legacy: string }
+  founder_facts?: { name: string; birth: string; legacy: string }
+  signature_products?: string
+  creative_directors?: string
   iconic_products?: { name: string; year: string; description: string }[]
   brand_dna?: string
   market_position?: string
   current_strategy?: string
+  careers?: string
   hiring_intelligence?: { culture: string; profiles: string; process: string; tips: string[] }
   key_executives?: { role: string; note: string }[]
+  key_facts?: {
+    headquarters_city?: string
+    headquarters_country?: string
+    founded_year?: number
+    founder_name?: string
+    parent_group?: string
+    sector?: string
+    subsectors?: string[]
+    estimated_employees?: string
+    key_markets?: string[]
+    website_url?: string
+  }
   presence?: { headquarters: string; key_markets: string[]; boutiques: string }
   stock?: { listed: boolean; exchange: string | null; ticker: string | null; parent_group: string }
   facts?: string[]
@@ -59,11 +76,31 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(months / 12)}y ago`
 }
 
+function renderParagraphs(text: string | undefined) {
+  if (!text) return null
+  return text.split('\n\n').map((p, i) => <p key={i}>{p}</p>)
+}
+
+function SkeletonSection() {
+  return (
+    <div className="py-8">
+      <div className="h-4 w-40 bg-[#e8e6df] rounded animate-pulse mb-6" />
+      <div className="space-y-3">
+        <div className="h-3 w-full bg-[#e8e6df] rounded animate-pulse" />
+        <div className="h-3 w-[95%] bg-[#e8e6df] rounded animate-pulse" />
+        <div className="h-3 w-[88%] bg-[#e8e6df] rounded animate-pulse" />
+        <div className="h-3 w-[92%] bg-[#e8e6df] rounded animate-pulse" />
+        <div className="h-3 w-[70%] bg-[#e8e6df] rounded animate-pulse" />
+      </div>
+    </div>
+  )
+}
+
 export default function BrandPage() {
   const params = useParams()
   const slug = params.slug as string
   const brand = BRANDS.find((b) => b.slug === slug)
-  const { isAuthenticated, isApproved, isLoading: authLoading } = useMember()
+  const { isAuthenticated, isApproved, isAdmin, isLoading: authLoading } = useMember()
   const [content, setContent] = useState<WikiContent | null>(null)
   const [loading, setLoading] = useState(true)
   const [images, setImages] = useState<BrandImage[]>([])
@@ -72,6 +109,17 @@ export default function BrandPage() {
   const [showAllInsights, setShowAllInsights] = useState(false)
   const [editorialNotes, setEditorialNotes] = useState<string | null>(null)
   const [contentUpdatedAt, setContentUpdatedAt] = useState<string | null>(null)
+
+  // Language state
+  const [activeLang, setActiveLang] = useState('en')
+  const [translations, setTranslations] = useState<Record<string, WikiContent>>({})
+  const [translating, setTranslating] = useState<string | null>(null)
+
+  // Admin state
+  const [regenerating, setRegenerating] = useState(false)
+  const [regenSuccess, setRegenSuccess] = useState(false)
+  const [generatingAllLangs, setGeneratingAllLangs] = useState(false)
+  const [langProgress, setLangProgress] = useState('')
 
   // Contribute modal state
   const [showContribute, setShowContribute] = useState(false)
@@ -99,6 +147,9 @@ export default function BrandPage() {
       .then((r) => r.json())
       .then((data) => {
         setContent(data.content)
+        if (data.translations) {
+          setTranslations(data.translations as Record<string, WikiContent>)
+        }
         if (data.updated_at) setContentUpdatedAt(data.updated_at)
         if (data.editorial_notes) setEditorialNotes(data.editorial_notes)
       })
@@ -111,6 +162,83 @@ export default function BrandPage() {
     fetch(`/api/wikilux/insights?slug=${encodeURIComponent(brand.slug)}&limit=20`)
       .then((r) => r.json()).then((data) => { setInsights(data.insights || []); setInsightsTotal(data.total || 0) }).catch(() => {})
   }, [brand])
+
+  // Switch language — load translation on demand
+  const switchLanguage = async (code: string) => {
+    if (code === 'en') {
+      setActiveLang('en')
+      return
+    }
+    if (translations[code]) {
+      setActiveLang(code)
+      return
+    }
+    // Generate translation on demand
+    setTranslating(code)
+    try {
+      const res = await fetch('/api/wikilux/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, language_code: code }),
+      })
+      const data = await res.json()
+      if (data.translation) {
+        setTranslations((prev) => ({ ...prev, [code]: data.translation }))
+        setActiveLang(code)
+      }
+    } catch {}
+    setTranslating(null)
+  }
+
+  // Admin: regenerate content
+  const handleRegenerate = async () => {
+    setRegenerating(true)
+    setRegenSuccess(false)
+    try {
+      const res = await fetch('/api/wikilux/regenerate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug }),
+      })
+      if (res.ok) {
+        // Re-fetch content
+        const genRes = await fetch('/api/wikilux/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug: brand!.slug, brandName: brand!.name, sector: brand!.sector, founded: brand!.founded, country: brand!.country, group: brand!.group }),
+        })
+        const data = await genRes.json()
+        setContent(data.content)
+        setTranslations({}) // Clear old translations since English changed
+        setActiveLang('en')
+        setRegenSuccess(true)
+      }
+    } catch {}
+    setRegenerating(false)
+  }
+
+  // Admin: generate all language translations
+  const handleGenerateAllLangs = async () => {
+    setGeneratingAllLangs(true)
+    const langs = SUPPORTED_LANGUAGES.filter((l) => l.code !== 'en')
+    for (let i = 0; i < langs.length; i++) {
+      const lang = langs[i]
+      setLangProgress(`${lang.name} (${i + 1}/${langs.length})`)
+      try {
+        const res = await fetch('/api/wikilux/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug, language_code: lang.code }),
+        })
+        const data = await res.json()
+        if (data.translation) {
+          setTranslations((prev) => ({ ...prev, [lang.code]: data.translation }))
+        }
+      } catch {}
+    }
+    setLangProgress('')
+    setGeneratingAllLangs(false)
+  }
 
   const handleContribute = async () => {
     if (!contributeCategory || contributeText.length < 50) {
@@ -135,8 +263,9 @@ export default function BrandPage() {
       setContributeSuccess(true)
       setContributeCategory('')
       setContributeText('')
-    } catch (err: any) {
-      setContributeError(err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err)
+      setContributeError(message)
     }
     setContributing(false)
   }
@@ -155,6 +284,28 @@ export default function BrandPage() {
   const galleryImages = images.slice(1, 4)
   const sectorIcon = WIKILUX_CATEGORY_ICONS[brand.sector]
   const visibleInsights = showAllInsights ? insights : insights.slice(0, 3)
+
+  // Resolve displayed content: use translation if active language is not English
+  const displayContent: WikiContent | null = activeLang === 'en'
+    ? content
+    : translations[activeLang]
+      ? { ...content, ...translations[activeLang] }
+      : content
+
+  // Helper: get founder text (handles both string and object formats)
+  const founderText = displayContent
+    ? typeof displayContent.founder === 'string'
+      ? displayContent.founder
+      : displayContent.founder
+        ? `${displayContent.founder.portrait || ''} ${displayContent.founder.legacy || ''}`
+        : undefined
+    : undefined
+
+  // Founder facts card (from founder_facts or from founder object)
+  const founderFacts = displayContent?.founder_facts
+    || (typeof displayContent?.founder === 'object' && displayContent.founder
+      ? { name: displayContent.founder.name, birth: displayContent.founder.birth, legacy: displayContent.founder.legacy }
+      : undefined)
 
   return (
     <div>
@@ -180,7 +331,7 @@ export default function BrandPage() {
             )}
             <div>
               <h1 className="jl-serif text-[2.5rem] md:text-[4rem] font-light text-white mb-3 leading-tight">{brand.name}</h1>
-              {content?.tagline && <p className="jl-editorial text-[#a58e28] mb-6 max-w-2xl">{content.tagline}</p>}
+              {displayContent?.tagline && <p className="jl-editorial text-[#a58e28] mb-6 max-w-2xl">{displayContent.tagline}</p>}
               <div className="flex items-center gap-3 flex-wrap">
                 <span className="font-sans text-[0.65rem] text-[#999] border border-[#444] px-3 py-1.5 tracking-wider uppercase">Est. {brand.founded}</span>
                 <span className="font-sans text-[0.65rem] text-[#999] border border-[#444] px-3 py-1.5 tracking-wider uppercase">{brand.country}</span>
@@ -197,10 +348,15 @@ export default function BrandPage() {
         )}
       </div>
 
+      {/* ── SKELETON LOADING ──────────────────────────────── */}
       {loading && (
-        <div className="jl-container py-20 text-center">
-          <div className="inline-block w-8 h-8 border-2 border-[#e8e2d8] border-t-[#a58e28] rounded-full animate-spin mb-4" />
-          <p className="font-sans text-sm text-[#888]">Building intelligence profile for {brand.name}...</p>
+        <div className="jl-container">
+          <SkeletonSection />
+          <div className="border-t border-[#e8e2d8]"><SkeletonSection /></div>
+          <div className="border-t border-[#e8e2d8]"><SkeletonSection /></div>
+          <div className="border-t border-[#e8e2d8]"><SkeletonSection /></div>
+          <div className="border-t border-[#e8e2d8]"><SkeletonSection /></div>
+          <div className="border-t border-[#e8e2d8]"><SkeletonSection /></div>
         </div>
       )}
 
@@ -229,61 +385,116 @@ export default function BrandPage() {
             </div>
           )}
 
-          {/* BRAND DNA + SIDEBAR */}
-          <div className="jl-container py-10">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-              <div className="lg:col-span-2">
-                <div className="jl-section-label"><span>Brand DNA</span></div>
-                <div className="jl-prose mb-8">{content.brand_dna?.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}</div>
-                <div className="jl-section-label"><span>Market Position</span></div>
-                <div className="jl-prose">{content.market_position?.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}</div>
+          {/* ── ADMIN CONTROLS ────────────────────────────── */}
+          {isAdmin && (
+            <div className="jl-container py-4">
+              <div className="flex items-center gap-3 flex-wrap border border-[#e8e2d8] bg-[#fafaf5] p-4">
+                <span className="jl-badge text-[0.5rem]">Admin</span>
+                <button
+                  onClick={handleRegenerate}
+                  disabled={regenerating}
+                  className="jl-btn jl-btn-outline text-[0.65rem] py-1.5 px-3"
+                >
+                  {regenerating ? 'Regenerating...' : 'Regenerate Content'}
+                </button>
+                <button
+                  onClick={handleGenerateAllLangs}
+                  disabled={generatingAllLangs}
+                  className="jl-btn jl-btn-outline text-[0.65rem] py-1.5 px-3"
+                >
+                  {generatingAllLangs ? `Translating ${langProgress}` : 'Generate All Languages'}
+                </button>
+                {regenSuccess && <span className="text-xs text-[#a58e28]">Content regenerated</span>}
               </div>
-              <div className="space-y-6">
-                {content.facts && content.facts.length > 0 && (
-                  <div className="border border-[#e8e2d8] p-5">
-                    <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-4">Key Facts</span>
-                    <ul className="space-y-3">{content.facts.map((fact, i) => (<li key={i} className="flex items-start gap-2"><span className="text-[#a58e28] mt-0.5 flex-shrink-0">&bull;</span><span className="font-sans text-xs text-[#555] leading-relaxed">{fact}</span></li>))}</ul>
+            </div>
+          )}
+
+          {/* ── STRUCTURED EDITORIAL SECTIONS ──────────────── */}
+
+          {/* HISTORY */}
+          {displayContent?.history && (
+            <div className="border-t border-[#e8e2d8]">
+              <div className="jl-container py-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                  <div className="lg:col-span-2">
+                    <div className="jl-section-label"><span>History</span></div>
+                    <div className="jl-prose">{renderParagraphs(displayContent.history)}</div>
                   </div>
-                )}
-                {content.stock && (
-                  <div className="border border-[#e8e2d8] p-5">
-                    <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-3">Corporate</span>
-                    <div className="space-y-2">
-                      <div className="flex justify-between"><span className="font-sans text-xs text-[#888]">Parent Group</span><span className="font-sans text-xs font-medium text-[#1a1a1a]">{content.stock.parent_group}</span></div>
-                      {content.stock.listed && content.stock.exchange && (<div className="flex justify-between"><span className="font-sans text-xs text-[#888]">Exchange</span><span className="jl-badge-gold text-[0.5rem]">{content.stock.exchange} {content.stock.ticker && `· ${content.stock.ticker}`}</span></div>)}
+                  <div className="space-y-6">
+                    {/* Key Facts sidebar */}
+                    {displayContent.key_facts && (
+                      <div className="border border-[#e8e2d8] p-5">
+                        <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-4">Key Facts</span>
+                        <div className="space-y-2.5">
+                          {displayContent.key_facts.founded_year && (
+                            <div className="flex justify-between"><span className="font-sans text-xs text-[#888]">Founded</span><span className="font-sans text-xs font-medium text-[#1a1a1a]">{displayContent.key_facts.founded_year}</span></div>
+                          )}
+                          {displayContent.key_facts.founder_name && (
+                            <div className="flex justify-between"><span className="font-sans text-xs text-[#888]">Founder</span><span className="font-sans text-xs font-medium text-[#1a1a1a]">{displayContent.key_facts.founder_name}</span></div>
+                          )}
+                          {displayContent.key_facts.headquarters_city && (
+                            <div className="flex justify-between"><span className="font-sans text-xs text-[#888]">Headquarters</span><span className="font-sans text-xs font-medium text-[#1a1a1a]">{displayContent.key_facts.headquarters_city}, {displayContent.key_facts.headquarters_country}</span></div>
+                          )}
+                          {displayContent.key_facts.parent_group && (
+                            <div className="flex justify-between"><span className="font-sans text-xs text-[#888]">Group</span><span className="font-sans text-xs font-medium text-[#1a1a1a]">{displayContent.key_facts.parent_group}</span></div>
+                          )}
+                          {displayContent.key_facts.estimated_employees && (
+                            <div className="flex justify-between"><span className="font-sans text-xs text-[#888]">Employees</span><span className="font-sans text-xs font-medium text-[#1a1a1a]">{displayContent.key_facts.estimated_employees}</span></div>
+                          )}
+                          {displayContent.key_facts.website_url && (
+                            <div className="flex justify-between"><span className="font-sans text-xs text-[#888]">Website</span><a href={displayContent.key_facts.website_url} target="_blank" rel="noopener noreferrer" className="font-sans text-xs text-[#a58e28] hover:underline truncate ml-2">{displayContent.key_facts.website_url.replace(/^https?:\/\/(www\.)?/, '')}</a></div>
+                          )}
+                        </div>
+                        {displayContent.key_facts.key_markets && displayContent.key_facts.key_markets.length > 0 && (
+                          <div className="mt-4 pt-3 border-t border-[#f0ece4]">
+                            <span className="font-sans text-[0.6rem] text-[#888] uppercase tracking-wider block mb-2">Key Markets</span>
+                            <div className="flex flex-wrap gap-1.5">{displayContent.key_facts.key_markets.map((m) => (<span key={m} className="font-sans text-[0.6rem] text-[#a58e28] border border-[#e8e2d8] px-2 py-0.5">{m}</span>))}</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {/* Fallback: facts, corporate, markets from old format */}
+                    {!displayContent.key_facts && displayContent.facts && displayContent.facts.length > 0 && (
+                      <div className="border border-[#e8e2d8] p-5">
+                        <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-4">Key Facts</span>
+                        <ul className="space-y-3">{displayContent.facts.map((fact, i) => (<li key={i} className="flex items-start gap-2"><span className="text-[#a58e28] mt-0.5 flex-shrink-0">&bull;</span><span className="font-sans text-xs text-[#555] leading-relaxed">{fact}</span></li>))}</ul>
+                      </div>
+                    )}
+                    {displayContent.stock && (
+                      <div className="border border-[#e8e2d8] p-5">
+                        <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-3">Corporate</span>
+                        <div className="space-y-2">
+                          <div className="flex justify-between"><span className="font-sans text-xs text-[#888]">Parent Group</span><span className="font-sans text-xs font-medium text-[#1a1a1a]">{displayContent.stock.parent_group}</span></div>
+                          {displayContent.stock.listed && displayContent.stock.exchange && (<div className="flex justify-between"><span className="font-sans text-xs text-[#888]">Exchange</span><span className="jl-badge-gold text-[0.5rem]">{displayContent.stock.exchange} {displayContent.stock.ticker && `· ${displayContent.stock.ticker}`}</span></div>)}
+                        </div>
+                      </div>
+                    )}
+                    <div className="border border-[#e8e2d8] p-5">
+                      <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-3">Known For</span>
+                      <div className="flex flex-wrap gap-2">{knownForTags.map((tag) => (<span key={tag} className="font-sans text-[0.6rem] text-[#a58e28] border border-[#e8e2d8] px-2.5 py-1">{tag}</span>))}</div>
                     </div>
                   </div>
-                )}
-                {content.presence?.key_markets && (
-                  <div className="border border-[#e8e2d8] p-5">
-                    <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-3">Key Markets</span>
-                    <div className="flex flex-wrap gap-2">{content.presence.key_markets.map((m) => (<span key={m} className="font-sans text-[0.6rem] text-[#a58e28] border border-[#e8e2d8] px-2.5 py-1">{m}</span>))}</div>
-                    {content.presence.boutiques && <p className="font-sans text-[0.65rem] text-[#aaa] mt-3">{content.presence.boutiques}</p>}
-                  </div>
-                )}
-                <div className="border border-[#e8e2d8] p-5">
-                  <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-3">Known For</span>
-                  <div className="flex flex-wrap gap-2">{knownForTags.map((tag) => (<span key={tag} className="font-sans text-[0.6rem] text-[#a58e28] border border-[#e8e2d8] px-2.5 py-1">{tag}</span>))}</div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* HISTORY */}
-          {content.history && (
+          {/* FOUNDER */}
+          {founderText && (
             <div className="border-t border-[#e8e2d8]">
-              <div className="jl-container py-10">
-                <div className="jl-section-label"><span>History &amp; Heritage</span></div>
+              <div className="jl-container py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                  <div className="lg:col-span-2 jl-prose">{content.history.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}</div>
-                  {content.founder && (
+                  <div className="lg:col-span-2">
+                    <div className="jl-section-label"><span>Founder</span></div>
+                    <div className="jl-prose">{renderParagraphs(founderText)}</div>
+                  </div>
+                  {founderFacts && (
                     <div>
                       <div className="bg-[#fafaf5] border-l-2 border-[#a58e28] p-5">
                         <span className="font-sans text-[0.65rem] text-[#a58e28] uppercase tracking-wider block mb-3">Founder</span>
-                        <h3 className="jl-serif text-lg font-light text-[#1a1a1a] mb-1">{content.founder.name}</h3>
-                        <p className="font-sans text-[0.65rem] text-[#aaa] mb-3">{content.founder.birth}</p>
-                        <p className="font-sans text-xs text-[#555] leading-relaxed mb-3">{content.founder.portrait}</p>
-                        <p className="jl-editorial text-xs">{content.founder.legacy}</p>
+                        <h3 className="jl-serif text-lg font-light text-[#1a1a1a] mb-1">{founderFacts.name}</h3>
+                        {founderFacts.birth && <p className="font-sans text-[0.65rem] text-[#aaa] mb-3">{founderFacts.birth}</p>}
+                        {founderFacts.legacy && <p className="jl-editorial text-xs">{founderFacts.legacy}</p>}
                       </div>
                     </div>
                   )}
@@ -292,48 +503,97 @@ export default function BrandPage() {
             </div>
           )}
 
-          {/* ICONIC PRODUCTS */}
-          {content.iconic_products && content.iconic_products.length > 0 && (
+          {/* SIGNATURE PRODUCTS */}
+          {(displayContent?.signature_products || displayContent?.iconic_products) && (
             <div className="border-t border-[#e8e2d8]">
-              <div className="jl-container py-10">
-                <div className="jl-section-label"><span>Iconic Creations</span></div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">{content.iconic_products.map((p) => (
-                  <div key={p.name} className="jl-card group"><h3 className="jl-serif text-base font-light text-[#1a1a1a] mb-1 group-hover:text-[#a58e28] transition-colors">{p.name}</h3><span className="font-sans text-[0.6rem] text-[#a58e28] tracking-wider uppercase">{p.year}</span><p className="font-sans text-xs text-[#888] leading-relaxed mt-2">{p.description}</p></div>
-                ))}</div>
+              <div className="jl-container py-8">
+                <div className="jl-section-label"><span>Signature Products</span></div>
+                {displayContent.signature_products && (
+                  <div className="jl-prose mb-6">{renderParagraphs(displayContent.signature_products)}</div>
+                )}
+                {displayContent.iconic_products && displayContent.iconic_products.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">{displayContent.iconic_products.map((p) => (
+                    <div key={p.name} className="jl-card group"><h3 className="jl-serif text-base font-light text-[#1a1a1a] mb-1 group-hover:text-[#a58e28] transition-colors">{p.name}</h3><span className="font-sans text-[0.6rem] text-[#a58e28] tracking-wider uppercase">{p.year}</span><p className="font-sans text-xs text-[#888] leading-relaxed mt-2">{p.description}</p></div>
+                  ))}</div>
+                )}
               </div>
             </div>
           )}
 
-          {/* STRATEGY */}
-          {content.current_strategy && (
+          {/* CREATIVE DIRECTORS */}
+          {displayContent?.creative_directors && (
             <div className="border-t border-[#e8e2d8]">
-              <div className="jl-container py-10">
-                <div className="jl-section-label"><span>Strategy &amp; Direction</span></div>
+              <div className="jl-container py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                  <div className="lg:col-span-2 jl-prose">{content.current_strategy.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}</div>
-                  {content.key_executives && content.key_executives.length > 0 && (
-                    <div><div className="border border-[#e8e2d8] p-5"><span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-4">Key Executives</span><div className="space-y-3">{content.key_executives.map((exec, i) => (<div key={i} className="border-b border-[#f0ece4] pb-3 last:border-0 last:pb-0"><div className="font-sans text-xs font-semibold text-[#1a1a1a]">{exec.role}</div><div className="font-sans text-[0.65rem] text-[#888] mt-0.5">{exec.note}</div></div>))}</div></div></div>
+                  <div className="lg:col-span-2">
+                    <div className="jl-section-label"><span>Creative Directors</span></div>
+                    <div className="jl-prose">{renderParagraphs(displayContent.creative_directors)}</div>
+                  </div>
+                  {displayContent.key_executives && displayContent.key_executives.length > 0 && (
+                    <div>
+                      <div className="border border-[#e8e2d8] p-5">
+                        <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-4">Key Executives</span>
+                        <div className="space-y-3">{displayContent.key_executives.map((exec, i) => (
+                          <div key={i} className="border-b border-[#f0ece4] pb-3 last:border-0 last:pb-0">
+                            <div className="font-sans text-xs font-semibold text-[#1a1a1a]">{exec.role}</div>
+                            <div className="font-sans text-[0.65rem] text-[#888] mt-0.5">{exec.note}</div>
+                          </div>
+                        ))}</div>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
             </div>
           )}
 
+          {/* BRAND DNA */}
+          {displayContent?.brand_dna && (
+            <div className="border-t border-[#e8e2d8]">
+              <div className="jl-container py-8">
+                <div className="jl-section-label"><span>Brand DNA</span></div>
+                <div className="jl-prose">{renderParagraphs(displayContent.brand_dna)}</div>
+                {displayContent.market_position && (
+                  <div className="mt-8">
+                    <div className="jl-section-label"><span>Market Position</span></div>
+                    <div className="jl-prose">{renderParagraphs(displayContent.market_position)}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* CAREERS */}
+          {displayContent?.careers && (
+            <div className="border-t border-[#e8e2d8]">
+              <div className="jl-container py-8">
+                <div className="jl-section-label"><span>Careers at {brand.name}</span></div>
+                <div className="jl-prose">{renderParagraphs(displayContent.careers)}</div>
+                {displayContent.current_strategy && (
+                  <div className="mt-8">
+                    <div className="jl-section-label"><span>Strategy &amp; Direction</span></div>
+                    <div className="jl-prose">{renderParagraphs(displayContent.current_strategy)}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* HIRING INTELLIGENCE */}
-          {content.hiring_intelligence && (
+          {displayContent?.hiring_intelligence && (
             <div className="border-t-2 border-[#a58e28] bg-[#fafaf5]">
               <div className="jl-container py-10">
                 <div className="jl-section-label"><span>&#10022; Hiring Intelligence</span></div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                  <div><h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Culture</h3><div className="font-sans text-sm text-[#555] leading-relaxed space-y-3">{content.hiring_intelligence.culture.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}</div></div>
-                  <div><h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Candidate Profiles</h3><div className="font-sans text-sm text-[#555] leading-relaxed space-y-3">{content.hiring_intelligence.profiles.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}</div></div>
+                  <div><h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Culture</h3><div className="font-sans text-sm text-[#555] leading-relaxed space-y-3">{displayContent.hiring_intelligence.culture.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}</div></div>
+                  <div><h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Candidate Profiles</h3><div className="font-sans text-sm text-[#555] leading-relaxed space-y-3">{displayContent.hiring_intelligence.profiles.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}</div></div>
                 </div>
-                {content.hiring_intelligence.process && (<div className="mb-8"><h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Recruitment Process</h3><p className="font-sans text-sm text-[#555] leading-relaxed">{content.hiring_intelligence.process}</p></div>)}
-                {content.hiring_intelligence.tips && content.hiring_intelligence.tips.length > 0 && (
+                {displayContent.hiring_intelligence.process && (<div className="mb-8"><h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Recruitment Process</h3><p className="font-sans text-sm text-[#555] leading-relaxed">{displayContent.hiring_intelligence.process}</p></div>)}
+                {displayContent.hiring_intelligence.tips && displayContent.hiring_intelligence.tips.length > 0 && (
                   <div className="relative">
                     <h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Insider Tips</h3>
                     <div className={!isAuthenticated ? 'blur-sm select-none' : ''}>
-                      <ol className="space-y-3">{content.hiring_intelligence.tips.map((tip, i) => (<li key={i} className="flex items-start gap-3"><span className="jl-serif text-lg text-[#a58e28] leading-none mt-0.5 flex-shrink-0 w-6">{i + 1}</span><span className="font-sans text-sm text-[#555] leading-relaxed">{tip}</span></li>))}</ol>
+                      <ol className="space-y-3">{displayContent.hiring_intelligence.tips.map((tip, i) => (<li key={i} className="flex items-start gap-3"><span className="jl-serif text-lg text-[#a58e28] leading-none mt-0.5 flex-shrink-0 w-6">{i + 1}</span><span className="font-sans text-sm text-[#555] leading-relaxed">{tip}</span></li>))}</ol>
                     </div>
                     {!isAuthenticated && (
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -352,6 +612,34 @@ export default function BrandPage() {
               </div>
             </div>
           )}
+
+          {/* ── LANGUAGE SWITCHER ──────────────────────────── */}
+          <div className="border-t border-[#e8e2d8]">
+            <div className="jl-container py-6">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider mr-2">Language</span>
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => switchLanguage(lang.code)}
+                    disabled={translating === lang.code}
+                    className={`font-sans text-[0.65rem] px-3 py-1.5 border transition-colors ${
+                      activeLang === lang.code
+                        ? 'border-[#a58e28] text-[#a58e28] bg-[#a58e28]/5'
+                        : 'border-[#e8e2d8] text-[#888] hover:border-[#a58e28] hover:text-[#a58e28]'
+                    }`}
+                  >
+                    {translating === lang.code ? '...' : `${lang.flag} ${lang.code.toUpperCase()}`}
+                  </button>
+                ))}
+              </div>
+              {translating && (
+                <p className="font-sans text-[0.65rem] text-[#a58e28] mt-2 animate-pulse">
+                  Generating translation...
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* ── EDITORIAL NOTES ──────────────────────────── */}
           {editorialNotes && (

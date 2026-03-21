@@ -31,6 +31,10 @@ export default function AdminWikiLuxPage() {
   const [editSaving, setEditSaving] = useState(false)
   const [editSuccess, setEditSuccess] = useState(false)
 
+  // Seed state
+  const [seeding, setSeeding] = useState(false)
+  const [seedResult, setSeedResult] = useState<string | null>(null)
+
   useEffect(() => {
     fetchStats()
   }, [])
@@ -81,6 +85,25 @@ export default function AdminWikiLuxPage() {
       setRegenResult('Failed.')
     }
     setSingleRegening(false)
+  }
+
+  const handleSeed = async () => {
+    if (!confirm('This will generate rich content for all brands that don\'t have it yet. This may take a while and incur API costs. Continue?')) return
+    setSeeding(true)
+    setSeedResult(null)
+    try {
+      const res = await fetch('/api/wikilux/seed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      const data = await res.json()
+      setSeedResult(`Total: ${data.total_brands} | Already seeded: ${data.already_seeded} | Newly generated: ${data.newly_generated} | Remaining: ${data.remaining} | Errors: ${data.errors?.length || 0}`)
+      fetchStats()
+    } catch {
+      setSeedResult('Seed request failed.')
+    }
+    setSeeding(false)
   }
 
   const handleSaveEditorial = async () => {
@@ -155,6 +178,21 @@ export default function AdminWikiLuxPage() {
               </div>
             </div>
             {regenResult && <p className="text-xs text-[#a58e28] mt-3">{regenResult}</p>}
+          </div>
+
+          {/* SEED BRANDS */}
+          <div className="mb-8">
+            <div className="jl-section-label"><span>Seed WikiLux Brands</span></div>
+            <div className="jl-card">
+              <h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Fill Missing Content</h3>
+              <p className="text-xs text-[#888] mb-3">
+                Generate rich editorial content (History, Founder, Signature Products, Creative Directors, Brand DNA, Careers) for all {BRANDS.length} brands that don&rsquo;t have it yet. Safe to run multiple times — only fills gaps.
+              </p>
+              <button onClick={handleSeed} disabled={seeding} className="jl-btn jl-btn-gold text-xs">
+                {seeding ? 'Seeding in progress...' : `Seed WikiLux Brands (${BRANDS.length})`}
+              </button>
+              {seedResult && <p className="text-xs text-[#a58e28] mt-3 whitespace-pre-line">{seedResult}</p>}
+            </div>
           </div>
 
           {/* EDITORIAL NOTES */}
