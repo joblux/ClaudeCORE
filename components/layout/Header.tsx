@@ -26,15 +26,15 @@ export function Header() {
     <header className="border-b border-[#e8e2d8]">
 
       {/* Top row — Logo + right actions */}
-      <div className="w-full px-6">
-        <div className="flex items-center justify-between py-4 sm:py-5 max-w-[1100px] mx-auto">
+      <div className="jl-container">
+        <div className="flex items-center justify-between py-4 sm:py-5">
 
           {/* Logo */}
           <Link href="/" className="inline-block flex-shrink-0">
             <div className="text-3xl sm:text-[2.15rem] font-semibold text-[#1a1a1a] leading-none" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</div>
           </Link>
 
-          {/* Right side — search (mobile), sign in, join, hamburger */}
+          {/* Right side */}
           <div className="flex items-center gap-4 sm:gap-5">
             {/* Search — mobile only (desktop search is in nav row) */}
             <button
@@ -46,12 +46,11 @@ export function Header() {
             </button>
             <UserMenu />
             {!isAuthenticated && (
-              <Link
-                href="/join"
-                className="hidden sm:inline-flex text-sm font-medium tracking-wide text-[#a58e28] hover:text-[#1a1a1a] transition-colors"
-              >
-                Join
-              </Link>
+              <span className="hidden sm:inline-flex text-sm font-medium">
+                <Link href="/members" className="text-[#1a1a1a] hover:text-[#a58e28] transition-colors">Log in</Link>
+                <span className="text-[#1a1a1a]/30 mx-1.5">/</span>
+                <Link href="/join" className="text-[#a58e28] hover:text-[#1a1a1a] transition-colors">Join</Link>
+              </span>
             )}
 
             {/* Mobile hamburger */}
@@ -69,8 +68,8 @@ export function Header() {
 
       {/* Bottom row — Nav links */}
       <div className="hidden md:block border-t border-[#e8e2d8]">
-        <div className="w-full px-6">
-          <nav className="flex items-center justify-center gap-9 py-2.5 max-w-[1100px] mx-auto">
+        <div className="jl-container">
+          <nav className="flex items-center justify-center gap-9 py-2.5">
             {navItems.map((item) => (
               <Link
                 key={item.label}
