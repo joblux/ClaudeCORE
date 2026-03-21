@@ -32,19 +32,19 @@ export default function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
 
       {/* ── Hero ── */}
-      <section className="w-full px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8 text-center border-b-2 border-[#1a1a1a]">
+      <section className="w-full bg-[#1a1a1a] px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8 text-center">
         <div className="max-w-3xl mx-auto">
 
           <p className="text-[11px] tracking-[0.16em] uppercase text-[#a58e28] font-medium mb-3">
             Luxury Talents Society
           </p>
 
-          <h1 className="font-playfair font-normal text-[#1a1a1a] mb-3">
+          <h1 className="font-playfair font-normal text-white mb-3">
             The society for<br className="hidden sm:block" />
             luxury professionals.
           </h1>
 
-          <p className="text-[#888] text-sm sm:text-base leading-relaxed max-w-xl mx-auto mb-6">
+          <p className="text-white/50 text-sm sm:text-base leading-relaxed max-w-xl mx-auto mb-6">
             WikiLux. Bloglux. Salary intelligence. Executive search.
             Free against contribution — no ads, no noise.
           </p>
@@ -52,16 +52,16 @@ export default function HomePage() {
           <div className="flex flex-col xs:flex-row gap-2 justify-center items-stretch xs:items-center">
             <Link
               href="/join"
-              className="px-5 py-2 bg-[#1a1a1a] text-[#a58e28] text-xs font-medium
-                         hover:bg-[#111111] active:scale-[0.98] transition-all duration-200
+              className="px-5 py-2 bg-[#a58e28] text-[#1a1a1a] text-xs font-medium
+                         hover:bg-[#c4aa3a] active:scale-[0.98] transition-all duration-200
                          text-center whitespace-nowrap"
             >
               Request Access
             </Link>
             <Link
               href="/wikilux"
-              className="px-5 py-2 border border-[#1a1a1a] text-[#1a1a1a] text-xs font-medium
-                         hover:bg-[#1a1a1a] hover:text-[#a58e28] active:scale-[0.98]
+              className="px-5 py-2 border border-white/30 text-white text-xs font-medium
+                         hover:border-white/60 active:scale-[0.98]
                          transition-all duration-200 text-center whitespace-nowrap"
             >
               Explore WikiLux
