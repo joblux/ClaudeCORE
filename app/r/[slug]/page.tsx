@@ -175,7 +175,7 @@ export async function generateMetadata({
   return {
     title: `${name} — ${currentRole} | JOBLUX`,
     description:
-      resume.resume_headline || 'Luxury professional on JOBLUX — Luxury Talents Society',
+      resume.resume_headline || 'Luxury professional on JOBLUX | Luxury Talents Society',
     robots: { index: false, follow: false },
     openGraph: {
       images: [

@@ -35,8 +35,6 @@ function timeAgo(d: string): string {
 
 export default function ArticleInteractions({ articleId, articleTitle, articleSlug }: Props) {
   const { isAuthenticated, isApproved } = useMember()
-  const [reactions, setReactions] = useState<Record<string, number>>({ like: 0, insightful: 0, bookmark: 0 })
-  const [myReactions, setMyReactions] = useState<string[]>([])
   const [comments, setComments] = useState<Comment[]>([])
   const [commentText, setCommentText] = useState('')
   const [replyTo, setReplyTo] = useState<string | null>(null)
@@ -49,37 +47,12 @@ export default function ArticleInteractions({ articleId, articleTitle, articleSl
     // Track view
     fetch(`/api/articles/${articleId}/views`, { method: 'POST' }).catch(() => {})
 
-    // Fetch reactions
-    fetch(`/api/articles/${articleId}/reactions`)
-      .then(r => r.json())
-      .then(data => {
-        setReactions(data.counts || { like: 0, insightful: 0, bookmark: 0 })
-        setMyReactions(data.my_reactions || [])
-      }).catch(() => {})
-
     // Fetch comments
     fetch(`/api/articles/${articleId}/comments`)
       .then(r => r.json())
       .then(data => setComments(data.comments || []))
       .catch(() => {})
   }, [articleId])
-
-  const toggleReaction = async (type: string) => {
-    if (!isAuthenticated) return
-    const res = await fetch(`/api/articles/${articleId}/reactions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reaction_type: type }),
-    })
-    const data = await res.json()
-    if (data.toggled) {
-      setMyReactions(prev => [...prev, type])
-      setReactions(prev => ({ ...prev, [type]: (prev[type] || 0) + 1 }))
-    } else {
-      setMyReactions(prev => prev.filter(r => r !== type))
-      setReactions(prev => ({ ...prev, [type]: Math.max(0, (prev[type] || 0) - 1) }))
-    }
-  }
 
   const submitComment = async (parentId?: string) => {
     const text = parentId ? replyText : commentText
@@ -137,33 +110,6 @@ export default function ArticleInteractions({ articleId, articleTitle, articleSl
                 {copied ? 'Copied!' : 'Copy link'}
               </button>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── REACTIONS ──────────────────────────────────── */}
-      <div className="border-t border-[#e8e2d8]">
-        <div className="jl-container py-6">
-          <div className="max-w-[720px] mx-auto flex items-center gap-4">
-            {[
-              { type: 'like', emoji: '❤️', label: 'Like' },
-              { type: 'insightful', emoji: '💡', label: 'Insightful' },
-              { type: 'bookmark', emoji: '🔖', label: 'Bookmark' },
-            ].map(({ type, emoji, label }) => (
-              <button
-                key={type}
-                onClick={() => isAuthenticated ? toggleReaction(type) : undefined}
-                className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-sm text-xs transition-colors ${
-                  myReactions.includes(type)
-                    ? 'border-[#a58e28] bg-[#a58e28]/5 text-[#a58e28]'
-                    : 'border-[#e8e2d8] text-[#888] hover:border-[#aaa]'
-                }`}
-              >
-                <span>{emoji}</span>
-                <span>{label}</span>
-                {reactions[type] > 0 && <span className="font-medium">{reactions[type]}</span>}
-              </button>
-            ))}
           </div>
         </div>
       </div>

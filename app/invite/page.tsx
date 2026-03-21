@@ -174,7 +174,7 @@ export default function InvitePage() {
   // ─── Share Messages ───
   const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(inviteLink)}`
   const whatsAppMessage = encodeURIComponent(
-    `I'd like to invite you to JOBLUX — the intelligence platform for luxury professionals. Free access to salary data, brand insights, and executive positions. Join here: ${inviteLink}`
+    `I'd like to invite you to JOBLUX — the society for luxury professionals. Free access to salary data, brand insights, and executive positions. Join here: ${inviteLink}`
   )
   const whatsAppUrl = `https://wa.me/?text=${whatsAppMessage}`
 
@@ -510,7 +510,7 @@ export default function InvitePage() {
                     <p className="text-xs text-[#999] mb-2">Or copy this message to send directly:</p>
                     <div className="bg-[#fafaf5] border border-[#e8e2d8] rounded-sm p-4">
                       <p className="text-sm text-[#666] leading-relaxed">
-                        I&apos;d like to invite you to JOBLUX — the intelligence platform for luxury professionals.
+                        I&apos;d like to invite you to JOBLUX — the society for luxury professionals.
                         Free access to salary data, brand insights, and executive positions across 150+ maisons.
                         No ads, no noise — just real intelligence from the community.
                       </p>
@@ -519,7 +519,7 @@ export default function InvitePage() {
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText(
-                          `I'd like to invite you to JOBLUX — the intelligence platform for luxury professionals. Free access to salary data, brand insights, and executive positions across 150+ maisons. No ads, no noise — just real intelligence from the community.\n\n${inviteLink}`
+                          `I'd like to invite you to JOBLUX — the society for luxury professionals. Free access to salary data, brand insights, and executive positions across 150+ maisons. No ads, no noise — just real intelligence from the community.\n\n${inviteLink}`
                         )
                         setSuccess('Message copied to clipboard!')
                       }}
@@ -561,7 +561,7 @@ export default function InvitePage() {
                     <p className="text-xs text-[#999] mb-2">Message preview:</p>
                     <div className="bg-[#fafaf5] border border-[#e8e2d8] rounded-sm p-4">
                       <p className="text-sm text-[#666] leading-relaxed">
-                        I&apos;d like to invite you to JOBLUX — the intelligence platform for luxury professionals.
+                        I&apos;d like to invite you to JOBLUX — the society for luxury professionals.
                         Free access to salary data, brand insights, and executive positions.
                         Join here: <span className="text-[#a58e28]">{inviteLink}</span>
                       </p>

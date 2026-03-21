@@ -7,7 +7,7 @@ import { useRequireAdmin } from '@/lib/auth-hooks'
 import {
   LayoutDashboard, BarChart3, Briefcase, Kanban, MessageSquare,
   Users, Star, Send, FileText, BookOpen, DollarSign, FileCode,
-  Menu, X, LogOut, Power, Images, PenLine, MessageCircle
+  Menu, X, LogOut, Power, Images, PenLine, MessageCircle, GraduationCap
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
@@ -22,6 +22,7 @@ const NAV_SECTIONS = [
     label: 'RECRUITMENT',
     items: [
       { label: 'Search Assignments', href: '/admin/assignments', icon: Briefcase },
+      { label: 'Internships', href: '/admin/internships', icon: GraduationCap, countKey: 'pending_internships' },
       { label: 'ATS Pipeline', href: '/admin/ats', icon: Kanban },
       { label: 'Messages', href: '/admin/messages', icon: MessageSquare, countKey: 'unread_messages' },
     ],

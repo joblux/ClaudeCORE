@@ -178,7 +178,7 @@ export default async function ArticlePage({ params }: Props) {
               <div>
                 <div className="font-sans text-sm font-semibold text-[#1a1a1a]">{article.author_name}</div>
                 {article.author_title && <div className="font-sans text-[0.65rem] text-[#888] mb-2">{article.author_title}</div>}
-                <p className="font-sans text-xs text-[#888] leading-relaxed">Founder of JOBLUX — Luxury Talents Society. Connecting exceptional talent with the world&rsquo;s most prestigious maisons.</p>
+                <p className="font-sans text-xs text-[#888] leading-relaxed">Founder of JOBLUX | Luxury Talents Society. Connecting exceptional talent with the world&rsquo;s most prestigious maisons.</p>
               </div>
             </div>
           </div>

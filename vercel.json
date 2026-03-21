@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/wikilux-refresh",
       "schedule": "0 3 1 * *"
+    },
+    {
+      "path": "/api/internships/expire",
+      "schedule": "0 4 * * *"
     }
   ]
 }

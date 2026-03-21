@@ -43,7 +43,7 @@ export function wrapInEmailTemplate({
         </td></tr>
         <!-- Footer -->
         <tr><td style="padding:20px 32px;border-top:1px solid #e8e2d8;text-align:center;">
-          <p style="font-size:11px;color:#999;margin:0;">This message was sent via JOBLUX — Luxury Talents Society</p>
+          <p style="font-size:11px;color:#999;margin:0;">This message was sent via JOBLUX | Luxury Talents Society</p>
           <p style="font-size:10px;color:#bbb;margin:4px 0 0;">Paris · London · Dubai · Singapore</p>
         </td></tr>
       </table>

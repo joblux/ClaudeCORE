@@ -8,7 +8,7 @@ import { TheBriefSignup } from '@/components/home/TheBriefSignup'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'JOBLUX — Luxury Talents Society',
+  title: 'JOBLUX | Luxury Talents Society',
   description: 'The private intelligence platform for luxury industry professionals. Executive search, salary intelligence, WikiLux brand encyclopedia and industry insights.',
 }
 
@@ -25,8 +25,8 @@ export default function HomePage() {
           </p>
 
           <h1 className="font-playfair font-normal text-[#1a1a1a] mb-6">
-            The intelligence platform<br className="hidden sm:block" />
-            for luxury professionals.
+            The society for<br className="hidden sm:block" />
+            luxury professionals.
           </h1>
 
           <p className="text-[#888] text-base sm:text-lg leading-relaxed max-w-xl mx-auto mb-10">
@@ -83,7 +83,7 @@ export default function HomePage() {
       <div className="border-t border-[#e8e2d8] mt-8">
         <div className="jl-container py-6 text-center">
           <p className="font-sans text-xs text-[#888] tracking-wide">
-            JOBLUX &mdash; The private intelligence platform for luxury professionals.
+            JOBLUX | The society for luxury professionals.
           </p>
           <div className="flex items-center justify-center gap-6 mt-3">
             <Link href="/join" className="font-sans text-[0.65rem] text-[#a58e28] tracking-wider uppercase hover:text-[#1a1a1a] transition-colors">Request Access</Link>

@@ -429,6 +429,19 @@ export default function ProfileClient({ email }: { email: string }) {
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const avatarInputRef = useRef<HTMLInputElement>(null)
 
+  // ── Opportunity Preferences ─────────────────────────────────────
+  const [prefSectors, setPrefSectors] = useState<string[]>([])
+  const [prefSeniority, setPrefSeniority] = useState<string[]>([])
+  const [prefDepts, setPrefDepts] = useState<string[]>([])
+  const [prefContracts, setPrefContracts] = useState<string[]>([])
+  const [prefRemote, setPrefRemote] = useState(false)
+  const [prefInternships, setPrefInternships] = useState(false)
+  const [prefMinSalary, setPrefMinSalary] = useState('')
+  const [prefSalaryCurrency, setPrefSalaryCurrency] = useState('EUR')
+  const [prefAlerts, setPrefAlerts] = useState(false)
+  const [prefAlertFreq, setPrefAlertFreq] = useState('weekly')
+  const [savingPrefs, setSavingPrefs] = useState(false)
+
   // ── Résumé Settings ────────────────────────────────────────────
   const [resumePublic, setResumePublic] = useState(false)
   const [resumeSlug, setResumeSlug] = useState<string | null>(null)
@@ -530,6 +543,22 @@ export default function ProfileClient({ email }: { email: string }) {
       if (data.resume_show_email !== undefined) setResumeShowEmail(data.resume_show_email)
       if (data.resume_show_phone !== undefined) setResumeShowPhone(data.resume_show_phone)
     }).catch(() => {})
+
+    // Load opportunity preferences
+    fetch('/api/members/preferences').then(r => r.json()).then(data => {
+      if (data && data.preferred_sectors) {
+        setPrefSectors(data.preferred_sectors || [])
+        setPrefSeniority(data.preferred_seniority || [])
+        setPrefDepts(data.preferred_departments || [])
+        setPrefContracts(data.preferred_contract_types || [])
+        setPrefRemote(data.open_to_remote || false)
+        setPrefInternships(data.open_to_internships || false)
+        setPrefMinSalary(data.min_salary ? String(data.min_salary) : '')
+        setPrefSalaryCurrency(data.salary_currency || 'EUR')
+        setPrefAlerts(data.alerts_enabled || false)
+        setPrefAlertFreq(data.alert_frequency || 'weekly')
+      }
+    }).catch(() => {})
   }, [email])
 
   // ══════════════════════════════════════════════════════════════════
@@ -580,6 +609,34 @@ export default function ProfileClient({ email }: { email: string }) {
       showToast('Résumé settings saved')
     } catch { showToast('Failed to save') }
     setSavingResume(false)
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  // Save Opportunity Preferences
+  // ══════════════════════════════════════════════════════════════════
+
+  const handleSavePreferences = async () => {
+    setSavingPrefs(true)
+    try {
+      await fetch('/api/members/preferences', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          preferred_sectors: prefSectors,
+          preferred_seniority: prefSeniority,
+          preferred_departments: prefDepts,
+          preferred_contract_types: prefContracts,
+          open_to_remote: prefRemote,
+          open_to_internships: prefInternships,
+          min_salary: prefMinSalary ? parseInt(prefMinSalary) : null,
+          salary_currency: prefSalaryCurrency,
+          alerts_enabled: prefAlerts,
+          alert_frequency: prefAlertFreq,
+        }),
+      })
+      showToast('Preferences saved')
+    } catch { showToast('Failed to save preferences') }
+    setSavingPrefs(false)
   }
 
   // ══════════════════════════════════════════════════════════════════
@@ -2027,8 +2084,9 @@ export default function ProfileClient({ email }: { email: string }) {
           </div>
 
           {/* ════════════════════════════════════════════════════ */}
-          {/* Photo Upload                                         */}
+          {/* Photo Upload (hidden for business/insider)           */}
           {/* ════════════════════════════════════════════════════ */}
+          {member && !['business', 'insider'].includes((member as any).role || '') && (
           <FormSection title="Profile Photo">
             <div className="flex items-center gap-6">
               {avatarUrl ? (
@@ -2048,6 +2106,79 @@ export default function ProfileClient({ email }: { email: string }) {
                 )}
                 <p className="text-[0.6rem] text-[#aaa]">JPG, PNG or WebP. Max 5MB.</p>
               </div>
+            </div>
+          </FormSection>
+          )}
+
+          {/* ════════════════════════════════════════════════════ */}
+          {/* Opportunity Preferences                               */}
+          {/* ════════════════════════════════════════════════════ */}
+          <FormSection title="Opportunity Preferences">
+            <div className="space-y-5">
+              <div>
+                <label className="jl-label">Preferred Sectors</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {['Fashion & leather goods', 'Watches & jewellery', 'Perfumes & cosmetics', 'Wines & spirits', 'Hospitality & travel', 'Automotive', 'Aviation & yachting', 'Real estate', 'Design', 'Art & auction houses', 'Media & publishing', 'Technology for luxury'].map(s => (
+                    <button key={s} type="button" onClick={() => setPrefSectors(p => p.includes(s) ? p.filter(x => x !== s) : [...p, s])} className={`text-[0.65rem] px-2.5 py-1 rounded-sm border transition-colors ${prefSectors.includes(s) ? 'border-[#a58e28] bg-[#a58e28]/10 text-[#a58e28]' : 'border-[#e8e2d8] text-[#888]'}`}>{s}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="jl-label">Seniority</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {SENIORITY_LEVELS.map(s => (
+                    <button key={s} type="button" onClick={() => setPrefSeniority(p => p.includes(s) ? p.filter(x => x !== s) : [...p, s])} className={`text-[0.65rem] px-2.5 py-1 rounded-sm border transition-colors ${prefSeniority.includes(s) ? 'border-[#a58e28] bg-[#a58e28]/10 text-[#a58e28]' : 'border-[#e8e2d8] text-[#888]'}`}>{s}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="jl-label">Departments</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {DEPARTMENTS.map(d => (
+                    <button key={d} type="button" onClick={() => setPrefDepts(p => p.includes(d) ? p.filter(x => x !== d) : [...p, d])} className={`text-[0.65rem] px-2.5 py-1 rounded-sm border transition-colors ${prefDepts.includes(d) ? 'border-[#a58e28] bg-[#a58e28]/10 text-[#a58e28]' : 'border-[#e8e2d8] text-[#888]'}`}>{d}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="jl-label">Contract Types</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {['Permanent', 'Fixed-term', 'Freelance', 'Internship'].map(c => (
+                    <button key={c} type="button" onClick={() => setPrefContracts(p => p.includes(c) ? p.filter(x => x !== c) : [...p, c])} className={`text-[0.65rem] px-2.5 py-1 rounded-sm border transition-colors ${prefContracts.includes(c) ? 'border-[#a58e28] bg-[#a58e28]/10 text-[#a58e28]' : 'border-[#e8e2d8] text-[#888]'}`}>{c}</button>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-sans text-xs text-[#888]">Open to remote</span>
+                  <button type="button" onClick={() => setPrefRemote(!prefRemote)} className={`relative w-8 h-4 rounded-full transition-colors ${prefRemote ? 'bg-[#a58e28]' : 'bg-[#e8e2d8]'}`}><span className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${prefRemote ? 'translate-x-4' : ''}`} /></button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="font-sans text-xs text-[#888]">Open to internships</span>
+                  <button type="button" onClick={() => setPrefInternships(!prefInternships)} className={`relative w-8 h-4 rounded-full transition-colors ${prefInternships ? 'bg-[#a58e28]' : 'bg-[#e8e2d8]'}`}><span className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${prefInternships ? 'translate-x-4' : ''}`} /></button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="jl-label">Minimum Salary</label>
+                  <input type="number" className="jl-input" value={prefMinSalary} onChange={(e) => setPrefMinSalary(e.target.value)} placeholder="e.g. 40000" />
+                </div>
+                <div>
+                  <label className="jl-label">Currency</label>
+                  <select className="jl-select" value={prefSalaryCurrency} onChange={(e) => setPrefSalaryCurrency(e.target.value)}>
+                    {SALARY_CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="font-sans text-xs text-[#1a1a1a] font-medium">Notify me about matching opportunities</span>
+                  <p className="font-sans text-[0.6rem] text-[#aaa] italic mt-0.5">Alerts coming soon — we&rsquo;re saving your preferences.</p>
+                </div>
+                <button type="button" onClick={() => setPrefAlerts(!prefAlerts)} className={`relative w-8 h-4 rounded-full transition-colors ${prefAlerts ? 'bg-[#a58e28]' : 'bg-[#e8e2d8]'}`}><span className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${prefAlerts ? 'translate-x-4' : ''}`} /></button>
+              </div>
+              <button type="button" onClick={handleSavePreferences} disabled={savingPrefs} className="jl-btn jl-btn-primary text-xs">
+                {savingPrefs ? 'Saving...' : 'Save Preferences'}
+              </button>
             </div>
           </FormSection>
 

@@ -56,10 +56,11 @@ export default async function DashboardPage() {
     )
   }
 
-  // Business gets post brief
+  // Business gets post brief + internships
   if (isBusiness) {
     cards.push(
       { num: '07', title: 'Post a Brief', desc: 'Create a new hiring assignment on the JOBLUX platform.', href: '/admin/briefs/new' },
+      { num: '08', title: 'Post an Internship', desc: 'Post internships for free and reach our society of luxury professionals.', href: '/dashboard/internships/new' },
     )
   }
 
