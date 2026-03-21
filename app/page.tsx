@@ -32,36 +32,35 @@ export default function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
 
       {/* ── Hero ── */}
-      {/* Mobile: centered text hero / Desktop: two-column editorial */}
-      <section className="w-full border-b-2 border-[#1a1a1a]">
+      <section className="w-full bg-[#1a1a1a]">
         {/* Mobile hero */}
         <div className="lg:hidden px-4 sm:px-6 pt-14 sm:pt-20 pb-10 sm:pb-14 text-center">
           <div className="max-w-3xl mx-auto">
-            <p className="text-[11px] tracking-[0.16em] uppercase text-[#a58e28] font-medium mb-5">
+            <p className="text-[11px] tracking-[0.14em] uppercase text-[#a58e28] font-medium mb-5">
               Luxury Talents Society
             </p>
-            <h1 className="font-playfair font-normal text-[#1a1a1a] mb-6">
+            <h1 className="font-playfair font-normal text-white mb-6">
               The society for<br className="hidden sm:block" />
               luxury professionals.
             </h1>
-            <p className="text-[#888] text-base sm:text-lg leading-relaxed max-w-xl mx-auto mb-10">
-              WikiLux. Bloglux. Salary intelligence. Executive search.
+            <p className="text-white/60 text-base sm:text-lg leading-relaxed max-w-xl mx-auto mb-10">
+              WikiLux. BlogLux. Salary intelligence. Executive search.
               Free against contribution — no ads, no noise.
             </p>
             <div className="flex flex-col xs:flex-row gap-3 justify-center items-stretch xs:items-center">
               <Link
                 href="/join"
-                className="px-8 py-3 bg-[#1a1a1a] text-[#a58e28] text-sm font-medium
-                           hover:bg-[#111111] active:scale-[0.98] transition-all duration-200
-                           text-center whitespace-nowrap"
+                className="px-8 py-3 bg-[#a58e28] text-[#1a1a1a] text-sm font-medium
+                           hover:bg-[#c4aa3a] active:scale-[0.98] transition-all duration-200
+                           text-center whitespace-nowrap rounded-md"
               >
                 Request Access
               </Link>
               <Link
                 href="/wikilux"
-                className="px-8 py-3 border border-[#1a1a1a] text-[#1a1a1a] text-sm font-medium
-                           hover:bg-[#1a1a1a] hover:text-[#a58e28] active:scale-[0.98]
-                           transition-all duration-200 text-center whitespace-nowrap"
+                className="px-8 py-3 border border-white/30 text-white text-sm font-medium
+                           hover:border-white/60 active:scale-[0.98]
+                           transition-all duration-200 text-center whitespace-nowrap rounded-md"
               >
                 Explore WikiLux
               </Link>
@@ -69,33 +68,34 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Desktop hero — two-column editorial grid */}
-        <div className="hidden lg:grid lg:grid-cols-[1.4fr_1fr] lg:min-h-[400px] max-w-[1400px] mx-auto lg:px-8 xl:px-16">
-          {/* Left panel — dark featured content */}
-          <div className="bg-[#1a1a1a] p-10 xl:p-14 flex flex-col justify-center lg:rounded-l-xl">
-            <span className="inline-block text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-[#a58e28] border border-[#a58e28]/30 px-3 py-1 w-fit mb-6">
-              Featured
-            </span>
-            <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-white leading-snug mb-4">
-              The Hybrid Luxury Executive: What Maisons Are Hiring in 2026
-            </h2>
-            <p className="font-sans text-sm text-[#888] leading-relaxed mb-6 max-w-lg">
-              JOBLUX analysis of 400 senior placements reveals a new leadership profile — operational rigour paired with creative brand fluency.
+        {/* Desktop hero — full-width centered */}
+        <div className="hidden lg:block pt-20 lg:pt-28 pb-14 lg:pb-20">
+          <div className="max-w-4xl mx-auto text-center px-8">
+            <p className="text-[11px] tracking-[0.14em] uppercase text-[#a58e28] font-medium mb-6">
+              Luxury Talents Society
             </p>
-            <Link
-              href="/bloglux/hybrid-luxury-executive-2026"
-              className="font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#e4b042] transition-colors w-fit"
-            >
-              Read on BlogLux →
-            </Link>
-          </div>
-          {/* Right panel — hero image placeholder */}
-          <div className="bg-[#f0ece4] lg:rounded-r-xl flex items-center justify-center overflow-hidden relative">
-            <div className="text-center">
-              <div className="font-serif text-4xl xl:text-5xl font-light tracking-[0.15em] text-[#a58e28]/30 uppercase">
-                JOBLUX
-              </div>
-              <p className="font-sans text-xs text-[#bbb] mt-2 tracking-wider uppercase">Luxury Talents Society</p>
+            <h1 className="font-['Playfair_Display'] text-4xl lg:text-5xl font-light text-white leading-tight mb-6">
+              The society for luxury professionals.
+            </h1>
+            <p className="text-lg text-white/60 leading-relaxed max-w-2xl mx-auto mb-10">
+              WikiLux. BlogLux. Salary intelligence. Executive search.
+              500+ brand encyclopedias, compensation benchmarks, and interview intelligence — free against contribution.
+            </p>
+            <div className="flex gap-4 justify-center">
+              <Link
+                href="/join"
+                className="px-8 py-3.5 bg-[#a58e28] text-[#1a1a1a] text-sm font-semibold tracking-wider uppercase
+                           hover:bg-[#c4aa3a] transition-all duration-200 rounded-md"
+              >
+                Request Access
+              </Link>
+              <Link
+                href="/wikilux"
+                className="px-8 py-3.5 border border-white/30 text-white text-sm font-semibold tracking-wider uppercase
+                           hover:border-white/60 transition-all duration-200 rounded-md"
+              >
+                Explore WikiLux
+              </Link>
             </div>
           </div>
         </div>
@@ -103,26 +103,6 @@ export default function HomePage() {
 
       {/* INDUSTRY TICKER */}
       <Ticker />
-
-      {/* ── Desktop: Category filter bar ── */}
-      <div className="hidden lg:block border-b border-[#e8e2d8] bg-white">
-        <div className="max-w-[1400px] mx-auto px-8 xl:px-16">
-          <div className="flex items-center gap-8 py-3">
-            {['All', 'Careers', 'Salary Data', 'Interviews', 'WikiLux', 'BlogLux'].map((tab, i) => (
-              <button
-                key={tab}
-                className={`text-[0.65rem] tracking-[0.12em] uppercase font-semibold pb-2 border-b-2 transition-colors ${
-                  i === 0
-                    ? 'border-[#a58e28] text-[#a58e28]'
-                    : 'border-transparent text-gray-400 hover:text-[#a58e28]'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* MAIN CONTENT */}
       <div className="jl-container py-10 lg:py-16">
