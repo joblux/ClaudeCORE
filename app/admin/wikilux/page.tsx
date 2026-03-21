@@ -122,10 +122,11 @@ export default function AdminWikiLuxPage() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto">
+    <div className="min-h-screen bg-[#fafaf5]">
+      <div className="px-6 py-5 lg:px-8 max-w-5xl">
       <div className="mb-6">
-        <div className="jl-overline-gold mb-1">Content</div>
-        <h1 className="jl-serif text-2xl font-light text-[#1a1a1a]">WikiLux Management</h1>
+        <h1 className="text-xl font-medium text-[#1a1a1a]">WikiLux Management</h1>
+        <p className="text-sm text-gray-400 mt-0.5">Brand content generation and editorial tools</p>
       </div>
 
       {loading ? (
@@ -260,6 +261,7 @@ export default function AdminWikiLuxPage() {
           )}
         </>
       )}
+      </div>
     </div>
   )
 }

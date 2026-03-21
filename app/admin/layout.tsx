@@ -7,30 +7,20 @@ import { useRequireAdmin } from '@/lib/auth-hooks'
 import {
   LayoutDashboard, BarChart3, Briefcase, Kanban, MessageSquare,
   Users, Star, Send, FileText, BookOpen, DollarSign, FileCode,
-  Menu, X, LogOut, Power, Images, PenLine, MessageCircle, GraduationCap, Mail
+  Menu, X, LogOut, Power, Images, PenLine, MessageCircle, GraduationCap, Mail, Settings
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
   {
-    label: 'OVERVIEW',
+    label: 'ADMIN',
     items: [
       { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
       { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-    ],
-  },
-  {
-    label: 'RECRUITMENT',
-    items: [
+      { label: 'Members', href: '/admin', icon: Users, exact: true },
       { label: 'Search Assignments', href: '/admin/assignments', icon: Briefcase },
       { label: 'Internships', href: '/admin/internships', icon: GraduationCap, countKey: 'pending_internships' },
       { label: 'ATS Pipeline', href: '/admin/ats', icon: Kanban },
       { label: 'Messages', href: '/admin/messages', icon: MessageSquare, countKey: 'unread_messages' },
-    ],
-  },
-  {
-    label: 'SOCIETY',
-    items: [
-      { label: 'Members', href: '/admin', icon: Users, exact: true },
       { label: 'Contributions', href: '/admin/contributions', icon: Star, countKey: 'pending_contributions' },
       { label: 'Invitations', href: '/admin/invitations', icon: Send },
     ],
@@ -38,7 +28,7 @@ const NAV_SECTIONS = [
   {
     label: 'CONTENT',
     items: [
-      { label: 'Articles', href: '/admin/articles', icon: FileText },
+      { label: 'BlogLux', href: '/admin/articles', icon: FileText },
       { label: 'New Article', href: '/admin/articles/new', icon: PenLine },
       { label: 'Comments', href: '/admin/bloglux/comments', icon: MessageCircle, countKey: 'pending_comments' },
       { label: 'WikiLux', href: '/admin/wikilux', icon: BookOpen },
@@ -68,13 +58,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [maintenanceMode, setMaintenanceMode] = useState(false)
   const [maintenanceLoading, setMaintenanceLoading] = useState(false)
 
-  // Fetch counts for badges (unread messages, pending contributions)
   useEffect(() => {
     fetch('/api/admin/sidebar-counts')
       .then(r => r.ok ? r.json() : {})
       .then(data => setCounts(data))
       .catch(() => {})
-    // Fetch maintenance mode status
     fetch('/api/admin/maintenance')
       .then(r => r.ok ? r.json() : {})
       .then((data: any) => { if (data.maintenance_mode !== undefined) setMaintenanceMode(data.maintenance_mode) })
@@ -106,9 +94,106 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return pathname === href || pathname.startsWith(href + '/')
   }
 
-  const sidebar = (
+  const initials = (name || email || 'A').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+
+  /* ── Desktop sidebar (light theme) ── */
+  const desktopSidebar = (
+    <aside className="hidden lg:flex lg:flex-col w-[200px] min-h-screen bg-white border-r border-gray-200 flex-shrink-0">
+      {/* Logo + Admin badge */}
+      <div className="px-4 py-4 border-b border-gray-100">
+        <Link href="/admin/dashboard" className="flex items-center gap-2">
+          <span className="text-lg font-semibold text-[#1a1a1a]" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>
+            JOBLUX.
+          </span>
+          <span className="text-[10px] tracking-wide px-2 py-0.5 bg-[#a58e28]/15 text-[#a58e28] rounded font-medium">
+            ADMIN
+          </span>
+        </Link>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto py-3 px-2">
+        {NAV_SECTIONS.map((section) => (
+          <div key={section.label} className="mb-4">
+            <div className="text-[10px] tracking-[0.15em] uppercase text-gray-400 px-3 mb-3 font-medium">
+              {section.label}
+            </div>
+            {section.items.map((item) => {
+              const Icon = item.icon
+              const active = isActive(item.href, (item as any).exact)
+              const count = (item as any).countKey ? counts[(item as any).countKey] : 0
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-2.5 py-2 px-3 text-sm rounded-lg mb-0.5 transition-colors ${
+                    active
+                      ? 'bg-[#a58e28]/10 text-[#a58e28] font-medium'
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Icon size={15} className="flex-shrink-0" />
+                  <span className="flex-1 truncate">{item.label}</span>
+                  {count > 0 && (
+                    <span className="text-[9px] font-bold bg-[#a58e28] text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                      {count}
+                    </span>
+                  )}
+                </Link>
+              )
+            })}
+          </div>
+        ))}
+      </nav>
+
+      {/* Offline Mode Toggle */}
+      <div className="px-3 py-3 border-t border-gray-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Power size={13} className={maintenanceMode ? 'text-red-400' : 'text-green-500'} />
+            <span className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">
+              {maintenanceMode ? 'Offline' : 'Live'}
+            </span>
+          </div>
+          <button
+            onClick={toggleMaintenance}
+            disabled={maintenanceLoading}
+            className={`relative w-8 h-[18px] rounded-full transition-colors ${
+              maintenanceMode ? 'bg-red-400' : 'bg-green-500'
+            } ${maintenanceLoading ? 'opacity-50' : ''}`}
+            title={maintenanceMode ? 'Site is offline — click to go live' : 'Site is live — click to go offline'}
+          >
+            <span
+              className={`absolute top-[2px] left-[2px] w-[14px] h-[14px] rounded-full bg-white transition-transform shadow-sm ${
+                maintenanceMode ? 'translate-x-[14px]' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
+      {/* Admin info + exit */}
+      <div className="px-3 py-3 border-t border-gray-100">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-7 h-7 rounded-full bg-[#1a1a1a] text-[#a58e28] text-[10px] font-medium flex items-center justify-center flex-shrink-0">
+            {initials}
+          </div>
+          <div className="text-xs text-gray-600 truncate">{name || email || 'Admin'}</div>
+        </div>
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-[#a58e28] transition-colors"
+        >
+          <LogOut size={11} />
+          Exit Admin
+        </Link>
+      </div>
+    </aside>
+  )
+
+  /* ── Mobile sidebar (dark theme — unchanged) ── */
+  const mobileSidebar = (
     <aside className="w-[260px] min-h-screen bg-[#1a1a1a] flex flex-col flex-shrink-0">
-      {/* Logo */}
       <div className="px-6 py-5 border-b border-[#2a2a2a]">
         <Link href="/admin/dashboard" className="block">
           <span className="text-xl font-semibold text-[#a58e28]" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>
@@ -117,8 +202,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <span className="text-[0.6rem] tracking-[0.2em] uppercase text-[#555] ml-2">Admin</span>
         </Link>
       </div>
-
-      {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-4 px-3">
         {NAV_SECTIONS.map((section) => (
           <div key={section.label} className="mb-5">
@@ -153,8 +236,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         ))}
       </nav>
-
-      {/* Offline Mode Toggle */}
       <div className="px-4 py-3 border-t border-[#2a2a2a]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -169,24 +250,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             className={`relative w-9 h-5 rounded-full transition-colors ${
               maintenanceMode ? 'bg-red-500/60' : 'bg-green-500/60'
             } ${maintenanceLoading ? 'opacity-50' : ''}`}
-            title={maintenanceMode ? 'Site is offline — click to go live' : 'Site is live — click to go offline'}
           >
-            <span
-              className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-                maintenanceMode ? 'translate-x-4' : 'translate-x-0'
-              }`}
-            />
+            <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${maintenanceMode ? 'translate-x-4' : 'translate-x-0'}`} />
           </button>
         </div>
       </div>
-
-      {/* Bottom -- admin info + exit */}
       <div className="px-4 py-4 border-t border-[#2a2a2a]">
         <div className="text-xs text-[#888] truncate mb-1">{name || email || 'Admin'}</div>
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-2 text-xs text-[#666] hover:text-[#a58e28] transition-colors"
-        >
+        <Link href="/dashboard" className="flex items-center gap-2 text-xs text-[#666] hover:text-[#a58e28] transition-colors">
           <LogOut size={12} />
           Exit Admin
         </Link>
@@ -197,13 +268,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex min-h-screen bg-[#fafaf5]">
       {/* Desktop sidebar */}
-      <div className="hidden lg:block">{sidebar}</div>
+      {desktopSidebar}
 
       {/* Mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <div className="relative z-10 w-[260px] h-full">{sidebar}</div>
+          <div className="relative z-10 w-[260px] h-full">{mobileSidebar}</div>
         </div>
       )}
 
@@ -220,6 +291,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
+        </div>
+
+        {/* Desktop top bar with admin badge + avatar */}
+        <div className="hidden lg:flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200">
+          <div />
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] tracking-wide px-2 py-0.5 bg-[#a58e28]/15 text-[#a58e28] rounded font-medium">
+              ADMIN
+            </span>
+            <div className="w-[30px] h-[30px] rounded-full bg-[#1a1a1a] text-[#a58e28] text-[10px] font-medium flex items-center justify-center">
+              {initials}
+            </div>
+          </div>
         </div>
 
         <main className="min-h-screen">

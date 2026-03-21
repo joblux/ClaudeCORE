@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import Link from 'next/link'
 import { useRequireAdmin } from '@/lib/auth-hooks'
 
 const CATEGORIES = [
@@ -94,18 +93,7 @@ export default function EditArticlePage() {
   }
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', background: '#fff', minHeight: '100vh' }}>
-
-      <div style={{ borderBottom: '2px solid #1a1a1a', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif", fontWeight: 600, fontSize: 18, color: '#1a1a1a', letterSpacing: 1 }}>JOBLUX</span>
-          <span style={{ color: '#ccc', fontSize: 14 }}>/</span>
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>Edit Article</span>
-        </div>
-        <Link href="/admin/articles" style={{ fontSize: 12, color: '#a58e28', textDecoration: 'none', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontWeight: 500 }}>
-          &larr; Back to Articles
-        </Link>
-      </div>
+    <div className="min-h-screen bg-[#fafaf5]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
 
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
 

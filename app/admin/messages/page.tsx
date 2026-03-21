@@ -293,32 +293,7 @@ export default function AdminMessagesPage() {
   // RENDER
   // =========================================================================
   return (
-    <div className="jl-page" style={{ fontFamily: 'Inter, system-ui, sans-serif', background: '#fff', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-
-      {/* ================================================================= */}
-      {/* TOP BAR                                                           */}
-      {/* ================================================================= */}
-      <div style={{ borderBottom: `2px solid ${BLACK}`, padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif", fontWeight: 600, fontSize: 18, color: BLACK, letterSpacing: 1 }}>JOBLUX</span>
-          <span style={{ color: '#ccc', fontSize: 14 }}>/</span>
-          <span style={{ fontSize: 13, fontWeight: 600, color: BLACK, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Messages</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <Link href="/admin/dashboard" className="jl-nav-link" style={{ fontSize: 12, color: MUTED, textDecoration: 'none', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 500 }}>
-            Command Centre
-          </Link>
-          <Link href="/admin/ats" className="jl-nav-link" style={{ fontSize: 12, color: MUTED, textDecoration: 'none', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 500 }}>
-            Pipeline
-          </Link>
-          <Link href="/admin/assignments" className="jl-nav-link" style={{ fontSize: 12, color: MUTED, textDecoration: 'none', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 500 }}>
-            Assignments
-          </Link>
-          <Link href="/admin" className="jl-nav-link" style={{ fontSize: 12, color: MUTED, textDecoration: 'none', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 500 }}>
-            Members
-          </Link>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#fafaf5]" style={{ fontFamily: 'Inter, system-ui, sans-serif', display: 'flex', flexDirection: 'column' }}>
 
       {/* ================================================================= */}
       {/* TWO-PANEL LAYOUT                                                  */}

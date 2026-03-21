@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRequireAdmin } from '@/lib/auth-hooks'
+import { PenLine, Trash2 } from 'lucide-react'
 
 interface Article {
   id: string
@@ -20,6 +21,7 @@ export default function AdminArticlesPage() {
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [categoryFilter, setCategoryFilter] = useState('all')
 
   useEffect(() => {
     if (!isAdmin) return
@@ -40,115 +42,124 @@ export default function AdminArticlesPage() {
   }
 
   const formatDate = (d: string | null) => {
-    if (!d) return '\u2014'
+    if (!d) return '—'
     return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
   }
 
+  const categories = ['all', ...Array.from(new Set(articles.map(a => a.category).filter(Boolean)))]
+  const filtered = categoryFilter === 'all' ? articles : articles.filter(a => a.category === categoryFilter)
+
   if (isLoading || !isAdmin) {
     return (
-      <div style={{ fontFamily: 'Inter, system-ui, sans-serif', padding: '60px 20px', textAlign: 'center', color: '#888', fontSize: 14 }}>
-        Loading...
+      <div className="min-h-screen flex items-center justify-center bg-[#fafaf5]">
+        <div className="text-sm text-gray-400">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', background: '#fff', minHeight: '100vh' }}>
-
-      {/* Top bar */}
-      <div style={{ borderBottom: '2px solid #1a1a1a', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif", fontWeight: 600, fontSize: 18, color: '#1a1a1a', letterSpacing: 1 }}>JOBLUX</span>
-          <span style={{ color: '#ccc', fontSize: 14 }}>/</span>
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>Articles</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <Link href="/admin/dashboard" style={{ fontSize: 12, color: '#a58e28', textDecoration: 'none', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontWeight: 500 }}>
-            Command Centre
-          </Link>
-          <Link href="/admin" style={{ fontSize: 12, color: '#888', textDecoration: 'none', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontWeight: 500 }}>
-            Members
-          </Link>
-        </div>
-      </div>
-
-      <div style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px' }}>
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+    <div className="min-h-screen bg-[#fafaf5]">
+      <div className="px-6 py-5 lg:px-8">
+        {/* Page header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
           <div>
-            <h1 style={{ fontSize: 20, fontWeight: 600, color: '#1a1a1a', margin: 0 }}>Articles</h1>
-            <p style={{ fontSize: 12, color: '#888', marginTop: 4 }}>{articles.length} articles</p>
+            <h1 className="text-xl font-medium text-[#1a1a1a]">BlogLux</h1>
+            <p className="text-sm text-gray-400 mt-0.5">{articles.length} articles</p>
           </div>
           <Link
             href="/admin/articles/new"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: '#1a1a1a', color: '#a58e28', fontSize: 11, fontWeight: 600,
-              letterSpacing: '0.1em', textTransform: 'uppercase' as const,
-              padding: '10px 20px', textDecoration: 'none',
-            }}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold tracking-wide uppercase bg-[#a58e28] text-white rounded-lg hover:bg-[#8a7622] transition-colors"
           >
-            + New Article
+            <PenLine size={13} />
+            Write article
           </Link>
         </div>
 
-        {loading ? (
-          <p style={{ color: '#888', fontSize: 14 }}>Loading...</p>
-        ) : articles.length === 0 ? (
-          <p style={{ color: '#888', fontSize: 14 }}>No articles yet.</p>
-        ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid #1a1a1a' }}>
-                {['Title', 'Category', 'Author', 'Date', 'Status', ''].map((h) => (
-                  <th key={h} style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#888' }}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {articles.map((article) => (
-                <tr key={article.id} style={{ borderBottom: '1px solid #f0ece4' }}>
-                  <td style={{ padding: '12px', maxWidth: 300 }}>
-                    <span style={{ fontWeight: 500, color: '#1a1a1a' }}>{article.title}</span>
-                  </td>
-                  <td style={{ padding: '12px', color: '#888', fontSize: 12 }}>{article.category}</td>
-                  <td style={{ padding: '12px', color: '#888', fontSize: 12 }}>{article.author_name}</td>
-                  <td style={{ padding: '12px', color: '#888', fontSize: 12 }}>{formatDate(article.published ? article.published_at : article.created_at)}</td>
-                  <td style={{ padding: '12px' }}>
-                    <span style={{
-                      display: 'inline-block', fontSize: 10, fontWeight: 600,
-                      letterSpacing: '0.08em', textTransform: 'uppercase' as const,
-                      padding: '3px 10px',
-                      background: article.published ? '#1a1a1a' : '#f5f4f0',
-                      color: article.published ? '#a58e28' : '#999',
-                    }}>
-                      {article.published ? 'Published' : 'Draft'}
-                    </span>
-                  </td>
-                  <td style={{ padding: '12px', textAlign: 'right' }}>
-                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                      <Link
-                        href={`/admin/articles/${article.id}/edit`}
-                        style={{ fontSize: 11, color: '#a58e28', textDecoration: 'none', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase' as const }}
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(article.id)}
-                        disabled={deleting === article.id}
-                        style={{ fontSize: 11, color: '#cc4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase' as const, opacity: deleting === article.id ? 0.5 : 1 }}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        {/* Category filter tabs */}
+        <div className="flex gap-1 mb-4 overflow-x-auto pb-1">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setCategoryFilter(cat)}
+              className={`px-3 py-1.5 text-xs rounded-lg whitespace-nowrap transition-colors ${
+                categoryFilter === cat
+                  ? 'bg-[#a58e28]/10 text-[#a58e28] font-medium'
+                  : 'text-gray-500 hover:bg-gray-100'
+              }`}
+            >
+              {cat === 'all' ? 'All' : cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Articles table */}
+        <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+          {/* Header */}
+          <div className="hidden lg:grid bg-gray-50 px-5 py-3 text-[11px] uppercase tracking-wide text-gray-400 font-medium" style={{ gridTemplateColumns: '2.5fr 1fr 0.8fr 0.8fr 0.6fr 0.5fr' }}>
+            <div>Title</div>
+            <div>Category</div>
+            <div>Author</div>
+            <div>Date</div>
+            <div>Status</div>
+            <div className="text-right">Actions</div>
+          </div>
+
+          {loading ? (
+            <div className="px-5 py-12 text-center text-sm text-gray-400">Loading...</div>
+          ) : filtered.length === 0 ? (
+            <div className="px-5 py-12 text-center text-sm text-gray-400">No articles yet.</div>
+          ) : (
+            filtered.map((article) => (
+              <div
+                key={article.id}
+                className="grid items-center px-5 py-3 border-t border-gray-100 hover:bg-gray-50/50 transition-colors"
+                style={{ gridTemplateColumns: '2.5fr 1fr 0.8fr 0.8fr 0.6fr 0.5fr' }}
+              >
+                {/* Title */}
+                <div className="text-sm font-medium text-[#1a1a1a] truncate pr-4 col-span-2 lg:col-span-1">
+                  {article.title}
+                </div>
+
+                {/* Category */}
+                <div className="hidden lg:block text-xs text-gray-500">{article.category || '—'}</div>
+
+                {/* Author */}
+                <div className="hidden lg:block text-xs text-gray-500">{article.author_name || '—'}</div>
+
+                {/* Date */}
+                <div className="hidden lg:block text-xs text-gray-400">
+                  {formatDate(article.published ? article.published_at : article.created_at)}
+                </div>
+
+                {/* Status */}
+                <div className="hidden lg:block">
+                  <span className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded ${
+                    article.published ? 'text-green-700 bg-green-50' : 'text-gray-500 bg-gray-100'
+                  }`}>
+                    {article.published ? 'Published' : 'Draft'}
+                  </span>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center justify-end gap-2">
+                  <Link
+                    href={`/admin/articles/${article.id}/edit`}
+                    className="text-[11px] font-medium text-[#a58e28] hover:text-[#8a7622] uppercase tracking-wide transition-colors"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(article.id)}
+                    disabled={deleting === article.id}
+                    className="text-gray-400 hover:text-red-500 transition-colors disabled:opacity-40"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   )

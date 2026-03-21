@@ -5,29 +5,26 @@ import Link from 'next/link'
 import { useRequireAdmin } from '@/lib/auth-hooks'
 import { ASSIGNMENT_STATUSES } from '@/lib/assignment-options'
 import type { SearchAssignment } from '@/types/search-assignment'
+import { Plus, Upload, Search } from 'lucide-react'
 
-// Status badge colours
-const statusColors: Record<string, { bg: string; text: string }> = {
-  draft:     { bg: '#f5f4f0', text: '#888' },
-  active:    { bg: '#1a1a1a', text: '#059669' },
-  on_hold:   { bg: '#fff8e6', text: '#c97a2a' },
-  closed:    { bg: '#f5f4f0', text: '#555' },
-  filled:    { bg: '#e8f5e9', text: '#2a7a3c' },
+const statusStyles: Record<string, string> = {
+  draft:   'text-gray-600 bg-gray-100',
+  active:  'text-green-700 bg-green-50',
+  on_hold: 'text-amber-700 bg-amber-50',
+  closed:  'text-red-700 bg-red-50',
+  filled:  'text-green-700 bg-green-50',
 }
 
-// Priority badge colours
-const priorityColors: Record<string, string> = {
-  low: '#999',
-  normal: '#666',
-  high: '#c97a2a',
-  urgent: '#d32f2f',
+const priorityStyles: Record<string, string> = {
+  low: 'text-gray-400',
+  normal: 'text-gray-600',
+  high: 'text-amber-600',
+  urgent: 'text-red-600',
 }
 
-/** Format a date string to "Mar 19, 2026" */
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '—'
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 export default function AdminAssignmentsPage() {
@@ -35,21 +32,16 @@ export default function AdminAssignmentsPage() {
   const [assignments, setAssignments] = useState<SearchAssignment[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
-
-  // Filters
   const [statusFilter, setStatusFilter] = useState('')
   const [search, setSearch] = useState('')
   const [searchInput, setSearchInput] = useState('')
 
-  // Fetch assignments when filters change
   useEffect(() => {
     if (!isAdmin) return
-
     setLoading(true)
     const params = new URLSearchParams()
     if (statusFilter) params.set('status', statusFilter)
     if (search) params.set('search', search)
-
     fetch(`/api/assignments?${params.toString()}`)
       .then((res) => res.json())
       .then((data) => {
@@ -60,190 +52,125 @@ export default function AdminAssignmentsPage() {
       .finally(() => setLoading(false))
   }, [isAdmin, statusFilter, search])
 
-  // Debounced search — submit on Enter or after typing stops
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') setSearch(searchInput)
   }
 
   if (authLoading || !isAdmin) {
     return (
-      <div style={{ fontFamily: 'Inter, system-ui, sans-serif', padding: '60px 20px', textAlign: 'center', color: '#888', fontSize: 14 }}>
-        Loading...
+      <div className="min-h-screen flex items-center justify-center bg-[#fafaf5]">
+        <div className="text-sm text-gray-400">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', background: '#fff', minHeight: '100vh' }}>
-
-      {/* Top bar */}
-      <div style={{ borderBottom: '2px solid #1a1a1a', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif", fontWeight: 600, fontSize: 18, color: '#1a1a1a', letterSpacing: 1 }}>JOBLUX</span>
-          <span style={{ color: '#ccc', fontSize: 14 }}>/</span>
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>Search Assignments</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <Link href="/admin/dashboard" style={{ fontSize: 12, color: '#888', textDecoration: 'none', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontWeight: 500 }}>
-            Command Centre
-          </Link>
-          <Link href="/admin/ats" style={{ fontSize: 12, color: '#888', textDecoration: 'none', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontWeight: 500 }}>
-            Pipeline
-          </Link>
-          <Link href="/admin" style={{ fontSize: 12, color: '#888', textDecoration: 'none', letterSpacing: '0.08em', textTransform: 'uppercase' as const, fontWeight: 500 }}>
-            Members
-          </Link>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div style={{ maxWidth: 1060, margin: '0 auto', padding: '32px 24px' }}>
-
-        {/* Header row */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+    <div className="min-h-screen bg-[#fafaf5]">
+      <div className="px-6 py-5 lg:px-8">
+        {/* Page header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
           <div>
-            <h1 style={{ fontSize: 20, fontWeight: 600, color: '#1a1a1a', margin: 0 }}>Search Assignments</h1>
-            <p style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
+            <h1 className="text-xl font-medium text-[#1a1a1a]">Search Assignments</h1>
+            <p className="text-sm text-gray-400 mt-0.5">
               {total} {total === 1 ? 'position' : 'positions'}
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="flex items-center gap-2">
             <Link
               href="/admin/assignments/import"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                background: '#fff', color: '#1a1a1a', fontSize: 11, fontWeight: 600,
-                letterSpacing: '0.1em', textTransform: 'uppercase' as const,
-                padding: '10px 20px', textDecoration: 'none', border: '1px solid #1a1a1a', cursor: 'pointer',
-              }}
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold tracking-wide uppercase border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
             >
+              <Upload size={13} />
               Import
             </Link>
             <Link
               href="/admin/assignments/new"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                background: '#1a1a1a', color: '#a58e28', fontSize: 11, fontWeight: 600,
-                letterSpacing: '0.1em', textTransform: 'uppercase' as const,
-                padding: '10px 20px', textDecoration: 'none', border: 'none', cursor: 'pointer',
-              }}
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold tracking-wide uppercase bg-[#a58e28] text-white rounded-lg hover:bg-[#8a7622] transition-colors"
             >
-              + New Assignment
+              <Plus size={13} />
+              New assignment
             </Link>
           </div>
         </div>
 
         {/* Filter bar */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+        <div className="flex flex-wrap gap-3 mb-5">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search title or maison..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              onBlur={() => setSearch(searchInput)}
+              className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm bg-white focus:outline-none focus:border-[#a58e28]/40 transition-colors"
+            />
+          </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            style={{
-              padding: '8px 12px', fontSize: 13, border: '1px solid #e8e2d8',
-              background: '#fff', color: '#1a1a1a', minWidth: 140,
-            }}
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white cursor-pointer focus:outline-none focus:border-[#a58e28]/40"
           >
             <option value="">All Statuses</option>
             {ASSIGNMENT_STATUSES.map((s) => (
               <option key={s.value} value={s.value}>{s.label}</option>
             ))}
           </select>
-
-          <input
-            type="text"
-            placeholder="Search title or maison..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={handleSearchKeyDown}
-            onBlur={() => setSearch(searchInput)}
-            style={{
-              padding: '8px 12px', fontSize: 13, border: '1px solid #e8e2d8',
-              background: '#fff', color: '#1a1a1a', flex: 1, minWidth: 200,
-            }}
-          />
         </div>
 
-        {/* Loading state */}
-        {loading ? (
-          <p style={{ fontSize: 13, color: '#888', textAlign: 'center', padding: 40 }}>Loading assignments...</p>
-        ) : assignments.length === 0 ? (
-          <p style={{ fontSize: 13, color: '#888', textAlign: 'center', padding: 40 }}>No assignments found.</p>
-        ) : (
-          /* Table */
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid #1a1a1a' }}>
-                  {['Ref #', 'Title', 'Maison', 'Status', 'Priority', 'City', 'Created'].map((h) => (
-                    <th key={h} style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#888' }}>
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {assignments.map((assignment) => {
-                  const sc = statusColors[assignment.status] || statusColors.draft
-                  const pc = priorityColors[assignment.priority] || '#666'
-
-                  return (
-                    <tr key={assignment.id} style={{ borderBottom: '1px solid #f0ece4' }}>
-                      {/* Reference number */}
-                      <td style={{ padding: '12px 12px', color: '#888', fontSize: 11, fontFamily: 'monospace' }}>
-                        {assignment.reference_number || '—'}
-                      </td>
-
-                      {/* Title — links to edit */}
-                      <td style={{ padding: '12px 12px' }}>
-                        <Link
-                          href={`/admin/assignments/new?id=${assignment.id}`}
-                          style={{ color: '#1a1a1a', textDecoration: 'none', fontWeight: 500 }}
-                        >
-                          {assignment.title}
-                        </Link>
-                      </td>
-
-                      {/* Maison — show "Confidential" if is_confidential */}
-                      <td style={{ padding: '12px 12px', color: '#888', fontSize: 12 }}>
-                        {assignment.is_confidential ? (
-                          <span style={{ fontStyle: 'italic', color: '#a58e28' }}>Confidential</span>
-                        ) : (
-                          assignment.maison || '—'
-                        )}
-                      </td>
-
-                      {/* Status badge */}
-                      <td style={{ padding: '12px 12px' }}>
-                        <span style={{
-                          display: 'inline-block', fontSize: 10, fontWeight: 600,
-                          letterSpacing: '0.08em', textTransform: 'uppercase' as const,
-                          padding: '3px 10px', background: sc.bg, color: sc.text,
-                        }}>
-                          {assignment.status.replace('_', ' ')}
-                        </span>
-                      </td>
-
-                      {/* Priority */}
-                      <td style={{ padding: '12px 12px', fontSize: 11, fontWeight: 600, color: pc, textTransform: 'capitalize' as const }}>
-                        {assignment.priority}
-                      </td>
-
-                      {/* City */}
-                      <td style={{ padding: '12px 12px', color: '#888', fontSize: 12 }}>
-                        {assignment.city || '—'}
-                      </td>
-
-                      {/* Created date */}
-                      <td style={{ padding: '12px 12px', color: '#888', fontSize: 12 }}>
-                        {formatDate(assignment.created_at)}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+        {/* Table */}
+        <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+          <div className="hidden lg:grid bg-gray-50 px-5 py-3 text-[11px] uppercase tracking-wide text-gray-400 font-medium" style={{ gridTemplateColumns: '0.6fr 2fr 1fr 0.7fr 0.6fr 0.7fr 0.8fr' }}>
+            <div>Ref</div>
+            <div>Title</div>
+            <div>Maison</div>
+            <div>Status</div>
+            <div>Priority</div>
+            <div>City</div>
+            <div>Created</div>
           </div>
-        )}
+
+          {loading ? (
+            <div className="px-5 py-12 text-center text-sm text-gray-400">Loading assignments...</div>
+          ) : assignments.length === 0 ? (
+            <div className="px-5 py-12 text-center text-sm text-gray-400">No assignments found.</div>
+          ) : (
+            assignments.map((a) => {
+              const sc = statusStyles[a.status] || statusStyles.draft
+              const pc = priorityStyles[a.priority] || 'text-gray-600'
+              return (
+                <div
+                  key={a.id}
+                  className="grid items-center px-5 py-3 border-t border-gray-100 hover:bg-gray-50/50 transition-colors"
+                  style={{ gridTemplateColumns: '0.6fr 2fr 1fr 0.7fr 0.6fr 0.7fr 0.8fr' }}
+                >
+                  <div className="text-xs text-gray-400 font-mono">{a.reference_number || '—'}</div>
+                  <div>
+                    <Link href={`/admin/assignments/new?id=${a.id}`} className="text-sm font-medium text-[#1a1a1a] hover:text-[#a58e28] transition-colors">
+                      {a.title}
+                    </Link>
+                  </div>
+                  <div className="hidden lg:block text-xs text-gray-500">
+                    {a.is_confidential ? (
+                      <span className="italic text-[#a58e28]">Confidential</span>
+                    ) : (
+                      a.maison || '—'
+                    )}
+                  </div>
+                  <div className="hidden lg:block">
+                    <span className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded ${sc}`}>
+                      {a.status.replace('_', ' ')}
+                    </span>
+                  </div>
+                  <div className={`hidden lg:block text-xs font-semibold capitalize ${pc}`}>{a.priority}</div>
+                  <div className="hidden lg:block text-xs text-gray-500">{a.city || '—'}</div>
+                  <div className="hidden lg:block text-xs text-gray-400">{formatDate(a.created_at)}</div>
+                </div>
+              )
+            })
+          )}
+        </div>
       </div>
     </div>
   )

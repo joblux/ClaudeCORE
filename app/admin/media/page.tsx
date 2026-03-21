@@ -157,12 +157,13 @@ export default function AdminMediaPage() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#fafaf5]">
+      <div className="px-6 py-5 lg:px-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <div className="jl-overline-gold mb-1">Content</div>
-          <h1 className="jl-serif text-2xl font-light text-[#1a1a1a]">Media Library</h1>
+          <h1 className="text-xl font-medium text-[#1a1a1a]">Media Library</h1>
+          <p className="text-sm text-gray-400 mt-0.5">{total} file{total !== 1 ? 's' : ''}</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -221,9 +222,9 @@ export default function AdminMediaPage() {
 
           {/* Grid */}
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-3">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="aspect-square bg-[#f0ece4] animate-pulse" />
+                <div key={i} className="aspect-square bg-[#f0ece4] animate-pulse rounded-lg" />
               ))}
             </div>
           ) : items.length === 0 ? (
@@ -234,7 +235,7 @@ export default function AdminMediaPage() {
           ) : (
             <>
               <div className="text-xs text-[#888] mb-3">{total} file{total !== 1 ? 's' : ''}</div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-3">
                 {items.map((item) => (
                   <button
                     key={item.id}
@@ -342,7 +343,7 @@ export default function AdminMediaPage() {
           </div>
 
           {unsplashResults.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-3">
               {unsplashResults.map((img) => (
                 <div key={img.id} className="jl-card p-0 overflow-hidden">
                   <div className="aspect-square relative bg-[#fafaf5]">
@@ -378,6 +379,7 @@ export default function AdminMediaPage() {
           )}
         </>
       )}
+      </div>
     </div>
   )
 }
