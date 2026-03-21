@@ -77,11 +77,11 @@ export default function InterviewsPage() {
       {/* Hero */}
       <section className="bg-[#222222] py-16 md:py-24">
         <div className="jl-container text-center">
-          <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#a58e28] mb-4">Interview Intelligence</div>
-          <h1 className="font-['Playfair_Display'] text-4xl lg:text-5xl font-light text-white mb-5">
+          <div className="jl-overline-gold mb-4 tracking-[0.2em]">Interview Intelligence</div>
+          <h1 className="jl-serif text-4xl md:text-5xl lg:text-6xl font-light text-white mb-5">
             Inside the Maisons
           </h1>
-          <p className="font-sans text-sm lg:text-base font-normal text-[#bbb] max-w-2xl mx-auto leading-relaxed mb-8">
+          <p className="font-sans text-sm md:text-base text-[#bbb] max-w-2xl mx-auto leading-relaxed mb-8">
             Real interview experiences from luxury professionals. Contributed by members, anonymised for your benefit.
           </p>
           {stats && stats.total_experiences > 0 && (
@@ -218,7 +218,7 @@ export default function InterviewsPage() {
               <EmptyStateLaunch />
             ) : experiences.length === 0 && hasFilters ? (
               <div className="text-center py-16">
-                <p className="text-lg lg:text-xl font-medium text-[#1a1a1a] mb-2">No matching experiences</p>
+                <p className="jl-serif text-xl text-[#1a1a1a] mb-2">No matching experiences</p>
                 <p className="text-sm text-[#888] mb-4">Try adjusting your filters</p>
                 <button onClick={clearFilters} className="jl-btn-outline">Clear filters</button>
               </div>
@@ -228,82 +228,33 @@ export default function InterviewsPage() {
                   {total} experience{total !== 1 ? 's' : ''}
                   {hasFilters ? ' matching your filters' : ''}
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {experiences.map((exp) => (
+                    <ExperienceCard key={exp.id} exp={exp} isAuthenticated={isAuthenticated} />
+                  ))}
+                </div>
 
-                {/* Show limited items for unauthenticated users */}
-                {!isAuthenticated ? (
-                  <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {experiences.slice(0, 3).map((exp) => (
-                        <ExperienceCard key={exp.id} exp={exp} isAuthenticated={false} />
-                      ))}
-                    </div>
-
-                    {/* Teaser wall */}
-                    <div className="relative mt-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 blur-sm opacity-30 pointer-events-none">
-                        {Array.from({ length: 4 }).map((_, i) => (
-                          <div key={i} className="border border-[#e8e2d8] rounded p-5 bg-white">
-                            <div className="h-4 bg-[#e8e2d8] rounded w-1/3 mb-3" />
-                            <div className="h-5 bg-[#e8e2d8] rounded w-2/3 mb-2" />
-                            <div className="h-3 bg-[#e8e2d8] rounded w-1/2 mb-3" />
-                            <div className="flex gap-2 mb-3">
-                              <div className="h-5 bg-[#e8e2d8] rounded w-12" />
-                              <div className="h-5 bg-[#e8e2d8] rounded w-16" />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-white via-white/90 to-transparent">
-                        <div className="text-center max-w-lg px-6">
-                          <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-[#1a1a1a] mb-3">
-                            Sign in to access all interview experiences from {stats?.unique_brands || 12} major luxury houses
-                          </h2>
-                          <p className="text-sm text-[#888] mb-6">
-                            Get real insider knowledge about interview processes, questions asked, and hiring outcomes.
-                          </p>
-                          <div className="flex items-center justify-center gap-3">
-                            <Link href="/join" className="px-6 py-3 bg-[#a58e28] text-white text-sm font-semibold tracking-wider uppercase rounded-md hover:bg-[#8a7622] transition-colors">
-                              Join
-                            </Link>
-                            <Link href="/members" className="px-6 py-3 border border-[#a58e28] text-[#a58e28] text-sm font-semibold tracking-wider uppercase rounded-md hover:bg-[#a58e28] hover:text-white transition-colors">
-                              Sign In
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {experiences.map((exp) => (
-                        <ExperienceCard key={exp.id} exp={exp} isAuthenticated={isAuthenticated} />
-                      ))}
-                    </div>
-
-                    {/* Pagination */}
-                    {totalPages > 1 && (
-                      <div className="flex items-center justify-center gap-2 mt-10">
-                        <button
-                          onClick={() => setPage(p => Math.max(1, p - 1))}
-                          disabled={page === 1}
-                          className="jl-btn text-xs disabled:opacity-30"
-                        >
-                          Previous
-                        </button>
-                        <span className="text-xs text-[#888] px-4">
-                          Page {page} of {totalPages}
-                        </span>
-                        <button
-                          onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                          disabled={page === totalPages}
-                          className="jl-btn text-xs disabled:opacity-30"
-                        >
-                          Next
-                        </button>
-                      </div>
-                    )}
-                  </>
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-10">
+                    <button
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className="jl-btn text-xs disabled:opacity-30"
+                    >
+                      Previous
+                    </button>
+                    <span className="text-xs text-[#888] px-4">
+                      Page {page} of {totalPages}
+                    </span>
+                    <button
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                      className="jl-btn text-xs disabled:opacity-30"
+                    >
+                      Next
+                    </button>
+                  </div>
                 )}
               </>
             )}
@@ -314,7 +265,7 @@ export default function InterviewsPage() {
             {/* Top Maisons */}
             {brands.length > 0 && (
               <div className="jl-card">
-                <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-4">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-[#1a1a1a] mb-4">
                   Top Interviewed Maisons
                 </h3>
                 <ul className="space-y-2">
@@ -335,7 +286,7 @@ export default function InterviewsPage() {
 
             {/* Contribute CTA */}
             <div className="jl-card border-[#a58e28]">
-              <h3 className="text-lg lg:text-xl font-medium text-[#1a1a1a] mb-2">Share Your Experience</h3>
+              <h3 className="jl-serif text-lg text-[#1a1a1a] mb-2">Share Your Experience</h3>
               <p className="text-xs text-[#888] leading-relaxed mb-4">
                 Contribute your interview experience and earn 10 points towards unlocking more intelligence.
               </p>
@@ -346,7 +297,7 @@ export default function InterviewsPage() {
 
             {/* How It Works */}
             <div className="jl-card">
-              <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-4">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-[#1a1a1a] mb-4">
                 How It Works
               </h3>
               <ol className="space-y-3 text-xs text-[#666] leading-relaxed">
@@ -412,7 +363,7 @@ function ExperienceCard({ exp, isAuthenticated }: { exp: InterviewExperienceList
         <DifficultyDots difficulty={exp.difficulty} />
       </div>
 
-      <h3 className="text-base font-medium text-[#1a1a1a] mb-2">{exp.job_title}</h3>
+      <h3 className="jl-serif text-base text-[#1a1a1a] mb-2">{exp.job_title}</h3>
 
       <div className="flex flex-wrap gap-1.5 text-[0.65rem] text-[#888] mb-3">
         {exp.department && <span>{exp.department}</span>}
@@ -497,8 +448,8 @@ function EmptyStateLaunch() {
   return (
     <div className="text-center py-16">
       <div className="max-w-lg mx-auto">
-        <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#a58e28] mb-4">Coming Soon</div>
-        <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-[#1a1a1a] mb-4">
+        <div className="jl-overline-gold mb-4">Coming Soon</div>
+        <h2 className="jl-serif text-2xl md:text-3xl text-[#1a1a1a] mb-4">
           Interview Intelligence is launching
         </h2>
         <p className="text-sm text-[#888] leading-relaxed mb-8">
@@ -521,7 +472,7 @@ function EmptyStateLaunch() {
                 <span className="text-xs text-[#a58e28] tracking-wide uppercase font-medium">Preview</span>
               </div>
               <div className="text-sm font-semibold text-[#1a1a1a] mb-1">{preview.brand}</div>
-              <div className="text-base font-medium text-[#1a1a1a] mb-2">{preview.role}</div>
+              <div className="jl-serif text-base text-[#1a1a1a] mb-2">{preview.role}</div>
               <div className="text-[0.65rem] text-[#888] mb-3">{preview.dept}</div>
               <div className="flex gap-2 mb-2">
                 <span className="jl-badge text-[0.6rem]">{preview.rounds} rounds</span>

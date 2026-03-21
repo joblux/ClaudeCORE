@@ -146,69 +146,42 @@ export default async function ArticlePage({ params }: Props) {
       </div>
 
       {/* ── CONTENT ───────────────────────────────────────── */}
-      <div className="jl-container py-10 lg:py-14">
-        <div className="lg:grid lg:grid-cols-[1fr_280px] lg:gap-12 max-w-[1100px] mx-auto">
-          {/* Main content column */}
-          <div className="max-w-[720px]">
-            <div className="jl-prose">
-              {paragraphs.map((p: string, i: number) => (
-                <p key={i}>{p}</p>
-              ))}
-            </div>
+      <div className="jl-container py-10">
+        <div className="max-w-[720px] mx-auto">
+          <div className="jl-prose">
+            {paragraphs.map((p: string, i: number) => (
+              <p key={i}>{p}</p>
+            ))}
+          </div>
 
-            {/* Tags */}
-            {article.tags && article.tags.length > 0 && (
-              <div className="mt-10 pt-6 border-t border-[#e8e2d8]">
-                <div className="flex flex-wrap gap-2">
-                  {article.tags.map((tag: string) => (
-                    <span key={tag} className="font-sans text-[0.6rem] text-[#a58e28] border border-[#e8e2d8] px-2.5 py-1 tracking-wider uppercase">{tag}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Author Bio Box */}
+          {/* Tags */}
+          {article.tags && article.tags.length > 0 && (
             <div className="mt-10 pt-6 border-t border-[#e8e2d8]">
-              <div className="flex items-start gap-4 p-5 bg-[#fafaf5] border border-[#e8e2d8]">
-                {article.author_avatar_url ? (
-                  <Image src={article.author_avatar_url} alt={article.author_name} width={48} height={48} className="rounded-full flex-shrink-0" />
-                ) : (
-                  <div className="w-12 h-12 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
-                    <span className="jl-serif text-base text-[#a58e28]">{article.author_name?.[0]}</span>
-                  </div>
-                )}
-                <div>
-                  <div className="font-sans text-sm font-semibold text-[#1a1a1a]">{article.author_name}</div>
-                  {article.author_title && <div className="font-sans text-[0.65rem] text-[#888] mb-2">{article.author_title}</div>}
-                  <p className="font-sans text-xs text-[#888] leading-relaxed">Founder of JOBLUX | Luxury Talents Society. Connecting exceptional talent with the world&rsquo;s most prestigious maisons.</p>
+              <div className="flex flex-wrap gap-2">
+                {article.tags.map((tag: string) => (
+                  <span key={tag} className="font-sans text-[0.6rem] text-[#a58e28] border border-[#e8e2d8] px-2.5 py-1 tracking-wider uppercase">{tag}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Author Bio Box */}
+          <div className="mt-10 pt-6 border-t border-[#e8e2d8]">
+            <div className="flex items-start gap-4 p-5 bg-[#fafaf5] border border-[#e8e2d8]">
+              {article.author_avatar_url ? (
+                <Image src={article.author_avatar_url} alt={article.author_name} width={48} height={48} className="rounded-full flex-shrink-0" />
+              ) : (
+                <div className="w-12 h-12 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
+                  <span className="jl-serif text-base text-[#a58e28]">{article.author_name?.[0]}</span>
                 </div>
+              )}
+              <div>
+                <div className="font-sans text-sm font-semibold text-[#1a1a1a]">{article.author_name}</div>
+                {article.author_title && <div className="font-sans text-[0.65rem] text-[#888] mb-2">{article.author_title}</div>}
+                <p className="font-sans text-xs text-[#888] leading-relaxed">Founder of JOBLUX | Luxury Talents Society. Connecting exceptional talent with the world&rsquo;s most prestigious maisons.</p>
               </div>
             </div>
           </div>
-
-          {/* Desktop sidebar */}
-          <aside className="hidden lg:block">
-            <div className="sticky top-20 space-y-6">
-              {/* Share section */}
-              <div className="border border-[#e8e2d8] rounded-xl p-5">
-                <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-3">Share</span>
-                <div className="flex gap-3">
-                  <span className="w-9 h-9 border border-[#e8e2d8] rounded flex items-center justify-center text-[#888] hover:text-[#a58e28] hover:border-[#a58e28] transition-colors cursor-pointer text-xs">X</span>
-                  <span className="w-9 h-9 border border-[#e8e2d8] rounded flex items-center justify-center text-[#888] hover:text-[#a58e28] hover:border-[#a58e28] transition-colors cursor-pointer text-xs">in</span>
-                  <span className="w-9 h-9 border border-[#e8e2d8] rounded flex items-center justify-center text-[#888] hover:text-[#a58e28] hover:border-[#a58e28] transition-colors cursor-pointer text-xs">✉</span>
-                </div>
-              </div>
-              {/* Category link */}
-              <div className="border border-[#e8e2d8] rounded-xl p-5">
-                <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-2">Category</span>
-                <span className="text-sm text-[#a58e28] font-medium">{getCategoryLabel(article.category)}</span>
-              </div>
-              {/* Back to BlogLux */}
-              <Link href="/bloglux" className="block text-xs text-[#a58e28] hover:text-[#9a6f0a] tracking-wide transition-colors">
-                ← All articles
-              </Link>
-            </div>
-          </aside>
         </div>
       </div>
 

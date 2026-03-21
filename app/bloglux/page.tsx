@@ -98,7 +98,7 @@ function BlogluxContent() {
 
       <div className="jl-container py-10">
         {/* Category filter pills */}
-        <div className="flex items-center gap-2 lg:gap-4 mb-8 flex-wrap lg:border-b lg:border-[#e8e2d8] lg:pb-4">
+        <div className="flex items-center gap-2 mb-8 flex-wrap">
           <button
             onClick={() => handleCategoryChange('All')}
             className={`font-sans text-[0.65rem] font-medium tracking-wider uppercase px-3 py-1.5 border transition-colors ${
@@ -185,7 +185,7 @@ function BlogluxContent() {
 
             {/* Article grid */}
             {remainingArticles.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {remainingArticles.map((article) => (
                   <Link
                     key={article.id}

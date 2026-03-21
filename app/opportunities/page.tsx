@@ -90,25 +90,25 @@ export default function OpportunitiesPage() {
   }, [opportunities, searchQuery, deptFilter, seniorityFilter, locationFilter, contractFilter, remoteFilter])
 
   return (
-    <div className="bg-[#f8f7f4] min-h-screen">
+    <div>
       {/* ── Page header ────────────────────────────────────────────── */}
-      <div className="bg-white border-b border-gray-200/60 py-8 lg:py-10">
+      <div className="border-b-2 border-[#1a1a1a] py-10">
         <div className="jl-container">
           <div className="jl-overline-gold mb-3">Current Opportunities</div>
-          <h1 className="font-['Playfair_Display'] text-4xl lg:text-5xl font-light text-[#1a1a1a] mb-3">
+          <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a] mb-3">
             Opportunities
           </h1>
-          <p className="font-sans text-sm lg:text-base font-normal text-[#555] leading-relaxed max-w-xl">
+          <p className="font-sans text-sm text-[#888] max-w-xl">
             Confidential and exclusive assignments across luxury. All positions are handled with full discretion by the JOBLUX team.
           </p>
         </div>
       </div>
 
-      <div className="jl-container py-8 lg:py-10">
-        {/* ── Filter bar — horizontal on desktop ─────────────────── */}
-        <div className="bg-white border border-gray-200/60 rounded-xl p-4 lg:p-5 mb-6">
+      <div className="jl-container py-10">
+        {/* ── Filter bar ─────────────────────────────────────────── */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
           {/* Search */}
-          <div className="mb-3">
+          <div className="col-span-2 sm:col-span-3 lg:col-span-6">
             <input
               type="text"
               className="jl-input w-full"
@@ -118,51 +118,47 @@ export default function OpportunitiesPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {/* Department */}
-            <select className="jl-input" value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}>
-              <option value="">All Departments</option>
-              {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
-            </select>
+          {/* Department */}
+          <select className="jl-input" value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}>
+            <option value="">All Departments</option>
+            {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
 
-            {/* Seniority */}
-            <select className="jl-input" value={seniorityFilter} onChange={(e) => setSeniorityFilter(e.target.value)}>
-              <option value="">All Seniority</option>
-              {SENIORITY_LEVELS.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
+          {/* Seniority */}
+          <select className="jl-input" value={seniorityFilter} onChange={(e) => setSeniorityFilter(e.target.value)}>
+            <option value="">All Seniority</option>
+            {SENIORITY_LEVELS.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
 
-            {/* Location */}
-            <select className="jl-input" value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
-              <option value="">All Locations</option>
-              {uniqueLocations.map((l) => <option key={l} value={l}>{l}</option>)}
-            </select>
+          {/* Location */}
+          <select className="jl-input" value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
+            <option value="">All Locations</option>
+            {uniqueLocations.map((l) => <option key={l} value={l}>{l}</option>)}
+          </select>
 
-            {/* Contract Type */}
-            <select className="jl-input" value={contractFilter} onChange={(e) => setContractFilter(e.target.value)}>
-              <option value="">All Contract Types</option>
-              {CONTRACT_TYPES.map((ct) => <option key={ct} value={ct}>{ct}</option>)}
-            </select>
+          {/* Contract Type */}
+          <select className="jl-input" value={contractFilter} onChange={(e) => setContractFilter(e.target.value)}>
+            <option value="">All Contract Types</option>
+            {CONTRACT_TYPES.map((ct) => <option key={ct} value={ct}>{ct}</option>)}
+          </select>
 
-            {/* Remote Policy */}
-            <select className="jl-input" value={remoteFilter} onChange={(e) => setRemoteFilter(e.target.value)}>
-              <option value="">All Work Models</option>
-              {REMOTE_POLICIES.map((r) => <option key={r} value={r}>{r}</option>)}
-            </select>
-          </div>
+          {/* Remote Policy */}
+          <select className="jl-input" value={remoteFilter} onChange={(e) => setRemoteFilter(e.target.value)}>
+            <option value="">All Work Models</option>
+            {REMOTE_POLICIES.map((r) => <option key={r} value={r}>{r}</option>)}
+          </select>
 
           {/* Clear filters */}
           {(searchQuery || deptFilter || seniorityFilter || locationFilter || contractFilter || remoteFilter) && (
-            <div className="mt-3 text-right">
-              <button
-                onClick={() => {
-                  setSearchQuery(''); setDeptFilter(''); setSeniorityFilter('')
-                  setLocationFilter(''); setContractFilter(''); setRemoteFilter('')
-                }}
-                className="text-xs text-[#a58e28] hover:text-[#7a6a1e] font-medium cursor-pointer bg-transparent border-none transition-colors"
-              >
-                Clear all filters
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                setSearchQuery(''); setDeptFilter(''); setSeniorityFilter('')
+                setLocationFilter(''); setContractFilter(''); setRemoteFilter('')
+              }}
+              className="text-xs text-[#a58e28] underline cursor-pointer bg-transparent border-none"
+            >
+              Clear all filters
+            </button>
           )}
         </div>
 
@@ -178,8 +174,8 @@ export default function OpportunitiesPage() {
           <p className="text-sm text-[#888] text-center py-10">Loading positions...</p>
         ) : filtered.length === 0 ? (
           /* Empty state */
-          <div className="bg-white border border-gray-200/60 rounded-xl text-center py-16 px-6">
-            <p className="font-sans text-lg lg:text-xl font-medium text-[#1a1a1a] mb-3">No current opportunities match your criteria.</p>
+          <div className="text-center py-16 px-6">
+            <p className="jl-serif text-xl text-[#1a1a1a] mb-3">No current opportunities match your criteria.</p>
             <p className="text-sm text-[#888] mb-6">
               Join JOBLUX to be notified when new positions become available.
             </p>
@@ -197,7 +193,7 @@ export default function OpportunitiesPage() {
             </div>
           </div>
         ) : (
-          <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
+          <div className="space-y-4">
             {filtered.map((assignment) => {
               const salary = salaryDisplay(assignment)
               const displayMaison = assignment.is_confidential
@@ -210,7 +206,7 @@ export default function OpportunitiesPage() {
                   href={`/opportunities/${assignment.slug || assignment.id}`}
                   className="block"
                 >
-                  <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6 group cursor-pointer hover:border-[#a58e28]/40 transition-all duration-200">
+                  <div className="jl-card group cursor-pointer">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
                         {/* Maison name */}
@@ -222,26 +218,35 @@ export default function OpportunitiesPage() {
                         </div>
 
                         {/* Position title */}
-                        <h3 className="font-sans text-lg lg:text-xl font-medium text-[#1a1a1a] mb-2 group-hover:text-[#a58e28] transition-colors">
+                        <h3 className="jl-serif text-lg font-light text-[#1a1a1a] mb-2 group-hover:text-[#a58e28] transition-colors">
                           {assignment.title}
                         </h3>
 
                         {/* Details row */}
                         <div className="flex flex-wrap items-center gap-3 mb-2">
+                          {/* Location */}
                           {(assignment.city || assignment.country) && (
                             <span className="font-sans text-xs text-[#888]">
                               {[assignment.city, assignment.country].filter(Boolean).join(', ')}
                             </span>
                           )}
+
+                          {/* Remote policy badge */}
                           {assignment.remote_policy && (
                             <span className="jl-badge-outline text-[0.55rem]">{assignment.remote_policy}</span>
                           )}
+
+                          {/* Department badge */}
                           {assignment.department && (
                             <span className="jl-badge text-[0.55rem]">{assignment.department}</span>
                           )}
+
+                          {/* Seniority badge */}
                           {assignment.seniority && (
                             <span className="jl-badge-outline text-[0.55rem]">{assignment.seniority}</span>
                           )}
+
+                          {/* Contract type */}
                           {assignment.contract_type && (
                             <span className="font-sans text-xs text-[#888]">{assignment.contract_type}</span>
                           )}
@@ -260,12 +265,9 @@ export default function OpportunitiesPage() {
                         </div>
                       </div>
 
-                      {/* Right: match badge + arrow */}
-                      <div className="flex flex-col items-center gap-2 flex-shrink-0 mt-1">
-                        <span className="hidden lg:inline-flex items-center px-2.5 py-1 bg-[#a58e28]/10 text-[#a58e28] text-[0.55rem] font-semibold rounded-full">
-                          Match
-                        </span>
-                        <svg className="w-5 h-5 text-gray-300 group-hover:text-[#a58e28] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {/* Arrow indicator */}
+                      <div className="flex-shrink-0 text-[#e8e2d8] group-hover:text-[#a58e28] transition-colors mt-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
                         </svg>
                       </div>
@@ -278,13 +280,13 @@ export default function OpportunitiesPage() {
         )}
 
         {/* ── Employer CTA ───────────────────────────────────────── */}
-        <div className="mt-10 bg-white border border-gray-200/60 rounded-xl p-6 lg:p-8 text-center">
+        <div className="mt-10 p-6 bg-[#fafaf5] border border-[#e8e2d8] text-center">
           <div className="jl-overline-gold mb-2">For Employers</div>
-          <p className="font-sans text-sm lg:text-base font-normal text-[#555] leading-relaxed mb-4">
+          <p className="font-sans text-sm text-[#666] mb-4">
             Submit a confidential hiring brief. JOBLUX presents pre-screened candidates from our vetted network.
           </p>
           <div className="flex items-center justify-center gap-3">
-            <Link href="/join?type=employer" className="jl-btn jl-btn-gold">Submit a Brief</Link>
+            <Link href="/join?type=employer" className="jl-btn jl-btn-primary">Submit a Brief</Link>
             <Link href="/join" className="jl-btn jl-btn-outline">Join JOBLUX</Link>
           </div>
         </div>

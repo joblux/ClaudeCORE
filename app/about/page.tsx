@@ -15,7 +15,7 @@ export default function AboutPage() {
         <p className="text-[11px] tracking-[0.14em] uppercase text-[#a58e28] mb-4 font-medium">
           Our story
         </p>
-        <h1 className="font-['Playfair_Display'] text-4xl lg:text-5xl font-light leading-tight mb-8">
+        <h1 className="font-playfair text-4xl md:text-5xl font-normal leading-tight mb-8">
           From a Paris boutique<br className="hidden md:block" /> and a London flat.
         </h1>
         <p className="text-lg leading-relaxed text-white/60 border-l-2 border-[#a58e28] pl-6 max-w-2xl">
@@ -112,7 +112,7 @@ export default function AboutPage() {
           {/* Text */}
           <div>
             <p className="text-[10px] tracking-[0.12em] uppercase text-[#a58e28] font-medium mb-2">Chapter I</p>
-            <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light mb-5 leading-snug">2006 — The agency</h2>
+            <h2 className="font-playfair text-2xl font-normal mb-5 leading-snug">2006 — The agency</h2>
             <p className="text-sm leading-relaxed text-white/55 mb-5">
               Paris and London. A luxury retail professional and a web developer decide
               that luxury hiring deserves its own platform — not a tab on a generalist
@@ -132,7 +132,7 @@ export default function AboutPage() {
           {/* Text first on mobile, second on desktop */}
           <div className="order-2 md:order-1">
             <p className="text-[10px] tracking-[0.12em] uppercase text-[#a58e28] font-medium mb-2">Chapter II</p>
-            <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light mb-5 leading-snug">2007–2012 — The job board</h2>
+            <h2 className="font-playfair text-2xl font-normal mb-5 leading-snug">2007–2012 — The job board</h2>
             <p className="text-sm leading-relaxed text-white/55 mb-5">
               JOBLUX expands with a dedicated UK platform, becoming one of the first
               niche luxury job boards operating across Britain and France simultaneously.
@@ -223,7 +223,7 @@ export default function AboutPage() {
           {/* Text */}
           <div>
             <p className="text-[10px] tracking-[0.12em] uppercase text-[#a58e28] font-medium mb-2">Chapter III</p>
-            <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light mb-5 leading-snug">2013–2022 — The community</h2>
+            <h2 className="font-playfair text-2xl font-normal mb-5 leading-snug">2013–2022 — The community</h2>
             <p className="text-sm leading-relaxed text-white/55 mb-5">
               As professional networks reshape how industries connect, JOBLUX evolves
               again — groups, forums, member profiles and LinkedIn-style social features
@@ -243,7 +243,7 @@ export default function AboutPage() {
           {/* Text */}
           <div className="order-2 md:order-1">
             <p className="text-[10px] tracking-[0.12em] uppercase text-[#a58e28] font-medium mb-2">Chapter IV</p>
-            <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light mb-5 leading-snug">2023 — present<br/>The intelligence platform</h2>
+            <h2 className="font-playfair text-2xl font-normal mb-5 leading-snug">2023 — present<br/>The intelligence platform</h2>
             <p className="text-sm leading-relaxed text-white/55 mb-5">
               The rebuild is not a pivot — it is a clarification. JOBLUX strips away
               everything borrowed from other models and commits fully to what it has
@@ -297,7 +297,7 @@ export default function AboutPage() {
 
       {/* ── Principles ── */}
       <section className="max-w-4xl mx-auto px-6 py-20">
-        <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light mb-5">Free against contribution</h2>
+        <h2 className="font-playfair text-3xl font-normal mb-5">Free against contribution</h2>
         <p className="text-sm leading-relaxed text-white/55 mb-3 max-w-2xl">
           JOBLUX today operates on a model the luxury industry has rarely seen applied
           to professional intelligence: everything we publish is freely accessible to

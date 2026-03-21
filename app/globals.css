@@ -35,13 +35,6 @@ body {
   color: #1a1a1a;
 }
 
-/* Desktop: warm grey canvas — cards sit on white */
-@media (min-width: 1024px) {
-  body {
-    background-color: #f8f7f4;
-  }
-}
-
 /* ── Playfair Display ── */
 .font-playfair,
 [class*="font-playfair"] {
@@ -149,17 +142,17 @@ a {
 
   .jl-overline {
     font-family: 'Inter', system-ui, sans-serif;
-    font-size: 0.65rem;
-    font-weight: 600;
+    font-size: 0.6875rem;
+    font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #999;
+    color: #888;
   }
 
   .jl-overline-gold {
     font-family: 'Inter', system-ui, sans-serif;
-    font-size: 0.65rem;
-    font-weight: 600;
+    font-size: 0.6875rem;
+    font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: #a58e28;
@@ -179,19 +172,6 @@ a {
     max-width: 1100px;
     margin: 0 auto;
     padding: 0 1.5rem;
-  }
-
-  @media (min-width: 1024px) {
-    .jl-container {
-      max-width: 1400px;
-      padding: 0 2rem;
-    }
-  }
-
-  @media (min-width: 1280px) {
-    .jl-container {
-      padding: 0 4rem;
-    }
   }
 
   .jl-container-sm {
