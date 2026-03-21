@@ -26,8 +26,8 @@ export function Header() {
     <header className="border-b border-[#e8e2d8]">
 
       {/* Top row — Logo + right actions */}
-      <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-4 sm:py-5 max-w-[1200px] mx-auto">
+      <div className="w-full px-6">
+        <div className="flex items-center justify-between py-4 sm:py-5 max-w-[1100px] mx-auto">
 
           {/* Logo */}
           <Link href="/" className="inline-block flex-shrink-0">
@@ -69,8 +69,8 @@ export function Header() {
 
       {/* Bottom row — Nav links */}
       <div className="hidden md:block border-t border-[#e8e2d8]">
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center justify-center gap-9 py-2.5 max-w-[1200px] mx-auto">
+        <div className="w-full px-6">
+          <nav className="flex items-center justify-center gap-9 py-2.5 max-w-[1100px] mx-auto">
             {navItems.map((item) => (
               <Link
                 key={item.label}
