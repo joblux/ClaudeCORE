@@ -15,7 +15,7 @@ export function Footer() {
           </div>
 
           {/* Right — Three sub-columns */}
-          <div className="flex gap-12 md:gap-16 flex-wrap">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 md:gap-16">
             <div>
               <h4 className="jl-overline text-[#1a1a1a] mb-3">Platform</h4>
               <ul className="space-y-2">
