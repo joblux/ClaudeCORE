@@ -175,9 +175,9 @@ export default function OpportunitiesPage() {
         ) : filtered.length === 0 ? (
           /* Empty state */
           <div className="text-center py-16 px-6">
-            <p className="jl-serif text-xl text-[#1a1a1a] mb-3">No current opportunities match your criteria.</p>
+            <p className="jl-serif text-xl text-[#1a1a1a] mb-3">No open positions at the moment.</p>
             <p className="text-sm text-[#888] mb-6">
-              Join JOBLUX to be notified when new positions become available.
+              New opportunities are added regularly. Join JOBLUX to be notified when positions become available.
             </p>
             <div className="flex items-center justify-center gap-3">
               <Link href="/join" className="jl-btn jl-btn-primary">Join JOBLUX</Link>
