@@ -196,14 +196,10 @@ export default function BrandPage() {
     })
       .then(async (r) => {
         const data = await r.json()
-        if (!r.ok) {
-          console.error('[WikiLux] API error:', r.status, data)
-          throw new Error(data?.error || `API returned ${r.status}`)
-        }
+        if (!r.ok) throw new Error(data?.error || `API returned ${r.status}`)
         return data
       })
       .then((data) => {
-        console.log('[WikiLux] Response received, has content:', !!data.content, 'cached:', data.cached)
         if (!data.content || data.content.error) {
           setContent({ error: data.content?.error || 'Content is being generated. Please refresh in a moment.' })
           return
@@ -215,8 +211,7 @@ export default function BrandPage() {
         if (data.updated_at) setContentUpdatedAt(data.updated_at)
         if (data.editorial_notes) setEditorialNotes(data.editorial_notes)
       })
-      .catch((err) => {
-        console.error('[WikiLux] Fetch error:', err)
+      .catch(() => {
         setContent({ error: 'Content generation failed. Please refresh to try again.' })
       })
       .finally(() => setLoading(false))

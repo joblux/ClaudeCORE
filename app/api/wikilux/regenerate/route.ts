@@ -19,10 +19,8 @@ const anthropic = new Anthropic({
 
 async function regenerateBrand(brand: Brand): Promise<{ success: boolean; error?: string }> {
   try {
-    // Delete existing cache
     await supabase.from("wikilux_content").delete().eq("slug", brand.slug)
 
-    // Generate with Claude using the rich prompt
     const message = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 6000,
@@ -36,13 +34,11 @@ async function regenerateBrand(brand: Brand): Promise<{ success: boolean; error?
       const cleaned = text.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim()
       content = JSON.parse(cleaned)
     } catch {
-      console.error(`[wikilux/regenerate] JSON parse error for ${brand.slug}`)
-      content = { error: "Failed to parse", raw: text.substring(0, 500) }
+      content = { error: "Failed to parse" }
     }
 
-    // Upsert into wikilux_content with tracking
     const now = new Date().toISOString()
-    const { data: upsertData, error: upsertError } = await supabase
+    const { error: upsertError } = await supabase
       .from("wikilux_content")
       .upsert(
         { slug: brand.slug, brand_name: brand.name, content, updated_at: now, last_regenerated_at: now },
@@ -51,15 +47,12 @@ async function regenerateBrand(brand: Brand): Promise<{ success: boolean; error?
       .select("slug")
 
     if (upsertError) {
-      console.error(`[wikilux/regenerate] UPSERT FAILED for ${brand.slug}:`, JSON.stringify(upsertError))
       return { success: false, error: `${brand.slug}: ${upsertError.message}` }
     }
-    console.log(`[wikilux/regenerate] UPSERT SUCCESS for ${brand.slug}:`, JSON.stringify(upsertData))
 
     return { success: true }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err)
-    console.error(`[wikilux/regenerate] Error for ${brand.slug}:`, msg)
     return { success: false, error: `${brand.slug}: ${msg}` }
   }
 }
@@ -84,7 +77,6 @@ export async function POST(req: Request) {
   const errors: string[] = []
 
   if (all) {
-    // Process all brands in batches of 5
     const batchSize = 5
     for (let i = 0; i < BRANDS.length; i += batchSize) {
       const batch = BRANDS.slice(i, i + batchSize)
@@ -98,7 +90,6 @@ export async function POST(req: Request) {
         }
       }
 
-      // Small delay between batches to avoid rate limits
       if (i + batchSize < BRANDS.length) {
         await new Promise((resolve) => setTimeout(resolve, 2000))
       }

@@ -61,7 +61,6 @@ export async function POST(req: Request) {
     const cleaned = text.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim()
     translation = JSON.parse(cleaned)
   } catch {
-    console.error("[wikilux/translate] JSON parse error for", slug, language_code)
     return NextResponse.json({ error: "Failed to parse translation" }, { status: 500 })
   }
 

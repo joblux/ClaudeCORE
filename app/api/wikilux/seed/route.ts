@@ -41,12 +41,11 @@ async function generateBrand(brand: Brand): Promise<{ success: boolean; error?: 
       const cleaned = text.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim()
       content = JSON.parse(cleaned)
     } catch {
-      console.error(`[wikilux/seed] JSON parse error for ${brand.slug}`)
       return { success: false, error: `${brand.slug}: Failed to parse AI response` }
     }
 
     const now = new Date().toISOString()
-    const { data: upsertData, error: upsertError } = await supabase
+    const { error: upsertError } = await supabase
       .from("wikilux_content")
       .upsert(
         { slug: brand.slug, brand_name: brand.name, content, updated_at: now },
@@ -55,10 +54,8 @@ async function generateBrand(brand: Brand): Promise<{ success: boolean; error?: 
       .select("slug")
 
     if (upsertError) {
-      console.error(`[wikilux/seed] UPSERT FAILED for ${brand.slug}:`, JSON.stringify(upsertError))
       return { success: false, error: `${brand.slug}: ${upsertError.message}` }
     }
-    console.log(`[wikilux/seed] UPSERT SUCCESS for ${brand.slug}:`, JSON.stringify(upsertData))
 
     return { success: true }
   } catch (err: unknown) {
@@ -73,12 +70,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  // Get optional params: offset and limit for resumable seeding
   const body = await req.json().catch(() => ({}))
   const offset = body.offset || 0
   const limit = body.limit || BRANDS.length
 
-  // Check which brands already have rich content
   const { data: existing } = await supabase
     .from("wikilux_content")
     .select("slug, content")
@@ -98,7 +93,6 @@ export async function POST(req: Request) {
   let newlyGenerated = 0
   const errors: string[] = []
 
-  // Process in batches of 3 with 2s delay
   const batchSize = 3
   for (let i = 0; i < brandsToSeed.length; i += batchSize) {
     const batch = brandsToSeed.slice(i, i + batchSize)
@@ -112,7 +106,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // Delay between batches
     if (i + batchSize < brandsToSeed.length) {
       await new Promise((resolve) => setTimeout(resolve, 2000))
     }

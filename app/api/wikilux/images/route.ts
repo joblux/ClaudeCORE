@@ -14,15 +14,12 @@ export async function GET(request: NextRequest) {
     const sector = searchParams.get('sector') || ''
 
     if (!brand) {
-      return NextResponse.json(
-        { error: 'brand query parameter is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'brand query parameter is required' }, { status: 400 })
     }
 
     const slug = brand.toLowerCase().replace(/\s+/g, '-')
 
-    // Check cache first — maybeSingle returns null when no row exists
+    // Check cache
     const { data: cached } = await supabase
       .from('wikilux_brands')
       .select('images')
@@ -33,7 +30,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ images: cached.images })
     }
 
-    // Handle missing Unsplash key gracefully
     if (!process.env.UNSPLASH_ACCESS_KEY) {
       return NextResponse.json({ images: [] })
     }
@@ -41,51 +37,32 @@ export async function GET(request: NextRequest) {
     const unsplash = getUnsplash()
     const query = `${brand} luxury ${sector}`.trim()
 
-    const result = await unsplash.search.getPhotos({
-      query,
-      perPage: 5,
-    })
+    const result = await unsplash.search.getPhotos({ query, perPage: 5 })
 
     if (result.errors) {
-      return NextResponse.json(
-        { error: 'Failed to search Unsplash', details: result.errors },
-        { status: 502 }
-      )
+      return NextResponse.json({ error: 'Failed to search Unsplash' }, { status: 502 })
     }
 
     const images = (result.response?.results || []).map(mapUnsplashPhoto)
 
-    // Cache images — try wikilux_brands first, fall back silently
+    // Cache images — non-blocking, never fails the response
     try {
-      // First try to update an existing row (avoids column mismatch on insert)
       const { error: updateError } = await supabase
         .from('wikilux_brands')
         .update({ images })
         .eq('slug', slug)
 
       if (updateError) {
-        // Row may not exist — try upsert with minimal columns
-        const { error: upsertError } = await supabase
+        await supabase
           .from('wikilux_brands')
-          .upsert(
-            { slug, brand_name: brand, images },
-            { onConflict: 'slug' }
-          )
-        if (upsertError) {
-          console.error('[wikilux/images] Cache write failed:', JSON.stringify(upsertError))
-        }
+          .upsert({ slug, brand_name: brand, images }, { onConflict: 'slug' })
       }
-    } catch (e) {
-      // Never block image delivery due to cache failure
-      console.error('[wikilux/images] Cache write exception:', e)
+    } catch {
+      // Cache failure is non-critical
     }
 
     return NextResponse.json({ images })
-  } catch (error) {
-    console.error('Wikilux images error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+  } catch {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
