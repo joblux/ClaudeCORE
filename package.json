@@ -11,6 +11,7 @@
     "seed:bloglux": "tsx scripts/seed-bloglux.ts",
     "seed:salaries": "tsx scripts/seed-salaries.ts",
     "seed:interviews": "tsx scripts/seed-interviews.ts",
+    "seed:translations": "tsx scripts/seed-translations.ts",
     "seed:all": "tsx scripts/seed-wikilux.ts && tsx scripts/seed-bloglux.ts && tsx scripts/seed-salaries.ts && tsx scripts/seed-interviews.ts"
   },
   "dependencies": {

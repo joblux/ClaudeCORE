@@ -27,7 +27,10 @@ export async function GET(request: NextRequest) {
       .maybeSingle()
 
     if (cached?.images && Array.isArray(cached.images) && cached.images.length > 0) {
-      return NextResponse.json({ images: cached.images })
+      return NextResponse.json(
+        { images: cached.images },
+        { headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' } }
+      )
     }
 
     if (!process.env.UNSPLASH_ACCESS_KEY) {

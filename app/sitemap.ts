@@ -29,13 +29,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
   ]
 
-  // WikiLux brand pages (from static brands list)
-  const brandPages: MetadataRoute.Sitemap = BRANDS.map((brand) => ({
-    url: `${baseUrl}/wikilux/${brand.slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly' as const,
-    priority: 0.7,
-  }))
+  // WikiLux brand pages — all languages (150 brands × 9 languages = 1,350 URLs)
+  const wikiLuxLangs = ['fr', 'ar', 'it', 'es', 'de', 'zh', 'ja', 'ru']
+  const brandPages: MetadataRoute.Sitemap = BRANDS.flatMap((brand) => [
+    { url: `${baseUrl}/wikilux/${brand.slug}`, lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.8 },
+    ...wikiLuxLangs.map((lang) => ({
+      url: `${baseUrl}/wikilux/${brand.slug}/${lang}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    })),
+  ])
 
   // Dynamic: BlogLux articles
   const { data: articles } = await supabase

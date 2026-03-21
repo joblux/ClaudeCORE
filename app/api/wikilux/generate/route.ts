@@ -31,7 +31,10 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     if (cached?.content) {
-      return NextResponse.json({ content: cached.content, translations: cached.translations, cached: true, updated_at: cached.updated_at, editorial_notes: cached.editorial_notes });
+      return NextResponse.json(
+        { content: cached.content, translations: cached.translations, cached: true, updated_at: cached.updated_at, editorial_notes: cached.editorial_notes },
+        { headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' } }
+      );
     }
 
     const brand = BRANDS.find((b) => b.slug === slug) || {

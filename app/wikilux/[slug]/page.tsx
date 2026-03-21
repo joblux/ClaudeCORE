@@ -8,6 +8,7 @@ import { BRANDS } from '@/lib/wikilux-brands'
 import { useMember } from '@/lib/auth-hooks'
 import { WIKILUX_CATEGORY_ICONS } from '@/lib/sector-icons'
 import { SUPPORTED_LANGUAGES } from '@/lib/wikilux-prompt'
+import { HreflangTags } from '@/components/wikilux/HreflangTags'
 
 interface WikiContent {
   tagline?: string
@@ -160,16 +161,9 @@ export default function BrandPage() {
   const [contentUpdatedAt, setContentUpdatedAt] = useState<string | null>(null)
   const [productImages, setProductImages] = useState<Record<string, BrandImage | null>>({})
 
-  // Language state
-  const [activeLang, setActiveLang] = useState('en')
-  const [translations, setTranslations] = useState<Record<string, WikiContent>>({})
-  const [translating, setTranslating] = useState<string | null>(null)
-
   // Admin state
   const [regenerating, setRegenerating] = useState(false)
   const [regenSuccess, setRegenSuccess] = useState(false)
-  const [generatingAllLangs, setGeneratingAllLangs] = useState(false)
-  const [langProgress, setLangProgress] = useState('')
 
   // Contribute modal state
   const [showContribute, setShowContribute] = useState(false)
@@ -205,9 +199,6 @@ export default function BrandPage() {
           return
         }
         setContent(data.content)
-        if (data.translations) {
-          setTranslations(data.translations as Record<string, WikiContent>)
-        }
         if (data.updated_at) setContentUpdatedAt(data.updated_at)
         if (data.editorial_notes) setEditorialNotes(data.editorial_notes)
       })
@@ -253,33 +244,6 @@ export default function BrandPage() {
     }
   }, [content, brand, fetchProductImages])
 
-  // Switch language — load translation on demand
-  const switchLanguage = async (code: string) => {
-    if (code === 'en') {
-      setActiveLang('en')
-      return
-    }
-    if (translations[code]) {
-      setActiveLang(code)
-      return
-    }
-    // Generate translation on demand
-    setTranslating(code)
-    try {
-      const res = await fetch('/api/wikilux/translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug, language_code: code }),
-      })
-      const data = await res.json()
-      if (data.translation) {
-        setTranslations((prev) => ({ ...prev, [code]: data.translation }))
-        setActiveLang(code)
-      }
-    } catch {}
-    setTranslating(null)
-  }
-
   // Admin: regenerate content
   const handleRegenerate = async () => {
     setRegenerating(true)
@@ -299,35 +263,10 @@ export default function BrandPage() {
         })
         const data = await genRes.json()
         setContent(data.content)
-        setTranslations({}) // Clear old translations since English changed
-        setActiveLang('en')
         setRegenSuccess(true)
       }
     } catch {}
     setRegenerating(false)
-  }
-
-  // Admin: generate all language translations
-  const handleGenerateAllLangs = async () => {
-    setGeneratingAllLangs(true)
-    const langs = SUPPORTED_LANGUAGES.filter((l) => l.code !== 'en')
-    for (let i = 0; i < langs.length; i++) {
-      const lang = langs[i]
-      setLangProgress(`${lang.name} (${i + 1}/${langs.length})`)
-      try {
-        const res = await fetch('/api/wikilux/translate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ slug, language_code: lang.code }),
-        })
-        const data = await res.json()
-        if (data.translation) {
-          setTranslations((prev) => ({ ...prev, [lang.code]: data.translation }))
-        }
-      } catch {}
-    }
-    setLangProgress('')
-    setGeneratingAllLangs(false)
   }
 
   const handleContribute = async () => {
@@ -375,12 +314,7 @@ export default function BrandPage() {
   const sectorIcon = WIKILUX_CATEGORY_ICONS[brand.sector]
   const visibleInsights = showAllInsights ? insights : insights.slice(0, 3)
 
-  // Resolve displayed content: use translation if active language is not English
-  const displayContent: WikiContent | null = activeLang === 'en'
-    ? content
-    : translations[activeLang]
-      ? { ...content, ...translations[activeLang] }
-      : content
+  const displayContent = content
 
   // Helper: get founder text (handles both string and object formats)
   const founderText = displayContent
@@ -501,41 +435,33 @@ export default function BrandPage() {
                 >
                   {regenerating ? 'Regenerating...' : 'Regenerate Content'}
                 </button>
-                <button
-                  onClick={handleGenerateAllLangs}
-                  disabled={generatingAllLangs}
-                  className="jl-btn jl-btn-outline text-[0.65rem] py-1.5 px-3"
-                >
-                  {generatingAllLangs ? `Translating ${langProgress}` : 'Generate All Languages'}
-                </button>
                 {regenSuccess && <span className="text-xs text-[#a58e28]">Content regenerated</span>}
               </div>
             </div>
           )}
 
-          {/* ── LANGUAGE SWITCHER ──────────────────────────── */}
+          {/* ── HREFLANG TAGS ──────────────────────────────── */}
+          <HreflangTags slug={slug} />
+
+          {/* ── LANGUAGE SWITCHER (navigation links) ─────── */}
           <div className="jl-container pt-6 pb-2">
             <div className="flex items-center gap-1 flex-wrap">
               {SUPPORTED_LANGUAGES.map((lang, i) => (
                 <span key={lang.code} className="flex items-center">
-                  <button
-                    onClick={() => switchLanguage(lang.code)}
-                    disabled={translating === lang.code}
-                    className={`font-sans text-[0.7rem] px-1.5 py-0.5 transition-colors ${
-                      activeLang === lang.code
-                        ? 'text-[#a58e28] font-semibold'
-                        : 'text-[#aaa] hover:text-[#a58e28]'
-                    }`}
-                  >
-                    {translating === lang.code ? '...' : lang.code.toUpperCase()}
-                  </button>
+                  {lang.code === 'en' ? (
+                    <span className="font-sans text-[0.7rem] px-1.5 py-0.5 text-[#a58e28] font-semibold">EN</span>
+                  ) : (
+                    <Link
+                      href={`/wikilux/${slug}/${lang.code}`}
+                      className="font-sans text-[0.7rem] px-1.5 py-0.5 text-[#aaa] hover:text-[#a58e28] transition-colors"
+                    >
+                      {lang.code.toUpperCase()}
+                    </Link>
+                  )}
                   {i < SUPPORTED_LANGUAGES.length - 1 && <span className="text-[#ddd] text-[0.6rem] mx-0.5">|</span>}
                 </span>
               ))}
             </div>
-            {translating && (
-              <p className="font-sans text-[0.65rem] text-[#a58e28] mt-1 animate-pulse">Generating translation...</p>
-            )}
           </div>
 
           {/* ── STRUCTURED EDITORIAL SECTIONS ──────────────── */}
