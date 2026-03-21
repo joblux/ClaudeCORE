@@ -31,7 +31,7 @@ function approvalEmailHtml(firstName?: string): string {
         <tr><td style="padding:40px 40px 32px;">
           ${greeting ? `<p style="font-size:14px;color:#888;margin:0 0 24px;">${greeting}</p>` : ""}
           <h1 style="font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:24px;font-weight:400;color:#1a1a1a;margin:0 0 20px;line-height:1.3;">Welcome to JOBLUX.</h1>
-          <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 32px;">Your membership has been approved. You now have full access to confidential positions, salary intelligence, WikiLux and all member features.</p>
+          <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 32px;">Your account has been approved. You now have full access to confidential positions, salary intelligence, WikiLux and all member features.</p>
           <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:0 0 32px;">
             <a href="https://www.luxuryrecruiter.com/dashboard" style="display:inline-block;background:#a58e28;color:#1a1a1a;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;font-weight:700;text-decoration:none;padding:14px 36px;letter-spacing:2px;text-transform:uppercase;">Access Your Dashboard</a>
           </td></tr></table>
@@ -77,7 +77,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     await getResend().emails.send({
       from: "JOBLUX <noreply@luxuryrecruiter.com>",
       to: member.email,
-      subject: "Your JOBLUX membership has been approved",
+      subject: "Your JOBLUX account has been approved",
       html: approvalEmailHtml(member.first_name),
     });
   } catch (emailError) {

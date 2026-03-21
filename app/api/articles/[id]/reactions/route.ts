@@ -67,7 +67,7 @@ export async function POST(
     }
 
     if ((session.user as any)?.status !== 'approved') {
-      return NextResponse.json({ error: 'Approved membership required' }, { status: 403 })
+      return NextResponse.json({ error: 'Approved account required' }, { status: 403 })
     }
 
     const userId = (session.user as any)?.id

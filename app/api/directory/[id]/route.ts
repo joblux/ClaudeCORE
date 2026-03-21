@@ -17,7 +17,7 @@ export async function GET(
     const role = session.user.role || 'professional'
     if (!(DIRECTORY_ACCESS_ROLES as readonly string[]).includes(role)) {
       return NextResponse.json(
-        { error: 'Directory access requires Business, Insider, or Executive membership', upgrade_required: true },
+        { error: 'Directory access requires Business, Insider, or Executive tier', upgrade_required: true },
         { status: 403 }
       )
     }

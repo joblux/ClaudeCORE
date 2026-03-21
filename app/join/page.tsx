@@ -47,13 +47,13 @@ function SignInContent() {
       {/* Error messages */}
       {error === "pending" && (
         <div className="mb-6 p-4 bg-[#fdf8e8] border border-[#e8e2c0] rounded-sm text-sm text-[#1a1a1a]">
-          Your membership is pending approval. You&apos;ll receive an email
+          Your application is pending approval. You&apos;ll receive an email
           once approved.
         </div>
       )}
       {error === "rejected" && (
         <div className="mb-6 p-4 bg-[#fde8e8] border border-[#e8c0c0] rounded-sm text-sm text-[#1a1a1a]">
-          Your membership request was not approved. Contact us for more
+          Your application was not approved. Contact us for more
           information.
         </div>
       )}
@@ -205,7 +205,7 @@ export default function MembersPage() {
 
         {/* Footer note */}
         <p className="text-center text-xs text-[#999] mt-6 leading-relaxed">
-          New to JOBLUX? Sign in to request membership.
+          New to JOBLUX? Sign in to request access.
           <br />
           All members are personally approved.
         </p>

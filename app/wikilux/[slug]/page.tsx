@@ -407,7 +407,7 @@ export default function BrandPage() {
                 <button
                   onClick={() => {
                     if (!isAuthenticated) { window.location.href = `/join?brand=${encodeURIComponent(brand.name)}`; return }
-                    if (!isApproved && !authLoading) { setContributeError('Your membership is pending approval.'); return }
+                    if (!isApproved && !authLoading) { setContributeError('Your account is pending approval.'); return }
                     setShowContribute(true)
                     setContributeSuccess(false)
                     setContributeError('')

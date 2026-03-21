@@ -28,12 +28,12 @@ function SignInContent() {
     <>
       {error === "pending" && (
         <div className="mb-6 p-4 bg-[#fdf8e8] border border-[#e8e2c0] rounded-sm text-sm text-[#1a1a1a]">
-          Your membership is pending approval.
+          Your application is pending approval.
         </div>
       )}
       {error === "rejected" && (
         <div className="mb-6 p-4 bg-[#fde8e8] border border-[#e8c0c0] rounded-sm text-sm text-[#1a1a1a]">
-          Your membership request was not approved.
+          Your application was not approved.
         </div>
       )}
       {error && error !== "pending" && error !== "rejected" && (
@@ -84,7 +84,7 @@ export default function MembersPage() {
             <SignInContent />
           </Suspense>
         </div>
-        <p className="text-center text-xs text-[#999] mt-6 leading-relaxed">New to JOBLUX? Sign in to request membership.<br />All members are personally approved.</p>
+        <p className="text-center text-xs text-[#999] mt-6 leading-relaxed">New to JOBLUX? Sign in to request access.<br />All applications are personally reviewed.</p>
       </div>
     </main>
   );

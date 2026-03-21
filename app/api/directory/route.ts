@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     if (!DIRECTORY_ACCESS_ROLES.includes(role as any)) {
       return NextResponse.json(
         {
-          error: 'Directory access requires Business, Insider, or Executive membership',
+          error: 'Directory access requires Business, Insider, or Executive tier',
           upgrade_required: true,
         },
         { status: 403 }

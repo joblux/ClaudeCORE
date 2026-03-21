@@ -301,7 +301,7 @@ export default function AboutPage() {
         <p className="text-sm leading-relaxed text-white/55 mb-3 max-w-2xl">
           JOBLUX today operates on a model the luxury industry has rarely seen applied
           to professional intelligence: everything we publish is freely accessible to
-          those who belong here. No paywalls, no membership tiers driving content,
+          those who belong here. No paywalls, no access tiers driving content,
           no advertisers shaping what you read.
         </p>
         <p className="text-sm leading-relaxed text-white/55 mb-12 max-w-2xl">

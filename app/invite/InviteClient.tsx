@@ -36,7 +36,7 @@ export default function InviteClient() {
             Invite a Colleague
           </h1>
           <p className="font-sans text-sm text-[#888] max-w-xl">
-            Share your personal invite link with luxury professionals who would benefit from JOBLUX membership.
+            Share your personal invite link with luxury professionals who would benefit from joining JOBLUX.
           </p>
         </div>
       </div>

@@ -419,7 +419,7 @@ export default function PendingPage() {
             </div>
             <h3 className="jl-serif text-xl text-[#1a1a1a] mb-2">Welcome to the Society</h3>
             <p className="text-sm text-[#666] mb-6">
-              {firstName ? `Congratulations, ${firstName}.` : 'Congratulations.'} Your membership has been approved.
+              {firstName ? `Congratulations, ${firstName}.` : 'Congratulations.'} Your account has been approved.
             </p>
             <Link href="/dashboard" className="jl-btn jl-btn-primary px-10 inline-block">
               Enter Dashboard
@@ -445,7 +445,7 @@ export default function PendingPage() {
             </div>
             <h3 className="jl-serif text-xl text-[#1a1a1a] mb-2">Pending Approval</h3>
             <p className="text-sm text-[#666] mb-4">
-              {firstName ? `Thank you, ${firstName}.` : 'Thank you.'} Your membership is under review.
+              {firstName ? `Thank you, ${firstName}.` : 'Thank you.'} Your application is under review.
             </p>
             <p className="text-xs text-[#999]">
               Every JOBLUX member is personally approved. You will receive an email once confirmed.
@@ -464,7 +464,7 @@ export default function PendingPage() {
     <main className="min-h-screen bg-[#fafaf5] flex flex-col items-center px-6 py-12">
       <div className="max-w-2xl w-full">
         <div className="text-center mb-10">
-          <p className="text-sm tracking-[0.3em] uppercase text-[#a58e28] mb-3">JOBLUX Membership</p>
+          <p className="text-sm tracking-[0.3em] uppercase text-[#a58e28] mb-3">JOBLUX Society</p>
           <h1 className="jl-serif text-2xl md:text-3xl text-[#1a1a1a] mb-2">
             {step === 1 ? 'Choose Your Tier' : 'Complete Your Profile'}
           </h1>
@@ -1121,7 +1121,7 @@ export default function PendingPage() {
                 <button onClick={submit} disabled={saving} className="jl-btn jl-btn-primary px-10">
                   {saving ? 'Submitting\u2026' : 'Submit Application'}
                 </button>
-                <p className="text-xs text-[#999] mt-3">Every JOBLUX membership is personally reviewed.</p>
+                <p className="text-xs text-[#999] mt-3">Every JOBLUX application is personally reviewed.</p>
               </div>
             </div>
           </>
