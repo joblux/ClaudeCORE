@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed:wikilux": "tsx scripts/seed-wikilux.ts",
+    "seed:bloglux": "tsx scripts/seed-bloglux.ts",
+    "seed:salaries": "tsx scripts/seed-salaries.ts",
+    "seed:interviews": "tsx scripts/seed-interviews.ts",
+    "seed:all": "tsx scripts/seed-wikilux.ts && tsx scripts/seed-bloglux.ts && tsx scripts/seed-salaries.ts && tsx scripts/seed-interviews.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
@@ -37,10 +42,12 @@
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.0",
+    "dotenv": "^17.3.1",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.0",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.4.0"
   }
 }
