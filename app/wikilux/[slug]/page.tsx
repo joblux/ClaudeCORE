@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
@@ -158,6 +158,7 @@ export default function BrandPage() {
   const [showAllInsights, setShowAllInsights] = useState(false)
   const [editorialNotes, setEditorialNotes] = useState<string | null>(null)
   const [contentUpdatedAt, setContentUpdatedAt] = useState<string | null>(null)
+  const [productImages, setProductImages] = useState<Record<string, BrandImage | null>>({})
 
   // Language state
   const [activeLang, setActiveLang] = useState('en')
@@ -226,6 +227,36 @@ export default function BrandPage() {
     fetch(`/api/wikilux/insights?slug=${encodeURIComponent(brand.slug)}&limit=20`)
       .then((r) => r.json()).then((data) => { setInsights(data.insights || []); setInsightsTotal(data.total || 0) }).catch(() => {})
   }, [brand])
+
+  // Fetch product images when iconic_products are available
+  const fetchProductImages = useCallback(async (products: { name: string; year: string }[], brandName: string) => {
+    const results: Record<string, BrandImage | null> = {}
+    // Fetch up to 4 product images in parallel
+    const toFetch = products.slice(0, 4)
+    await Promise.all(
+      toFetch.map(async (p) => {
+        try {
+          const query = `${brandName} ${p.name} luxury product`
+          const res = await fetch(`/api/wikilux/images?brand=${encodeURIComponent(query)}&sector=product`)
+          const data = await res.json()
+          if (data.images && data.images.length > 0) {
+            results[p.name] = data.images[0]
+          } else {
+            results[p.name] = null
+          }
+        } catch {
+          results[p.name] = null
+        }
+      })
+    )
+    setProductImages(results)
+  }, [])
+
+  useEffect(() => {
+    if (content?.iconic_products && content.iconic_products.length > 0 && brand) {
+      fetchProductImages(content.iconic_products, brand.name)
+    }
+  }, [content, brand, fetchProductImages])
 
   // Switch language — load translation on demand
   const switchLanguage = async (code: string) => {
@@ -594,6 +625,30 @@ export default function BrandPage() {
             <div className="border-t border-[#e8e2d8]">
               <div className="jl-container py-8">
                 <div className="jl-section-label"><span>Signature Products</span></div>
+                {/* Product illustration strip */}
+                {Object.values(productImages).some(Boolean) && (
+                  <div className="flex gap-3 overflow-x-auto pb-4 mb-6 -mx-1 px-1">
+                    {displayContent?.iconic_products?.slice(0, 4).map((p) => {
+                      const img = productImages[p.name]
+                      if (!img) return null
+                      return (
+                        <div key={p.name} className="flex-shrink-0 group">
+                          <div className="w-[120px] h-[120px] relative overflow-hidden border border-[#e8e2d8] group-hover:border-[#a58e28] transition-colors">
+                            <Image
+                              src={img.thumb + '&w=240&q=80&fm=webp'}
+                              alt={p.name}
+                              fill
+                              className="object-cover grayscale-[30%] contrast-[1.1]"
+                              sizes="120px"
+                            />
+                          </div>
+                          <p className="font-sans text-[0.55rem] text-[#888] mt-1.5 text-center max-w-[120px] truncate">{p.name}</p>
+                          <p className="font-sans text-[0.5rem] text-[#a58e28] text-center">{p.year}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
                 {displayContent.signature_products && (
                   <div className="jl-prose mb-6">{renderParagraphs(displayContent.signature_products)}</div>
                 )}
