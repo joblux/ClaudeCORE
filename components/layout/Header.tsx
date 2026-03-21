@@ -34,16 +34,26 @@ export function Header() {
             <div className="text-3xl sm:text-[2.15rem] font-semibold text-[#1a1a1a] leading-none" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</div>
           </Link>
 
+          {/* Center search field — desktop */}
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="hidden md:flex items-center gap-2 w-full max-w-md mx-6 px-4 py-2 border border-[#d5d0c8] rounded-full text-left hover:border-[#a58e28] transition-colors cursor-text"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#999] flex-shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <span className="text-sm text-[#999] truncate">Search opportunities, brands, intelligence...</span>
+          </button>
+
+          {/* Center search field — mobile */}
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="md:hidden flex items-center justify-center w-9 h-9 text-[#1a1a1a]/60 hover:text-[#1a1a1a] transition-colors"
+            aria-label="Search"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </button>
+
           {/* Right side */}
-          <div className="flex items-center gap-4 sm:gap-5">
-            {/* Search — mobile only (desktop search is in nav row) */}
-            <button
-              onClick={() => setSearchOpen(!searchOpen)}
-              className="md:hidden inline-flex items-center justify-center text-[#1a1a1a]/60 hover:text-[#1a1a1a] transition-colors"
-              aria-label="Search"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            </button>
+          <div className="flex items-center gap-4 sm:gap-5 flex-shrink-0">
             {isAuthenticated ? (
               <UserMenu />
             ) : (
@@ -75,18 +85,11 @@ export function Header() {
               <Link
                 key={item.label}
                 href={item.href}
-                className="text-[0.8rem] leading-[1] font-medium tracking-wide text-[#1a1a1a]/60 hover:text-[#1a1a1a] transition-colors"
+                className="text-[0.8rem] leading-[1] font-semibold tracking-wide text-[#1a1a1a]/60 hover:text-[#1a1a1a] transition-colors"
               >
                 {item.label}
               </Link>
             ))}
-            <button
-              onClick={() => setSearchOpen(!searchOpen)}
-              className="flex items-center justify-center h-[0.8rem] text-[#1a1a1a]/60 hover:text-[#1a1a1a] transition-colors"
-              aria-label="Search"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            </button>
           </nav>
         </div>
       </div>
