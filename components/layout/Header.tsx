@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import UserMenu from '@/components/UserMenu'
 import SearchOverlay from '@/components/SearchOverlay'
 import { useMember } from '@/lib/auth-hooks'
@@ -32,17 +31,7 @@ export function Header() {
 
           {/* Logo */}
           <Link href="/" className="inline-block flex-shrink-0">
-            {/* Mobile: text logo */}
-            <div className="lg:hidden text-2xl sm:text-3xl font-semibold text-[#1a1a1a] leading-none" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</div>
-            {/* Desktop: gold SVG logo */}
-            <Image
-              src="/logos/joblux-gold.svg"
-              alt="JOBLUX"
-              width={140}
-              height={32}
-              className="hidden lg:block"
-              priority
-            />
+            <span className="text-xl font-medium tracking-[2px] text-[#a58e28]" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</span>
           </Link>
 
           {/* Desktop nav links — hidden on mobile */}

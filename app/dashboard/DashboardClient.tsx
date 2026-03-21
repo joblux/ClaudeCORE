@@ -5,14 +5,24 @@ import Link from 'next/link'
 import type { SearchAssignment } from '@/types/search-assignment'
 import { CURRENCY_SYMBOLS } from '@/lib/assignment-options'
 
-// ── Tier labels ──────────────────────────────────────────────────────
+// ── Tier config ──────────────────────────────────────────────────────
 const TIER_LABELS: Record<string, string> = {
-  rising: 'Rising Member',
-  pro: 'Pro Member',
-  professional: 'Pro+ Member',
-  executive: 'Executive Member',
-  business: 'Business Member',
-  insider: 'Insider Member',
+  rising: 'Rising',
+  pro: 'Pro',
+  professional: 'Pro+',
+  executive: 'Executive',
+  business: 'Business',
+  insider: 'Insider',
+  admin: 'Admin',
+}
+
+const TIER_SUBTITLES: Record<string, string> = {
+  rising: 'Professional account',
+  pro: 'Professional account',
+  professional: 'Professional account',
+  executive: 'Professional account',
+  business: 'Employer account',
+  insider: 'Employer account',
   admin: 'Administrator',
 }
 
@@ -41,7 +51,6 @@ function timeAgo(dateStr: string | null): string {
   return `${Math.floor(days / 30)}mo ago`
 }
 
-// ── Arrow icon ───────────────────────────────────────────────────────
 function ArrowRight({ className = 'w-4 h-4' }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,8 +59,6 @@ function ArrowRight({ className = 'w-4 h-4' }: { className?: string }) {
   )
 }
 
-// ══════════════════════════════════════════════════════════════════════
-// Dashboard Client Component
 // ══════════════════════════════════════════════════════════════════════
 
 interface Props {
@@ -62,9 +69,10 @@ interface Props {
 }
 
 export default function DashboardClient({ firstName, role, email, isAdmin }: Props) {
-  const tierLabel = TIER_LABELS[role] || 'Member'
-  const isSenior = ['professional', 'executive', 'insider'].includes(role)
-  const isBusiness = role === 'business'
+  const tierLabel = TIER_LABELS[role] || role
+  const tierSubtitle = TIER_SUBTITLES[role] || 'Professional account'
+  const isBusiness = ['business', 'insider'].includes(role)
+  const isProfessional = ['rising', 'pro', 'professional', 'executive'].includes(role)
 
   // ── State ────────────────────────────────────────────────────────
   const [opportunities, setOpportunities] = useState<SearchAssignment[]>([])
@@ -78,42 +86,53 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
   useEffect(() => {
     async function load() {
       try {
-        // Fetch opportunities
         const oppRes = await fetch('/api/opportunities?limit=5')
         const oppData = await oppRes.json()
         setOpportunities(oppData.opportunities || [])
 
-        // Fetch profile data for completeness
         const profileRes = await fetch(`/api/members/profile?email=${encodeURIComponent(email)}`)
         const profileData = await profileRes.json()
         if (profileData.member) {
-          // Calculate completeness
           const m = profileData.member
+
+          // Tier-aware profile completeness
           let score = 0
-          const total = 10
-          if (m.first_name && m.last_name) score++
-          if (m.headline) score++
-          if (m.city && m.country) score++
-          if (m.job_title && m.seniority) score++
-          if (profileData.workExperiences?.length > 0) score++
-          if (profileData.educationRecords?.length > 0) score++
-          if (profileData.languages?.length > 0) score++
-          if (m.key_skills?.length > 0) score++
-          if (m.product_categories?.length > 0) score++
-          if (profileData.documents?.length > 0) score++
+          let total = 0
+          if (isBusiness) {
+            // Business/Insider: company name, sector, description, contact info
+            total = 4
+            if (m.company_name || m.maison) score++
+            if (m.sector || m.department) score++
+            if (m.bio || m.headline) score++
+            if (m.email || m.phone) score++
+          } else {
+            // Pro/Rising/Executive: headline, experience, CV, location, contact preference
+            total = 5
+            if (m.headline) score++
+            if (profileData.workExperiences?.length > 0) score++
+            if (profileData.documents?.length > 0) score++
+            if (m.city && m.country) score++
+            if (m.contact_preference || m.email) score++
+          }
           setProfileCompleteness(Math.round((score / total) * 100))
 
-          // Hint
-          if (!m.first_name || !m.last_name) setCompletenessHint('Add your full name to get started')
-          else if (!m.headline) setCompletenessHint('Add a headline to stand out')
-          else if (profileData.documents?.length === 0) setCompletenessHint('Upload your CV to unlock full opportunity matching')
-          else if (score < total) setCompletenessHint('Complete more sections to improve your match rate')
-          else setCompletenessHint('Your profile is complete!')
+          // Tier-aware completeness hints
+          if (isBusiness) {
+            if (!m.company_name && !m.maison) setCompletenessHint('Add your company name to get started')
+            else if (!m.bio && !m.headline) setCompletenessHint('Add a company description')
+            else if (score < total) setCompletenessHint('Complete more sections to improve visibility')
+            else setCompletenessHint('Your profile is complete!')
+          } else {
+            if (!m.headline) setCompletenessHint('Add a headline to stand out')
+            else if (profileData.documents?.length === 0) setCompletenessHint('Upload your CV to unlock full opportunity matching')
+            else if (!(m.city && m.country)) setCompletenessHint('Add your location to improve matching')
+            else if (score < total) setCompletenessHint('Complete more sections to improve your match rate')
+            else setCompletenessHint('Your profile is complete!')
+          }
 
           setContributionPoints(m.contribution_points || 0)
         }
 
-        // Fetch application count
         try {
           const appRes = await fetch('/api/opportunities/applications')
           if (appRes.ok) {
@@ -125,28 +144,37 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
       setLoading(false)
     }
     load()
-  }, [email])
+  }, [email, isBusiness])
 
-  // ── Quick action items ───────────────────────────────────────────
-  const quickActions = [
-    { label: 'Upload CV', href: '/profile', desc: 'Improve your match rate' },
-    { label: 'Browse WikiLux', href: '/wikilux', desc: '500+ brand encyclopedias' },
-    { label: 'Interview Intelligence', href: '/interviews', desc: 'Real interview experiences' },
-    { label: 'Invite a colleague', href: '/invite', desc: 'Grow the JOBLUX community' },
-    { label: 'Contribute an insight', href: '/contribute', desc: 'Earn contribution points' },
-  ]
+  // ── Tier-specific quick actions ────────────────────────────────
+  const quickActions: { label: string; href: string; desc: string }[] = []
 
-  if (isSenior) {
-    quickActions.push({ label: 'Salary Intelligence', href: '/salaries', desc: 'Compensation benchmarks' })
-  }
-  if (isBusiness) {
+  if (isAdmin) {
     quickActions.push(
-      { label: 'Post a Brief', href: '/admin/briefs/new', desc: 'Create a hiring assignment' },
-      { label: 'Post an Internship', href: '/dashboard/internships/new', desc: 'Reach luxury professionals' },
+      { label: 'Open Command Centre', href: '/admin/dashboard', desc: 'Admin dashboard' },
+      { label: 'Review pending applications', href: '/admin', desc: 'Approve or reject' },
+      { label: 'Write BlogLux article', href: '/admin/articles/new', desc: 'Create content' },
+      { label: 'Import content', href: '/admin/assignments/import', desc: 'Bulk import' },
+    )
+  } else if (isBusiness) {
+    quickActions.push(
+      { label: 'Post a free internship', href: '/dashboard/internships/new', desc: 'Reach luxury professionals' },
+      { label: 'Submit a search request', href: '/admin/briefs/new', desc: 'Create a hiring assignment' },
+      { label: 'Browse WikiLux', href: '/wikilux', desc: '500+ brand encyclopedias' },
+      { label: 'View your assignments', href: '/admin/assignments', desc: 'Track open positions' },
+    )
+  } else {
+    // Pro / Pro+ / Rising / Executive
+    quickActions.push(
+      { label: 'Browse opportunities', href: '/opportunities', desc: 'Matched positions' },
+      { label: 'Upload CV', href: '/profile', desc: 'Improve your match rate' },
+      { label: 'Share your profile', href: '/profile', desc: 'Increase visibility' },
+      { label: 'Contribute an insight', href: '/contribute', desc: 'Earn contribution points' },
+      { label: 'Browse WikiLux', href: '/wikilux', desc: '500+ brand encyclopedias' },
     )
   }
 
-  // ── KPI data ─────────────────────────────────────────────────────
+  // ── KPI data ─────────────────────────────────────────────────
   const kpis = [
     { label: 'Matched Opportunities', value: String(opportunities.length), gold: false },
     { label: 'Applications', value: String(applicationCount), gold: false },
@@ -166,18 +194,26 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
         <div className="jl-container py-8 lg:py-10">
           <div className="lg:flex lg:justify-between lg:items-end">
             <div>
-              <div className="jl-overline-gold mb-2">Member Dashboard</div>
               <h1 className="jl-serif text-2xl md:text-3xl lg:text-[22px] font-medium text-[#1a1a1a] mb-1.5">
                 Welcome back, {firstName}
               </h1>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#a58e28]/10 text-[#a58e28] text-[0.65rem] font-semibold tracking-wider uppercase rounded-full">
                   {tierLabel}
                 </span>
+                <span className="text-xs text-gray-500">{tierSubtitle}</span>
                 {contributionPoints > 0 && (
-                  <span className="text-xs text-gray-500">{contributionPoints} contribution points</span>
+                  <span className="text-xs text-gray-400">{contributionPoints} points</span>
                 )}
               </div>
+              {isAdmin && (
+                <Link
+                  href="/admin/dashboard"
+                  className="inline-flex items-center gap-1 text-sm text-[#a58e28] hover:text-[#7a6a1e] font-medium transition-colors mt-2"
+                >
+                  Open Command Centre →
+                </Link>
+              )}
             </div>
             <div className="mt-4 lg:mt-0">
               <Link
@@ -352,7 +388,7 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
               </div>
             </div>
 
-            {/* Card 3: Your Messages */}
+            {/* Card 3: Messages */}
             <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider">
@@ -391,7 +427,7 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
                   <span className="mt-1.5 w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" />
                   <div>
                     <p className="text-sm text-[#1a1a1a]">Joined JOBLUX</p>
-                    <p className="text-xs text-gray-400">Member since joining</p>
+                    <p className="text-xs text-gray-400">Since joining</p>
                   </div>
                 </div>
               </div>
@@ -454,8 +490,8 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
               {[
                 { num: 'A1', title: 'Admin Panel', desc: 'Command centre — stats, notifications, overview.', href: '/admin/dashboard' },
                 { num: 'A2', title: 'Post a Brief', desc: 'Create a new hiring assignment.', href: '/admin/briefs/new' },
-                { num: 'A3', title: 'Review Contributions', desc: 'Approve member contributions.', href: '/admin/contributions' },
-                { num: 'A4', title: 'Manage Articles', desc: 'Bloglux editorial and publishing.', href: '/admin/articles' },
+                { num: 'A3', title: 'Review Contributions', desc: 'Approve contributions.', href: '/admin/contributions' },
+                { num: 'A4', title: 'Manage Articles', desc: 'BlogLux editorial and publishing.', href: '/admin/articles' },
               ].map((card) => (
                 <Link
                   key={card.num}

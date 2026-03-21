@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Image from 'next/image'
 
 export function Footer() {
   return (
@@ -11,15 +10,7 @@ export function Footer() {
 
           {/* Col 1 — Brand */}
           <div>
-            {/* Mobile: text logo / Desktop: white SVG on dark would be odd, use gold */}
-            <div className="lg:hidden text-lg font-semibold text-[#1a1a1a] tracking-[0.1em] mb-2" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</div>
-            <Image
-              src="/logos/joblux-gold.svg"
-              alt="JOBLUX"
-              width={120}
-              height={28}
-              className="hidden lg:block mb-3"
-            />
+            <span className="text-sm font-medium tracking-[2px] text-[#1a1a1a]" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</span>
             <p className="font-sans text-xs text-[#888] leading-relaxed mb-3">Luxury Talents Society</p>
             <p className="font-sans text-[0.65rem] text-[#bbb]">Paris &middot; London &middot; New York &middot; Dubai &middot; Singapore</p>
           </div>

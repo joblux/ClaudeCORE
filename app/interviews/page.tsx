@@ -228,33 +228,82 @@ export default function InterviewsPage() {
                   {total} experience{total !== 1 ? 's' : ''}
                   {hasFilters ? ' matching your filters' : ''}
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {experiences.map((exp) => (
-                    <ExperienceCard key={exp.id} exp={exp} isAuthenticated={isAuthenticated} />
-                  ))}
-                </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-10">
-                    <button
-                      onClick={() => setPage(p => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                      className="jl-btn text-xs disabled:opacity-30"
-                    >
-                      Previous
-                    </button>
-                    <span className="text-xs text-[#888] px-4">
-                      Page {page} of {totalPages}
-                    </span>
-                    <button
-                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                      disabled={page === totalPages}
-                      className="jl-btn text-xs disabled:opacity-30"
-                    >
-                      Next
-                    </button>
-                  </div>
+                {/* Show limited items for unauthenticated users */}
+                {!isAuthenticated ? (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {experiences.slice(0, 3).map((exp) => (
+                        <ExperienceCard key={exp.id} exp={exp} isAuthenticated={false} />
+                      ))}
+                    </div>
+
+                    {/* Teaser wall */}
+                    <div className="relative mt-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 blur-sm opacity-30 pointer-events-none">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                          <div key={i} className="border border-[#e8e2d8] rounded p-5 bg-white">
+                            <div className="h-4 bg-[#e8e2d8] rounded w-1/3 mb-3" />
+                            <div className="h-5 bg-[#e8e2d8] rounded w-2/3 mb-2" />
+                            <div className="h-3 bg-[#e8e2d8] rounded w-1/2 mb-3" />
+                            <div className="flex gap-2 mb-3">
+                              <div className="h-5 bg-[#e8e2d8] rounded w-12" />
+                              <div className="h-5 bg-[#e8e2d8] rounded w-16" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-white via-white/90 to-transparent">
+                        <div className="text-center max-w-lg px-6">
+                          <h2 className="jl-serif text-2xl text-[#1a1a1a] mb-3">
+                            Sign in to access all interview experiences from {stats?.unique_brands || 12} major luxury houses
+                          </h2>
+                          <p className="text-sm text-[#888] mb-6">
+                            Get real insider knowledge about interview processes, questions asked, and hiring outcomes.
+                          </p>
+                          <div className="flex items-center justify-center gap-3">
+                            <Link href="/join" className="px-6 py-3 bg-[#a58e28] text-white text-sm font-semibold tracking-wider uppercase rounded-md hover:bg-[#8a7622] transition-colors">
+                              Join the Society
+                            </Link>
+                            <Link href="/members" className="px-6 py-3 border border-[#a58e28] text-[#a58e28] text-sm font-semibold tracking-wider uppercase rounded-md hover:bg-[#a58e28] hover:text-white transition-colors">
+                              Sign In
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {experiences.map((exp) => (
+                        <ExperienceCard key={exp.id} exp={exp} isAuthenticated={isAuthenticated} />
+                      ))}
+                    </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-center gap-2 mt-10">
+                        <button
+                          onClick={() => setPage(p => Math.max(1, p - 1))}
+                          disabled={page === 1}
+                          className="jl-btn text-xs disabled:opacity-30"
+                        >
+                          Previous
+                        </button>
+                        <span className="text-xs text-[#888] px-4">
+                          Page {page} of {totalPages}
+                        </span>
+                        <button
+                          onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                          disabled={page === totalPages}
+                          className="jl-btn text-xs disabled:opacity-30"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </>
             )}

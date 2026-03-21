@@ -8,7 +8,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient
-      firstName={member.firstName || member.name || "Member"}
+      firstName={member.firstName || member.name || "there"}
       role={member.role || "professional"}
       email={member.email!}
       isAdmin={member.isAdmin}

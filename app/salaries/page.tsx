@@ -36,12 +36,7 @@ export default function SalariesPage() {
   }
 
   if (!isAuthenticated) {
-    return (
-      <div className="jl-container py-20 text-center">
-        <h1 className="jl-serif text-2xl text-[#1a1a1a] mb-3">Sign in to access Salary Intelligence</h1>
-        <Link href="/join" className="jl-btn-primary">Request Access</Link>
-      </div>
-    )
+    return <SalaryTeaser />
   }
 
   const tabs: { key: TabKey; label: string; requiredRank: number; points: number }[] = [
@@ -554,6 +549,89 @@ function CalculatorTab() {
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+/* ── SALARY TEASER (unauthenticated) ────────────────── */
+function SalaryTeaser() {
+  const [entries, setEntries] = useState<SalaryRangeData[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/salaries?page=1&limit=5')
+      .then(r => r.ok ? r.json() : { entries: [], total: 0 })
+      .then(data => { setEntries(data.entries || []); setTotal(data.total || 0) })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  return (
+    <div>
+      {/* Hero */}
+      <section className="bg-[#222222] py-14 md:py-20">
+        <div className="jl-container text-center">
+          <div className="jl-overline-gold mb-4 tracking-[0.2em]">Salary Intelligence</div>
+          <h1 className="jl-serif text-4xl md:text-5xl lg:text-6xl font-light text-white mb-5">
+            Know Your Worth
+          </h1>
+          <p className="font-sans text-sm md:text-base text-[#bbb] max-w-2xl mx-auto leading-relaxed">
+            Salary benchmarks, comparisons, and personalised estimates across the world&rsquo;s most prestigious maisons.
+          </p>
+        </div>
+      </section>
+
+      <div className="jl-container py-10">
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block w-8 h-8 border-2 border-[#e8e2d8] border-t-[#a58e28] rounded-full animate-spin" />
+          </div>
+        ) : (
+          <>
+            {/* Show first 5 salary cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-0">
+              {entries.slice(0, 5).map((entry, i) => (
+                <SalaryCard key={i} entry={entry} />
+              ))}
+            </div>
+
+            {/* Teaser wall */}
+            <div className="relative mt-0">
+              {/* Blurred placeholder cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 blur-sm opacity-30 pointer-events-none">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="border border-[#e8e2d8] rounded p-5 bg-white">
+                    <div className="h-5 bg-[#e8e2d8] rounded w-2/3 mb-3" />
+                    <div className="h-3 bg-[#e8e2d8] rounded w-1/2 mb-2" />
+                    <div className="h-2 bg-[#f0ece4] rounded w-full mb-1" />
+                    <div className="h-2 bg-[#f0ece4] rounded w-3/4" />
+                  </div>
+                ))}
+              </div>
+              {/* CTA overlay */}
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-white via-white/90 to-transparent">
+                <div className="text-center max-w-lg px-6">
+                  <h2 className="jl-serif text-2xl text-[#1a1a1a] mb-3">
+                    Sign in to see all {total} salary benchmarks across 8 luxury markets
+                  </h2>
+                  <p className="text-sm text-[#888] mb-6">
+                    Access compensation data, benchmarking tools, and personalised salary calculators.
+                  </p>
+                  <div className="flex items-center justify-center gap-3">
+                    <Link href="/join" className="px-6 py-3 bg-[#a58e28] text-white text-sm font-semibold tracking-wider uppercase rounded-md hover:bg-[#8a7622] transition-colors">
+                      Join the Society
+                    </Link>
+                    <Link href="/members" className="px-6 py-3 border border-[#a58e28] text-[#a58e28] text-sm font-semibold tracking-wider uppercase rounded-md hover:bg-[#a58e28] hover:text-white transition-colors">
+                      Sign In
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   )
 }
