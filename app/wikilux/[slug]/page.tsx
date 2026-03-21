@@ -144,8 +144,15 @@ export default function BrandPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ slug: brand.slug, brandName: brand.name, sector: brand.sector, founded: brand.founded, country: brand.country, group: brand.group }),
     })
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`API returned ${r.status}`)
+        return r.json()
+      })
       .then((data) => {
+        if (!data.content) {
+          setContent({ error: 'Content is being generated. Please refresh in a moment.' })
+          return
+        }
         setContent(data.content)
         if (data.translations) {
           setTranslations(data.translations as Record<string, WikiContent>)
@@ -153,7 +160,7 @@ export default function BrandPage() {
         if (data.updated_at) setContentUpdatedAt(data.updated_at)
         if (data.editorial_notes) setEditorialNotes(data.editorial_notes)
       })
-      .catch(() => setContent({ error: 'Failed to load' }))
+      .catch(() => setContent({ error: 'Content generation failed. Please refresh to try again.' }))
       .finally(() => setLoading(false))
 
     fetch(`/api/wikilux/images?brand=${encodeURIComponent(brand.name)}&sector=${encodeURIComponent(brand.sector)}`)
@@ -362,6 +369,10 @@ export default function BrandPage() {
 
       {content?.error && !loading && (
         <div className="jl-container py-10">
+          <div className="border border-[#e8e2d8] bg-[#fafaf5] p-6 mb-8 text-center">
+            <p className="font-sans text-sm text-[#888] mb-2">{typeof content.error === 'string' ? content.error : 'Content is being generated.'}</p>
+            <button onClick={() => window.location.reload()} className="jl-btn jl-btn-outline text-xs mt-2">Refresh Page</button>
+          </div>
           <div className="jl-prose"><h2>About</h2><p>{brand.description}</p></div>
           <blockquote className="border-l-2 border-[#a58e28] pl-5 py-2 mt-6 bg-[#fafaf5]"><p className="jl-editorial">{brand.hiring_profile}</p></blockquote>
         </div>

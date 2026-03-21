@@ -31,25 +31,33 @@ async function regenerateBrand(brand: Brand): Promise<{ success: boolean; error?
 
     let content
     try {
-      content = JSON.parse(text)
+      const cleaned = text.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim()
+      content = JSON.parse(cleaned)
     } catch {
-      content = { error: "Failed to parse", raw: text }
+      console.error(`[wikilux/regenerate] JSON parse error for ${brand.slug}`)
+      content = { error: "Failed to parse", raw: text.substring(0, 500) }
     }
 
     // Upsert into wikilux_content with tracking
     const now = new Date().toISOString()
-    await supabase.from("wikilux_content").upsert({
+    const { error: upsertError } = await supabase.from("wikilux_content").upsert({
       slug: brand.slug,
       brand_name: brand.name,
       content,
-      generated_at: now,
       updated_at: now,
       last_regenerated_at: now,
     })
 
+    if (upsertError) {
+      console.error(`[wikilux/regenerate] Upsert error for ${brand.slug}:`, upsertError)
+      return { success: false, error: `${brand.slug}: ${upsertError.message}` }
+    }
+
     return { success: true }
-  } catch (err: any) {
-    return { success: false, error: `${brand.slug}: ${err.message}` }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error(`[wikilux/regenerate] Error for ${brand.slug}:`, msg)
+    return { success: false, error: `${brand.slug}: ${msg}` }
   }
 }
 

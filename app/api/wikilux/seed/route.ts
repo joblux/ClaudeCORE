@@ -36,19 +36,25 @@ async function generateBrand(brand: Brand): Promise<{ success: boolean; error?: 
     const text = message.content[0].type === "text" ? message.content[0].text : ""
     let content
     try {
-      content = JSON.parse(text)
+      const cleaned = text.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim()
+      content = JSON.parse(cleaned)
     } catch {
+      console.error(`[wikilux/seed] JSON parse error for ${brand.slug}`)
       return { success: false, error: `${brand.slug}: Failed to parse AI response` }
     }
 
     const now = new Date().toISOString()
-    await supabase.from("wikilux_content").upsert({
+    const { error: upsertError } = await supabase.from("wikilux_content").upsert({
       slug: brand.slug,
       brand_name: brand.name,
       content,
-      generated_at: now,
       updated_at: now,
     })
+
+    if (upsertError) {
+      console.error(`[wikilux/seed] Upsert error for ${brand.slug}:`, upsertError)
+      return { success: false, error: `${brand.slug}: ${upsertError.message}` }
+    }
 
     return { success: true }
   } catch (err: unknown) {
