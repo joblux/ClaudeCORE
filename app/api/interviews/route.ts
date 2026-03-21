@@ -57,7 +57,41 @@ export async function GET(req: NextRequest) {
 
     if (error) {
       console.error('Interview list error:', error)
-      return NextResponse.json({ error: 'Failed to fetch experiences' }, { status: 500 })
+      // Fallback: try simple query without join
+      const { data: fallbackData, count: fallbackCount } = await db
+        .from('interview_experiences' as any)
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1)
+
+      if (fallbackData && fallbackData.length > 0) {
+        const fallbackExperiences = fallbackData.map((exp: any) => ({
+          id: exp.id,
+          brand_name: exp.brand_name || exp.company || '',
+          brand_slug: exp.brand_slug || '',
+          job_title: exp.job_title,
+          department: exp.department,
+          seniority: exp.seniority,
+          location: exp.location,
+          interview_year: exp.interview_year,
+          number_of_rounds: exp.number_of_rounds,
+          interview_format: exp.interview_format,
+          difficulty: exp.difficulty,
+          overall_experience: exp.overall_experience,
+          outcome: exp.outcome,
+          is_anonymous: true,
+          created_at: exp.created_at,
+        }))
+        return NextResponse.json({
+          experiences: fallbackExperiences,
+          stats: { total_experiences: fallbackCount || fallbackData.length, unique_brands: 0, difficulty_distribution: {}, common_formats: {} },
+          brands: [],
+          total: fallbackCount || fallbackData.length,
+          page,
+          limit,
+        })
+      }
+      return NextResponse.json({ experiences: [], stats: { total_experiences: 0, unique_brands: 0 }, brands: [], total: 0, page, limit })
     }
 
     const experiences = (rawExperiences || []).map((exp: any) => {
@@ -82,21 +116,29 @@ export async function GET(req: NextRequest) {
     })
 
     // Aggregated stats — fetch all approved for stats (unfiltered)
-    const { data: allExperiences } = await db
-      .from('interview_experiences' as any)
-      .select(`
-        difficulty,
-        interview_format,
-        contributions!inner (
-          brand_slug,
-          status,
-          contribution_type
-        )
-      `)
-      .eq('contributions.status', 'approved')
-      .eq('contributions.contribution_type', 'interview_experience')
-
-    const allExp = allExperiences || []
+    let allExp: any[] = []
+    try {
+      const { data: allExperiences } = await db
+        .from('interview_experiences' as any)
+        .select(`
+          difficulty,
+          interview_format,
+          contributions!inner (
+            brand_slug,
+            status,
+            contribution_type
+          )
+        `)
+        .eq('contributions.status', 'approved')
+        .eq('contributions.contribution_type', 'interview_experience')
+      allExp = allExperiences || []
+    } catch {
+      // If join fails, try simple query for stats
+      const { data: simpleStats } = await db
+        .from('interview_experiences' as any)
+        .select('difficulty, interview_format')
+      allExp = simpleStats || []
+    }
 
     const difficultyDist: Record<string, number> = {}
     const formatDist: Record<string, number> = {}

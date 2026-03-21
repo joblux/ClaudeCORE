@@ -44,15 +44,31 @@ function BlogluxContent() {
   const activeCategory = searchParams.get('category') || 'All'
 
   useEffect(() => {
-    supabase
-      .from('articles')
-      .select('id, title, slug, excerpt, category, author_name, published_at, read_time, tags, hero_image_url, hero_image_alt, is_featured, views_count')
-      .eq('published', true)
-      .order('published_at', { ascending: false })
-      .then(({ data }) => {
-        setArticles(data || [])
+    async function fetchArticles() {
+      // Try direct Supabase first
+      const { data, error } = await supabase
+        .from('articles')
+        .select('id, title, slug, excerpt, category, author_name, published_at, read_time, tags, hero_image_url, hero_image_alt, is_featured, views_count')
+        .eq('published', true)
+        .order('published_at', { ascending: false })
+
+      if (!error && data && data.length > 0) {
+        setArticles(data)
         setLoading(false)
-      })
+        return
+      }
+
+      // Fallback: try API route
+      try {
+        const res = await fetch('/api/articles')
+        if (res.ok) {
+          const json = await res.json()
+          setArticles((json.articles || []).filter((a: any) => a.published))
+        }
+      } catch { /* silent */ }
+      setLoading(false)
+    }
+    fetchArticles()
   }, [])
 
   const handleCategoryChange = (cat: string) => {

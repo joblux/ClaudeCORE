@@ -35,31 +35,37 @@ export async function GET(req: NextRequest) {
     if (country) bmQuery = bmQuery.eq('country', country)
     if (currency) bmQuery = bmQuery.eq('currency', currency)
 
-    const { data: benchmarks } = await bmQuery
+    const { data: benchmarks, error: bmError } = await bmQuery
+    if (bmError) console.error('Salary benchmarks error:', bmError)
     const bms = benchmarks || []
 
-    // Fetch approved salary contributions
-    let contribQuery = db
-      .from('salary_contributions')
-      .select(`
-        *, contributions!inner (
-          brand_name, brand_slug, status, contribution_type
-        )
-      `)
-      .eq('contributions.status', 'approved')
-      .eq('contributions.contribution_type', 'salary_data')
+    // Fetch approved salary contributions (may fail if table/join doesn't exist)
+    let contribs: any[] = []
+    try {
+      let contribQuery = db
+        .from('salary_contributions')
+        .select(`
+          *, contributions!inner (
+            brand_name, brand_slug, status, contribution_type
+          )
+        `)
+        .eq('contributions.status', 'approved')
+        .eq('contributions.contribution_type', 'salary_data')
 
-    if (department) contribQuery = contribQuery.eq('department', department)
-    if (seniority) contribQuery = contribQuery.eq('seniority', seniority)
-    if (city) contribQuery = contribQuery.eq('city', city)
-    if (country) contribQuery = contribQuery.eq('country', country)
-    if (currency) contribQuery = contribQuery.eq('salary_currency', currency)
-    if (brand) {
-      contribQuery = contribQuery.ilike('contributions.brand_name', `%${brand}%`)
+      if (department) contribQuery = contribQuery.eq('department', department)
+      if (seniority) contribQuery = contribQuery.eq('seniority', seniority)
+      if (city) contribQuery = contribQuery.eq('city', city)
+      if (country) contribQuery = contribQuery.eq('country', country)
+      if (currency) contribQuery = contribQuery.eq('salary_currency', currency)
+      if (brand) {
+        contribQuery = contribQuery.ilike('contributions.brand_name', `%${brand}%`)
+      }
+
+      const { data: contributions } = await contribQuery
+      contribs = (contributions || []) as any[]
+    } catch {
+      // salary_contributions table may not exist yet — continue with benchmarks only
     }
-
-    const { data: contributions } = await contribQuery
-    const contribs = (contributions || []) as any[]
 
     // Aggregate by role+brand+city
     const aggregateMap = new Map<string, any>()
