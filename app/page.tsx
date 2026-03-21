@@ -32,19 +32,19 @@ export default function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
 
       {/* ── Hero ── */}
-      <section className="w-full px-4 sm:px-6 lg:px-8 pt-14 sm:pt-20 pb-10 sm:pb-14 text-center border-b-2 border-[#1a1a1a]">
+      <section className="w-full px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-8 sm:pb-10 text-center border-b-2 border-[#1a1a1a]">
         <div className="max-w-3xl mx-auto">
 
-          <p className="text-[11px] tracking-[0.16em] uppercase text-[#a58e28] font-medium mb-5">
+          <p className="text-[11px] tracking-[0.16em] uppercase text-[#a58e28] font-medium mb-4">
             Luxury Talents Society
           </p>
 
-          <h1 className="font-playfair font-normal text-[#1a1a1a] mb-6">
+          <h1 className="font-playfair font-normal text-[#1a1a1a] mb-4">
             The society for<br className="hidden sm:block" />
             luxury professionals.
           </h1>
 
-          <p className="text-[#888] text-base sm:text-lg leading-relaxed max-w-xl mx-auto mb-10">
+          <p className="text-[#888] text-base sm:text-lg leading-relaxed max-w-xl mx-auto mb-8">
             WikiLux. Bloglux. Salary intelligence. Executive search.
             Free against contribution — no ads, no noise.
           </p>
@@ -91,19 +91,6 @@ export default function HomePage() {
             <WikiLuxPreview />
           </div>
 
-        </div>
-      </div>
-
-      {/* PRE-FOOTER CTA */}
-      <div className="border-t border-[#e8e2d8] mt-8">
-        <div className="jl-container py-6 text-center">
-          <p className="font-sans text-xs text-[#888] tracking-wide">
-            JOBLUX | The society for luxury professionals.
-          </p>
-          <div className="flex items-center justify-center gap-6 mt-3">
-            <Link href="/join" className="font-sans text-[0.65rem] text-[#a58e28] tracking-wider uppercase hover:text-[#1a1a1a] transition-colors">Request Access</Link>
-            <Link href="/about" className="font-sans text-[0.65rem] text-[#a58e28] tracking-wider uppercase hover:text-[#1a1a1a] transition-colors">Learn More</Link>
-          </div>
         </div>
       </div>
 

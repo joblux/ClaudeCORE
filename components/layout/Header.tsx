@@ -60,20 +60,12 @@ export function Header() {
             </button>
             <UserMenu />
             {!isAuthenticated && (
-              <div className="hidden sm:flex items-center gap-4">
-                <Link
-                  href="/members"
-                  className="text-[0.8rem] tracking-wide text-[#1a1a1a]/70 hover:text-[#1a1a1a] transition-colors"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/join"
-                  className="text-[0.8rem] tracking-wide text-[#a58e28] hover:text-[#1a1a1a] transition-colors"
-                >
-                  Join
-                </Link>
-              </div>
+              <Link
+                href="/join"
+                className="hidden sm:inline-flex text-[0.8rem] tracking-wide text-[#a58e28] hover:text-[#1a1a1a] transition-colors"
+              >
+                Join
+              </Link>
             )}
 
             {/* Mobile hamburger — visible only on mobile */}
