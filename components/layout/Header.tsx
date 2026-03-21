@@ -13,8 +13,6 @@ const publicNavItems = [
   { label: 'Salaries', href: '/salaries' },
   { label: 'Coaching', href: '/coaching' },
   { label: 'Bloglux', href: '/bloglux' },
-  { label: 'Travel', href: '/travel' },
-  { label: 'The Brief', href: '/the-brief' },
 ]
 
 const authOnlyNavItems: { label: string; href: string }[] = []
@@ -71,7 +69,7 @@ export function Header() {
       {/* Bottom row — Nav links */}
       <div className="hidden md:block border-t border-[#e8e2d8]">
         <div className="w-full px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center justify-center gap-7 py-2.5 max-w-[1200px] mx-auto">
+          <nav className="flex items-center justify-center gap-9 py-2.5 max-w-[1200px] mx-auto">
             {navItems.map((item) => (
               <Link
                 key={item.label}
