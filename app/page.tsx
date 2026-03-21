@@ -39,11 +39,6 @@ export default function HomePage() {
             Luxury Talents Society
           </p>
 
-          <h1 className="font-playfair font-normal text-white mb-3">
-            The society for<br className="hidden sm:block" />
-            luxury professionals.
-          </h1>
-
           <p className="text-white/50 text-sm sm:text-base leading-relaxed max-w-xl mx-auto mb-6">
             WikiLux. Bloglux. Salary intelligence. Executive search.
             Free against contribution — no ads, no noise.
