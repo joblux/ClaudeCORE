@@ -32,7 +32,7 @@ export function Footer() {
                 <li><Link href="/members" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Sign In</Link></li>
                 <li><Link href="/join" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Request Access</Link></li>
                 <li><Link href="/about" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">About</Link></li>
-                <li><Link href="/faq" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">FAQ</Link></li>
+                <li><Link href="/faq" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Help</Link></li>
               </ul>
             </div>
             <div>

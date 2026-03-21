@@ -92,9 +92,9 @@ export default function TermsOfServicePage() {
           </p>
         </section>
 
-        {/* ── 3. Membership & Registration ── */}
-        <section id="membership">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">3. Membership &amp; Registration</h2>
+        {/* ── 3. Registration & Access ── */}
+        <section id="registration">
+          <h2 className="jl-serif text-2xl font-semibold mb-4">3. Registration &amp; Access</h2>
           <p>
             JOBLUX operates on an invitation and application basis. Access to the Platform is not
             automatic; prospective Members must either receive an invitation from an existing Member or
@@ -132,7 +132,7 @@ export default function TermsOfServicePage() {
           <h2 className="jl-serif text-2xl font-semibold mb-4">4. The Platform — Free Against Contribution</h2>
           <p>
             JOBLUX is offered free of charge to individual Members. There are no subscription fees,
-            membership dues, or hidden costs for accessing the core features of the Platform. Our
+            recurring fees, or hidden costs for accessing the core features of the Platform. Our
             model is built on the principle of reciprocity: the Platform thrives because Members
             contribute their knowledge, experiences, and insights back to the Society.
           </p>

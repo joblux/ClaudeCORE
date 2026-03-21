@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | JOBLUX',
-  description: 'Privacy policy and GDPR compliance information for JOBLUX members.',
+  description: 'Privacy policy and GDPR compliance for JOBLUX. Your data is never sold.',
 }
 
 export default function PrivacyPolicyPage() {
@@ -52,7 +52,7 @@ export default function PrivacyPolicyPage() {
           </p>
           <p className="mt-3">
             <strong>Account data:</strong> Information provided during registration, including your
-            full name, email address, and membership tier. This data is necessary to create and
+            full name, email address, and account tier. This data is necessary to create and
             maintain your account on the Platform.
           </p>
           <p className="mt-3">

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
+import { useMember } from '@/lib/auth-hooks'
 
 /* ── FAQ Data ── */
 
@@ -20,61 +21,86 @@ const faqData: FaqCategory[] = [
     items: [
       {
         q: 'What is JOBLUX?',
-        a: 'JOBLUX is a private luxury talents society — a members-only platform connecting professionals who work in or aspire to work in the luxury industry. It combines career intelligence, curated opportunities, editorial content, and a vetted professional directory.',
+        a: 'A private society for luxury industry professionals. Founded in Paris in 2006, bringing together careers, intelligence, and a shared passion for excellence in the premium-to-ultra-luxury segment.',
       },
       {
-        q: 'Who is JOBLUX for?',
-        a: 'JOBLUX is for anyone who works in, has worked in, or wants to work in the luxury sector — from boutique advisors and store managers to regional directors, artisans, marketing leads, and corporate professionals across fashion, jewellery, watches, hospitality, beauty, and more.',
+        q: 'Is JOBLUX free?',
+        a: 'Yes. Free to use with no ads, no subscriptions, no paywalls. JOBLUX operates on a "free against contribution" model \u2014 share knowledge to unlock deeper intelligence.',
       },
       {
-        q: 'Is JOBLUX a recruitment agency?',
-        a: 'No. JOBLUX is not a recruitment agency. We are an intelligence platform and professional society. We surface curated opportunities and connect talent with maisons, but we do not act as intermediaries or charge placement fees.',
+        q: 'Who can join JOBLUX?',
+        a: 'Anyone connected to the luxury industry: professionals at all levels, students aspiring to work in luxury, brands, recruiters, industry enthusiasts. All applications are reviewed and curated.',
       },
       {
-        q: 'How is JOBLUX different from LinkedIn or other job boards?',
-        a: 'JOBLUX is built exclusively for the luxury industry. Every feature — from the directory to the editorial content to the salary data — is designed for this world. There is no noise, no irrelevant content, and no algorithm trying to sell you something. It is a focused, curated, members-first environment.',
-      },
-    ],
-  },
-  {
-    label: 'Membership',
-    items: [
-      {
-        q: 'How do I become a member?',
-        a: 'You can apply to join JOBLUX through our registration page. All applications are reviewed to ensure the community remains relevant and high-quality. Membership is open to professionals with genuine ties to the luxury industry.',
-      },
-      {
-        q: 'Is membership free?',
-        a: 'Core membership is free. We may introduce premium tiers in the future with additional features, but the foundational experience — directory access, opportunities, editorial, and contributions — will always be available to approved members.',
-      },
-      {
-        q: 'Can I join if I don\'t currently work in luxury?',
-        a: 'Yes. If you have prior experience in the luxury sector or a genuine aspiration to enter it, you are welcome to apply. JOBLUX values potential and passion as much as current tenure.',
-      },
-      {
-        q: 'Can I be removed from JOBLUX?',
-        a: 'Members who violate our terms of use, misrepresent their identity, or behave in ways that undermine the community may have their membership revoked. We reserve the right to maintain the integrity of the society.',
+        q: 'How is JOBLUX different from LinkedIn?',
+        a: 'Exclusively dedicated to the luxury industry. Every feature, piece of content, and person serves the premium-to-ultra-luxury segment. A curated society, not a general-purpose network.',
       },
     ],
   },
   {
-    label: 'Opportunities & Recruitment',
+    label: 'Joining JOBLUX',
     items: [
       {
-        q: 'How are opportunities sourced?',
-        a: 'Opportunities are curated from verified luxury employers, direct maison partnerships, and trusted industry contacts. We do not scrape job boards or aggregate irrelevant listings.',
+        q: 'How do I join?',
+        a: 'Click "Request Access" and sign in with Google or LinkedIn. Complete the registration form. Most applications are processed within 24\u201348 hours.',
       },
       {
-        q: 'Can I apply to roles directly through JOBLUX?',
-        a: 'Yes. Where available, you can express interest or apply directly through the platform. Some roles may redirect you to the employer\'s own application process.',
+        q: 'Why was my application not approved?',
+        a: 'We review every application to ensure JOBLUX remains relevant to the luxury industry. You may reapply with updated information. Use the contact form below for details.',
       },
       {
-        q: 'I\'m a recruiter or maison — can I post roles on JOBLUX?',
-        a: 'Yes. We work with select luxury employers and recruitment partners. Please contact us at mo@joblux.com to discuss posting opportunities or partnership options.',
+        q: 'Can I invite colleagues?',
+        a: 'Yes. Approved accounts can invite colleagues via the Invite page on their dashboard.',
       },
       {
-        q: 'Do you offer coaching or career support?',
-        a: 'Yes. JOBLUX offers a coaching programme designed for luxury professionals at all levels. Whether you\'re preparing for an interview, navigating a career transition, or looking to move into a new maison, our coaching sessions provide tailored, industry-specific guidance.',
+        q: 'What are the different tiers?',
+        a: 'Rising (students/interns), Pro (junior\u2013mid), Pro+ (managers\u2013directors), Executive (VP/C-Suite), Business (brands/employers), Insider (consultants/influencers). Each tier unlocks different features and intelligence.',
+      },
+    ],
+  },
+  {
+    label: 'Executive Search & Opportunities',
+    items: [
+      {
+        q: 'What are JOBLUX executive search services?',
+        a: 'Bespoke, human-led executive search for manager-level and above positions at luxury maisons globally. We are selective \u2014 quality takes time and we take it.',
+      },
+      {
+        q: 'How does recruitment work?',
+        a: 'JOBLUX acts as gatekeeper between candidates and employers. All communication goes through us. Candidates and employers never communicate directly.',
+      },
+      {
+        q: 'Can I apply for opportunities directly?',
+        a: 'You can express interest in any listed opportunity. JOBLUX reviews your profile and facilitates the introduction if there\u2019s a match.',
+      },
+      {
+        q: 'Do I pay for recruitment?',
+        a: 'Never. Candidates are never charged. Fees are paid by the hiring employer.',
+      },
+      {
+        q: 'Can my company post internships?',
+        a: 'Yes. Business-tier accounts can post internship listings for free. All listings are reviewed before publication.',
+      },
+      {
+        q: 'How do I engage JOBLUX for a search assignment?',
+        a: 'Use the contact form below and select "I represent a brand or employer".',
+      },
+    ],
+  },
+  {
+    label: 'Luxury Travel',
+    items: [
+      {
+        q: 'Does JOBLUX offer travel services?',
+        a: 'Yes. Curated luxury travel consulting through a network of local advisors worldwide. From hotel bookings to bespoke itineraries.',
+      },
+      {
+        q: 'How do I book luxury travel?',
+        a: 'Use the contact form below and select "Luxury travel services".',
+      },
+      {
+        q: 'Who are the travel advisors?',
+        a: 'Luxury industry professionals and local experts based in key destinations worldwide. Personal, insider recommendations \u2014 not generic packages.',
       },
     ],
   },
@@ -82,16 +108,16 @@ const faqData: FaqCategory[] = [
     label: 'Contributions & Intelligence',
     items: [
       {
-        q: 'What are contributions?',
-        a: 'Contributions are anonymous insights shared by JOBLUX members — salary data, interview experiences, company reviews, and workplace intelligence. They help the community make more informed career decisions.',
+        q: 'What is the contribution system?',
+        a: 'Earn access to deeper intelligence by contributing knowledge. Share salary data, interview experiences, or brand insights to earn points.',
       },
       {
-        q: 'Are contributions anonymous?',
-        a: 'Yes. All contributions are fully anonymous. We never reveal who submitted a contribution, and data is aggregated so that no individual can be identified.',
+        q: 'Is my contributed data anonymous?',
+        a: 'Yes. All salary and interview contributions are anonymised. Your name is never attached to salary figures or interview details.',
       },
       {
-        q: 'Why should I contribute?',
-        a: 'The luxury industry has long operated behind closed doors. Contributions help level the playing field — giving professionals the transparency they deserve when it comes to pay, culture, and hiring practices. The more members contribute, the more valuable the platform becomes for everyone.',
+        q: 'What is WikiLux?',
+        a: 'The luxury industry\u2019s encyclopedia \u2014 500+ brand pages covering history, leadership, culture, careers, salary intelligence. Independently compiled by JOBLUX, enriched by web sources and contributions.',
       },
     ],
   },
@@ -100,15 +126,15 @@ const faqData: FaqCategory[] = [
     items: [
       {
         q: 'How is my data protected?',
-        a: 'We take data protection seriously. All personal data is stored securely, and we comply with GDPR and applicable data protection regulations. We never sell your data to third parties. See our Privacy Policy for full details.',
-      },
-      {
-        q: 'Who can see my profile?',
-        a: 'Your profile is visible only to other approved JOBLUX members. You control what information is displayed, and you can adjust your visibility settings at any time from your dashboard.',
+        a: 'Encrypted, secure infrastructure, never sold. See Privacy Policy.',
       },
       {
         q: 'Can I delete my account?',
-        a: 'Yes. You can request account deletion at any time by contacting us at hello@joblux.com. We will remove your personal data in accordance with our Privacy Policy and applicable regulations.',
+        a: 'Yes. Delete your account and all personal data at any time via profile settings or using the contact form below.',
+      },
+      {
+        q: 'Does JOBLUX sell my data?',
+        a: 'Absolutely not. JOBLUX never sells, rents, or shares individual data. Only anonymised, aggregated data is used for platform intelligence.',
       },
     ],
   },
@@ -117,11 +143,11 @@ const faqData: FaqCategory[] = [
     items: [
       {
         q: 'What is The Brief?',
-        a: 'The Brief is JOBLUX\'s editorial publication — a curated mix of industry analysis, career intelligence, interviews with luxury professionals, and thought pieces on the world of luxury. It is written for insiders, by insiders.',
+        a: 'Biweekly newsletter covering luxury industry moves, salary insights, new opportunities, and WikiLux updates.',
       },
       {
-        q: 'Can I write for The Brief?',
-        a: 'Yes. We welcome pitches from luxury professionals who have something meaningful to share. If you have an idea for an article, interview, or opinion piece, reach out to us at hello@joblux.com with a brief outline.',
+        q: 'How do I unsubscribe?',
+        a: 'Every edition includes an unsubscribe link. One click.',
       },
     ],
   },
@@ -143,38 +169,163 @@ function ChevronDown({ open }: { open: boolean }) {
   )
 }
 
+/* ── Contact Form Types ── */
+
+type ContactCategory =
+  | 'professional'
+  | 'brand'
+  | 'travel'
+  | 'technical'
+  | 'press'
+  | 'other'
+
+interface CategoryCard {
+  key: ContactCategory
+  emoji: string
+  title: string
+  description: string
+}
+
+const categoryCards: CategoryCard[] = [
+  { key: 'professional', emoji: '\uD83D\uDC64', title: "I'm a luxury professional", description: 'Opportunities, profile, contributions' },
+  { key: 'brand', emoji: '\uD83C\uDFE2', title: 'I represent a brand or employer', description: 'Executive search, internships, partnerships' },
+  { key: 'travel', emoji: '\u2708\uFE0F', title: 'Luxury travel services', description: 'Booking, consulting, local advisors' },
+  { key: 'technical', emoji: '\uD83D\uDD27', title: "Something isn't working", description: 'Technical issue, bug, login problem' },
+  { key: 'press', emoji: '\uD83D\uDCF0', title: 'Press enquiry', description: 'Media, interviews, editorial' },
+  { key: 'other', emoji: '\uD83D\uDCAC', title: 'Something else', description: 'General question or feedback' },
+]
+
+const subcategoryMap: Record<ContactCategory, string[]> = {
+  professional: ['About opportunities', 'My profile', 'Contributions & points', 'Salary or interview data', 'Joining JOBLUX', 'Other'],
+  brand: ['Executive search services', 'Post an internship', 'Partnership or sponsorship', 'WikiLux brand page', 'Other'],
+  travel: ['Booking enquiry', 'Travel consulting', 'Local advisor request', 'Other'],
+  technical: ['Login issue', 'Profile or account', 'Content not loading', 'Other bug'],
+  press: ['Interview request', 'Data or statistics', 'Editorial collaboration', 'Other'],
+  other: ['General feedback', 'Feature suggestion', 'Complaint', 'Other'],
+}
+
+const challengeOptions = ['Technology', 'Luxury', 'Finance', 'Healthcare'] as const
+
 /* ── Page Component ── */
 
 export default function FaqPage() {
-  const [openItems, setOpenItems] = useState<Set<string>>(new Set())
-  const [formData, setFormData] = useState({ name: '', email: '', subject: 'General Enquiry', message: '' })
-  const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
+  const [openItems, setOpenItems] = useState<Set<number>>(new Set())
 
-  function toggleItem(key: string) {
+  /* Contact form state */
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
+  const [category, setCategory] = useState<ContactCategory | null>(null)
+  const [subcategory, setSubcategory] = useState<string | null>(null)
+  const [challengePassed, setChallengePassed] = useState(false)
+  const [disabledAnswers, setDisabledAnswers] = useState<Set<string>>(new Set())
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [message, setMessage] = useState('')
+  const [honeypot, setHoneypot] = useState('')
+  const [formLoadTimestamp, setFormLoadTimestamp] = useState<number>(0)
+  const [sending, setSending] = useState(false)
+
+  const member = useMember()
+
+  /* Pre-fill from auth */
+  useEffect(() => {
+    if (member.isAuthenticated) {
+      if (member.firstName && !name) setName(member.firstName)
+      if (member.email && !email) setEmail(member.email)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [member.isAuthenticated, member.firstName, member.email])
+
+  /* Set timestamp on step 1 load */
+  useEffect(() => {
+    setFormLoadTimestamp(Date.now())
+  }, [])
+
+  function toggleItem(index: number) {
     setOpenItems((prev) => {
       const next = new Set(prev)
-      if (next.has(key)) next.delete(key)
-      else next.add(key)
+      if (next.has(index)) next.delete(index)
+      else next.add(index)
       return next
     })
   }
 
+  function handleCategoryClick(cat: ContactCategory) {
+    setCategory(cat)
+    setTimeout(() => setStep(2), 200)
+  }
+
+  function handleSubcategoryClick(sub: string) {
+    setSubcategory(sub)
+    setStep(3)
+  }
+
+  function handleChallengeAnswer(answer: string) {
+    if (answer === 'Luxury') {
+      setChallengePassed(true)
+    } else {
+      setDisabledAnswers((prev) => new Set(prev).add(answer))
+    }
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    setFormStatus('sending')
+    if (honeypot) return
+    setSending(true)
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name,
+          email,
+          category,
+          subcategory,
+          message,
+          website_url: honeypot,
+          form_load_timestamp: formLoadTimestamp,
+        }),
       })
       if (!res.ok) throw new Error('Failed')
-      setFormStatus('success')
-      setFormData({ name: '', email: '', subject: 'General Enquiry', message: '' })
+      setStep(4)
     } catch {
-      setFormStatus('error')
+      /* allow retry */
+    } finally {
+      setSending(false)
     }
   }
+
+  /* Step indicator */
+  const totalSteps = 3
+  function StepDots() {
+    const currentVisual = step >= 4 ? 3 : step
+    return (
+      <div className="flex items-center justify-center gap-2 mb-8">
+        {[1, 2, 3].map((s) => (
+          <div
+            key={s}
+            className={`w-2 h-2 rounded-full ${
+              s < currentVisual
+                ? 'bg-[#a58e28]'
+                : s === currentVisual
+                ? 'bg-[#a58e28]'
+                : 'border border-[#e8e2d8]'
+            }`}
+          />
+        ))}
+      </div>
+    )
+  }
+
+  /* Build global FAQ index */
+  let globalIndex = 0
+  const faqSections = faqData.map((category) => {
+    const items = category.items.map((item) => {
+      const idx = globalIndex
+      globalIndex++
+      return { ...item, idx }
+    })
+    return { ...category, items }
+  })
 
   return (
     <main className="min-h-screen bg-white text-[#1a1a1a]">
@@ -186,31 +337,30 @@ export default function FaqPage() {
           Frequently Asked Questions
         </h1>
         <p className="text-base text-[#888] leading-relaxed max-w-2xl">
-          Everything you need to know about JOBLUX — membership, opportunities,
+          Everything you need to know about JOBLUX &mdash; access, opportunities,
           contributions, privacy, and how to get in touch.
         </p>
       </section>
 
       {/* ── FAQ Accordion ── */}
       <section className="max-w-3xl mx-auto px-6 pb-20">
-        {faqData.map((category, ci) => (
+        {faqSections.map((cat, ci) => (
           <div key={ci} className="mb-10">
             <div className="jl-section-label">
-              <span>{category.label}</span>
+              <span>{cat.label}</span>
             </div>
 
             <div>
-              {category.items.map((item, ii) => {
-                const key = `${ci}-${ii}`
-                const isOpen = openItems.has(key)
+              {cat.items.map((item) => {
+                const isOpen = openItems.has(item.idx)
                 return (
-                  <div key={key} className="border-b border-[#e8e2d8]">
+                  <div key={item.idx} className="border-b border-[#e8e2d8] py-4">
                     <button
                       type="button"
-                      onClick={() => toggleItem(key)}
-                      className="w-full flex items-center justify-between py-4 text-left gap-4"
+                      onClick={() => toggleItem(item.idx)}
+                      className="w-full flex items-center justify-between text-left gap-4"
                     >
-                      <span className="font-semibold text-[0.95rem] leading-snug">
+                      <span className="font-semibold text-[#1a1a1a]">
                         {item.q}
                       </span>
                       <ChevronDown open={isOpen} />
@@ -219,7 +369,7 @@ export default function FaqPage() {
                       className="overflow-hidden transition-all duration-300"
                       style={{ maxHeight: isOpen ? '500px' : '0px' }}
                     >
-                      <p className="text-sm text-[#555] leading-relaxed pb-4">
+                      <p className="text-sm text-[#555] leading-relaxed pt-3">
                         {item.a}
                       </p>
                     </div>
@@ -231,100 +381,185 @@ export default function FaqPage() {
         ))}
       </section>
 
-      {/* ── Contact Section ── */}
+      {/* ── Smart Multi-Step Contact Form ── */}
       <section className="max-w-3xl mx-auto px-6 pb-24">
         <div className="jl-section-label">
           <span>Contact</span>
         </div>
 
-        <h2 className="jl-serif text-3xl md:text-4xl font-normal mb-8">
+        <h2 className="jl-serif text-3xl md:text-4xl font-normal mb-2">
           Get in Touch
         </h2>
+        <p className="text-sm text-[#888] mb-8">
+          We typically respond within 24&ndash;48 hours.
+        </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <StepDots />
 
-          {/* ── Left: Info ── */}
-          <div>
-            <p className="text-[0.95rem] text-[#555] leading-relaxed mb-6">
-              Whether you have a question about membership, want to explore a partnership,
-              or need help with your account — we are here to help.
-            </p>
-            <div className="space-y-3 text-sm text-[#555]">
-              <p>
-                <span className="font-semibold text-[#1a1a1a]">General enquiries</span><br />
-                <a href="mailto:hello@joblux.com" className="text-[#a58e28] underline underline-offset-2">
-                  hello@joblux.com
-                </a>
-              </p>
-              <p>
-                <span className="font-semibold text-[#1a1a1a]">Recruitment &amp; partnerships</span><br />
-                <a href="mailto:mo@joblux.com" className="text-[#a58e28] underline underline-offset-2">
-                  mo@joblux.com
-                </a>
-              </p>
-              <p className="pt-2 text-xs tracking-wide uppercase text-[#888] font-medium">
-                Paris &nbsp;|&nbsp; London &nbsp;|&nbsp; Global
-              </p>
-            </div>
+        {/* ── Step 1: Category Selection ── */}
+        {step === 1 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {categoryCards.map((card) => (
+              <button
+                key={card.key}
+                type="button"
+                onClick={() => handleCategoryClick(card.key)}
+                className="border border-[#e8e2d8] rounded-sm p-4 text-left hover:border-[#a58e28] transition-colors"
+              >
+                <span className="text-xl mb-2 block">{card.emoji}</span>
+                <span className="font-semibold text-sm block">{card.title}</span>
+                <span className="text-xs text-[#888] block mt-1">{card.description}</span>
+              </button>
+            ))}
           </div>
+        )}
 
-          {/* ── Right: Form ── */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              type="text"
-              placeholder="Your name"
-              required
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="jl-input"
-            />
-            <input
-              type="email"
-              placeholder="Your email"
-              required
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="jl-input"
-            />
-            <select
-              value={formData.subject}
-              onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-              className="jl-select"
-            >
-              <option>General Enquiry</option>
-              <option>Recruitment</option>
-              <option>Partnership</option>
-              <option>Press</option>
-              <option>Technical Issue</option>
-              <option>Other</option>
-            </select>
-            <textarea
-              placeholder="Your message"
-              required
-              value={formData.message}
-              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              className="jl-input min-h-[120px] resize-y"
-            />
+        {/* ── Step 2: Subcategory Pills ── */}
+        {step === 2 && category && (
+          <div>
+            <div className="flex flex-wrap gap-2 mb-6">
+              {subcategoryMap[category].map((sub) => (
+                <button
+                  key={sub}
+                  type="button"
+                  onClick={() => handleSubcategoryClick(sub)}
+                  className="border border-[#e8e2d8] px-3 py-2 text-xs rounded-sm hover:border-[#a58e28] transition-colors"
+                >
+                  {sub}
+                </button>
+              ))}
+            </div>
             <button
-              type="submit"
-              disabled={formStatus === 'sending'}
-              className="jl-btn jl-btn-gold w-full"
+              type="button"
+              onClick={() => {
+                setStep(1)
+                setCategory(null)
+              }}
+              className="text-xs text-[#888] underline underline-offset-2"
             >
-              {formStatus === 'sending' ? 'Sending...' : 'Send Message'}
+              &larr; Back
             </button>
+          </div>
+        )}
 
-            {formStatus === 'success' && (
-              <p className="text-sm text-green-700 mt-2">
-                Message sent. We&apos;ll get back to you shortly.
-              </p>
+        {/* ── Step 3: Challenge + Form ── */}
+        {step === 3 && category && subcategory && (
+          <div>
+            {/* Breadcrumb */}
+            <p className="text-[0.65rem] text-[#a58e28] mb-6">
+              {categoryCards.find((c) => c.key === category)?.title} &rsaquo; {subcategory}
+            </p>
+
+            {/* Challenge */}
+            {!challengePassed && (
+              <div>
+                <p className="text-sm text-[#1a1a1a] font-semibold mb-3">
+                  Quick check &mdash; what industry does JOBLUX serve?
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {challengeOptions.map((option) => {
+                    const isDisabled = disabledAnswers.has(option)
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={() => handleChallengeAnswer(option)}
+                        className={`border border-[#e8e2d8] px-4 py-2 text-sm rounded-sm transition-colors ${
+                          isDisabled
+                            ? 'opacity-30 cursor-not-allowed'
+                            : 'hover:border-[#a58e28]'
+                        }`}
+                      >
+                        {option}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
             )}
-            {formStatus === 'error' && (
-              <p className="text-sm text-red-600 mt-2">
-                Something went wrong. Please try again or email us directly.
-              </p>
+
+            {/* Form (visible after challenge passed) */}
+            {challengePassed && (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Your name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="jl-input"
+                />
+                <input
+                  type="email"
+                  placeholder="Your email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="jl-input"
+                />
+                <textarea
+                  placeholder="Your message"
+                  required
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="jl-input min-h-[120px]"
+                />
+
+                {/* Honeypot */}
+                <input
+                  type="text"
+                  name="website_url"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                  style={{ display: 'none' }}
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+
+                <button
+                  type="submit"
+                  disabled={sending}
+                  className="jl-btn jl-btn-gold w-full"
+                >
+                  {sending ? 'Sending...' : 'Send Message'}
+                </button>
+                <p className="text-xs text-[#888] text-center">
+                  We typically respond within 24&ndash;48 hours.
+                </p>
+              </form>
             )}
-          </form>
-        </div>
+
+            {/* Back button */}
+            <button
+              type="button"
+              onClick={() => {
+                setStep(2)
+                setSubcategory(null)
+                setChallengePassed(false)
+                setDisabledAnswers(new Set())
+              }}
+              className="text-xs text-[#888] underline underline-offset-2 mt-6"
+            >
+              &larr; Back
+            </button>
+          </div>
+        )}
+
+        {/* ── Step 4: Success ── */}
+        {step === 4 && (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 rounded-full border-2 border-[#a58e28] flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-[#a58e28]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="jl-serif text-2xl mb-2">Message sent</h3>
+            <p className="text-sm text-[#888]">
+              Thank you for reaching out. We&apos;ll get back to you within 24&ndash;48 hours.
+            </p>
+          </div>
+        )}
       </section>
     </main>
   )

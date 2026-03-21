@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,9 +10,21 @@ const supabase = createClient(
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, subject, message } = await req.json()
+    const body = await req.json()
+    const { name, email, category, subcategory, message, website_url, form_load_timestamp } = body
 
-    if (!name?.trim() || !email?.trim() || !subject?.trim() || !message?.trim()) {
+    // 1. Honeypot — if filled, silently return success (trap bots)
+    if (website_url) {
+      return NextResponse.json({ success: true, message: 'Message sent successfully' })
+    }
+
+    // 2. Timing check — if submitted in under 5 seconds, silently return success
+    if (form_load_timestamp && Date.now() - form_load_timestamp < 5000) {
+      return NextResponse.json({ success: true, message: 'Message sent successfully' })
+    }
+
+    // 3. Validate fields
+    if (!name?.trim() || !email?.trim() || !category?.trim() || !message?.trim()) {
       return NextResponse.json({ error: 'All fields are required' }, { status: 400 })
     }
 
@@ -18,25 +32,43 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Message must be at least 20 characters' }, { status: 400 })
     }
 
-    // Rate limit: max 3 messages per email per hour
+    // Basic email format check
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return NextResponse.json({ error: 'Invalid email address' }, { status: 400 })
+    }
+
+    // 4. Rate limit by IP — max 3 per hour
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
     const { count } = await supabase
       .from('contact_messages')
       .select('*', { count: 'exact', head: true })
-      .eq('email', email.trim())
+      .eq('ip_address', ip)
       .gte('created_at', oneHourAgo)
 
     if (count && count >= 3) {
       return NextResponse.json({ error: 'Too many messages. Please try again later.' }, { status: 429 })
     }
 
+    // 5. Check if user is authenticated
+    let memberId: string | null = null
+    try {
+      const session = await getServerSession(authOptions)
+      memberId = (session?.user as any)?.memberId || null
+    } catch {}
+
+    // 6. Store in database
     const { error } = await supabase
       .from('contact_messages')
       .insert({
+        member_id: memberId,
         name: name.trim(),
         email: email.trim(),
-        subject: subject.trim(),
+        category: category.trim(),
+        subcategory: (subcategory || '').trim() || null,
         message: message.trim(),
+        ip_address: ip,
+        form_load_timestamp: form_load_timestamp || null,
       })
 
     if (error) {
