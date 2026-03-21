@@ -105,7 +105,6 @@ export default async function ArticlePage({ params }: Props) {
   if (!article) notFound()
 
   const related = await getRelatedArticles(article)
-  const paragraphs = article.content.split('\n\n').filter((p: string) => p.trim())
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -180,11 +179,7 @@ export default async function ArticlePage({ params }: Props) {
       {/* ── CONTENT ───────────────────────────────────────── */}
       <div className="jl-container py-10">
         <div className="max-w-[720px] mx-auto">
-          <div className="jl-prose">
-            {paragraphs.map((p: string, i: number) => (
-              <p key={i}>{p}</p>
-            ))}
-          </div>
+          <div className="jl-prose" dangerouslySetInnerHTML={{ __html: article.content }} />
 
           {/* Tags */}
           {article.tags && article.tags.length > 0 && (
