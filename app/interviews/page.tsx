@@ -263,7 +263,7 @@ export default function InterviewsPage() {
                           </p>
                           <div className="flex items-center justify-center gap-3">
                             <Link href="/join" className="px-6 py-3 bg-[#a58e28] text-white text-sm font-semibold tracking-wider uppercase rounded-md hover:bg-[#8a7622] transition-colors">
-                              Join the Society
+                              Join
                             </Link>
                             <Link href="/members" className="px-6 py-3 border border-[#a58e28] text-[#a58e28] text-sm font-semibold tracking-wider uppercase rounded-md hover:bg-[#a58e28] hover:text-white transition-colors">
                               Sign In

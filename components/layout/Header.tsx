@@ -89,7 +89,7 @@ export function Header() {
                   href="/join"
                   className="hidden lg:inline-flex px-7 py-3 bg-[#a58e28] text-white text-sm font-semibold tracking-wider uppercase rounded-md hover:bg-[#9a6f0a] transition-colors"
                 >
-                  Join the Society
+                  Join
                 </Link>
               </>
             )}
