@@ -81,6 +81,55 @@ function renderParagraphs(text: string | undefined) {
   return text.split('\n\n').map((p, i) => <p key={i}>{p}</p>)
 }
 
+// Stock ticker mapping by brand group or brand name
+const STOCK_TICKERS: Record<string, { exchange: string; ticker: string }> = {
+  'LVMH': { exchange: 'Euronext Paris', ticker: 'MC' },
+  'Hermès': { exchange: 'Euronext Paris', ticker: 'RMS' },
+  'Hermes': { exchange: 'Euronext Paris', ticker: 'RMS' },
+  'Kering': { exchange: 'Euronext Paris', ticker: 'KER' },
+  'Richemont': { exchange: 'SIX Swiss', ticker: 'CFR' },
+  'Prada': { exchange: 'HKEX', ticker: '1913' },
+  'Prada Group': { exchange: 'HKEX', ticker: '1913' },
+  'Burberry': { exchange: 'LSE', ticker: 'BRBY' },
+  'Burberry Group': { exchange: 'LSE', ticker: 'BRBY' },
+  'Moncler': { exchange: 'MTA', ticker: 'MONC' },
+  'Moncler Group': { exchange: 'MTA', ticker: 'MONC' },
+  'Ferrari': { exchange: 'NYSE', ticker: 'RACE' },
+  'Ferrari N.V.': { exchange: 'NYSE', ticker: 'RACE' },
+  'Brunello Cucinelli': { exchange: 'MTA', ticker: 'BC' },
+  'Salvatore Ferragamo': { exchange: 'MTA', ticker: 'SFER' },
+  'Ferragamo': { exchange: 'MTA', ticker: 'SFER' },
+  'Ralph Lauren': { exchange: 'NYSE', ticker: 'RL' },
+  'Ralph Lauren Corporation': { exchange: 'NYSE', ticker: 'RL' },
+  'Tapestry': { exchange: 'NYSE', ticker: 'TPR' },
+  'Capri Holdings': { exchange: 'NYSE', ticker: 'CPRI' },
+  'Swatch Group': { exchange: 'SIX Swiss', ticker: 'UHR' },
+  'EssilorLuxottica': { exchange: 'Euronext Paris', ticker: 'EL' },
+  'Estée Lauder': { exchange: 'NYSE', ticker: 'EL' },
+  'Compagnie Financière Rupert': { exchange: 'SIX Swiss', ticker: 'CFR' },
+}
+
+const PRIVATE_BRANDS = new Set([
+  'Independent', 'Chanel', 'Rolex', 'Giorgio Armani', 'Patek Philippe',
+  'Goyard', 'Audemars Piguet', 'Bovet', 'Chopard',
+])
+
+function getStockInfo(group: string, brandName: string): { exchange: string; ticker: string } | 'private' | null {
+  // Check brand name first, then group
+  if (STOCK_TICKERS[brandName]) return STOCK_TICKERS[brandName]
+  if (STOCK_TICKERS[group]) return STOCK_TICKERS[group]
+  if (PRIVATE_BRANDS.has(group) || PRIVATE_BRANDS.has(brandName)) return 'private'
+  return null
+}
+
+function getFounderInitials(name: string | undefined): string {
+  if (!name) return '?'
+  const parts = name.split(/\s+/).filter(Boolean)
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+  if (parts.length === 1) return parts[0][0].toUpperCase()
+  return '?'
+}
+
 function SkeletonSection() {
   return (
     <div className="py-8">
@@ -328,8 +377,8 @@ export default function BrandPage() {
       <div className="bg-[#222222] border-b-2 border-[#a58e28] relative overflow-hidden">
         {heroImage && (
           <div className="absolute inset-0">
-            <Image src={heroImage.url + '&w=1400&q=80&fm=webp'} alt={heroImage.alt || `${brand.name} luxury`} fill className="object-cover opacity-20" priority sizes="100vw" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#222222] via-[#222222]/80 to-[#222222]/60" />
+            <Image src={heroImage.url + '&w=1400&q=80&fm=webp'} alt={heroImage.alt || `${brand.name} luxury`} fill className="object-cover opacity-40" priority sizes="100vw" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#222222] via-[#222222]/60 to-[#222222]/30" />
           </div>
         )}
         <div className="jl-container py-14 relative z-10">
@@ -352,6 +401,16 @@ export default function BrandPage() {
                 <span className="font-sans text-[0.65rem] text-[#999] border border-[#444] px-3 py-1.5 tracking-wider uppercase">{brand.country}</span>
                 <span className="font-sans text-[0.65rem] text-[#999] border border-[#444] px-3 py-1.5 tracking-wider uppercase">{brand.sector}</span>
                 <span className="font-sans text-[0.65rem] text-[#a58e28] border border-[#a58e28] px-3 py-1.5 tracking-wider uppercase">{brand.group}</span>
+                {(() => {
+                  const stockInfo = getStockInfo(brand.group, brand.name)
+                  if (stockInfo === 'private') {
+                    return <span className="font-sans text-[0.65rem] text-[#777] border border-[#444] px-3 py-1.5 tracking-wider uppercase">Privately Held</span>
+                  }
+                  if (stockInfo) {
+                    return <span className="font-sans text-[0.65rem] text-[#a58e28] border border-[#a58e28] px-3 py-1.5 tracking-wider">{stockInfo.exchange}: {stockInfo.ticker}</span>
+                  }
+                  return null
+                })()}
               </div>
             </div>
           </div>
@@ -505,7 +564,15 @@ export default function BrandPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                   <div className="lg:col-span-2">
                     <div className="jl-section-label"><span>Founder</span></div>
-                    <div className="jl-prose">{renderParagraphs(founderText)}</div>
+                    <div className="flex gap-5 items-start">
+                      {/* Founder portrait placeholder */}
+                      <div className="w-20 h-20 bg-[#222222] rounded flex-shrink-0 flex items-center justify-center">
+                        <span className="jl-serif text-2xl text-[#a58e28] font-light">
+                          {getFounderInitials(founderFacts?.name || displayContent?.key_facts?.founder_name)}
+                        </span>
+                      </div>
+                      <div className="jl-prose flex-1">{renderParagraphs(founderText)}</div>
+                    </div>
                   </div>
                   {founderFacts && (
                     <div>

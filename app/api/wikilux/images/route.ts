@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       )
 
     if (upsertError) {
-      console.error('Failed to cache images:', upsertError)
+      console.error('[wikilux/images] Failed to cache images:', JSON.stringify(upsertError))
     }
 
     return NextResponse.json({ images })

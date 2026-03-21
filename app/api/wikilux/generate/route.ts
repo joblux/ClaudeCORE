@@ -54,37 +54,45 @@ export async function POST(req: Request) {
     });
 
     const text = message.content[0].type === "text" ? message.content[0].text : "";
+    console.log(`[wikilux/generate] Claude returned ${text.length} chars for ${slug}`);
 
-    let content;
+    let parsedContent: Record<string, unknown>;
     try {
       // Strip markdown code fences if Claude wraps the JSON
       const cleaned = text.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
-      content = JSON.parse(cleaned);
+      parsedContent = JSON.parse(cleaned);
     } catch (parseErr) {
       console.error("[wikilux/generate] JSON parse error:", parseErr, "Raw (first 500):", text.substring(0, 500));
       return NextResponse.json({ content: { error: "Content is being generated. Please refresh in a moment." }, cached: false });
     }
 
-    console.log(`[wikilux/generate] Parsed OK for ${brandName}, saving to Supabase...`);
+    // Verify we got a real object, not a string or array
+    if (typeof parsedContent !== "object" || parsedContent === null || Array.isArray(parsedContent)) {
+      console.error("[wikilux/generate] Parsed content is not an object:", typeof parsedContent);
+      return NextResponse.json({ content: { error: "Content is being generated. Please refresh in a moment." }, cached: false });
+    }
+
+    console.log(`[wikilux/generate] Parsed OK for ${brandName}. Keys: ${Object.keys(parsedContent).join(", ")}`);
 
     // Cache in Supabase — use onConflict on slug (the unique column)
     const now = new Date().toISOString();
-    const { error: upsertError } = await supabaseAdmin
+    const row = { slug, brand_name: brandName, content: parsedContent, updated_at: now };
+    console.log(`[wikilux/generate] Upserting to wikilux_content: slug=${slug}, brand_name=${brandName}, content_keys=${Object.keys(parsedContent).length}`);
+
+    const { data: upsertData, error: upsertError } = await supabaseAdmin
       .from("wikilux_content")
-      .upsert(
-        { slug, brand_name: brandName, content, updated_at: now },
-        { onConflict: "slug" }
-      );
+      .upsert(row, { onConflict: "slug" })
+      .select("slug");
 
     if (upsertError) {
-      console.error("[wikilux/generate] Supabase upsert FAILED:", JSON.stringify(upsertError));
+      console.error("[wikilux/generate] UPSERT FAILED:", JSON.stringify(upsertError));
     } else {
-      console.log(`[wikilux/generate] Saved to Supabase for ${brandName}`);
+      console.log(`[wikilux/generate] UPSERT SUCCESS for ${slug}:`, JSON.stringify(upsertData));
     }
 
-    return NextResponse.json({ content, cached: false, updated_at: now });
+    return NextResponse.json({ content: parsedContent, cached: false, updated_at: now });
   } catch (err) {
-    console.error("[wikilux/generate] Unhandled error:", err instanceof Error ? err.message : err);
+    console.error("[wikilux/generate] Unhandled error:", err instanceof Error ? `${err.message}\n${err.stack}` : err);
     return NextResponse.json(
       { content: { error: "Content generation failed. Please refresh to try again." }, cached: false },
       { status: 200 }
