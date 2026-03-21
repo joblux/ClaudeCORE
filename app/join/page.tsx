@@ -173,19 +173,6 @@ export default function MembersPage() {
   return (
     <main className="min-h-screen bg-[#f5f4f0] flex items-center justify-center px-4">
       <div className="w-full max-w-[420px]">
-        {/* Logo */}
-        <div className="text-center mb-10">
-          <h1
-            className="text-4xl font-semibold text-[#1a1a1a] tracking-[3px]"
-            style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}
-          >
-            JOBLUX
-          </h1>
-          <p className="text-[11px] text-[#a58e28] tracking-[4px] uppercase mt-1">
-            Luxury Talents Society
-          </p>
-        </div>
-
         {/* Card */}
         <div className="bg-white border border-[#e8e6df] rounded-sm p-8">
           <h2
