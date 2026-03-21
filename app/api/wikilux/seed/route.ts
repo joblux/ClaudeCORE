@@ -46,12 +46,12 @@ async function generateBrand(brand: Brand): Promise<{ success: boolean; error?: 
     }
 
     const now = new Date().toISOString()
-    const { error: upsertError } = await supabase.from("wikilux_content").upsert({
-      slug: brand.slug,
-      brand_name: brand.name,
-      content,
-      updated_at: now,
-    })
+    const { error: upsertError } = await supabase
+      .from("wikilux_content")
+      .upsert(
+        { slug: brand.slug, brand_name: brand.name, content, updated_at: now },
+        { onConflict: "slug" }
+      )
 
     if (upsertError) {
       console.error(`[wikilux/seed] Upsert error for ${brand.slug}:`, upsertError)

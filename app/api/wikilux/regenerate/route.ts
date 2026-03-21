@@ -42,13 +42,12 @@ async function regenerateBrand(brand: Brand): Promise<{ success: boolean; error?
 
     // Upsert into wikilux_content with tracking
     const now = new Date().toISOString()
-    const { error: upsertError } = await supabase.from("wikilux_content").upsert({
-      slug: brand.slug,
-      brand_name: brand.name,
-      content,
-      updated_at: now,
-      last_regenerated_at: now,
-    })
+    const { error: upsertError } = await supabase
+      .from("wikilux_content")
+      .upsert(
+        { slug: brand.slug, brand_name: brand.name, content, updated_at: now, last_regenerated_at: now },
+        { onConflict: "slug" }
+      )
 
     if (upsertError) {
       console.error(`[wikilux/regenerate] Upsert error for ${brand.slug}:`, upsertError)

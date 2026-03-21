@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       .single();
 
     if (cacheError && cacheError.code !== "PGRST116") {
-      console.error("[wikilux/generate] Supabase cache lookup error:", cacheError);
+      console.error("[wikilux/generate] Cache lookup error:", JSON.stringify(cacheError));
     }
 
     if (cached?.content) {
@@ -61,31 +61,33 @@ export async function POST(req: Request) {
       const cleaned = text.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
       content = JSON.parse(cleaned);
     } catch (parseErr) {
-      console.error("[wikilux/generate] JSON parse error:", parseErr, "Raw text (first 500 chars):", text.substring(0, 500));
+      console.error("[wikilux/generate] JSON parse error:", parseErr, "Raw (first 500):", text.substring(0, 500));
       return NextResponse.json({ content: { error: "Content is being generated. Please refresh in a moment." }, cached: false });
     }
 
-    // Cache in Supabase
+    console.log(`[wikilux/generate] Parsed OK for ${brandName}, saving to Supabase...`);
+
+    // Cache in Supabase — use onConflict on slug (the unique column)
     const now = new Date().toISOString();
-    const { error: upsertError } = await supabaseAdmin.from("wikilux_content").upsert({
-      slug,
-      brand_name: brandName,
-      content,
-      updated_at: now,
-    });
+    const { error: upsertError } = await supabaseAdmin
+      .from("wikilux_content")
+      .upsert(
+        { slug, brand_name: brandName, content, updated_at: now },
+        { onConflict: "slug" }
+      );
 
     if (upsertError) {
-      console.error("[wikilux/generate] Supabase upsert error:", upsertError);
-      // Still return the content even if caching fails
+      console.error("[wikilux/generate] Supabase upsert FAILED:", JSON.stringify(upsertError));
+    } else {
+      console.log(`[wikilux/generate] Saved to Supabase for ${brandName}`);
     }
 
-    console.log(`[wikilux/generate] Successfully generated content for ${brandName}`);
-    return NextResponse.json({ content, cached: false });
+    return NextResponse.json({ content, cached: false, updated_at: now });
   } catch (err) {
-    console.error("[wikilux/generate] Unhandled error:", err);
+    console.error("[wikilux/generate] Unhandled error:", err instanceof Error ? err.message : err);
     return NextResponse.json(
       { content: { error: "Content generation failed. Please refresh to try again." }, cached: false },
-      { status: 200 } // Return 200 so client can parse and display the error message
+      { status: 200 }
     );
   }
 }

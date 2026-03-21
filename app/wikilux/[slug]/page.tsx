@@ -144,13 +144,18 @@ export default function BrandPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ slug: brand.slug, brandName: brand.name, sector: brand.sector, founded: brand.founded, country: brand.country, group: brand.group }),
     })
-      .then((r) => {
-        if (!r.ok) throw new Error(`API returned ${r.status}`)
-        return r.json()
+      .then(async (r) => {
+        const data = await r.json()
+        if (!r.ok) {
+          console.error('[WikiLux] API error:', r.status, data)
+          throw new Error(data?.error || `API returned ${r.status}`)
+        }
+        return data
       })
       .then((data) => {
-        if (!data.content) {
-          setContent({ error: 'Content is being generated. Please refresh in a moment.' })
+        console.log('[WikiLux] Response received, has content:', !!data.content, 'cached:', data.cached)
+        if (!data.content || data.content.error) {
+          setContent({ error: data.content?.error || 'Content is being generated. Please refresh in a moment.' })
           return
         }
         setContent(data.content)
@@ -160,7 +165,10 @@ export default function BrandPage() {
         if (data.updated_at) setContentUpdatedAt(data.updated_at)
         if (data.editorial_notes) setEditorialNotes(data.editorial_notes)
       })
-      .catch(() => setContent({ error: 'Content generation failed. Please refresh to try again.' }))
+      .catch((err) => {
+        console.error('[WikiLux] Fetch error:', err)
+        setContent({ error: 'Content generation failed. Please refresh to try again.' })
+      })
       .finally(() => setLoading(false))
 
     fetch(`/api/wikilux/images?brand=${encodeURIComponent(brand.name)}&sector=${encodeURIComponent(brand.sector)}`)
