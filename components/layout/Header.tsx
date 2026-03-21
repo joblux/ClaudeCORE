@@ -64,7 +64,7 @@ export function Header() {
                 href="/join"
                 className="hidden sm:inline-flex px-4 py-2 bg-[#a58e28] text-[#1a1a1a] text-[0.7rem] font-semibold tracking-wider uppercase rounded-md hover:bg-[#c4aa3a] transition-colors"
               >
-                Request Access
+                Join
               </Link>
             )}
 
@@ -102,7 +102,7 @@ export function Header() {
                   onClick={() => setMobileOpen(false)}
                   className="block mt-3 py-3 text-center bg-[#a58e28] text-[#1a1a1a] text-sm font-semibold rounded-md"
                 >
-                  Request Access
+                  Join
                 </Link>
               )}
             </div>
