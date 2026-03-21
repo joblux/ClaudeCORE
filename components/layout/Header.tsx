@@ -33,7 +33,7 @@ export function Header() {
 
           {/* Logo */}
           <Link href="/" className="inline-block flex-shrink-0">
-            <div className="text-2xl sm:text-3xl font-semibold text-[#1a1a1a] leading-none" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</div>
+            <div className="text-3xl sm:text-[2.15rem] font-semibold text-[#1a1a1a] leading-none" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</div>
           </Link>
 
           {/* Right side — search, sign in, join, hamburger */}
