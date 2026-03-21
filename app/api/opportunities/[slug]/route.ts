@@ -73,7 +73,7 @@ export async function GET(
         .from('search_assignments')
         .select(PUBLIC_FIELDS)
         .eq('id', slug)
-        .eq('status', 'active')
+        .eq('status', 'published')
         .single()
 
       if (!error && data) {
@@ -87,7 +87,7 @@ export async function GET(
         .from('search_assignments')
         .select(PUBLIC_FIELDS)
         .eq('slug', slug)
-        .eq('status', 'active')
+        .eq('status', 'published')
         .single()
 
       if (!error && data) {
