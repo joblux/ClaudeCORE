@@ -49,36 +49,41 @@ function BlogluxContent() {
 
   useEffect(() => {
     async function fetchArticles() {
-      // Query bloglux_articles table (the actual table name in Supabase)
-      const { data, error } = await supabase
-        .from('bloglux_articles')
-        .select('id, title, slug, excerpt, category, author_name, published_at, read_time_minutes, tags, cover_image_url, status')
-        .eq('status', 'published')
-        .order('published_at', { ascending: false })
+      try {
+        // Query bloglux_articles table (the actual table name in Supabase)
+        const { data, error } = await supabase
+          .from('bloglux_articles')
+          .select('id, title, slug, excerpt, category, author_name, published_at, read_time_minutes, tags, cover_image_url, status')
+          .eq('status', 'published')
+          .order('published_at', { ascending: false })
 
-      if (!error && data && data.length > 0) {
-        // Map bloglux_articles columns to the Article interface
-        setArticles(data.map((a: any) => ({
-          ...a,
-          read_time: a.read_time_minutes,
-          hero_image_url: a.cover_image_url,
-          hero_image_alt: a.title,
-          is_featured: false,
-          views_count: null,
-        })))
-        setLoading(false)
-        return
-      }
+        if (error) console.error('bloglux_articles query error:', error.message)
 
-      // Fallback: try legacy 'articles' table name
-      const { data: legacyData } = await supabase
-        .from('articles')
-        .select('id, title, slug, excerpt, category, author_name, published_at, read_time, tags, hero_image_url, hero_image_alt, is_featured, views_count')
-        .eq('published', true)
-        .order('published_at', { ascending: false })
+        if (data && data.length > 0) {
+          setArticles(data.map((a: any) => ({
+            ...a,
+            read_time: a.read_time_minutes,
+            hero_image_url: a.cover_image_url,
+            hero_image_alt: a.title,
+            is_featured: false,
+            views_count: null,
+          })))
+          setLoading(false)
+          return
+        }
 
-      if (legacyData && legacyData.length > 0) {
-        setArticles(legacyData)
+        // Fallback: try legacy 'articles' table name
+        const { data: legacyData } = await supabase
+          .from('articles')
+          .select('id, title, slug, excerpt, category, author_name, published_at, read_time, tags, hero_image_url, hero_image_alt, is_featured, views_count')
+          .eq('published', true)
+          .order('published_at', { ascending: false })
+
+        if (legacyData && legacyData.length > 0) {
+          setArticles(legacyData)
+        }
+      } catch (err) {
+        console.error('Failed to fetch articles:', err)
       }
       setLoading(false)
     }
