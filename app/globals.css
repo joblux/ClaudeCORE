@@ -478,28 +478,49 @@ a {
 
   .jl-ticker {
     background: #1a1a1a;
-    padding: 0.5rem 0;
+    padding: 0.625rem 0;
     overflow: hidden;
     white-space: nowrap;
+    position: relative;
   }
 
-  .jl-ticker-inner {
-    display: inline-flex;
-    gap: 3rem;
-    animation: ticker 45s linear infinite;
+  .jl-ticker-track {
+    display: flex;
+    width: max-content;
+    animation: ticker-scroll 60s linear infinite;
+  }
+
+  .jl-ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1.5rem;
     font-family: 'Inter', system-ui, sans-serif;
-    font-size: 0.6875rem;
-    color: #888;
-    letter-spacing: 0.04em;
+    font-size: 0.75rem;
+    color: #999;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    flex-shrink: 0;
   }
 
-  .jl-ticker-inner em {
+  .jl-ticker-item:hover {
+    color: #ccc;
+  }
+
+  .jl-ticker-item em {
     color: #a58e28;
     font-style: normal;
     font-weight: 600;
+    white-space: nowrap;
   }
 
-  @keyframes ticker {
+  .jl-ticker-dot {
+    color: #444;
+    margin: 0 0.25rem;
+    flex-shrink: 0;
+  }
+
+  @keyframes ticker-scroll {
     0%   { transform: translateX(0); }
     100% { transform: translateX(-50%); }
   }
