@@ -1,27 +1,66 @@
-const tickerItems = [
-  { type: 'News', text: 'LVMH reports record revenue of \u20ac84.7 billion in 2024' },
-  { type: 'News', text: 'Kering announces strategic restructuring across key maisons' },
-  { type: 'News', text: 'Herm\u00e8s opens largest flagship in Tokyo Ginza district' },
-  { type: 'News', text: 'Richemont acquires majority stake in emerging jewellery brand' },
-  { type: 'News', text: 'Chanel confirms appointment of new Global Creative Director' },
-  { type: 'News', text: 'LVMH Fashion Group expands presence in Southeast Asia' },
-  { type: 'News', text: 'Swatch Group reports 14% decline in annual net profit' },
-  { type: 'News', text: 'Burberry returns to profit under new creative direction' },
-]
+'use client'
+
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+interface TickerArticle {
+  title: string
+  slug: string
+  category: string
+}
 
 export function Ticker() {
+  const [articles, setArticles] = useState<TickerArticle[]>([])
+
+  useEffect(() => {
+    async function fetchTicker() {
+      // Try featured articles first
+      const { data: featured } = await supabase
+        .from('bloglux_articles')
+        .select('title, slug, category')
+        .eq('status', 'published')
+        .eq('featured_homepage', true)
+        .order('published_at', { ascending: false })
+        .limit(8)
+
+      if (featured && featured.length > 0) {
+        setArticles(featured)
+        return
+      }
+
+      // Fallback: most recent published
+      const { data: recent } = await supabase
+        .from('bloglux_articles')
+        .select('title, slug, category')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(8)
+
+      setArticles(recent || [])
+    }
+    fetchTicker()
+  }, [])
+
+  if (articles.length === 0) return null
+
   // Duplicate for seamless loop
-  const items = [...tickerItems, ...tickerItems]
+  const items = [...articles, ...articles]
 
   return (
     <div className="jl-ticker">
       <div className="jl-ticker-inner">
         {items.map((item, i) => (
-          <span key={i} className="flex items-center gap-3">
-            <em>{item.type}</em>
-            <span>{item.text}</span>
+          <Link key={i} href={`/bloglux/${item.slug}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <em>{item.category}</em>
+            <span>{item.title}</span>
             <span className="text-[#555]">&middot;</span>
-          </span>
+          </Link>
         ))}
       </div>
     </div>

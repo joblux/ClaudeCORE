@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -16,6 +17,7 @@ interface Article {
   excerpt: string | null
   published_at: string | null
   read_time_minutes: number | null
+  cover_image_url: string | null
 }
 
 function formatDate(d: string | null): string {
@@ -23,30 +25,39 @@ function formatDate(d: string | null): string {
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-const featuredInterview = {
-  category:    'Interview',
-  name:        'Marie Dupont',
-  role:        'HR Director · Hermès Paris',
-  initials:    'MD',
-  quote:       '"What we look for has not changed in twenty years — discretion, cultural alignment, and a genuine love of the object. Everything else can be taught."',
-  href:        '/interviews',
-}
-
 export function FeaturedContent() {
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase
-      .from('bloglux_articles')
-      .select('title, slug, category, excerpt, published_at, read_time_minutes')
-      .eq('status', 'published')
-      .order('published_at', { ascending: false })
-      .limit(3)
-      .then(({ data }) => {
-        setArticles(data || [])
+    async function fetchFeatured() {
+      // Try featured_homepage articles first
+      const { data: featured } = await supabase
+        .from('bloglux_articles')
+        .select('title, slug, category, excerpt, published_at, read_time_minutes, cover_image_url')
+        .eq('status', 'published')
+        .eq('featured_homepage', true)
+        .order('published_at', { ascending: false })
+        .limit(5)
+
+      if (featured && featured.length > 0) {
+        setArticles(featured)
         setLoading(false)
-      })
+        return
+      }
+
+      // Fallback: most recent published
+      const { data: recent } = await supabase
+        .from('bloglux_articles')
+        .select('title, slug, category, excerpt, published_at, read_time_minutes, cover_image_url')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(3)
+
+      setArticles(recent || [])
+      setLoading(false)
+    }
+    fetchFeatured()
   }, [])
 
   const lead = articles[0]
@@ -88,15 +99,25 @@ export function FeaturedContent() {
               </div>
             </div>
 
-            {/* Lead visual — brand mark placeholder */}
-            <div className="bg-[#fafaf5] border border-[#e8e2d8] flex items-center justify-center min-h-[180px]">
-              <div className="text-center">
-                <div className="jl-serif text-3xl font-light tracking-[0.2em] text-[#a58e28] uppercase">
-                  Intelligence
-                </div>
-                <div className="jl-overline mt-2">JOBLUX · 2026 Report</div>
+            {/* Lead visual */}
+            {lead.cover_image_url ? (
+              <div className="relative bg-[#fafaf5] border border-[#e8e2d8] min-h-[180px] overflow-hidden">
+                <Image
+                  src={lead.cover_image_url}
+                  alt={lead.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
               </div>
-            </div>
+            ) : (
+              <div className="bg-[#fafaf5] border border-[#e8e2d8] flex items-center justify-center min-h-[180px]">
+                <div className="text-center">
+                  <div className="jl-serif text-3xl font-light tracking-[0.2em] text-[#a58e28] uppercase">Intelligence</div>
+                  <div className="jl-overline mt-2">JOBLUX · 2026</div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -140,27 +161,23 @@ export function FeaturedContent() {
         </div>
       )}
 
-      {/* FEATURED INTERVIEW */}
+      {/* INTERVIEW TEASER */}
       <div>
         <div className="jl-section-label">
           <span>Interviews</span>
         </div>
 
-        <Link href={featuredInterview.href} className="block group">
+        <Link href="/interviews" className="block group">
           <div className="flex items-start gap-4 p-5 border border-[#e8e2d8] hover:border-[#a58e28] transition-colors">
             <div className="w-14 h-14 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
-              <span className="jl-serif text-lg text-[#a58e28]">
-                {featuredInterview.initials}
-              </span>
+              <span className="jl-serif text-lg text-[#a58e28]">MD</span>
             </div>
             <div className="flex-1">
-              <div className="jl-overline-gold mb-1">{featuredInterview.category}</div>
-              <div className="font-sans text-sm font-medium text-[#1a1a1a] mb-0.5">
-                {featuredInterview.name}
-              </div>
-              <div className="jl-overline mb-3">{featuredInterview.role}</div>
+              <div className="jl-overline-gold mb-1">Interview</div>
+              <div className="font-sans text-sm font-medium text-[#1a1a1a] mb-0.5">Marie Dupont</div>
+              <div className="jl-overline mb-3">HR Director · Hermès Paris</div>
               <p className="jl-serif text-sm text-[#555] leading-relaxed italic">
-                {featuredInterview.quote}
+                &ldquo;What we look for has not changed in twenty years — discretion, cultural alignment, and a genuine love of the object. Everything else can be taught.&rdquo;
               </p>
             </div>
           </div>

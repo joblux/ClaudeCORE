@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRequireAdmin } from '@/lib/auth-hooks'
-import { PenLine, Trash2 } from 'lucide-react'
+import { PenLine, Trash2, Star } from 'lucide-react'
 
 interface Article {
   id: string
@@ -14,6 +14,7 @@ interface Article {
   published: boolean
   published_at: string | null
   created_at: string
+  featured_homepage: boolean
 }
 
 export default function AdminArticlesPage() {
@@ -21,6 +22,7 @@ export default function AdminArticlesPage() {
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [toggling, setToggling] = useState<string | null>(null)
   const [categoryFilter, setCategoryFilter] = useState('all')
 
   useEffect(() => {
@@ -39,6 +41,21 @@ export default function AdminArticlesPage() {
       setArticles((prev) => prev.filter((a) => a.id !== id))
     }
     setDeleting(null)
+  }
+
+  const toggleFeatured = async (id: string, current: boolean) => {
+    setToggling(id)
+    const res = await fetch('/api/articles/featured', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, featured_homepage: !current }),
+    })
+    if (res.ok) {
+      setArticles((prev) => prev.map((a) =>
+        a.id === id ? { ...a, featured_homepage: !current } : a
+      ))
+    }
+    setToggling(null)
   }
 
   const formatDate = (d: string | null) => {
@@ -95,12 +112,13 @@ export default function AdminArticlesPage() {
         {/* Articles table */}
         <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
           {/* Header */}
-          <div className="hidden lg:grid bg-gray-50 px-5 py-3 text-[11px] uppercase tracking-wide text-gray-400 font-medium" style={{ gridTemplateColumns: '2.5fr 1fr 0.8fr 0.8fr 0.6fr 0.5fr' }}>
+          <div className="hidden lg:grid bg-gray-50 px-5 py-3 text-[11px] uppercase tracking-wide text-gray-400 font-medium" style={{ gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 0.6fr 0.4fr 0.5fr' }}>
             <div>Title</div>
             <div>Category</div>
             <div>Author</div>
             <div>Date</div>
             <div>Status</div>
+            <div className="text-center">Home</div>
             <div className="text-right">Actions</div>
           </div>
 
@@ -113,11 +131,12 @@ export default function AdminArticlesPage() {
               <div
                 key={article.id}
                 className="grid items-center px-5 py-3 border-t border-gray-100 hover:bg-gray-50/50 transition-colors"
-                style={{ gridTemplateColumns: '2.5fr 1fr 0.8fr 0.8fr 0.6fr 0.5fr' }}
+                style={{ gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 0.6fr 0.4fr 0.5fr' }}
               >
                 {/* Title */}
-                <div className="text-sm font-medium text-[#1a1a1a] truncate pr-4 col-span-2 lg:col-span-1">
-                  {article.title}
+                <div className="flex items-center gap-2 text-sm font-medium text-[#1a1a1a] truncate pr-4 col-span-2 lg:col-span-1">
+                  {article.featured_homepage && <Star size={13} className="text-[#a58e28] fill-[#a58e28] flex-shrink-0" />}
+                  <span className="truncate">{article.title}</span>
                 </div>
 
                 {/* Category */}
@@ -138,6 +157,22 @@ export default function AdminArticlesPage() {
                   }`}>
                     {article.published ? 'Published' : 'Draft'}
                   </span>
+                </div>
+
+                {/* Featured toggle */}
+                <div className="hidden lg:flex justify-center">
+                  <button
+                    onClick={() => toggleFeatured(article.id, article.featured_homepage)}
+                    disabled={toggling === article.id}
+                    className={`p-1 rounded transition-colors ${
+                      article.featured_homepage
+                        ? 'text-[#a58e28] hover:text-[#8a7622]'
+                        : 'text-gray-300 hover:text-[#a58e28]'
+                    } ${toggling === article.id ? 'opacity-40' : ''}`}
+                    title={article.featured_homepage ? 'Remove from homepage' : 'Feature on homepage'}
+                  >
+                    <Star size={16} className={article.featured_homepage ? 'fill-current' : ''} />
+                  </button>
                 </div>
 
                 {/* Actions */}
