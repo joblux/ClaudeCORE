@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import UserMenu from '@/components/UserMenu'
 import SearchOverlay from '@/components/SearchOverlay'
 import { useMember } from '@/lib/auth-hooks'
@@ -30,25 +29,19 @@ export function Header() {
       <div className="w-full px-4 sm:px-6 lg:px-16 xl:px-24">
         <div className="flex items-center justify-between h-16 lg:h-24 max-w-[1400px] mx-auto">
 
-          {/* Logo — SVG on desktop, smaller on mobile */}
+          {/* Logo */}
           <Link href="/" className="inline-block flex-shrink-0">
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src="/logos/joblux-gold.svg"
               alt="JOBLUX"
-              width={160}
-              height={36}
-              className="hidden lg:block"
-              style={{ width: '160px', height: 'auto' }}
-              priority
+              className="hidden lg:block w-[160px] h-auto"
             />
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src="/logos/joblux-gold.svg"
               alt="JOBLUX"
-              width={120}
-              height={28}
-              className="lg:hidden"
-              style={{ width: '120px', height: 'auto' }}
-              priority
+              className="lg:hidden w-[120px] h-auto"
             />
           </Link>
 
