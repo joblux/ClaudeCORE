@@ -22,14 +22,14 @@ export async function GET(request: NextRequest) {
 
     const slug = brand.toLowerCase().replace(/\s+/g, '-')
 
-    // Check cache first
-    const { data: cached, error: cacheError } = await supabase
+    // Check cache first — maybeSingle returns null when no row exists
+    const { data: cached } = await supabase
       .from('wikilux_brands')
       .select('images')
       .eq('slug', slug)
-      .single()
+      .maybeSingle()
 
-    if (!cacheError && cached?.images && Array.isArray(cached.images) && cached.images.length > 0) {
+    if (cached?.images && Array.isArray(cached.images) && cached.images.length > 0) {
       return NextResponse.json({ images: cached.images })
     }
 

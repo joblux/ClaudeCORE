@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     .from("wikilux_content")
     .select("content, translations")
     .eq("slug", slug)
-    .single()
+    .maybeSingle()
 
   if (!row?.content) {
     return NextResponse.json({ error: "No English content found" }, { status: 404 })

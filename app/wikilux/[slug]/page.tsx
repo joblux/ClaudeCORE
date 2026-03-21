@@ -518,6 +518,31 @@ export default function BrandPage() {
             </div>
           )}
 
+          {/* ── LANGUAGE SWITCHER ──────────────────────────── */}
+          <div className="jl-container pt-6 pb-2">
+            <div className="flex items-center gap-1 flex-wrap">
+              {SUPPORTED_LANGUAGES.map((lang, i) => (
+                <span key={lang.code} className="flex items-center">
+                  <button
+                    onClick={() => switchLanguage(lang.code)}
+                    disabled={translating === lang.code}
+                    className={`font-sans text-[0.7rem] px-1.5 py-0.5 transition-colors ${
+                      activeLang === lang.code
+                        ? 'text-[#a58e28] font-semibold'
+                        : 'text-[#aaa] hover:text-[#a58e28]'
+                    }`}
+                  >
+                    {translating === lang.code ? '...' : lang.code.toUpperCase()}
+                  </button>
+                  {i < SUPPORTED_LANGUAGES.length - 1 && <span className="text-[#ddd] text-[0.6rem] mx-0.5">|</span>}
+                </span>
+              ))}
+            </div>
+            {translating && (
+              <p className="font-sans text-[0.65rem] text-[#a58e28] mt-1 animate-pulse">Generating translation...</p>
+            )}
+          </div>
+
           {/* ── STRUCTURED EDITORIAL SECTIONS ──────────────── */}
 
           {/* HISTORY */}
@@ -753,34 +778,6 @@ export default function BrandPage() {
               </div>
             </div>
           )}
-
-          {/* ── LANGUAGE SWITCHER ──────────────────────────── */}
-          <div className="border-t border-[#e8e2d8]">
-            <div className="jl-container py-6">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider mr-2">Language</span>
-                {SUPPORTED_LANGUAGES.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => switchLanguage(lang.code)}
-                    disabled={translating === lang.code}
-                    className={`font-sans text-[0.65rem] px-3 py-1.5 border transition-colors ${
-                      activeLang === lang.code
-                        ? 'border-[#a58e28] text-[#a58e28] bg-[#a58e28]/5'
-                        : 'border-[#e8e2d8] text-[#888] hover:border-[#a58e28] hover:text-[#a58e28]'
-                    }`}
-                  >
-                    {translating === lang.code ? '...' : `${lang.flag} ${lang.code.toUpperCase()}`}
-                  </button>
-                ))}
-              </div>
-              {translating && (
-                <p className="font-sans text-[0.65rem] text-[#a58e28] mt-2 animate-pulse">
-                  Generating translation...
-                </p>
-              )}
-            </div>
-          </div>
 
           {/* ── EDITORIAL NOTES ──────────────────────────── */}
           {editorialNotes && (

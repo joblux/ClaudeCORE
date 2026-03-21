@@ -23,14 +23,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "slug and brandName are required" }, { status: 400 });
     }
 
-    // Check cache first
+    // Check cache first — maybeSingle returns null (no error) when row doesn't exist
     const { data: cached, error: cacheError } = await supabaseAdmin
       .from("wikilux_content")
       .select("content, translations, updated_at, editorial_notes")
       .eq("slug", slug)
-      .single();
+      .maybeSingle();
 
-    if (cacheError && cacheError.code !== "PGRST116") {
+    if (cacheError) {
       console.error("[wikilux/generate] Cache lookup error:", JSON.stringify(cacheError));
     }
 
