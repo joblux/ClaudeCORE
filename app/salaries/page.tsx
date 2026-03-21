@@ -98,7 +98,7 @@ export default function SalariesPage() {
       </div>
 
       {/* Tab content */}
-      <div className="jl-container py-8">
+      <div className="jl-container py-8 lg:py-12">
         {activeTab === 'browse' && <BrowseTab accessLevel={accessLevel} />}
         {activeTab === 'benchmark' && (
           accessRank >= 1 ? <BenchmarkTab /> : <LockedTab tool="Benchmark" points={10} level="Standard" />

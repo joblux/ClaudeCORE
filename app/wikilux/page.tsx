@@ -83,7 +83,7 @@ export default function WikiLuxPage() {
         </div>
       </div>
 
-      <div className="jl-container py-10">
+      <div className="jl-container py-10 lg:py-14">
 
         <WikiLuxSearch brands={BRANDS} categories={categories} />
 

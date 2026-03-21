@@ -104,7 +104,7 @@ export default function OpportunitiesPage() {
         </div>
       </div>
 
-      <div className="jl-container py-10">
+      <div className="jl-container py-10 lg:py-14">
         {/* ── Filter bar ─────────────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
           {/* Search */}
@@ -193,7 +193,7 @@ export default function OpportunitiesPage() {
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
             {filtered.map((assignment) => {
               const salary = salaryDisplay(assignment)
               const displayMaison = assignment.is_confidential

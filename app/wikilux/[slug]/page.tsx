@@ -475,7 +475,7 @@ export default function BrandPage() {
                     <div className="jl-section-label"><span>History</span></div>
                     <div className="jl-prose">{renderParagraphs(displayContent.history)}</div>
                   </div>
-                  <div className="space-y-6">
+                  <div className="space-y-6 lg:sticky lg:top-20 lg:self-start">
                     {/* Key Facts sidebar */}
                     {displayContent.key_facts && (
                       <div className="border border-[#e8e2d8] p-5">

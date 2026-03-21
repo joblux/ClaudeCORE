@@ -53,7 +53,7 @@ export default function WikiLuxSearch({ brands, categories }: Props) {
       {/* CATEGORIES */}
       <div className="mb-10">
         <div className="jl-section-label"><span>Browse by Category</span></div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-3">
           {categories.map((cat) => (
             <Link
               key={cat.slug}
@@ -87,7 +87,7 @@ export default function WikiLuxSearch({ brands, categories }: Props) {
             No brands match &ldquo;{query}&rdquo;. <Link href="/wikilux/all" className="text-[#a58e28] hover:underline">Browse A&ndash;Z &rarr;</Link>
           </p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {featuredBrands.map((brand) => (
               <Link
                 key={brand.slug}
