@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Our Story | JOBLUX | Luxury Talents Society',
   description:
-    'From a Paris boutique and a London flat — twenty years building the luxury industry\'s intelligence layer. The story of JOBLUX.',
+    'From a Paris boutique and a London flat — twenty years building the luxury talents society. The story of JOBLUX.',
 }
 
 export default function AboutPage() {

@@ -9,12 +9,27 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'JOBLUX | Luxury Talents Society',
-  description: 'The private intelligence platform for luxury industry professionals. Executive search, salary intelligence, WikiLux brand encyclopedia and industry insights.',
+  description: 'The society for luxury professionals. Salary data, brand insights, executive search, and career intelligence across 150+ maisons.',
+}
+
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'JOBLUX',
+  alternateName: 'Luxury Talents Society',
+  url: 'https://www.luxuryrecruiter.com',
+  logo: 'https://www.luxuryrecruiter.com/favicon.svg',
+  description: 'The society for luxury professionals. Executive search, salary intelligence, and career intelligence for the premium-to-ultra-luxury industry.',
+  foundingDate: '2006',
+  founder: { '@type': 'Person', name: "Mohammed M'zaour" },
+  address: { '@type': 'PostalAddress', addressLocality: 'Paris', addressCountry: 'FR' },
+  sameAs: [],
 }
 
 export default function HomePage() {
   return (
     <div>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
 
       {/* ── Hero ── */}
       <section className="w-full px-4 sm:px-6 lg:px-8 pt-14 sm:pt-20 pb-10 sm:pb-14 text-center border-b-2 border-[#1a1a1a]">

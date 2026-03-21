@@ -327,8 +327,21 @@ export default function FaqPage() {
     return { ...category, items }
   })
 
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqData.flatMap((cat) =>
+      cat.items.map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: { '@type': 'Answer', text: item.a },
+      }))
+    ),
+  }
+
   return (
     <main className="min-h-screen bg-white text-[#1a1a1a]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
       {/* ── Header ── */}
       <section className="jl-container pt-24 pb-16 max-w-3xl mx-auto px-6">

@@ -20,6 +20,7 @@ export function Footer() {
               <h4 className="jl-overline text-[#1a1a1a] mb-3">Platform</h4>
               <ul className="space-y-2">
                 <li><Link href="/wikilux" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">WikiLux</Link></li>
+                <li><Link href="/opportunities" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Careers</Link></li>
                 <li><Link href="/salaries" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Salaries</Link></li>
                 <li><Link href="/coaching" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Career Intelligence</Link></li>
                 <li><Link href="/bloglux" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Bloglux</Link></li>

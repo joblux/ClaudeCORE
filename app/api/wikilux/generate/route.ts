@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     max_tokens: 4000,
     messages: [{
       role: "user",
-      content: `You are a luxury industry encyclopedia editor writing for JOBLUX — the premier intelligence platform for luxury professionals. Write a comprehensive encyclopedia entry for ${brandName}.
+      content: `You are a luxury industry encyclopedia editor writing for JOBLUX — the luxury talents society for industry professionals. Write a comprehensive encyclopedia entry for ${brandName}.
 
 Return ONLY a valid JSON object with these exact fields (no markdown, no backticks, just pure JSON):
 

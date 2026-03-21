@@ -35,10 +35,10 @@ export function TheBriefSignup() {
     <div className="bg-[#222222] p-5">
       <div className="jl-overline-gold mb-3">The Brief</div>
       <h3 className="jl-serif text-base font-light text-white mb-2">
-        The JOBLUX Weekly
+        The Brief
       </h3>
       <p className="font-sans text-xs text-[#888] leading-relaxed mb-4">
-        Luxury industry moves · Salary insights · New positions · WikiLux updates. Every Monday morning.
+        Luxury industry moves · Salary insights · New positions · WikiLux updates. Delivered biweekly.
       </p>
 
       {status === 'success' ? (

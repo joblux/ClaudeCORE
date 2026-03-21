@@ -13,7 +13,7 @@ const anthropic = new Anthropic({
 })
 
 function buildPrompt(brand: Brand) {
-  return `You are a luxury industry encyclopedia editor writing for JOBLUX — the premier intelligence platform for luxury professionals. Write a comprehensive encyclopedia entry for ${brand.name}.
+  return `You are a luxury industry encyclopedia editor writing for JOBLUX — the luxury talents society for industry professionals. Write a comprehensive encyclopedia entry for ${brand.name}.
 
 Return ONLY a valid JSON object with these exact fields (no markdown, no backticks, just pure JSON):
 

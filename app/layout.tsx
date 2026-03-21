@@ -16,13 +16,15 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.luxuryrecruiter.com'),
+  alternates: { canonical: './' },
   title: "JOBLUX | Luxury Talents Society",
   description:
-    "The intelligence platform for luxury professionals. Salary data, brand insights, executive search, and career intelligence across 150+ maisons. Free against contribution — no ads, no noise.",
+    "The society for luxury professionals. Salary data, brand insights, executive search, and career intelligence across 150+ maisons. Free against contribution — no ads, no noise.",
   icons: { icon: '/favicon.svg' },
   openGraph: {
     title: "JOBLUX | Luxury Talents Society",
-    description: "The intelligence platform for luxury professionals. Salary data, brand insights, executive search across 150+ maisons.",
+    description: "The society for luxury professionals. Salary data, brand insights, executive search, and career intelligence across 150+ maisons.",
     url: "https://www.luxuryrecruiter.com",
     siteName: "JOBLUX",
     locale: "en_US",
@@ -39,7 +41,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "JOBLUX | Luxury Talents Society",
-    description: "The intelligence platform for luxury professionals.",
+    description: "The society for luxury professionals. Salary data, brand insights, executive search, and career intelligence across 150+ maisons.",
     images: ["https://www.luxuryrecruiter.com/api/og?title=JOBLUX&subtitle=Luxury+Talents+Society"],
   },
 };
@@ -57,6 +59,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="alternate" type="application/rss+xml" title="JOBLUX BlogLux" href="/rss.xml" />
       </head>
       <body className={`${inter.variable} ${playfair.variable} antialiased overflow-x-hidden min-h-screen`}>
         <AuthProvider>

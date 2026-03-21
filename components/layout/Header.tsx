@@ -8,7 +8,7 @@ import { useMember } from '@/lib/auth-hooks'
 
 const publicNavItems = [
   { label: 'WikiLux', href: '/wikilux' },
-  { label: 'Opportunities', href: '/opportunities' },
+  { label: 'Careers', href: '/opportunities' },
   { label: 'Interviews', href: '/interviews' },
   { label: 'Salaries', href: '/salaries' },
   { label: 'Coaching', href: '/coaching' },

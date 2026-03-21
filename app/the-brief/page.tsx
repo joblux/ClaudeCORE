@@ -26,7 +26,7 @@ export default function TheBriefPage() {
       })
       if (res.ok) {
         setStatus('success')
-        setMessage('You are subscribed. The Brief arrives every Monday.')
+        setMessage('You are subscribed. Welcome to The Brief.')
       } else {
         setStatus('error')
         setMessage('Something went wrong. Please try again.')
@@ -42,13 +42,13 @@ export default function TheBriefPage() {
       {/* HERO */}
       <div className="bg-[#222222] py-16">
         <div className="jl-container-xs text-center">
-          <div className="jl-overline-gold mb-4">Weekly Newsletter</div>
+          <div className="jl-overline-gold mb-4">Biweekly Newsletter</div>
           <h1 className="jl-serif text-4xl md:text-5xl font-light text-white mb-4">
-            The JOBLUX Brief
+            The Brief
           </h1>
           <p className="font-sans text-sm text-[#888] mb-10 max-w-md mx-auto leading-relaxed">
-            Luxury industry moves · Salary intelligence · New confidential positions · WikiLux updates.
-            Every Monday morning. Free.
+            Luxury industry moves · Salary insights · New positions · WikiLux updates.
+            Delivered biweekly. Free.
           </p>
 
           {status === 'success' ? (
