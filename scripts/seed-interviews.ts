@@ -48,6 +48,21 @@ async function main() {
   console.log(`Interview experiences to generate: ${specs.length}`)
   console.log('')
 
+  // Get admin member_id for contributions (member_id is NOT NULL)
+  const { data: admin } = await supabase
+    .from('members')
+    .select('id')
+    .eq('role', 'admin')
+    .limit(1)
+    .single()
+
+  if (!admin) {
+    console.error('No admin member found in members table. Cannot create contributions.')
+    process.exit(1)
+  }
+  console.log(`Using admin member_id: ${admin.id}`)
+  console.log('')
+
   let success = 0
   const failed: string[] = []
 
@@ -73,16 +88,16 @@ Return ONLY valid JSON (no markdown, no backticks):
   "location": "city where interview took place",
   "interview_year": 2025,
   "department": "department name (Retail, Marketing, CRM, Visual Merchandising, etc.)",
-  "seniority": "Junior|Mid-Level|Senior|Director",
+  "seniority": "junior|mid-level|senior|director",
   "process_duration": "e.g. 2 weeks, 1 month",
   "number_of_rounds": 3,
   "interview_format": "In-person|Video|Phone + In-person|Multi-stage",
   "process_description": "3-5 sentences describing the full interview process, stages, and what happened",
   "questions_asked": ["realistic interview question 1", "question 2", "question 3", "question 4"],
   "tips": ["practical tip for candidates 1", "tip 2", "tip 3"],
-  "outcome": "Hired|Not Hired|Declined Offer",
-  "difficulty": "Easy|Medium|Hard|Very Hard",
-  "overall_experience": "Positive|Neutral|Negative"
+  "outcome": "offered|rejected|withdrew",
+  "difficulty": "easy|moderate|challenging",
+  "overall_experience": "positive|neutral|negative"
 }
 
 Make it specific, realistic, and useful for luxury job seekers. Vary the outcomes and experiences naturally.`
@@ -97,6 +112,7 @@ Make it specific, realistic, and useful for luxury job seekers. Vary the outcome
       const { data: contrib, error: contribError } = await supabase
         .from('contributions')
         .insert({
+          member_id: admin.id,
           contribution_type: 'interview_experience',
           brand_slug: spec.brandSlug,
           brand_name: spec.brand,
@@ -109,6 +125,17 @@ Make it specific, realistic, and useful for luxury job seekers. Vary the outcome
 
       if (contribError) throw new Error(`Contribution insert: ${contribError.message}`)
 
+      // Validate enum values against DB check constraints (all lowercase)
+      const validDifficulty = ['easy', 'moderate', 'challenging']
+      const validOutcome = ['offered', 'rejected', 'withdrew', 'pending']
+      const validExperience = ['positive', 'neutral', 'negative']
+      const validSeniority = ['junior', 'mid-level', 'senior', 'director']
+
+      const difficulty = validDifficulty.includes(exp.difficulty?.toLowerCase()) ? exp.difficulty.toLowerCase() : 'moderate'
+      const outcome = validOutcome.includes(exp.outcome?.toLowerCase()) ? exp.outcome.toLowerCase() : 'rejected'
+      const overallExperience = validExperience.includes(exp.overall_experience?.toLowerCase()) ? exp.overall_experience.toLowerCase() : 'neutral'
+      const seniority = validSeniority.includes(exp.seniority?.toLowerCase()) ? exp.seniority.toLowerCase() : 'mid-level'
+
       // Then create the interview_experience linked to it
       const { error: expError } = await supabase
         .from('interview_experiences')
@@ -116,7 +143,7 @@ Make it specific, realistic, and useful for luxury job seekers. Vary the outcome
           contribution_id: contrib.id,
           job_title: spec.role,
           department: exp.department || 'Retail',
-          seniority: exp.seniority || 'Mid-Level',
+          seniority,
           location: exp.location || 'Paris',
           interview_year: exp.interview_year || 2025,
           process_duration: exp.process_duration || null,
@@ -125,9 +152,9 @@ Make it specific, realistic, and useful for luxury job seekers. Vary the outcome
           process_description: exp.process_description || '',
           questions_asked: exp.questions_asked || [],
           tips: exp.tips || [],
-          outcome: exp.outcome || 'Not Hired',
-          difficulty: exp.difficulty || 'Medium',
-          overall_experience: exp.overall_experience || 'Neutral',
+          outcome,
+          difficulty,
+          overall_experience: overallExperience,
         })
 
       if (expError) throw new Error(`Experience insert: ${expError.message}`)

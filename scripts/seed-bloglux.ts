@@ -76,13 +76,11 @@ async function main() {
   console.log('')
 
   // Check existing
-  const { data: existing } = await supabase.from('articles').select('slug')
+  const { data: existing } = await supabase.from('bloglux_articles').select('slug')
   const existingSlugs = new Set((existing || []).map((r) => r.slug))
 
   let success = 0
   const failed: string[] = []
-
-  // Stagger published_at over past 90 days
   const now = Date.now()
 
   for (let i = 0; i < TOPICS.length; i++) {
@@ -110,7 +108,7 @@ Category: ${topic.category}
 Return ONLY valid JSON (no markdown, no backticks):
 {
   "excerpt": "2-sentence summary, max 150 characters",
-  "content": "Full HTML article body, 800-1200 words. Use <h2>, <h3>, <p> tags. Write in authoritative editorial style like Business of Fashion. Include specific examples, data points, and industry insights. Do NOT use markdown — only HTML tags.",
+  "body": "Full HTML article body, 800-1200 words. Use <h2>, <h3>, <p> tags. Write in authoritative editorial style like Business of Fashion. Include specific examples, data points, and industry insights. Do NOT use markdown — only HTML tags.",
   "tags": ["tag1", "tag2", "tag3", "tag4"],
   "reading_time": 5
 }
@@ -127,22 +125,20 @@ Write for luxury industry professionals. Be authoritative, specific, and insight
       const daysAgo = Math.floor((i / TOPICS.length) * 90)
       const publishedAt = new Date(now - daysAgo * 86400000).toISOString()
 
-      // Fetch cover image
       const coverImage = await fetchCoverImage(topic.category)
 
-      const { error } = await supabase.from('articles').upsert({
+      const { error } = await supabase.from('bloglux_articles').upsert({
         title: topic.title,
         slug,
-        excerpt: article.excerpt || '',
-        content: article.content,
+        excerpt: (article.excerpt || '').substring(0, 150),
+        body: article.body,
         category: topic.category,
         author_name: 'JOBLUX Editorial',
-        cover_image: coverImage,
-        published: true,
+        cover_image_url: coverImage,
+        status: 'published',
         published_at: publishedAt,
-        read_time: article.reading_time || 5,
+        read_time_minutes: article.reading_time || 5,
         tags: article.tags || [],
-        is_featured: topic.featured,
       }, { onConflict: 'slug' })
 
       if (error) throw new Error(error.message)
@@ -155,7 +151,6 @@ Write for luxury industry professionals. Be authoritative, specific, and insight
       failed.push(topic.title)
     }
 
-    // 2s delay between articles
     if (i < TOPICS.length - 1) {
       await new Promise((r) => setTimeout(r, 2000))
     }
