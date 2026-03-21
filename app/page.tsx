@@ -44,20 +44,20 @@ export default function HomePage() {
             Free against contribution — no ads, no noise.
           </p>
 
-          <div className="flex flex-col xs:flex-row gap-2 justify-center items-stretch xs:items-center">
+          <div className="flex flex-row gap-2 justify-center items-center">
             <Link
               href="/join"
-              className="px-5 py-2 bg-[#a58e28] text-[#1a1a1a] text-xs font-medium
+              className="px-3 py-1.5 bg-[#a58e28] text-[#1a1a1a] text-xs font-medium
                          hover:bg-[#c4aa3a] active:scale-[0.98] transition-all duration-200
-                         text-center whitespace-nowrap"
+                         whitespace-nowrap"
             >
               Request Access
             </Link>
             <Link
               href="/wikilux"
-              className="px-5 py-2 border border-white/30 text-white text-xs font-medium
+              className="px-3 py-1.5 border border-white/30 text-white text-xs font-medium
                          hover:border-white/60 active:scale-[0.98]
-                         transition-all duration-200 text-center whitespace-nowrap"
+                         transition-all duration-200 whitespace-nowrap"
             >
               Explore WikiLux
             </Link>
