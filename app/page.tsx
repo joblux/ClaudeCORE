@@ -39,10 +39,10 @@ export default function HomePage() {
             Luxury Talents Society
           </p>
 
-          <div className="flex flex-row gap-2 justify-center items-center">
+          <div className="flex flex-row gap-1.5 justify-center items-center">
             <Link
               href="/join"
-              className="px-3 py-1.5 bg-[#a58e28] text-[#1a1a1a] text-xs font-medium
+              className="px-2.5 py-1 bg-[#a58e28] text-[#1a1a1a] text-[0.65rem] font-medium
                          hover:bg-[#c4aa3a] active:scale-[0.98] transition-all duration-200
                          whitespace-nowrap"
             >
@@ -50,7 +50,7 @@ export default function HomePage() {
             </Link>
             <Link
               href="/wikilux"
-              className="px-3 py-1.5 border border-white/30 text-white text-xs font-medium
+              className="px-2.5 py-1 border border-white/30 text-white text-[0.65rem] font-medium
                          hover:border-white/60 active:scale-[0.98]
                          transition-all duration-200 whitespace-nowrap"
             >
