@@ -44,8 +44,9 @@ export function Header() {
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             </button>
-            <UserMenu />
-            {!isAuthenticated && (
+            {isAuthenticated ? (
+              <UserMenu />
+            ) : (
               <span className="hidden sm:inline-flex text-sm font-medium">
                 <Link href="/members" className="text-[#1a1a1a] hover:text-[#a58e28] transition-colors">Log in</Link>
                 <span className="text-[#1a1a1a]/30 mx-1.5">/</span>
