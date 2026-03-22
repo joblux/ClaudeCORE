@@ -47,15 +47,17 @@ export default function HomePage() {
       {/* ── S2: TICKER ── */}
       <Ticker />
 
-      {/* ── S3: FEATURED ARTICLE + SALARY SNAPSHOT (side by side) ── */}
+      {/* ── S3a: FEATURED ARTICLE (full width) ── */}
       <div className="bg-[#f5f4f0] py-5 lg:py-6">
         <div className="jl-container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-            <FeaturedArticle />
-            <div className="bg-white border border-[#e8e2d8] p-4 self-start h-fit">
-              <SalarySnapshot />
-            </div>
-          </div>
+          <FeaturedArticle />
+        </div>
+      </div>
+
+      {/* ── S3b: SALARY SNAPSHOT (full-width row) ── */}
+      <div className="bg-white py-5 lg:py-6 border-t border-[#e8e2d8]">
+        <div className="jl-container">
+          <SalarySnapshot />
         </div>
       </div>
 
