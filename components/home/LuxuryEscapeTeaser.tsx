@@ -19,14 +19,11 @@ export function LuxuryEscapeTeaser() {
   return (
     <div>
       <div className="jl-section-label">
-        <span>Luxury Escape</span>
+        <span>Private Travel Advisory</span>
       </div>
 
-      <p className="jl-serif text-base text-[#1a1a1a] mb-1">
-        Where Luxury Professionals Unwind
-      </p>
       <p className="font-sans text-xs text-[#888] leading-relaxed mb-4">
-        Curated travel intelligence — destination guides, hotel reviews, and exclusive experiences for the luxury industry.
+        Bespoke travel design for luxury industry executives. Hotels, private experiences, and itineraries arranged with the same discretion as our recruitment services.
       </p>
 
       <div className="space-y-0">
@@ -46,10 +43,10 @@ export function LuxuryEscapeTeaser() {
       </div>
 
       <Link
-        href="/travel"
+        href="/services/travel"
         className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors"
       >
-        Explore Luxury Escape →
+        Arrange private travel →
       </Link>
     </div>
   )

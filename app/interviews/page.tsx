@@ -5,11 +5,11 @@ import type { InterviewExperienceListItem, InterviewStats } from '@/types/interv
 
 export const metadata: Metadata = {
   title: 'Interview Intelligence — Luxury Industry Interview Experiences | JOBLUX',
-  description: 'Real interview experiences at Van Cleef & Arpels, Bulgari, Cartier, Dior and more. Tips, process details, and preparation guides contributed by professionals.',
+  description: 'Confidential interview experiences shared by professionals who have been through the process at the industry\'s most selective maisons.',
   alternates: { canonical: 'https://www.joblux.com/interviews' },
   openGraph: {
     title: 'Interview Intelligence | JOBLUX',
-    description: 'Real interview experiences from luxury professionals.',
+    description: 'Confidential interview experiences from luxury professionals.',
   },
 }
 

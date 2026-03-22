@@ -39,7 +39,7 @@ export default function TermsOfServicePage() {
           <p className="mt-3">
             JOBLUX is designed as an invitation-based society connecting exceptional talent with
             premier opportunities in the luxury sector. By joining, you agree to uphold the standards
-            of professionalism and discretion that define our community.
+            of professionalism and discretion that define our ecosystem.
           </p>
         </section>
 
@@ -53,10 +53,10 @@ export default function TermsOfServicePage() {
             <strong>"Platform"</strong> refers to the JOBLUX website, web application, mobile
             applications (if any), APIs, and all associated services, tools, and features made
             available by JOBLUX. This includes, without limitation, the job board, directory,
-            community features, and all content hosted therein.
+            ecosystem features, and all content hosted therein.
           </p>
           <p className="mt-3">
-            <strong>"Society"</strong> refers to the JOBLUX member community as a whole. JOBLUX
+            <strong>"Society"</strong> refers to the JOBLUX member ecosystem as a whole. JOBLUX
             operates as a curated, invitation-based society of luxury professionals, and the term
             "Society" encompasses all active members and the collective culture, standards, and values
             they uphold.
@@ -84,7 +84,7 @@ export default function TermsOfServicePage() {
             and career intelligence.
           </p>
           <p className="mt-3">
-            <strong>"BlogLux"</strong> refers to the editorial and community blog section of the
+            <strong>"BlogLux"</strong> refers to the editorial and ecosystem blog section of the
             Platform where Members and the JOBLUX team publish articles, thought pieces, and industry
             commentary.
           </p>
@@ -118,7 +118,7 @@ export default function TermsOfServicePage() {
           <p className="mt-3">
             JOBLUX reserves the absolute right to reject any application or revoke any invitation at
             its sole discretion, without obligation to provide a reason. This right extends to
-            applications that are incomplete, fraudulent, or that do not meet our community standards.
+            applications that are incomplete, fraudulent, or that do not meet our ecosystem standards.
           </p>
           <p className="mt-3">
             Members registering under the Business tier or seeking Insider status may be subject to
@@ -154,7 +154,7 @@ export default function TermsOfServicePage() {
             The free-against-contribution model ensures that JOBLUX remains accessible to all
             qualified luxury professionals, regardless of their financial situation. It also ensures
             that the data and insights on the Platform remain fresh, relevant, and uniquely valuable to
-            the community.
+            the ecosystem.
           </p>
         </section>
 
@@ -186,7 +186,7 @@ export default function TermsOfServicePage() {
             Contributions generated with the assistance of artificial intelligence (AI) tools are
             permitted, provided they are clearly identified as AI-assisted and meet the same quality
             and accuracy standards as human-authored content. JOBLUX reserves the right to label,
-            flag, or remove AI-generated content that does not meet community standards or that may
+            flag, or remove AI-generated content that does not meet ecosystem standards or that may
             mislead other Members.
           </p>
           <p className="mt-3">

@@ -106,12 +106,12 @@ export default function OpportunitiesClient({ initialOpportunities }: { initialO
       {/* ── Page header ────────────────────────────────────────────── */}
       <div className="border-b-2 border-[#1a1a1a] py-10 bg-white">
         <div className="jl-container">
-          <div className="jl-overline-gold mb-3">Current Opportunities</div>
+          <div className="jl-overline-gold mb-3">Confidential Search Assignments</div>
           <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a] mb-3">
-            Opportunities
+            Current assignments
           </h1>
           <p className="font-sans text-sm text-[#888] max-w-xl">
-            Confidential and exclusive assignments across luxury. All positions are handled with full discretion by the JOBLUX team.
+            Active search assignments handled with full discretion by JOBLUX. All introductions are managed privately — no direct contact until both parties are ready.
           </p>
         </div>
       </div>
@@ -187,10 +187,10 @@ export default function OpportunitiesClient({ initialOpportunities }: { initialO
           <div className="text-center py-16 px-6">
             <p className="jl-serif text-xl text-[#1a1a1a] mb-3">No open positions at the moment.</p>
             <p className="text-sm text-[#888] mb-6">
-              New opportunities are added regularly. Join JOBLUX to be notified when positions become available.
+              New opportunities are added regularly. Request access to be notified when positions become available.
             </p>
             <div className="flex items-center justify-center gap-3">
-              <Link href="/join" className="jl-btn jl-btn-primary">Join JOBLUX</Link>
+              <Link href="/join" className="jl-btn jl-btn-primary">Request Access</Link>
               <button
                 onClick={() => {
                   setSearchQuery(''); setDeptFilter(''); setSeniorityFilter('')
@@ -293,11 +293,11 @@ export default function OpportunitiesClient({ initialOpportunities }: { initialO
         <div className="mt-10 p-6 bg-[#fafaf5] border border-[#e8e2d8] text-center">
           <div className="jl-overline-gold mb-2">For Employers</div>
           <p className="font-sans text-sm text-[#666] mb-4">
-            Submit a confidential hiring brief. JOBLUX presents pre-screened candidates from our vetted network.
+            Submit a confidential hiring brief. JOBLUX presents pre-screened candidates from our intelligence network.
           </p>
           <div className="flex items-center justify-center gap-3">
             <Link href="/join?type=employer" className="jl-btn jl-btn-primary">Submit a Search Assignment</Link>
-            <Link href="/join" className="jl-btn jl-btn-outline">Join JOBLUX</Link>
+            <Link href="/join" className="jl-btn jl-btn-outline">Request Access</Link>
           </div>
         </div>
       </div>

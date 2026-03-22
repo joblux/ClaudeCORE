@@ -7,12 +7,11 @@ import SearchOverlay from '@/components/SearchOverlay'
 import { useMember } from '@/lib/auth-hooks'
 
 const publicNavItems = [
-  { label: 'WikiLux', href: '/wikilux' },
-  { label: 'Careers', href: '/opportunities' },
-  { label: 'Interviews', href: '/interviews' },
+  { label: 'Intelligence', href: '/wikilux' },
   { label: 'Salaries', href: '/salaries' },
-  { label: 'Coaching', href: '/coaching' },
-  { label: 'Bloglux', href: '/bloglux' },
+  { label: 'Interviews', href: '/interviews' },
+  { label: 'Insights', href: '/bloglux' },
+  { label: 'Private Services', href: '/services' },
 ]
 
 const authOnlyNavItems: { label: string; href: string }[] = []
@@ -40,7 +39,7 @@ export function Header() {
             className="hidden md:flex items-center gap-2 w-full max-w-md mx-6 px-4 py-2 border border-[#d5d0c8] rounded-full text-left hover:border-[#a58e28] transition-colors cursor-text"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#999] flex-shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            <span className="text-sm text-[#999] truncate">Search opportunities, brands, intelligence...</span>
+            <span className="text-sm text-[#999] truncate">Search intelligence, brands, salaries...</span>
           </button>
 
           {/* Center search field — mobile */}
@@ -60,7 +59,7 @@ export function Header() {
               <span className="hidden sm:inline-flex text-sm font-medium">
                 <Link href="/members" className="text-[#1a1a1a] hover:text-[#a58e28] transition-colors">Log in</Link>
                 <span className="text-[#1a1a1a]/30 mx-1.5">/</span>
-                <Link href="/join" className="text-[#a58e28] hover:text-[#1a1a1a] transition-colors">Join</Link>
+                <Link href="/join" className="text-[#a58e28] hover:text-[#1a1a1a] transition-colors">Request access</Link>
               </span>
             )}
 
@@ -115,7 +114,7 @@ export function Header() {
                   onClick={() => setMobileOpen(false)}
                   className="block mt-3 py-3 text-center bg-[#a58e28] text-[#1a1a1a] text-sm font-semibold rounded-md"
                 >
-                  Join
+                  Request access
                 </Link>
               )}
             </div>

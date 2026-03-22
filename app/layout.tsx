@@ -19,15 +19,15 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.luxuryrecruiter.com'),
   alternates: { canonical: './' },
   title: {
-    default: 'JOBLUX — Luxury Talents Society',
+    default: 'JOBLUX — Luxury Industry Careers Intelligence',
     template: '%s',
   },
   description:
-    "The society for luxury professionals. Salary data, brand insights, executive search, and career intelligence across 150+ maisons. Free against contribution — no ads, no noise.",
+    "The confidential gateway for luxury industry careers intelligence, private recruitment, and travel advisory. Salary data, interview insights, and brand intelligence across 500+ maisons.",
   icons: { icon: '/favicon.svg' },
   openGraph: {
-    title: "JOBLUX | Luxury Talents Society",
-    description: "The society for luxury professionals. Salary data, brand insights, executive search, and career intelligence across 150+ maisons.",
+    title: "JOBLUX — Luxury Industry Careers Intelligence",
+    description: "The confidential gateway for luxury industry careers intelligence, private recruitment, and travel advisory. Salary data, interview insights, and brand intelligence across 500+ maisons.",
     url: "https://www.luxuryrecruiter.com",
     siteName: "JOBLUX",
     locale: "en_US",
@@ -37,14 +37,14 @@ export const metadata: Metadata = {
         url: "https://www.luxuryrecruiter.com/api/og?title=JOBLUX&subtitle=Luxury+Talents+Society",
         width: 1200,
         height: 630,
-        alt: "JOBLUX | Luxury Talents Society",
+        alt: "JOBLUX — Luxury Industry Careers Intelligence",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "JOBLUX | Luxury Talents Society",
-    description: "The society for luxury professionals. Salary data, brand insights, executive search, and career intelligence across 150+ maisons.",
+    title: "JOBLUX — Luxury Industry Careers Intelligence",
+    description: "The confidential gateway for luxury industry careers intelligence, private recruitment, and travel advisory. Salary data, interview insights, and brand intelligence across 500+ maisons.",
     images: ["https://www.luxuryrecruiter.com/api/og?title=JOBLUX&subtitle=Luxury+Talents+Society"],
   },
 };

@@ -190,12 +190,12 @@ export default function InvitePage() {
       {/* Header */}
       <section className="border-b border-[#e8e2d8] bg-white">
         <div className="jl-container py-12 md:py-16">
-          <p className="jl-overline-gold mb-3">Grow the Community</p>
+          <p className="jl-overline-gold mb-3">Grow the Ecosystem</p>
           <h1 className="jl-serif text-3xl md:text-4xl text-[#1a1a1a] mb-3">
             Invite Colleagues
           </h1>
           <p className="text-[#666] max-w-xl">
-            JOBLUX is built by invitation. Share the platform with luxury professionals in your network — the stronger the community, the richer the intelligence.
+            JOBLUX is built by invitation. Share the platform with luxury professionals in your network — the stronger the ecosystem, the richer the intelligence.
           </p>
         </div>
       </section>
@@ -512,14 +512,14 @@ export default function InvitePage() {
                       <p className="text-sm text-[#666] leading-relaxed">
                         I&apos;d like to invite you to JOBLUX — the society for luxury professionals.
                         Free access to salary data, brand insights, and executive positions across 150+ maisons.
-                        No ads, no noise — just real intelligence from the community.
+                        No ads, no noise — just real intelligence from the ecosystem.
                       </p>
                       <p className="text-sm text-[#a58e28] mt-2">{inviteLink}</p>
                     </div>
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText(
-                          `I'd like to invite you to JOBLUX — the society for luxury professionals. Free access to salary data, brand insights, and executive positions across 150+ maisons. No ads, no noise — just real intelligence from the community.\n\n${inviteLink}`
+                          `I'd like to invite you to JOBLUX — the society for luxury professionals. Free access to salary data, brand insights, and executive positions across 150+ maisons. No ads, no noise — just real intelligence from the ecosystem.\n\n${inviteLink}`
                         )
                         setSuccess('Message copied to clipboard!')
                       }}

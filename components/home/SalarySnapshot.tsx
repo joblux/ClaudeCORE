@@ -56,7 +56,7 @@ export async function SalarySnapshot() {
   return (
     <div>
       <div className="jl-section-label">
-        <span>Salary Snapshot</span>
+        <span>Salary Intelligence</span>
       </div>
 
       <div className="space-y-0">

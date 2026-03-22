@@ -5,11 +5,11 @@ import BlogluxClient from './BlogluxClient'
 import type { Article } from './BlogluxClient'
 
 export const metadata: Metadata = {
-  title: 'BlogLux — Luxury Industry News & Analysis | JOBLUX',
+  title: 'Insights — Luxury Industry Analysis | JOBLUX',
   description: 'Expert analysis, career insights, and industry intelligence from across the luxury sector.',
   alternates: { canonical: 'https://www.joblux.com/bloglux' },
   openGraph: {
-    title: 'BlogLux | JOBLUX',
+    title: 'Insights | JOBLUX',
     description: 'Expert analysis, career insights, and industry intelligence from across the luxury sector.',
     images: ['/api/og?title=BlogLux&subtitle=Luxury+Industry+Intelligence&type=article'],
   },

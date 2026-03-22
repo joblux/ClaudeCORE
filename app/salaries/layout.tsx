@@ -2,11 +2,11 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Salary Intelligence — Luxury Industry Compensation Data | JOBLUX',
-  description: 'Salary benchmarks for 15 roles across 8 global markets. Compensation data for Louis Vuitton, Chanel, Hermès and 150+ luxury maisons.',
+  description: 'Confidential salary benchmarks across 15 roles, 8 global markets, and 500+ maisons. Built on real data contributed by industry professionals.',
   alternates: { canonical: 'https://www.joblux.com/salaries' },
   openGraph: {
     title: 'Salary Intelligence | JOBLUX',
-    description: 'Salary benchmarks across luxury. Compensation data for 150+ maisons.',
+    description: 'Confidential salary benchmarks across 500+ luxury maisons.',
     images: [
       {
         url: '/api/og?title=Salary+Intelligence&subtitle=Luxury+Industry+Compensation&type=page',
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Salary Intelligence | JOBLUX',
-    description: 'Salary benchmarks across luxury. Compensation data for 150+ maisons.',
+    description: 'Confidential salary benchmarks across 500+ luxury maisons.',
     images: ['/api/og?title=Salary+Intelligence&subtitle=Luxury+Industry+Compensation&type=page'],
   },
 }

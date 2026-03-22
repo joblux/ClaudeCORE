@@ -125,13 +125,13 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
           if (isBusiness) {
             if (!m.company_name && !m.maison) setCompletenessHint('Add your company name to get started')
             else if (!m.bio && !m.headline) setCompletenessHint('Add a company description')
-            else if (score < total) setCompletenessHint('Complete more sections to improve visibility')
+            else if (score < total) setCompletenessHint('Complete more sections to strengthen your profile')
             else setCompletenessHint('Your company profile is complete!')
           } else {
             if (!m.headline) setCompletenessHint('Add a headline to stand out')
             else if (profileData.documents?.length === 0) setCompletenessHint('Upload your CV to unlock full opportunity matching')
             else if (!(m.city && m.country)) setCompletenessHint('Add your location to improve matching')
-            else if (score < total) setCompletenessHint('Complete more sections to improve your match rate')
+            else if (score < total) setCompletenessHint('Complete more sections to improve your relevance')
             else setCompletenessHint('Your profile is complete!')
           }
 
@@ -344,14 +344,13 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
   const proKpis = [
     { label: 'Matched Opportunities', value: String(opportunities.length), gold: false },
     { label: 'Applications', value: String(applicationCount), gold: false },
-    { label: 'Profile Views', value: '—', gold: false },
+    { label: 'Profile Strength', value: '—', gold: false },
     { label: 'Contribution Points', value: String(contributionPoints), gold: true },
   ]
 
   const proActions = [
     { label: 'Browse opportunities', href: '/opportunities', desc: 'Matched positions' },
-    { label: 'Upload CV', href: '/profile', desc: 'Improve your match rate' },
-    { label: 'Share your profile', href: '/profile', desc: 'Increase visibility' },
+    { label: 'Upload CV', href: '/profile', desc: 'Improve your relevance' },
     { label: 'Contribute an insight', href: '/contribute', desc: 'Earn contribution points' },
     { label: 'Browse WikiLux', href: '/wikilux', desc: '500+ brand encyclopedias' },
   ]

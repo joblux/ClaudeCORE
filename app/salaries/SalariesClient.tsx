@@ -65,7 +65,7 @@ export default function SalariesClient({ initialEntries, initialTotal, initialSt
             Know Your Worth
           </h1>
           <p className="font-sans text-xs md:text-sm text-[#bbb] max-w-2xl mx-auto leading-relaxed">
-            Salary benchmarks, comparisons, and personalised estimates across the world&rsquo;s most prestigious maisons.
+            Confidential salary benchmarks across 15 roles, 8 global markets, and 500+ maisons. Built on real data contributed by industry professionals.
           </p>
         </div>
       </section>
@@ -317,7 +317,7 @@ function BrowseTab({ accessLevel, initialEntries, initialTotal, initialStats, in
               {hasFilters ? 'No salary data matches your search' : 'Salary Intelligence is building'}
             </p>
             <p className="text-sm text-[#888] mb-4">
-              {hasFilters ? 'Try broadening your filters' : 'Be the first to contribute salary data and help the community'}
+              {hasFilters ? 'Try broadening your filters' : 'Be the first to contribute salary data and help the ecosystem'}
             </p>
             <Link href="/contribute" className="jl-btn-primary">Contribute Salary Data</Link>
           </div>
@@ -341,7 +341,7 @@ function BrowseTab({ accessLevel, initialEntries, initialTotal, initialStats, in
       <aside className="hidden lg:block space-y-6">
         <div className="jl-card border-[#a58e28]">
           <h3 className="jl-serif text-lg text-[#1a1a1a] mb-2">Contribute Your Salary</h3>
-          <p className="text-xs text-[#888] leading-relaxed mb-4">Share your compensation data anonymously and earn 10 points towards unlocking advanced tools.</p>
+          <p className="text-xs text-[#888] leading-relaxed mb-4">Contribute your salary data — it takes one minute and strengthens the intelligence for everyone.</p>
           <Link href="/contribute" className="jl-btn-gold w-full text-center">Contribute</Link>
         </div>
         <div className="jl-card">

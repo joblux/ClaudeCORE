@@ -5,7 +5,7 @@ import { WIKILUX_CATEGORY_ICONS } from '@/lib/sector-icons'
 import WikiLuxSearch from './WikiLuxSearch'
 
 export const metadata: Metadata = {
-  title: 'WikiLux — 500+ Luxury Maisons Directory | JOBLUX',
+  title: 'Brand Intelligence — 500+ Luxury Maisons | JOBLUX',
   description: 'Explore career intelligence, salary data, and interview insights for over 500 luxury brands including LVMH, Kering, Richemont, Hermès, Chanel and more.',
   alternates: { canonical: 'https://www.joblux.com/wikilux' },
   openGraph: {
@@ -62,12 +62,12 @@ export default function WikiLuxPage() {
       {/* HERO */}
       <div className="bg-[#222222] py-14">
         <div className="jl-container-sm text-center">
-          <div className="jl-overline-gold mb-4">WikiLux by JOBLUX</div>
+          <div className="jl-overline-gold mb-4">BRAND INTELLIGENCE</div>
           <h1 className="jl-serif text-4xl md:text-5xl font-light text-white mb-4">
-            The Luxury Brand Encyclopedia
+            500+ luxury maisons. One intelligence source.
           </h1>
           <p className="font-sans text-sm text-[#888] mb-8 max-w-lg mx-auto">
-            {BRANDS.length}+ maisons &middot; Fashion &middot; Watches &middot; Jewellery &middot; Automotive &middot; Hospitality &middot; Beauty
+            Career intelligence, salary benchmarks, interview insights, and hiring signals for every major luxury house — from LVMH to independent ateliers.
           </p>
           <div className="flex items-center justify-center gap-8 flex-wrap">
             {[
@@ -85,6 +85,8 @@ export default function WikiLuxPage() {
       </div>
 
       <div className="jl-container py-10">
+
+        <p className="font-sans text-sm text-[#666] leading-relaxed mb-8 max-w-2xl">The brand intelligence directory is built on public data, AI research, and — most importantly — confidential contributions from professionals who have worked inside these houses.</p>
 
         <WikiLuxSearch brands={BRANDS} categories={categories} />
 

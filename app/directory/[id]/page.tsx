@@ -308,9 +308,9 @@ export default function MemberProfilePage() {
 
             {/* Contributions */}
             {m.contribution_count > 0 && (
-              <ProfileSection title="Community">
+              <ProfileSection title="Ecosystem">
                 <p className="text-sm text-[#888]">
-                  {m.contribution_count} contribution{m.contribution_count !== 1 ? 's' : ''} to the JOBLUX community
+                  {m.contribution_count} contribution{m.contribution_count !== 1 ? 's' : ''} to the JOBLUX ecosystem
                 </p>
               </ProfileSection>
             )}

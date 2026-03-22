@@ -108,7 +108,7 @@ function RoleBadge({ role }: { role: string | null }) {
         border: `1px solid ${GOLD}30`,
       }}
     >
-      {role ?? "member"}
+      {role ?? "professional"}
     </span>
   );
 }
@@ -292,7 +292,7 @@ export default function MemberProfilePage() {
       <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", background: CREAM, fontFamily: "sans-serif" }}>
         <div style={{ textAlign: "center" }}>
           <div style={{ width: 32, height: 32, border: `2px solid ${BORDER}`, borderTopColor: GOLD, borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 16px" }} />
-          <div style={{ fontSize: 14, color: "#888" }}>Loading member profile...</div>
+          <div style={{ fontSize: 14, color: "#888" }}>Loading profile...</div>
         </div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -304,8 +304,8 @@ export default function MemberProfilePage() {
     return (
       <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", background: CREAM, fontFamily: "sans-serif" }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontFamily: "serif", fontSize: 24, color: BLACK, marginBottom: 8 }}>Member not found</div>
-          <div style={{ fontSize: 13, color: "#999", marginBottom: 24 }}>The member profile could not be loaded.</div>
+          <div style={{ fontFamily: "serif", fontSize: 24, color: BLACK, marginBottom: 8 }}>Profile not found</div>
+          <div style={{ fontSize: 13, color: "#999", marginBottom: 24 }}>The profile could not be loaded.</div>
           <a
             href="/admin"
             style={{
@@ -336,7 +336,7 @@ export default function MemberProfilePage() {
       {/* Back link */}
       <div style={{ padding: "16px 32px 0" }}>
         <a href="/admin" style={{ fontSize: 12, color: GOLD, textDecoration: "none", letterSpacing: 0.5 }}>
-          &larr; Back to Members
+          &larr; Back to Profiles
         </a>
       </div>
 
@@ -366,7 +366,7 @@ export default function MemberProfilePage() {
               <RoleBadge role={member.role} />
               <StatusBadge status={member.status} />
               <span style={{ fontSize: 11, color: "#aaa", marginLeft: 8 }}>
-                Member since {formatDate(member.created_at as any)}
+                Joined {formatDate(member.created_at as any)}
               </span>
             </div>
 

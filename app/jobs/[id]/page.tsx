@@ -499,13 +499,13 @@ export default function JobDetailPage() {
                 )
               ) : (
                 <div className="p-4 bg-[#222222] text-center">
-                  <div className="jl-overline-gold mb-2">Members Only</div>
+                  <div className="jl-overline-gold mb-2">Professionals Only</div>
                   <p className="font-sans text-xs text-[#888] mb-3">
                     Sign in to view full details and express interest.
                   </p>
                   <div className="flex items-center justify-center gap-2">
                     <Link href="/members" className="jl-btn jl-btn-gold text-[0.6rem] py-1.5 px-3">Sign In</Link>
-                    <Link href="/join" className="jl-btn jl-btn-ghost text-[0.6rem] py-1.5 px-3">Join</Link>
+                    <Link href="/join" className="jl-btn jl-btn-ghost text-[0.6rem] py-1.5 px-3">Request Access</Link>
                   </div>
                 </div>
               )}

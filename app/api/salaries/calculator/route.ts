@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
     if (yrsExp < 5) {
       recommendations.push('Focus on building luxury-specific experience — compensation increases significantly after 5+ years in the sector')
     }
-    recommendations.push('Contribute your own salary data to improve estimates for the entire community')
+    recommendations.push('Contribute your own salary data to improve estimates for the entire ecosystem')
 
     const confidence = validContribs.length > 0 ? 'aggregated' : (exactBms || []).length > 3 ? 'estimated' : 'limited'
 

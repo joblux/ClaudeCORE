@@ -177,10 +177,10 @@ export default function JobsPage() {
           <div className="text-center py-16 px-6">
             <p className="jl-serif text-xl text-[#1a1a1a] mb-3">No current openings match your criteria.</p>
             <p className="text-sm text-[#888] mb-6">
-              Check back soon or join JOBLUX to be notified of new opportunities.
+              Check back soon or request access to be notified of new opportunities.
             </p>
             <div className="flex items-center justify-center gap-3">
-              <Link href="/join" className="jl-btn jl-btn-primary">Join JOBLUX</Link>
+              <Link href="/join" className="jl-btn jl-btn-primary">Request Access</Link>
               <button
                 onClick={() => {
                   setSearchQuery(''); setDeptFilter(''); setSeniorityFilter('')
@@ -287,7 +287,7 @@ export default function JobsPage() {
           </p>
           <div className="flex items-center justify-center gap-3">
             <Link href="/join?type=employer" className="jl-btn jl-btn-primary">Submit a Search Assignment</Link>
-            <Link href="/join" className="jl-btn jl-btn-outline">Join JOBLUX</Link>
+            <Link href="/join" className="jl-btn jl-btn-outline">Request Access</Link>
           </div>
         </div>
       </div>

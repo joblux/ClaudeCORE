@@ -21,36 +21,36 @@ const faqData: FaqCategory[] = [
     items: [
       {
         q: 'What is JOBLUX?',
-        a: 'A private society for luxury industry professionals. Founded in Paris in 2006, bringing together careers, intelligence, and a shared passion for excellence in the premium-to-ultra-luxury segment.',
+        a: 'A confidential careers intelligence gateway for the luxury industry. Founded in Paris in 2006, bringing together salary data, interview insights, brand intelligence, and private recruitment across the premium-to-ultra-luxury segment.',
       },
       {
         q: 'Is JOBLUX free?',
         a: 'Yes. Free to use with no ads, no subscriptions, no paywalls. JOBLUX operates on a "free against contribution" model \u2014 share knowledge to unlock deeper intelligence.',
       },
       {
-        q: 'Who can join JOBLUX?',
+        q: 'Who can access JOBLUX?',
         a: 'Anyone connected to the luxury industry: professionals at all levels, students aspiring to work in luxury, brands, recruiters, industry enthusiasts. All applications are reviewed and curated.',
       },
       {
         q: 'How is JOBLUX different from LinkedIn?',
-        a: 'Exclusively dedicated to the luxury industry. Every feature, piece of content, and person serves the premium-to-ultra-luxury segment. A curated society, not a general-purpose network.',
+        a: 'Exclusively dedicated to the luxury industry. Every feature, piece of content, and person serves the premium-to-ultra-luxury segment. A curated portal, not a general-purpose network.',
       },
     ],
   },
   {
-    label: 'Joining JOBLUX',
+    label: 'Accessing JOBLUX',
     items: [
       {
-        q: 'How do I join?',
+        q: 'How do I request access?',
         a: 'Click "Request Access" and sign in with Google or LinkedIn. Complete the registration form. Most applications are processed within 24\u201348 hours.',
       },
       {
         q: 'Why was my application not approved?',
-        a: 'We review every application to ensure JOBLUX remains relevant to the luxury industry. You may reapply with updated information. Use the contact form below for details.',
+        a: 'We review every application to ensure JOBLUX remains relevant to the luxury industry. You may reapply with updated information. Use the contact section below for details.',
       },
       {
         q: 'Can I invite colleagues?',
-        a: 'Yes. Approved accounts can invite colleagues via the Invite page on their dashboard.',
+        a: 'Yes. Approved professionals can invite colleagues via the Invite page on their dashboard.',
       },
       {
         q: 'What are the different tiers?',
@@ -117,7 +117,7 @@ const faqData: FaqCategory[] = [
       },
       {
         q: 'What is WikiLux?',
-        a: 'The luxury industry\u2019s encyclopedia \u2014 500+ brand pages covering history, leadership, culture, careers, salary intelligence. Independently compiled by JOBLUX, enriched by web sources and contributions.',
+        a: 'The luxury industry\u2019s encyclopedia \u2014 500+ brand pages covering history, leadership, culture, careers, salary intelligence. Independently compiled by JOBLUX, enriched by web sources and professional contributions.',
       },
     ],
   },
@@ -196,7 +196,7 @@ const categoryCards: CategoryCard[] = [
 ]
 
 const subcategoryMap: Record<ContactCategory, string[]> = {
-  professional: ['About opportunities', 'My profile', 'Contributions & points', 'Salary or interview data', 'Joining JOBLUX', 'Other'],
+  professional: ['About opportunities', 'My profile', 'Contributions & points', 'Salary or interview data', 'Accessing JOBLUX', 'Other'],
   brand: ['Executive search services', 'Post an internship', 'Partnership or sponsorship', 'WikiLux brand page', 'Other'],
   travel: ['Booking enquiry', 'Travel consulting', 'Local advisor request', 'Other'],
   technical: ['Login issue', 'Profile or account', 'Content not loading', 'Other bug'],
@@ -574,6 +574,33 @@ export default function FaqPage() {
           </div>
         )}
       </section>
+
+      {/* CONTACT SECTION */}
+      <div className="max-w-3xl mx-auto px-6 pb-20">
+        <div className="border-t border-[#e8e2d8] mt-12 pt-12">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="jl-serif text-xl font-light text-[#1a1a1a] mb-3">Discreet enquiries welcome</h2>
+            <p className="font-sans text-sm text-[#666] leading-relaxed mb-8">
+              Whether you are a maison considering a confidential search, a professional exploring a move, or an executive seeking bespoke travel — we respond to every enquiry personally.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+              <div className="p-4 border border-[#e8e2d8]">
+                <div className="jl-overline-gold mb-2">Confidential Recruitment</div>
+                <a href="mailto:recruitment@joblux.com" className="font-sans text-xs text-[#a58e28] hover:text-[#1a1a1a] transition-colors">recruitment@joblux.com</a>
+              </div>
+              <div className="p-4 border border-[#e8e2d8]">
+                <div className="jl-overline-gold mb-2">Travel Advisory</div>
+                <a href="mailto:travel@joblux.com" className="font-sans text-xs text-[#a58e28] hover:text-[#1a1a1a] transition-colors">travel@joblux.com</a>
+              </div>
+              <div className="p-4 border border-[#e8e2d8]">
+                <div className="jl-overline-gold mb-2">General Enquiry</div>
+                <a href="mailto:hello@joblux.com" className="font-sans text-xs text-[#a58e28] hover:text-[#1a1a1a] transition-colors">hello@joblux.com</a>
+              </div>
+            </div>
+            <p className="font-sans text-[0.65rem] text-[#aaa]">All enquiries are confidential. We respond within 24 hours.</p>
+          </div>
+        </div>
+      </div>
     </main>
   )
 }

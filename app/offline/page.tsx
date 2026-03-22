@@ -106,7 +106,7 @@ export default function OfflinePage() {
                 opacity: 0.8,
               }}
             >
-              Luxury Talents Society
+              Luxury Industry Careers Intelligence
             </p>
           </div>
 

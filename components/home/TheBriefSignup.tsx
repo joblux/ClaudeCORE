@@ -59,7 +59,7 @@ export function TheBriefSignup() {
               disabled={status === 'loading'}
               className="bg-[#a58e28] text-[#1a1a1a] px-4 font-sans text-[0.6rem] font-bold tracking-widest uppercase hover:bg-[#e4b042] transition-colors disabled:opacity-50"
             >
-              {status === 'loading' ? '...' : 'Join'}
+              {status === 'loading' ? '...' : 'Subscribe'}
             </button>
           </div>
           {status === 'error' && (

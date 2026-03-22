@@ -179,10 +179,10 @@ export default function InterviewsClient({
         <div className="jl-container text-center">
           <div className="jl-overline-gold mb-2 tracking-[0.2em]">Interview Intelligence</div>
           <h1 className="jl-serif text-2xl md:text-3xl font-light text-white mb-2">
-            Inside the Maisons
+            Inside the interview rooms of luxury
           </h1>
           <p className="font-sans text-xs md:text-sm text-[#bbb] max-w-2xl mx-auto leading-relaxed mb-3">
-            Real interview experiences from luxury professionals. Contributed by professionals, anonymised for your benefit.
+            Confidential interview experiences shared by professionals who have been through the process at the industry's most selective maisons.
           </p>
           {stats && stats.total_experiences > 0 && (
             <div className="flex items-center justify-center gap-4 text-xs text-[#999] tracking-wide uppercase">
@@ -383,9 +383,9 @@ export default function InterviewsClient({
 
             {/* Contribute CTA */}
             <div className="jl-card border-[#a58e28]">
-              <h3 className="jl-serif text-lg text-[#1a1a1a] mb-2">Share Your Experience</h3>
+              <h3 className="jl-serif text-lg text-[#1a1a1a] mb-2">Contribute Your Experience</h3>
               <p className="text-xs text-[#888] leading-relaxed mb-4">
-                Contribute your interview experience and earn 10 points towards unlocking more intelligence.
+                Contribute your interview experience — it takes one minute and strengthens the intelligence for everyone.
               </p>
               <Link href="/contribute" className="jl-btn-gold w-full text-center">
                 Contribute
@@ -550,10 +550,10 @@ function EmptyStateLaunch() {
           Interview Intelligence is launching
         </h2>
         <p className="text-sm text-[#888] leading-relaxed mb-8">
-          Be the first to contribute your interview experience at a luxury maison and help build the most valuable intelligence resource for the community.
+          Be the first to contribute your interview experience at a luxury maison and help build the most valuable intelligence resource for the ecosystem.
         </p>
         <Link href="/contribute" className="jl-btn-primary">
-          Share Your Experience
+          Contribute Your Experience
         </Link>
 
         {/* Preview cards */}

@@ -410,7 +410,7 @@ export default function PendingPage() {
       <main className="min-h-screen bg-[#fafaf5] flex items-center justify-center px-6">
         <div className="max-w-md w-full text-center">
           <h2 className="jl-serif text-3xl text-[#1a1a1a] mb-2">JOBLUX</h2>
-          <p className="text-sm tracking-[0.2em] uppercase text-[#a58e28] mb-10">Luxury Talents Society</p>
+          <p className="text-sm tracking-[0.2em] uppercase text-[#a58e28] mb-10">Luxury Industry Careers Intelligence</p>
           <div className="bg-white border border-[#e8e2d8] rounded-sm p-8">
             <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[#fafaf5] border border-[#a58e28] flex items-center justify-center">
               <svg className="w-6 h-6 text-[#a58e28]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -436,7 +436,7 @@ export default function PendingPage() {
       <main className="min-h-screen bg-[#fafaf5] flex items-center justify-center px-6">
         <div className="max-w-md w-full text-center">
           <h2 className="jl-serif text-3xl text-[#1a1a1a] mb-2">JOBLUX</h2>
-          <p className="text-sm tracking-[0.2em] uppercase text-[#a58e28] mb-10">Luxury Talents Society</p>
+          <p className="text-sm tracking-[0.2em] uppercase text-[#a58e28] mb-10">Luxury Industry Careers Intelligence</p>
           <div className="bg-white border border-[#e8e2d8] rounded-sm p-8">
             <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[#fafaf5] border border-[#e8e2d8] flex items-center justify-center">
               <svg className="w-6 h-6 text-[#a58e28]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

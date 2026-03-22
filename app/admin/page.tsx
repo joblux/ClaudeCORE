@@ -216,7 +216,7 @@ export default function AdminPage() {
       <div className="px-6 py-5 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
           <div>
-            <h1 className="text-xl font-medium text-[#1a1a1a]">Members</h1>
+            <h1 className="text-xl font-medium text-[#1a1a1a]">Profiles</h1>
             <p className="text-sm text-gray-400 mt-0.5">
               {counts.total} total · {counts.pending} pending approval
             </p>
@@ -228,7 +228,7 @@ export default function AdminPage() {
             </button>
             <button className="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold tracking-wide uppercase bg-[#a58e28] text-white rounded-lg hover:bg-[#8a7622] transition-colors">
               <UserPlus size={13} />
-              Invite member
+              Invite professional
             </button>
           </div>
         </div>
@@ -328,8 +328,8 @@ export default function AdminPage() {
         {counts.pending > 0 && (
           <div className="bg-[#a58e28]/[0.06] border border-[#a58e28]/20 rounded-lg p-4 mb-5 flex items-center justify-between">
             <div>
-              <span className="text-sm font-medium text-[#1a1a1a]">{counts.pending} member{counts.pending !== 1 ? 's' : ''} awaiting approval</span>
-              <span className="text-sm text-gray-500 ml-2">Review pending applications to grow the community</span>
+              <span className="text-sm font-medium text-[#1a1a1a]">{counts.pending} profile{counts.pending !== 1 ? 's' : ''} awaiting approval</span>
+              <span className="text-sm text-gray-500 ml-2">Review pending applications to grow the ecosystem</span>
             </div>
             <button
               onClick={() => { setStatusFilter("pending"); setRoleFilter("all"); }}
@@ -352,7 +352,7 @@ export default function AdminPage() {
                 className="rounded border-gray-300"
               />
             </div>
-            <div>Member</div>
+            <div>Profile</div>
             <div>Email</div>
             <div>Tier</div>
             <div>Status</div>
@@ -364,7 +364,7 @@ export default function AdminPage() {
           {loading ? (
             <div className="px-5 py-12 text-center text-sm text-gray-400">Loading…</div>
           ) : filteredMembers.length === 0 ? (
-            <div className="px-5 py-12 text-center text-sm text-gray-400">No members found.</div>
+            <div className="px-5 py-12 text-center text-sm text-gray-400">No profiles found.</div>
           ) : (
             filteredMembers.map((m) => {
               const busy = acting.has(m.id);
@@ -506,7 +506,7 @@ export default function AdminPage() {
         {/* ── Pagination ── */}
         <div className="flex justify-between items-center mt-4 text-sm text-gray-500">
           <div>
-            Showing {totalRows > 0 ? startItem : 0}-{endItem} of {totalRows} members
+            Showing {totalRows > 0 ? startItem : 0}-{endItem} of {totalRows} profiles
           </div>
           <div className="flex items-center gap-2">
             <button

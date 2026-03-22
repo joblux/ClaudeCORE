@@ -146,7 +146,7 @@ export default function NewInternshipPage() {
             Post an Internship
           </h1>
           <p className="text-sm text-[#666] mt-1">
-            Submit an internship opportunity for review by the JOBLUX team. Once approved, it will be visible to our community.
+            Submit an internship opportunity for review by the JOBLUX team. Once approved, it will be visible to our ecosystem.
           </p>
         </div>
       </section>

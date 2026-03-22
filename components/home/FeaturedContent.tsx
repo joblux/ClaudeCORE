@@ -130,7 +130,7 @@ export async function FeaturedContent() {
       {others.length > 0 && (
         <div>
           <div className="jl-section-label">
-            <span>Bloglux</span>
+            <span>Insights</span>
           </div>
 
           <div className="space-y-0">
@@ -160,7 +160,7 @@ export async function FeaturedContent() {
             href="/bloglux"
             className="inline-block mt-4 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors"
           >
-            More from Bloglux →
+            More insights →
           </Link>
         </div>
       )}

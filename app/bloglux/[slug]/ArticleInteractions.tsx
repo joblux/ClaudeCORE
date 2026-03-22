@@ -148,7 +148,7 @@ export default function ArticleInteractions({ articleId, articleTitle, articleSl
             ) : (
               <div className="mb-8 p-4 bg-[#fafaf5] border border-[#e8e2d8] text-center">
                 <p className="font-sans text-sm text-[#888]">
-                  <Link href="/join" className="text-[#a58e28] hover:underline">Join JOBLUX</Link> to join the discussion.
+                  <Link href="/join" className="text-[#a58e28] hover:underline">Request access</Link> to join the discussion.
                 </p>
               </div>
             )}

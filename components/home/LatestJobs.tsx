@@ -29,7 +29,7 @@ export async function LatestJobs() {
   return (
     <div>
       <div className="jl-section-label">
-        <span>Latest Positions</span>
+        <span>Confidential Search Assignments</span>
       </div>
       <div className="space-y-0">
         {jobs.map((job) => {
@@ -55,8 +55,9 @@ export async function LatestJobs() {
           )
         })}
       </div>
+      <p className="font-sans text-[0.6rem] text-[#aaa] italic mt-2">All assignments handled with full discretion by JOBLUX.</p>
       <Link href="/opportunities" className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors">
-        All opportunities →
+        View all assignments →
       </Link>
     </div>
   )

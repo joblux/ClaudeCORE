@@ -43,7 +43,7 @@ export default function ContributePage() {
   const [error, setError] = useState('')
   const [points, setPoints] = useState<any>(null)
 
-  // Fetch member points on load
+  // Fetch professional's points on load
   useEffect(() => {
     fetch('/api/contributions/my-points')
       .then((res) => res.json())
@@ -195,12 +195,12 @@ export default function ContributePage() {
       {/* Header */}
       <section className="border-b border-[#e8e2d8] bg-white">
         <div className="jl-container py-12 md:py-16">
-          <p className="jl-overline-gold mb-3">Share Your Intelligence</p>
+          <p className="jl-overline-gold mb-3">CONTRIBUTE</p>
           <h1 className="jl-serif text-3xl md:text-4xl text-[#1a1a1a] mb-3">
-            Contribute to JOBLUX
+            Intelligence is built on contribution
           </h1>
           <p className="text-[#666] max-w-xl">
-            JOBLUX is built by the luxury community. Share your insider knowledge — salary data, interview experiences, brand insights — and unlock deeper intelligence from fellow professionals.
+            JOBLUX is free because professionals contribute what they know. A salary figure. An interview experience. A market signal. Every contribution sharpens the intelligence for everyone.
           </p>
         </div>
       </section>
@@ -377,7 +377,7 @@ export default function ContributePage() {
             {activeTab === 'salary' && (
               <div className="space-y-4">
               <div className="bg-[#fafaf5] border border-[#a58e28] rounded-sm p-4 flex items-center justify-between">
-                <p className="text-xs text-[#888]">See how your data helps the community understand luxury compensation.</p>
+                <p className="text-xs text-[#888]">See how your data helps professionals understand luxury compensation.</p>
                 <a href="/salaries" className="text-xs text-[#a58e28] hover:text-[#1a1a1a] transition-colors tracking-wide whitespace-nowrap ml-4">View Salary Intelligence &rarr;</a>
               </div>
               <div className="bg-white border border-[#e8e2d8] rounded-sm p-6 space-y-4">

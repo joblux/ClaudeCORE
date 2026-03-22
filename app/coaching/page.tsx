@@ -41,12 +41,12 @@ export default function CareerIntelligencePage() {
     <div className="bg-[#f5f4f0] min-h-screen">
       <div className="border-b-2 border-[#1a1a1a] py-10 bg-white">
         <div className="jl-container">
-          <div className="jl-overline-gold mb-3">Career Intelligence</div>
+          <div className="jl-overline-gold mb-3">CAREER INTELLIGENCE</div>
           <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a] mb-3">
-            Career Intelligence
+            Luxury industry career intelligence
           </h1>
           <p className="font-sans text-sm text-[#888] max-w-xl">
-            Compensation benchmarks, interview preparation, career strategies and recruiter insights from twenty years placing luxury professionals.
+            Salary benchmarks, interview preparation, and strategic career guidance for luxury industry professionals.
           </p>
         </div>
       </div>
@@ -126,9 +126,9 @@ export default function CareerIntelligencePage() {
 
           {/* MEMBERS GATE */}
           <div className="p-6 bg-[#222222] text-center">
-            <div className="jl-overline-gold mb-2">Members Only</div>
+            <div className="jl-overline-gold mb-2">Professionals Only</div>
             <p className="font-sans text-sm text-[#888] mb-4">
-              Full career guides, interview prep kits, salary data and recruiter insights. Available to approved JOBLUX members.
+              Full career guides, interview prep kits, salary data and recruiter insights. Available to approved JOBLUX professionals.
             </p>
             <div className="flex items-center justify-center gap-3">
               <Link href="/members" className="jl-btn jl-btn-gold">Sign In</Link>

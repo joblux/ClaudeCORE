@@ -175,7 +175,7 @@ export async function generateMetadata({
   return {
     title: `${name} — ${currentRole} | JOBLUX`,
     description:
-      resume.resume_headline || 'Luxury professional on JOBLUX | Luxury Talents Society',
+      resume.resume_headline || 'Luxury professional on JOBLUX | Luxury Industry Careers Intelligence',
     robots: { index: false, follow: false },
     openGraph: {
       images: [
@@ -219,7 +219,7 @@ export default async function ResumePage({
         >
           JOBLUX
         </span>
-        <span className="text-[#888] text-xs tracking-wide">Luxury Talents Society</span>
+        <span className="text-[#888] text-xs tracking-wide">Luxury Industry Careers Intelligence</span>
       </header>
 
       {/* ── Main content ───────────────────────────────────────── */}

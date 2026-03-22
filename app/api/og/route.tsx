@@ -6,7 +6,7 @@ export const runtime = 'edge'
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
   const title = searchParams.get('title') || 'JOBLUX'
-  const subtitle = searchParams.get('subtitle') || 'Luxury Talents Society'
+  const subtitle = searchParams.get('subtitle') || 'Luxury Industry Careers Intelligence'
   const type = searchParams.get('type') || 'page'
 
   return new ImageResponse(

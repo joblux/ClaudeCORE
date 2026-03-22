@@ -100,7 +100,7 @@ async function main() {
         max_tokens: 3000,
         messages: [{
           role: 'user',
-          content: `Write a luxury industry editorial article for JOBLUX | Luxury Talents Society.
+          content: `Write a luxury industry editorial article for JOBLUX | Luxury Industry Careers Intelligence.
 
 Title: "${topic.title}"
 Category: ${topic.category}

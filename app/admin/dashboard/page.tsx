@@ -223,7 +223,7 @@ export default function AdminDashboardPage() {
 
   const kpiCards = [
     {
-      label: 'MEMBERS',
+      label: 'PROFILES',
       value: kpis.members,
       sub: kpis.pendingMembers > 0 ? `+${kpis.pendingMembers} pending` : 'All reviewed',
       subColor: kpis.pendingMembers > 0 ? 'text-green-600' : 'text-gray-400',
@@ -330,9 +330,9 @@ export default function AdminDashboardPage() {
               {[
                 { label: 'New search assignment', href: '/admin/assignments/new', icon: Briefcase },
                 { label: 'Write BlogLux article', href: '/admin/articles/new', icon: PenLine },
-                ...(kpis.pendingMembers > 0 ? [{ label: `Review pending member (${kpis.pendingMembers})`, href: '/admin', icon: UserCheck }] : []),
+                ...(kpis.pendingMembers > 0 ? [{ label: `Review pending profile (${kpis.pendingMembers})`, href: '/admin', icon: UserCheck }] : []),
                 { label: 'Import content', href: '/admin/assignments/import', icon: Download },
-                { label: 'Invite members', href: '/admin/invitations', icon: Send },
+                { label: 'Invite professionals', href: '/admin/invitations', icon: Send },
               ].map((action) => {
                 const Icon = action.icon
                 return (

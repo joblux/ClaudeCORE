@@ -12,7 +12,7 @@ export function WikiLuxPreview() {
   return (
     <div>
       <div className="jl-section-label">
-        <span>WikiLux — Brand Intelligence</span>
+        <span>Brand Intelligence</span>
       </div>
       <div className="space-y-0">
         {wikiBrands.map((brand) => (

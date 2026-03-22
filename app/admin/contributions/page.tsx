@@ -90,7 +90,7 @@ export default function AdminContributionsPage() {
             Review Contributions
           </h1>
           <p className="text-sm text-[#666] mt-1">
-            Approve or reject member contributions. Points are awarded on approval.
+            Approve or reject contributions. Points are awarded on approval.
           </p>
         </div>
       </section>

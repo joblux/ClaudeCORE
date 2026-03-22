@@ -258,15 +258,15 @@ export default function AdminInvitationsPage() {
         {/* Header */}
         <div className="mb-6">
           <p className="jl-overline-gold mb-1">Admin</p>
-          <h1 className="text-2xl jl-serif font-semibold text-[#1a1a1a]">Invitations</h1>
+          <h1 className="text-2xl jl-serif font-semibold text-[#1a1a1a]">Access Approvals</h1>
         </div>
 
         {/* Tabs */}
         <div className="flex gap-1 border-b border-[#e8e2d8] mb-6">
           {[
-            { key: 'all' as Tab, label: 'All Invitations' },
+            { key: 'all' as Tab, label: 'All Approvals' },
             { key: 'import' as Tab, label: 'Bulk Import' },
-            { key: 'stats' as Tab, label: 'Invitation Stats' },
+            { key: 'stats' as Tab, label: 'Approval Stats' },
           ].map((t) => (
             <button
               key={t.key}
@@ -312,7 +312,7 @@ export default function AdminInvitationsPage() {
               {invLoading ? (
                 <div className="p-8 text-center text-sm text-[#999]">Loading...</div>
               ) : invitations.length === 0 ? (
-                <div className="p-8 text-center text-sm text-[#999]">No invitations found.</div>
+                <div className="p-8 text-center text-sm text-[#999]">No access approvals found.</div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">

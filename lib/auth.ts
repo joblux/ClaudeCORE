@@ -159,7 +159,7 @@ function magicLinkEmailHtml(url: string): string {
       <table width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:2px;border:1px solid #e8e6df;">
         <tr><td style="padding:40px 40px 24px;text-align:center;border-bottom:1px solid #e8e6df;">
           <div style="font-family:'Gill Sans','Gill Sans MT',Calibri,sans-serif;font-size:28px;font-weight:600;color:#1a1a1a;letter-spacing:2px;">JOBLUX</div>
-          <div style="font-size:11px;color:#a58e28;letter-spacing:3px;margin-top:4px;text-transform:uppercase;">Luxury Talents Society</div>
+          <div style="font-size:11px;color:#a58e28;letter-spacing:3px;margin-top:4px;text-transform:uppercase;">Luxury Industry Careers Intelligence</div>
         </td></tr>
         <tr><td style="padding:32px 40px;">
           <p style="font-size:16px;color:#1a1a1a;line-height:1.6;margin:0 0 24px;">Click the button below to sign in to your JOBLUX account. This link expires in 24 hours.</p>
