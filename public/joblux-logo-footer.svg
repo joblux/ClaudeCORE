@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="180" height="180" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+  <defs><style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400');</style></defs>
+  <rect x="10" y="10" width="160" height="160" fill="none" stroke="#1A1A1A" stroke-width="4"/>
+  <text x="90" y="78" font-family="'Playfair Display', Georgia, serif" font-size="50" font-weight="400" fill="#1A1A1A" text-anchor="middle" letter-spacing="3">JOB</text>
+  <text x="90" y="128" font-family="'Playfair Display', Georgia, serif" font-size="50" font-weight="400" fill="#1A1A1A" text-anchor="middle" letter-spacing="3">LUX.</text>
+</svg>

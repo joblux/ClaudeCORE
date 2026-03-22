@@ -9,7 +9,7 @@ export function Footer() {
 
           {/* Left — Brand */}
           <div>
-            <div className="text-lg font-semibold text-[#1a1a1a] tracking-[0.1em] mb-2" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</div>
+            <img src="/joblux-logo-footer.svg" alt="JOBLUX" className="h-8 w-auto mb-2" />
             <p className="font-sans text-xs text-[#888] leading-relaxed mb-3">Luxury, decoded.</p>
             <p className="font-sans text-[0.65rem] text-[#bbb]">Paris &middot; London &middot; New York &middot; Dubai &middot; Singapore</p>
           </div>

@@ -25,7 +25,7 @@ export function Header() {
 
           {/* Logo */}
           <Link href="/" className="inline-block flex-shrink-0">
-            <div className="text-2xl sm:text-[2rem] font-semibold text-[#1a1a1a] leading-none" style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}>JOBLUX.</div>
+            <img src="/joblux-logo-header.svg" alt="JOBLUX" className="h-10 sm:h-11 w-auto" />
           </Link>
 
           {/* Center nav — desktop */}
