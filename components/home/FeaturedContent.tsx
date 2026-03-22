@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@supabase/supabase-js'
-import { CURRENCY_SYMBOLS } from '@/lib/assignment-options'
+
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -24,23 +24,10 @@ interface Article {
 interface InterviewRow {
   id: string
   job_title: string
-  brand_name: string | null
-  brand_slug: string | null
+  brand_name: string
   location: string | null
-  difficulty: string | null
+  tips: string | null
   overall_experience: string | null
-  interview_year: number | null
-  number_of_rounds: number | null
-}
-
-interface SalaryRow {
-  job_title: string
-  brand_name: string | null
-  city: string | null
-  currency: string | null
-  salary_min: number | null
-  salary_max: number | null
-  seniority: string | null
 }
 
 function formatDate(d: string | null): string {
@@ -48,27 +35,10 @@ function formatDate(d: string | null): string {
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-function formatK(n: number): string {
-  if (n >= 1000) return `${Math.round(n / 1000)}K`
-  return String(n)
-}
-
-function buildRange(row: SalaryRow): string {
-  const sym = CURRENCY_SYMBOLS[row.currency || 'EUR'] || row.currency || ''
-  if (row.salary_min && row.salary_max) return `${sym}${formatK(row.salary_min)}–${formatK(row.salary_max)}`
-  if (row.salary_min) return `From ${sym}${formatK(row.salary_min)}`
-  if (row.salary_max) return `Up to ${sym}${formatK(row.salary_max)}`
-  return ''
-}
-
-const DIFFICULTY_DOTS: Record<string, number> = {
-  'Easy': 1, 'Moderate': 2, 'Challenging': 3, 'Difficult': 4, 'Very Difficult': 5,
-}
 
 export function FeaturedContent() {
   const [articles, setArticles] = useState<Article[]>([])
   const [interviews, setInterviews] = useState<InterviewRow[]>([])
-  const [salaries, setSalaries] = useState<SalaryRow[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -95,21 +65,41 @@ export function FeaturedContent() {
         setArticles(recent || [])
       }
 
-      // Fetch interview experiences
+      // Fetch interview experiences with brand name from contributions
       const { data: intData } = await supabase
         .from('interview_experiences')
-        .select('id, job_title, brand_name, brand_slug, location, difficulty, overall_experience, interview_year, number_of_rounds')
+        .select('id, job_title, location, tips, overall_experience, contributions!inner(brand_name)')
         .order('created_at', { ascending: false })
         .limit(3)
-      setInterviews(intData || [])
 
-      // Fetch salary highlights (diverse roles)
-      const { data: salData } = await supabase
-        .from('salary_benchmarks')
-        .select('job_title, brand_name, city, currency, salary_min, salary_max, seniority')
-        .order('salary_max', { ascending: false })
-        .limit(4)
-      setSalaries(salData || [])
+      if (intData && intData.length > 0) {
+        setInterviews(intData.map((e: any) => {
+          const c = Array.isArray(e.contributions) ? e.contributions[0] : e.contributions
+          return {
+            id: e.id,
+            job_title: e.job_title,
+            brand_name: c?.brand_name || e.brand_name || '',
+            location: e.location,
+            tips: e.tips,
+            overall_experience: e.overall_experience,
+          }
+        }))
+      } else {
+        // Fallback: try without join (brand_name may be on the row directly)
+        const { data: fallback } = await supabase
+          .from('interview_experiences')
+          .select('id, job_title, brand_name, location, tips, overall_experience')
+          .order('created_at', { ascending: false })
+          .limit(3)
+        setInterviews((fallback || []).map((e: any) => ({
+          id: e.id,
+          job_title: e.job_title,
+          brand_name: e.brand_name || '',
+          location: e.location,
+          tips: e.tips,
+          overall_experience: e.overall_experience,
+        })))
+      }
 
       setLoading(false)
     }
@@ -224,61 +214,39 @@ export function FeaturedContent() {
         </div>
 
         {interviews.length > 0 ? (
-          <div className="space-y-0">
+          <div className="space-y-4">
             {interviews.map((exp) => {
-              const dots = exp.difficulty ? (DIFFICULTY_DOTS[exp.difficulty] || 0) : 0
+              // Extract first tip as a quote
+              const firstTip = exp.tips
+                ? exp.tips.split('\n').map(l => l.trim()).filter(Boolean)[0] || null
+                : null
+              const initials = (exp.brand_name || '??').slice(0, 2).toUpperCase()
+
               return (
-                <Link
-                  key={exp.id}
-                  href={`/interviews/${exp.brand_slug || ''}`}
-                  className="flex items-start gap-4 py-4 border-b border-[#f0ece4] last:border-0 group"
-                >
-                  <div className="w-12 h-12 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
-                    <span className="jl-serif text-sm text-[#a58e28]">
-                      {(exp.brand_name || '??').slice(0, 2).toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="flex-1">
-                    <div className="jl-overline-gold mb-1">{exp.brand_name || 'Luxury Maison'}</div>
-                    <div className="font-sans text-sm font-medium text-[#1a1a1a] mb-0.5 group-hover:text-[#a58e28] transition-colors">
-                      {exp.job_title}
+                <Link key={exp.id} href="/interviews" className="block group">
+                  <div className="flex items-start gap-4 p-5 border border-[#e8e2d8] hover:border-[#a58e28] transition-colors">
+                    <div className="w-14 h-14 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
+                      <span className="jl-serif text-lg text-[#a58e28]">{initials}</span>
                     </div>
-                    <div className="flex items-center gap-3 text-[0.65rem] text-[#aaa]">
-                      {exp.location && <span>{exp.location}</span>}
-                      {exp.number_of_rounds && <span>{exp.number_of_rounds} rounds</span>}
-                      {exp.interview_year && <span>{exp.interview_year}</span>}
+                    <div className="flex-1">
+                      <div className="jl-overline-gold mb-1">{exp.brand_name || 'Luxury Maison'}</div>
+                      <div className="font-sans text-sm font-medium text-[#1a1a1a] mb-0.5">{exp.job_title}</div>
+                      <div className="jl-overline mb-3">{exp.location || ''}</div>
+                      {firstTip && (
+                        <p className="jl-serif text-sm text-[#555] leading-relaxed italic">
+                          &ldquo;{firstTip}&rdquo;
+                        </p>
+                      )}
                     </div>
-                    {dots > 0 && (
-                      <div className="flex gap-0.5 mt-1.5">
-                        {[1, 2, 3, 4, 5].map(j => (
-                          <span
-                            key={j}
-                            className="inline-block w-1.5 h-1.5 rounded-full"
-                            style={{ backgroundColor: j <= dots ? '#a58e28' : '#e8e2d8' }}
-                          />
-                        ))}
-                      </div>
-                    )}
                   </div>
                 </Link>
               )
             })}
           </div>
         ) : (
-          <Link href="/interviews" className="block group">
-            <div className="flex items-start gap-4 p-5 border border-[#e8e2d8] hover:border-[#a58e28] transition-colors">
-              <div className="w-14 h-14 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
-                <span className="jl-serif text-lg text-[#a58e28]">IN</span>
-              </div>
-              <div className="flex-1">
-                <div className="jl-overline-gold mb-1">Coming Soon</div>
-                <div className="font-sans text-sm font-medium text-[#1a1a1a] mb-0.5">Interview Intelligence</div>
-                <p className="font-sans text-xs text-[#888] leading-relaxed">
-                  Real interview experiences from luxury professionals, contributed by members.
-                </p>
-              </div>
-            </div>
-          </Link>
+          <p className="font-sans text-sm text-[#888] py-4">
+            Real interview experiences from luxury professionals, contributed by professionals.
+          </p>
         )}
 
         <Link
@@ -288,35 +256,6 @@ export function FeaturedContent() {
           More interviews →
         </Link>
       </div>
-
-      {/* ── SALARY INTELLIGENCE PREVIEW ────────────────────────── */}
-      {salaries.length > 0 && (
-        <div>
-          <div className="jl-section-label">
-            <span>Salary Intelligence</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {salaries.map((s, i) => (
-              <div key={i} className="p-4 border border-[#e8e2d8] bg-white">
-                <div className="jl-overline-gold mb-1">{s.brand_name || 'Luxury Maison'}</div>
-                <div className="font-sans text-sm font-medium text-[#1a1a1a] mb-0.5">{s.job_title}</div>
-                <div className="font-sans text-[0.65rem] text-[#aaa] mb-2">
-                  {[s.city, s.seniority].filter(Boolean).join(' · ')}
-                </div>
-                <div className="font-sans text-base font-semibold text-[#1a1a1a]">{buildRange(s)}</div>
-              </div>
-            ))}
-          </div>
-
-          <Link
-            href="/salaries"
-            className="inline-block mt-4 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors"
-          >
-            Full salary guide →
-          </Link>
-        </div>
-      )}
 
     </div>
   )

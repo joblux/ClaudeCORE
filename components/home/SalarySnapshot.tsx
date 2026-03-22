@@ -3,12 +3,15 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
-import { CURRENCY_SYMBOLS } from '@/lib/assignment-options'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
+
+const CITY_SYMBOLS: Record<string, string> = {
+  EUR: '€', GBP: '£', USD: '$', AED: 'AED ', CHF: 'CHF ',
+}
 
 interface SalaryRow {
   job_title: string
@@ -19,28 +22,48 @@ interface SalaryRow {
 }
 
 function formatK(n: number): string {
-  if (n >= 1000) return `${Math.round(n / 1000)}K`
-  return String(n)
+  return `${Math.round(n / 1000)}K`
 }
 
 function buildRange(row: SalaryRow): string {
-  const sym = CURRENCY_SYMBOLS[row.currency || 'EUR'] || row.currency || ''
+  const sym = CITY_SYMBOLS[row.currency || 'EUR'] || row.currency || ''
   if (row.salary_min && row.salary_max) return `${sym}${formatK(row.salary_min)}–${formatK(row.salary_max)}`
   if (row.salary_min) return `From ${sym}${formatK(row.salary_min)}`
   if (row.salary_max) return `Up to ${sym}${formatK(row.salary_max)}`
   return ''
 }
 
+const TARGET_CITIES = ['Paris', 'London', 'New York', 'Dubai', 'Geneva']
+
 export function SalarySnapshot() {
   const [salaries, setSalaries] = useState<SalaryRow[]>([])
 
   useEffect(() => {
-    supabase
-      .from('salary_benchmarks')
-      .select('job_title, city, currency, salary_min, salary_max')
-      .order('salary_max', { ascending: false })
-      .limit(5)
-      .then(({ data }) => setSalaries(data || []))
+    async function fetchSalaries() {
+      const { data } = await supabase
+        .from('salary_benchmarks')
+        .select('job_title, city, currency, salary_min, salary_max')
+        .in('city', TARGET_CITIES)
+        .order('salary_max', { ascending: false })
+        .limit(50)
+
+      if (!data || data.length === 0) {
+        setSalaries([])
+        return
+      }
+
+      // Pick one role per city for diversity
+      const seen = new Set<string>()
+      const picked: SalaryRow[] = []
+      for (const row of data) {
+        if (!row.city || seen.has(row.city)) continue
+        seen.add(row.city)
+        picked.push(row)
+        if (picked.length >= 5) break
+      }
+      setSalaries(picked)
+    }
+    fetchSalaries()
   }, [])
 
   if (salaries.length === 0) return null
