@@ -57,11 +57,7 @@ export function Header() {
             {isAuthenticated ? (
               <UserMenu />
             ) : (
-              <span className="hidden sm:inline-flex text-sm font-medium">
-                <Link href="/members" className="text-[#1a1a1a] hover:text-[#a58e28] transition-colors">Log in</Link>
-                <span className="text-[#1a1a1a]/30 mx-1.5">/</span>
-                <Link href="/join" className="text-[#a58e28] hover:text-[#1a1a1a] transition-colors">Request access</Link>
-              </span>
+              <Link href="/members" className="hidden sm:inline-flex text-sm font-medium text-[#a58e28] hover:text-[#1a1a1a] transition-colors">Access</Link>
             )}
 
             {/* Mobile hamburger */}
@@ -115,7 +111,7 @@ export function Header() {
                   onClick={() => setMobileOpen(false)}
                   className="block mt-3 py-3 text-center bg-[#a58e28] text-[#1a1a1a] text-sm font-semibold rounded-md"
                 >
-                  Request access
+                  Access
                 </Link>
               )}
             </div>

@@ -33,19 +33,16 @@ export default function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
 
       {/* POSITIONING BLOCK */}
-      <div className="bg-[#1a1a1a] py-14 md:py-20">
+      <div className="bg-[#1a1a1a] py-8 md:py-12">
         <div className="jl-container text-center">
-          <div className="jl-overline-gold mb-4 tracking-[0.2em]">Confidential Careers Intelligence</div>
+          <div className="jl-overline-gold mb-4 tracking-[0.2em]">Luxury, decoded.</div>
           <h1 className="jl-serif text-3xl md:text-5xl font-light text-white mb-5 leading-tight max-w-3xl mx-auto">
-            Luxury industry careers intelligence, discreetly built around contribution.
+            Luxury Talent Intelligence, Powered by Contribution.
           </h1>
           <p className="font-sans text-sm text-[#888] max-w-2xl mx-auto leading-relaxed mb-8">
-            Salary data, interview insights, and brand intelligence across 500+ maisons — built on confidential contributions from industry professionals. Free to access. No ads. No membership fees.
+            Salary intelligence, interview insight, brand knowledge, recruitment, and travel for the global luxury world.
           </p>
-          <div className="flex items-center justify-center gap-4 flex-wrap">
-            <Link href="/join" className="jl-btn jl-btn-gold">Request confidential access</Link>
-            <Link href="/services" className="jl-btn jl-btn-ghost">Private recruitment & travel</Link>
-          </div>
+          <Link href="/join" className="jl-btn jl-btn-gold">Access</Link>
         </div>
       </div>
 
@@ -70,14 +67,20 @@ export default function HomePage() {
               </p>
               <Link href="/contribute" className="jl-btn jl-btn-outline text-xs">Contribute an insight</Link>
             </div>
+
+            {/* SEARCH ASSIGNMENTS */}
+            <div className="border-t border-[#e8e2d8] pt-10">
+              <div className="bg-white rounded-lg shadow-sm p-5"><LatestJobs /></div>
+            </div>
+
+            {/* BRAND INTELLIGENCE */}
+            <div className="bg-white rounded-lg shadow-sm p-5"><WikiLuxPreview /></div>
           </div>
 
           {/* RIGHT — Sidebar */}
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm p-5"><TheBriefSignup /></div>
             <div className="bg-white rounded-lg shadow-sm p-5"><SalarySnapshot /></div>
-            <div className="bg-white rounded-lg shadow-sm p-5"><LatestJobs /></div>
-            <div className="bg-white rounded-lg shadow-sm p-5"><WikiLuxPreview /></div>
             <div className="bg-white rounded-lg shadow-sm p-5"><LuxuryEscapeTeaser /></div>
           </div>
 
