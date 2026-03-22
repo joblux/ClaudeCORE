@@ -19,6 +19,7 @@ export async function getCurrentMember() {
     status: session.user.status,
     isAdmin: session.user.role === "admin",
     isApproved: session.user.status === "approved" || session.user.role === "admin",
+    registrationCompleted: session.user.registrationCompleted ?? false,
   };
 }
 

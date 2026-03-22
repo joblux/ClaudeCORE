@@ -5,6 +5,7 @@ import DashboardClient from "./DashboardClient";
 export default async function DashboardPage() {
   const member = await requireApproved();
   if (member.isAdmin) redirect("/admin/dashboard");
+  if (!member.registrationCompleted) redirect("/select-profile");
 
   return (
     <DashboardClient
