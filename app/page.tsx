@@ -16,7 +16,7 @@ const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'JOBLUX',
-  alternateName: 'Luxury Industry Careers Intelligence',
+  alternateName: 'Luxury, decoded.',
   url: 'https://www.joblux.com',
   logo: 'https://www.joblux.com/favicon.svg',
   description: 'JOBLUX brings together luxury intelligence, salary insight, interviews, recruitment, and travel for the global luxury world.',

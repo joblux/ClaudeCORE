@@ -18,7 +18,8 @@ function formatK(n: number): string {
 }
 
 function buildRange(row: SalaryRow): string {
-  const sym = CITY_SYMBOLS[row.currency || 'EUR'] || row.currency || ''
+  const raw = row.currency || 'EUR'
+  const sym = CITY_SYMBOLS[raw] ?? ''
   if (row.salary_min && row.salary_max) return `${sym}${formatK(row.salary_min)}–${formatK(row.salary_max)}`
   if (row.salary_min) return `From ${sym}${formatK(row.salary_min)}`
   if (row.salary_max) return `Up to ${sym}${formatK(row.salary_max)}`

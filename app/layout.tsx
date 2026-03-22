@@ -62,7 +62,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="alternate" type="application/rss+xml" title="JOBLUX BlogLux" href="/rss.xml" />
+        <link rel="alternate" type="application/rss+xml" title="JOBLUX Intelligence" href="/rss.xml" />
       </head>
       <body className={`${inter.variable} ${playfair.variable} antialiased overflow-x-hidden min-h-screen`}>
         <AuthProvider>
