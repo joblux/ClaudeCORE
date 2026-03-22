@@ -9,11 +9,11 @@ export function Footer() {
 
           {/* Left — Brand */}
           <div>
-            <svg width="32" height="32" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto mb-2">
-              <rect x="10" y="10" width="160" height="160" fill="none" stroke="#1A1A1A" strokeWidth="4"/>
-              <text x="90" y="78" fontFamily="Georgia, 'Times New Roman', serif" fontSize="50" fontWeight="400" fill="#1A1A1A" textAnchor="middle" letterSpacing="3">JOB</text>
-              <text x="90" y="128" fontFamily="Georgia, 'Times New Roman', serif" fontSize="50" fontWeight="400" fill="#1A1A1A" textAnchor="middle" letterSpacing="3">LUX.</text>
-            </svg>
+            <img
+              src="/logos/joblux-header.png"
+              alt="JOBLUX"
+              className="h-5 w-auto mb-2"
+            />
             <p className="font-sans text-xs text-[#888] leading-relaxed mb-3">Luxury, decoded.</p>
             <p className="font-sans text-[0.65rem] text-[#bbb]">Paris &middot; London &middot; New York &middot; Dubai &middot; Singapore</p>
           </div>
