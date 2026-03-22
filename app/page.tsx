@@ -4,6 +4,7 @@ import { FeaturedContent } from '@/components/home/FeaturedContent'
 import { SalarySnapshot } from '@/components/home/SalarySnapshot'
 import { LatestJobs } from '@/components/home/LatestJobs'
 import { WikiLuxPreview } from '@/components/home/WikiLuxPreview'
+import { LuxuryEscapeTeaser } from '@/components/home/LuxuryEscapeTeaser'
 import { TheBriefSignup } from '@/components/home/TheBriefSignup'
 import type { Metadata } from 'next'
 
@@ -79,6 +80,7 @@ export default function HomePage() {
             <SalarySnapshot />
             <LatestJobs />
             <WikiLuxPreview />
+            <LuxuryEscapeTeaser />
           </div>
 
         </div>
