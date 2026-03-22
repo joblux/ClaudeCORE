@@ -32,20 +32,19 @@ export function TheBriefSignup() {
   }
 
   return (
-    <div className="bg-[#222222] p-5">
-      <div className="jl-overline-gold mb-3">The Brief</div>
-      <h3 className="jl-serif text-base font-light text-white mb-2">
-        The Brief
-      </h3>
-      <p className="font-sans text-xs text-[#888] leading-relaxed mb-4">
-        Luxury industry moves · Salary insights · Interview intelligence · Wiki updates. Delivered biweekly.
-      </p>
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex-shrink-0">
+        <div className="jl-overline-gold mb-1">The Brief</div>
+        <p className="font-sans text-xs text-[#888] leading-relaxed">
+          Luxury intelligence digest. Delivered biweekly.
+        </p>
+      </div>
 
       {status === 'success' ? (
         <p className="font-sans text-xs text-[#a58e28]">{message}</p>
       ) : (
-        <form onSubmit={handleSubmit}>
-          <div className="flex border border-[#333]">
+        <form onSubmit={handleSubmit} className="flex-1 max-w-md">
+          <div className="flex border border-[#444]">
             <input
               type="email"
               value={email}
@@ -57,17 +56,14 @@ export function TheBriefSignup() {
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="bg-[#a58e28] text-[#1a1a1a] px-4 font-sans text-[0.6rem] font-bold tracking-widest uppercase hover:bg-[#e4b042] transition-colors disabled:opacity-50"
+              className="bg-[#a58e28] text-[#1a1a1a] px-5 font-sans text-[0.6rem] font-bold tracking-widest uppercase hover:bg-[#e4b042] transition-colors disabled:opacity-50"
             >
               {status === 'loading' ? '...' : 'Subscribe'}
             </button>
           </div>
           {status === 'error' && (
-            <p className="font-sans text-[0.65rem] text-red-400 mt-2">{message}</p>
+            <p className="font-sans text-[0.65rem] text-red-400 mt-1">{message}</p>
           )}
-          <p className="font-sans text-[0.6rem] text-[#555] mt-2">
-            Free · No spam · Unsubscribe anytime
-          </p>
         </form>
       )}
     </div>

@@ -31,7 +31,8 @@ export async function LatestJobs() {
       <div className="jl-section-label">
         <span>Confidential Search Assignments</span>
       </div>
-      <div className="space-y-0">
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         {jobs.map((job) => {
           const displayMaison = job.is_confidential
             ? 'Confidential Maison'
@@ -41,10 +42,10 @@ export async function LatestJobs() {
             <Link
               key={job.id}
               href={`/opportunities/${job.slug || job.id}`}
-              className="block py-3 border-b border-[#f5f0e8] last:border-0 hover:bg-[#fafaf5] transition-colors -mx-1 px-1"
+              className="block border border-[#e8e2d8] p-4 hover:border-[#a58e28] transition-colors"
             >
-              <div className="jl-overline-gold mb-1">{displayMaison}</div>
-              <div className="jl-serif text-sm text-[#1a1a1a] mb-1">{job.title}</div>
+              <div className="jl-overline-gold mb-2">{displayMaison}</div>
+              <div className="jl-serif text-sm text-[#1a1a1a] mb-2">{job.title}</div>
               <div className="flex items-center justify-between">
                 <div className="font-sans text-[0.65rem] text-[#aaa]">{location}</div>
                 {job.seniority && (
@@ -55,8 +56,9 @@ export async function LatestJobs() {
           )
         })}
       </div>
-      <p className="font-sans text-[0.6rem] text-[#aaa] italic mt-2">All assignments handled with full discretion by JOBLUX.</p>
-      <Link href="/opportunities" className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors">
+
+      <p className="font-sans text-[0.6rem] text-[#aaa] italic mb-3">All assignments handled with full discretion by JOBLUX.</p>
+      <Link href="/opportunities" className="font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors">
         View all assignments →
       </Link>
     </div>
