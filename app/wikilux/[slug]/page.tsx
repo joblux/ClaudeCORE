@@ -58,25 +58,25 @@ export default async function WikiLuxBrandPage({ params }: { params: { slug: str
     .eq('slug', params.slug)
     .maybeSingle()
 
-  // Fetch insights
-  const { data: insightsData, count: insightsCount } = await supabase
-    .from('wikilux_insights')
-    .select('*', { count: 'exact' })
-    .eq('brand_slug', params.slug)
-    .order('created_at', { ascending: false })
-    .limit(20)
+  // Compute related brands on the server (avoids shipping the full BRANDS array to client)
+  const related = BRANDS
+    .filter(b => b.sector === brand.sector && b.slug !== brand.slug)
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 3)
 
-  // Note: Images still fetched client-side (they come from Unsplash API via /api/wikilux/images)
+  // Insights and images are fetched client-side via API routes
+  // (insights need service role key join; images come from Unsplash API)
 
   return (
     <WikiLuxBrandClient
       brand={brand}
       initialContent={cached?.content || null}
       initialImages={[]}
-      initialInsights={insightsData || []}
-      insightsTotal={insightsCount || 0}
+      initialInsights={[]}
+      insightsTotal={0}
       contentUpdatedAt={cached?.updated_at || null}
       editorialNotes={cached?.editorial_notes || null}
+      related={related}
     />
   )
 }

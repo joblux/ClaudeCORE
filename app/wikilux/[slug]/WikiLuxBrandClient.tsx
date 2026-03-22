@@ -1,13 +1,24 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useMember } from '@/lib/auth-hooks'
 import { WIKILUX_CATEGORY_ICONS } from '@/lib/sector-icons'
-import { SUPPORTED_LANGUAGES } from '@/lib/wikilux-prompt'
 import { HreflangTags } from '@/components/wikilux/HreflangTags'
-import { BRANDS } from '@/lib/wikilux-brands'
+
+// Inlined to avoid importing @/lib/wikilux-prompt which bundles server prompt code
+const SUPPORTED_LANGUAGES = [
+  { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'fr', name: 'French', flag: '🇫🇷' },
+  { code: 'ar', name: 'Arabic', flag: '🇸🇦' },
+  { code: 'it', name: 'Italian', flag: '🇮🇹' },
+  { code: 'es', name: 'Spanish', flag: '🇪🇸' },
+  { code: 'de', name: 'German', flag: '🇩🇪' },
+  { code: 'zh', name: 'Chinese', flag: '🇨🇳' },
+  { code: 'ja', name: 'Japanese', flag: '🇯🇵' },
+  { code: 'ru', name: 'Russian', flag: '🇷🇺' },
+] as const
 
 interface WikiContent {
   tagline?: string
@@ -153,6 +164,7 @@ interface WikiLuxBrandClientProps {
   insightsTotal: number
   contentUpdatedAt: string | null
   editorialNotes: string | null
+  related: any[]
 }
 
 export default function WikiLuxBrandClient({
@@ -163,6 +175,7 @@ export default function WikiLuxBrandClient({
   insightsTotal: initialInsightsTotal,
   contentUpdatedAt: initialContentUpdatedAt,
   editorialNotes: initialEditorialNotes,
+  related,
 }: WikiLuxBrandClientProps) {
   const slug = brand.slug
   const { isAuthenticated, isApproved, isAdmin, isLoading: authLoading } = useMember()
@@ -188,11 +201,6 @@ export default function WikiLuxBrandClient({
   const [contributing, setContributing] = useState(false)
   const [contributeSuccess, setContributeSuccess] = useState(false)
   const [contributeError, setContributeError] = useState('')
-
-  const related = useMemo(() => {
-    return BRANDS.filter((b) => b.sector === brand.sector && b.slug !== brand.slug)
-      .sort(() => 0.5 - Math.random()).slice(0, 3)
-  }, [brand])
 
   // If no initial content, fetch via generate API (fallback for uncached brands)
   useEffect(() => {
@@ -223,10 +231,14 @@ export default function WikiLuxBrandClient({
       .finally(() => setLoading(false))
   }, [brand, initialContent])
 
-  // Always fetch images client-side (Unsplash API)
+  // Fetch images client-side (Unsplash API)
   useEffect(() => {
     fetch(`/api/wikilux/images?brand=${encodeURIComponent(brand.name)}&sector=${encodeURIComponent(brand.sector)}`)
       .then((r) => r.json()).then((data) => setImages(data.images || [])).catch(() => {})
+
+    // Fetch insights client-side (requires service role join via API)
+    fetch(`/api/wikilux/insights?slug=${encodeURIComponent(brand.slug)}&limit=20`)
+      .then((r) => r.json()).then((data) => { setInsights(data.insights || []); setInsightsTotal(data.total || 0) }).catch(() => {})
   }, [brand])
 
   // Fetch product images when iconic_products are available
