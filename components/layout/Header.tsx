@@ -29,9 +29,9 @@ export function Header() {
             <Image
               src="/logos/joblux-header.png"
               alt="JOBLUX"
-              width={120}
-              height={32}
-              className="h-7 sm:h-8 w-auto"
+              width={500}
+              height={116}
+              className="h-6 sm:h-7 w-auto"
               priority
             />
           </Link>
