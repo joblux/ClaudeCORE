@@ -39,10 +39,9 @@ export default function HomePage() {
           <h1 className="jl-serif text-3xl md:text-5xl font-light text-white mb-5 leading-tight max-w-3xl mx-auto">
             Luxury Talent Intelligence, Powered by Contribution.
           </h1>
-          <p className="font-sans text-sm text-[#888] max-w-2xl mx-auto leading-relaxed mb-8">
+          <p className="font-sans text-sm text-[#888] max-w-2xl mx-auto leading-relaxed">
             Salary intelligence, interview insight, brand knowledge, recruitment, and travel for the global luxury world.
           </p>
-          <Link href="/join" className="jl-btn jl-btn-gold">Access</Link>
         </div>
       </div>
 

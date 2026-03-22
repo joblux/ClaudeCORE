@@ -485,7 +485,7 @@ a {
 
   .jl-ticker-track {
     display: inline-flex;
-    animation: ticker-scroll 80s linear infinite;
+    animation: ticker-scroll 65s linear infinite;
   }
 
   .jl-ticker-item {
