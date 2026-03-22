@@ -24,7 +24,10 @@ export const metadata: Metadata = {
   },
   description:
     "JOBLUX brings together luxury intelligence, salary insight, interviews, recruitment, and travel for the global luxury world. Free to access, with deeper value shaped by contribution.",
-  icons: { icon: '/favicon.svg' },
+  icons: {
+    icon: [{ url: '/favicon.ico', sizes: 'any' }],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180' }],
+  },
   openGraph: {
     title: "JOBLUX — Luxury, decoded.",
     description: "JOBLUX brings together luxury intelligence, salary insight, interviews, recruitment, and travel for the global luxury world. Free to access, with deeper value shaped by contribution.",
