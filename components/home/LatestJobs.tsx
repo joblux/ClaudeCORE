@@ -20,7 +20,7 @@ export async function LatestJobs() {
     .select('id, slug, title, maison, is_confidential, city, country, seniority')
     .eq('status', 'published')
     .order('activated_at', { ascending: false })
-    .limit(4)
+    .limit(5)
 
   const jobs: Job[] = data || []
 

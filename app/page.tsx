@@ -50,7 +50,7 @@ export default function HomePage() {
       {/* ── S3: FEATURED ARTICLE + SALARY SNAPSHOT (side by side) ── */}
       <div className="bg-[#f5f4f0] py-5 lg:py-6">
         <div className="jl-container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             <FeaturedArticle />
             <div className="bg-white border border-[#e8e2d8] p-5">
               <SalarySnapshot />
@@ -62,7 +62,7 @@ export default function HomePage() {
       {/* ── S4: ARTICLE LIST + SEARCH ASSIGNMENTS (side by side) ── */}
       <div className="bg-white py-4 lg:py-5 border-t border-[#e8e2d8]">
         <div className="jl-container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             <ArticleList />
             <LatestJobs />
           </div>
@@ -79,8 +79,8 @@ export default function HomePage() {
       {/* ── S6: THE BRIEF + CONTRIBUTE (dark band) ── */}
       <div className="bg-[#222]">
         <div className="jl-container py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <TheBriefSignup />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div><TheBriefSignup /></div>
             <div className="flex flex-col justify-center">
               <div className="jl-overline-gold mb-1">Contribute</div>
               <p className="font-sans text-xs text-[#888] leading-relaxed mb-3">

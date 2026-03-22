@@ -25,7 +25,7 @@ export function WikiLuxPreview() {
           <Link
             key={brand.slug}
             href={`/wikilux/${brand.slug}`}
-            className="inline-flex items-center gap-2 border border-[#e8e2d8] px-3 py-2 hover:border-[#a58e28] transition-colors group"
+            className="inline-flex items-center gap-1.5 border border-[#e8e2d8] px-2.5 py-1.5 hover:border-[#a58e28] transition-colors group text-xs"
           >
             <div className="w-6 h-6 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0 group-hover:bg-[#a58e28] transition-colors">
               <span className="font-serif text-xs text-[#a58e28] group-hover:text-[#1a1a1a]">

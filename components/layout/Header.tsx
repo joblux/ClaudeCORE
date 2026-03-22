@@ -34,7 +34,7 @@ export function Header() {
               <Link
                 key={item.label}
                 href={item.href}
-                className="text-[0.8rem] leading-[1] font-semibold tracking-wide text-[#1a1a1a]/60 hover:text-[#1a1a1a] transition-colors"
+                className="text-[0.8rem] leading-none font-semibold tracking-wide text-[#1a1a1a]/60 hover:text-[#1a1a1a] transition-colors"
               >
                 {item.label}
               </Link>
@@ -46,7 +46,7 @@ export function Header() {
             {isAuthenticated ? (
               <UserMenu />
             ) : (
-              <Link href="/members" className="hidden sm:inline-flex text-sm font-medium text-[#a58e28] hover:text-[#1a1a1a] transition-colors">Access</Link>
+              <Link href="/members" className="hidden sm:inline-flex text-sm font-medium leading-none text-[#a58e28] hover:text-[#1a1a1a] transition-colors">Access</Link>
             )}
 
             {/* Mobile hamburger */}

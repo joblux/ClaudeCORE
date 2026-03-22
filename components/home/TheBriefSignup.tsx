@@ -32,31 +32,29 @@ export function TheBriefSignup() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div className="flex-shrink-0">
-        <div className="jl-overline-gold mb-1">The Brief</div>
-        <p className="font-sans text-xs text-[#888] leading-relaxed">
-          Luxury intelligence digest. Delivered biweekly.
-        </p>
-      </div>
+    <div>
+      <div className="jl-overline-gold mb-1">The Brief</div>
+      <p className="font-sans text-xs text-[#888] leading-relaxed mb-3">
+        Luxury intelligence digest. Biweekly.
+      </p>
 
       {status === 'success' ? (
         <p className="font-sans text-xs text-[#a58e28]">{message}</p>
       ) : (
-        <form onSubmit={handleSubmit} className="flex-1 max-w-md">
-          <div className="flex border border-[#444]">
+        <form onSubmit={handleSubmit}>
+          <div className="flex gap-2">
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your@email.com"
               required
-              className="flex-1 bg-transparent px-3 py-2.5 font-sans text-xs text-white placeholder-[#555] outline-none"
+              className="flex-1 bg-transparent px-3 py-2 font-sans text-xs text-white placeholder-[#555] border border-[#444] outline-none focus:border-[#a58e28] transition-colors"
             />
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="bg-[#a58e28] text-[#1a1a1a] px-5 font-sans text-[0.6rem] font-bold tracking-widest uppercase hover:bg-[#e4b042] transition-colors disabled:opacity-50"
+              className="bg-[#a58e28] text-[#1a1a1a] px-4 py-2 font-sans text-[0.6rem] font-bold tracking-widest uppercase hover:bg-[#e4b042] transition-colors disabled:opacity-50 flex-shrink-0"
             >
               {status === 'loading' ? '...' : 'Subscribe'}
             </button>
