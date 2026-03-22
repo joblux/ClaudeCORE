@@ -24,11 +24,11 @@ export function Header() {
         <div className="flex items-center justify-between py-4">
 
           {/* Logo */}
-          <Link href="/" className="inline-block flex-shrink-0">
+          <Link href="/" className="flex items-center flex-shrink-0">
             <img
               src="/logos/joblux-header.png"
               alt="JOBLUX"
-              className="h-6 sm:h-7 w-auto"
+              className="h-6 sm:h-7 w-auto block"
             />
           </Link>
 
@@ -38,7 +38,7 @@ export function Header() {
               <Link
                 key={item.label}
                 href={item.href}
-                className="text-[0.8rem] leading-none font-semibold tracking-wide text-[#1a1a1a]/60 hover:text-[#1a1a1a] transition-colors"
+                className="flex items-center text-[0.8rem] leading-none font-semibold tracking-wide text-[#1a1a1a]/60 hover:text-[#1a1a1a] transition-colors"
               >
                 {item.label}
               </Link>
@@ -50,7 +50,7 @@ export function Header() {
             {isAuthenticated ? (
               <UserMenu />
             ) : (
-              <Link href="/members" className="hidden sm:inline-flex text-sm font-medium leading-none text-[#a58e28] hover:text-[#1a1a1a] transition-colors">Access</Link>
+              <Link href="/members" className="hidden sm:flex items-center text-sm font-medium leading-none text-[#a58e28] hover:text-[#1a1a1a] transition-colors">Access</Link>
             )}
 
             {/* Mobile hamburger */}
