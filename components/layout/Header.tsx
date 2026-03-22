@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import UserMenu from '@/components/UserMenu'
 import { useMember } from '@/lib/auth-hooks'
 
@@ -25,11 +26,14 @@ export function Header() {
 
           {/* Logo */}
           <Link href="/" className="inline-block flex-shrink-0">
-            <svg width="44" height="44" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" className="h-10 sm:h-11 w-auto">
-              <rect x="10" y="10" width="160" height="160" fill="none" stroke="#1A1A1A" strokeWidth="4"/>
-              <text x="90" y="78" fontFamily="Georgia, 'Times New Roman', serif" fontSize="48" fontWeight="500" fill="#B8975C" textAnchor="middle" letterSpacing="4">JOB</text>
-              <text x="90" y="126" fontFamily="Georgia, 'Times New Roman', serif" fontSize="48" fontWeight="500" fill="#B8975C" textAnchor="middle" letterSpacing="4">LUX.</text>
-            </svg>
+            <Image
+              src="/logos/joblux-header.png"
+              alt="JOBLUX"
+              width={120}
+              height={32}
+              className="h-7 sm:h-8 w-auto"
+              priority
+            />
           </Link>
 
           {/* Center nav — desktop */}
