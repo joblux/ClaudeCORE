@@ -43,6 +43,9 @@ export default function TravelPage() {
               A private travel advisory service — not a booking engine. Designed by a luxury
               travel advisor with two decades in the industry.
             </p>
+            <p className="font-sans text-lg text-[#a58e28] italic mt-6 max-w-xl">
+              You work at the highest level. Your travel should reflect that.
+            </p>
           </div>
         </div>
       </section>
@@ -89,6 +92,10 @@ export default function TravelPage() {
               ))}
             </div>
 
+            <p className="font-sans text-sm text-[#666] leading-relaxed mb-12">
+              Travel includes destination guides, hotel directory, travel consulting, booking requests, and advisors located globally — across Europe, the Middle East, Asia, and the Americas.
+            </p>
+
             {/* ── Why through JOBLUX ── */}
             <div className="jl-section-label"><span>Why Through JOBLUX</span></div>
 
@@ -96,7 +103,7 @@ export default function TravelPage() {
               <p className="font-sans text-sm text-[#888] leading-relaxed mb-5">
                 JOBLUX is affiliated with <span className="text-[#1a1a1a] font-medium">Fora Travel</span> —
                 one of the leading luxury travel advisory networks. This affiliation gives our
-                members access to exclusive benefits that are not available through direct
+                professionals access to exclusive benefits that are not available through direct
                 booking or online travel agencies.
               </p>
 

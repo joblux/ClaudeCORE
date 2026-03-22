@@ -130,31 +130,46 @@ export default function AboutPage() {
         <div className="border-t border-white/10" />
       </div>
 
-      {/* ── The founder ── */}
+      {/* ── The story behind the relaunch ── */}
       <section className="max-w-4xl mx-auto px-6 py-20">
         <p className="text-[11px] tracking-[0.14em] uppercase text-[#a58e28] mb-4 font-medium">
-          The founder
+          The story behind the relaunch
         </p>
-        <div className="flex items-start gap-6">
-          <div className="w-12 h-12 rounded-full bg-[#a58e28]/20 border border-[#a58e28]/40 flex items-center justify-center text-[#a58e28] text-sm font-medium shrink-0">
-            MM
-          </div>
-          <div>
-            <h2 className="font-playfair text-3xl font-normal mb-2 leading-snug">
-              Mohammed M&apos;zaour
-            </h2>
-            <p className="text-xs text-[#a58e28] tracking-wide mb-5">
-              Founder &middot; Executive Search &middot; Travel Advisory
-            </p>
-            <p className="text-sm leading-relaxed text-white/55 max-w-2xl">
-              Mohammed M&apos;zaour has worked as a confidential recruitment partner for
-              luxury maisons across Europe and the Middle East since 2006. He is also an
-              affiliated travel designer, arranging bespoke itineraries for luxury industry
-              professionals. JOBLUX is the natural convergence of these two practices —
-              intelligence, recruitment, and travel under one discreet roof.
-            </p>
-          </div>
+        <h2 className="font-playfair text-3xl font-normal mb-6 leading-snug">
+          Twenty years in the making
+        </h2>
+        <div className="space-y-5 text-sm leading-relaxed text-white/55 max-w-2xl">
+          <p>
+            Luxury Recruiter began more than twenty years ago when a luxury retail professional
+            in Paris met a web developer in London and together created one of the first specialist
+            recruitment consultancies dedicated to the luxury sector. Over time, that consultancy
+            evolved into a global luxury job board, then into a niche professional platform. Each
+            phase answered the market at a particular moment.
+          </p>
+          <p>
+            This relaunch is a further evolution — and a clarification. Today, the need is no longer
+            for more noise, more generic listings, or another social platform. The need is for better
+            intelligence, greater discretion, and a more trusted ecosystem around luxury careers,
+            hiring, and professional life.
+          </p>
+          <p>
+            Luxury Recruiter is now being shaped as a confidential, contribution-led platform where
+            access is free for now and depth is earned through contribution. By gathering salary
+            insight, interview intelligence, market perspective, and sector knowledge, the ecosystem
+            becomes more valuable to professionals, brands, and decision-makers alike. That authority
+            supports two private service businesses: manager-and-up recruitment mandates and
+            high-touch travel advisory.
+          </p>
+          <p>
+            If, in time, this evolves into something larger, it will not be by imitating LinkedIn or
+            Indeed. It will be by building something quieter, smarter, and more valuable first.
+          </p>
         </div>
+
+        {/* Closing quote */}
+        <p className="font-playfair text-xl italic text-[#a58e28] mt-10 max-w-xl">
+          &ldquo;Depth before scale. Intelligence before noise.&rdquo;
+        </p>
       </section>
 
       {/* ── CTA block ── */}

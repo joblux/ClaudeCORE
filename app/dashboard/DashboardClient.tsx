@@ -10,7 +10,7 @@ const TIER_LABELS: Record<string, string> = {
   rising: 'Rising',
   pro: 'Pro',
   professional: 'Pro+',
-  executive: 'Executive',
+  executive: 'Pro+',
   business: 'Business',
   insider: 'Insider',
   admin: 'Admin',
@@ -22,8 +22,17 @@ const TIER_SUBTITLES: Record<string, string> = {
   professional: 'Professional account',
   executive: 'Professional account',
   business: 'Employer account',
-  insider: 'Employer account',
+  insider: 'Intelligence partner',
   admin: 'Administrator',
+}
+
+const TIER_WELCOME: Record<string, string> = {
+  rising: 'Welcome to JOBLUX. Your starting point into luxury industry careers intelligence. Explore salary data, interview insights, and brand intelligence — and contribute what you know to deepen the ecosystem.',
+  pro: 'Your intelligence workspace. Deeper access to salary benchmarks, interview intelligence, and brand insights across the luxury industry. Your contributions strengthen the data for everyone.',
+  professional: 'Strategic intelligence access. Comprehensive salary data, interview patterns, and sector-level insights across the luxury industry. Your seniority and contributions unlock the deepest layer of intelligence.',
+  executive: 'Strategic intelligence access. Comprehensive salary data, interview patterns, and sector-level insights across the luxury industry. Your seniority and contributions unlock the deepest layer of intelligence.',
+  business: 'Private hiring access for luxury employers. Submit confidential search briefs, access market intelligence on compensation and talent movement, and work with JOBLUX\'s recruitment consultants to identify exceptional candidates.',
+  insider: 'Your trusted contributor workspace. As an Insider, your knowledge directly shapes the intelligence ecosystem. Contribute insights, review intelligence quality, and access the platform\'s deepest intelligence layer.',
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────
@@ -174,6 +183,9 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
                 <span className="text-[0.6rem] text-[#aaa]">{contributionPoints} points</span>
               )}
             </div>
+            {TIER_WELCOME[role] && (
+              <p className="text-sm text-[#888] leading-relaxed mt-3 max-w-xl">{TIER_WELCOME[role]}</p>
+            )}
             {isAdmin && (
               <Link
                 href="/admin/dashboard"
@@ -338,21 +350,21 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // PRO / RISING / EXECUTIVE DASHBOARD (+ Admin overlay)
+  // PRO / RISING / PRO+ DASHBOARD (+ Admin overlay)
   // ══════════════════════════════════════════════════════════════════
 
   const proKpis = [
-    { label: 'Matched Opportunities', value: String(opportunities.length), gold: false },
-    { label: 'Applications', value: String(applicationCount), gold: false },
-    { label: 'Profile Strength', value: '—', gold: false },
+    { label: 'Tracked Assignments', value: String(opportunities.length), gold: false },
+    { label: 'Expressions of Interest', value: String(applicationCount), gold: false },
+    { label: 'Relevance Indicator', value: `${profileCompleteness}%`, gold: false },
     { label: 'Contribution Points', value: String(contributionPoints), gold: true },
   ]
 
   const proActions = [
-    { label: 'Browse opportunities', href: '/opportunities', desc: 'Matched positions' },
+    { label: 'Browse assignments', href: '/opportunities', desc: 'Confidential search assignments' },
     { label: 'Upload CV', href: '/profile', desc: 'Improve your relevance' },
     { label: 'Contribute an insight', href: '/contribute', desc: 'Earn contribution points' },
-    { label: 'Browse WikiLux', href: '/wikilux', desc: '500+ brand encyclopedias' },
+    { label: 'Browse intelligence', href: '/wikilux', desc: '500+ brand profiles' },
   ]
 
   return (
@@ -380,7 +392,7 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-[#1a1a1a]">
-                Matched Opportunities
+                Tracked Assignments
               </h2>
               <Link href="/opportunities" className="text-sm text-[#a58e28] hover:text-[#7a6a1e] font-medium transition-colors flex items-center gap-1">
                 View all <ArrowRight className="w-3.5 h-3.5" />
@@ -389,7 +401,7 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
 
             {loading ? (
               <div className="bg-white border border-gray-200/60 rounded-xl p-8 text-center">
-                <p className="text-sm text-[#555]">Loading opportunities...</p>
+                <p className="text-sm text-[#555]">Loading assignments...</p>
               </div>
             ) : opportunities.length === 0 ? (
               <div className="bg-white border border-gray-200/60 rounded-xl p-10 text-center">
@@ -476,6 +488,34 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
                 <Link href="/dashboard/messages" className="text-sm text-[#a58e28] hover:text-[#7a6a1e] font-medium transition-colors">View all</Link>
               </div>
               <p className="text-sm text-[#555]">Messages from the JOBLUX recruitment team.</p>
+            </div>
+
+            {/* Contribution Progress */}
+            <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
+              <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-3">Contribution Progress</h4>
+              <p className="text-sm text-[#555]">Track your salary, interview, and insight contributions.</p>
+              <p className="text-[0.6rem] text-[#aaa] mt-2 italic">Coming soon</p>
+            </div>
+
+            {/* Tracked Sectors & Brands */}
+            <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
+              <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-3">Tracked Sectors & Brands</h4>
+              <p className="text-sm text-[#555]">Follow brands and sectors to receive targeted intelligence.</p>
+              <p className="text-[0.6rem] text-[#aaa] mt-2 italic">Coming soon</p>
+            </div>
+
+            {/* Saved Intelligence */}
+            <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
+              <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-3">Saved Intelligence</h4>
+              <p className="text-sm text-[#555]">Bookmarked salary data, interview experiences, and articles.</p>
+              <p className="text-[0.6rem] text-[#aaa] mt-2 italic">Coming soon</p>
+            </div>
+
+            {/* Discreet Requests */}
+            <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
+              <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-3">Discreet Requests</h4>
+              <p className="text-sm text-[#555]">Private enquiries and expressions of interest.</p>
+              <p className="text-[0.6rem] text-[#aaa] mt-2 italic">Coming soon</p>
             </div>
           </div>
         </div>
