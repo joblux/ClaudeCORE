@@ -148,14 +148,14 @@ export default function InterviewsPage() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-[#222222] py-16 md:py-24">
+      <section className="bg-[#222222] py-6 md:py-8">
         <div className="jl-container text-center">
-          <div className="jl-overline-gold mb-4 tracking-[0.2em]">Interview Intelligence</div>
-          <h1 className="jl-serif text-4xl md:text-5xl lg:text-6xl font-light text-white mb-5">
+          <div className="jl-overline-gold mb-2 tracking-[0.2em]">Interview Intelligence</div>
+          <h1 className="jl-serif text-2xl md:text-3xl font-light text-white mb-2">
             Inside the Maisons
           </h1>
-          <p className="font-sans text-sm md:text-base text-[#bbb] max-w-2xl mx-auto leading-relaxed mb-8">
-            Real interview experiences from luxury professionals. Contributed by members, anonymised for your benefit.
+          <p className="font-sans text-xs md:text-sm text-[#bbb] max-w-2xl mx-auto leading-relaxed mb-3">
+            Real interview experiences from luxury professionals. Contributed by professionals, anonymised for your benefit.
           </p>
           {stats && stats.total_experiences > 0 && (
             <div className="flex items-center justify-center gap-4 text-xs text-[#999] tracking-wide uppercase">
@@ -172,25 +172,22 @@ export default function InterviewsPage() {
       {/* Filter Bar */}
       <div className="sticky top-0 z-30 bg-white border-b border-[#e8e2d8]">
         <div className="jl-container py-3">
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Brand filter with search */}
-            <div className="relative">
-              <select
-                value={filterBrand}
-                onChange={(e) => { setFilterBrand(e.target.value); setPage(1) }}
-                className="jl-select text-xs min-w-[160px]"
-              >
-                <option value="">All Maisons</option>
-                {brands.map(b => (
-                  <option key={b.slug} value={b.slug}>{b.name}</option>
-                ))}
-              </select>
-            </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={filterBrand}
+              onChange={(e) => { setFilterBrand(e.target.value); setPage(1) }}
+              className="jl-select text-xs w-auto"
+            >
+              <option value="">All Maisons</option>
+              {brands.map(b => (
+                <option key={b.slug} value={b.slug}>{b.name}</option>
+              ))}
+            </select>
 
             <select
               value={filterDepartment}
               onChange={(e) => { setFilterDepartment(e.target.value); setPage(1) }}
-              className="jl-select text-xs min-w-[150px]"
+              className="jl-select text-xs w-auto"
             >
               <option value="">All Departments</option>
               {uniqueDepartments.map(d => (
@@ -201,7 +198,7 @@ export default function InterviewsPage() {
             <select
               value={filterSeniority}
               onChange={(e) => { setFilterSeniority(e.target.value); setPage(1) }}
-              className="jl-select text-xs min-w-[150px]"
+              className="jl-select text-xs w-auto"
             >
               <option value="">All Levels</option>
               {uniqueSeniority.map(s => (
@@ -212,7 +209,7 @@ export default function InterviewsPage() {
             <select
               value={filterYear}
               onChange={(e) => { setFilterYear(e.target.value); setPage(1) }}
-              className="jl-select text-xs min-w-[100px]"
+              className="jl-select text-xs w-auto"
             >
               <option value="">All Years</option>
               {yearOptions.map(y => (
@@ -223,7 +220,7 @@ export default function InterviewsPage() {
             <select
               value={filterDifficulty}
               onChange={(e) => { setFilterDifficulty(e.target.value); setPage(1) }}
-              className="jl-select text-xs min-w-[130px]"
+              className="jl-select text-xs w-auto"
             >
               <option value="">All Difficulty</option>
               {DIFFICULTY_OPTIONS.map(d => (

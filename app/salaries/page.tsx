@@ -51,13 +51,13 @@ export default function SalariesPage() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-[#222222] py-14 md:py-20">
+      <section className="bg-[#222222] py-6 md:py-8">
         <div className="jl-container text-center">
-          <div className="jl-overline-gold mb-4 tracking-[0.2em]">Salary Intelligence</div>
-          <h1 className="jl-serif text-4xl md:text-5xl lg:text-6xl font-light text-white mb-5">
+          <div className="jl-overline-gold mb-2 tracking-[0.2em]">Salary Intelligence</div>
+          <h1 className="jl-serif text-2xl md:text-3xl font-light text-white mb-2">
             Know Your Worth
           </h1>
-          <p className="font-sans text-sm md:text-base text-[#bbb] max-w-2xl mx-auto leading-relaxed">
+          <p className="font-sans text-xs md:text-sm text-[#bbb] max-w-2xl mx-auto leading-relaxed">
             Salary benchmarks, comparisons, and personalised estimates across the world&rsquo;s most prestigious maisons.
           </p>
         </div>
