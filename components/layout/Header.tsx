@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import UserMenu from '@/components/UserMenu'
 import { useMember } from '@/lib/auth-hooks'
 
@@ -26,13 +25,10 @@ export function Header() {
 
           {/* Logo */}
           <Link href="/" className="inline-block flex-shrink-0">
-            <Image
+            <img
               src="/logos/joblux-header.png"
               alt="JOBLUX"
-              width={500}
-              height={116}
               className="h-6 sm:h-7 w-auto"
-              priority
             />
           </Link>
 
