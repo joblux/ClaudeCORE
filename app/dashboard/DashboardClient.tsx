@@ -178,7 +178,7 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
               <span className="inline-flex items-center px-2.5 py-1 bg-[#a58e28]/10 text-[#a58e28] text-[0.65rem] font-semibold tracking-[0.12em] uppercase rounded-full">
                 {tierLabel}
               </span>
-              <span className="text-sm text-[#555]">{tierSubtitle}</span>
+              {!isBusiness && <span className="text-sm text-[#555]">{tierSubtitle}</span>}
               {contributionPoints > 0 && !isBusiness && (
                 <span className="text-[0.6rem] text-[#aaa]">{contributionPoints} points</span>
               )}

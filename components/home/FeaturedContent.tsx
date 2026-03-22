@@ -62,29 +62,33 @@ export async function FeaturedArticle() {
   }
 
   return (
-    <div>
-      <div className="jl-overline-gold mb-2">{lead.category}</div>
-      <h2 className="jl-serif text-2xl font-light text-[#1a1a1a] leading-snug mb-2 hover:text-[#a58e28] transition-colors">
-        <Link href={`/bloglux/${lead.slug}`}>{lead.title}</Link>
-      </h2>
-      {lead.excerpt && (
-        <p className="font-sans text-sm text-[#666] leading-relaxed mb-2">
-          {lead.excerpt}
-        </p>
-      )}
-      <div className="jl-overline mb-3">
-        {formatDate(lead.published_at)}
-        {lead.read_time_minutes && <> &nbsp;·&nbsp; {lead.read_time_minutes} min read</>}
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+      {/* Image */}
       {lead.cover_image_url ? (
-        <div className="relative bg-[#fafaf5] border border-[#e8e2d8] h-[180px] overflow-hidden">
+        <div className="relative bg-[#fafaf5] border border-[#e8e2d8] h-[280px] md:h-[320px] overflow-hidden">
           <Image src={lead.cover_image_url} alt={lead.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
         </div>
       ) : (
-        <div className="bg-[#fafaf5] border border-[#e8e2d8] flex items-center justify-center h-[180px]">
+        <div className="bg-[#fafaf5] border border-[#e8e2d8] flex items-center justify-center h-[280px] md:h-[320px]">
           <div className="jl-serif text-2xl font-light tracking-[0.2em] text-[#a58e28] uppercase">{lead.category}</div>
         </div>
       )}
+      {/* Text */}
+      <div className="flex flex-col justify-center">
+        <div className="jl-overline-gold mb-2">{lead.category}</div>
+        <h2 className="jl-serif text-2xl font-light text-[#1a1a1a] leading-snug mb-2 hover:text-[#a58e28] transition-colors">
+          <Link href={`/bloglux/${lead.slug}`}>{lead.title}</Link>
+        </h2>
+        {lead.excerpt && (
+          <p className="font-sans text-sm text-[#666] leading-relaxed mb-2">
+            {lead.excerpt}
+          </p>
+        )}
+        <div className="jl-overline">
+          {formatDate(lead.published_at)}
+          {lead.read_time_minutes && <> &nbsp;·&nbsp; {lead.read_time_minutes} min read</>}
+        </div>
+      </div>
     </div>
   )
 }

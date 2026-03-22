@@ -442,6 +442,19 @@ export default function ProfileClient({ email }: { email: string }) {
   const [prefAlertFreq, setPrefAlertFreq] = useState('weekly')
   const [savingPrefs, setSavingPrefs] = useState(false)
 
+  // ── Business Profile ──────────────────────────────────────────
+  const [companyName, setCompanyName] = useState('')
+  const [companySector, setCompanySector] = useState('')
+  const [companyDescription, setCompanyDescription] = useState('')
+  const [hiringLocations, setHiringLocations] = useState('')
+  const [typicalRoles, setTypicalRoles] = useState('')
+  const [teamSize, setTeamSize] = useState('')
+  const [hiringDepartments, setHiringDepartments] = useState('')
+  const [contactName, setContactName] = useState('')
+  const [contactEmail, setContactEmail] = useState('')
+  const [contactPhone, setContactPhone] = useState('')
+  const [savingBusiness, setSavingBusiness] = useState(false)
+
   // ── Résumé Settings ────────────────────────────────────────────
   const [resumePublic, setResumePublic] = useState(false)
   const [resumeSlug, setResumeSlug] = useState<string | null>(null)
@@ -519,6 +532,18 @@ export default function ProfileClient({ email }: { email: string }) {
 
           // Avatar
           setAvatarUrl((m as any).avatar_url || null)
+
+          // Business fields
+          setCompanyName((m as any).company_name || '')
+          setCompanySector((m as any).company_sector || '')
+          setCompanyDescription((m as any).company_description || '')
+          setHiringLocations((m as any).hiring_locations || '')
+          setTypicalRoles((m as any).typical_roles || '')
+          setTeamSize((m as any).team_size || '')
+          setHiringDepartments((m as any).hiring_departments || '')
+          setContactName((m as any).contact_name || '')
+          setContactEmail((m as any).contact_email || '')
+          setContactPhone((m as any).contact_phone || '')
         }
 
         // Related records
@@ -685,6 +710,18 @@ export default function ProfileClient({ email }: { email: string }) {
         desired_locations: desiredLocations,
         desired_contract_types: desiredContractTypes,
         desired_departments: desiredDepartments,
+
+        // Business fields
+        company_name: companyName || null,
+        company_sector: companySector || null,
+        company_description: companyDescription || null,
+        hiring_locations: hiringLocations || null,
+        typical_roles: typicalRoles || null,
+        team_size: teamSize || null,
+        hiring_departments: hiringDepartments || null,
+        contact_name: contactName || null,
+        contact_email: contactEmail || null,
+        contact_phone: contactPhone || null,
       }
 
       const res = await fetch('/api/members/profile', {
@@ -997,6 +1034,8 @@ export default function ProfileClient({ email }: { email: string }) {
     }
   }
 
+  const isBusiness = member && ['business'].includes((member as any).role || '')
+
   // ══════════════════════════════════════════════════════════════════
   // Profile Completeness
   // ══════════════════════════════════════════════════════════════════
@@ -1210,6 +1249,78 @@ export default function ProfileClient({ email }: { email: string }) {
             </div>
           </FormSection>
 
+          {/* ════════════════════════════════════════════════════ */}
+          {/* BUSINESS PROFILE SECTIONS                           */}
+          {/* ════════════════════════════════════════════════════ */}
+          {isBusiness && (
+            <>
+              <FormSection title="Company Information" defaultOpen={true}>
+                <div className="space-y-5">
+                  <div>
+                    <label className="jl-label">Company Name *</label>
+                    <input className="jl-input" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="jl-label">Sector *</label>
+                    <select className="jl-select" value={companySector} onChange={(e) => setCompanySector(e.target.value)}>
+                      <option value="">Select sector</option>
+                      {['Fashion & leather goods', 'Watches & jewellery', 'Perfumes & cosmetics', 'Wines & spirits', 'Hospitality & travel', 'Automotive', 'Aviation & yachting', 'Real estate', 'Design', 'Art & auction houses', 'Media & publishing', 'Technology for luxury', 'Multi-sector group', 'Recruitment agency'].map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="jl-label">Company Description</label>
+                    <textarea className="jl-input min-h-[80px]" value={companyDescription} onChange={(e) => setCompanyDescription(e.target.value)} placeholder="Brief description of your company" />
+                  </div>
+                </div>
+              </FormSection>
+
+              <FormSection title="Hiring Details">
+                <div className="space-y-5">
+                  <div>
+                    <label className="jl-label">Hiring Locations</label>
+                    <input className="jl-input" value={hiringLocations} onChange={(e) => setHiringLocations(e.target.value)} placeholder="e.g. Paris, London, New York" />
+                  </div>
+                  <div>
+                    <label className="jl-label">Typical Roles Hired</label>
+                    <input className="jl-input" value={typicalRoles} onChange={(e) => setTypicalRoles(e.target.value)} placeholder="e.g. Store Directors, Buyers, Marketing Managers" />
+                  </div>
+                  <div>
+                    <label className="jl-label">Team Size</label>
+                    <input className="jl-input" value={teamSize} onChange={(e) => setTeamSize(e.target.value)} placeholder="e.g. 50–200" />
+                  </div>
+                  <div>
+                    <label className="jl-label">Departments Hiring For</label>
+                    <input className="jl-input" value={hiringDepartments} onChange={(e) => setHiringDepartments(e.target.value)} placeholder="e.g. Retail, Marketing, Digital" />
+                  </div>
+                </div>
+              </FormSection>
+
+              <FormSection title="Contact Information">
+                <div className="space-y-5">
+                  <div>
+                    <label className="jl-label">Primary Contact Name</label>
+                    <input className="jl-input" value={contactName} onChange={(e) => setContactName(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="jl-label">Email</label>
+                    <input className="jl-input" type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="jl-label">Phone</label>
+                    <input className="jl-input" type="tel" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
+                  </div>
+                </div>
+              </FormSection>
+            </>
+          )}
+
+          {/* ════════════════════════════════════════════════════ */}
+          {/* CANDIDATE PROFILE SECTIONS (hidden for business)    */}
+          {/* ════════════════════════════════════════════════════ */}
+          {!isBusiness && (
+          <>
           {/* ════════════════════════════════════════════════════ */}
           {/* Section 2 — Professional Summary                    */}
           {/* ════════════════════════════════════════════════════ */}
@@ -2304,6 +2415,9 @@ export default function ProfileClient({ email }: { email: string }) {
             </div>
           </FormSection>
 
+          </>
+          )}
+
           {/* Quick links — mobile only (sidebar has these on desktop) */}
           <div className="mt-10 lg:hidden">
             <div className="jl-section-label"><span>Quick Links</span></div>
@@ -2316,7 +2430,7 @@ export default function ProfileClient({ email }: { email: string }) {
               </Link>
               <Link href="/opportunities" className="jl-card group">
                 <h3 className="font-sans text-sm font-semibold text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors">
-                  Opportunities
+                  Search Assignments
                 </h3>
                 <p className="font-sans text-xs text-[#888] mt-1">Browse confidential assignments</p>
               </Link>
@@ -2417,11 +2531,7 @@ export default function ProfileClient({ email }: { email: string }) {
                   </Link>
                   <Link href="/opportunities" className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#a58e28] transition-colors">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#a58e28]" />
-                    Opportunities
-                  </Link>
-                  <Link href="/invite" className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#a58e28] transition-colors">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#a58e28]" />
-                    Invite Colleagues
+                    Search Assignments
                   </Link>
                 </div>
               </div>

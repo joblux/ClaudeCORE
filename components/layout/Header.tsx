@@ -21,19 +21,19 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-[#e8e2d8]">
       <div className="jl-container">
-        <div className="flex items-center justify-between py-3">
+        <div className="flex items-center justify-between py-4">
 
           {/* Logo */}
           <Link href="/" className="inline-block flex-shrink-0">
-            <img
-              src="/logos/joblux-header.png"
-              alt="JOBLUX"
-              className="h-6 sm:h-7 w-auto"
-            />
+            <svg width="44" height="44" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" className="h-10 sm:h-11 w-auto">
+              <rect x="10" y="10" width="160" height="160" fill="none" stroke="#1A1A1A" strokeWidth="4"/>
+              <text x="90" y="78" fontFamily="Georgia, 'Times New Roman', serif" fontSize="48" fontWeight="500" fill="#B8975C" textAnchor="middle" letterSpacing="4">JOB</text>
+              <text x="90" y="126" fontFamily="Georgia, 'Times New Roman', serif" fontSize="48" fontWeight="500" fill="#B8975C" textAnchor="middle" letterSpacing="4">LUX.</text>
+            </svg>
           </Link>
 
           {/* Center nav — desktop */}
-          <nav className="hidden md:flex items-center justify-center gap-7">
+          <nav className="hidden md:flex items-center justify-center gap-5">
             {navItems.map((item) => (
               <Link
                 key={item.label}
