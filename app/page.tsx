@@ -52,7 +52,7 @@ export default function HomePage() {
         <div className="jl-container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             <FeaturedArticle />
-            <div className="bg-white border border-[#e8e2d8] p-4 self-start">
+            <div className="bg-white border border-[#e8e2d8] p-4 self-start h-fit">
               <SalarySnapshot />
             </div>
           </div>

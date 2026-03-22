@@ -57,10 +57,10 @@ export async function SalarySnapshot() {
       <div className="jl-section-label"><span>Salary Intelligence</span></div>
       <div className="space-y-0">
         {picked.map((item, i) => (
-          <div key={i} className="flex items-center justify-between py-2 border-b border-[#f5f0e8] last:border-0">
+          <div key={i} className="flex items-center justify-between py-1.5 border-b border-[#f5f0e8] last:border-0">
             <div>
               <div className="font-sans text-xs font-medium text-[#1a1a1a]">{item.job_title}</div>
-              {item.city && <div className="font-sans text-[0.65rem] text-[#aaa] mt-0.5">{item.city}</div>}
+              {item.city && <div className="font-sans text-[0.6rem] text-[#aaa] mt-0.5">{item.city}</div>}
             </div>
             <div className="font-sans text-xs font-semibold text-[#1a1a1a]">{buildRange(item)}</div>
           </div>
