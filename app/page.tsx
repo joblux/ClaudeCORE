@@ -35,7 +35,8 @@ export default function HomePage() {
       <Ticker />
 
       {/* MAIN CONTENT */}
-      <div className="jl-container py-10">
+      <div className="bg-[#f5f4f0] py-12 lg:py-16">
+      <div className="jl-container">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
           {/* LEFT — Main content */}
@@ -44,15 +45,16 @@ export default function HomePage() {
           </div>
 
           {/* RIGHT — Sidebar */}
-          <div className="space-y-8">
-            <TheBriefSignup />
-            <SalarySnapshot />
-            <LatestJobs />
-            <WikiLuxPreview />
-            <LuxuryEscapeTeaser />
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm p-5"><TheBriefSignup /></div>
+            <div className="bg-white rounded-lg shadow-sm p-5"><SalarySnapshot /></div>
+            <div className="bg-white rounded-lg shadow-sm p-5"><LatestJobs /></div>
+            <div className="bg-white rounded-lg shadow-sm p-5"><WikiLuxPreview /></div>
+            <div className="bg-white rounded-lg shadow-sm p-5"><LuxuryEscapeTeaser /></div>
           </div>
 
         </div>
+      </div>
       </div>
 
     </div>

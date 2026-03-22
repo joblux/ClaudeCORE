@@ -332,7 +332,7 @@ export default function BrandPage() {
       : undefined)
 
   return (
-    <div>
+    <div className="bg-[#f5f4f0] min-h-screen">
       {/* ── HERO ──────────────────────────────────────────── */}
       <div className="bg-[#222222] border-b-2 border-[#a58e28] relative overflow-hidden">
         {heroImage && (

@@ -340,7 +340,7 @@ export default function FaqPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white text-[#1a1a1a]">
+    <main className="min-h-screen bg-[#f5f4f0] text-[#1a1a1a]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
       {/* ── Header ── */}

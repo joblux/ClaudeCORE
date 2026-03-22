@@ -8,7 +8,9 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="jl-container max-w-3xl mx-auto px-6 py-20">
+    <main className="bg-[#f5f4f0] min-h-screen">
+    <div className="max-w-3xl mx-auto px-6 py-12 lg:py-16">
+    <div className="bg-white rounded-lg shadow-sm p-8 md:p-12">
       <p className="jl-overline-gold tracking-widest uppercase text-sm mb-4">Legal</p>
       <h1 className="jl-serif text-4xl md:text-5xl font-bold mb-4">Privacy Policy</h1>
       <p className="text-muted-foreground mb-12">Last updated: March 2026 — GDPR compliant</p>
@@ -462,14 +464,16 @@ export default function PrivacyPolicyPage() {
       </div>
 
       {/* ── Footer Links ── */}
-      <div className="mt-16 pt-8 border-t border-border flex gap-6 text-sm text-muted-foreground">
-        <Link href="/terms" className="underline hover:text-foreground transition-colors">
+      <div className="mt-16 pt-8 border-t border-[#e8e2d8] flex gap-6 text-sm text-[#888]">
+        <Link href="/terms" className="underline hover:text-[#a58e28] transition-colors">
           Terms of Service
         </Link>
-        <Link href="/faq" className="underline hover:text-foreground transition-colors">
+        <Link href="/faq" className="underline hover:text-[#a58e28] transition-colors">
           FAQ
         </Link>
       </div>
+    </div>
+    </div>
     </main>
   )
 }

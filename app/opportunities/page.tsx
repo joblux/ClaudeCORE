@@ -114,9 +114,9 @@ export default function OpportunitiesPage() {
   }, [opportunities, searchQuery, deptFilter, seniorityFilter, locationFilter, contractFilter, remoteFilter])
 
   return (
-    <div>
+    <div className="bg-[#f5f4f0] min-h-screen">
       {/* ── Page header ────────────────────────────────────────────── */}
-      <div className="border-b-2 border-[#1a1a1a] py-10">
+      <div className="border-b-2 border-[#1a1a1a] py-10 bg-white">
         <div className="jl-container">
           <div className="jl-overline-gold mb-3">Current Opportunities</div>
           <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a] mb-3">
@@ -310,7 +310,7 @@ export default function OpportunitiesPage() {
             Submit a confidential hiring brief. JOBLUX presents pre-screened candidates from our vetted network.
           </p>
           <div className="flex items-center justify-center gap-3">
-            <Link href="/join?type=employer" className="jl-btn jl-btn-primary">Submit a Brief</Link>
+            <Link href="/join?type=employer" className="jl-btn jl-btn-primary">Submit a Search Assignment</Link>
             <Link href="/join" className="jl-btn jl-btn-outline">Join JOBLUX</Link>
           </div>
         </div>

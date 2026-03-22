@@ -34,8 +34,8 @@ const salaryData = [
 
 export default function CareerIntelligencePage() {
   return (
-    <div>
-      <div className="border-b-2 border-[#1a1a1a] py-10">
+    <div className="bg-[#f5f4f0] min-h-screen">
+      <div className="border-b-2 border-[#1a1a1a] py-10 bg-white">
         <div className="jl-container">
           <div className="jl-overline-gold mb-3">Career Intelligence</div>
           <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a] mb-3">
@@ -47,7 +47,7 @@ export default function CareerIntelligencePage() {
         </div>
       </div>
 
-      <div className="jl-container py-10">
+      <div className="jl-container py-12 lg:py-16">
         <div className="max-w-3xl">
 
           {/* SECTION 1 — SALARY INTELLIGENCE */}

@@ -228,7 +228,7 @@ export default function OpportunityDetailPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="bg-[#f8f7f4] min-h-screen">
+      <div className="bg-[#f5f4f0] min-h-screen">
         {/* ── Header section ──────────────────────────────────────── */}
         <div className="bg-white border-b border-gray-200/60 py-8 lg:py-10">
           <div className="jl-container">

@@ -286,7 +286,7 @@ export default function JobsPage() {
             Submit a confidential hiring brief. JOBLUX presents pre-screened candidates from our vetted network.
           </p>
           <div className="flex items-center justify-center gap-3">
-            <Link href="/join?type=employer" className="jl-btn jl-btn-primary">Submit a Brief</Link>
+            <Link href="/join?type=employer" className="jl-btn jl-btn-primary">Submit a Search Assignment</Link>
             <Link href="/join" className="jl-btn jl-btn-outline">Join JOBLUX</Link>
           </div>
         </div>

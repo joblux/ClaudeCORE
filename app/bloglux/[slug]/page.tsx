@@ -124,7 +124,7 @@ export default async function ArticlePage({ params }: Props) {
   }
 
   return (
-    <div>
+    <div className="bg-[#f5f4f0] min-h-screen">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* ── HERO ──────────────────────────────────────────── */}

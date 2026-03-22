@@ -49,7 +49,7 @@ export default function SalariesPage() {
   ]
 
   return (
-    <div>
+    <div className="bg-[#f5f4f0] min-h-screen">
       {/* Hero */}
       <section className="bg-[#222222] py-6 md:py-8">
         <div className="jl-container text-center">
