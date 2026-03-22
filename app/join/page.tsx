@@ -179,10 +179,10 @@ export default function MembersPage() {
             className="text-2xl text-[#1a1a1a] mb-1 text-center"
             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
-            Member Access
+            Request Access
           </h2>
           <p className="text-sm text-[#777] text-center mb-8">
-            Sign in or request access to JOBLUX
+            Luxury, decoded.
           </p>
 
           <Suspense fallback={<div className="text-center text-sm text-[#999] py-4">Loading...</div>}>

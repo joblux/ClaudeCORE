@@ -7,7 +7,7 @@ import { useRequireAdmin } from '@/lib/auth-hooks'
 import {
   LayoutDashboard, BarChart3, Briefcase, Kanban, MessageSquare,
   Users, Star, Send, FileText, BookOpen, DollarSign, FileCode,
-  Menu, X, LogOut, Power, Images, PenLine, MessageCircle, GraduationCap, Mail
+  Menu, X, LogOut, Power, Images, PenLine, MessageCircle, Mail
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
@@ -18,7 +18,6 @@ const NAV_SECTIONS = [
       { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
       { label: 'Profiles', href: '/admin', icon: Users, exact: true },
       { label: 'Search Assignments', href: '/admin/assignments', icon: Briefcase },
-      { label: 'Internships', href: '/admin/internships', icon: GraduationCap, countKey: 'pending_internships' },
       { label: 'ATS Pipeline', href: '/admin/ats', icon: Kanban },
       { label: 'Messages', href: '/admin/messages', icon: MessageSquare, countKey: 'unread_messages' },
       { label: 'Contributions', href: '/admin/contributions', icon: Star, countKey: 'pending_contributions' },
@@ -28,11 +27,11 @@ const NAV_SECTIONS = [
   {
     label: 'CONTENT',
     items: [
-      { label: 'BlogLux', href: '/admin/articles', icon: FileText },
-      { label: 'New Article', href: '/admin/articles/new', icon: PenLine },
+      { label: 'Intelligence', href: '/admin/articles', icon: FileText },
+      { label: 'New Intelligence', href: '/admin/articles/new', icon: PenLine },
       { label: 'Editorial Review', href: '/admin/bloglux/comments', icon: MessageCircle, countKey: 'pending_comments' },
       { label: 'WikiLux', href: '/admin/wikilux', icon: BookOpen },
-      { label: 'Salary Data', href: '/salaries', icon: DollarSign },
+      { label: 'Salary Intelligence', href: '/salaries', icon: DollarSign },
       { label: 'Media Library', href: '/admin/media', icon: Images },
     ],
   },

@@ -17,22 +17,22 @@ const TIER_LABELS: Record<string, string> = {
 }
 
 const TIER_SUBTITLES: Record<string, string> = {
-  rising: 'Professional account',
-  pro: 'Professional account',
-  professional: 'Professional account',
-  executive: 'Professional account',
-  business: 'Employer account',
-  insider: 'Intelligence partner',
+  rising: 'Emerging Professional',
+  pro: 'Established Professional',
+  professional: 'Senior & Executive',
+  executive: 'Senior & Executive',
+  business: 'Luxury Employer',
+  insider: 'Trusted Contributor',
   admin: 'Administrator',
 }
 
 const TIER_WELCOME: Record<string, string> = {
-  rising: 'Welcome to JOBLUX. Your starting point into luxury industry careers intelligence. Explore salary data, interview insights, and brand intelligence — and contribute what you know to deepen the ecosystem.',
-  pro: 'Your intelligence workspace. Deeper access to salary benchmarks, interview intelligence, and brand insights across the luxury industry. Your contributions strengthen the data for everyone.',
-  professional: 'Strategic intelligence access. Comprehensive salary data, interview patterns, and sector-level insights across the luxury industry. Your seniority and contributions unlock the deepest layer of intelligence.',
-  executive: 'Strategic intelligence access. Comprehensive salary data, interview patterns, and sector-level insights across the luxury industry. Your seniority and contributions unlock the deepest layer of intelligence.',
-  business: 'Private hiring access for luxury employers. Submit confidential search briefs, access market intelligence on compensation and talent movement, and work with JOBLUX\'s recruitment consultants to identify exceptional candidates.',
-  insider: 'Your trusted contributor workspace. As an Insider, your knowledge directly shapes the intelligence ecosystem. Contribute insights, review intelligence quality, and access the platform\'s deepest intelligence layer.',
+  rising: 'Your starting point into luxury industry intelligence.',
+  pro: 'Your intelligence workspace.',
+  professional: 'Strategic intelligence access.',
+  executive: 'Strategic intelligence access.',
+  business: 'Your private hiring workspace.',
+  insider: 'Your trusted contributor workspace.',
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────
@@ -214,17 +214,17 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
 
   if (isBusiness) {
     const businessKpis = [
-      { label: 'Active Assignments', value: String(assignments.length), gold: false },
-      { label: 'Internships Posted', value: String(internshipCount), gold: false },
-      { label: 'Candidates Viewed', value: '—', gold: false },
+      { label: 'Active search briefs', value: String(assignments.length), gold: false },
+      { label: 'Candidates presented', value: '—', gold: false },
+      { label: 'Assignments in progress', value: String(assignments.length), gold: false },
       { label: 'Messages', value: '—', gold: false },
     ]
 
     const businessActions = [
-      { label: 'Post a free internship', href: '/dashboard/internships/new', desc: 'Reach luxury professionals' },
-      { label: 'Submit a search request', href: '/admin/briefs/new', desc: 'Find exceptional talent' },
-      { label: 'Browse WikiLux', href: '/wikilux', desc: '500+ brand encyclopedias' },
-      { label: 'Contact JOBLUX team', href: '/contact', desc: 'Get in touch with us' },
+      { label: 'Submit a search brief', href: '/admin/briefs/new', desc: 'Start a confidential search' },
+      { label: 'Compensation intelligence', href: '/salaries', desc: 'Market salary benchmarks' },
+      { label: 'Browse Wiki', href: '/wikilux', desc: '500+ brand profiles' },
+      { label: 'Contact your consultant', href: '/contact', desc: 'Get in touch with JOBLUX' },
     ]
 
     return (
@@ -250,7 +250,7 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-[#1a1a1a]">
-                  Your Search Assignments
+                  Your search briefs
                 </h2>
               </div>
 
@@ -260,12 +260,12 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
                 </div>
               ) : assignments.length === 0 ? (
                 <div className="bg-white border border-gray-200/60 rounded-xl p-10 text-center">
-                  <p className="text-base font-medium text-[#1a1a1a] mb-2">No active search assignments</p>
+                  <p className="text-base font-medium text-[#1a1a1a] mb-2">No active search briefs</p>
                   <p className="text-sm text-[#555] leading-relaxed mb-6">
-                    Submit your first search request to find exceptional talent through the JOBLUX network.
+                    Submit a search brief and our team will begin identifying candidates.
                   </p>
                   <Link href="/admin/briefs/new" className="inline-flex px-6 py-2.5 bg-[#a58e28] text-white text-[0.7rem] font-semibold tracking-wider uppercase rounded-md hover:bg-[#8a7622] transition-colors">
-                    Submit Search Request
+                    Submit a search brief
                   </Link>
                 </div>
               ) : (
@@ -354,17 +354,17 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
   // ══════════════════════════════════════════════════════════════════
 
   const proKpis = [
-    { label: 'Tracked Assignments', value: String(opportunities.length), gold: false },
-    { label: 'Expressions of Interest', value: String(applicationCount), gold: false },
-    { label: 'Relevance Indicator', value: `${profileCompleteness}%`, gold: false },
-    { label: 'Contribution Points', value: String(contributionPoints), gold: true },
+    { label: 'Contributions', value: String(contributionPoints), gold: true },
+    { label: 'Saved intelligence', value: '—', gold: false },
+    { label: 'Tracked sectors', value: '—', gold: false },
+    { label: 'Assignments tracked', value: String(opportunities.length), gold: false },
   ]
 
   const proActions = [
+    { label: 'Contribute an insight', href: '/contribute', desc: 'Salary data, interviews, or market signals' },
     { label: 'Browse assignments', href: '/opportunities', desc: 'Confidential search assignments' },
-    { label: 'Upload CV', href: '/profile', desc: 'Improve your relevance' },
-    { label: 'Contribute an insight', href: '/contribute', desc: 'Earn contribution points' },
     { label: 'Browse intelligence', href: '/wikilux', desc: '500+ brand profiles' },
+    { label: 'Edit profile', href: '/profile', desc: 'Update your access profile' },
   ]
 
   return (
@@ -392,7 +392,7 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-[#1a1a1a]">
-                Tracked Assignments
+                Tracked assignments
               </h2>
               <Link href="/opportunities" className="text-sm text-[#a58e28] hover:text-[#7a6a1e] font-medium transition-colors flex items-center gap-1">
                 View all <ArrowRight className="w-3.5 h-3.5" />
@@ -405,10 +405,10 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
               </div>
             ) : opportunities.length === 0 ? (
               <div className="bg-white border border-gray-200/60 rounded-xl p-10 text-center">
-                <p className="text-base font-medium text-[#1a1a1a] mb-2">No matched opportunities yet</p>
-                <p className="text-sm text-[#555] leading-relaxed mb-6">Complete your profile to improve matching.</p>
-                <Link href="/profile" className="inline-flex px-6 py-2.5 bg-[#a58e28] text-white text-[0.7rem] font-semibold tracking-wider uppercase rounded-md hover:bg-[#8a7622] transition-colors">
-                  Complete Profile
+                <p className="text-base font-medium text-[#1a1a1a] mb-2">No tracked assignments. Browse current assignments to find relevant positions.</p>
+                <p className="text-sm text-[#555] leading-relaxed mb-6">Browse assignments to find positions relevant to your career.</p>
+                <Link href="/opportunities" className="inline-flex px-6 py-2.5 bg-[#a58e28] text-white text-[0.7rem] font-semibold tracking-wider uppercase rounded-md hover:bg-[#8a7622] transition-colors">
+                  Browse Assignments
                 </Link>
               </div>
             ) : (
@@ -507,7 +507,7 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
             {/* Saved Intelligence */}
             <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
               <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-3">Saved Intelligence</h4>
-              <p className="text-sm text-[#555]">Bookmarked salary data, interview experiences, and articles.</p>
+              <p className="text-sm text-[#555]">Nothing saved yet. Bookmark intelligence as you browse.</p>
               <p className="text-[0.6rem] text-[#aaa] mt-2 italic">Coming soon</p>
             </div>
 
@@ -523,13 +523,13 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
         {/* Bottom: Recommended */}
         <div className="border-t border-[#e8e2d8] pt-10 lg:pt-12">
           <h2 className="font-['Playfair_Display'] text-2xl lg:text-3xl font-light text-[#1a1a1a] mb-6 lg:mb-8">
-            Recommended for You
+            Recommended for you
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
             <Link href="/wikilux" className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6 group hover:border-[#a58e28]/40 transition-all">
               <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#a58e28] mb-2">Brand Intelligence</div>
-              <h3 className="text-lg font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors mb-1">WikiLux</h3>
-              <p className="text-sm text-[#555] leading-relaxed">Explore 500+ luxury brand encyclopedias</p>
+              <h3 className="text-lg font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors mb-1">Wiki</h3>
+              <p className="text-sm text-[#555] leading-relaxed">500+ luxury brand profiles</p>
             </Link>
             <Link href="/salaries" className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6 group hover:border-[#a58e28]/40 transition-all">
               <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#a58e28] mb-2">Career Intelligence</div>
@@ -553,9 +553,9 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
               {[
                 { title: 'Command Centre', desc: 'Stats, pipeline, system status.', href: '/admin/dashboard' },
-                { title: 'Post a Brief', desc: 'Create a new hiring assignment.', href: '/admin/briefs/new' },
+                { title: 'Submit a search brief', desc: 'Start a confidential search.', href: '/admin/briefs/new' },
                 { title: 'Review Contributions', desc: 'Approve contributions.', href: '/admin/contributions' },
-                { title: 'Manage Articles', desc: 'BlogLux editorial and publishing.', href: '/admin/articles' },
+                { title: 'Manage intelligence', desc: 'Editorial intelligence and publishing.', href: '/admin/articles' },
               ].map((card) => (
                 <Link key={card.title} href={card.href} className="bg-white border border-[#a58e28]/30 rounded-xl p-5 group hover:border-[#a58e28] transition-all">
                   <h3 className="text-lg font-medium text-[#a58e28] mb-2">{card.title}</h3>

@@ -235,7 +235,7 @@ export default function AdminDashboardPage() {
       subColor: kpis.activeAssignments > 0 ? 'text-green-600' : 'text-gray-400',
     },
     {
-      label: 'BLOGLUX',
+      label: 'INTELLIGENCE',
       value: kpis.articles,
       sub: 'articles',
       subColor: 'text-gray-400',
@@ -247,7 +247,7 @@ export default function AdminDashboardPage() {
       subColor: kpis.failedBrands > 0 ? 'text-amber-600' : 'text-green-600',
     },
     {
-      label: 'SALARY DATA',
+      label: 'SALARY INTELLIGENCE',
       value: kpis.salaries,
       sub: 'All seeded',
       subColor: 'text-green-600',
@@ -329,7 +329,7 @@ export default function AdminDashboardPage() {
             <div className="space-y-1.5">
               {[
                 { label: 'New search assignment', href: '/admin/assignments/new', icon: Briefcase },
-                { label: 'Write BlogLux article', href: '/admin/articles/new', icon: PenLine },
+                { label: 'Write intelligence article', href: '/admin/articles/new', icon: PenLine },
                 ...(kpis.pendingMembers > 0 ? [{ label: `Review pending profile (${kpis.pendingMembers})`, href: '/admin', icon: UserCheck }] : []),
                 { label: 'Import content', href: '/admin/assignments/import', icon: Download },
                 { label: 'Invite professionals', href: '/admin/invitations', icon: Send },

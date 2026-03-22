@@ -7,11 +7,12 @@ import SearchOverlay from '@/components/SearchOverlay'
 import { useMember } from '@/lib/auth-hooks'
 
 const publicNavItems = [
-  { label: 'Intelligence', href: '/wikilux' },
+  { label: 'Intelligence', href: '/bloglux' },
+  { label: 'Wiki', href: '/wikilux' },
   { label: 'Salaries', href: '/salaries' },
   { label: 'Interviews', href: '/interviews' },
-  { label: 'Insights', href: '/bloglux' },
-  { label: 'Private Services', href: '/services' },
+  { label: 'The Brief', href: '/the-brief' },
+  { label: 'Services', href: '/services' },
 ]
 
 const authOnlyNavItems: { label: string; href: string }[] = []

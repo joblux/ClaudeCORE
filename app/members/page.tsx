@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 function SignInContent() {
   const [email, setEmail] = useState("");
@@ -78,13 +79,14 @@ export default function MembersPage() {
     <main className="min-h-screen bg-[#f5f4f0] flex items-center justify-center px-4">
       <div className="w-full max-w-[420px]">
         <div className="bg-white border border-[#e8e6df] rounded-sm p-8">
-          <h2 className="text-2xl text-[#1a1a1a] mb-1 text-center" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Member Access</h2>
-          <p className="text-sm text-[#777] text-center mb-8">Sign in or request access to JOBLUX</p>
+          <h2 className="text-2xl text-[#1a1a1a] mb-1 text-center" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Sign in to JOBLUX</h2>
+          <p className="text-sm text-[#777] text-center mb-8">Luxury, decoded.</p>
           <Suspense fallback={<div className="text-center text-sm text-[#999] py-4">Loading...</div>}>
             <SignInContent />
           </Suspense>
         </div>
-        <p className="text-center text-xs text-[#999] mt-6 leading-relaxed">New to JOBLUX? Sign in to request access.<br />All applications are personally reviewed.</p>
+        <p className="text-center text-xs text-[#999] mt-6 leading-relaxed">Rising, Pro, and Pro+ profiles are approved on completion.<br />Business and Insider profiles are reviewed by JOBLUX.</p>
+        <p className="text-center text-xs mt-3"><Link href="/join" className="text-[#a58e28] hover:text-[#1a1a1a] transition-colors">Don&apos;t have access yet? Request access</Link></p>
       </div>
     </main>
   );
