@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { Ticker } from '@/components/home/Ticker'
 import { FeaturedContent } from '@/components/home/FeaturedContent'
 import { SalarySnapshot } from '@/components/home/SalarySnapshot'
@@ -31,36 +30,6 @@ export default function HomePage() {
   return (
     <div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
-
-      {/* ── Hero ── */}
-      <section className="w-full bg-[#1a1a1a] px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8 text-center">
-        <div className="max-w-3xl mx-auto">
-
-          <p className="text-sm sm:text-base tracking-[0.14em] uppercase text-[#a58e28] font-medium mb-6">
-            Luxury Talents Society
-          </p>
-
-          <div className="flex flex-row gap-1.5 justify-center items-center">
-            <Link
-              href="/join"
-              className="px-2.5 py-1 bg-[#a58e28] text-[#1a1a1a] text-[0.65rem] font-medium
-                         hover:bg-[#c4aa3a] active:scale-[0.98] transition-all duration-200
-                         whitespace-nowrap"
-            >
-              Request Access
-            </Link>
-            <Link
-              href="/wikilux"
-              className="px-2.5 py-1 border border-white/30 text-white text-[0.65rem] font-medium
-                         hover:border-white/60 active:scale-[0.98]
-                         transition-all duration-200 whitespace-nowrap"
-            >
-              Explore WikiLux
-            </Link>
-          </div>
-
-        </div>
-      </section>
 
       {/* INDUSTRY TICKER */}
       <Ticker />

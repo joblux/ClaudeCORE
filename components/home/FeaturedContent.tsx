@@ -217,9 +217,19 @@ export function FeaturedContent() {
           <div className="space-y-4">
             {interviews.map((exp) => {
               // Extract first tip as a quote
-              const firstTip = exp.tips
-                ? exp.tips.split('\n').map(l => l.trim()).filter(Boolean)[0] || null
-                : null
+              let firstTip: string | null = null
+              if (exp.tips) {
+                try {
+                  const parsed = JSON.parse(exp.tips)
+                  if (Array.isArray(parsed) && parsed.length > 0) {
+                    firstTip = String(parsed[0]).trim()
+                  } else {
+                    firstTip = exp.tips.split('\n').map(l => l.trim()).filter(Boolean)[0] || null
+                  }
+                } catch {
+                  firstTip = exp.tips.split('\n').map(l => l.trim()).filter(Boolean)[0] || null
+                }
+              }
               const initials = (exp.brand_name || '??').slice(0, 2).toUpperCase()
 
               return (
