@@ -1,15 +1,6 @@
-'use client'
-
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@supabase/supabase-js'
-
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 interface Article {
   title: string
@@ -35,76 +26,47 @@ function formatDate(d: string | null): string {
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
+export async function FeaturedContent() {
+  const supabase = createServerSupabaseClient()
 
-export function FeaturedContent() {
-  const [articles, setArticles] = useState<Article[]>([])
-  const [interviews, setInterviews] = useState<InterviewRow[]>([])
-  const [loading, setLoading] = useState(true)
+  // Fetch articles
+  const { data: featured } = await supabase
+    .from('bloglux_articles')
+    .select('title, slug, category, excerpt, published_at, read_time_minutes, cover_image_url')
+    .eq('status', 'published')
+    .eq('featured_homepage', true)
+    .order('published_at', { ascending: false })
+    .limit(8)
 
-  useEffect(() => {
-    async function fetchAll() {
-      // Fetch articles
-      const { data: featured } = await supabase
-        .from('bloglux_articles')
-        .select('title, slug, category, excerpt, published_at, read_time_minutes, cover_image_url')
-        .eq('status', 'published')
-        .eq('featured_homepage', true)
-        .order('published_at', { ascending: false })
-        .limit(8)
+  let articles: Article[]
+  if (featured && featured.length >= 6) {
+    articles = featured
+  } else {
+    // Fallback: most recent published
+    const { data: recent } = await supabase
+      .from('bloglux_articles')
+      .select('title, slug, category, excerpt, published_at, read_time_minutes, cover_image_url')
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .limit(8)
+    articles = recent || []
+  }
 
-      if (featured && featured.length >= 6) {
-        setArticles(featured)
-      } else {
-        // Fallback: most recent published
-        const { data: recent } = await supabase
-          .from('bloglux_articles')
-          .select('title, slug, category, excerpt, published_at, read_time_minutes, cover_image_url')
-          .eq('status', 'published')
-          .order('published_at', { ascending: false })
-          .limit(8)
-        setArticles(recent || [])
-      }
+  // Fetch interview experiences with brand_name directly on the row
+  const { data: intData } = await supabase
+    .from('interview_experiences')
+    .select('id, job_title, brand_name, location, tips, overall_experience')
+    .order('created_at', { ascending: false })
+    .limit(3)
 
-      // Fetch interview experiences with brand name from contributions
-      const { data: intData } = await supabase
-        .from('interview_experiences')
-        .select('id, job_title, location, tips, overall_experience, contributions!inner(brand_name)')
-        .order('created_at', { ascending: false })
-        .limit(3)
-
-      if (intData && intData.length > 0) {
-        setInterviews(intData.map((e: any) => {
-          const c = Array.isArray(e.contributions) ? e.contributions[0] : e.contributions
-          return {
-            id: e.id,
-            job_title: e.job_title,
-            brand_name: c?.brand_name || e.brand_name || '',
-            location: e.location,
-            tips: e.tips,
-            overall_experience: e.overall_experience,
-          }
-        }))
-      } else {
-        // Fallback: try without join (brand_name may be on the row directly)
-        const { data: fallback } = await supabase
-          .from('interview_experiences')
-          .select('id, job_title, brand_name, location, tips, overall_experience')
-          .order('created_at', { ascending: false })
-          .limit(3)
-        setInterviews((fallback || []).map((e: any) => ({
-          id: e.id,
-          job_title: e.job_title,
-          brand_name: e.brand_name || '',
-          location: e.location,
-          tips: e.tips,
-          overall_experience: e.overall_experience,
-        })))
-      }
-
-      setLoading(false)
-    }
-    fetchAll()
-  }, [])
+  const interviews: InterviewRow[] = (intData || []).map((e: any) => ({
+    id: e.id,
+    job_title: e.job_title,
+    brand_name: e.brand_name || '',
+    location: e.location,
+    tips: e.tips,
+    overall_experience: e.overall_experience,
+  }))
 
   const lead = articles[0]
   const others = articles.slice(1)
@@ -118,11 +80,7 @@ export function FeaturedContent() {
           <span>Latest Intelligence</span>
         </div>
 
-        {loading ? (
-          <div className="py-8 text-center">
-            <p className="text-sm text-[#888]">Loading articles...</p>
-          </div>
-        ) : !lead ? (
+        {!lead ? (
           <div className="py-8 text-center">
             <p className="text-sm text-[#888]">No articles published yet.</p>
           </div>

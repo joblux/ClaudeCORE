@@ -1,16 +1,17 @@
-'use client'
-
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Head from 'next/head'
-import { useParams } from 'next/navigation'
-import { useMember } from '@/lib/auth-hooks'
+import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { CURRENCY_SYMBOLS } from '@/lib/assignment-options'
 import type { SearchAssignment } from '@/types/search-assignment'
+import OpportunityDetailClient from './OpportunityDetailClient'
+
+// ── Select fields (public only) ─────────────────────────────────────
+const SELECT_FIELDS = 'id, title, slug, maison, is_confidential, city, country, region, remote_policy, department, seniority, contract_type, description, responsibilities, requirements, nice_to_haves, about_maison, salary_min, salary_max, salary_currency, salary_period, salary_display, product_category, client_segment, languages_required, clienteling_experience, travel_percentage, luxury_sector_experience, benefits, relocation_offered, visa_sponsorship, start_date, team_size, seo_title, seo_description, location, reference_number, activated_at, closing_date, bonus_commission'
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
-/** Format salary number to readable (e.g. 120000 → "120,000") */
+/** Format salary number to readable (e.g. 120000 -> "120,000") */
 function formatNum(n: number): string {
   return n.toLocaleString('en-US')
 }
@@ -121,108 +122,63 @@ function buildJsonLd(assignment: SearchAssignment): object {
   return ld
 }
 
+// ── generateMetadata ────────────────────────────────────────────────
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const supabase = createServerSupabaseClient()
+  const { data: assignment } = await supabase
+    .from('search_assignments')
+    .select('title, maison, is_confidential, city, country, description, seo_title, seo_description')
+    .eq('slug', params.slug)
+    .eq('status', 'published')
+    .single()
+
+  if (!assignment) return { title: 'Position Not Found | JOBLUX' }
+
+  const displayMaison = assignment.is_confidential ? 'Leading Luxury Maison' : assignment.maison || 'JOBLUX'
+  const location = [assignment.city, assignment.country].filter(Boolean).join(', ')
+  const title = assignment.seo_title || `${assignment.title} at ${displayMaison} — ${location} | JOBLUX`
+  const desc = assignment.seo_description || (assignment.description || '').slice(0, 160)
+
+  return {
+    title,
+    description: desc,
+    alternates: { canonical: `https://www.joblux.com/opportunities/${params.slug}` },
+    openGraph: { title, description: desc },
+  }
+}
+
 // ══════════════════════════════════════════════════════════════════════
-// Page component
+// Page component (Server)
 // ══════════════════════════════════════════════════════════════════════
 
-export default function OpportunityDetailPage() {
-  const params = useParams()
-  const slug = params.slug as string
-  const { isAuthenticated } = useMember()
+export default async function OpportunityDetailPage({ params }: { params: { slug: string } }) {
+  const supabase = createServerSupabaseClient()
+  const { data: assignment } = await supabase
+    .from('search_assignments')
+    .select(SELECT_FIELDS)
+    .eq('slug', params.slug)
+    .eq('status', 'published')
+    .single()
 
-  const [assignment, setAssignment] = useState<SearchAssignment | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [notFound, setNotFound] = useState(false)
-
-  // Application state
-  const [applying, setApplying] = useState(false)
-  const [applied, setApplied] = useState(false)
-  const [applyError, setApplyError] = useState('')
-
-  // Fetch the opportunity
-  useEffect(() => {
-    fetch(`/api/opportunities/${slug}`)
-      .then((res) => {
-        if (!res.ok) throw new Error('Not found')
-        return res.json()
-      })
-      .then((data) => setAssignment(data))
-      .catch(() => setNotFound(true))
-      .finally(() => setLoading(false))
-  }, [slug])
-
-  // Handle express interest
-  const handleApply = async () => {
-    if (!isAuthenticated || !assignment) return
-    setApplying(true)
-    setApplyError('')
-    try {
-      const res = await fetch('/api/opportunities/apply', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jobId: assignment.id }),
-      })
-      if (res.ok) {
-        setApplied(true)
-      } else {
-        const data = await res.json().catch(() => ({}))
-        setApplyError(data.error || 'Something went wrong')
-      }
-    } catch {
-      setApplyError('Something went wrong')
-    } finally {
-      setApplying(false)
-    }
-  }
-
-  // ── Loading / Not found states ─────────────────────────────────
-  if (loading) {
-    return (
-      <div className="jl-container py-20 text-center">
-        <p className="text-sm text-[#888]">Loading position...</p>
-      </div>
-    )
-  }
-
-  if (notFound || !assignment) {
-    return (
-      <div className="jl-container py-20 text-center">
-        <p className="font-sans text-sm text-[#888]">Position not found.</p>
-        <Link href="/opportunities" className="jl-overline-gold mt-4 inline-block hover:underline">
-          &larr; All Opportunities
-        </Link>
-      </div>
-    )
-  }
+  if (!assignment) notFound()
 
   // ── Derived data ───────────────────────────────────────────────
   const displayMaison = assignment.is_confidential
     ? 'Confidential — Leading Luxury Maison'
     : assignment.maison || 'JOBLUX'
-  const salary = buildSalaryRange(assignment)
-  const jsonLd = buildJsonLd(assignment)
+  const salary = buildSalaryRange(assignment as SearchAssignment)
+  const jsonLd = buildJsonLd(assignment as SearchAssignment)
   const responsibilityLines = textToLines(assignment.responsibilities)
   const requirementLines = textToLines(assignment.requirements)
   const niceToHaveLines = textToLines(assignment.nice_to_haves)
-  const pageTitle = assignment.seo_title || `${assignment.title} — JOBLUX`
-  const pageDescription = assignment.seo_description || (assignment.description || '').slice(0, 160)
 
   // ══════════════════════════════════════════════════════════════════
   // RENDER
   // ══════════════════════════════════════════════════════════════════
   return (
     <>
-      {/* SEO meta tags + JSON-LD structured data */}
-      <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </Head>
-
-      {/* Also inject JSON-LD via a script tag in the body for SSR fallback */}
+      {/* JSON-LD structured data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -401,7 +357,7 @@ export default function OpportunityDetailPage() {
                     <div className="border-b border-[#f0ece4] pb-3">
                       <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-2">Benefits</span>
                       <div className="flex flex-wrap gap-1.5">
-                        {assignment.benefits.map((b) => (
+                        {assignment.benefits.map((b: string) => (
                           <span key={b} className="jl-badge-outline text-[0.55rem]">{b}</span>
                         ))}
                       </div>
@@ -413,7 +369,7 @@ export default function OpportunityDetailPage() {
                     <div className="border-b border-[#f0ece4] pb-3">
                       <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-2">Languages</span>
                       <div className="flex flex-wrap gap-1.5">
-                        {assignment.languages_required.map((l) => (
+                        {assignment.languages_required.map((l: string) => (
                           <span key={l} className="jl-badge-outline text-[0.55rem]">{l}</span>
                         ))}
                       </div>
@@ -425,7 +381,7 @@ export default function OpportunityDetailPage() {
                     <div className="border-b border-[#f0ece4] pb-3">
                       <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-2">Product Categories</span>
                       <div className="flex flex-wrap gap-1.5">
-                        {assignment.product_category.map((pc) => (
+                        {assignment.product_category.map((pc: string) => (
                           <span key={pc} className="jl-badge-outline text-[0.55rem]">{pc}</span>
                         ))}
                       </div>
@@ -473,42 +429,8 @@ export default function OpportunityDetailPage() {
                 </div>
               </div>
 
-              {/* ── Call to Action ──────────────────────────────────── */}
-              {isAuthenticated ? (
-                applied ? (
-                  <div className="p-5 bg-white border border-[#a58e28] rounded-xl text-center">
-                    <p className="font-sans text-sm text-[#a58e28] font-medium">Interest submitted</p>
-                    <p className="font-sans text-xs text-[#888] mt-1">The JOBLUX team will be in touch.</p>
-                  </div>
-                ) : (
-                  <div>
-                    <button
-                      onClick={handleApply}
-                      disabled={applying}
-                      className="jl-btn jl-btn-gold w-full justify-center disabled:opacity-50 py-3 text-sm"
-                    >
-                      {applying ? 'Submitting...' : 'Express Interest'}
-                    </button>
-                    {applyError && (
-                      <p className="font-sans text-xs text-red-500 mt-2 text-center">{applyError}</p>
-                    )}
-                    <p className="font-sans text-[0.6rem] text-[#aaa] mt-3 text-center leading-relaxed">
-                      Your profile will be shared with the JOBLUX team. The maison will not see your details until you approve.
-                    </p>
-                  </div>
-                )
-              ) : (
-                <div className="p-5 bg-[#1a1a1a] text-center rounded-xl">
-                  <div className="jl-overline-gold mb-2">Members Only</div>
-                  <p className="font-sans text-xs text-[#888] mb-3">
-                    Sign in to view full details and express interest.
-                  </p>
-                  <div className="flex items-center justify-center gap-2">
-                    <Link href="/members" className="jl-btn jl-btn-gold text-[0.6rem] py-1.5 px-3">Sign In</Link>
-                    <Link href="/join" className="jl-btn jl-btn-ghost text-[0.6rem] py-1.5 px-3">Join</Link>
-                  </div>
-                </div>
-              )}
+              {/* ── Call to Action (client component) ──────────────── */}
+              <OpportunityDetailClient assignmentId={assignment.id} isSticky />
             </div>
 
           </div>

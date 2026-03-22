@@ -5,18 +5,19 @@ import { WIKILUX_CATEGORY_ICONS } from '@/lib/sector-icons'
 import WikiLuxSearch from './WikiLuxSearch'
 
 export const metadata: Metadata = {
-  title: 'WikiLux — Luxury Brand Encyclopedia | JOBLUX',
-  description: `${BRANDS.length}+ luxury brand encyclopedias. Fashion, watches, jewellery, automotive, hospitality, beauty and more. By JOBLUX.`,
+  title: 'WikiLux — 500+ Luxury Maisons Directory | JOBLUX',
+  description: 'Explore career intelligence, salary data, and interview insights for over 500 luxury brands including LVMH, Kering, Richemont, Hermès, Chanel and more.',
+  alternates: { canonical: 'https://www.joblux.com/wikilux' },
   openGraph: {
-    title: 'WikiLux — The Luxury Encyclopedia',
-    description: `${BRANDS.length}+ luxury brand profiles with hiring intelligence, salary data and interview insights.`,
-    images: [{ url: 'https://www.luxuryrecruiter.com/api/og?title=WikiLux&subtitle=The+Luxury+Encyclopedia&type=brand', width: 1200, height: 630 }],
+    title: 'WikiLux | JOBLUX',
+    description: 'The definitive directory of luxury maisons. Career intelligence for 500+ brands.',
+    images: ['/api/og?title=WikiLux&subtitle=500%2B+Luxury+Maisons&type=wikilux'],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'WikiLux — The Luxury Encyclopedia | JOBLUX',
-    description: `${BRANDS.length}+ luxury brand profiles with hiring intelligence.`,
-    images: ['https://www.luxuryrecruiter.com/api/og?title=WikiLux&subtitle=The+Luxury+Encyclopedia&type=brand'],
+    description: 'The definitive directory of luxury maisons. Career intelligence for 500+ brands.',
+    images: ['/api/og?title=WikiLux&subtitle=500%2B+Luxury+Maisons&type=wikilux'],
   },
 }
 

@@ -2,12 +2,15 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Career Intelligence — JOBLUX",
+  title: "Career Intelligence — Luxury Industry Insights | JOBLUX",
+  description: "Salary benchmarks, interview preparation, and career guidance for luxury industry professionals.",
+  alternates: { canonical: "https://www.joblux.com/coaching" },
   openGraph: {
-    title: "Career Intelligence — JOBLUX",
+    title: "Career Intelligence | JOBLUX",
+    description: "Salary benchmarks, interview preparation, and career guidance for luxury industry professionals.",
     images: [
       {
-        url: "https://www.luxuryrecruiter.com/api/og?title=Career+Intelligence&subtitle=Luxury+Industry+Careers&type=page",
+        url: "/api/og?title=Career+Intelligence&subtitle=Luxury+Industry+Careers&type=page",
         width: 1200,
         height: 630,
         alt: "Career Intelligence | JOBLUX",
@@ -16,8 +19,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Career Intelligence — JOBLUX",
-    images: ["https://www.luxuryrecruiter.com/api/og?title=Career+Intelligence&subtitle=Luxury+Industry+Careers&type=page"],
+    title: "Career Intelligence | JOBLUX",
+    description: "Salary benchmarks, interview preparation, and career guidance for luxury industry professionals.",
+    images: ["/api/og?title=Career+Intelligence&subtitle=Luxury+Industry+Careers&type=page"],
   },
 };
 

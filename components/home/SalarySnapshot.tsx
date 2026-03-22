@@ -1,13 +1,5 @@
-'use client'
-
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 const CITY_SYMBOLS: Record<string, string> = {
   EUR: '€', GBP: '£', USD: '$', AED: 'AED ', CHF: 'CHF ',
@@ -35,38 +27,31 @@ function buildRange(row: SalaryRow): string {
 
 const TARGET_CITIES = ['Paris', 'London', 'New York', 'Dubai', 'Geneva']
 
-export function SalarySnapshot() {
-  const [salaries, setSalaries] = useState<SalaryRow[]>([])
+export async function SalarySnapshot() {
+  const supabase = createServerSupabaseClient()
 
-  useEffect(() => {
-    async function fetchSalaries() {
-      const { data } = await supabase
-        .from('salary_benchmarks')
-        .select('job_title, city, currency, salary_min, salary_max')
-        .in('city', TARGET_CITIES)
-        .order('salary_max', { ascending: false })
-        .limit(50)
+  const { data } = await supabase
+    .from('salary_benchmarks')
+    .select('job_title, city, currency, salary_min, salary_max')
+    .in('city', TARGET_CITIES)
+    .order('salary_max', { ascending: false })
+    .limit(50)
 
-      if (!data || data.length === 0) {
-        setSalaries([])
-        return
-      }
+  if (!data || data.length === 0) return null
 
-      // Pick one role per city for diversity
-      const seen = new Set<string>()
-      const picked: SalaryRow[] = []
-      for (const row of data) {
-        if (!row.city || seen.has(row.city)) continue
-        seen.add(row.city)
-        picked.push(row)
-        if (picked.length >= 5) break
-      }
-      setSalaries(picked)
-    }
-    fetchSalaries()
-  }, [])
+  // Pick one row per city, ensuring each picked row has a different job_title AND a different city
+  const usedCities = new Set<string>()
+  const usedTitles = new Set<string>()
+  const picked: SalaryRow[] = []
+  for (const row of data) {
+    if (!row.city || usedCities.has(row.city) || usedTitles.has(row.job_title)) continue
+    usedCities.add(row.city)
+    usedTitles.add(row.job_title)
+    picked.push(row)
+    if (picked.length >= 5) break
+  }
 
-  if (salaries.length === 0) return null
+  if (picked.length === 0) return null
 
   return (
     <div>
@@ -75,7 +60,7 @@ export function SalarySnapshot() {
       </div>
 
       <div className="space-y-0">
-        {salaries.map((item, i) => (
+        {picked.map((item, i) => (
           <div
             key={i}
             className="flex items-center justify-between py-2.5 border-b border-[#f5f0e8] last:border-0"

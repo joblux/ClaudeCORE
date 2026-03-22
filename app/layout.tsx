@@ -18,7 +18,10 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.luxuryrecruiter.com'),
   alternates: { canonical: './' },
-  title: "JOBLUX | Luxury Talents Society",
+  title: {
+    default: 'JOBLUX — Luxury Talents Society',
+    template: '%s',
+  },
   description:
     "The society for luxury professionals. Salary data, brand insights, executive search, and career intelligence across 150+ maisons. Free against contribution — no ads, no noise.",
   icons: { icon: '/favicon.svg' },

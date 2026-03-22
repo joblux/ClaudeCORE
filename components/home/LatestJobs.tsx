@@ -1,13 +1,5 @@
-'use client'
-
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 interface Job {
   id: string
@@ -20,18 +12,17 @@ interface Job {
   seniority: string | null
 }
 
-export function LatestJobs() {
-  const [jobs, setJobs] = useState<Job[]>([])
+export async function LatestJobs() {
+  const supabase = createServerSupabaseClient()
 
-  useEffect(() => {
-    supabase
-      .from('search_assignments')
-      .select('id, slug, title, maison, is_confidential, city, country, seniority')
-      .eq('status', 'published')
-      .order('activated_at', { ascending: false })
-      .limit(4)
-      .then(({ data }) => setJobs(data || []))
-  }, [])
+  const { data } = await supabase
+    .from('search_assignments')
+    .select('id, slug, title, maison, is_confidential, city, country, seniority')
+    .eq('status', 'published')
+    .order('activated_at', { ascending: false })
+    .limit(4)
+
+  const jobs: Job[] = data || []
 
   if (jobs.length === 0) return null
 

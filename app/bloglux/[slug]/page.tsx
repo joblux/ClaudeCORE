@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!article) return { title: 'Article Not Found — BlogLux' }
 
   const ogImage = article.og_image_url || article.hero_image_url ||
-    `https://www.luxuryrecruiter.com/api/og?title=${encodeURIComponent(article.title)}&subtitle=${encodeURIComponent(getCategoryLabel(article.category))}&type=article`
+    `/api/og?title=${encodeURIComponent(article.title)}&subtitle=${encodeURIComponent(getCategoryLabel(article.category))}&type=article`
 
   return {
     title: `${article.title} | BlogLux — JOBLUX`,
@@ -95,6 +95,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+export async function generateStaticParams() {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+  const { data } = await supabase
+    .from('bloglux_articles')
+    .select('slug')
+    .eq('status', 'published')
+  return (data || []).map(a => ({ slug: a.slug }))
+}
+
 function formatDate(d: string | null) {
   if (!d) return ''
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -115,7 +127,7 @@ export default async function ArticlePage({ params }: Props) {
     publisher: {
       '@type': 'Organization',
       name: 'JOBLUX',
-      logo: { '@type': 'ImageObject', url: 'https://www.luxuryrecruiter.com/images/joblux-logo.png' },
+      logo: { '@type': 'ImageObject', url: 'https://www.joblux.com/images/joblux-logo.png' },
     },
     datePublished: article.published_at,
     dateModified: article.updated_at || article.published_at,
