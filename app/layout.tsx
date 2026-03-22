@@ -19,32 +19,32 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.luxuryrecruiter.com'),
   alternates: { canonical: './' },
   title: {
-    default: 'JOBLUX — Luxury Industry Careers Intelligence',
+    default: 'JOBLUX — Luxury, decoded.',
     template: '%s',
   },
   description:
-    "The confidential gateway for luxury industry careers intelligence, private recruitment, and travel advisory. Salary data, interview insights, and brand intelligence across 500+ maisons.",
+    "JOBLUX brings together luxury intelligence, salary insight, interviews, recruitment, and travel for the global luxury world. Free to access, with deeper value shaped by contribution.",
   icons: { icon: '/favicon.svg' },
   openGraph: {
-    title: "JOBLUX — Luxury Industry Careers Intelligence",
-    description: "The confidential gateway for luxury industry careers intelligence, private recruitment, and travel advisory. Salary data, interview insights, and brand intelligence across 500+ maisons.",
+    title: "JOBLUX — Luxury, decoded.",
+    description: "JOBLUX brings together luxury intelligence, salary insight, interviews, recruitment, and travel for the global luxury world. Free to access, with deeper value shaped by contribution.",
     url: "https://www.luxuryrecruiter.com",
     siteName: "JOBLUX",
     locale: "en_US",
     type: "website",
     images: [
       {
-        url: "https://www.luxuryrecruiter.com/api/og?title=JOBLUX&subtitle=Luxury+Talents+Society",
+        url: "/api/og?title=JOBLUX&subtitle=Luxury%2C+decoded.",
         width: 1200,
         height: 630,
-        alt: "JOBLUX — Luxury Industry Careers Intelligence",
+        alt: "JOBLUX — Luxury, decoded.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "JOBLUX — Luxury Industry Careers Intelligence",
-    description: "The confidential gateway for luxury industry careers intelligence, private recruitment, and travel advisory. Salary data, interview insights, and brand intelligence across 500+ maisons.",
+    title: "JOBLUX — Luxury, decoded.",
+    description: "JOBLUX brings together luxury intelligence, salary insight, interviews, recruitment, and travel for the global luxury world. Free to access, with deeper value shaped by contribution.",
     images: ["https://www.luxuryrecruiter.com/api/og?title=JOBLUX&subtitle=Luxury+Talents+Society"],
   },
 };

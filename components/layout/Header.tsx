@@ -12,6 +12,7 @@ const publicNavItems = [
   { label: 'Salaries', href: '/salaries' },
   { label: 'Interviews', href: '/interviews' },
   { label: 'The Brief', href: '/the-brief' },
+  { label: 'Escape', href: '/services/travel' },
   { label: 'Services', href: '/services' },
 ]
 
@@ -37,7 +38,7 @@ export function Header() {
           {/* Center search field — desktop */}
           <button
             onClick={() => setSearchOpen(true)}
-            className="hidden md:flex items-center gap-2 w-full max-w-md mx-6 px-4 py-2 border border-[#d5d0c8] rounded-full text-left hover:border-[#a58e28] transition-colors cursor-text"
+            className="hidden md:flex items-center gap-2 w-full max-w-sm mx-6 px-4 py-2 border border-[#d5d0c8] rounded-full text-left hover:border-[#a58e28] transition-colors cursor-text"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#999] flex-shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             <span className="text-sm text-[#999] truncate">Search intelligence, brands, salaries...</span>

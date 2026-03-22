@@ -38,7 +38,7 @@ export function TheBriefSignup() {
         The Brief
       </h3>
       <p className="font-sans text-xs text-[#888] leading-relaxed mb-4">
-        Luxury industry moves · Salary insights · New positions · WikiLux updates. Delivered biweekly.
+        Luxury industry moves · Salary insights · Interview intelligence · Wiki updates. Delivered biweekly.
       </p>
 
       {status === 'success' ? (
