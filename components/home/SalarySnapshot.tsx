@@ -47,34 +47,26 @@ export async function SalarySnapshot() {
     usedCities.add(row.city)
     usedTitles.add(row.job_title)
     picked.push(row)
-    if (picked.length >= 5) break
+    if (picked.length >= 3) break
   }
 
   if (picked.length === 0) return null
 
   return (
     <div>
-      <div className="jl-section-label">
-        <span>Salary Intelligence</span>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      <div className="jl-section-label"><span>Salary Intelligence</span></div>
+      <div className="space-y-0">
         {picked.map((item, i) => (
-          <div
-            key={i}
-            className="border border-[#e8e2d8] p-4 text-center"
-          >
-            <div className="font-sans text-lg font-semibold text-[#1a1a1a] mb-1">{buildRange(item)}</div>
-            <div className="font-sans text-xs text-[#666] mb-0.5">{item.job_title}</div>
-            <div className="font-sans text-[0.65rem] text-[#aaa]">{item.city}</div>
+          <div key={i} className="flex items-center justify-between py-2.5 border-b border-[#f5f0e8] last:border-0">
+            <div>
+              <div className="font-sans text-xs font-medium text-[#1a1a1a]">{item.job_title}</div>
+              {item.city && <div className="font-sans text-[0.65rem] text-[#aaa] mt-0.5">{item.city}</div>}
+            </div>
+            <div className="font-sans text-xs font-semibold text-[#1a1a1a]">{buildRange(item)}</div>
           </div>
         ))}
       </div>
-
-      <Link
-        href="/salaries"
-        className="font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors"
-      >
+      <Link href="/salaries" className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors">
         Full salary guide →
       </Link>
     </div>

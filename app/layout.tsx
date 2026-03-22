@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "JOBLUX — Luxury, decoded.",
     description: "JOBLUX brings together luxury intelligence, salary insight, interviews, recruitment, and travel for the global luxury world. Free to access, with deeper value shaped by contribution.",
-    images: ["https://www.luxuryrecruiter.com/api/og?title=JOBLUX&subtitle=Luxury+Talents+Society"],
+    images: ["/api/og?title=JOBLUX&subtitle=Luxury%2C+decoded."],
   },
 };
 
