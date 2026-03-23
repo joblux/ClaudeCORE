@@ -433,7 +433,7 @@ export default function TermsOfServicePage() {
           <h2 className="jl-serif text-2xl font-semibold mb-4">14. Travel Advisory Services</h2>
           <p>
             Travel advisory services featured on JOBLUX Escape are provided by independent advisors
-            affiliated with Fora Travel, Inc. JOBLUX is a media partner and does not provide, arrange,
+            affiliated with Fora Travel, Inc. Joblux US LLC, registered in Delaware, is a media partner and does not provide, arrange,
             or guarantee any travel services.
           </p>
           <p className="mt-3">

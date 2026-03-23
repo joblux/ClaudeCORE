@@ -68,7 +68,17 @@ function ConsultationForm() {
   // Pre-fill from URL and session
   useEffect(() => {
     const dest = searchParams.get('destination')
-    if (dest) setDestination(dest)
+    const hotel = searchParams.get('hotel')
+    if (dest && hotel) {
+      setDestination(`${dest} — ${hotel}`)
+    } else if (dest) {
+      setDestination(dest)
+    }
+    // Pre-select Cruise if coming from a cruise page
+    const tripType = searchParams.get('tripType')
+    if (tripType === 'cruise' && !tripTypes.includes('Cruise')) {
+      setTripTypes(prev => [...prev, 'Cruise'])
+    }
   }, [searchParams])
 
   useEffect(() => {
