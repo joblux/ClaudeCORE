@@ -26,6 +26,19 @@ function formatDate(d: string | null): string {
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
+async function getHomepageFeature(): Promise<Article | null> {
+  const supabase = createServerSupabaseClient()
+  const { data } = await supabase
+    .from('bloglux_articles')
+    .select('title, slug, category, excerpt, published_at, read_time_minutes, cover_image_url')
+    .eq('status', 'published')
+    .eq('homepage_feature', true)
+    .limit(1)
+    .single()
+
+  return data || null
+}
+
 async function getArticles(): Promise<Article[]> {
   const supabase = createServerSupabaseClient()
   const { data: featured } = await supabase
@@ -50,8 +63,9 @@ async function getArticles(): Promise<Article[]> {
 
 // ── Featured Article (lead story with image) ──
 export async function FeaturedArticle() {
+  const homepageFeatured = await getHomepageFeature()
   const articles = await getArticles()
-  const lead = articles[0]
+  const lead = homepageFeatured || articles[0]
 
   if (!lead) {
     return (

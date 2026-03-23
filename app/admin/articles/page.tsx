@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRequireAdmin } from '@/lib/auth-hooks'
-import { PenLine, Trash2, Star } from 'lucide-react'
+import { PenLine, Trash2, Star, Home, Search } from 'lucide-react'
 
 interface Article {
   id: string
@@ -15,6 +15,7 @@ interface Article {
   published_at: string | null
   created_at: string
   featured_homepage: boolean
+  homepage_feature: boolean
 }
 
 export default function AdminArticlesPage() {
@@ -23,7 +24,9 @@ export default function AdminArticlesPage() {
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [toggling, setToggling] = useState<string | null>(null)
+  const [togglingHome, setTogglingHome] = useState<string | null>(null)
   const [categoryFilter, setCategoryFilter] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     if (!isAdmin) return
@@ -58,13 +61,34 @@ export default function AdminArticlesPage() {
     setToggling(null)
   }
 
+  const toggleHomepageFeature = async (id: string, current: boolean) => {
+    setTogglingHome(id)
+    const res = await fetch('/api/articles/homepage-feature', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, homepage_feature: !current }),
+    })
+    if (res.ok) {
+      setArticles((prev) => prev.map((a) =>
+        a.id === id ? { ...a, homepage_feature: !current } : { ...a, homepage_feature: false }
+      ))
+    }
+    setTogglingHome(null)
+  }
+
   const formatDate = (d: string | null) => {
     if (!d) return '—'
     return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
   }
 
   const categories = ['all', ...Array.from(new Set(articles.map(a => a.category).filter(Boolean)))]
-  const filtered = categoryFilter === 'all' ? articles : articles.filter(a => a.category === categoryFilter)
+  const afterCategory = categoryFilter === 'all' ? articles : articles.filter(a => a.category === categoryFilter)
+  const filtered = searchQuery.trim()
+    ? afterCategory.filter(a => {
+        const q = searchQuery.toLowerCase()
+        return a.title.toLowerCase().includes(q) || (a.category || '').toLowerCase().includes(q) || (a.author_name || '').toLowerCase().includes(q)
+      })
+    : afterCategory
 
   if (isLoading || !isAdmin) {
     return (
@@ -109,16 +133,29 @@ export default function AdminArticlesPage() {
           ))}
         </div>
 
+        {/* Search */}
+        <div className="relative mb-4">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search articles by title, category, author..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm bg-white focus:outline-none focus:border-[#a58e28]/40 transition-colors"
+          />
+        </div>
+
         {/* Articles table */}
         <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
           {/* Header */}
-          <div className="hidden lg:grid bg-gray-50 px-5 py-3 text-[11px] uppercase tracking-wide text-gray-400 font-medium" style={{ gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 0.6fr 0.4fr 0.5fr' }}>
+          <div className="hidden lg:grid bg-gray-50 px-5 py-3 text-[11px] uppercase tracking-wide text-gray-400 font-medium" style={{ gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 0.6fr 0.4fr 0.4fr 0.5fr' }}>
             <div>Title</div>
             <div>Category</div>
             <div>Author</div>
             <div>Date</div>
             <div>Status</div>
-            <div className="text-center">Home</div>
+            <div className="text-center">Ticker</div>
+            <div className="text-center">Feature</div>
             <div className="text-right">Actions</div>
           </div>
 
@@ -131,7 +168,7 @@ export default function AdminArticlesPage() {
               <div
                 key={article.id}
                 className="grid items-center px-5 py-3 border-t border-gray-100 hover:bg-gray-50/50 transition-colors"
-                style={{ gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 0.6fr 0.4fr 0.5fr' }}
+                style={{ gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 0.6fr 0.4fr 0.4fr 0.5fr' }}
               >
                 {/* Title */}
                 <div className="flex items-center gap-2 text-sm font-medium text-[#1a1a1a] truncate pr-4 col-span-2 lg:col-span-1">
@@ -172,6 +209,22 @@ export default function AdminArticlesPage() {
                     title={article.featured_homepage ? 'Remove from homepage' : 'Feature on homepage'}
                   >
                     <Star size={16} className={article.featured_homepage ? 'fill-current' : ''} />
+                  </button>
+                </div>
+
+                {/* Homepage feature toggle */}
+                <div className="hidden lg:flex justify-center">
+                  <button
+                    onClick={() => toggleHomepageFeature(article.id, article.homepage_feature)}
+                    disabled={togglingHome === article.id}
+                    className={`p-1 rounded transition-colors ${
+                      article.homepage_feature
+                        ? 'text-[#a58e28] hover:text-[#8a7622]'
+                        : 'text-gray-300 hover:text-[#a58e28]'
+                    } ${togglingHome === article.id ? 'opacity-40' : ''}`}
+                    title={article.homepage_feature ? 'Remove from homepage feature' : 'Feature on homepage'}
+                  >
+                    <Home size={16} className={article.homepage_feature ? 'fill-current' : ''} />
                   </button>
                 </div>
 

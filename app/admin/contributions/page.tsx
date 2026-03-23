@@ -23,6 +23,7 @@ export default function AdminContributionsPage() {
   const [selectedDetail, setSelectedDetail] = useState<any>(null)
   const [actionLoading, setActionLoading] = useState(false)
   const [rejectionReason, setRejectionReason] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
 
   const fetchContributions = useCallback(async () => {
     setLoading(true)
@@ -96,6 +97,17 @@ export default function AdminContributionsPage() {
       </section>
 
       <div className="max-w-5xl mx-auto px-6 py-8">
+        {/* Search */}
+        <div className="relative mb-4">
+          <input
+            type="text"
+            placeholder="Search by type, contributor, brand..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full border border-[#e8e2d8] rounded-sm pl-3 pr-3 py-2 text-sm bg-white focus:outline-none focus:border-[#a58e28] transition-colors"
+          />
+        </div>
+
         {/* Status tabs */}
         <div className="flex gap-2 mb-6">
           {['pending', 'approved', 'rejected'].map((s) => (
@@ -124,7 +136,13 @@ export default function AdminContributionsPage() {
               </div>
             ) : (
               <div className="space-y-2">
-                {contributions.map((c) => (
+                {contributions.filter(c => {
+                  if (!searchQuery.trim()) return true
+                  const q = searchQuery.toLowerCase()
+                  return (TYPE_LABELS[c.contribution_type] || '').toLowerCase().includes(q)
+                    || (c.brand_name || '').toLowerCase().includes(q)
+                    || (c.members?.full_name || '').toLowerCase().includes(q)
+                }).map((c) => (
                   <button
                     key={c.id}
                     onClick={() => viewDetail(c.id)}

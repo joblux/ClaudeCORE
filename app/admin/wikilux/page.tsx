@@ -31,6 +31,9 @@ export default function AdminWikiLuxPage() {
   const [editSaving, setEditSaving] = useState(false)
   const [editSuccess, setEditSuccess] = useState(false)
 
+  // Search state
+  const [brandSearch, setBrandSearch] = useState('')
+
   // Seed state
   const [seeding, setSeeding] = useState(false)
   const [seedResult, setSeedResult] = useState<string | null>(null)
@@ -129,6 +132,17 @@ export default function AdminWikiLuxPage() {
         <p className="text-sm text-gray-400 mt-0.5">Brand content generation and editorial tools</p>
       </div>
 
+      {/* Brand search */}
+      <div className="relative mb-6">
+        <input
+          type="text"
+          placeholder="Search brands..."
+          value={brandSearch}
+          onChange={(e) => setBrandSearch(e.target.value)}
+          className="w-full border border-[#e8e2d8] rounded-sm pl-3 pr-3 py-2 text-sm bg-white focus:outline-none focus:border-[#a58e28] transition-colors"
+        />
+      </div>
+
       {loading ? (
         <div className="text-center py-16"><div className="inline-block w-8 h-8 border-2 border-[#e8e2d8] border-t-[#a58e28] rounded-full animate-spin" /></div>
       ) : (
@@ -170,7 +184,7 @@ export default function AdminWikiLuxPage() {
                 <div className="flex gap-2">
                   <select value={singleRegen} onChange={(e) => setSingleRegen(e.target.value)} className="jl-select flex-1 text-xs">
                     <option value="">Select brand</option>
-                    {BRANDS.map((b) => <option key={b.slug} value={b.slug}>{b.name}</option>)}
+                    {BRANDS.filter(b => !brandSearch.trim() || b.name.toLowerCase().includes(brandSearch.toLowerCase())).map((b) => <option key={b.slug} value={b.slug}>{b.name}</option>)}
                   </select>
                   <button onClick={handleRegenSingle} disabled={singleRegening || !singleRegen} className="jl-btn jl-btn-outline text-xs">
                     {singleRegening ? '...' : 'Regenerate'}
@@ -206,7 +220,7 @@ export default function AdminWikiLuxPage() {
                   <label className="jl-label">Brand</label>
                   <select value={editSlug} onChange={(e) => { setEditSlug(e.target.value); setEditSuccess(false); setEditNote('') }} className="jl-select w-full text-xs">
                     <option value="">Select brand</option>
-                    {BRANDS.map((b) => <option key={b.slug} value={b.slug}>{b.name}</option>)}
+                    {BRANDS.filter(b => !brandSearch.trim() || b.name.toLowerCase().includes(brandSearch.toLowerCase())).map((b) => <option key={b.slug} value={b.slug}>{b.name}</option>)}
                   </select>
                 </div>
                 {editSlug && (
