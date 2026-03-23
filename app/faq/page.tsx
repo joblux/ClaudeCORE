@@ -590,7 +590,7 @@ export default function FaqPage() {
               </div>
               <div className="p-4 border border-[#e8e2d8]">
                 <div className="jl-overline-gold mb-2">Travel Advisory</div>
-                <a href="mailto:travel@joblux.com" className="font-sans text-xs text-[#a58e28] hover:text-[#1a1a1a] transition-colors">travel@joblux.com</a>
+                <a href="/escape/consultation" className="font-sans text-xs text-[#a58e28] hover:text-[#1a1a1a] transition-colors">Request a consultation</a>
               </div>
               <div className="p-4 border border-[#e8e2d8]">
                 <div className="jl-overline-gold mb-2">General Enquiry</div>

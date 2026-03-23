@@ -10,7 +10,7 @@ const navItems = [
   { label: 'Wiki', href: '/wikilux' },
   { label: 'Salaries', href: '/salaries' },
   { label: 'Interviews', href: '/interviews' },
-  { label: 'Escape', href: '/services/travel' },
+  { label: 'Escape', href: '/escape' },
   { label: 'Services', href: '/services' },
 ]
 

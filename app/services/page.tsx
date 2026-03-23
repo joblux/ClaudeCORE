@@ -125,7 +125,7 @@ export default function ServicesPage() {
               </p>
 
               <Link
-                href="/services/travel"
+                href="/escape"
                 className="font-sans text-sm font-medium text-[#a58e28] hover:text-[#8a7620] transition-colors"
               >
                 Request a private itinerary &rarr;
