@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { sendEmail } from '@/lib/ses'
+import { contributionApprovedEmail, contributionRejectedEmail } from '@/lib/email-templates'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -127,6 +129,27 @@ export async function PUT(
         }
       }
 
+      // Send approval email to contributor
+      const { data: approvedMember } = await supabase
+        .from('members')
+        .select('email, first_name')
+        .eq('id', contribution.member_id)
+        .single()
+
+      if (approvedMember?.email) {
+        const { html, text } = contributionApprovedEmail({
+          firstName: approvedMember.first_name,
+          contributionType: contribution.contribution_type,
+          pointsAwarded: points,
+        })
+        sendEmail({
+          to: approvedMember.email,
+          subject: 'Your contribution is now live',
+          body: text,
+          bodyHtml: html,
+        }).catch(() => {})
+      }
+
       return NextResponse.json({
         success: true,
         message: `Contribution approved. ${points} points awarded.`,
@@ -147,6 +170,27 @@ export async function PUT(
 
       if (updateError) {
         return NextResponse.json({ error: updateError.message }, { status: 500 })
+      }
+
+      // Send rejection email to contributor
+      const { data: rejectedMember } = await supabase
+        .from('members')
+        .select('email, first_name')
+        .eq('id', contribution.member_id)
+        .single()
+
+      if (rejectedMember?.email) {
+        const { html, text } = contributionRejectedEmail({
+          firstName: rejectedMember.first_name,
+          contributionType: contribution.contribution_type,
+          reason: rejection_reason,
+        })
+        sendEmail({
+          to: rejectedMember.email,
+          subject: 'Update on your contribution',
+          body: text,
+          bodyHtml: html,
+        }).catch(() => {})
       }
 
       return NextResponse.json({

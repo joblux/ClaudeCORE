@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { sendEmail } from '@/lib/email'
+import { sendEmail } from '@/lib/ses'
+import { adminNewMemberEmail, ADMIN_ALERT_EMAIL } from '@/lib/email-templates'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -108,10 +109,18 @@ export async function POST(req: NextRequest) {
     if (tier === 'business' || tier === 'insider') {
       const memberName = data.full_name || data.email
       const company = body.maison || body.consulting_firm || 'Unknown'
+      const { html, text } = adminNewMemberEmail({
+        name: memberName,
+        email: data.email,
+        tier: tier === 'business' ? 'Business' : 'Insider',
+        company,
+        registrationDate: new Date().toISOString().split('T')[0],
+      })
       sendEmail({
-        to: 'luxuryistime@gmail.com',
-        subject: `New ${tier === 'business' ? 'Business' : 'Insider'} registration: ${memberName} from ${company}`,
-        body: `A new ${tier} member has registered on JOBLUX.\n\nName: ${memberName}\nEmail: ${data.email}\nCompany: ${company}\nRole: ${body.job_title || body.speciality || 'N/A'}\n\nReview their profile: ${process.env.NEXTAUTH_URL}/admin/members/${memberId}`,
+        to: ADMIN_ALERT_EMAIL,
+        subject: `New access request: ${memberName} (${tier === 'business' ? 'Business' : 'Insider'})`,
+        body: text,
+        bodyHtml: html,
       }).catch(() => {})
     }
 

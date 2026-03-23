@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { sendEmail } from '@/lib/email'
+import { sendEmail } from '@/lib/ses'
 import { candidateNotificationEmail } from '@/lib/email-templates'
 
 const supabase = createClient(

@@ -4,19 +4,13 @@ import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
 import { SupabaseAdapter } from "./supabase-adapter";
 import { createClient } from "@supabase/supabase-js";
-import { Resend } from "resend";
+import { sendEmail } from "./ses";
+import { magicLinkEmail } from "./email-templates";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
-
-function getResend() {
-  if (!process.env.RESEND_API_KEY) {
-    throw new Error("RESEND_API_KEY is not set");
-  }
-  return new Resend(process.env.RESEND_API_KEY);
-}
 
 export const authOptions: NextAuthOptions = {
   adapter: SupabaseAdapter(supabaseAdmin),
@@ -47,14 +41,15 @@ export const authOptions: NextAuthOptions = {
     }),
 
     EmailProvider({
-      from: process.env.EMAIL_FROM || "JOBLUX <noreply@luxuryrecruiter.com>",
+      from: "JOBLUX <noreply@joblux.com>",
       sendVerificationRequest: async ({ identifier: email, url }) => {
         try {
-          await getResend().emails.send({
-            from: process.env.EMAIL_FROM || "JOBLUX <noreply@luxuryrecruiter.com>",
+          const { html, text } = magicLinkEmail(url);
+          await sendEmail({
             to: email,
             subject: "Sign in to JOBLUX",
-            html: magicLinkEmailHtml(url),
+            body: text,
+            bodyHtml: html,
           });
         } catch (error) {
           console.error("Failed to send magic link email:", error);
@@ -148,32 +143,3 @@ export const authOptions: NextAuthOptions = {
 
   debug: process.env.NODE_ENV === "development",
 };
-
-function magicLinkEmailHtml(url: string): string {
-  return `<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#f5f4f0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f4f0;padding:40px 20px;">
-    <tr><td align="center">
-      <table width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:2px;border:1px solid #e8e6df;">
-        <tr><td style="padding:40px 40px 24px;text-align:center;border-bottom:1px solid #e8e6df;">
-          <div style="font-family:'Gill Sans','Gill Sans MT',Calibri,sans-serif;font-size:28px;font-weight:600;color:#1a1a1a;letter-spacing:2px;">JOBLUX</div>
-          <div style="font-size:11px;color:#a58e28;letter-spacing:3px;margin-top:4px;text-transform:uppercase;">Luxury Industry Careers Intelligence</div>
-        </td></tr>
-        <tr><td style="padding:32px 40px;">
-          <p style="font-size:16px;color:#1a1a1a;line-height:1.6;margin:0 0 24px;">Click the button below to sign in to your JOBLUX account. This link expires in 24 hours.</p>
-          <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:8px 0 24px;">
-            <a href="${url}" style="display:inline-block;background:#1a1a1a;color:#ffffff;font-size:14px;font-weight:500;text-decoration:none;padding:14px 40px;border-radius:2px;letter-spacing:1px;">SIGN IN TO JOBLUX</a>
-          </td></tr></table>
-          <p style="font-size:13px;color:#888;line-height:1.5;margin:0;">If you didn't request this email, you can safely ignore it.</p>
-        </td></tr>
-        <tr><td style="padding:24px 40px;border-top:1px solid #e8e6df;text-align:center;">
-          <p style="font-size:11px;color:#999;margin:0;">JOBLUX · Paris · London · New York · Dubai · Singapore</p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`;
-}

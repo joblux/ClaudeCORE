@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { sendEmail } from '@/lib/ses'
+import { applicationConfirmationEmail, adminNewApplicationEmail, ADMIN_ALERT_EMAIL } from '@/lib/email-templates'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -82,6 +84,50 @@ export async function POST(req: NextRequest) {
     if (historyError) {
       console.error('[POST /api/opportunities/apply] Stage history insert error:', historyError)
     }
+
+    // Fetch assignment title and member details for emails
+    const [{ data: assignment }, { data: memberInfo }] = await Promise.all([
+      supabase
+        .from('search_assignments')
+        .select('title')
+        .eq('id', jobId)
+        .single(),
+      supabase
+        .from('members')
+        .select('email, first_name, full_name, role')
+        .eq('id', memberId)
+        .single(),
+    ])
+
+    const assignmentTitle = assignment?.title || 'Position'
+
+    // Send confirmation to applicant
+    if (memberInfo?.email) {
+      const { html, text } = applicationConfirmationEmail({
+        firstName: memberInfo.first_name,
+        assignmentTitle,
+      })
+      sendEmail({
+        to: memberInfo.email,
+        subject: 'Application received',
+        body: text,
+        bodyHtml: html,
+      }).catch(() => {})
+    }
+
+    // Admin alert
+    const { html: adminHtml, text: adminText } = adminNewApplicationEmail({
+      applicantName: memberInfo?.full_name || session.user.email || 'Unknown',
+      applicantEmail: memberInfo?.email || session.user.email || '',
+      tier: memberInfo?.role || 'member',
+      assignmentTitle,
+    })
+    sendEmail({
+      to: ADMIN_ALERT_EMAIL,
+      subject: `New application: ${memberInfo?.full_name || 'Member'} for ${assignmentTitle}`,
+      body: adminText,
+      bodyHtml: adminHtml,
+    }).catch(() => {})
 
     return NextResponse.json({
       success: true,

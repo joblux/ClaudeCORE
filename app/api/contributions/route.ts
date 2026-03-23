@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { sendEmail } from '@/lib/ses'
+import { contributionSubmittedEmail, adminNewContributionEmail, ADMIN_ALERT_EMAIL } from '@/lib/email-templates'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -161,6 +163,39 @@ export async function POST(req: NextRequest) {
       await supabase.from('contributions').delete().eq('id', contribution.id)
       return NextResponse.json({ error: detailError.message }, { status: 500 })
     }
+
+    // Send confirmation email to contributor + admin alert
+    const { data: memberData } = await supabase
+      .from('members')
+      .select('email, first_name, full_name')
+      .eq('id', memberId)
+      .single()
+
+    if (memberData?.email) {
+      const { html, text } = contributionSubmittedEmail({
+        firstName: memberData.first_name,
+        contributionType: contribution_type,
+      })
+      sendEmail({
+        to: memberData.email,
+        subject: 'Thank you for your contribution',
+        body: text,
+        bodyHtml: html,
+      }).catch(() => {})
+    }
+
+    // Admin alert
+    const { html: adminHtml, text: adminText } = adminNewContributionEmail({
+      contributionType: contribution_type,
+      contributorName: memberData?.full_name || memberData?.email || 'Unknown',
+      brand: brand_name || undefined,
+    })
+    sendEmail({
+      to: ADMIN_ALERT_EMAIL,
+      subject: `New contribution: ${contribution_type} from ${memberData?.full_name || 'Member'}`,
+      body: adminText,
+      bodyHtml: adminHtml,
+    }).catch(() => {})
 
     return NextResponse.json({
       success: true,

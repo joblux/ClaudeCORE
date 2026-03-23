@@ -44,6 +44,7 @@ const NAV_SECTIONS = [
   {
     label: 'SETTINGS',
     items: [
+      { label: 'Email Templates', href: '/admin/emails', icon: Mail },
       { label: 'Message Templates', href: '/admin/messages/templates', icon: FileCode },
     ],
   },

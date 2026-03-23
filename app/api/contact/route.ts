@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { sendEmail } from '@/lib/ses'
+import { contactConfirmationEmail, adminNewContactEmail, ADMIN_ALERT_EMAIL } from '@/lib/email-templates'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -74,6 +76,31 @@ export async function POST(req: NextRequest) {
     if (error) {
       return NextResponse.json({ error: 'Failed to send message' }, { status: 500 })
     }
+
+    // Send confirmation email to the sender
+    const { html: confirmHtml, text: confirmText } = contactConfirmationEmail({
+      firstName: name.trim().split(' ')[0],
+    })
+    sendEmail({
+      to: email.trim(),
+      subject: 'We received your message',
+      body: confirmText,
+      bodyHtml: confirmHtml,
+    }).catch(() => {})
+
+    // Send admin alert
+    const { html: adminHtml, text: adminText } = adminNewContactEmail({
+      name: name.trim(),
+      email: email.trim(),
+      subject: `${category}${subcategory ? ' — ' + subcategory : ''}`,
+      messagePreview: message.trim().slice(0, 300),
+    })
+    sendEmail({
+      to: ADMIN_ALERT_EMAIL,
+      subject: `New contact: ${name.trim()} — ${category}`,
+      body: adminText,
+      bodyHtml: adminHtml,
+    }).catch(() => {})
 
     return NextResponse.json({ success: true, message: 'Message sent successfully' })
   } catch {
