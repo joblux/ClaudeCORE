@@ -114,14 +114,14 @@ export default function HomePage() {
                 Discuss a search →
               </Link>
             </div>
-            <div className="border border-[#333] p-5">
-              <div className="jl-overline text-[#888] mb-2">Escape</div>
-              <h3 className="jl-serif text-lg font-light text-white mb-2">Bespoke travel for executives</h3>
-              <p className="font-sans text-xs text-[#888] leading-relaxed mb-3">
-                Hotels, villas, private experiences.
+            <div className="border border-[#333] p-5" style={{ background: 'linear-gradient(135deg, #1a1a1a 0%, #2B4A3E 100%)' }}>
+              <div className="jl-overline text-[#B8975C] mb-2">Private Travel Advisory</div>
+              <h3 className="jl-serif text-lg font-light text-white mb-2">Your next escape, designed for you</h3>
+              <p className="font-sans text-xs text-[#ccc] leading-relaxed mb-3">
+                Curated travel intelligence from seasoned advisors. In partnership with Fora Travel.
               </p>
-              <Link href="/services/travel" className="font-sans text-[0.65rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#e4b042] transition-colors">
-                Arrange travel →
+              <Link href="/escape" className="font-sans text-[0.65rem] font-semibold tracking-[0.1em] uppercase text-[#B8975C] hover:text-[#e4b042] transition-colors">
+                Discover Escape →
               </Link>
             </div>
           </div>

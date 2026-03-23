@@ -511,6 +511,15 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
               <p className="text-[0.6rem] text-[#aaa] mt-2 italic">Coming soon</p>
             </div>
 
+            {/* Escape Card */}
+            <div className="rounded-xl p-5 lg:p-6 border border-[#D4C9B4]" style={{ background: '#FDF8EE' }}>
+              <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#2B4A3E] mb-2">Your next escape</h4>
+              <p className="text-sm text-[#5C5040] leading-relaxed mb-3">Curated travel from seasoned advisors. Cultural discovery, refined comfort.</p>
+              <Link href="/escape" className="inline-flex items-center gap-1 text-sm text-[#2B4A3E] font-medium hover:text-[#B8975C] transition-colors">
+                Explore <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+
             {/* Discreet Requests */}
             <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
               <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-3">Discreet Requests</h4>

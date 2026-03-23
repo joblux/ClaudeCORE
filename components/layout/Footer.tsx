@@ -34,7 +34,7 @@ export function Footer() {
               <h4 className="jl-overline text-[#1a1a1a] mb-3">Services</h4>
               <ul className="space-y-2">
                 <li><Link href="/services/recruitment" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Recruitment</Link></li>
-                <li><Link href="/services/travel" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Travel Advisory</Link></li>
+                <li><Link href="/escape" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Private Travel Advisory</Link></li>
                 <li><Link href="/about" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">About</Link></li>
                 <li><Link href="/faq" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Contact</Link></li>
               </ul>

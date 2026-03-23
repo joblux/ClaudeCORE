@@ -7,7 +7,8 @@ import { useRequireAdmin } from '@/lib/auth-hooks'
 import {
   LayoutDashboard, BarChart3, Briefcase, Kanban, MessageSquare,
   Users, Star, Send, FileText, BookOpen, DollarSign, FileCode,
-  Menu, X, LogOut, Power, Images, PenLine, MessageCircle, Mail
+  Menu, X, LogOut, Power, Images, PenLine, MessageCircle, Mail,
+  Compass, ClipboardList
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
@@ -21,6 +22,7 @@ const NAV_SECTIONS = [
       { label: 'ATS Pipeline', href: '/admin/ats', icon: Kanban },
       { label: 'Messages', href: '/admin/messages', icon: MessageSquare, countKey: 'unread_messages' },
       { label: 'Contributions', href: '/admin/contributions', icon: Star, countKey: 'pending_contributions' },
+      { label: 'Consultations', href: '/admin/escape/consultations', icon: ClipboardList, countKey: 'pending_consultations' },
       { label: 'Access Approvals', href: '/admin/invitations', icon: Send },
     ],
   },
@@ -31,6 +33,7 @@ const NAV_SECTIONS = [
       { label: 'New Intelligence', href: '/admin/articles/new', icon: PenLine },
       { label: 'Editorial Review', href: '/admin/bloglux/comments', icon: MessageCircle, countKey: 'pending_comments' },
       { label: 'WikiLux', href: '/admin/wikilux', icon: BookOpen },
+      { label: 'Escape', href: '/admin/escape', icon: Compass },
       { label: 'Salary Intelligence', href: '/salaries', icon: DollarSign },
       { label: 'Media Library', href: '/admin/media', icon: Images },
     ],

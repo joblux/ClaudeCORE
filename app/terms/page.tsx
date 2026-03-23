@@ -428,9 +428,29 @@ export default function TermsOfServicePage() {
           </p>
         </section>
 
-        {/* ── 14. Contact ── */}
+        {/* ── 14. Travel Advisory Services ── */}
+        <section id="travel-advisory">
+          <h2 className="jl-serif text-2xl font-semibold mb-4">14. Travel Advisory Services</h2>
+          <p>
+            Travel advisory services featured on JOBLUX Escape are provided by independent advisors
+            affiliated with Fora Travel, Inc. JOBLUX is a media partner and does not provide, arrange,
+            or guarantee any travel services.
+          </p>
+          <p className="mt-3">
+            All bookings, itineraries, and travel arrangements are between the client and their Fora
+            Travel advisor. JOBLUX facilitates the introduction and provides the platform for
+            consultation requests, but bears no responsibility for the quality, outcome, or delivery
+            of any travel services.
+          </p>
+          <p className="mt-3">
+            Each advisor is independently licensed and insured through Fora Travel, Inc. For questions
+            about travel services, clients should contact their assigned advisor directly.
+          </p>
+        </section>
+
+        {/* ── 15. Contact ── */}
         <section id="contact">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">14. Contact</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4">15. Contact</h2>
           <p>
             If you have any questions, concerns, or feedback regarding these Terms of Service or the
             Platform, please contact us:
