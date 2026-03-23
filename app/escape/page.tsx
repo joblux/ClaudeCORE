@@ -41,8 +41,9 @@ export default async function EscapePage() {
       {/* ── S1: HERO ── */}
       <div
         className="relative h-[50vh] min-h-[400px] flex items-center justify-center"
-        style={{ background: 'linear-gradient(135deg, #2B4A3E 0%, #4a7a6a 100%)' }}
+        style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&q=80)', backgroundSize: 'cover', backgroundPosition: 'center' }}
       >
+        <div className="absolute inset-0 bg-gradient-to-b from-[#2B4A3E]/30 to-[#2B4A3E]/85" />
         <div className="relative text-center px-4 max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#B8975C] mb-4">
             Private Travel Advisory · In partnership with Fora Travel
@@ -147,14 +148,22 @@ export default async function EscapePage() {
             Hand-selected properties with insider perks. Each one personally vetted by our advisors.
           </p>
           <div className="overflow-x-auto flex gap-4 pb-4">
-            {hotels.map((hotel: any) => (
+            {hotels.map((hotel: any, idx: number) => {
+              const gradients = [
+                'linear-gradient(135deg, #3D6B5E 0%, #2B4A3E 50%, #1d3a2e 100%)',
+                'linear-gradient(135deg, #8B6B4A 0%, #6a5030 100%)',
+                'linear-gradient(135deg, #5a8a6f 0%, #3D6B5E 100%)',
+                'linear-gradient(135deg, #C49567 0%, #8B6B4A 100%)',
+                'linear-gradient(135deg, #4a7a6a 0%, #2B4A3E 100%)',
+              ]
+              return (
               <div key={hotel.id} className="w-[200px] flex-shrink-0">
                 <div
                   className="relative h-[140px] rounded-t-lg"
                   style={{
                     backgroundImage: hotel.photos?.[0]
                       ? `url(${hotel.photos[0]})`
-                      : 'linear-gradient(135deg, #2B4A3E 0%, #5C5040 100%)',
+                      : gradients[idx % gradients.length],
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                   }}
@@ -181,7 +190,8 @@ export default async function EscapePage() {
                   )}
                 </div>
               </div>
-            ))}
+              )
+            })}
           </div>
           <div className="text-center mt-4">
             <Link href="/escape/hotels" className="text-sm text-[#B8975C] hover:underline">
@@ -227,13 +237,13 @@ export default async function EscapePage() {
                   {cruise.route_name && (
                     <p className="text-xs text-[#5C5040]">{cruise.route_name}</p>
                   )}
-                  {cruise.duration && (
+                  {cruise.duration_nights && (
                     <span className="inline-block bg-[#2B4A3E]/10 text-[#2B4A3E] text-[10px] px-2 py-0.5 rounded-full mt-1">
-                      {cruise.duration}
+                      {cruise.duration_nights} nights
                     </span>
                   )}
-                  {cruise.departure_ports && (
-                    <p className="text-[10px] text-[#8B7A5E] mt-1">{cruise.departure_ports}</p>
+                  {cruise.departure_ports?.length > 0 && (
+                    <p className="text-[10px] text-[#8B7A5E] mt-1">{cruise.departure_ports.join(' · ')}</p>
                   )}
                 </div>
               </Link>
@@ -256,24 +266,26 @@ export default async function EscapePage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {itineraryDays.map((day: any) => (
-                <div key={day.id} className="bg-white border border-[#D4C9B4] rounded-lg p-5">
-                  <p className="text-sm font-semibold text-[#2B4A3E] mb-3">{day.title}</p>
-                  {day.morning && (
+                <div key={day.id} className="bg-white border border-[#D4C9B4] rounded-lg p-4">
+                  <h4 className="text-sm font-semibold text-[#2B4A3E] mb-3 pb-2 border-b border-[#e8e2d8]">
+                    Day {day.day_number}: {day.title}
+                  </h4>
+                  {day.morning_text && (
                     <div className="mb-3">
-                      <p className="text-[10px] uppercase tracking-wider text-[#B8975C] mb-1">Morning</p>
-                      <p className="text-xs text-[#5C5040] leading-relaxed">{day.morning}</p>
+                      <p className="text-[10px] tracking-widest text-[#B8975C] mb-1">MORNING</p>
+                      <p className="text-sm text-[#5C5040] leading-relaxed">{day.morning_text}</p>
                     </div>
                   )}
-                  {day.afternoon && (
+                  {day.afternoon_text && (
                     <div className="mb-3">
-                      <p className="text-[10px] uppercase tracking-wider text-[#B8975C] mb-1">Afternoon</p>
-                      <p className="text-xs text-[#5C5040] leading-relaxed">{day.afternoon}</p>
+                      <p className="text-[10px] tracking-widest text-[#B8975C] mb-1">AFTERNOON</p>
+                      <p className="text-sm text-[#5C5040] leading-relaxed">{day.afternoon_text}</p>
                     </div>
                   )}
-                  {day.evening && (
-                    <div className="mb-3">
-                      <p className="text-[10px] uppercase tracking-wider text-[#B8975C] mb-1">Evening</p>
-                      <p className="text-xs text-[#5C5040] leading-relaxed">{day.evening}</p>
+                  {day.evening_text && (
+                    <div>
+                      <p className="text-[10px] tracking-widest text-[#B8975C] mb-1">EVENING</p>
+                      <p className="text-sm text-[#5C5040] leading-relaxed">{day.evening_text}</p>
                     </div>
                   )}
                 </div>

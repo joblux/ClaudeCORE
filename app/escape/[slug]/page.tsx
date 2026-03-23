@@ -2,7 +2,6 @@ import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import Image from 'next/image'
 import AdvisorCard from '@/components/escape/AdvisorCard'
 
 const supabase = createClient(
@@ -174,29 +173,27 @@ export default async function DestinationPage({ params }: { params: { slug: stri
               key={day.id}
               className="bg-[#FFFDF7] border border-[#D4C9B4] rounded-lg p-6 mb-4"
             >
-              <h3 className="font-semibold text-[#2B4A3E]">
-                Day {day.day_number}{day.title ? ` — ${day.title}` : ''}
-              </h3>
-              <div className="mt-4 space-y-3">
-                {day.morning && (
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider font-semibold text-[#B8975C]">Morning</p>
-                    <p className="text-sm text-[#5C5040] mt-0.5">{day.morning}</p>
-                  </div>
-                )}
-                {day.afternoon && (
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider font-semibold text-[#B8975C]">Afternoon</p>
-                    <p className="text-sm text-[#5C5040] mt-0.5">{day.afternoon}</p>
-                  </div>
-                )}
-                {day.evening && (
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider font-semibold text-[#B8975C]">Evening</p>
-                    <p className="text-sm text-[#5C5040] mt-0.5">{day.evening}</p>
-                  </div>
-                )}
-              </div>
+              <h4 className="text-sm font-semibold text-[#2B4A3E] mb-3 pb-2 border-b border-[#e8e2d8]">
+                Day {day.day_number}: {day.title}
+              </h4>
+              {day.morning_text && (
+                <div className="mb-3">
+                  <p className="text-[10px] tracking-widest text-[#B8975C] mb-1">MORNING</p>
+                  <p className="text-sm text-[#5C5040] leading-relaxed">{day.morning_text}</p>
+                </div>
+              )}
+              {day.afternoon_text && (
+                <div className="mb-3">
+                  <p className="text-[10px] tracking-widest text-[#B8975C] mb-1">AFTERNOON</p>
+                  <p className="text-sm text-[#5C5040] leading-relaxed">{day.afternoon_text}</p>
+                </div>
+              )}
+              {day.evening_text && (
+                <div>
+                  <p className="text-[10px] tracking-widest text-[#B8975C] mb-1">EVENING</p>
+                  <p className="text-sm text-[#5C5040] leading-relaxed">{day.evening_text}</p>
+                </div>
+              )}
             </div>
           ))}
         </div>
