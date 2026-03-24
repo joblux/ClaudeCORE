@@ -143,6 +143,24 @@ export default function AdminEscapePage() {
       const plainText = (editArticle.body || '').replace(/<[^>]*>/g, '').trim()
       const excerpt = editArticle.excerpt || plainText.slice(0, 280)
 
+      // Resolve cover image: prefer Supabase-hosted, then extract real URL from Fora proxy
+      let coverImageUrl = editArticle.featured_image || null
+      if (coverImageUrl) {
+        // If it's a Fora _next/image proxy URL, extract the real source
+        if (coverImageUrl.includes('/_next/image')) {
+          try {
+            const parsed = new URL(coverImageUrl)
+            const realUrl = parsed.searchParams.get('url')
+            if (realUrl) coverImageUrl = decodeURIComponent(realUrl)
+          } catch {}
+        }
+      }
+      // If still no good URL, try to find first Supabase-hosted image in the body
+      if (!coverImageUrl || coverImageUrl.includes('/_next/image')) {
+        const supabaseMatch = (editArticle.body || '').match(/src="(https:\/\/zspcmvdoqhvrcdynlriz\.supabase\.co[^"]*)"/)
+        if (supabaseMatch) coverImageUrl = supabaseMatch[1]
+      }
+
       // Check if already cross-posted (by slug)
       const { data: existing } = await supabase
         .from('bloglux_articles')
@@ -156,7 +174,7 @@ export default function AdminEscapePage() {
           title: editArticle.title,
           body: editArticle.body,
           excerpt,
-          cover_image_url: editArticle.featured_image || null,
+          cover_image_url: coverImageUrl,
           status: 'published',
           published_at: editArticle.published_at || new Date().toISOString(),
           read_time_minutes: readTime,
@@ -171,7 +189,7 @@ export default function AdminEscapePage() {
           excerpt,
           category: 'lifestyle-culture',
           author_name: "JOBLUX Escape",
-          cover_image_url: editArticle.featured_image || null,
+          cover_image_url: coverImageUrl,
           status: 'published',
           published_at: editArticle.published_at || new Date().toISOString(),
           read_time_minutes: readTime,
