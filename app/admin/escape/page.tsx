@@ -360,7 +360,8 @@ export default function AdminEscapePage() {
                     featured_image: result.coverImage || '',
                     slug: result.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
                     edition_id: currentEdition?.id || '',
-                    published: false,
+                    published: true,
+                    published_at: new Date().toISOString(),
                     read_time: Math.max(1, Math.round((result.content.replace(/<[^>]*>/g, '').split(/\s+/).length) / 200)),
                   })
                   setShowPasteImporter(false)

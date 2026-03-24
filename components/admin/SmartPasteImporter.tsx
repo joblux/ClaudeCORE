@@ -11,6 +11,7 @@ interface ImportResult {
   content: string
   excerpt: string
   coverImage: string
+  published?: boolean
 }
 
 interface SmartPasteImporterProps {
@@ -140,6 +141,7 @@ export default function SmartPasteImporter({ onImport, onCancel }: SmartPasteImp
       content: finalContent,
       excerpt,
       coverImage,
+      published: true,
     })
 
     setUploading(false)
