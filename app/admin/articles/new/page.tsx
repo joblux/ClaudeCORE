@@ -149,14 +149,21 @@ export default function NewArticlePage() {
     const slug = pasteTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'import'
     let coverImage = ''
 
-    if (pasteImages.length > 0) {
-      setImageProgress(`Uploading images... 0/${pasteImages.length}`)
+    // Re-scan the edited HTML for images (Mo may have deleted some in the preview editor)
+    const parser = new DOMParser()
+    const editedDoc = parser.parseFromString(pasteHtml, 'text/html')
+    const currentImages = Array.from(editedDoc.querySelectorAll('img'))
+      .map((img, i) => ({ url: img.src || img.getAttribute('data-src') || '', index: i }))
+      .filter(img => img.url && !img.url.startsWith('data:'))
+
+    if (currentImages.length > 0) {
+      setImageProgress(`Uploading images... 0/${currentImages.length}`)
 
       try {
         const res = await fetch('/api/admin/upload-images', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ images: pasteImages, slug }),
+          body: JSON.stringify({ images: currentImages, slug }),
         })
         const data = await res.json()
 
@@ -175,7 +182,7 @@ export default function NewArticlePage() {
             }
           }
 
-          setImageProgress(`${uploaded}/${pasteImages.length} images uploaded`)
+          setImageProgress(`${uploaded}/${currentImages.length} images uploaded`)
           if (errors.length > 0) {
             setImageErrors([`${errors.length} image(s) could not be imported`])
           }
@@ -578,11 +585,14 @@ export default function NewArticlePage() {
                   </div>
                 )}
 
-                <label style={LABEL}>Content Preview</label>
-                <div
-                  style={{ ...INPUT, maxHeight: 300, overflow: 'auto', lineHeight: 1.7, marginBottom: 16, background: '#fff' }}
-                  dangerouslySetInnerHTML={{ __html: pasteHtml || pasteContent.replace(/\n/g, '<br>') }}
-                />
+                <label style={LABEL}>Content — edit before importing</label>
+                <div style={{ marginBottom: 16 }}>
+                  <RichTextEditor
+                    content={pasteHtml || pasteContent.replace(/\n/g, '<br>')}
+                    onChange={(html) => setPasteHtml(html)}
+                    placeholder="Edit the pasted content here..."
+                  />
+                </div>
 
                 {imageProgress && (
                   <p style={{ fontSize: 12, color: '#a58e28', marginBottom: 12 }}>{imageProgress}</p>
@@ -592,7 +602,7 @@ export default function NewArticlePage() {
                 ))}
 
                 <div style={{ display: 'flex', gap: 12 }}>
-                  {pasteHtml && pasteImages.length > 0 && (
+                  {pasteHtml && pasteHtml.includes('<img') && (
                     <button
                       onClick={handleImportWithImages}
                       disabled={imageUploading || !pasteTitle.trim()}
