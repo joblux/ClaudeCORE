@@ -69,10 +69,10 @@ export default function BlogluxClient({ initialArticles }: { initialArticles: Ar
 
       <div className="jl-container py-10">
         {/* Category filter pills */}
-        <div className="flex items-center gap-2 mb-8 flex-wrap">
+        <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2 md:flex-wrap md:overflow-visible" style={{ WebkitOverflowScrolling: 'touch' }}>
           <button
             onClick={() => handleCategoryChange('All')}
-            className={`font-sans text-[0.65rem] font-medium tracking-wider uppercase px-3 py-1.5 border transition-colors ${
+            className={`font-sans text-[0.65rem] font-medium tracking-wider uppercase px-3 py-1.5 border transition-colors whitespace-nowrap flex-shrink-0 ${
               activeCategory === 'All'
                 ? 'border-[#a58e28] text-[#a58e28]'
                 : 'border-[#e8e2d8] text-[#888] hover:border-[#aaa] hover:text-[#555]'
@@ -84,7 +84,7 @@ export default function BlogluxClient({ initialArticles }: { initialArticles: Ar
             <button
               key={cat.value}
               onClick={() => handleCategoryChange(cat.value)}
-              className={`font-sans text-[0.65rem] font-medium tracking-wider uppercase px-3 py-1.5 border transition-colors ${
+              className={`font-sans text-[0.65rem] font-medium tracking-wider uppercase px-3 py-1.5 border transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeCategory === cat.value
                   ? 'border-[#a58e28] text-[#a58e28]'
                   : 'border-[#e8e2d8] text-[#888] hover:border-[#aaa] hover:text-[#555]'
@@ -110,7 +110,7 @@ export default function BlogluxClient({ initialArticles }: { initialArticles: Ar
                 href={`/bloglux/${featuredArticle.slug}`}
                 className="block mb-10 group"
               >
-                <div className="relative w-full aspect-[16/7] overflow-hidden">
+                <div className="relative w-full aspect-[4/3] md:aspect-[16/7] overflow-hidden rounded-lg">
                   {featuredArticle.hero_image_url ? (
                     <>
                       <Image
