@@ -128,12 +128,58 @@ export default function AdminEscapePage() {
 
   const handleSaveArticle = async () => {
     if (!editArticle?.title) return
-    const payload = { ...editArticle, slug: editArticle.slug || slugify(editArticle.title), read_time: Number(editArticle.read_time) || 5 }
+    const slug = editArticle.slug || slugify(editArticle.title)
+    const payload = { ...editArticle, slug, read_time: Number(editArticle.read_time) || 5 }
     if (editArticle.id) {
       await supabase.from('escape_articles').update(payload).eq('id', editArticle.id)
     } else {
       await supabase.from('escape_articles').insert(payload)
     }
+
+    // Cross-post to Insights (bloglux_articles) under Lifestyle & Culture when published
+    if (editArticle.published) {
+      const readTime = Number(editArticle.read_time) || 5
+      const plainText = (editArticle.body || '').replace(/<[^>]*>/g, '').trim()
+      const excerpt = editArticle.excerpt || plainText.slice(0, 280)
+
+      // Check if already cross-posted (by slug)
+      const { data: existing } = await supabase
+        .from('bloglux_articles')
+        .select('id')
+        .eq('slug', `escape-${slug}`)
+        .maybeSingle()
+
+      if (existing) {
+        // Update existing cross-post
+        await supabase.from('bloglux_articles').update({
+          title: editArticle.title,
+          body: editArticle.body,
+          excerpt,
+          cover_image_url: editArticle.featured_image || null,
+          status: 'published',
+          published_at: editArticle.published_at || new Date().toISOString(),
+          read_time_minutes: readTime,
+          updated_at: new Date().toISOString(),
+        }).eq('id', existing.id)
+      } else {
+        // Create new cross-post
+        await supabase.from('bloglux_articles').insert({
+          title: editArticle.title,
+          slug: `escape-${slug}`,
+          body: editArticle.body,
+          excerpt,
+          category: 'lifestyle-culture',
+          author_name: "JOBLUX Escape",
+          cover_image_url: editArticle.featured_image || null,
+          status: 'published',
+          published_at: editArticle.published_at || new Date().toISOString(),
+          read_time_minutes: readTime,
+          meta_description: excerpt.slice(0, 155),
+          tags: editArticle.tag ? [editArticle.tag] : [],
+        })
+      }
+    }
+
     setEditArticle(null)
     fetchAll()
   }
