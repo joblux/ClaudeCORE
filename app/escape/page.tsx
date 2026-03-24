@@ -57,24 +57,24 @@ export default async function EscapePage() {
 
       {/* ── HERO ── */}
       {edition && (
-        <div
-          className="relative w-full"
-          style={{
-            aspectRatio: '16 / 5',
-            maxHeight: 260,
-            backgroundImage: edition.hero_image ? `url(${edition.hero_image})` : 'linear-gradient(135deg, #2B4A3E 0%, #4a7a6a 100%)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        >
-          {/* Dark gradient overlay */}
+        <div className="max-w-7xl mx-auto px-6 pt-8">
           <div
-            className="absolute inset-0"
-            style={{ background: 'linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.6) 100%)' }}
-          />
-          {/* Content */}
-          <div className="relative max-w-7xl mx-auto px-6 h-full">
-            <div className="absolute bottom-0 pb-5">
+            className="relative w-full rounded-lg overflow-hidden"
+            style={{
+              height: 340,
+              backgroundImage: edition.hero_image ? `url(${edition.hero_image})` : 'linear-gradient(135deg, #2B4A3E 0%, #4a7a6a 100%)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          >
+            {/* Dark gradient overlay */}
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.6) 100%)' }}
+            />
+            {/* Content */}
+            <div className="relative h-full px-6">
+              <div className="absolute bottom-0 pb-6">
               <p
                 className="uppercase mb-3"
                 style={{ fontSize: 11, letterSpacing: 3, color: '#B8975C' }}
@@ -86,17 +86,18 @@ export default async function EscapePage() {
                 style={{
                   fontFamily: "'Playfair Display', Georgia, serif",
                   fontStyle: 'italic',
-                  fontSize: 34,
+                  fontSize: 42,
                   lineHeight: 1.15,
                 }}
               >
                 {edition.title}
               </h1>
               {edition.intro && (
-                <p className="text-white" style={{ fontSize: 13, opacity: 0.85, maxWidth: 520 }}>
+                <p className="text-white" style={{ fontSize: 15, opacity: 0.85, maxWidth: 520 }}>
                   {edition.intro}
                 </p>
               )}
+              </div>
             </div>
           </div>
         </div>
