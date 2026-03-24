@@ -3,6 +3,10 @@ import { createClient } from '@supabase/supabase-js'
 import AdmZip from 'adm-zip'
 import sharp from 'sharp'
 
+// App Router: increase timeout and ensure Node.js runtime for zip processing
+export const runtime = 'nodejs'
+export const maxDuration = 300 // 5 minutes for large zips
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!

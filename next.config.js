@@ -2,6 +2,11 @@ const { withSentryConfig } = require("@sentry/nextjs")
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '200mb',
+    },
+  },
   env: {
     WIKILUX_API_KEY: process.env.WIKILUX_API_KEY,
   },
