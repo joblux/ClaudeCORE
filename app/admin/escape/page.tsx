@@ -24,6 +24,37 @@ interface Consultation { id: string; first_name: string; last_name: string; emai
 
 function slugify(s: string) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') }
 
+const EscInput = ({ label, value, onChange, type = 'text', placeholder }: { label: string; value: any; onChange: (v: string) => void; type?: string; placeholder?: string }) => (
+  <div>
+    <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
+    <input type={type} value={value || ''} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full px-3 py-2 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#2B4A3E]" />
+  </div>
+)
+
+const EscToggle = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) => (
+  <label className="flex items-center gap-2 text-sm cursor-pointer">
+    <input type="checkbox" checked={checked || false} onChange={e => onChange(e.target.checked)} className="rounded border-gray-300" />
+    {label}
+  </label>
+)
+
+const EscSelect = ({ label, value, onChange, options }: { label: string; value: any; onChange: (v: string) => void; options: { value: string; label: string }[] }) => (
+  <div>
+    <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
+    <select value={value || ''} onChange={e => onChange(e.target.value)} className="w-full px-3 py-2 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#2B4A3E]">
+      <option value="">— Select —</option>
+      {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+    </select>
+  </div>
+)
+
+const EscTextArea = ({ label, value, onChange, rows = 3 }: { label: string; value: any; onChange: (v: string) => void; rows?: number }) => (
+  <div>
+    <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
+    <textarea value={value || ''} onChange={e => onChange(e.target.value)} rows={rows} className="w-full px-3 py-2 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#2B4A3E]" />
+  </div>
+)
+
 export default function AdminEscapePage() {
   const [tab, setTab] = useState<Tab>('editions')
   const [editions, setEditions] = useState<Edition[]>([])
@@ -204,36 +235,6 @@ export default function AdminEscapePage() {
   const filteredConsultations = consultFilter === 'all' ? consultations : consultations.filter(c => c.status === consultFilter)
 
   // --- Form helpers ---
-  const Input = ({ label, value, onChange, type = 'text', placeholder }: { label: string; value: any; onChange: (v: string) => void; type?: string; placeholder?: string }) => (
-    <div>
-      <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
-      <input type={type} value={value || ''} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full px-3 py-2 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#2B4A3E]" />
-    </div>
-  )
-
-  const Toggle = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) => (
-    <label className="flex items-center gap-2 text-sm cursor-pointer">
-      <input type="checkbox" checked={checked || false} onChange={e => onChange(e.target.checked)} className="rounded border-gray-300" />
-      {label}
-    </label>
-  )
-
-  const Select = ({ label, value, onChange, options }: { label: string; value: any; onChange: (v: string) => void; options: { value: string; label: string }[] }) => (
-    <div>
-      <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
-      <select value={value || ''} onChange={e => onChange(e.target.value)} className="w-full px-3 py-2 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#2B4A3E]">
-        <option value="">— Select —</option>
-        {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-      </select>
-    </div>
-  )
-
-  const TextArea = ({ label, value, onChange, rows = 3 }: { label: string; value: any; onChange: (v: string) => void; rows?: number }) => (
-    <div>
-      <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
-      <textarea value={value || ''} onChange={e => onChange(e.target.value)} rows={rows} className="w-full px-3 py-2 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#2B4A3E]" />
-    </div>
-  )
 
   const editionOptions = editions.map(e => ({ value: e.id, label: `${e.title} (${e.month}/${e.year})` }))
   const itineraryOptions = itineraries.map(i => ({ value: i.id, label: i.name }))
@@ -301,14 +302,14 @@ export default function AdminEscapePage() {
             {editEdition && (
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                  <Input label="Title" value={editEdition.title} onChange={v => setEditEdition({ ...editEdition, title: v })} />
-                  <Input label="Month (1-12)" value={editEdition.month} onChange={v => setEditEdition({ ...editEdition, month: Number(v) as any })} type="number" />
-                  <Input label="Year" value={editEdition.year} onChange={v => setEditEdition({ ...editEdition, year: Number(v) as any })} type="number" />
-                  <Input label="Hero Image URL" value={editEdition.hero_image} onChange={v => setEditEdition({ ...editEdition, hero_image: v })} />
+                  <EscInput label="Title" value={editEdition.title} onChange={v => setEditEdition({ ...editEdition, title: v })} />
+                  <EscInput label="Month (1-12)" value={editEdition.month} onChange={v => setEditEdition({ ...editEdition, month: Number(v) as any })} type="number" />
+                  <EscInput label="Year" value={editEdition.year} onChange={v => setEditEdition({ ...editEdition, year: Number(v) as any })} type="number" />
+                  <EscInput label="Hero Image URL" value={editEdition.hero_image} onChange={v => setEditEdition({ ...editEdition, hero_image: v })} />
                 </div>
-                <TextArea label="Intro" value={editEdition.intro} onChange={v => setEditEdition({ ...editEdition, intro: v })} />
+                <EscTextArea label="Intro" value={editEdition.intro} onChange={v => setEditEdition({ ...editEdition, intro: v })} />
                 <div className="flex items-center gap-4 mt-3">
-                  <Toggle label="Current Edition" checked={!!editEdition.is_current} onChange={v => setEditEdition({ ...editEdition, is_current: v })} />
+                  <EscToggle label="Current Edition" checked={!!editEdition.is_current} onChange={v => setEditEdition({ ...editEdition, is_current: v })} />
                   <button onClick={handleSaveEdition} className="text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">Save</button>
                   <button onClick={() => setEditEdition(null)} className="text-sm text-gray-500 hover:text-gray-700">Cancel</button>
                 </div>
@@ -370,14 +371,14 @@ export default function AdminEscapePage() {
             {editArticle && (
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
-                  <Input label="Title" value={editArticle.title} onChange={v => setEditArticle(prev => prev ? { ...prev, title: v, slug: prev.slug || slugify(v) } : prev)} />
-                  <Input label="Slug" value={editArticle.slug} onChange={v => setEditArticle(prev => prev ? { ...prev, slug: v } : prev)} />
-                  <Select label="Edition" value={editArticle.edition_id} onChange={v => setEditArticle(prev => prev ? { ...prev, edition_id: v } : prev)} options={editionOptions} />
-                  <Input label="Tag" value={editArticle.tag} onChange={v => setEditArticle(prev => prev ? { ...prev, tag: v } : prev)} placeholder="e.g. wellness, adventure" />
-                  <Input label="Read Time (min)" value={editArticle.read_time} onChange={v => setEditArticle(prev => prev ? { ...prev, read_time: Number(v) as any } : prev)} type="number" />
-                  <Input label="Featured Image URL" value={editArticle.featured_image} onChange={v => setEditArticle(prev => prev ? { ...prev, featured_image: v } : prev)} />
+                  <EscInput label="Title" value={editArticle.title} onChange={v => setEditArticle(prev => prev ? { ...prev, title: v, slug: prev.slug || slugify(v) } : prev)} />
+                  <EscInput label="Slug" value={editArticle.slug} onChange={v => setEditArticle(prev => prev ? { ...prev, slug: v } : prev)} />
+                  <EscSelect label="Edition" value={editArticle.edition_id} onChange={v => setEditArticle(prev => prev ? { ...prev, edition_id: v } : prev)} options={editionOptions} />
+                  <EscInput label="Tag" value={editArticle.tag} onChange={v => setEditArticle(prev => prev ? { ...prev, tag: v } : prev)} placeholder="e.g. wellness, adventure" />
+                  <EscInput label="Read Time (min)" value={editArticle.read_time} onChange={v => setEditArticle(prev => prev ? { ...prev, read_time: Number(v) as any } : prev)} type="number" />
+                  <EscInput label="Featured Image URL" value={editArticle.featured_image} onChange={v => setEditArticle(prev => prev ? { ...prev, featured_image: v } : prev)} />
                 </div>
-                <TextArea label="Excerpt" value={editArticle.excerpt} onChange={v => setEditArticle(prev => prev ? { ...prev, excerpt: v } : prev)} rows={2} />
+                <EscTextArea label="Excerpt" value={editArticle.excerpt} onChange={v => setEditArticle(prev => prev ? { ...prev, excerpt: v } : prev)} rows={2} />
                 <div className="mb-3">
                   <label style={{ display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#666', marginBottom: 6 }}>Body</label>
                   <RichTextEditor
@@ -387,7 +388,7 @@ export default function AdminEscapePage() {
                   />
                 </div>
                 <div className="flex items-center gap-4 mt-3">
-                  <Toggle label="Published" checked={!!editArticle.published} onChange={v => setEditArticle(prev => prev ? { ...prev, published: v, published_at: v ? new Date().toISOString() : prev.published_at } : prev)} />
+                  <EscToggle label="Published" checked={!!editArticle.published} onChange={v => setEditArticle(prev => prev ? { ...prev, published: v, published_at: v ? new Date().toISOString() : prev.published_at } : prev)} />
                   <button onClick={handleSaveArticle} className="text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">Save</button>
                   <button onClick={() => setEditArticle(null)} className="text-sm text-gray-500 hover:text-gray-700">Cancel</button>
                 </div>
@@ -426,20 +427,20 @@ export default function AdminEscapePage() {
             {editItinerary && (
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
-                  <Input label="Name" value={editItinerary.name} onChange={v => setEditItinerary({ ...editItinerary, name: v, slug: editItinerary.slug || slugify(v) })} />
-                  <Input label="Slug" value={editItinerary.slug} onChange={v => setEditItinerary({ ...editItinerary, slug: v })} />
-                  <Select label="Edition" value={editItinerary.edition_id} onChange={v => setEditItinerary({ ...editItinerary, edition_id: v })} options={editionOptions} />
-                  <Input label="Duration" value={editItinerary.duration} onChange={v => setEditItinerary({ ...editItinerary, duration: v })} placeholder="e.g. 7 days" />
-                  <Input label="Tagline" value={editItinerary.tagline} onChange={v => setEditItinerary({ ...editItinerary, tagline: v })} />
-                  <Input label="Season" value={editItinerary.season} onChange={v => setEditItinerary({ ...editItinerary, season: v })} placeholder="e.g. Spring, Year-round" />
-                  <Input label="Style" value={editItinerary.style} onChange={v => setEditItinerary({ ...editItinerary, style: v })} placeholder="e.g. Luxury, Adventure" />
-                  <Input label="Price From" value={editItinerary.price_from} onChange={v => setEditItinerary({ ...editItinerary, price_from: Number(v) as any })} type="number" />
-                  <Input label="Hero Image URL" value={editItinerary.hero_image} onChange={v => setEditItinerary({ ...editItinerary, hero_image: v })} />
-                  <Input label="Card Image URL" value={editItinerary.card_image} onChange={v => setEditItinerary({ ...editItinerary, card_image: v })} />
-                  <Input label="Season Note" value={editItinerary.season_note} onChange={v => setEditItinerary({ ...editItinerary, season_note: v })} />
+                  <EscInput label="Name" value={editItinerary.name} onChange={v => setEditItinerary({ ...editItinerary, name: v, slug: editItinerary.slug || slugify(v) })} />
+                  <EscInput label="Slug" value={editItinerary.slug} onChange={v => setEditItinerary({ ...editItinerary, slug: v })} />
+                  <EscSelect label="Edition" value={editItinerary.edition_id} onChange={v => setEditItinerary({ ...editItinerary, edition_id: v })} options={editionOptions} />
+                  <EscInput label="Duration" value={editItinerary.duration} onChange={v => setEditItinerary({ ...editItinerary, duration: v })} placeholder="e.g. 7 days" />
+                  <EscInput label="Tagline" value={editItinerary.tagline} onChange={v => setEditItinerary({ ...editItinerary, tagline: v })} />
+                  <EscInput label="Season" value={editItinerary.season} onChange={v => setEditItinerary({ ...editItinerary, season: v })} placeholder="e.g. Spring, Year-round" />
+                  <EscInput label="Style" value={editItinerary.style} onChange={v => setEditItinerary({ ...editItinerary, style: v })} placeholder="e.g. Luxury, Adventure" />
+                  <EscInput label="Price From" value={editItinerary.price_from} onChange={v => setEditItinerary({ ...editItinerary, price_from: Number(v) as any })} type="number" />
+                  <EscInput label="Hero Image URL" value={editItinerary.hero_image} onChange={v => setEditItinerary({ ...editItinerary, hero_image: v })} />
+                  <EscInput label="Card Image URL" value={editItinerary.card_image} onChange={v => setEditItinerary({ ...editItinerary, card_image: v })} />
+                  <EscInput label="Season Note" value={editItinerary.season_note} onChange={v => setEditItinerary({ ...editItinerary, season_note: v })} />
                 </div>
                 <div className="flex items-center gap-4 mt-3">
-                  <Toggle label="Published" checked={!!editItinerary.published} onChange={v => setEditItinerary({ ...editItinerary, published: v })} />
+                  <EscToggle label="Published" checked={!!editItinerary.published} onChange={v => setEditItinerary({ ...editItinerary, published: v })} />
                   <button onClick={handleSaveItinerary} className="text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">Save</button>
                   <button onClick={() => setEditItinerary(null)} className="text-sm text-gray-500 hover:text-gray-700">Cancel</button>
                 </div>
@@ -479,23 +480,23 @@ export default function AdminEscapePage() {
             {editHotel && (
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
-                  <Input label="Name" value={editHotel.name} onChange={v => setEditHotel({ ...editHotel, name: v, slug: editHotel.slug || slugify(v) })} />
-                  <Input label="Slug" value={editHotel.slug} onChange={v => setEditHotel({ ...editHotel, slug: v })} />
-                  <Input label="City" value={editHotel.city} onChange={v => setEditHotel({ ...editHotel, city: v })} />
-                  <Input label="Country" value={editHotel.country} onChange={v => setEditHotel({ ...editHotel, country: v })} />
-                  <Input label="Destination Tag" value={editHotel.destination_tag} onChange={v => setEditHotel({ ...editHotel, destination_tag: v })} placeholder="e.g. europe, caribbean" />
-                  <Input label="Style Tag" value={editHotel.style_tag} onChange={v => setEditHotel({ ...editHotel, style_tag: v })} placeholder="e.g. boutique, resort" />
-                  <Input label="Image URL" value={editHotel.image} onChange={v => setEditHotel({ ...editHotel, image: v })} />
-                  <Input label="Hero Image URL" value={editHotel.hero_image} onChange={v => setEditHotel({ ...editHotel, hero_image: v })} />
-                  <Select label="Itinerary" value={editHotel.itinerary_id} onChange={v => setEditHotel({ ...editHotel, itinerary_id: v || null })} options={itineraryOptions} />
+                  <EscInput label="Name" value={editHotel.name} onChange={v => setEditHotel({ ...editHotel, name: v, slug: editHotel.slug || slugify(v) })} />
+                  <EscInput label="Slug" value={editHotel.slug} onChange={v => setEditHotel({ ...editHotel, slug: v })} />
+                  <EscInput label="City" value={editHotel.city} onChange={v => setEditHotel({ ...editHotel, city: v })} />
+                  <EscInput label="Country" value={editHotel.country} onChange={v => setEditHotel({ ...editHotel, country: v })} />
+                  <EscInput label="Destination Tag" value={editHotel.destination_tag} onChange={v => setEditHotel({ ...editHotel, destination_tag: v })} placeholder="e.g. europe, caribbean" />
+                  <EscInput label="Style Tag" value={editHotel.style_tag} onChange={v => setEditHotel({ ...editHotel, style_tag: v })} placeholder="e.g. boutique, resort" />
+                  <EscInput label="Image URL" value={editHotel.image} onChange={v => setEditHotel({ ...editHotel, image: v })} />
+                  <EscInput label="Hero Image URL" value={editHotel.hero_image} onChange={v => setEditHotel({ ...editHotel, hero_image: v })} />
+                  <EscSelect label="Itinerary" value={editHotel.itinerary_id} onChange={v => setEditHotel({ ...editHotel, itinerary_id: v || null })} options={itineraryOptions} />
                 </div>
-                <TextArea label="Advisor Note" value={editHotel.advisor_note} onChange={v => setEditHotel({ ...editHotel, advisor_note: v })} rows={2} />
+                <EscTextArea label="Advisor Note" value={editHotel.advisor_note} onChange={v => setEditHotel({ ...editHotel, advisor_note: v })} rows={2} />
                 <div className="mt-3">
-                  <Input label="Perks (comma-separated)" value={Array.isArray(editHotel.perks) ? editHotel.perks.join(', ') : editHotel.perks} onChange={v => setEditHotel({ ...editHotel, perks: v })} placeholder="e.g. Spa credit, Airport transfer, Late checkout" />
+                  <EscInput label="Perks (comma-separated)" value={Array.isArray(editHotel.perks) ? editHotel.perks.join(', ') : editHotel.perks} onChange={v => setEditHotel({ ...editHotel, perks: v })} placeholder="e.g. Spa credit, Airport transfer, Late checkout" />
                 </div>
                 <div className="flex items-center gap-4 mt-3">
-                  <Toggle label="Preferred" checked={!!editHotel.preferred} onChange={v => setEditHotel({ ...editHotel, preferred: v })} />
-                  <Toggle label="Published" checked={!!editHotel.published} onChange={v => setEditHotel({ ...editHotel, published: v })} />
+                  <EscToggle label="Preferred" checked={!!editHotel.preferred} onChange={v => setEditHotel({ ...editHotel, preferred: v })} />
+                  <EscToggle label="Published" checked={!!editHotel.published} onChange={v => setEditHotel({ ...editHotel, published: v })} />
                   <button onClick={handleSaveHotel} className="text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">Save</button>
                   <button onClick={() => setEditHotel(null)} className="text-sm text-gray-500 hover:text-gray-700">Cancel</button>
                 </div>
@@ -536,16 +537,16 @@ export default function AdminEscapePage() {
             {editCity && (
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
-                  <Input label="City Name" value={editCity.city_name} onChange={v => setEditCity({ ...editCity, city_name: v, slug: editCity.slug || slugify(v) })} />
-                  <Input label="Slug" value={editCity.slug} onChange={v => setEditCity({ ...editCity, slug: v })} />
-                  <Input label="Country" value={editCity.country} onChange={v => setEditCity({ ...editCity, country: v })} />
-                  <Input label="Hero Image URL" value={editCity.hero_image} onChange={v => setEditCity({ ...editCity, hero_image: v })} />
-                  <Select label="Edition" value={editCity.edition_id} onChange={v => setEditCity({ ...editCity, edition_id: v })} options={editionOptions} />
+                  <EscInput label="City Name" value={editCity.city_name} onChange={v => setEditCity({ ...editCity, city_name: v, slug: editCity.slug || slugify(v) })} />
+                  <EscInput label="Slug" value={editCity.slug} onChange={v => setEditCity({ ...editCity, slug: v })} />
+                  <EscInput label="Country" value={editCity.country} onChange={v => setEditCity({ ...editCity, country: v })} />
+                  <EscInput label="Hero Image URL" value={editCity.hero_image} onChange={v => setEditCity({ ...editCity, hero_image: v })} />
+                  <EscSelect label="Edition" value={editCity.edition_id} onChange={v => setEditCity({ ...editCity, edition_id: v })} options={editionOptions} />
                 </div>
-                <TextArea label="Intro" value={editCity.intro} onChange={v => setEditCity({ ...editCity, intro: v })} rows={2} />
-                <TextArea label="Body" value={editCity.body} onChange={v => setEditCity({ ...editCity, body: v })} rows={6} />
+                <EscTextArea label="Intro" value={editCity.intro} onChange={v => setEditCity({ ...editCity, intro: v })} rows={2} />
+                <EscTextArea label="Body" value={editCity.body} onChange={v => setEditCity({ ...editCity, body: v })} rows={6} />
                 <div className="flex items-center gap-4 mt-3">
-                  <Toggle label="Published" checked={!!editCity.published} onChange={v => setEditCity({ ...editCity, published: v })} />
+                  <EscToggle label="Published" checked={!!editCity.published} onChange={v => setEditCity({ ...editCity, published: v })} />
                   <button onClick={handleSaveCity} className="text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">Save</button>
                   <button onClick={() => setEditCity(null)} className="text-sm text-gray-500 hover:text-gray-700">Cancel</button>
                 </div>
@@ -584,16 +585,16 @@ export default function AdminEscapePage() {
             {editCruise && (
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
-                  <Input label="Name" value={editCruise.name} onChange={v => setEditCruise({ ...editCruise, name: v, slug: editCruise.slug || slugify(v) })} />
-                  <Input label="Slug" value={editCruise.slug} onChange={v => setEditCruise({ ...editCruise, slug: v })} />
-                  <Select label="Edition" value={editCruise.edition_id} onChange={v => setEditCruise({ ...editCruise, edition_id: v })} options={editionOptions} />
-                  <Input label="Duration" value={editCruise.duration} onChange={v => setEditCruise({ ...editCruise, duration: v })} placeholder="e.g. 12 nights" />
-                  <Input label="Style" value={editCruise.style} onChange={v => setEditCruise({ ...editCruise, style: v })} placeholder="e.g. Expedition, River" />
-                  <Input label="Hero Image URL" value={editCruise.hero_image} onChange={v => setEditCruise({ ...editCruise, hero_image: v })} />
+                  <EscInput label="Name" value={editCruise.name} onChange={v => setEditCruise({ ...editCruise, name: v, slug: editCruise.slug || slugify(v) })} />
+                  <EscInput label="Slug" value={editCruise.slug} onChange={v => setEditCruise({ ...editCruise, slug: v })} />
+                  <EscSelect label="Edition" value={editCruise.edition_id} onChange={v => setEditCruise({ ...editCruise, edition_id: v })} options={editionOptions} />
+                  <EscInput label="Duration" value={editCruise.duration} onChange={v => setEditCruise({ ...editCruise, duration: v })} placeholder="e.g. 12 nights" />
+                  <EscInput label="Style" value={editCruise.style} onChange={v => setEditCruise({ ...editCruise, style: v })} placeholder="e.g. Expedition, River" />
+                  <EscInput label="Hero Image URL" value={editCruise.hero_image} onChange={v => setEditCruise({ ...editCruise, hero_image: v })} />
                 </div>
-                <TextArea label="Route Summary" value={editCruise.route_summary} onChange={v => setEditCruise({ ...editCruise, route_summary: v })} rows={2} />
+                <EscTextArea label="Route Summary" value={editCruise.route_summary} onChange={v => setEditCruise({ ...editCruise, route_summary: v })} rows={2} />
                 <div className="flex items-center gap-4 mt-3">
-                  <Toggle label="Published" checked={!!editCruise.published} onChange={v => setEditCruise({ ...editCruise, published: v })} />
+                  <EscToggle label="Published" checked={!!editCruise.published} onChange={v => setEditCruise({ ...editCruise, published: v })} />
                   <button onClick={handleSaveCruise} className="text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">Save</button>
                   <button onClick={() => setEditCruise(null)} className="text-sm text-gray-500 hover:text-gray-700">Cancel</button>
                 </div>
