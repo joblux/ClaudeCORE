@@ -4,6 +4,8 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import BlogluxClient from './BlogluxClient'
 import type { Article } from './BlogluxClient'
 
+export const revalidate = 0
+
 export const metadata: Metadata = {
   title: 'Insights — Luxury Industry Analysis | JOBLUX',
   description: 'Expert analysis, career insights, and industry intelligence from across the luxury sector.',

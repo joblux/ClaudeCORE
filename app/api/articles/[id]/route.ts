@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createClient } from "@supabase/supabase-js";
+import { revalidatePath } from "next/cache";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -48,6 +49,10 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  revalidatePath('/bloglux');
+  revalidatePath('/');
+
   return NextResponse.json({ article: data });
 }
 
@@ -63,5 +68,9 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
     .eq("id", params.id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  revalidatePath('/bloglux');
+  revalidatePath('/');
+
   return NextResponse.json({ success: true });
 }
