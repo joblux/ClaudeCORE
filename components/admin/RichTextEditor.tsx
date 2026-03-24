@@ -179,6 +179,18 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
         <button onClick={addLink} style={editor.isActive('link') ? BTN_ACTIVE : BTN} type="button">
           {editor.isActive('link') ? 'Unlink' : 'Link'}
         </button>
+        <button
+          onClick={() => {
+            if (!editor) return
+            if (confirm('Remove ALL links from this article? The text will be kept.')) {
+              editor.chain().focus().selectAll().unsetLink().run()
+            }
+          }}
+          style={{ ...BTN, color: '#cc4444' }}
+          type="button"
+        >
+          Remove All Links
+        </button>
         <button onClick={addImage} style={BTN} type="button">
           Image
         </button>
