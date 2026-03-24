@@ -23,7 +23,7 @@ export default function EscapeLayout({ children }: { children: React.ReactNode }
         <div className="jl-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 90 }}>
           {/* Left: JOBLUX link + separator + Escape */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Link href="/" className="hover:opacity-70 transition-opacity" style={{ color: '#999', fontSize: 14, fontWeight: 600, letterSpacing: '0.025em', lineHeight: '1', display: 'inline-flex', alignItems: 'center' }}>
+            <Link href="/" className="hover:opacity-70 transition-opacity" style={{ color: '#999', fontSize: 15, fontWeight: 600, letterSpacing: '0.025em', lineHeight: '1', display: 'inline-flex', alignItems: 'center' }}>
               ← JOBLUX
             </Link>
           </div>
@@ -35,7 +35,7 @@ export default function EscapeLayout({ children }: { children: React.ReactNode }
                 key={link.href}
                 href={link.href}
                 className="hover:opacity-80 transition-colors"
-                style={{ color: '#555', fontSize: 14, fontWeight: 600, lineHeight: '1', display: 'inline-flex', alignItems: 'center' }}
+                style={{ color: '#555', fontSize: 15, fontWeight: 600, lineHeight: '1', display: 'inline-flex', alignItems: 'center' }}
               >
                 {link.label}
               </Link>
