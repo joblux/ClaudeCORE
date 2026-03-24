@@ -78,7 +78,6 @@ export async function POST(req: Request) {
       read_time_minutes: read_time,
       tags: tags || [],
       author_title: author_title?.trim() || 'Founder, JOBLUX',
-      author_avatar_url: author_avatar_url?.trim() || null,
       is_featured: !!is_featured,
       meta_description: autoMeta,
     })
