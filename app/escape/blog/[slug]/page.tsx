@@ -98,12 +98,43 @@ export default async function EscapeBlogArticlePage({ params }: { params: { slug
         )}
 
         {/* Body */}
-        {article.body && (
-          <div
-            dangerouslySetInnerHTML={{ __html: article.body }}
-            style={{ fontSize: 16, lineHeight: 1.8, color: '#333' }}
-          />
-        )}
+        {article.body && (() => {
+          // Strip the first image if it matches the cover photo (prevents duplicate)
+          let cleanBody = article.body
+            .replace(/<p>\s*<\/p>/g, '') // Remove empty paragraphs
+
+          if (article.featured_image) {
+            // Remove first img tag whose src matches the cover image
+            const coverSrc = article.featured_image.split('?')[0] // Compare without query params
+            cleanBody = cleanBody.replace(/<img[^>]*src="[^"]*"[^>]*>/i, (match: string) => {
+              const srcMatch = match.match(/src="([^"]*)"/)
+              if (srcMatch && srcMatch[1].split('?')[0] === coverSrc) return ''
+              return match
+            })
+          }
+
+          return (
+            <div
+              dangerouslySetInnerHTML={{ __html: cleanBody }}
+              className="escape-article-body"
+              style={{ fontSize: 16, lineHeight: 1.8, color: '#333' }}
+            />
+          )
+        })()}
+
+        <style>{`
+          .escape-article-body p { margin-bottom: 1.2em; }
+          .escape-article-body p:empty { display: none; }
+          .escape-article-body h1 { font-family: 'Playfair Display', Georgia, serif; font-size: 28px; margin-top: 2em; margin-bottom: 0.8em; color: #1A1A1A; font-weight: 400; }
+          .escape-article-body h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 24px; margin-top: 2em; margin-bottom: 0.8em; color: #1A1A1A; font-weight: 400; }
+          .escape-article-body h3 { font-family: 'Playfair Display', Georgia, serif; font-size: 20px; margin-top: 1.5em; margin-bottom: 0.6em; color: #1A1A1A; font-weight: 400; }
+          .escape-article-body ul, .escape-article-body ol { margin-bottom: 1em; padding-left: 1.5em; }
+          .escape-article-body li { margin-bottom: 0.4em; }
+          .escape-article-body blockquote { border-left: 3px solid #B8975C; padding-left: 16px; margin: 1.5em 0; font-style: italic; color: #555; }
+          .escape-article-body img { max-width: 100%; height: auto; border-radius: 8px; margin: 1.5em 0; display: block; }
+          .escape-article-body a { color: #B8975C; text-decoration: underline; }
+          .escape-article-body strong { font-weight: 600; color: #1A1A1A; }
+        `}</style>
 
         {/* Bottom CTA */}
         <div style={{ marginTop: 64, padding: 40, borderRadius: 8, backgroundColor: '#FDF8EE', textAlign: 'center' }}>

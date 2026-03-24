@@ -190,7 +190,19 @@ export default async function ArticlePage({ params }: Props) {
       {/* ── CONTENT ───────────────────────────────────────── */}
       <div className="jl-container py-10">
         <div className="max-w-[720px] mx-auto">
-          <div className="jl-prose" dangerouslySetInnerHTML={{ __html: article.content }} />
+          <div className="jl-prose" dangerouslySetInnerHTML={{ __html: (() => {
+            let body = (article.content || '').replace(/<p>\s*<\/p>/g, '')
+            const heroUrl = article.hero_image_url || article.cover_image_url
+            if (heroUrl) {
+              const heroBase = heroUrl.split('?')[0]
+              body = body.replace(/<img[^>]*src="[^"]*"[^>]*>/i, (match: string) => {
+                const m = match.match(/src="([^"]*)"/)
+                if (m && m[1].split('?')[0] === heroBase) return ''
+                return match
+              })
+            }
+            return body
+          })() }} />
 
           {/* Tags */}
           {article.tags && article.tags.length > 0 && (

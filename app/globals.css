@@ -491,6 +491,25 @@ a {
     text-decoration-color: #a58e28;
   }
 
+  .jl-prose p:empty { display: none; }
+
+  .jl-prose ul, .jl-prose ol {
+    margin-bottom: 1em;
+    padding-left: 1.5em;
+  }
+
+  .jl-prose li { margin-bottom: 0.4em; }
+
+  .jl-prose img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1.5em 0;
+    display: block;
+  }
+
+  .jl-prose strong { font-weight: 600; color: #1a1a1a; }
+
   /* ── TICKER ───────────────────────────────────────── */
 
   .jl-ticker {
