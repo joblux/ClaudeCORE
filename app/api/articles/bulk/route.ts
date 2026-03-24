@@ -42,17 +42,17 @@ export async function POST(req: Request) {
       const read_time = Math.max(1, Math.ceil(content.split(/\s+/).length / 200));
       const published = !!article.published;
 
-      const { error } = await supabaseAdmin.from("articles").insert({
+      const { error } = await supabaseAdmin.from("bloglux_articles").insert({
         title,
         slug,
         excerpt: article.excerpt?.trim()?.slice(0, 280) || null,
-        content,
-        category: article.category || "bloglux",
+        body: content,
+        category: article.category || "industry-news",
         author_name: article.author_name?.trim() || "JOBLUX Editorial",
-        cover_image: article.cover_image?.trim() || null,
-        published,
+        cover_image_url: article.cover_image?.trim() || null,
+        status: published ? 'published' : 'draft',
         published_at: published ? new Date().toISOString() : null,
-        read_time,
+        read_time_minutes: read_time,
         tags: Array.isArray(article.tags) ? article.tags : (article.tags || "").split(",").map((t: string) => t.trim()).filter(Boolean),
       });
 

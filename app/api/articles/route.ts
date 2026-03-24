@@ -64,28 +64,23 @@ export async function POST(req: Request) {
   const autoMeta = meta_description?.trim() || content.trim().slice(0, 155);
 
   const { data, error } = await supabaseAdmin
-    .from("articles")
+    .from("bloglux_articles")
     .insert({
       title: title.trim(),
       slug,
       excerpt: excerpt?.trim() || null,
-      content: content.trim(),
+      body: content.trim(),
       category: category || "industry-news",
       author_name: author_name?.trim() || "Mohammed M'zaour",
-      cover_image: cover_image?.trim() || hero_image_url?.trim() || null,
-      published: !!published,
+      cover_image_url: cover_image?.trim() || hero_image_url?.trim() || null,
+      status: published ? 'published' : 'draft',
       published_at: published ? new Date().toISOString() : null,
-      read_time,
+      read_time_minutes: read_time,
       tags: tags || [],
-      hero_image_url: hero_image_url?.trim() || null,
-      hero_image_alt: hero_image_alt?.trim() || null,
-      hero_image_caption: hero_image_caption?.trim() || null,
-      hero_image_source: hero_image_source || null,
       author_title: author_title?.trim() || 'Founder, JOBLUX',
       author_avatar_url: author_avatar_url?.trim() || null,
       is_featured: !!is_featured,
       meta_description: autoMeta,
-      og_image_url: og_image_url?.trim() || null,
     })
     .select()
     .single();

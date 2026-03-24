@@ -27,28 +27,23 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
   if (title !== undefined) updateData.title = title.trim();
   if (excerpt !== undefined) updateData.excerpt = excerpt?.trim() || null;
-  if (content !== undefined) updateData.content = content.trim();
+  if (content !== undefined) updateData.body = content.trim();
   if (category !== undefined) updateData.category = category;
   if (author_name !== undefined) updateData.author_name = author_name?.trim() || "JOBLUX Editorial";
-  if (cover_image !== undefined) updateData.cover_image = cover_image?.trim() || null;
+  if (cover_image !== undefined) updateData.cover_image_url = cover_image?.trim() || null;
   if (published !== undefined) {
-    updateData.published = !!published;
+    updateData.status = published ? 'published' : 'draft';
     if (published) updateData.published_at = new Date().toISOString();
   }
   if (tags !== undefined) updateData.tags = tags;
-  if (read_time !== undefined) updateData.read_time = read_time;
-  if (hero_image_url !== undefined) updateData.hero_image_url = hero_image_url?.trim() || null;
-  if (hero_image_alt !== undefined) updateData.hero_image_alt = hero_image_alt?.trim() || null;
-  if (hero_image_caption !== undefined) updateData.hero_image_caption = hero_image_caption?.trim() || null;
-  if (hero_image_source !== undefined) updateData.hero_image_source = hero_image_source || null;
+  if (read_time !== undefined) updateData.read_time_minutes = read_time;
   if (author_title !== undefined) updateData.author_title = author_title?.trim() || null;
   if (author_avatar_url !== undefined) updateData.author_avatar_url = author_avatar_url?.trim() || null;
   if (is_featured !== undefined) updateData.is_featured = !!is_featured;
   if (meta_description !== undefined) updateData.meta_description = meta_description?.trim() || null;
-  if (og_image_url !== undefined) updateData.og_image_url = og_image_url?.trim() || null;
 
   const { data, error } = await supabaseAdmin
-    .from("articles")
+    .from("bloglux_articles")
     .update(updateData)
     .eq("id", params.id)
     .select()
@@ -65,7 +60,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
   }
 
   const { error } = await supabaseAdmin
-    .from("articles")
+    .from("bloglux_articles")
     .delete()
     .eq("id", params.id);
 
