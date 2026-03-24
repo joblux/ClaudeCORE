@@ -228,16 +228,32 @@ export default function NewArticlePage() {
     setPasteTitle('')
   }
 
+  const [saveError, setSaveError] = useState('')
   const handleSave = async (publish: boolean) => {
-    if (!form.title.trim() || !form.content.trim()) return
+    // Strip HTML tags to check if there's actual text content
+    const plainContent = form.content.replace(/<[^>]*>/g, '').trim()
+    if (!form.title.trim() || !plainContent) {
+      setSaveError('Title and content are required.')
+      return
+    }
     setSaving(true)
-    const tags = form.tags.split(',').map((t) => t.trim()).filter(Boolean)
-    const res = await fetch('/api/articles', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...form, published: publish, tags }),
-    })
-    if (res.ok) router.push('/admin/articles')
+    setSaveError('')
+    try {
+      const tags = form.tags.split(',').map((t) => t.trim()).filter(Boolean)
+      const res = await fetch('/api/articles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, published: publish, tags }),
+      })
+      if (res.ok) {
+        router.push('/admin/articles')
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setSaveError(data.error || `Save failed (${res.status})`)
+      }
+    } catch (err: any) {
+      setSaveError(err.message || 'Network error')
+    }
     setSaving(false)
   }
 
@@ -693,16 +709,22 @@ export default function NewArticlePage() {
           />
         </div>
 
+        {saveError && (
+          <p style={{ fontSize: 13, color: '#cc4444', marginBottom: 12, padding: '10px 14px', background: '#fef2f2', borderRadius: 6 }}>
+            {saveError}
+          </p>
+        )}
+
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #e8e2d8', paddingTop: 24 }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#888', cursor: 'pointer' }}>
             <input type="checkbox" checked={form.published} onChange={(e) => handleChange('published', e.target.checked)} />
             Publish immediately
           </label>
           <div style={{ display: 'flex', gap: 12 }}>
-            <button onClick={() => handleSave(false)} disabled={saving || !form.title.trim() || !form.content.trim()} style={{ ...BTN_OUTLINE, opacity: saving ? 0.5 : 1 }}>
+            <button onClick={() => handleSave(false)} disabled={saving} style={{ ...BTN_OUTLINE, opacity: saving ? 0.5 : 1 }}>
               Save Draft
             </button>
-            <button onClick={() => handleSave(true)} disabled={saving || !form.title.trim() || !form.content.trim()} style={{ ...BTN_GOLD, opacity: saving ? 0.5 : 1 }}>
+            <button onClick={() => handleSave(true)} disabled={saving} style={{ ...BTN_GOLD, opacity: saving ? 0.5 : 1 }}>
               {saving ? 'Saving...' : 'Publish'}
             </button>
           </div>

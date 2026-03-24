@@ -4,7 +4,7 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useRef } from 'react'
 
 interface RichTextEditorProps {
   content: string
@@ -33,6 +33,10 @@ const BTN_ACTIVE: React.CSSProperties = {
 }
 
 export default function RichTextEditor({ content, onChange, placeholder }: RichTextEditorProps) {
+  // Track whether we're programmatically setting content to avoid feedback loops
+  const settingContent = useRef(false)
+  const lastExternalContent = useRef(content)
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -58,14 +62,20 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
       },
     },
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML())
+      // Don't fire onChange when we're programmatically setting content
+      if (!settingContent.current) {
+        onChange(editor.getHTML())
+      }
     },
   })
 
   // Update content when it changes externally (e.g. from importer)
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
+    if (editor && content !== lastExternalContent.current) {
+      lastExternalContent.current = content
+      settingContent.current = true
       editor.commands.setContent(content)
+      settingContent.current = false
     }
   }, [content, editor])
 
@@ -79,9 +89,25 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
 
   const addLink = useCallback(() => {
     if (!editor) return
-    const url = window.prompt('Link URL:')
-    if (url) {
-      editor.chain().focus().setLink({ href: url }).run()
+
+    // If already a link, remove it
+    if (editor.isActive('link')) {
+      editor.chain().focus().unsetLink().run()
+      return
+    }
+
+    // Get the current selection text for the prompt
+    const { from, to } = editor.state.selection
+    const selectedText = editor.state.doc.textBetween(from, to)
+
+    if (!selectedText) {
+      window.alert('Select some text first, then click Link to add a URL.')
+      return
+    }
+
+    const url = window.prompt('Enter URL:', 'https://')
+    if (url && url !== 'https://') {
+      editor.chain().focus().setLink({ href: url, target: '_blank' }).run()
     }
   }, [editor])
 
@@ -150,8 +176,8 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
           &ldquo; Quote
         </button>
         <span style={{ width: 1, background: '#e8e2d8', margin: '0 4px' }} />
-        <button onClick={addLink} style={BTN} type="button">
-          Link
+        <button onClick={addLink} style={editor.isActive('link') ? BTN_ACTIVE : BTN} type="button">
+          {editor.isActive('link') ? 'Unlink' : 'Link'}
         </button>
         <button onClick={addImage} style={BTN} type="button">
           Image
