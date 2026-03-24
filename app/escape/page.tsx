@@ -58,9 +58,10 @@ export default async function EscapePage() {
       {/* ── HERO ── */}
       {edition && (
         <div
-          className="relative w-full h-[220px] md:h-[260px]"
+          className="relative w-full"
           style={{
-            maxHeight: '40vh',
+            aspectRatio: '16 / 5',
+            maxHeight: 260,
             backgroundImage: edition.hero_image ? `url(${edition.hero_image})` : 'linear-gradient(135deg, #2B4A3E 0%, #4a7a6a 100%)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
