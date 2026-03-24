@@ -1,8 +1,12 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useRequireAdmin } from '@/lib/auth-hooks'
+import sanitizeHtml from 'sanitize-html'
+import dynamic from 'next/dynamic'
+
+const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor'), { ssr: false })
 
 const CATEGORIES = [
   { value: 'industry-news', label: 'Industry News' },
@@ -52,8 +56,14 @@ export default function NewArticlePage() {
   const [urlLoading, setUrlLoading] = useState(false)
   const [urlError, setUrlError] = useState('')
   const [pasteTitle, setPasteTitle] = useState('')
-  const [pasteCategory, setPasteCategory] = useState('bloglux')
+  const [pasteCategory, setPasteCategory] = useState('industry-news')
   const [pasteContent, setPasteContent] = useState('')
+  const [pasteHtml, setPasteHtml] = useState('')
+  const [pasteImages, setPasteImages] = useState<Array<{ url: string; index: number; alt: string }>>([])
+  const [pasteMode, setPasteMode] = useState<'empty' | 'preview'>('empty')
+  const [imageUploading, setImageUploading] = useState(false)
+  const [imageProgress, setImageProgress] = useState('')
+  const [imageErrors, setImageErrors] = useState<string[]>([])
   const [wpPosts, setWpPosts] = useState<WpPost[]>([])
   const [wpImporting, setWpImporting] = useState(false)
   const [csvRows, setCsvRows] = useState<CsvRow[]>([])
@@ -71,6 +81,144 @@ export default function NewArticlePage() {
   const fillEditor = (data: Partial<typeof form>) => {
     setForm((prev) => ({ ...prev, ...data }))
     setActiveTab('write')
+  }
+
+  // ── Smart Paste Handler ──
+  const handleSmartPaste = useCallback((e: React.ClipboardEvent) => {
+    const html = e.clipboardData.getData('text/html')
+    const plain = e.clipboardData.getData('text/plain')
+
+    if (html && html.includes('<')) {
+      e.preventDefault()
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(html, 'text/html')
+
+      // Extract title
+      const title = doc.querySelector('h1')?.textContent?.trim()
+        || doc.querySelector('h2')?.textContent?.trim()
+        || ''
+
+      // Extract images (skip icons, logos, tiny images, data URIs)
+      const imgs = Array.from(doc.querySelectorAll('img'))
+        .map((img, i) => {
+          const src = img.src || img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || ''
+          // Try srcset for largest
+          const srcset = img.getAttribute('srcset')
+          let bestSrc = src
+          if (srcset) {
+            const parts = srcset.split(',').map(s => s.trim()).filter(Boolean)
+            const last = parts[parts.length - 1]?.split(' ')[0]
+            if (last) bestSrc = last
+          }
+          return { url: bestSrc, alt: img.alt || '', index: i }
+        })
+        .filter(img => {
+          if (!img.url || img.url.startsWith('data:')) return false
+          const lc = img.url.toLowerCase()
+          if (lc.includes('logo') || lc.includes('icon') || lc.includes('avatar') || lc.includes('sprite') || lc.includes('pixel') || lc.includes('tracking')) return false
+          return true
+        })
+
+      // Sanitize HTML
+      const clean = sanitizeHtml(doc.body.innerHTML, {
+        allowedTags: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'b', 'i', 'a', 'ul', 'ol', 'li', 'blockquote', 'img', 'br', 'figure', 'figcaption'],
+        allowedAttributes: {
+          a: ['href'],
+          img: ['src', 'alt', 'data-src'],
+        },
+        allowedSchemes: ['http', 'https'],
+      })
+
+      setPasteTitle(title)
+      setPasteHtml(clean)
+      setPasteImages(imgs)
+      setPasteContent(doc.body.textContent?.trim() || '')
+      setPasteMode('preview')
+    } else {
+      // Plain text — let normal paste happen, just update state
+      setPasteContent(plain)
+      setPasteMode('preview')
+    }
+  }, [])
+
+  const handleImportWithImages = async () => {
+    setImageUploading(true)
+    setImageErrors([])
+
+    let processedHtml = pasteHtml
+    const slug = pasteTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'import'
+    let coverImage = ''
+
+    if (pasteImages.length > 0) {
+      setImageProgress(`Uploading images... 0/${pasteImages.length}`)
+
+      try {
+        const res = await fetch('/api/admin/upload-images', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ images: pasteImages, slug }),
+        })
+        const data = await res.json()
+
+        if (data.results) {
+          let uploaded = 0
+          const errors: string[] = []
+
+          for (const result of data.results) {
+            if (result.success && result.originalUrl && result.newUrl) {
+              // Replace all occurrences of the original URL
+              processedHtml = processedHtml.split(result.originalUrl).join(result.newUrl)
+              uploaded++
+              if (!coverImage) coverImage = result.newUrl
+            } else if (!result.success) {
+              errors.push(result.error || 'Unknown error')
+            }
+          }
+
+          setImageProgress(`${uploaded}/${pasteImages.length} images uploaded`)
+          if (errors.length > 0) {
+            setImageErrors([`${errors.length} image(s) could not be imported`])
+          }
+        }
+      } catch (err: any) {
+        setImageErrors([err.message || 'Upload failed'])
+      }
+    }
+
+    // Extract plain text excerpt from content
+    const tempDiv = document.createElement('div')
+    tempDiv.innerHTML = processedHtml
+    const plainExcerpt = tempDiv.textContent?.trim().slice(0, 280) || ''
+
+    fillEditor({
+      title: pasteTitle,
+      content: processedHtml,
+      category: pasteCategory,
+      excerpt: plainExcerpt,
+      cover_image: coverImage,
+      hero_image_url: coverImage,
+    })
+
+    setImageUploading(false)
+    setPasteMode('empty')
+    setPasteHtml('')
+    setPasteImages([])
+    setPasteContent('')
+    setPasteTitle('')
+  }
+
+  const handleImportTextOnly = () => {
+    fillEditor({
+      title: pasteTitle,
+      content: pasteContent,
+      category: pasteCategory,
+      excerpt: pasteContent.slice(0, 280),
+    })
+    setPasteMode('empty')
+    setPasteHtml('')
+    setPasteImages([])
+    setPasteContent('')
+    setPasteTitle('')
   }
 
   const handleSave = async (publish: boolean) => {
@@ -393,17 +541,82 @@ export default function NewArticlePage() {
         {/* ── PASTE TEXT PANEL ────────────────── */}
         {activeTab === 'paste' && (
           <div style={PANEL}>
-            <label style={LABEL}>Title</label>
-            <input type="text" value={pasteTitle} onChange={(e) => setPasteTitle(e.target.value)} placeholder="Article title" style={{ ...INPUT, marginBottom: 16 }} />
-            <label style={LABEL}>Category</label>
-            <select value={pasteCategory} onChange={(e) => setPasteCategory(e.target.value)} style={{ ...INPUT, marginBottom: 16, background: '#fff' }}>
-              {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-            </select>
-            <label style={LABEL}>Content</label>
-            <textarea value={pasteContent} onChange={(e) => setPasteContent(e.target.value)} rows={12} placeholder="Paste your article content here..." style={{ ...INPUT, resize: 'vertical', lineHeight: 1.7, marginBottom: 16 }} />
-            <button onClick={() => fillEditor({ title: pasteTitle, content: pasteContent, category: pasteCategory, excerpt: pasteContent.slice(0, 280) })} disabled={!pasteTitle.trim() || !pasteContent.trim()} style={{ ...BTN_GOLD, opacity: !pasteTitle.trim() || !pasteContent.trim() ? 0.4 : 1 }}>
-              Use This Content
-            </button>
+            {pasteMode === 'empty' ? (
+              <>
+                <label style={LABEL}>Paste Article Content</label>
+                <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>
+                  Copy content from any website (Cmd+A then Cmd+C), then paste here. Images will be detected automatically.
+                </p>
+                <div
+                  contentEditable
+                  onPaste={handleSmartPaste}
+                  style={{
+                    ...INPUT,
+                    minHeight: 200,
+                    resize: 'vertical',
+                    lineHeight: 1.7,
+                    overflow: 'auto',
+                    background: '#fff',
+                    cursor: 'text',
+                  }}
+                  suppressContentEditableWarning
+                />
+              </>
+            ) : (
+              <>
+                {/* Preview after paste */}
+                <label style={LABEL}>Title</label>
+                <input type="text" value={pasteTitle} onChange={(e) => setPasteTitle(e.target.value)} placeholder="Article title" style={{ ...INPUT, marginBottom: 16 }} />
+                <label style={LABEL}>Category</label>
+                <select value={pasteCategory} onChange={(e) => setPasteCategory(e.target.value)} style={{ ...INPUT, marginBottom: 16, background: '#fff' }}>
+                  {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+                </select>
+
+                {pasteImages.length > 0 && (
+                  <div style={{ padding: '10px 14px', background: '#f5f0e0', borderRadius: 6, marginBottom: 16, fontSize: 13, color: '#8a7622' }}>
+                    Found {pasteImages.length} image{pasteImages.length > 1 ? 's' : ''} from external source
+                  </div>
+                )}
+
+                <label style={LABEL}>Content Preview</label>
+                <div
+                  style={{ ...INPUT, maxHeight: 300, overflow: 'auto', lineHeight: 1.7, marginBottom: 16, background: '#fff' }}
+                  dangerouslySetInnerHTML={{ __html: pasteHtml || pasteContent.replace(/\n/g, '<br>') }}
+                />
+
+                {imageProgress && (
+                  <p style={{ fontSize: 12, color: '#a58e28', marginBottom: 12 }}>{imageProgress}</p>
+                )}
+                {imageErrors.map((err, i) => (
+                  <p key={i} style={{ fontSize: 12, color: '#cc4444', marginBottom: 8 }}>{err}</p>
+                ))}
+
+                <div style={{ display: 'flex', gap: 12 }}>
+                  {pasteHtml && pasteImages.length > 0 && (
+                    <button
+                      onClick={handleImportWithImages}
+                      disabled={imageUploading || !pasteTitle.trim()}
+                      style={{ ...BTN_GOLD, background: '#a58e28', color: '#fff', opacity: imageUploading || !pasteTitle.trim() ? 0.5 : 1 }}
+                    >
+                      {imageUploading ? 'Uploading...' : 'Import with Images'}
+                    </button>
+                  )}
+                  <button
+                    onClick={handleImportTextOnly}
+                    disabled={!pasteTitle.trim() || !(pasteContent.trim() || pasteHtml.trim())}
+                    style={{ ...BTN_OUTLINE, opacity: !pasteTitle.trim() ? 0.4 : 1 }}
+                  >
+                    {pasteHtml ? 'Import Text Only' : 'Use This Content'}
+                  </button>
+                  <button
+                    onClick={() => { setPasteMode('empty'); setPasteHtml(''); setPasteImages([]); setPasteContent(''); setPasteTitle('') }}
+                    style={{ ...BTN_OUTLINE, color: '#999', borderColor: '#ddd' }}
+                  >
+                    Clear
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -463,10 +676,10 @@ export default function NewArticlePage() {
 
         <div style={{ marginBottom: 24 }}>
           <label style={LABEL}>Content</label>
-          <textarea
-            value={form.content} onChange={(e) => handleChange('content', e.target.value)} rows={20}
-            placeholder="Write your article here. Use blank lines between paragraphs."
-            style={{ ...INPUT, padding: 16, fontSize: 15, lineHeight: 1.8, resize: 'vertical', color: '#333', fontFamily: "'Playfair Display', Georgia, serif", minHeight: 400 }}
+          <RichTextEditor
+            content={form.content}
+            onChange={(html) => handleChange('content', html)}
+            placeholder="Write your article here..."
           />
         </div>
 
