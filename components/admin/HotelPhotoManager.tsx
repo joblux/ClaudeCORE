@@ -23,8 +23,9 @@ export default function HotelPhotoManager({ hotelId, hotelSlug, hotelName }: Pro
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState('')
   const [error, setError] = useState('')
+  const [warnings, setWarnings] = useState<string[]>([])
   const fileRef = useRef<HTMLInputElement>(null)
-  const dropRef = useRef<HTMLDivElement>(null)
+  const zipRef = useRef<HTMLInputElement>(null)
   const [dragOver, setDragOver] = useState(false)
 
   const fetchPhotos = useCallback(async () => {
@@ -35,9 +36,11 @@ export default function HotelPhotoManager({ hotelId, hotelSlug, hotelName }: Pro
 
   useEffect(() => { fetchPhotos() }, [fetchPhotos])
 
+  // Individual file upload
   const uploadFiles = async (files: FileList | File[]) => {
     setUploading(true)
     setError('')
+    setWarnings([])
     setUploadProgress(`Uploading ${files.length} photo${files.length > 1 ? 's' : ''}...`)
 
     const formData = new FormData()
@@ -53,12 +56,42 @@ export default function HotelPhotoManager({ hotelId, hotelSlug, hotelName }: Pro
       const data = await res.json()
       const failed = data.results?.filter((r: any) => !r.success) || []
       if (failed.length > 0) {
-        setError(`${failed.length} file(s) failed: ${failed.map((f: any) => f.error).join(', ')}`)
+        setError(`${failed.length} file(s) failed`)
       }
-      setUploadProgress('')
       fetchPhotos()
     } catch (err: any) {
       setError(err.message || 'Upload failed')
+    }
+    setUploadProgress('')
+    setUploading(false)
+  }
+
+  // Zip upload
+  const uploadZip = async (file: File) => {
+    setUploading(true)
+    setError('')
+    setWarnings([])
+    setUploadProgress('Extracting and uploading zip...')
+
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('hotel_id', hotelId)
+    formData.append('hotel_slug', hotelSlug)
+    formData.append('hotel_name', hotelName)
+
+    try {
+      const res = await fetch('/api/admin/hotel-photos/bulk-zip', { method: 'POST', body: formData })
+      const data = await res.json()
+
+      if (data.error) {
+        setError(data.error)
+      } else {
+        setUploadProgress(`Done: ${data.uploaded} uploaded${data.failed > 0 ? `, ${data.failed} failed` : ''}`)
+        if (data.warnings?.length > 0) setWarnings(data.warnings)
+        fetchPhotos()
+      }
+    } catch (err: any) {
+      setError(err.message || 'Zip upload failed')
     }
     setUploading(false)
   }
@@ -68,10 +101,20 @@ export default function HotelPhotoManager({ hotelId, hotelSlug, hotelName }: Pro
     if (files?.length) uploadFiles(files)
   }
 
+  const handleZipSelect = () => {
+    const file = zipRef.current?.files?.[0]
+    if (file) uploadZip(file)
+  }
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(false)
-    if (e.dataTransfer.files.length) uploadFiles(e.dataTransfer.files)
+    const files = e.dataTransfer.files
+    if (files.length === 1 && files[0].name.endsWith('.zip')) {
+      uploadZip(files[0])
+    } else if (files.length > 0) {
+      uploadFiles(files)
+    }
   }
 
   const setCover = async (id: string) => {
@@ -92,7 +135,6 @@ export default function HotelPhotoManager({ hotelId, hotelSlug, hotelName }: Pro
   }
 
   const deletePhoto = async (id: string) => {
-    if (!confirm('Delete this photo?')) return
     await fetch('/api/admin/hotel-photos', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -122,35 +164,44 @@ export default function HotelPhotoManager({ hotelId, hotelSlug, hotelName }: Pro
 
       {/* Upload zone */}
       <div
-        ref={dropRef}
         onDragOver={e => { e.preventDefault(); setDragOver(true) }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
-        className="border-2 border-dashed rounded-lg p-6 text-center mb-4 transition-colors cursor-pointer"
+        className="border-2 border-dashed rounded-lg p-5 text-center mb-3 transition-colors"
         style={{ borderColor: dragOver ? '#2B4A3E' : '#e0d9ca', backgroundColor: dragOver ? '#f0ede4' : '#fafaf5' }}
-        onClick={() => fileRef.current?.click()}
       >
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          multiple
-          onChange={handleFileSelect}
-          className="hidden"
-        />
-        <p className="text-sm text-gray-500">
-          {uploading ? uploadProgress : 'Drop photos here or click to browse'}
+        <p className="text-sm text-gray-500 mb-2">
+          {uploading ? uploadProgress : 'Drop photos or a zip file here'}
         </p>
-        <p className="text-xs text-gray-400 mt-1">JPG, PNG, WebP · Max 10MB each · Up to 20 at once</p>
+        <div className="flex gap-2 justify-center">
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="text-xs bg-[#2B4A3E] text-white px-3 py-1.5 rounded hover:bg-[#1e3a2e] disabled:opacity-50"
+          >
+            Browse Photos
+          </button>
+          <button
+            onClick={() => zipRef.current?.click()}
+            disabled={uploading}
+            className="text-xs border border-[#2B4A3E] text-[#2B4A3E] px-3 py-1.5 rounded hover:bg-[#2B4A3E]/5 disabled:opacity-50"
+          >
+            Upload Zip
+          </button>
+        </div>
+        <p className="text-[10px] text-gray-400 mt-2">JPG, PNG, WebP, TIF · Max 10MB/image · Zip max 200MB</p>
+        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handleFileSelect} className="hidden" />
+        <input ref={zipRef} type="file" accept=".zip" onChange={handleZipSelect} className="hidden" />
       </div>
 
-      {error && <p className="text-xs text-red-500 mb-3">{error}</p>}
+      {error && <p className="text-xs text-red-500 mb-2">{error}</p>}
+      {warnings.map((w, i) => <p key={i} className="text-xs text-amber-600 mb-1">{w}</p>)}
 
       {/* Photo grid */}
       {photos.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
           {photos.map((photo, i) => (
-            <div key={photo.id} className="relative group" style={{ border: photo.is_cover ? '2px solid #B8975C' : '1px solid #e8e2d8', borderRadius: 8, overflow: 'hidden' }}>
+            <div key={photo.id} className="relative group" style={{ border: photo.is_cover ? '2px solid #B8975C' : '1px solid #e8e2d8', borderRadius: 6, overflow: 'hidden' }}>
               <img
                 src={photo.url}
                 alt={photo.alt || photo.caption || ''}
@@ -159,57 +210,51 @@ export default function HotelPhotoManager({ hotelId, hotelSlug, hotelName }: Pro
 
               {/* Cover badge */}
               {photo.is_cover && (
-                <span className="absolute top-2 left-2 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded" style={{ backgroundColor: '#B8975C', color: '#fff' }}>
+                <span className="absolute top-1.5 left-1.5 text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ backgroundColor: '#B8975C', color: '#fff' }}>
                   Cover
                 </span>
               )}
 
-              {/* Actions overlay */}
-              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                {!photo.is_cover && (
-                  <button
-                    onClick={() => setCover(photo.id)}
-                    className="w-7 h-7 rounded bg-white/90 flex items-center justify-center text-xs hover:bg-yellow-50"
-                    title="Set as cover"
-                  >
-                    ★
-                  </button>
-                )}
+              {/* Star — set as cover (top-left, always visible) */}
+              {!photo.is_cover && (
+                <button
+                  onClick={() => setCover(photo.id)}
+                  className="absolute top-1.5 left-1.5 w-6 h-6 rounded bg-black/40 flex items-center justify-center text-white/70 hover:text-yellow-400 hover:bg-black/60 transition-colors"
+                  title="Set as cover"
+                  style={{ fontSize: 12 }}
+                >
+                  ★
+                </button>
+              )}
+
+              {/* Delete — top-right, always visible */}
+              <button
+                onClick={() => deletePhoto(photo.id)}
+                className="absolute top-1.5 right-1.5 w-6 h-6 rounded bg-black/40 flex items-center justify-center text-white/70 hover:text-red-400 hover:bg-black/60 transition-colors"
+                title="Delete"
+                style={{ fontSize: 11 }}
+              >
+                ✕
+              </button>
+
+              {/* Reorder — bottom-right, on hover */}
+              <div className="absolute bottom-8 right-1.5 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                 {i > 0 && (
-                  <button
-                    onClick={() => movePhoto(i, -1)}
-                    className="w-7 h-7 rounded bg-white/90 flex items-center justify-center text-xs hover:bg-gray-100"
-                    title="Move left"
-                  >
-                    ←
-                  </button>
+                  <button onClick={() => movePhoto(i, -1)} className="w-5 h-5 rounded bg-black/40 text-white/70 hover:text-white text-[10px] flex items-center justify-center">←</button>
                 )}
                 {i < photos.length - 1 && (
-                  <button
-                    onClick={() => movePhoto(i, 1)}
-                    className="w-7 h-7 rounded bg-white/90 flex items-center justify-center text-xs hover:bg-gray-100"
-                    title="Move right"
-                  >
-                    →
-                  </button>
+                  <button onClick={() => movePhoto(i, 1)} className="w-5 h-5 rounded bg-black/40 text-white/70 hover:text-white text-[10px] flex items-center justify-center">→</button>
                 )}
-                <button
-                  onClick={() => deletePhoto(photo.id)}
-                  className="w-7 h-7 rounded bg-white/90 flex items-center justify-center text-xs text-red-500 hover:bg-red-50"
-                  title="Delete"
-                >
-                  ✕
-                </button>
               </div>
 
-              {/* Caption input */}
-              <div className="p-2">
+              {/* Caption */}
+              <div className="px-1.5 py-1">
                 <input
                   type="text"
                   defaultValue={photo.caption || ''}
                   onBlur={e => updateCaption(photo.id, e.target.value)}
                   placeholder="Caption..."
-                  className="w-full text-xs text-gray-600 border-none outline-none bg-transparent"
+                  className="w-full text-[10px] text-gray-500 border-none outline-none bg-transparent"
                 />
               </div>
             </div>
