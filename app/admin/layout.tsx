@@ -29,7 +29,7 @@ const NAV_SECTIONS = [
   {
     label: 'CONTENT',
     items: [
-      { label: 'Intelligence', href: '/admin/articles', icon: FileText },
+      { label: 'Insights', href: '/admin/articles', icon: FileText },
       { label: 'New Intelligence', href: '/admin/articles/new', icon: PenLine },
       { label: 'Editorial Review', href: '/admin/bloglux/comments', icon: MessageCircle, countKey: 'pending_comments' },
       { label: 'WikiLux', href: '/admin/wikilux', icon: BookOpen },

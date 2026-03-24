@@ -6,7 +6,7 @@ import UserMenu from '@/components/UserMenu'
 import { useMember } from '@/lib/auth-hooks'
 
 const navItems = [
-  { label: 'Intelligence', href: '/bloglux' },
+  { label: 'Insights', href: '/bloglux' },
   { label: 'Wiki', href: '/wikilux' },
   { label: 'Salaries', href: '/salaries' },
   { label: 'Interviews', href: '/interviews' },
