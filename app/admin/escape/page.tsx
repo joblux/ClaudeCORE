@@ -370,24 +370,24 @@ export default function AdminEscapePage() {
             {editArticle && (
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
-                  <Input label="Title" value={editArticle.title} onChange={v => setEditArticle({ ...editArticle, title: v, slug: editArticle.slug || slugify(v) })} />
-                  <Input label="Slug" value={editArticle.slug} onChange={v => setEditArticle({ ...editArticle, slug: v })} />
-                  <Select label="Edition" value={editArticle.edition_id} onChange={v => setEditArticle({ ...editArticle, edition_id: v })} options={editionOptions} />
-                  <Input label="Tag" value={editArticle.tag} onChange={v => setEditArticle({ ...editArticle, tag: v })} placeholder="e.g. wellness, adventure" />
-                  <Input label="Read Time (min)" value={editArticle.read_time} onChange={v => setEditArticle({ ...editArticle, read_time: Number(v) as any })} type="number" />
-                  <Input label="Featured Image URL" value={editArticle.featured_image} onChange={v => setEditArticle({ ...editArticle, featured_image: v })} />
+                  <Input label="Title" value={editArticle.title} onChange={v => setEditArticle(prev => prev ? { ...prev, title: v, slug: prev.slug || slugify(v) } : prev)} />
+                  <Input label="Slug" value={editArticle.slug} onChange={v => setEditArticle(prev => prev ? { ...prev, slug: v } : prev)} />
+                  <Select label="Edition" value={editArticle.edition_id} onChange={v => setEditArticle(prev => prev ? { ...prev, edition_id: v } : prev)} options={editionOptions} />
+                  <Input label="Tag" value={editArticle.tag} onChange={v => setEditArticle(prev => prev ? { ...prev, tag: v } : prev)} placeholder="e.g. wellness, adventure" />
+                  <Input label="Read Time (min)" value={editArticle.read_time} onChange={v => setEditArticle(prev => prev ? { ...prev, read_time: Number(v) as any } : prev)} type="number" />
+                  <Input label="Featured Image URL" value={editArticle.featured_image} onChange={v => setEditArticle(prev => prev ? { ...prev, featured_image: v } : prev)} />
                 </div>
-                <TextArea label="Excerpt" value={editArticle.excerpt} onChange={v => setEditArticle({ ...editArticle, excerpt: v })} rows={2} />
+                <TextArea label="Excerpt" value={editArticle.excerpt} onChange={v => setEditArticle(prev => prev ? { ...prev, excerpt: v } : prev)} rows={2} />
                 <div className="mb-3">
                   <label style={{ display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#666', marginBottom: 6 }}>Body</label>
                   <RichTextEditor
                     content={editArticle.body || ''}
-                    onChange={v => setEditArticle({ ...editArticle, body: v })}
+                    onChange={v => setEditArticle(prev => prev ? { ...prev, body: v } : prev)}
                     placeholder="Write or paste article content..."
                   />
                 </div>
                 <div className="flex items-center gap-4 mt-3">
-                  <Toggle label="Published" checked={!!editArticle.published} onChange={v => setEditArticle({ ...editArticle, published: v, published_at: v ? new Date().toISOString() : editArticle.published_at })} />
+                  <Toggle label="Published" checked={!!editArticle.published} onChange={v => setEditArticle(prev => prev ? { ...prev, published: v, published_at: v ? new Date().toISOString() : prev.published_at } : prev)} />
                   <button onClick={handleSaveArticle} className="text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">Save</button>
                   <button onClick={() => setEditArticle(null)} className="text-sm text-gray-500 hover:text-gray-700">Cancel</button>
                 </div>
