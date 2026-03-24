@@ -37,7 +37,6 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
   if (tags !== undefined) updateData.tags = tags;
   if (read_time !== undefined) updateData.read_time_minutes = read_time;
-  if (author_title !== undefined) updateData.author_title = author_title?.trim() || null;
   if (is_featured !== undefined) updateData.is_featured = !!is_featured;
   if (meta_description !== undefined) updateData.meta_description = meta_description?.trim() || null;
 
