@@ -21,7 +21,7 @@ export default function EscapeLayout({ children }: { children: React.ReactNode }
       {/* Escape Nav */}
       <nav className="sticky top-0 z-50 border-b" style={{ backgroundColor: '#FFFDF7', borderColor: '#E0D9CA' }}>
         <div className="jl-container">
-          <div className="flex items-center justify-between h-12">
+          <div className="flex items-center justify-between" style={{ height: 53 }}>
             {/* Left: JOBLUX link + Escape */}
             <div className="flex items-center gap-3 flex-shrink-0">
               <Link href="/" className="text-xs font-medium tracking-wide hover:opacity-70 transition-opacity" style={{ color: '#999' }}>
