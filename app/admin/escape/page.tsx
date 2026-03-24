@@ -2,8 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Globe, Plus, Pencil, Trash2, Star, FileText, MapPin, Building2, Ship, Users, Newspaper } from 'lucide-react'
+import { Globe, Plus, Pencil, Trash2, Star, FileText, MapPin, Building2, Ship, Users, Newspaper, ClipboardPaste } from 'lucide-react'
 import { supabase as typedSupabase } from '@/lib/supabase'
+import dynamic from 'next/dynamic'
+
+const SmartPasteImporter = dynamic(() => import('@/components/admin/SmartPasteImporter'), { ssr: false })
+const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor'), { ssr: false })
 
 // Cast to any since new escape tables aren't in the generated Database type yet
 const supabase = typedSupabase as any
@@ -36,6 +40,7 @@ export default function AdminEscapePage() {
   // Edit states
   const [editEdition, setEditEdition] = useState<Partial<Edition> | null>(null)
   const [editArticle, setEditArticle] = useState<Partial<Article> | null>(null)
+  const [showPasteImporter, setShowPasteImporter] = useState(false)
   const [editItinerary, setEditItinerary] = useState<Partial<Itinerary> | null>(null)
   const [editHotel, setEditHotel] = useState<any>(null)
   const [editCruise, setEditCruise] = useState<Partial<Cruise> | null>(null)
@@ -334,10 +339,32 @@ export default function AdminEscapePage() {
           <div>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-sm font-semibold text-gray-700">Articles</h2>
-              <button onClick={() => setEditArticle({ published: false, read_time: 5 })} className="flex items-center gap-1 text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">
-                <Plus size={14} />Add Article
-              </button>
+              <div className="flex gap-2">
+                <button onClick={() => { setShowPasteImporter(true); setEditArticle(null) }} className="flex items-center gap-1 text-sm border border-[#2B4A3E] text-[#2B4A3E] px-4 py-2 rounded hover:bg-[#2B4A3E]/5">
+                  <ClipboardPaste size={14} />Paste Article
+                </button>
+                <button onClick={() => { setEditArticle({ published: false, read_time: 5 }); setShowPasteImporter(false) }} className="flex items-center gap-1 text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">
+                  <Plus size={14} />Add Article
+                </button>
+              </div>
             </div>
+            {showPasteImporter && (
+              <SmartPasteImporter
+                onImport={(result) => {
+                  setEditArticle({
+                    title: result.title,
+                    body: result.content,
+                    excerpt: result.excerpt,
+                    featured_image: result.coverImage || '',
+                    slug: result.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+                    published: false,
+                    read_time: Math.max(1, Math.round((result.content.replace(/<[^>]*>/g, '').split(/\s+/).length) / 200)),
+                  })
+                  setShowPasteImporter(false)
+                }}
+                onCancel={() => setShowPasteImporter(false)}
+              />
+            )}
             {editArticle && (
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
@@ -349,7 +376,14 @@ export default function AdminEscapePage() {
                   <Input label="Featured Image URL" value={editArticle.featured_image} onChange={v => setEditArticle({ ...editArticle, featured_image: v })} />
                 </div>
                 <TextArea label="Excerpt" value={editArticle.excerpt} onChange={v => setEditArticle({ ...editArticle, excerpt: v })} rows={2} />
-                <TextArea label="Body" value={editArticle.body} onChange={v => setEditArticle({ ...editArticle, body: v })} rows={6} />
+                <div className="mb-3">
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#666', marginBottom: 6 }}>Body</label>
+                  <RichTextEditor
+                    content={editArticle.body || ''}
+                    onChange={v => setEditArticle({ ...editArticle, body: v })}
+                    placeholder="Write or paste article content..."
+                  />
+                </div>
                 <div className="flex items-center gap-4 mt-3">
                   <Toggle label="Published" checked={!!editArticle.published} onChange={v => setEditArticle({ ...editArticle, published: v, published_at: v ? new Date().toISOString() : editArticle.published_at })} />
                   <button onClick={handleSaveArticle} className="text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">Save</button>
