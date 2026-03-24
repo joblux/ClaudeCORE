@@ -124,20 +124,13 @@ export default function SmartPasteImporter({ onImport, onCancel }: SmartPasteImp
       }
     }
 
-    const finalHtml = withImages ? processedHtml : html
     const tempDiv = document.createElement('div')
-    tempDiv.innerHTML = finalHtml
+    tempDiv.innerHTML = withImages ? processedHtml : html
     const excerpt = tempDiv.textContent?.trim().slice(0, 280) || ''
-
-    // If no cover image yet, grab the first image from the content
-    if (!coverImage) {
-      const firstImg = tempDiv.querySelector('img')
-      if (firstImg) coverImage = firstImg.src || firstImg.getAttribute('data-src') || ''
-    }
 
     onImport({
       title,
-      content: finalHtml || plainText,
+      content: withImages ? processedHtml : (html || plainText),
       excerpt,
       coverImage,
     })
