@@ -21,26 +21,26 @@ export default function EscapeLayout({ children }: { children: React.ReactNode }
       {/* Escape Nav */}
       <nav className="sticky top-0 z-50 border-b" style={{ backgroundColor: '#FFFDF7', borderColor: '#E0D9CA' }}>
         <div className="jl-container">
-          <div className="flex items-center justify-between" style={{ height: 53 }}>
+          <div className="flex items-center justify-between" style={{ height: 58 }}>
             {/* Left: JOBLUX link + Escape */}
-            <div className="flex items-center gap-3 flex-shrink-0">
-              <Link href="/" className="text-xs font-medium tracking-wide hover:opacity-70 transition-opacity" style={{ color: '#999' }}>
+            <div className="flex items-center gap-3 flex-shrink-0" style={{ lineHeight: 1 }}>
+              <Link href="/" className="font-medium tracking-wide hover:opacity-70 transition-opacity" style={{ color: '#999', fontSize: 13 }}>
                 ← JOBLUX
               </Link>
-              <span className="text-[#E0D9CA]">|</span>
-              <Link href="/escape" className="text-sm font-semibold tracking-wide" style={{ color: '#1A1A1A' }}>
+              <span style={{ color: '#E0D9CA', fontSize: 13 }}>|</span>
+              <Link href="/escape" className="font-medium tracking-wide" style={{ color: '#B8975C', fontSize: 13 }}>
                 Escape
               </Link>
             </div>
 
             {/* Center: Nav links */}
-            <div className="hidden md:flex items-center gap-6">
+            <div className="hidden md:flex items-center gap-6" style={{ lineHeight: 1 }}>
               {NAV_LINKS.map(link => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-[13px] font-medium transition-colors hover:opacity-80"
-                  style={{ color: '#555' }}
+                  className="font-medium transition-colors hover:opacity-80"
+                  style={{ color: '#555', fontSize: 13 }}
                 >
                   {link.label}
                 </Link>
@@ -48,8 +48,8 @@ export default function EscapeLayout({ children }: { children: React.ReactNode }
             </div>
 
             {/* Right: Edition pill */}
-            <div className="flex-shrink-0">
-              <span className="text-[11px] font-medium px-3 py-1 rounded-full" style={{ backgroundColor: '#F7F3E8', color: '#B8975C', border: '1px solid #E0D9CA' }}>
+            <div className="flex-shrink-0" style={{ lineHeight: 1 }}>
+              <span className="font-medium px-3 py-1 rounded-full" style={{ fontSize: 11, backgroundColor: '#F7F3E8', color: '#B8975C', border: '1px solid #E0D9CA' }}>
                 April 2026
               </span>
             </div>
