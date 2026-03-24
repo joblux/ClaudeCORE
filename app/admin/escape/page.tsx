@@ -8,6 +8,7 @@ import dynamic from 'next/dynamic'
 
 const SmartPasteImporter = dynamic(() => import('@/components/admin/SmartPasteImporter'), { ssr: false })
 const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor'), { ssr: false })
+const HotelPhotoManager = dynamic(() => import('@/components/admin/HotelPhotoManager'), { ssr: false })
 
 // Cast to any since new escape tables aren't in the generated Database type yet
 const supabase = typedSupabase as any
@@ -547,6 +548,11 @@ export default function AdminEscapePage() {
                   <button onClick={handleSaveHotel} className="text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">Save</button>
                   <button onClick={() => setEditHotel(null)} className="text-sm text-gray-500 hover:text-gray-700">Cancel</button>
                 </div>
+                {editHotel.id ? (
+                  <HotelPhotoManager hotelId={editHotel.id} hotelSlug={editHotel.slug || ''} hotelName={editHotel.name || ''} />
+                ) : (
+                  <p className="mt-4 text-xs text-gray-400">Save the hotel first to add photos.</p>
+                )}
               </div>
             )}
             <table className="w-full text-sm">

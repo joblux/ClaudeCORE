@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import EscapeShareBar from '@/components/escape/EscapeShareBar'
+import HotelGallery from '@/components/escape/HotelGallery'
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
@@ -44,6 +45,17 @@ export default async function HotelDetailPage({ params }: { params: { slug: stri
     .neq('slug', hotel.slug)
     .limit(3)
 
+  // Fetch gallery photos
+  const { data: photos } = await supabase
+    .from('escape_hotel_photos')
+    .select('id, url, caption, credit, is_cover')
+    .eq('hotel_id', hotel.id)
+    .order('sort_order')
+
+  const galleryPhotos = photos || []
+  const coverPhoto = galleryPhotos.find((p: any) => p.is_cover)
+  const heroImage = coverPhoto?.url || hotel.hero_image || hotel.image
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Hotel',
@@ -53,7 +65,7 @@ export default async function HotelDetailPage({ params }: { params: { slug: stri
       addressLocality: hotel.city,
       addressCountry: hotel.country,
     },
-    image: hotel.hero_image || hotel.image,
+    image: heroImage,
     ...(hotel.perks && hotel.perks.length > 0
       ? {
           amenityFeature: hotel.perks.map((perk: string) => ({
@@ -82,16 +94,18 @@ export default async function HotelDetailPage({ params }: { params: { slug: stri
       </div>
 
       {/* Hero */}
-      <div
-        style={{
-          width: '100%',
-          height: '400px',
-          backgroundImage: `url(${hotel.hero_image || hotel.image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          marginTop: '1rem',
-        }}
-      />
+      <div className="jl-container mt-4">
+        <div style={{ borderRadius: 10, overflow: 'hidden' }}>
+          <img
+            src={heroImage}
+            alt={hotel.name}
+            style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', display: 'block' }}
+          />
+        </div>
+        {coverPhoto?.credit && (
+          <p style={{ fontSize: 11, color: '#999', marginTop: 6, textAlign: 'right' }}>{coverPhoto.credit}</p>
+        )}
+      </div>
 
       {/* Share bar */}
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '1rem 1.5rem' }}>
@@ -177,6 +191,13 @@ export default async function HotelDetailPage({ params }: { params: { slug: stri
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Gallery */}
+        {galleryPhotos.length > 1 && (
+          <div style={{ marginTop: '2.5rem' }}>
+            <HotelGallery photos={galleryPhotos} />
           </div>
         )}
 

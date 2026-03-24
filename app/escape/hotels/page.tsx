@@ -19,6 +19,17 @@ export default async function HotelsPage() {
     .order('preferred', { ascending: false })
     .order('name', { ascending: true })
 
+  // Fetch cover photos for all hotels
+  const { data: coverPhotos } = await supabase
+    .from('escape_hotel_photos')
+    .select('hotel_id, url')
+    .eq('is_cover', true)
+
+  const coverMap = new Map<string, string>()
+  for (const cp of coverPhotos || []) {
+    coverMap.set(cp.hotel_id, cp.url)
+  }
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -107,12 +118,14 @@ export default async function HotelsPage() {
                 textDecoration: 'none',
               }}
             >
-              <div
+              <img
+                src={coverMap.get(hotel.id) || hotel.image}
+                alt={hotel.name}
                 style={{
+                  width: '100%',
                   height: '180px',
-                  backgroundImage: `url(${hotel.image})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
+                  objectFit: 'cover',
+                  display: 'block',
                 }}
               />
               <div style={{ padding: '1rem' }}>
