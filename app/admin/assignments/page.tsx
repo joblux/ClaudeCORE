@@ -120,7 +120,8 @@ export default function AdminAssignmentsPage() {
         </div>
 
         {/* Table */}
-        <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+        <div className="border border-gray-200 rounded-xl overflow-x-auto bg-white" style={{ minWidth: 0 }}>
+          <div style={{ minWidth: 800 }}>
           <div className="hidden lg:grid bg-gray-50 px-5 py-3 text-[11px] uppercase tracking-wide text-gray-400 font-medium" style={{ gridTemplateColumns: '0.6fr 2fr 1fr 0.7fr 0.6fr 0.7fr 0.8fr' }}>
             <div>Ref</div>
             <div>Title</div>
@@ -170,6 +171,7 @@ export default function AdminAssignmentsPage() {
               )
             })
           )}
+        </div>
         </div>
       </div>
     </div>

@@ -341,7 +341,8 @@ export default function AdminPage() {
         )}
 
         {/* ── Members table ── */}
-        <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+        <div className="border border-gray-200 rounded-xl overflow-x-auto bg-white" style={{ minWidth: 0 }}>
+          <div style={{ minWidth: 800 }}>
           {/* Table header */}
           <div className="hidden lg:grid bg-gray-50 px-5 py-3 text-[11px] uppercase tracking-wide text-gray-400 font-medium" style={{ gridTemplateColumns: '36px 2fr 1.2fr 0.8fr 0.8fr 1fr 0.6fr' }}>
             <div className="flex items-center">
@@ -501,6 +502,7 @@ export default function AdminPage() {
               );
             })
           )}
+          </div>
         </div>
 
         {/* ── Pagination ── */}

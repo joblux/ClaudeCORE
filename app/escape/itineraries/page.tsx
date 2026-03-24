@@ -79,15 +79,7 @@ export default async function ItinerariesPage() {
           Three curated routes for the destinations that shine this month.
         </p>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(1, 1fr)',
-            gap: 24,
-            marginTop: 40,
-          }}
-          className="itineraries-grid"
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-10">
           {(itineraries ?? []).map((itinerary) => (
             <Link
               key={itinerary.id}
@@ -169,14 +161,6 @@ export default async function ItinerariesPage() {
         </div>
       </div>
 
-      {/* Responsive grid via inline style tag */}
-      <style>{`
-        @media (min-width: 768px) {
-          .itineraries-grid {
-            grid-template-columns: repeat(3, 1fr) !important;
-          }
-        }
-      `}</style>
     </div>
   )
 }

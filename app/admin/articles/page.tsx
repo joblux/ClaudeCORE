@@ -146,7 +146,8 @@ export default function AdminArticlesPage() {
         </div>
 
         {/* Articles table */}
-        <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+        <div className="border border-gray-200 rounded-xl overflow-x-auto bg-white" style={{ minWidth: 0 }}>
+          <div style={{ minWidth: 800 }}>
           {/* Header */}
           <div className="hidden lg:grid bg-gray-50 px-5 py-3 text-[11px] uppercase tracking-wide text-gray-400 font-medium" style={{ gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 0.6fr 0.4fr 0.4fr 0.5fr' }}>
             <div>Title</div>
@@ -247,6 +248,7 @@ export default function AdminArticlesPage() {
               </div>
             ))
           )}
+          </div>
         </div>
       </div>
     </div>

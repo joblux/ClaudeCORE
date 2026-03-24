@@ -171,19 +171,36 @@ a {
   .jl-container {
     max-width: 1100px;
     margin: 0 auto;
-    padding: 0 1.5rem;
+    padding: 0 1rem;
   }
 
   .jl-container-sm {
     max-width: 960px;
     margin: 0 auto;
-    padding: 0 1.5rem;
+    padding: 0 1rem;
   }
 
   .jl-container-xs {
     max-width: 680px;
     margin: 0 auto;
-    padding: 0 1.5rem;
+    padding: 0 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .jl-container, .jl-container-sm, .jl-container-xs {
+      padding: 0 1.25rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .jl-container, .jl-container-sm, .jl-container-xs {
+      padding: 0 2rem;
+    }
+  }
+
+  /* Prevent iOS auto-zoom on input focus */
+  input, textarea, select {
+    font-size: 16px;
   }
 
   /* ── DIVIDERS ─────────────────────────────────────── */
