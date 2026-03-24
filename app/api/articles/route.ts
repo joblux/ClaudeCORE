@@ -68,6 +68,7 @@ export async function POST(req: Request) {
     .insert({
       title: title.trim(),
       slug,
+      subtitle: null,
       excerpt: excerpt?.trim() || null,
       body: content.trim(),
       category: category || "industry-news",
@@ -77,8 +78,8 @@ export async function POST(req: Request) {
       published_at: published ? new Date().toISOString() : null,
       read_time_minutes: read_time,
       tags: tags || [],
-      is_featured: !!is_featured,
       meta_description: autoMeta,
+      featured_homepage: !!is_featured,
     })
     .select()
     .single();
