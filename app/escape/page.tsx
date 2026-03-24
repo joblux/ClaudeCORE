@@ -61,7 +61,7 @@ export default async function EscapePage() {
           <div
             className="relative w-full rounded-lg overflow-hidden"
             style={{
-              height: 380,
+              height: 405,
               backgroundImage: edition.hero_image ? `url(${edition.hero_image})` : 'linear-gradient(135deg, #2B4A3E 0%, #4a7a6a 100%)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
