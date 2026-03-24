@@ -75,7 +75,8 @@ export default function HotelPhotoManager({ hotelId, hotelSlug, hotelName }: Pro
 
     try {
       // Step 1: Upload zip directly to Supabase Storage (bypasses Vercel body limit)
-      const zipPath = `temp/${Date.now()}-${file.name}`
+      const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+      const zipPath = `temp/${Date.now()}-${cleanName}`
       const { createClient } = await import('@supabase/supabase-js')
       const sb = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
