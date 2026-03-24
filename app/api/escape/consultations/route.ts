@@ -3,61 +3,44 @@ import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { sendEmail } from '@/lib/ses'
-import { escapeConsultationEmail, adminNewEscapeEmail, ADMIN_ALERT_EMAIL } from '@/lib/email-templates'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+const ADVISOR_EMAIL = 'mo.mzaour@fora.travel'
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { name, email, phone, contact_preference, trip_types, destination_text, experience_prefs, occasion, preferred_dates, duration, date_flexibility, budget_range, plan_scope, past_trips_text, favorite_hotels, additional_notes, travelers, is_cruise, cruise_details } = body
+    const {
+      first_name, last_name, email, phone, preferred_language,
+      travel_styles, destinations, preferred_dates, special_needs,
+      budget_range, notes, source_context, source_page,
+    } = body
 
-    if (!name?.trim() || !email?.trim()) {
-      return NextResponse.json({ error: 'Name and email are required' }, { status: 400 })
+    if (!email?.trim()) {
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
-
-    // Check if user is logged in
-    let userId: string | null = null
-    let tier: string | undefined
-    try {
-      const session = await getServerSession(authOptions)
-      if (session?.user?.memberId) {
-        userId = session.user.memberId
-        const { data: member } = await supabase
-          .from('members')
-          .select('role')
-          .eq('id', userId)
-          .single()
-        tier = member?.role
-      }
-    } catch {}
 
     const { data: consultation, error } = await supabase
       .from('escape_consultations')
       .insert({
-        user_id: userId,
-        name: name.trim(),
+        first_name: first_name?.trim() || null,
+        last_name: last_name?.trim() || null,
         email: email.trim(),
         phone: phone?.trim() || null,
-        contact_preference: contact_preference || 'email',
-        trip_types: trip_types || [],
-        destination_text: destination_text?.trim() || null,
-        experience_prefs: experience_prefs || [],
-        occasion: occasion || null,
+        preferred_language: preferred_language?.trim() || null,
+        travel_styles: travel_styles || [],
+        destinations: destinations?.trim() || null,
         preferred_dates: preferred_dates?.trim() || null,
-        duration: duration?.trim() || null,
-        date_flexibility: date_flexibility || null,
-        budget_range: budget_range || null,
-        plan_scope: plan_scope || [],
-        past_trips_text: past_trips_text?.trim() || null,
-        favorite_hotels: favorite_hotels?.trim() || null,
-        additional_notes: additional_notes?.trim() || null,
-        travelers: travelers || [],
-        is_cruise: is_cruise || false,
-        cruise_details: cruise_details || null,
+        special_needs: special_needs?.trim() || null,
+        budget_range: budget_range?.trim() || null,
+        notes: notes?.trim() || null,
+        source_context: source_context?.trim() || null,
+        source_page: source_page || null,
+        status: 'new',
       })
       .select('id')
       .single()
@@ -66,34 +49,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    // Send confirmation email to visitor
-    const firstName = name.trim().split(' ')[0]
-    const { html: confirmHtml, text: confirmText } = escapeConsultationEmail({ firstName })
+    // Send email to advisor
+    const fullName = [first_name, last_name].filter(Boolean).join(' ') || 'A visitor'
+    const subject = `New Escape consultation: ${source_context || 'General inquiry'}`
+    const emailBody = [
+      `New travel consultation from JOBLUX Escape`,
+      ``,
+      `Name: ${fullName}`,
+      `Email: ${email.trim()}`,
+      phone ? `Phone: ${phone.trim()}` : null,
+      preferred_language ? `Preferred language: ${preferred_language.trim()}` : null,
+      travel_styles?.length > 0 ? `Travel styles: ${travel_styles.join(', ')}` : null,
+      destinations ? `Destinations: ${destinations.trim()}` : null,
+      preferred_dates ? `Preferred dates: ${preferred_dates.trim()}` : null,
+      budget_range ? `Budget: ${budget_range.trim()}` : null,
+      special_needs ? `Special needs: ${special_needs.trim()}` : null,
+      notes ? `Notes: ${notes.trim()}` : null,
+      ``,
+      source_context ? `Source: ${source_context}` : null,
+      source_page ? `Page: ${source_page}` : null,
+      `Submitted: ${new Date().toISOString()}`,
+    ].filter(Boolean).join('\n')
+
     sendEmail({
-      to: email.trim(),
-      subject: 'We received your travel request',
-      body: confirmText,
-      bodyHtml: confirmHtml,
+      to: ADVISOR_EMAIL,
+      subject,
+      body: emailBody,
+      bodyHtml: `<pre style="font-family: sans-serif; font-size: 14px; line-height: 1.6;">${emailBody}</pre>`,
     }).catch(() => {})
 
-    // Send admin alert
-    const { html: adminHtml, text: adminText } = adminNewEscapeEmail({
-      name: name.trim(),
-      email: email.trim(),
-      tripType: trip_types?.[0] || undefined,
-      destination: destination_text?.trim() || undefined,
-      budget: budget_range || undefined,
-      dates: preferred_dates?.trim() || undefined,
-      tier: tier || 'Visitor',
-    })
-    sendEmail({
-      to: ADMIN_ALERT_EMAIL,
-      subject: `New travel request: ${name.trim()} — ${destination_text?.trim() || 'TBD'}`,
-      body: adminText,
-      bodyHtml: adminHtml,
-    }).catch(() => {})
-
-    return NextResponse.json({ success: true, consultation_id: consultation.id }, { status: 201 })
+    return NextResponse.json({ success: true, id: consultation.id }, { status: 201 })
   } catch {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
@@ -114,7 +99,7 @@ export async function GET(req: NextRequest) {
 
   let query = supabase
     .from('escape_consultations')
-    .select('*, member:members!user_id(full_name, role, avatar_url)', { count: 'exact' })
+    .select('*', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
 
@@ -122,7 +107,7 @@ export async function GET(req: NextRequest) {
     query = query.eq('status', status)
   }
   if (search) {
-    query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,destination_text.ilike.%${search}%`)
+    query = query.or(`first_name.ilike.%${search}%,email.ilike.%${search}%,destinations.ilike.%${search}%`)
   }
 
   const { data, error, count } = await query
