@@ -93,7 +93,7 @@ export default async function CruisePage() {
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-        <div className="max-w-7xl mx-auto px-6 absolute bottom-0 left-0 right-0 pb-8">
+        <div className="jl-container absolute bottom-0 left-0 right-0 pb-8">
           <Link
             href="/escape"
             className="text-sm text-white/70 hover:text-white mb-3 inline-block transition-colors"
@@ -115,13 +115,13 @@ export default async function CruisePage() {
       </section>
 
       {/* Share Bar */}
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="jl-container">
         <EscapeShareBar title={cruise.name} />
       </div>
 
       {/* Trip Summary Bar */}
       <div className="border-y border-[#E0D9CA] py-4 my-8">
-        <div className="max-w-7xl mx-auto px-6 flex justify-center gap-10 flex-wrap">
+        <div className="jl-container flex justify-center gap-10 flex-wrap">
           {[
             { label: 'Duration', value: cruise.duration },
             { label: 'Route', value: cruise.route_summary },
@@ -178,7 +178,7 @@ export default async function CruisePage() {
       </div>
 
       {/* Port-by-Port Editorial */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="jl-container py-8">
         {portList.map((port: any, index: number) => {
           const isOdd = index % 2 !== 0
           return (

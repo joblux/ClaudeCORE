@@ -46,7 +46,7 @@ export default async function HotelsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '3rem 1.5rem' }}>
+      <div className="jl-container py-12">
         <Link
           href="/escape"
           style={{ color: '#B8975C', fontSize: '0.875rem', textDecoration: 'none' }}

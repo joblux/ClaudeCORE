@@ -72,7 +72,7 @@ export default async function HotelDetailPage({ params }: { params: { slug: stri
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '1.5rem 1.5rem 0' }}>
+      <div className="jl-container pt-6">
         <Link
           href="/escape/hotels"
           style={{ color: '#B8975C', fontSize: '0.875rem', textDecoration: 'none' }}

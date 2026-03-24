@@ -57,7 +57,7 @@ export default async function EscapePage() {
 
       {/* ── HERO ── */}
       {edition && (
-        <div className="max-w-7xl mx-auto px-6 pt-8">
+        <div className="jl-container pt-8">
           <div
             className="relative w-full rounded-lg overflow-hidden"
             style={{
@@ -104,7 +104,7 @@ export default async function EscapePage() {
       )}
 
       {/* ── ARTICLES GRID ── */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="jl-container py-12">
         {allArticles.length > 0 ? (
           <>
             {/* Row 1: Featured layout */}

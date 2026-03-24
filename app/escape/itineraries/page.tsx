@@ -43,7 +43,7 @@ export default async function ItinerariesPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 24px' }}>
+      <div className="jl-container py-12">
         <Link
           href="/escape"
           style={{ fontSize: 14, color: '#B8975C', textDecoration: 'none', display: 'inline-block', marginBottom: 24 }}

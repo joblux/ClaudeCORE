@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function EscapeDealsPage() {
   return (
-    <div style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 24px' }}>
+    <div className="jl-container py-12">
       {/* Back link */}
       <Link
         href="/escape"
