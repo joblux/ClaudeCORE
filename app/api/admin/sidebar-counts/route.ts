@@ -14,15 +14,13 @@ export async function GET() {
   if (!isAdmin) return NextResponse.json({}, { status: 401 })
 
   try {
-    const [unreadRes, contribRes, commentsRes, internshipsRes, contactRes, consultRes, hotelsRes, cruisesRes] = await Promise.all([
+    const [unreadRes, contribRes, commentsRes, internshipsRes, contactRes, consultRes] = await Promise.all([
       supabase.from('conversations').select('id', { count: 'exact', head: true }).gt('unread_count', 0),
       supabase.from('contributions').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('bloglux_comments').select('id', { count: 'exact', head: true }).eq('is_approved', false),
       supabase.from('internship_listings').select('id', { count: 'exact', head: true }).eq('status', 'pending_review'),
       supabase.from('contact_messages').select('id', { count: 'exact', head: true }).eq('status', 'new'),
       supabase.from('escape_consultations').select('id', { count: 'exact', head: true }).eq('status', 'new'),
-      supabase.from('escape_hotels').select('id', { count: 'exact', head: true }),
-      supabase.from('escape_cruises').select('id', { count: 'exact', head: true }),
     ])
 
     return NextResponse.json({
@@ -32,8 +30,6 @@ export async function GET() {
       pending_internships: internshipsRes.count ?? 0,
       new_contact: contactRes.count ?? 0,
       pending_consultations: consultRes.count ?? 0,
-      total_hotels: hotelsRes.count ?? 0,
-      total_cruises: cruisesRes.count ?? 0,
     })
   } catch {
     return NextResponse.json({})

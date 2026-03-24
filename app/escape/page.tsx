@@ -1,413 +1,266 @@
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import AdvisorCard from '@/components/escape/AdvisorCard'
 
 export const revalidate = 0
 
 export const metadata: Metadata = {
-  title: 'Private Travel Advisory | JOBLUX Escape',
-  description: 'Curated travel intelligence from seasoned advisors. Destination guides, curated hotels, day-by-day itineraries. In partnership with Fora Travel.',
+  title: 'April Knows Better — Travel Intelligence | JOBLUX Escape',
+  description: 'Where to travel in April 2026. Cherry blossoms in Japan, spring in Morocco, green season safaris in Kenya. Curated by your private travel advisor.',
+  openGraph: {
+    title: 'April Knows Better — JOBLUX Escape',
+    description: 'Where to travel in April 2026. Curated travel intelligence from your private advisor.',
+    type: 'website',
+  },
 }
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
 export default async function EscapePage() {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  // Fetch current edition
+  const { data: edition } = await supabase
+    .from('escape_editions')
+    .select('*')
+    .eq('is_current', true)
+    .single()
 
-  const [featuredRes, hotelsRes, cruisesRes, moreDestinationsRes, articlesRes, advisorRes] = await Promise.all([
-    supabase.from('escape_destinations').select('*').eq('status', 'published').eq('featured', true).order('updated_at', { ascending: false }).limit(3),
-    supabase.from('escape_hotels').select('*').eq('status', 'active').order('is_preferred', { ascending: false }).order('name').limit(10),
-    supabase.from('escape_cruises').select('*').eq('status', 'active').order('is_preferred', { ascending: false }).order('name').limit(6),
-    supabase.from('escape_destinations').select('*').eq('status', 'published').eq('featured', false).limit(6),
-    supabase.from('bloglux_articles').select('id, title, slug, excerpt, cover_image_url, published_at, tags').eq('status', 'published').contains('tags', ['travel']).order('published_at', { ascending: false }).limit(4),
-    supabase.from('escape_advisors').select('*').eq('status', 'active').limit(1).single(),
-  ])
+  // Fetch published articles for this edition
+  const { data: articles } = edition
+    ? await supabase
+        .from('escape_articles')
+        .select('*')
+        .eq('edition_id', edition.id)
+        .eq('published', true)
+        .order('published_at', { ascending: false })
+    : { data: [] }
 
-  const featured = featuredRes.data || []
-  const hotels = hotelsRes.data || []
-  const cruises = cruisesRes.data || []
-  const moreDestinations = moreDestinationsRes.data || []
-  const articles = articlesRes.data || []
-  const advisor = advisorRes.data
-
-  const itineraryDays = featured.length > 0
-    ? (await supabase.from('escape_itinerary_days').select('*').eq('destination_id', featured[0].id).order('day_number').limit(2)).data || []
-    : []
+  const allArticles = articles || []
 
   return (
-    <div style={{ backgroundColor: '#FDF8EE' }}>
-      {/* ── S1: HERO ── */}
-      <div
-        className="relative h-[50vh] min-h-[400px] flex items-center justify-center"
-        style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&q=80)', backgroundSize: 'cover', backgroundPosition: 'center' }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-[#2B4A3E]/30 to-[#2B4A3E]/85" />
-        <div className="relative text-center px-4 max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#B8975C] mb-4">
-            Private Travel Advisory · In partnership with Fora Travel
-          </p>
-          <h1
-            className="text-4xl md:text-5xl font-light text-white mb-4"
-            style={{ fontFamily: 'Georgia, serif' }}
-          >
-            Discover the world, one journey at a time.
-          </h1>
-          <p className="text-sm text-white/60">
-            Destination guides · Curated hotels · Day-by-day itineraries
-          </p>
-        </div>
-      </div>
+    <>
+      {/* JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Blog',
+            name: 'JOBLUX Escape',
+            description: 'Curated travel intelligence',
+            url: 'https://joblux.com/escape',
+          }),
+        }}
+      />
 
-      {/* ── S2: DESTINATION GUIDES ── */}
-      {featured.length > 0 && (
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#8B7A5E] mb-6">
-            Destination Guides
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {/* Large card — featured[0] */}
-            <Link href={`/escape/${featured[0].slug}`} className="md:col-span-3 block">
-              <div
-                className="relative h-[320px] md:h-[400px] rounded-lg overflow-hidden"
+      {/* ── HERO ── */}
+      {edition && (
+        <div
+          className="relative w-full"
+          style={{
+            height: 340,
+            backgroundImage: edition.hero_image ? `url(${edition.hero_image})` : 'linear-gradient(135deg, #2B4A3E 0%, #4a7a6a 100%)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          {/* Dark gradient overlay */}
+          <div
+            className="absolute inset-0"
+            style={{ background: 'linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.6) 100%)' }}
+          />
+          {/* Content */}
+          <div className="relative max-w-7xl mx-auto px-6 h-full">
+            <div className="absolute bottom-0 pb-8">
+              <p
+                className="uppercase mb-3"
+                style={{ fontSize: 11, letterSpacing: 3, color: '#B8975C' }}
+              >
+                Escape · {edition.month} {edition.year}
+              </p>
+              <h1
+                className="text-white mb-3"
                 style={{
-                  backgroundImage: featured[0].hero_image
-                    ? `url(${featured[0].hero_image})`
-                    : 'linear-gradient(135deg, #2B4A3E 0%, #4a7a6a 100%)',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
+                  fontFamily: "'Playfair Display', Georgia, serif",
+                  fontStyle: 'italic',
+                  fontSize: 42,
+                  lineHeight: 1.15,
                 }}
               >
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)' }} />
-                <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <p className="text-[10px] uppercase tracking-wider text-white/70 mb-1">
-                    {[
-                      featured[0].days_count && `${featured[0].days_count} DAYS`,
-                      featured[0].hotel_count && `${featured[0].hotel_count} HOTELS`,
-                      featured[0].restaurant_count && `${featured[0].restaurant_count} RESTAURANTS`,
-                    ].filter(Boolean).join(' · ')}
-                  </p>
-                  <h3 className="text-2xl text-white font-medium" style={{ fontFamily: 'Georgia, serif' }}>
-                    {featured[0].name}
-                  </h3>
-                  {featured[0].description && (
-                    <p className="text-sm text-white/80 line-clamp-2 mt-1">{featured[0].description}</p>
-                  )}
-                </div>
-              </div>
-            </Link>
-
-            {/* Right column — featured[1] and featured[2] */}
-            {featured.length > 1 && (
-              <div className="md:col-span-2 flex flex-col gap-4">
-                {featured.slice(1, 3).map((d: any) => (
-                  <Link key={d.id} href={`/escape/${d.slug}`} className="block">
-                    <div
-                      className="relative h-[190px] rounded-lg overflow-hidden"
-                      style={{
-                        backgroundImage: d.hero_image
-                          ? `url(${d.hero_image})`
-                          : 'linear-gradient(135deg, #2B4A3E 0%, #4a7a6a 100%)',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                      }}
-                    >
-                      <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)' }} />
-                      <div className="absolute bottom-0 left-0 right-0 p-4">
-                        <p className="text-[10px] uppercase tracking-wider text-white/70 mb-1">
-                          {[
-                            d.days_count && `${d.days_count} DAYS`,
-                            d.hotel_count && `${d.hotel_count} HOTELS`,
-                            d.restaurant_count && `${d.restaurant_count} RESTAURANTS`,
-                          ].filter(Boolean).join(' · ')}
-                        </p>
-                        <h3 className="text-lg text-white font-medium" style={{ fontFamily: 'Georgia, serif' }}>
-                          {d.name}
-                        </h3>
-                        {d.description && (
-                          <p className="text-sm text-white/80 line-clamp-2 mt-1">{d.description}</p>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ── S3: CURATED HOTELS ── */}
-      {hotels.length > 0 && (
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#8B7A5E] mb-2">
-            Curated Hotels
-          </h2>
-          <p className="text-sm text-[#5C5040] mb-6">
-            Hand-selected properties with insider perks. Each one personally vetted by our advisors.
-          </p>
-          <div className="overflow-x-auto flex gap-4 pb-4">
-            {hotels.map((hotel: any, idx: number) => {
-              const gradients = [
-                'linear-gradient(135deg, #3D6B5E 0%, #2B4A3E 50%, #1d3a2e 100%)',
-                'linear-gradient(135deg, #8B6B4A 0%, #6a5030 100%)',
-                'linear-gradient(135deg, #5a8a6f 0%, #3D6B5E 100%)',
-                'linear-gradient(135deg, #C49567 0%, #8B6B4A 100%)',
-                'linear-gradient(135deg, #4a7a6a 0%, #2B4A3E 100%)',
-              ]
-              return (
-              <div key={hotel.id} className="w-[200px] flex-shrink-0">
-                <div
-                  className="relative h-[140px] rounded-t-lg"
-                  style={{
-                    backgroundImage: hotel.photos?.[0]
-                      ? `url(${hotel.photos[0]})`
-                      : gradients[idx % gradients.length],
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  }}
-                >
-                  {hotel.is_preferred && (
-                    <span className="absolute top-2 left-2 bg-[#B8975C] text-white text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider">
-                      Preferred
-                    </span>
-                  )}
-                </div>
-                <div className="p-3 bg-[#FFFDF7] border border-t-0 border-[#D4C9B4] rounded-b-lg">
-                  <p className="text-sm font-medium text-[#2B4A3E]">{hotel.name}</p>
-                  <p className="text-xs text-[#8B7A5E]">
-                    {[hotel.city, hotel.country].filter(Boolean).join(', ')}
-                  </p>
-                  {hotel.description && (
-                    <p className="text-xs text-[#5C5040] line-clamp-2 mt-1">{hotel.description}</p>
-                  )}
-                  {hotel.perks?.length > 0 && (
-                    <p className="text-[10px] text-[#B8975C] mt-1">{hotel.perks[0]}</p>
-                  )}
-                  {hotel.photo_credit && (
-                    <p className="text-[9px] italic text-[#D4C9B4] mt-1">{hotel.photo_credit}</p>
-                  )}
-                </div>
-              </div>
-              )
-            })}
-          </div>
-          <div className="text-center mt-4">
-            <Link href="/escape/hotels" className="text-sm text-[#B8975C] hover:underline">
-              Browse all hotels by destination &gt;
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {/* ── S4: VOYAGES ── */}
-      {cruises.length > 0 && (
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#8B7A5E] mb-2">
-            Voyages
-          </h2>
-          <p className="text-sm text-[#5C5040] mb-6">
-            Curated cruise experiences from the world&apos;s finest lines.
-          </p>
-          <div className="overflow-x-auto flex gap-4 pb-4">
-            {cruises.map((cruise: any) => (
-              <Link key={cruise.id} href={`/escape/cruises/${cruise.slug}`} className="w-[220px] flex-shrink-0 block">
-                <div
-                  className="relative h-[140px] rounded-t-lg"
-                  style={{
-                    backgroundImage: cruise.photos?.[0]
-                      ? `url(${cruise.photos[0]})`
-                      : 'linear-gradient(135deg, #2B4A3E 0%, #5C5040 100%)',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  }}
-                >
-                  {cruise.is_preferred && (
-                    <span className="absolute top-2 left-2 bg-[#B8975C] text-white text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider">
-                      Preferred
-                    </span>
-                  )}
-                </div>
-                <div className="p-3 bg-[#FFFDF7] border border-t-0 border-[#D4C9B4] rounded-b-lg">
-                  {cruise.cruise_line && (
-                    <p className="text-[10px] uppercase tracking-wider text-[#8B7A5E]">{cruise.cruise_line}</p>
-                  )}
-                  <p className="text-sm font-medium text-[#2B4A3E]">{cruise.name}</p>
-                  {cruise.route_name && (
-                    <p className="text-xs text-[#5C5040]">{cruise.route_name}</p>
-                  )}
-                  {cruise.duration_nights && (
-                    <span className="inline-block bg-[#2B4A3E]/10 text-[#2B4A3E] text-[10px] px-2 py-0.5 rounded-full mt-1">
-                      {cruise.duration_nights} nights
-                    </span>
-                  )}
-                  {cruise.departure_ports?.length > 0 && (
-                    <p className="text-[10px] text-[#8B7A5E] mt-1">{cruise.departure_ports.join(' · ')}</p>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
-          <div className="text-center mt-4">
-            <Link href="/escape/cruises" className="text-sm text-[#B8975C] hover:underline">
-              Browse all voyages &gt;
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {/* ── S5: INSIDE THE GUIDE ── */}
-      {featured.length > 0 && itineraryDays.length > 0 && (
-        <div className="bg-[#FFFDF7] border-y border-[#D4C9B4] py-12">
-          <div className="max-w-6xl mx-auto px-4">
-            <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#8B7A5E] mb-6">
-              Inside the Guide — {featured[0].name.toUpperCase()}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {itineraryDays.map((day: any) => (
-                <div key={day.id} className="bg-white border border-[#D4C9B4] rounded-lg p-4">
-                  <h4 className="text-sm font-semibold text-[#2B4A3E] mb-3 pb-2 border-b border-[#e8e2d8]">
-                    Day {day.day_number}: {day.title}
-                  </h4>
-                  {day.morning_text && (
-                    <div className="mb-3">
-                      <p className="text-[10px] tracking-widest text-[#B8975C] mb-1">MORNING</p>
-                      <p className="text-sm text-[#5C5040] leading-relaxed">{day.morning_text}</p>
-                    </div>
-                  )}
-                  {day.afternoon_text && (
-                    <div className="mb-3">
-                      <p className="text-[10px] tracking-widest text-[#B8975C] mb-1">AFTERNOON</p>
-                      <p className="text-sm text-[#5C5040] leading-relaxed">{day.afternoon_text}</p>
-                    </div>
-                  )}
-                  {day.evening_text && (
-                    <div>
-                      <p className="text-[10px] tracking-widest text-[#B8975C] mb-1">EVENING</p>
-                      <p className="text-sm text-[#5C5040] leading-relaxed">{day.evening_text}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="text-center mt-6">
-              <Link href={`/escape/${featured[0].slug}`} className="text-sm text-[#B8975C] hover:underline">
-                Read the full {featured[0].days_count || ''}-day guide &gt;
-              </Link>
+                {edition.title}
+              </h1>
+              {edition.intro && (
+                <p className="text-white" style={{ fontSize: 15, opacity: 0.85, maxWidth: 520 }}>
+                  {edition.intro}
+                </p>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* ── S6: MORE DESTINATIONS ── */}
-      {moreDestinations.length > 0 && (
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#8B7A5E] mb-6">
-            More Destinations
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {moreDestinations.map((d: any) => (
-              <Link key={d.id} href={`/escape/${d.slug}`} className="block">
+      {/* ── ARTICLES GRID ── */}
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        {allArticles.length > 0 ? (
+          <>
+            {/* Row 1: Featured layout */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-10">
+              {/* Large featured card */}
+              <Link href={`/escape/blog/${allArticles[0].slug}`} className="md:col-span-3 block">
                 <div
-                  className="relative h-[160px] rounded-lg overflow-hidden"
+                  className="relative rounded-lg overflow-hidden"
                   style={{
-                    backgroundImage: d.hero_image
-                      ? `url(${d.hero_image})`
+                    minHeight: 420,
+                    backgroundImage: allArticles[0].featured_image
+                      ? `url(${allArticles[0].featured_image})`
                       : 'linear-gradient(135deg, #2B4A3E 0%, #4a7a6a 100%)',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                   }}
                 >
-                  <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)' }} />
-                  <p className="absolute bottom-0 left-0 text-white font-medium text-sm p-3">
-                    {d.name}
-                  </p>
+                  <div
+                    className="absolute inset-0"
+                    style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%)' }}
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    {allArticles[0].tag && (
+                      <p className="uppercase mb-2" style={{ fontSize: 10, letterSpacing: '0.15em', color: '#B8975C' }}>
+                        {allArticles[0].tag}
+                      </p>
+                    )}
+                    <h2
+                      className="text-white mb-2"
+                      style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 26, lineHeight: 1.25 }}
+                    >
+                      {allArticles[0].title}
+                    </h2>
+                    {allArticles[0].excerpt && (
+                      <p className="text-white/80 line-clamp-2" style={{ fontSize: 14 }}>
+                        {allArticles[0].excerpt}
+                      </p>
+                    )}
+                    {allArticles[0].read_time && (
+                      <p className="text-white/50 mt-2" style={{ fontSize: 11 }}>
+                        {allArticles[0].read_time}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </Link>
-            ))}
-          </div>
-        </div>
-      )}
 
-      {/* ── S7: TRAVEL EDITORIAL ── */}
-      {articles.length > 0 && (
-        <div className="bg-[#FFFDF7] border-y border-[#D4C9B4] py-12">
-          <div className="max-w-6xl mx-auto px-4">
-            <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#8B7A5E] mb-6">
-              Travel Editorial
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {articles.map((a: any) => (
-                <Link key={a.id} href={`/bloglux/${a.slug}`} className="block">
-                  <div className="bg-white border border-[#D4C9B4] rounded-lg overflow-hidden hover:border-[#2B4A3E] transition-colors">
-                    {a.cover_image_url && (
+              {/* Right column: two stacked cards */}
+              {(allArticles[1] || allArticles[2]) && (
+                <div className="md:col-span-2 flex flex-col gap-4">
+                  {allArticles.slice(1, 3).map((article: any) => (
+                    <Link
+                      key={article.id}
+                      href={`/escape/blog/${article.slug}`}
+                      className="flex rounded-lg overflow-hidden border"
+                      style={{ backgroundColor: '#FFFDF7', borderColor: '#E0D9CA' }}
+                    >
+                      {/* Image */}
                       <div
-                        className="h-32"
+                        className="flex-shrink-0"
                         style={{
-                          backgroundImage: `url(${a.cover_image_url})`,
+                          width: 160,
+                          height: 110,
+                          backgroundImage: article.featured_image
+                            ? `url(${article.featured_image})`
+                            : 'linear-gradient(135deg, #2B4A3E 0%, #4a7a6a 100%)',
                           backgroundSize: 'cover',
                           backgroundPosition: 'center',
+                          borderRadius: '0.5rem 0 0 0.5rem',
                         }}
                       />
-                    )}
-                    <div className="p-4">
-                      <h3 className="text-sm font-semibold text-[#2B4A3E]">{a.title}</h3>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+                      {/* Text */}
+                      <div className="p-3 flex flex-col justify-center min-w-0">
+                        {article.tag && (
+                          <p className="uppercase mb-1" style={{ fontSize: 10, letterSpacing: '0.12em', color: '#B8975C' }}>
+                            {article.tag}
+                          </p>
+                        )}
+                        <h3
+                          className="line-clamp-2 mb-1"
+                          style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 17, color: '#1A1A1A', lineHeight: 1.3 }}
+                        >
+                          {article.title}
+                        </h3>
+                        {article.excerpt && (
+                          <p className="line-clamp-2" style={{ fontSize: 13, color: '#777' }}>
+                            {article.excerpt}
+                          </p>
+                        )}
+                        {article.read_time && (
+                          <p className="mt-1" style={{ fontSize: 11, color: '#bbb' }}>
+                            {article.read_time}
+                          </p>
+                        )}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
+
+            {/* Remaining articles: list format */}
+            {allArticles.length > 3 && (
+              <div>
+                {allArticles.slice(3).map((article: any) => (
+                  <Link
+                    key={article.id}
+                    href={`/escape/blog/${article.slug}`}
+                    className="flex gap-5 py-5 border-b"
+                    style={{ borderColor: '#E0D9CA' }}
+                  >
+                    {/* Image */}
+                    <div
+                      className="flex-shrink-0 rounded-lg"
+                      style={{
+                        width: 200,
+                        height: 140,
+                        backgroundImage: article.featured_image
+                          ? `url(${article.featured_image})`
+                          : 'linear-gradient(135deg, #2B4A3E 0%, #4a7a6a 100%)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }}
+                    />
+                    {/* Text */}
+                    <div className="flex flex-col justify-center min-w-0">
+                      {article.tag && (
+                        <p className="uppercase mb-1" style={{ fontSize: 10, letterSpacing: '0.12em', color: '#B8975C' }}>
+                          {article.tag}
+                        </p>
+                      )}
+                      <h3
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 18, color: '#1A1A1A', lineHeight: 1.3 }}
+                      >
+                        {article.title}
+                      </h3>
+                      {article.excerpt && (
+                        <p className="line-clamp-2 mt-1" style={{ fontSize: 14, color: '#777' }}>
+                          {article.excerpt}
+                        </p>
+                      )}
+                      {article.read_time && (
+                        <p className="mt-1" style={{ fontSize: 11, color: '#bbb' }}>
+                          {article.read_time}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="text-center py-20">
+            <p style={{ fontSize: 14, color: '#999' }}>Stories coming soon.</p>
           </div>
-        </div>
-      )}
-
-      {/* ── S8: ADVISOR WIDGET ── */}
-      {advisor && (
-        <div className="max-w-6xl mx-auto px-4 py-8">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#8B7A5E] mb-6">
-            Your Travel Advisor
-          </h2>
-          <div className="max-w-lg">
-            <AdvisorCard advisor={advisor} />
-          </div>
-        </div>
-      )}
-
-      {/* ── S9: CTA ── */}
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="bg-[#2B4A3E] rounded-lg p-10 text-center">
-          <h2 className="text-2xl text-white" style={{ fontFamily: 'Georgia, serif' }}>
-            Ready to plan your escape?
-          </h2>
-          <p className="text-sm text-white/50 mt-2">
-            Complimentary video consultation. No commitment.
-          </p>
-          <Link
-            href="/escape/consultation"
-            className="inline-block bg-[#B8975C] text-[#2B4A3E] font-semibold px-8 py-3 rounded hover:bg-[#a07d4a] transition-colors mt-6"
-          >
-            Book a consultation
-          </Link>
-        </div>
+        )}
       </div>
-
-      {/* ── S10: LEGAL FOOTER ── */}
-      <div className="text-center py-8 px-4">
-        <p className="text-xs text-[#8B7A5E]">
-          Alex Mason on behalf of Joblux US LLC · Registered in Delaware · Joblux is an online media
-        </p>
-        <p className="text-xs text-[#B8975C] mt-1">
-          Travel advisory services provided by independent advisors affiliated with Fora Travel, Inc.
-        </p>
-        <p className="text-xs text-[#8B7A5E] mt-2">
-          <Link href="/help" className="hover:text-[#2B4A3E] transition-colors">Help centre</Link>
-          {' · '}
-          <Link href="/terms" className="hover:text-[#2B4A3E] transition-colors">Terms</Link>
-          {' · '}
-          <Link href="/" className="hover:text-[#2B4A3E] transition-colors">JOBLUX</Link>
-        </p>
-      </div>
-    </div>
+    </>
   )
 }
