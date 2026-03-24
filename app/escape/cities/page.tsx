@@ -8,7 +8,7 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env
 export const revalidate = 0
 
 export const metadata: Metadata = {
-  title: 'City Life — City Guides | JOBLUX Escape',
+  title: 'City Life — City Guides',
   description: 'Curated city guides with insider recommendations on where to stay, eat, and explore in the world\'s most inspiring destinations.',
 }
 

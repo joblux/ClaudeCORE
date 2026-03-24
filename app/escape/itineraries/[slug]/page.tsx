@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   if (!itinerary) return {}
 
   return {
-    title: `${itinerary.duration} in ${itinerary.name} — Luxury Itinerary | JOBLUX Escape`,
+    title: `${itinerary.duration} in ${itinerary.name} — Luxury Itinerary`,
     description: itinerary.tagline,
   }
 }

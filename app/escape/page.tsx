@@ -5,7 +5,7 @@ import type { Metadata } from 'next'
 export const revalidate = 0
 
 export const metadata: Metadata = {
-  title: 'April Knows Better — Travel Intelligence | JOBLUX Escape',
+  title: 'April Knows Better — Travel Intelligence',
   description: 'Where to travel in April 2026. Cherry blossoms in Japan, spring in Morocco, green season safaris in Kenya. Curated by your private travel advisor.',
   openGraph: {
     title: 'April Knows Better — JOBLUX Escape',
@@ -58,9 +58,9 @@ export default async function EscapePage() {
       {/* ── HERO ── */}
       {edition && (
         <div
-          className="relative w-full"
+          className="relative w-full h-[220px] md:h-[260px]"
           style={{
-            height: 340,
+            maxHeight: '40vh',
             backgroundImage: edition.hero_image ? `url(${edition.hero_image})` : 'linear-gradient(135deg, #2B4A3E 0%, #4a7a6a 100%)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
@@ -73,7 +73,7 @@ export default async function EscapePage() {
           />
           {/* Content */}
           <div className="relative max-w-7xl mx-auto px-6 h-full">
-            <div className="absolute bottom-0 pb-8">
+            <div className="absolute bottom-0 pb-5">
               <p
                 className="uppercase mb-3"
                 style={{ fontSize: 11, letterSpacing: 3, color: '#B8975C' }}
@@ -85,14 +85,14 @@ export default async function EscapePage() {
                 style={{
                   fontFamily: "'Playfair Display', Georgia, serif",
                   fontStyle: 'italic',
-                  fontSize: 42,
+                  fontSize: 34,
                   lineHeight: 1.15,
                 }}
               >
                 {edition.title}
               </h1>
               {edition.intro && (
-                <p className="text-white" style={{ fontSize: 15, opacity: 0.85, maxWidth: 520 }}>
+                <p className="text-white" style={{ fontSize: 13, opacity: 0.85, maxWidth: 520 }}>
                   {edition.intro}
                 </p>
               )}

@@ -7,7 +7,7 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env
 export const revalidate = 0
 
 export const metadata: Metadata = {
-  title: 'April Itineraries — Luxury Travel Routes | JOBLUX Escape',
+  title: 'April Itineraries — Luxury Travel Routes',
   description: 'Curated luxury itineraries for April 2026. Morocco, Japan, Kenya — day-by-day travel plans with preferred hotels and insider dining.',
 }
 

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Deals — Exclusive Travel Offers | JOBLUX Escape',
+  title: 'Deals — Exclusive Travel Offers',
   description: 'Exclusive rates and seasonal travel offers curated by JOBLUX Escape — time-sensitive opportunities for those who plan ahead.',
 }
 

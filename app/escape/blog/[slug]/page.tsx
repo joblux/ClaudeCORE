@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   if (!article) return {}
 
   return {
-    title: `${article.title} | JOBLUX Escape`,
+    title: article.title,
     description: article.excerpt,
   }
 }

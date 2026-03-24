@@ -17,11 +17,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     .single()
 
   if (!hotel) {
-    return { title: 'Hotel Not Found | JOBLUX Escape' }
+    return { title: 'Hotel Not Found' }
   }
 
   return {
-    title: `${hotel.name}, ${hotel.city} — Preferred Hotel | JOBLUX Escape`,
+    title: `${hotel.name}, ${hotel.city} — Preferred Hotel`,
     description: hotel.advisor_note || `Discover ${hotel.name} in ${hotel.city}, ${hotel.country} — a preferred JOBLUX hotel.`,
   }
 }

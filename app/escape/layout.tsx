@@ -10,7 +10,7 @@ const NAV_LINKS = [
   { label: 'Blog', href: '/escape' },
   { label: 'Itineraries', href: '/escape/itineraries' },
   { label: 'Hotels Reserve', href: '/escape/hotels' },
-  { label: 'City Life', href: '/escape/city-life' },
+  { label: 'City Life', href: '/escape/cities' },
   { label: 'Deals', href: '/escape/deals' },
   { label: 'Plan Your Trip', href: '/escape/plan' },
 ]
