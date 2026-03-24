@@ -3,9 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import AdmZip from 'adm-zip'
 import sharp from 'sharp'
 
-// App Router: increase timeout and ensure Node.js runtime for zip processing
 export const runtime = 'nodejs'
-export const maxDuration = 300 // 5 minutes for large zips
+export const maxDuration = 300
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,13 +25,13 @@ async function ensureBucket() {
 
 function cleanFilename(name: string): string {
   return name
-    .replace(/\.[^.]+$/, '')          // remove extension
-    .replace(/[_-]+/g, ' ')           // underscores/hyphens to spaces
-    .replace(/\s+/g, ' ')             // collapse multiple spaces
-    .replace(/\(\d+\)/g, '')          // remove (1), (2) etc
-    .replace(/\s*\d+\s*$/, '')        // remove trailing numbers
+    .replace(/\.[^.]+$/, '')
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/\(\d+\)/g, '')
+    .replace(/\s*\d+\s*$/, '')
     .trim()
-    .replace(/\b\w/g, c => c.toUpperCase()) // title case
+    .replace(/\b\w/g, c => c.toUpperCase())
 }
 
 function getExt(filename: string): string {
@@ -51,17 +50,23 @@ export async function POST(req: NextRequest) {
   try {
     await ensureBucket()
 
-    const formData = await req.formData()
-    const file = formData.get('file') as File
-    const hotelId = formData.get('hotel_id') as string
-    const hotelSlug = formData.get('hotel_slug') as string
-    const hotelName = formData.get('hotel_name') as string || ''
+    const body = await req.json()
+    const { zipPath, hotel_id: hotelId, hotel_slug: hotelSlug, hotel_name: hotelName } = body
 
-    if (!file || !hotelId || !hotelSlug) {
-      return NextResponse.json({ error: 'file, hotel_id, and hotel_slug required' }, { status: 400 })
+    if (!zipPath || !hotelId || !hotelSlug) {
+      return NextResponse.json({ error: 'zipPath, hotel_id, and hotel_slug required' }, { status: 400 })
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer())
+    // Download zip from Supabase Storage
+    const { data: zipData, error: dlErr } = await supabase.storage
+      .from(BUCKET)
+      .download(zipPath)
+
+    if (dlErr || !zipData) {
+      return NextResponse.json({ error: 'Could not download zip: ' + (dlErr?.message || 'unknown') }, { status: 500 })
+    }
+
+    const buffer = Buffer.from(await zipData.arrayBuffer())
     const zip = new AdmZip(buffer)
     const entries = zip.getEntries()
 
@@ -99,12 +104,11 @@ export async function POST(req: NextRequest) {
         continue
       }
 
-      if (imgBuffer.length < 100) continue // skip tiny files
+      if (imgBuffer.length < 100) continue
 
       let uploadExt = ext === '.jpeg' ? '.jpg' : ext
       let contentType = 'image/jpeg'
 
-      // Convert .tif to .jpg
       if (ext === '.tif' || ext === '.tiff') {
         try {
           imgBuffer = await sharp(imgBuffer).jpeg({ quality: 85 }).toBuffer()
@@ -161,6 +165,9 @@ export async function POST(req: NextRequest) {
 
       nextOrder++
     }
+
+    // Clean up the temp zip file
+    await supabase.storage.from(BUCKET).remove([zipPath])
 
     return NextResponse.json({ uploaded, failed, photos, warnings })
   } catch (err: any) {

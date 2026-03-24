@@ -66,21 +66,44 @@ export default function HotelPhotoManager({ hotelId, hotelSlug, hotelName }: Pro
     setUploading(false)
   }
 
-  // Zip upload
+  // Zip upload — uploads to Supabase Storage first, then processes server-side
   const uploadZip = async (file: File) => {
     setUploading(true)
     setError('')
     setWarnings([])
-    setUploadProgress('Extracting and uploading zip...')
-
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('hotel_id', hotelId)
-    formData.append('hotel_slug', hotelSlug)
-    formData.append('hotel_name', hotelName)
+    setUploadProgress('Uploading zip to storage...')
 
     try {
-      const res = await fetch('/api/admin/hotel-photos/bulk-zip', { method: 'POST', body: formData })
+      // Step 1: Upload zip directly to Supabase Storage (bypasses Vercel body limit)
+      const zipPath = `temp/${Date.now()}-${file.name}`
+      const { createClient } = await import('@supabase/supabase-js')
+      const sb = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+
+      const { error: uploadErr } = await sb.storage
+        .from('hotel-images')
+        .upload(zipPath, file, { upsert: true })
+
+      if (uploadErr) {
+        setError('Failed to upload zip: ' + uploadErr.message)
+        setUploading(false)
+        return
+      }
+
+      // Step 2: Call API to process the zip from storage
+      setUploadProgress('Processing zip...')
+      const res = await fetch('/api/admin/hotel-photos/bulk-zip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          zipPath,
+          hotel_id: hotelId,
+          hotel_slug: hotelSlug,
+          hotel_name: hotelName,
+        }),
+      })
       const data = await res.json()
 
       if (data.error) {
