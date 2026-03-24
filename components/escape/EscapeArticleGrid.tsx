@@ -61,17 +61,28 @@ function ArticleCard({ article, index }: { article: Article; index: number }) {
       }}
     >
       {/* Image */}
-      <div
-        className="relative"
-        style={{
-          height: 140,
-          backgroundImage: article.featured_image
-            ? `url(${article.featured_image})`
-            : 'linear-gradient(135deg, #2B4A3E 0%, #4a7a6a 100%)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
+      <div className="relative" style={{ overflow: 'hidden' }}>
+        {article.featured_image ? (
+          <img
+            src={article.featured_image}
+            alt={article.title}
+            style={{
+              width: '100%',
+              aspectRatio: '3 / 2',
+              objectFit: 'cover',
+              objectPosition: 'center',
+              display: 'block',
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: '100%',
+              aspectRatio: '3 / 2',
+              background: 'linear-gradient(135deg, #2B4A3E 0%, #4a7a6a 100%)',
+            }}
+          />
+        )}
         {article.tag && (
           <span
             className="absolute uppercase"
@@ -154,19 +165,17 @@ function MoreItem({ article, index }: { article: Article; index: number }) {
         transition: 'opacity 0.5s ease, transform 0.5s ease',
       }}
     >
-      <div
-        className="flex-shrink-0"
-        style={{
-          width: 120,
-          height: 80,
-          borderRadius: 8,
-          backgroundImage: article.featured_image
-            ? `url(${article.featured_image})`
-            : 'linear-gradient(135deg, #2B4A3E 0%, #4a7a6a 100%)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      />
+      <div className="flex-shrink-0" style={{ width: 120, height: 80, borderRadius: 8, overflow: 'hidden' }}>
+        {article.featured_image ? (
+          <img
+            src={article.featured_image}
+            alt={article.title}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
+          />
+        ) : (
+          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B4A3E 0%, #4a7a6a 100%)' }} />
+        )}
+      </div>
       <div className="flex flex-col justify-center min-w-0">
         <h3
           className="line-clamp-2"

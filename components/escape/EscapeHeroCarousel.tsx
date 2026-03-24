@@ -16,46 +16,75 @@ interface Article {
 export default function EscapeHeroCarousel({ articles }: { articles: Article[] }) {
   const [active, setActive] = useState(0)
   const [progress, setProgress] = useState(0)
+  const [paused, setPaused] = useState(false)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const progressRef = useRef<NodeJS.Timeout | null>(null)
+  const startTimeRef = useRef<number>(0)
+  const pausedAtRef = useRef<number>(0)
   const total = articles.length
 
-  const startTimer = useCallback(() => {
+  const clearTimers = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
     if (progressRef.current) clearInterval(progressRef.current)
+  }, [])
 
-    setProgress(0)
-    const startTime = Date.now()
+  const startTimer = useCallback((remainingMs?: number) => {
+    clearTimers()
+    const duration = remainingMs ?? 5000
+    startTimeRef.current = Date.now()
+    const baseProgress = remainingMs ? ((5000 - duration) / 5000) * 100 : 0
 
     progressRef.current = setInterval(() => {
-      const elapsed = Date.now() - startTime
-      setProgress(Math.min((elapsed / 5000) * 100, 100))
+      const elapsed = Date.now() - startTimeRef.current
+      setProgress(Math.min(baseProgress + (elapsed / 5000) * 100, 100))
     }, 30)
 
     timerRef.current = setTimeout(() => {
       setActive(prev => (prev + 1) % total)
-    }, 5000)
-  }, [total])
+    }, duration)
+  }, [total, clearTimers])
 
   useEffect(() => {
-    startTimer()
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-      if (progressRef.current) clearInterval(progressRef.current)
+    if (!paused) {
+      startTimer()
     }
-  }, [active, startTimer])
+    return clearTimers
+  }, [active, startTimer, clearTimers, paused])
+
+  const handleMouseEnter = useCallback(() => {
+    setPaused(true)
+    pausedAtRef.current = Date.now()
+    clearTimers()
+  }, [clearTimers])
+
+  const handleMouseLeave = useCallback(() => {
+    setPaused(false)
+    const elapsed = pausedAtRef.current - startTimeRef.current
+    const remaining = Math.max(5000 - elapsed, 500)
+    startTimer(remaining)
+  }, [startTimer])
 
   const goTo = (index: number) => {
     setActive(index)
+    setPaused(false)
   }
 
   if (articles.length === 0) return null
 
   return (
-    <div
-      className="relative w-full overflow-hidden h-[220px] md:h-[320px]"
-      style={{ borderRadius: 10 }}
-    >
+    <>
+      <style>{`
+        .escape-hero-carousel { aspect-ratio: 16 / 9; }
+        @media (min-width: 768px) {
+          .escape-hero-carousel { aspect-ratio: 2.2 / 1; }
+        }
+      `}</style>
+      <div
+        className="escape-hero-carousel relative w-full overflow-hidden"
+        style={{ borderRadius: 10 }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
       {/* Slides */}
       {articles.map((article, i) => (
         <Link
@@ -82,10 +111,10 @@ export default function EscapeHeroCarousel({ articles }: { articles: Article[] }
           {/* Gradient overlay */}
           <div
             className="absolute inset-0"
-            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 60%)' }}
+            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.15) 55%, transparent 100%)' }}
           />
           {/* Text content */}
-          <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8">
+          <div className="absolute bottom-0 left-0 right-0" style={{ padding: '28px 32px', maxWidth: 560 }}>
             {article.tag && (
               <p
                 className="uppercase mb-2"
@@ -95,11 +124,10 @@ export default function EscapeHeroCarousel({ articles }: { articles: Article[] }
               </p>
             )}
             <h2
-              className="text-white mb-2"
+              className="text-white mb-2 text-[28px] md:text-[34px]"
               style={{
                 fontFamily: "'Playfair Display', Georgia, serif",
                 fontStyle: 'italic',
-                fontSize: 34,
                 lineHeight: 1.15,
               }}
             >
@@ -107,8 +135,8 @@ export default function EscapeHeroCarousel({ articles }: { articles: Article[] }
             </h2>
             {article.excerpt && (
               <p
-                className="text-white line-clamp-2 hidden sm:block"
-                style={{ fontSize: 14, opacity: 0.82, maxWidth: 560 }}
+                className="text-white line-clamp-2 hidden sm:block text-[13px] md:text-[14px]"
+                style={{ opacity: 0.82 }}
               >
                 {article.excerpt}
               </p>
@@ -151,6 +179,7 @@ export default function EscapeHeroCarousel({ articles }: { articles: Article[] }
           }}
         />
       </div>
-    </div>
+      </div>
+    </>
   )
 }

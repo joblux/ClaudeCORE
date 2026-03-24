@@ -11,7 +11,7 @@ const NAV_LINKS = [
   { label: 'Itineraries', href: '/escape/itineraries' },
   { label: 'Hotels Reserve', href: '/escape/hotels' },
   { label: 'City Life', href: '/escape/cities' },
-  { label: 'Deals', href: '/escape/deals' },
+  { label: 'Cruises', href: '/escape/cruises' },
   { label: 'Plan Your Trip', href: '/escape/plan' },
 ]
 
