@@ -26,10 +26,6 @@ export default function EscapeLayout({ children }: { children: React.ReactNode }
             <Link href="/" className="hover:opacity-70 transition-opacity" style={{ color: '#999', fontSize: 14, fontWeight: 600, letterSpacing: '0.025em', lineHeight: '1', display: 'inline-flex', alignItems: 'center' }}>
               ← JOBLUX
             </Link>
-            <span style={{ color: '#E0D9CA', fontSize: 14, lineHeight: '1', display: 'inline-flex', alignItems: 'center' }}>|</span>
-            <Link href="/escape" style={{ color: '#B8975C', fontSize: 14, fontWeight: 600, letterSpacing: '0.025em', lineHeight: '1', display: 'inline-flex', alignItems: 'center' }}>
-              Escape
-            </Link>
           </div>
 
           {/* Center: Nav links */}
