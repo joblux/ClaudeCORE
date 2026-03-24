@@ -343,7 +343,7 @@ export default function AdminEscapePage() {
                 <button onClick={() => { setShowPasteImporter(true); setEditArticle(null) }} className="flex items-center gap-1 text-sm border border-[#2B4A3E] text-[#2B4A3E] px-4 py-2 rounded hover:bg-[#2B4A3E]/5">
                   <ClipboardPaste size={14} />Paste Article
                 </button>
-                <button onClick={() => { setEditArticle({ published: false, read_time: 5 }); setShowPasteImporter(false) }} className="flex items-center gap-1 text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">
+                <button onClick={() => { const cur = editions.find(e => e.is_current); setEditArticle({ published: false, read_time: 5, edition_id: cur?.id }); setShowPasteImporter(false) }} className="flex items-center gap-1 text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">
                   <Plus size={14} />Add Article
                 </button>
               </div>
@@ -351,12 +351,14 @@ export default function AdminEscapePage() {
             {showPasteImporter && (
               <SmartPasteImporter
                 onImport={(result) => {
+                  const currentEdition = editions.find(e => e.is_current)
                   setEditArticle({
                     title: result.title,
                     body: result.content,
                     excerpt: result.excerpt,
                     featured_image: result.coverImage || '',
                     slug: result.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+                    edition_id: currentEdition?.id || '',
                     published: false,
                     read_time: Math.max(1, Math.round((result.content.replace(/<[^>]*>/g, '').split(/\s+/).length) / 200)),
                   })
