@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
 import { getCategoryLabel } from '@/lib/bloglux-options'
-import ArticleInteractions from './ArticleInteractions'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -223,9 +222,6 @@ export default async function ArticlePage({ params }: Props) {
           </div>
         </div>
       </div>
-
-      {/* ── INTERACTIONS (Client Component) ─────────────── */}
-      <ArticleInteractions articleId={article.id} articleTitle={article.title} articleSlug={article.slug} />
 
       {/* ── RELATED ARTICLES ──────────────────────────────── */}
       {related.length > 0 && (
