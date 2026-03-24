@@ -66,7 +66,7 @@ export default function EscapeNav() {
           <button
             onClick={() => setOpen(!open)}
             className="md:hidden flex items-center justify-center"
-            style={{ width: 44, height: 44, color: '#555', fontSize: 22 }}
+            style={{ width: 44, height: 44, color: '#555', fontSize: 33 }}
             aria-label={open ? 'Close menu' : 'Open menu'}
           >
             {open ? '\u2715' : '\u2630'}
