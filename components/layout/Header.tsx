@@ -2,96 +2,147 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import UserMenu from '@/components/UserMenu'
 import { useMember } from '@/lib/auth-hooks'
 
 const navItems = [
-  { label: 'Insights', href: '/bloglux' },
-  { label: 'Wiki', href: '/wikilux' },
-  { label: 'Salaries', href: '/salaries' },
-  { label: 'Interviews', href: '/interviews' },
-  { label: 'Escape', href: '/escape' },
-  { label: 'Services', href: '/services' },
+  { label: 'Brands', href: '/brands' },
+  { label: 'Insights', href: '/insights' },
+  { label: 'Signals', href: '/signals' },
+  { label: 'Careers', href: '/careers' },
+  { label: 'Events', href: '/events' },
 ]
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const { isAuthenticated } = useMember()
+  const pathname = usePathname()
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-[#e8e2d8]">
-      <div className="jl-container">
-        <div className="flex items-center justify-between py-4">
+    <header className="sticky top-0 z-50 bg-[#1a1a1a] border-b border-[#2a2a2a]">
+      <div className="px-7 py-[14px] flex items-center justify-between">
 
-          {/* Logo */}
-          <Link href="/" className="flex items-center flex-shrink-0">
-            <img
-              src="/logos/joblux-header.png"
-              alt="JOBLUX"
-              className="h-6 sm:h-7 w-auto block"
-            />
-          </Link>
+        {/* Logo */}
+        <Link href="/" className="flex items-center flex-shrink-0">
+          <img
+            src="/logos/joblux-header.png"
+            alt="JOBLUX"
+            className="h-[22px] w-auto block"
+          />
+        </Link>
 
-          {/* Center nav — desktop */}
-          <nav className="hidden md:flex items-center justify-center gap-5">
-            {navItems.map((item) => (
+        {/* Center nav — desktop */}
+        <nav className="hidden md:flex items-center justify-center gap-7">
+          {navItems.map((item) => {
+            const isActive = pathname.startsWith(item.href)
+            return (
               <Link
                 key={item.label}
                 href={item.href}
-                className="flex items-center text-[0.8rem] leading-none font-semibold tracking-wide text-[#1a1a1a]/60 hover:text-[#1a1a1a] transition-colors"
+                className={`text-[13px] font-normal tracking-wide transition-colors ${
+                  isActive
+                    ? 'text-white underline underline-offset-[6px] decoration-[1.5px]'
+                    : 'text-[#888] hover:text-white'
+                }`}
+                style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 {item.label}
               </Link>
-            ))}
-          </nav>
+            )
+          })}
+        </nav>
 
-          {/* Right side */}
-          <div className="flex items-center gap-4 flex-shrink-0">
-            {isAuthenticated ? (
-              <UserMenu />
-            ) : (
-              <Link href="/members" className="hidden sm:flex items-center text-sm font-medium leading-none text-[#a58e28] hover:text-[#1a1a1a] transition-colors">Access</Link>
-            )}
+        {/* Right side */}
+        <div className="flex items-center gap-5 flex-shrink-0">
+          <Link
+            href="/escape"
+            className="hidden sm:inline text-[14px] italic text-[#a58e28] hover:text-[#e4b042] transition-colors"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            Escape
+          </Link>
 
-            {/* Mobile hamburger */}
-            <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden flex items-center justify-center w-11 h-11 text-[33px] text-[#555] hover:text-[#1a1a1a]"
-              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-            >
-              {mobileOpen ? '\u2715' : '\u2630'}
-            </button>
-          </div>
+          {isAuthenticated ? (
+            <UserMenu />
+          ) : (
+            <>
+              <Link
+                href="/members"
+                className="hidden sm:inline text-[13px] text-[#888] hover:text-white transition-colors"
+                style={{ fontFamily: 'Inter, sans-serif' }}
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/members"
+                className="hidden sm:inline-block border border-[#a58e28] text-[#a58e28] text-[11px] tracking-wide px-5 py-2 rounded-[3px] hover:bg-[#a58e28] hover:text-[#1a1a1a] transition-colors"
+                style={{ fontFamily: 'Inter, sans-serif' }}
+              >
+                Request access
+              </Link>
+            </>
+          )}
 
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="md:hidden flex items-center justify-center w-10 h-10 text-[24px] text-[#888] hover:text-white"
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+          >
+            {mobileOpen ? '\u2715' : '\u2630'}
+          </button>
         </div>
       </div>
 
-      {/* Mobile nav drawer */}
+      {/* Mobile nav overlay */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-[#e8e2d8]">
-          <nav className="w-full px-4 sm:px-6 py-4">
-            <div className="max-w-[1200px] mx-auto space-y-1">
-              {navItems.map((item) => (
+        <div className="md:hidden fixed inset-0 top-[53px] bg-[#1a1a1a] z-50 flex flex-col">
+          <nav className="flex-1 px-7 py-8 space-y-1">
+            {navItems.map((item) => {
+              const isActive = pathname.startsWith(item.href)
+              return (
                 <Link
                   key={item.label}
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
-                  className="block py-3 text-sm text-[#555] hover:text-[#a58e28] transition-colors border-b border-[#f0ece4] last:border-0"
+                  className={`block py-4 text-[15px] border-b border-[#2a2a2a] transition-colors ${
+                    isActive ? 'text-white' : 'text-[#888] hover:text-white'
+                  }`}
                 >
                   {item.label}
                 </Link>
-              ))}
-              {!isAuthenticated && (
+              )
+            })}
+          </nav>
+          <div className="px-7 pb-10 space-y-4">
+            <Link
+              href="/escape"
+              onClick={() => setMobileOpen(false)}
+              className="block py-3 text-[15px] italic text-[#a58e28]"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              Escape
+            </Link>
+            {!isAuthenticated && (
+              <>
                 <Link
                   href="/members"
                   onClick={() => setMobileOpen(false)}
-                  className="block mt-3 py-3 text-center bg-[#a58e28] text-[#1a1a1a] text-sm font-semibold rounded-md"
+                  className="block py-3 text-[15px] text-[#888]"
                 >
-                  Access
+                  Sign in
                 </Link>
-              )}
-            </div>
-          </nav>
+                <Link
+                  href="/members"
+                  onClick={() => setMobileOpen(false)}
+                  className="block text-center border border-[#a58e28] text-[#a58e28] text-[13px] tracking-wide px-5 py-3 rounded-[3px]"
+                >
+                  Request access
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       )}
     </header>

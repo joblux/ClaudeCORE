@@ -11,7 +11,6 @@ export default function UserMenu() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -24,7 +23,7 @@ export default function UserMenu() {
 
   if (isLoading) {
     return (
-      <div className="w-8 h-8 rounded-full bg-[#e8e6df] animate-pulse" />
+      <div className="w-8 h-8 rounded-full bg-[#333] animate-pulse" />
     );
   }
 
@@ -32,7 +31,7 @@ export default function UserMenu() {
     return (
       <Link
         href="/members"
-        className="text-sm text-[#1a1a1a] hover:text-[#a58e28] transition-colors tracking-wide"
+        className="text-[13px] text-[#888] hover:text-white transition-colors"
       >
         Sign in
       </Link>
@@ -52,49 +51,49 @@ export default function UserMenu() {
           <img
             src={image}
             alt={displayName}
-            className="w-8 h-8 rounded-full object-cover border border-[#e8e6df]"
+            className="w-8 h-8 rounded-full object-cover border border-[#333]"
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-[#1a1a1a] text-white text-xs font-medium flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-[#333] text-[#a58e28] text-xs font-medium flex items-center justify-center border border-[#444]">
             {initials}
           </div>
         )}
-        <span className="text-sm text-[#1a1a1a] hidden sm:inline">
+        <span className="text-[13px] text-[#ccc] hidden sm:inline">
           {displayName}
         </span>
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-48 bg-white border border-[#e8e6df] rounded-sm shadow-lg py-1 z-50">
+        <div className="absolute right-0 mt-2 w-48 bg-[#222] border border-[#333] rounded-[4px] shadow-lg py-1 z-50">
           {isApproved && (
             <>
               <Link
                 href="/dashboard"
                 onClick={() => setOpen(false)}
-                className="block px-4 py-2 text-sm text-[#1a1a1a] hover:bg-[#f5f4f0] transition-colors"
+                className="block px-4 py-2 text-[13px] text-[#ccc] hover:bg-[#2a2a2a] hover:text-white transition-colors"
               >
                 Dashboard
               </Link>
               <Link
                 href="/profile"
                 onClick={() => setOpen(false)}
-                className="block px-4 py-2 text-sm text-[#1a1a1a] hover:bg-[#f5f4f0] transition-colors"
+                className="block px-4 py-2 text-[13px] text-[#ccc] hover:bg-[#2a2a2a] hover:text-white transition-colors"
               >
                 Profile
               </Link>
               <Link
                 href="/invite"
                 onClick={() => setOpen(false)}
-                className="block px-4 py-2 text-sm text-[#1a1a1a] hover:bg-[#f5f4f0] transition-colors"
+                className="block px-4 py-2 text-[13px] text-[#ccc] hover:bg-[#2a2a2a] hover:text-white transition-colors"
               >
                 Invite
               </Link>
             </>
           )}
-          <div className="border-t border-[#e8e6df] my-1" />
+          <div className="border-t border-[#333] my-1" />
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
-            className="block w-full text-left px-4 py-2 text-sm text-[#777] hover:bg-[#f5f4f0] transition-colors"
+            className="block w-full text-left px-4 py-2 text-[13px] text-[#888] hover:bg-[#2a2a2a] hover:text-white transition-colors"
           >
             Sign out
           </button>

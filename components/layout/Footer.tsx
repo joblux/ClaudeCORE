@@ -2,64 +2,41 @@ import Link from 'next/link'
 
 export function Footer() {
   return (
-    <footer className="border-t border-[#e8e2d8] mt-8">
-
-      <div className="jl-container py-6">
-        <div className="flex flex-col md:flex-row justify-between gap-8">
-
-          {/* Left — Brand */}
-          <div>
+    <footer className="bg-[#1a1a1a] border-t border-[#2a2a2a]">
+      <div className="px-7 py-8">
+        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          {/* Left: Logo */}
+          <Link href="/" className="flex-shrink-0">
             <img
               src="/logos/joblux-header.png"
               alt="JOBLUX"
-              className="h-5 w-auto mb-2"
+              className="h-[18px] w-auto block"
             />
-            <p className="font-sans text-xs text-[#888] leading-relaxed mb-3">Luxury, decoded.</p>
-            <p className="font-sans text-[0.65rem] text-[#bbb]">Paris &middot; London &middot; New York &middot; Dubai &middot; Singapore</p>
-          </div>
+          </Link>
 
-          {/* Right — Three sub-columns */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 md:gap-16">
-            <div>
-              <h4 className="jl-overline text-[#1a1a1a] mb-3">Intelligence</h4>
-              <ul className="space-y-2">
-                <li><Link href="/bloglux" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Intelligence</Link></li>
-                <li><Link href="/wikilux" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Wiki</Link></li>
-                <li><Link href="/salaries" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Salary Intelligence</Link></li>
-                <li><Link href="/interviews" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Interview Intelligence</Link></li>
-                <li><Link href="/the-brief" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">The Brief</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="jl-overline text-[#1a1a1a] mb-3">Services</h4>
-              <ul className="space-y-2">
-                <li><Link href="/services/recruitment" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Recruitment</Link></li>
-                <li><Link href="/escape" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Private Travel Advisory</Link></li>
-                <li><Link href="/about" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">About</Link></li>
-                <li><Link href="/faq" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Contact</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="jl-overline text-[#1a1a1a] mb-3">Legal</h4>
-              <ul className="space-y-2">
-                <li><Link href="/terms" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Terms of Service</Link></li>
-                <li><Link href="/privacy" className="font-sans text-xs text-[#888] hover:text-[#1a1a1a] transition-colors">Privacy Policy</Link></li>
-              </ul>
-            </div>
-          </div>
+          {/* Center: Nav links */}
+          <nav className="flex flex-wrap items-center justify-center gap-6">
+            {['Brands', 'Insights', 'Signals', 'Events', 'Escape', 'Privacy'].map((label) => (
+              <Link
+                key={label}
+                href={`/${label.toLowerCase()}`}
+                className="text-[12px] text-[#666] hover:text-white transition-colors"
+                style={{ fontFamily: 'Inter, sans-serif' }}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
 
-        </div>
-      </div>
-
-      {/* BOTTOM BAR */}
-      <div className="border-t border-[#e8e2d8]">
-        <div className="jl-container py-2 text-center">
-          <p className="font-sans text-[0.65rem] text-[#bbb] tracking-wide">
-            &copy; {new Date().getFullYear()} JOBLUX
+          {/* Right: Copyright */}
+          <p
+            className="text-[12px] text-[#555] flex-shrink-0"
+            style={{ fontFamily: 'Inter, sans-serif' }}
+          >
+            &copy; 2026 JOBLUX
           </p>
         </div>
       </div>
-
     </footer>
   )
 }
