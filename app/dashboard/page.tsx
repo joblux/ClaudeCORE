@@ -13,11 +13,10 @@ export default function DashboardRouter() {
     if (!session) { router.push('/members'); return }
 
     const role = (session.user as any)?.role
-    const tier = (session.user as any)?.tier
 
     if (role === 'admin') {
       router.push('/admin')
-    } else if (tier === 'business' || tier === 'insider_contributor' || tier === 'insider_key_speaker') {
+    } else if (role === 'business' || role === 'insider_contributor' || role === 'insider_key_speaker' || role === 'insider') {
       router.push('/dashboard/business')
     } else {
       router.push('/dashboard/candidate')
