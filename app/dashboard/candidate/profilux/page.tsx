@@ -252,12 +252,8 @@ export default function ProfiluxPage() {
     <div style={{ background: '#1a1a1a', minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: '#fff' }}>
 
       {/* TOP BAR — flush, no gap */}
-      <div style={{
-        background: '#111111',
-        borderBottom: '1px solid #2a2a2a',
-        padding: '0 32px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
+      <div style={{ background: '#111111', borderBottom: '1px solid #2a2a2a', padding: '0 32px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '10px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           <Link href="/dashboard/candidate" style={{ color: '#555', fontSize: '12px', textDecoration: 'none' }}>
             ← Dashboard
@@ -289,6 +285,9 @@ export default function ProfiluxPage() {
           }}>
             ↓ Export PDF
           </button>
+        </div>
+      </div>
+
         </div>
       </div>
 
