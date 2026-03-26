@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 
@@ -36,6 +36,7 @@ const placeholderSignals: Signal[] = [
 
 export function SignalsTicker() {
   const [signals, setSignals] = useState<Signal[]>(placeholderSignals)
+  const trackRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     async function fetchSignals() {
@@ -53,11 +54,13 @@ export function SignalsTicker() {
     fetchSignals()
   }, [])
 
+  // Duplicate items so the second copy fills in seamlessly as first scrolls out
   const items = [...signals, ...signals]
 
   return (
     <div className="bg-[#222222] border-b border-[#2a2a2a] overflow-hidden">
       <div className="max-w-[1200px] mx-auto flex items-center h-[36px]">
+
         {/* SIGNALS label */}
         <div className="flex-shrink-0 px-5 flex items-center h-full border-r border-[#333]">
           <span
@@ -68,26 +71,41 @@ export function SignalsTicker() {
           </span>
         </div>
 
-        {/* Scrolling headlines */}
+        {/* Scrolling track */}
         <div className="flex-1 overflow-hidden relative">
-          <div className="flex items-center animate-ticker whitespace-nowrap">
+          <div
+            ref={trackRef}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              whiteSpace: 'nowrap',
+              animation: `ticker-scroll ${signals.length * 6}s linear infinite`,
+            }}
+          >
             {items.map((signal, i) => (
               <Link
                 key={`${signal.id}-${i}`}
                 href="/signals"
-                className="inline-flex items-center gap-2 px-5 text-[12px] text-[#999] hover:text-white transition-colors"
+                className="inline-flex items-center gap-2 px-5 text-[12px] text-[#999] hover:text-white transition-colors flex-shrink-0"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 <span
                   className="inline-block w-[5px] h-[5px] rounded-full flex-shrink-0"
                   style={{ backgroundColor: categoryColors[signal.category] || '#888' }}
                 />
-                <span className="whitespace-nowrap">{signal.headline}</span>
+                <span>{signal.headline}</span>
               </Link>
             ))}
           </div>
         </div>
       </div>
+
+      <style jsx global>{`
+        @keyframes ticker-scroll {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
     </div>
   )
 }
