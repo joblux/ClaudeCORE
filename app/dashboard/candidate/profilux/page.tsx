@@ -251,50 +251,52 @@ export default function ProfiluxPage() {
   return (
     <div style={{ background: '#1a1a1a', minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: '#fff' }}>
 
-      {/* TOP BAR — flush, no gap */}
+      {/* TOP BAR */}
       <div style={{ background: '#111111', borderBottom: '1px solid #2a2a2a', padding: '0 32px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '10px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <Link href="/dashboard/candidate" style={{ color: '#555', fontSize: '12px', textDecoration: 'none' }}>
-            ← Dashboard
-          </Link>
-          <div style={{ width: '1px', height: '14px', background: '#2a2a2a' }} />
-          <span style={{ fontSize: '12px', color: '#777' }}>
-            Profilux · <span style={{ color: '#a58e28' }}>Building your profile</span>
-          </span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{
-            background: '#222', border: '1px solid #a58e28', color: '#a58e28',
-            fontSize: '10px', letterSpacing: '0.08em', padding: '3px 10px',
-            borderRadius: '3px', fontWeight: 500,
-          }}>
-            {(session?.user as any)?.role?.toUpperCase() || 'MEMBER'}
-          </span>
-          <button onClick={handleSave} disabled={saving} style={{
-            background: 'transparent', border: '1px solid #2a2a2a', color: '#666',
-            fontSize: '11px', padding: '5px 12px', borderRadius: '4px',
-            cursor: 'pointer', fontFamily: 'Inter, sans-serif',
-          }}>
-            {saving ? 'Saving...' : 'Save draft'}
-          </button>
-          <button onClick={() => window.print()} style={{
-            background: '#a58e28', border: 'none', color: '#000',
-            fontSize: '11px', fontWeight: 500, padding: '5px 14px',
-            borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
-          }}>
-            ↓ Export PDF
-          </button>
-        </div>
-      </div>
-
+        <div style={{
+          maxWidth: '1200px', margin: '0 auto',
+          padding: '10px 0',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <Link href="/dashboard/candidate" style={{ color: '#555', fontSize: '12px', textDecoration: 'none' }}>
+              ← Dashboard
+            </Link>
+            <div style={{ width: '1px', height: '14px', background: '#2a2a2a' }} />
+            <span style={{ fontSize: '12px', color: '#555' }}>
+              Profilux · <span style={{ color: '#888' }}>Building your profile</span>
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{
+              background: '#222', border: '1px solid #444', color: '#888',
+              fontSize: '10px', letterSpacing: '0.08em', padding: '3px 10px',
+              borderRadius: '3px', fontWeight: 500,
+            }}>
+              {(session?.user as any)?.role?.toUpperCase() || 'MEMBER'}
+            </span>
+            <button onClick={handleSave} disabled={saving} style={{
+              background: 'transparent', border: '1px solid #2a2a2a', color: '#666',
+              fontSize: '11px', padding: '5px 12px', borderRadius: '4px',
+              cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+            }}>
+              {saving ? 'Saving...' : 'Save draft'}
+            </button>
+            <button onClick={() => window.print()} style={{
+              background: '#a58e28', border: 'none', color: '#000',
+              fontSize: '11px', fontWeight: 500, padding: '5px 14px',
+              borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+            }}>
+              ↓ Export PDF
+            </button>
+          </div>
         </div>
       </div>
 
       {/* HERO — directly below topbar */}
       <div style={{ background: '#1a1a1a', borderBottom: '1px solid #222', padding: '0 32px' }}>
         <div style={{
-          maxWidth: '1200px', margin: '0 auto',
+          maxWidth: '1200px', margin: '0 auto', padding: '20px 0 16px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px',
         }}>
           <div>
@@ -334,7 +336,7 @@ export default function ProfiluxPage() {
 
       {/* STEPS — directly below hero */}
       <div style={{ background: '#1a1a1a', borderBottom: '1px solid #222', padding: '0 32px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', overflowX: 'auto' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', overflowX: 'auto', padding: '0' }}>
           {STEPS.map((step, i) => (
             <div key={step.id} style={{ display: 'flex', alignItems: 'stretch' }}>
               <button
@@ -743,7 +745,7 @@ export default function ProfiluxPage() {
           {/* SIDEBAR */}
           <div style={{ position: 'sticky', top: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ background: '#111', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '20px' }}>
-              <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#222', border: '1px solid #a58e28', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', color: '#a58e28', marginBottom: '12px', fontWeight: 500 }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#2a2a2a', border: '1px solid #444', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', color: '#888', marginBottom: '12px', fontWeight: 500 }}>
                 {initials}
               </div>
               <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '15px', color: '#fff', marginBottom: '2px' }}>
@@ -753,7 +755,7 @@ export default function ProfiluxPage() {
                 {profile.headline || 'Your headline'}
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
-                <span style={{ fontSize: '9px', border: '1px solid #a58e28', color: '#a58e28', padding: '2px 7px', borderRadius: '2px' }}>
+                <span style={{ fontSize: '9px', border: '1px solid #444', color: '#777', padding: '2px 7px', borderRadius: '2px' }}>
                   {(session?.user as any)?.role?.toUpperCase() || 'MEMBER'}
                 </span>
                 {profile.sectors.slice(0, 2).map(s => (
@@ -779,7 +781,7 @@ export default function ProfiluxPage() {
               </div>
             </div>
             <div style={{ background: '#111', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '18px' }}>
-              <div style={{ fontSize: '10px', color: '#a58e28', letterSpacing: '0.08em', marginBottom: '9px' }}>
+              <div style={{ fontSize: '10px', color: '#666', letterSpacing: '0.08em', marginBottom: '9px' }}>
                 {tipText[currentStep]?.label || 'NOTE'}
               </div>
               <div style={{ fontSize: '12px', color: '#555', lineHeight: 1.7, fontWeight: 300 }}>
