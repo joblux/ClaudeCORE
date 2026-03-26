@@ -1,0 +1,80 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+export async function GET() {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { data, error } = await supabase
+    .from('profilux')
+    .select('*')
+    .eq('email', session.user.email)
+    .single()
+
+  if (error && error.code !== 'PGRST116') {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ profile: data || null })
+}
+
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const body = await req.json()
+
+  const { data: existing } = await supabase
+    .from('profilux')
+    .select('id, share_slug')
+    .eq('email', session.user.email)
+    .single()
+
+  const profileData = {
+    email: session.user.email,
+    first_name: body.firstName,
+    last_name: body.lastName,
+    city: body.city,
+    nationality: body.nationality,
+    headline: body.headline,
+    bio: body.bio,
+    experience: body.experience,
+    specialisations: body.specialisations,
+    languages: body.languages,
+    sectors: body.sectors,
+    markets: body.markets,
+    salary_expectation: body.salaryExpectation,
+    availability: body.availability,
+    sharing_enabled: body.sharingEnabled,
+    share_slug: existing?.share_slug || body.shareSlug || null,
+    updated_at: new Date().toISOString(),
+  }
+
+  if (existing?.id) {
+    const { error } = await supabase
+      .from('profilux')
+      .update(profileData)
+      .eq('id', existing.id)
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  } else {
+    const { error } = await supabase
+      .from('profilux')
+      .insert({ ...profileData, created_at: new Date().toISOString() })
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ success: true })
+}
