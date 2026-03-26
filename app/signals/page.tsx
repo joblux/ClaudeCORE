@@ -153,7 +153,7 @@ export default function SignalsPage() {
             {/* Heading */}
             <div className="flex items-center gap-2 mb-2">
               <span className="w-2 h-2 rounded-full bg-[#4CAF50] flex-shrink-0" />
-              <h1 className="text-3xl font-normal text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
+              <h1 className="text-3xl font-normal text-white" style={{ fontFamily: 'Inter, sans-serif', color: '#ffffff' }}>
                 Market signals
               </h1>
             </div>
@@ -185,7 +185,7 @@ export default function SignalsPage() {
                 <span className="text-[#a58e28] text-xs">↑</span>
                 <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">PINNED BY EDITORIAL</span>
               </div>
-              <h2 className="text-lg font-medium text-white mb-3 leading-snug" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
+              <h2 className="text-lg font-medium text-white mb-3 leading-snug" style={{ fontFamily: 'Inter, sans-serif', color: '#ffffff' }}>
                 {pinnedSignal.headline}
               </h2>
               <p className="text-sm text-[#777] leading-relaxed mb-4">{pinnedSignal.body}</p>
