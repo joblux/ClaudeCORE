@@ -57,7 +57,7 @@ export function SignalsTicker() {
 
   return (
     <div className="bg-[#222222] border-b border-[#2a2a2a] overflow-hidden">
-      <div className="flex items-center h-[36px]">
+      <div className="max-w-[1200px] mx-auto flex items-center h-[36px]">
         {/* SIGNALS label */}
         <div className="flex-shrink-0 px-5 flex items-center h-full border-r border-[#333]">
           <span
