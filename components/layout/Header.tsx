@@ -21,7 +21,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-[#1a1a1a] border-b border-[#2a2a2a]">
-      <div className="max-w-[1200px] mx-auto px-7 py-[14px] flex items-center justify-between">
+      <div className="max-w-[1200px] mx-auto px-7 py-[28px] flex items-center justify-between">
 
         {/* Logo */}
         <Link href="/" className="flex items-center flex-shrink-0">
@@ -63,25 +63,19 @@ export function Header() {
             Escape
           </Link>
 
+          {/* Separator */}
+          <div className="hidden sm:block w-px h-4 bg-[#333]" />
+
           {isAuthenticated ? (
             <UserMenu />
           ) : (
-            <>
-              <Link
-                href="/members"
-                className="hidden sm:inline text-[13px] text-[#888] hover:text-white transition-colors"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/members"
-                className="hidden sm:inline-block border border-[#a58e28] text-[#a58e28] text-[11px] tracking-wide px-5 py-2 rounded-[3px] hover:bg-[#a58e28] hover:text-[#1a1a1a] transition-colors"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-              >
-                Request access
-              </Link>
-            </>
+            <Link
+              href="/members"
+              className="hidden sm:inline text-[13px] text-[#888] hover:text-white transition-colors"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              Connect
+            </Link>
           )}
 
           {/* Mobile hamburger */}
@@ -125,22 +119,13 @@ export function Header() {
               Escape
             </Link>
             {!isAuthenticated && (
-              <>
-                <Link
-                  href="/members"
-                  onClick={() => setMobileOpen(false)}
-                  className="block py-3 text-[15px] text-[#888]"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href="/members"
-                  onClick={() => setMobileOpen(false)}
-                  className="block text-center border border-[#a58e28] text-[#a58e28] text-[13px] tracking-wide px-5 py-3 rounded-[3px]"
-                >
-                  Request access
-                </Link>
-              </>
+              <Link
+                href="/members"
+                onClick={() => setMobileOpen(false)}
+                className="block py-3 text-[15px] text-[#888]"
+              >
+                Connect
+              </Link>
             )}
           </div>
         </div>

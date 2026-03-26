@@ -99,7 +99,7 @@ export default function ProfiluxPage() {
   })
 
   useEffect(() => {
-    if (status === 'unauthenticated') router.push('/auth/signin')
+    if (status === 'unauthenticated') router.push('/members')
   }, [status, router])
 
   useEffect(() => {
@@ -238,7 +238,7 @@ export default function ProfiluxPage() {
     fontFamily: 'Inter, sans-serif', outline: 'none', boxSizing: 'border-box',
   }
   const labelStyle: React.CSSProperties = {
-    fontSize: '11px', color: '#666', letterSpacing: '0.06em', marginBottom: '8px', display: 'block',
+    fontSize: '11px', color: '#555', letterSpacing: '0.06em', marginBottom: '8px', display: 'block',
   }
   const pillStyle = (active: boolean): React.CSSProperties => ({
     padding: '7px 14px', borderRadius: '3px', fontSize: '12px', cursor: 'pointer',
@@ -248,14 +248,22 @@ export default function ProfiluxPage() {
     fontFamily: 'Inter, sans-serif',
   })
 
+  const navBtn = (dir: 'prev' | 'next'): React.CSSProperties => ({
+    background: dir === 'next' ? '#a58e28' : 'transparent',
+    border: dir === 'next' ? 'none' : '1px solid #333',
+    color: dir === 'next' ? '#000' : '#666',
+    fontSize: '13px', fontWeight: dir === 'next' ? 500 : 400,
+    padding: '10px 24px', borderRadius: '4px', cursor: 'pointer',
+    fontFamily: 'Inter, sans-serif',
+  })
+
   return (
     <div style={{ background: '#1a1a1a', minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: '#fff' }}>
 
-      {/* TOP BAR */}
+      {/* TOP BAR — py-28px, no Export PDF */}
       <div style={{ background: '#111111', borderBottom: '1px solid #2a2a2a', padding: '0 32px' }}>
         <div style={{
-          maxWidth: '1200px', margin: '0 auto',
-          padding: '10px 0',
+          maxWidth: '1200px', margin: '0 auto', padding: '28px 0',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -263,13 +271,13 @@ export default function ProfiluxPage() {
               ← Dashboard
             </Link>
             <div style={{ width: '1px', height: '14px', background: '#2a2a2a' }} />
-            <span style={{ fontSize: '12px', color: '#555' }}>
+            <span style={{ fontSize: '12px', color: '#666' }}>
               Profilux · <span style={{ color: '#888' }}>Building your profile</span>
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{
-              background: '#222', border: '1px solid #444', color: '#888',
+              background: '#222', border: '1px solid #444', color: '#777',
               fontSize: '10px', letterSpacing: '0.08em', padding: '3px 10px',
               borderRadius: '3px', fontWeight: 500,
             }}>
@@ -282,28 +290,18 @@ export default function ProfiluxPage() {
             }}>
               {saving ? 'Saving...' : 'Save draft'}
             </button>
-            <button onClick={() => window.print()} style={{
-              background: '#a58e28', border: 'none', color: '#000',
-              fontSize: '11px', fontWeight: 500, padding: '5px 14px',
-              borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
-            }}>
-              ↓ Export PDF
-            </button>
           </div>
         </div>
       </div>
 
-      {/* HERO — directly below topbar */}
+      {/* HERO */}
       <div style={{ background: '#1a1a1a', borderBottom: '1px solid #222', padding: '0 32px' }}>
         <div style={{
-          maxWidth: '1200px', margin: '0 auto', padding: '20px 0 16px',
+          maxWidth: '1200px', margin: '0 auto', padding: '22px 0 18px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px',
         }}>
           <div>
-            <h1 style={{
-              fontFamily: 'Playfair Display, serif', fontWeight: 400,
-              fontSize: '28px', margin: '0 0 5px', color: '#fff',
-            }}>
+            <h1 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '28px', margin: '0 0 5px', color: '#fff' }}>
               Your <span style={{ fontStyle: 'italic', color: '#a58e28' }}>intelligence</span> profile
             </h1>
             <p style={{ fontSize: '13px', color: '#555', margin: 0, fontWeight: 300 }}>
@@ -322,11 +320,7 @@ export default function ProfiluxPage() {
                 <circle cx="24" cy="24" r="20" fill="none" stroke="#a58e28" strokeWidth="3.5"
                   strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" />
               </svg>
-              <div style={{
-                position: 'absolute', inset: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '11px', color: '#a58e28', fontWeight: 500,
-              }}>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: '#a58e28', fontWeight: 500 }}>
                 {completeness}
               </div>
             </div>
@@ -334,16 +328,16 @@ export default function ProfiluxPage() {
         </div>
       </div>
 
-      {/* STEPS — directly below hero */}
+      {/* STEPS */}
       <div style={{ background: '#1a1a1a', borderBottom: '1px solid #222', padding: '0 32px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', overflowX: 'auto', padding: '0' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', overflowX: 'auto' }}>
           {STEPS.map((step, i) => (
             <div key={step.id} style={{ display: 'flex', alignItems: 'stretch' }}>
               <button
                 onClick={() => setCurrentStep(step.id)}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  padding: '13px 18px', background: 'transparent', border: 'none',
+                  display: 'flex', alignItems: 'center', gap: '8px', padding: '13px 18px',
+                  background: 'transparent', border: 'none',
                   borderBottom: currentStep === step.id ? '2px solid #a58e28' : '2px solid transparent',
                   cursor: 'pointer', whiteSpace: 'nowrap',
                 }}
@@ -366,16 +360,14 @@ export default function ProfiluxPage() {
                   {step.label}
                 </span>
               </button>
-              {i < STEPS.length - 1 && (
-                <div style={{ width: '1px', background: '#222', margin: '10px 0', flexShrink: 0 }} />
-              )}
+              {i < STEPS.length - 1 && <div style={{ width: '1px', background: '#222', margin: '10px 0', flexShrink: 0 }} />}
             </div>
           ))}
         </div>
       </div>
 
       {/* MAIN CONTENT */}
-      <div style={{ padding: '28px 32px' }}>
+      <div style={{ padding: '28px 32px', minHeight: 'calc(100vh - 280px)' }}>
         <div style={{
           maxWidth: '1200px', margin: '0 auto',
           display: 'grid', gridTemplateColumns: '1fr 280px', gap: '24px', alignItems: 'start',
@@ -386,80 +378,48 @@ export default function ProfiluxPage() {
 
             {/* STEP 1: PERSONAL */}
             {currentStep === 1 && (
-              <div style={{ background: '#222', border: '1px solid #a58e28', borderRadius: '6px', padding: '28px' }}>
-                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 24px' }}>
-                  Personal information
-                </h2>
+              <div style={{ background: '#222', border: '1px solid #333', borderRadius: '6px', padding: '28px' }}>
+                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 24px' }}>Personal information</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                  <div>
-                    <label style={labelStyle}>FIRST NAME</label>
-                    <input value={profile.firstName} onChange={e => setProfile(p => ({ ...p, firstName: e.target.value }))}
-                      placeholder="Genny" style={inputStyle} />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>LAST NAME</label>
-                    <input value={profile.lastName} onChange={e => setProfile(p => ({ ...p, lastName: e.target.value }))}
-                      placeholder="Woods" style={inputStyle} />
-                  </div>
+                  <div><label style={labelStyle}>FIRST NAME</label><input value={profile.firstName} onChange={e => setProfile(p => ({ ...p, firstName: e.target.value }))} placeholder="Genny" style={inputStyle} /></div>
+                  <div><label style={labelStyle}>LAST NAME</label><input value={profile.lastName} onChange={e => setProfile(p => ({ ...p, lastName: e.target.value }))} placeholder="Woods" style={inputStyle} /></div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                  <div>
-                    <label style={labelStyle}>CURRENT CITY</label>
-                    <input value={profile.city} onChange={e => setProfile(p => ({ ...p, city: e.target.value }))}
-                      placeholder="Paris, France" style={inputStyle} />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>NATIONALITY</label>
-                    <input value={profile.nationality} onChange={e => setProfile(p => ({ ...p, nationality: e.target.value }))}
-                      placeholder="French" style={inputStyle} />
-                  </div>
+                  <div><label style={labelStyle}>CURRENT CITY</label><input value={profile.city} onChange={e => setProfile(p => ({ ...p, city: e.target.value }))} placeholder="Paris, France" style={inputStyle} /></div>
+                  <div><label style={labelStyle}>NATIONALITY</label><input value={profile.nationality} onChange={e => setProfile(p => ({ ...p, nationality: e.target.value }))} placeholder="French" style={inputStyle} /></div>
                 </div>
                 <div style={{ marginBottom: '16px' }}>
                   <label style={labelStyle}>PROFESSIONAL HEADLINE</label>
-                  <input value={profile.headline} onChange={e => setProfile(p => ({ ...p, headline: e.target.value }))}
-                    placeholder="Senior Retail Director · LVMH · Paris" style={inputStyle} />
+                  <input value={profile.headline} onChange={e => setProfile(p => ({ ...p, headline: e.target.value }))} placeholder="Senior Retail Director · LVMH · Paris" style={inputStyle} />
                 </div>
                 <div style={{ marginBottom: '24px' }}>
                   <label style={labelStyle}>SHORT BIO <span style={{ color: '#444', fontSize: '10px' }}>(optional)</span></label>
-                  <textarea value={profile.bio} onChange={e => setProfile(p => ({ ...p, bio: e.target.value }))}
-                    placeholder="A brief summary of your professional background..."
-                    rows={3}
-                    style={{ ...inputStyle, resize: 'vertical', minHeight: '80px' }} />
+                  <textarea value={profile.bio} onChange={e => setProfile(p => ({ ...p, bio: e.target.value }))} placeholder="A brief summary of your professional background..." rows={3} style={{ ...inputStyle, resize: 'vertical', minHeight: '80px' }} />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #2a2a2a', paddingTop: '20px' }}>
-                  <button onClick={() => { markComplete(1); setCurrentStep(2) }}
-                    style={{ background: '#a58e28', border: 'none', color: '#000', fontSize: '13px', fontWeight: 500, padding: '10px 28px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
-                    Experience →
-                  </button>
+                  <button onClick={() => { markComplete(1); setCurrentStep(2) }} style={navBtn('next')}>Experience →</button>
                 </div>
               </div>
             )}
 
             {/* STEP 2: EXPERIENCE */}
             {currentStep === 2 && (
-              <div style={{ background: '#222', border: '1px solid #a58e28', borderRadius: '6px', padding: '28px' }}>
-                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 24px' }}>
-                  Career history
-                </h2>
+              <div style={{ background: '#222', border: '1px solid #333', borderRadius: '6px', padding: '28px' }}>
+                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 24px' }}>Career history</h2>
                 {profile.experience.map(exp => (
                   <div key={exp.id} style={{ border: '1px solid #2a2a2a', borderRadius: '4px', padding: '16px', marginBottom: '12px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <div>
                         <div style={{ fontSize: '14px', fontWeight: 500, color: '#fff' }}>{exp.role}</div>
                         <div style={{ fontSize: '13px', color: '#a58e28', marginTop: '2px' }}>{exp.brand}{exp.group ? ` · ${exp.group}` : ''}</div>
-                        <div style={{ fontSize: '12px', color: '#555', marginTop: '4px' }}>
-                          {exp.from}{exp.current ? ' — Present' : exp.to ? ` — ${exp.to}` : ''}{exp.location ? ` · ${exp.location}` : ''}
-                        </div>
+                        <div style={{ fontSize: '12px', color: '#555', marginTop: '4px' }}>{exp.from}{exp.current ? ' — Present' : exp.to ? ` — ${exp.to}` : ''}{exp.location ? ` · ${exp.location}` : ''}</div>
                       </div>
-                      <button onClick={() => removeExperience(exp.id)}
-                        style={{ background: 'transparent', border: 'none', color: '#444', fontSize: '11px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
-                        Remove
-                      </button>
+                      <button onClick={() => removeExperience(exp.id)} style={{ background: 'transparent', border: 'none', color: '#444', fontSize: '11px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Remove</button>
                     </div>
                   </div>
                 ))}
                 {showAddExp ? (
-                  <div style={{ border: '1px solid #a58e28', borderRadius: '4px', padding: '20px', marginBottom: '12px' }}>
+                  <div style={{ border: '1px solid #333', borderRadius: '4px', padding: '20px', marginBottom: '12px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                       {[
                         { label: 'ROLE TITLE', key: 'role', placeholder: 'Senior Retail Manager' },
@@ -471,9 +431,7 @@ export default function ProfiluxPage() {
                       ].map(f => (
                         <div key={f.key}>
                           <label style={{ ...labelStyle, fontSize: '10px' }}>{f.label}</label>
-                          <input value={(newExp as any)[f.key] || ''} onChange={e => setNewExp(p => ({ ...p, [f.key]: e.target.value }))}
-                            placeholder={f.placeholder} disabled={f.key === 'to' && !!newExp.current}
-                            style={{ ...inputStyle, background: f.key === 'to' && newExp.current ? '#111' : '#1a1a1a', color: f.key === 'to' && newExp.current ? '#444' : '#fff' }} />
+                          <input value={(newExp as any)[f.key] || ''} onChange={e => setNewExp(p => ({ ...p, [f.key]: e.target.value }))} placeholder={f.placeholder} disabled={f.key === 'to' && !!newExp.current} style={{ ...inputStyle, background: f.key === 'to' && newExp.current ? '#111' : '#1a1a1a', color: f.key === 'to' && newExp.current ? '#444' : '#fff' }} />
                         </div>
                       ))}
                     </div>
@@ -482,12 +440,8 @@ export default function ProfiluxPage() {
                       This is my current position
                     </label>
                     <div style={{ display: 'flex', gap: '10px' }}>
-                      <button onClick={addExperience} style={{ background: '#a58e28', border: 'none', color: '#000', fontSize: '12px', fontWeight: 500, padding: '8px 20px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
-                        Add position
-                      </button>
-                      <button onClick={() => setShowAddExp(false)} style={{ background: 'transparent', border: '1px solid #333', color: '#666', fontSize: '12px', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
-                        Cancel
-                      </button>
+                      <button onClick={addExperience} style={navBtn('next')}>Add position</button>
+                      <button onClick={() => setShowAddExp(false)} style={navBtn('prev')}>Cancel</button>
                     </div>
                   </div>
                 ) : (
@@ -496,127 +450,81 @@ export default function ProfiluxPage() {
                   </button>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #2a2a2a', paddingTop: '20px', marginTop: '8px' }}>
-                  <button onClick={() => setCurrentStep(1)} style={{ background: 'transparent', border: '1px solid #333', color: '#666', fontSize: '13px', padding: '10px 20px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Personal</button>
-                  <button onClick={() => { markComplete(2); setCurrentStep(3) }} style={{ background: '#a58e28', border: 'none', color: '#000', fontSize: '13px', fontWeight: 500, padding: '10px 28px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Expertise →</button>
+                  <button onClick={() => setCurrentStep(1)} style={navBtn('prev')}>← Personal</button>
+                  <button onClick={() => { markComplete(2); setCurrentStep(3) }} style={navBtn('next')}>Expertise →</button>
                 </div>
               </div>
             )}
 
             {/* STEP 3: EXPERTISE & LANGUAGES */}
             {currentStep === 3 && (
-              <div style={{ background: '#222', border: '1px solid #a58e28', borderRadius: '6px', padding: '28px' }}>
-                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 24px' }}>
-                  Expertise & languages
-                </h2>
+              <div style={{ background: '#222', border: '1px solid #333', borderRadius: '6px', padding: '28px' }}>
+                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 24px' }}>Expertise & languages</h2>
                 <label style={labelStyle}>FUNCTIONAL SPECIALISATIONS</label>
                 <p style={{ fontSize: '12px', color: '#555', marginBottom: '14px', fontWeight: 300 }}>Your area of professional expertise.</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '28px' }}>
-                  {SPECIALISATIONS.map(s => (
-                    <button key={s} onClick={() => setProfile(p => ({ ...p, specialisations: toggle(p.specialisations, s) }))}
-                      style={pillStyle(profile.specialisations.includes(s))}>
-                      {s}
-                    </button>
-                  ))}
+                  {SPECIALISATIONS.map(s => <button key={s} onClick={() => setProfile(p => ({ ...p, specialisations: toggle(p.specialisations, s) }))} style={pillStyle(profile.specialisations.includes(s))}>{s}</button>)}
                 </div>
                 <div style={{ borderTop: '1px solid #2a2a2a', margin: '0 0 24px' }} />
                 <label style={labelStyle}>LANGUAGES</label>
                 <p style={{ fontSize: '12px', color: '#555', marginBottom: '14px', fontWeight: 300 }}>Languages you work in professionally.</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '24px' }}>
-                  {LANGUAGES.map(l => (
-                    <button key={l} onClick={() => setProfile(p => ({ ...p, languages: toggle(p.languages, l) }))}
-                      style={pillStyle(profile.languages.includes(l))}>
-                      {l}
-                    </button>
-                  ))}
+                  {LANGUAGES.map(l => <button key={l} onClick={() => setProfile(p => ({ ...p, languages: toggle(p.languages, l) }))} style={pillStyle(profile.languages.includes(l))}>{l}</button>)}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #2a2a2a', paddingTop: '20px' }}>
-                  <button onClick={() => setCurrentStep(2)} style={{ background: 'transparent', border: '1px solid #333', color: '#666', fontSize: '13px', padding: '10px 20px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Experience</button>
-                  <button onClick={() => { markComplete(3); setCurrentStep(4) }} style={{ background: '#a58e28', border: 'none', color: '#000', fontSize: '13px', fontWeight: 500, padding: '10px 28px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Sectors →</button>
+                  <button onClick={() => setCurrentStep(2)} style={navBtn('prev')}>← Experience</button>
+                  <button onClick={() => { markComplete(3); setCurrentStep(4) }} style={navBtn('next')}>Sectors →</button>
                 </div>
               </div>
             )}
 
             {/* STEP 4: SECTORS */}
             {currentStep === 4 && (
-              <div style={{ background: '#222', border: '1px solid #a58e28', borderRadius: '6px', padding: '28px' }}>
-                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 24px' }}>
-                  Sectors & geographies
-                </h2>
+              <div style={{ background: '#222', border: '1px solid #333', borderRadius: '6px', padding: '28px' }}>
+                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 24px' }}>Sectors & geographies</h2>
                 <label style={labelStyle}>SECTORS OF EXPERTISE</label>
-                <p style={{ fontSize: '12px', color: '#555', marginBottom: '14px', fontWeight: 300 }}>Select all that apply. This shapes which search assignments are matched to you.</p>
+                <p style={{ fontSize: '12px', color: '#555', marginBottom: '14px', fontWeight: 300 }}>Select all that apply.</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '28px' }}>
-                  {SECTORS.map(s => (
-                    <button key={s} onClick={() => setProfile(p => ({ ...p, sectors: toggle(p.sectors, s) }))}
-                      style={pillStyle(profile.sectors.includes(s))}>
-                      {s}
-                    </button>
-                  ))}
+                  {SECTORS.map(s => <button key={s} onClick={() => setProfile(p => ({ ...p, sectors: toggle(p.sectors, s) }))} style={pillStyle(profile.sectors.includes(s))}>{s}</button>)}
                 </div>
                 <div style={{ borderTop: '1px solid #2a2a2a', margin: '0 0 24px' }} />
                 <label style={labelStyle}>MARKETS & GEOGRAPHIES</label>
                 <p style={{ fontSize: '12px', color: '#555', marginBottom: '14px', fontWeight: 300 }}>Where are you open to working?</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '24px' }}>
-                  {MARKETS.map(m => (
-                    <button key={m} onClick={() => setProfile(p => ({ ...p, markets: toggle(p.markets, m) }))}
-                      style={pillStyle(profile.markets.includes(m))}>
-                      {m}
-                    </button>
-                  ))}
+                  {MARKETS.map(m => <button key={m} onClick={() => setProfile(p => ({ ...p, markets: toggle(p.markets, m) }))} style={pillStyle(profile.markets.includes(m))}>{m}</button>)}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #2a2a2a', paddingTop: '20px' }}>
-                  <button onClick={() => setCurrentStep(3)} style={{ background: 'transparent', border: '1px solid #333', color: '#666', fontSize: '13px', padding: '10px 20px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Expertise</button>
-                  <button onClick={() => { markComplete(4); setCurrentStep(5) }} style={{ background: '#a58e28', border: 'none', color: '#000', fontSize: '13px', fontWeight: 500, padding: '10px 28px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Salary →</button>
+                  <button onClick={() => setCurrentStep(3)} style={navBtn('prev')}>← Expertise</button>
+                  <button onClick={() => { markComplete(4); setCurrentStep(5) }} style={navBtn('next')}>Salary →</button>
                 </div>
               </div>
             )}
 
             {/* STEP 5: SALARY */}
             {currentStep === 5 && (
-              <div style={{ background: '#222', border: '1px solid #a58e28', borderRadius: '6px', padding: '28px' }}>
-                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 8px' }}>
-                  Salary expectation
-                </h2>
-                <p style={{ fontSize: '13px', color: '#555', fontWeight: 300, margin: '0 0 28px', lineHeight: 1.7 }}>
-                  Used by Mo to match you to appropriately scoped search assignments. Never shown publicly.
-                </p>
+              <div style={{ background: '#222', border: '1px solid #333', borderRadius: '6px', padding: '28px' }}>
+                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 8px' }}>Salary expectation</h2>
+                <p style={{ fontSize: '13px', color: '#555', fontWeight: 300, margin: '0 0 28px', lineHeight: 1.7 }}>Used by Mo to match you to appropriately scoped search assignments. Never shown publicly.</p>
                 <label style={labelStyle}>ANNUAL GROSS SALARY EXPECTATION</label>
-                <div style={{ textAlign: 'center', fontSize: '28px', color: '#a58e28', fontWeight: 400, margin: '16px 0' }}>
-                  {formatSalary(profile.salaryExpectation)} / year
-                </div>
-                <input type="range" min="40000" max="500000" step="5000" value={profile.salaryExpectation}
-                  onChange={e => setProfile(p => ({ ...p, salaryExpectation: Number(e.target.value) }))}
-                  style={{ width: '100%', accentColor: '#a58e28', marginBottom: '8px' }} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#555', marginBottom: '28px' }}>
-                  <span>€40K</span><span>€500K+</span>
-                </div>
+                <div style={{ textAlign: 'center', fontSize: '28px', color: '#a58e28', fontWeight: 400, margin: '16px 0' }}>{formatSalary(profile.salaryExpectation)} / year</div>
+                <input type="range" min="40000" max="500000" step="5000" value={profile.salaryExpectation} onChange={e => setProfile(p => ({ ...p, salaryExpectation: Number(e.target.value) }))} style={{ width: '100%', accentColor: '#a58e28', marginBottom: '8px' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#555', marginBottom: '28px' }}><span>€40K</span><span>€500K+</span></div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #2a2a2a', paddingTop: '20px' }}>
-                  <button onClick={() => setCurrentStep(4)} style={{ background: 'transparent', border: '1px solid #333', color: '#666', fontSize: '13px', padding: '10px 20px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Sectors</button>
-                  <button onClick={() => { markComplete(5); setCurrentStep(6) }} style={{ background: '#a58e28', border: 'none', color: '#000', fontSize: '13px', fontWeight: 500, padding: '10px 28px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Availability →</button>
+                  <button onClick={() => setCurrentStep(4)} style={navBtn('prev')}>← Sectors</button>
+                  <button onClick={() => { markComplete(5); setCurrentStep(6) }} style={navBtn('next')}>Availability →</button>
                 </div>
               </div>
             )}
 
             {/* STEP 6: AVAILABILITY */}
             {currentStep === 6 && (
-              <div style={{ background: '#222', border: '1px solid #a58e28', borderRadius: '6px', padding: '28px' }}>
-                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 24px' }}>
-                  Availability
-                </h2>
+              <div style={{ background: '#222', border: '1px solid #333', borderRadius: '6px', padding: '28px' }}>
+                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 24px' }}>Availability</h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
                   {AVAILABILITY.map(opt => (
                     <button key={opt.value} onClick={() => setProfile(p => ({ ...p, availability: opt.value }))}
-                      style={{
-                        display: 'flex', alignItems: 'flex-start', gap: '14px',
-                        border: `1px solid ${profile.availability === opt.value ? '#a58e28' : '#2a2a2a'}`,
-                        background: profile.availability === opt.value ? 'rgba(165,142,40,0.04)' : 'transparent',
-                        borderRadius: '4px', padding: '14px 16px', cursor: 'pointer', textAlign: 'left', fontFamily: 'Inter, sans-serif',
-                      }}>
-                      <div style={{
-                        width: '16px', height: '16px', borderRadius: '50%',
-                        border: `1px solid ${profile.availability === opt.value ? '#a58e28' : '#444'}`,
-                        marginTop: '2px', flexShrink: 0,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      }}>
+                      style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', border: `1px solid ${profile.availability === opt.value ? '#a58e28' : '#2a2a2a'}`, background: profile.availability === opt.value ? 'rgba(165,142,40,0.04)' : 'transparent', borderRadius: '4px', padding: '14px 16px', cursor: 'pointer', textAlign: 'left', fontFamily: 'Inter, sans-serif' }}>
+                      <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: `1px solid ${profile.availability === opt.value ? '#a58e28' : '#444'}`, marginTop: '2px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {profile.availability === opt.value && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#a58e28' }} />}
                       </div>
                       <div>
@@ -627,23 +535,19 @@ export default function ProfiluxPage() {
                   ))}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #2a2a2a', paddingTop: '20px' }}>
-                  <button onClick={() => setCurrentStep(5)} style={{ background: 'transparent', border: '1px solid #333', color: '#666', fontSize: '13px', padding: '10px 20px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Salary</button>
-                  <button onClick={() => { markComplete(6); setCurrentStep(7) }} style={{ background: '#a58e28', border: 'none', color: '#000', fontSize: '13px', fontWeight: 500, padding: '10px 28px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Share →</button>
+                  <button onClick={() => setCurrentStep(5)} style={navBtn('prev')}>← Salary</button>
+                  <button onClick={() => { markComplete(6); setCurrentStep(7) }} style={navBtn('next')}>Share →</button>
                 </div>
               </div>
             )}
 
             {/* STEP 7: SHARE */}
             {currentStep === 7 && (
-              <div style={{ background: '#222', border: '1px solid #a58e28', borderRadius: '6px', padding: '28px', marginBottom: '20px' }}>
-                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 8px' }}>
-                  Profile sharing
-                </h2>
-                <p style={{ fontSize: '13px', color: '#555', fontWeight: 300, margin: '0 0 28px', lineHeight: 1.7 }}>
-                  Your profile is private by default. You decide if, when, and with whom you share it.
-                </p>
+              <div style={{ background: '#222', border: '1px solid #333', borderRadius: '6px', padding: '28px', marginBottom: '20px' }}>
+                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 8px' }}>Profile sharing</h2>
+                <p style={{ fontSize: '13px', color: '#555', fontWeight: 300, margin: '0 0 28px', lineHeight: 1.7 }}>Your profile is private by default. You decide if, when, and with whom you share it.</p>
                 <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '4px', padding: '16px 18px', display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '28px' }}>
-                  <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a58e28', fontSize: '13px', flexShrink: 0 }}>🔒</div>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', fontSize: '13px', flexShrink: 0 }}>🔒</div>
                   <div>
                     <div style={{ fontSize: '13px', color: '#ccc', marginBottom: '2px' }}>Your profile is private</div>
                     <div style={{ fontSize: '11px', color: '#555', fontWeight: 300 }}>Not indexed by Google, Bing, or any search engine.</div>
@@ -656,30 +560,18 @@ export default function ProfiluxPage() {
                   </div>
                   <label style={{ position: 'relative', width: '40px', height: '22px', flexShrink: 0, cursor: 'pointer' }}>
                     <input type="checkbox" checked={profile.sharingEnabled} onChange={e => handleToggleSharing(e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
-                    <span style={{
-                      position: 'absolute', inset: 0,
-                      background: profile.sharingEnabled ? 'rgba(165,142,40,0.2)' : '#2a2a2a',
-                      borderRadius: '11px', border: `1px solid ${profile.sharingEnabled ? '#a58e28' : '#333'}`,
-                    }}>
-                      <span style={{
-                        position: 'absolute', width: '16px', height: '16px',
-                        left: profile.sharingEnabled ? '20px' : '2px', top: '2px',
-                        background: profile.sharingEnabled ? '#a58e28' : '#555', borderRadius: '50', transition: '0.2s',
-                      }} />
+                    <span style={{ position: 'absolute', inset: 0, background: profile.sharingEnabled ? 'rgba(165,142,40,0.2)' : '#2a2a2a', borderRadius: '11px', border: `1px solid ${profile.sharingEnabled ? '#a58e28' : '#333'}` }}>
+                      <span style={{ position: 'absolute', width: '16px', height: '16px', left: profile.sharingEnabled ? '20px' : '2px', top: '2px', background: profile.sharingEnabled ? '#a58e28' : '#555', borderRadius: '50%', transition: '0.2s' }} />
                     </span>
                   </label>
                 </div>
                 {profile.sharingEnabled && profile.shareSlug && (
                   <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '4px', padding: '14px 16px', marginBottom: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '12px', color: '#666', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        joblux.com/<span style={{ color: '#a58e28' }}>{profile.shareSlug}</span>
-                      </span>
+                      <span style={{ fontSize: '12px', color: '#666', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>joblux.com/<span style={{ color: '#a58e28' }}>{profile.shareSlug}</span></span>
                       <button onClick={handleResetLink} style={{ background: 'transparent', border: 'none', color: '#444', fontSize: '11px', cursor: 'pointer', fontFamily: 'Inter, sans-serif', textDecoration: 'underline', flexShrink: 0 }}>Reset link</button>
                     </div>
-                    <div style={{ fontSize: '11px', color: '#444', fontWeight: 300, lineHeight: 1.6 }}>
-                      Resetting instantly revokes anyone who had the previous link.
-                    </div>
+                    <div style={{ fontSize: '11px', color: '#444', fontWeight: 300, lineHeight: 1.6 }}>Resetting instantly revokes anyone who had the previous link.</div>
                   </div>
                 )}
                 {profile.sharingEnabled && (
@@ -692,8 +584,7 @@ export default function ProfiluxPage() {
                         { icon: '↓', title: 'Download PDF', desc: 'Export a formatted JOBLUX profile document', action: handleSave },
                         { icon: '✉', title: 'Send by email', desc: 'Opens your email client with your profile link pre-filled', action: handleEmailShare },
                       ].map(btn => (
-                        <button key={btn.title} onClick={btn.action}
-                          style={{ display: 'flex', alignItems: 'center', gap: '14px', background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '4px', padding: '13px 16px', cursor: 'pointer', textAlign: 'left', fontFamily: 'Inter, sans-serif', width: '100%' }}>
+                        <button key={btn.title} onClick={btn.action} style={{ display: 'flex', alignItems: 'center', gap: '14px', background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '4px', padding: '13px 16px', cursor: 'pointer', textAlign: 'left', fontFamily: 'Inter, sans-serif', width: '100%' }}>
                           <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#a58e28', flexShrink: 0 }}>{btn.icon}</div>
                           <div style={{ flex: 1 }}>
                             <div style={{ fontSize: '13px', color: '#ccc', marginBottom: '2px' }}>{btn.title}</div>
@@ -706,7 +597,7 @@ export default function ProfiluxPage() {
                   </>
                 )}
                 <div style={{ background: '#111', border: '1px solid #2a2a2a', borderRadius: '4px', padding: '16px 18px', marginBottom: '20px' }}>
-                  <div style={{ fontSize: '10px', color: '#a58e28', letterSpacing: '0.08em', marginBottom: '10px' }}>OUR COMMITMENT TO YOU</div>
+                  <div style={{ fontSize: '10px', color: '#555', letterSpacing: '0.08em', marginBottom: '10px' }}>OUR COMMITMENT TO YOU</div>
                   {[
                     'Your profile is never indexed by Google, Bing, or any search engine',
                     'JOBLUX never shares your data with third parties',
@@ -714,13 +605,13 @@ export default function ProfiluxPage() {
                     'You can delete your profile and all data at any time',
                   ].map(item => (
                     <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '12px', color: '#555', fontWeight: 300, lineHeight: 1.6, marginBottom: '7px' }}>
-                      <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#a58e28', flexShrink: 0, marginTop: '7px' }} />
+                      <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#444', flexShrink: 0, marginTop: '7px' }} />
                       {item}
                     </div>
                   ))}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-start', borderTop: '1px solid #2a2a2a', paddingTop: '20px' }}>
-                  <button onClick={() => setCurrentStep(6)} style={{ background: 'transparent', border: '1px solid #333', color: '#666', fontSize: '13px', padding: '10px 20px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Availability</button>
+                  <button onClick={() => setCurrentStep(6)} style={navBtn('prev')}>← Availability</button>
                 </div>
               </div>
             )}
@@ -734,7 +625,7 @@ export default function ProfiluxPage() {
                   Your intelligence profile is ready. Mo will review it and match you to relevant search assignments confidentially.
                 </p>
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                  <button onClick={() => window.print()} style={{ background: '#a58e28', border: 'none', color: '#000', fontSize: '13px', fontWeight: 500, padding: '11px 26px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>↓ Export as PDF</button>
+                  <button onClick={handleSave} style={{ background: '#a58e28', border: 'none', color: '#000', fontSize: '13px', fontWeight: 500, padding: '11px 26px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>↓ Download profile</button>
                   <Link href={`/${profile.shareSlug || ''}`} style={{ background: 'transparent', border: '1px solid #333', color: '#888', fontSize: '13px', padding: '11px 20px', borderRadius: '4px', textDecoration: 'none', display: 'inline-block' }}>View my profile →</Link>
                   <Link href="/dashboard/candidate" style={{ background: 'transparent', border: '1px solid #333', color: '#888', fontSize: '13px', padding: '11px 20px', borderRadius: '4px', textDecoration: 'none', display: 'inline-block' }}>← Dashboard</Link>
                 </div>
@@ -742,7 +633,7 @@ export default function ProfiluxPage() {
             )}
           </div>
 
-          {/* SIDEBAR */}
+          {/* SIDEBAR — no gold on avatar or badge */}
           <div style={{ position: 'sticky', top: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ background: '#111', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '20px' }}>
               <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#2a2a2a', border: '1px solid #444', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', color: '#888', marginBottom: '12px', fontWeight: 500 }}>
