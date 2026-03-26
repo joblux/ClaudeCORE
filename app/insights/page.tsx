@@ -103,7 +103,7 @@ export default function InsightsPage() {
         .eq('status', 'published')
         .order('published_at', { ascending: false })
         .limit(6)
-      if (data && data.length > 0) setArticles(data)
+      if (data if (data && data.length > 0) setArticles(data)if (data && data.length > 0) setArticles(data) data.length > 0) setArticles(data.map((a: any) => ({ ...a, date: a.published_at || "" })))
     }
     fetchArticles()
   }, [])
