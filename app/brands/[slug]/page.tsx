@@ -80,12 +80,94 @@ const hermesData = {
     { label: 'Pace', text: 'Decision-making can be slow due to family governance. If you want fast-moving startup energy, this isn\'t it.' },
     { label: 'Access', text: 'Roles are competitive and rarely advertised publicly. Networking and referrals are essential to get in.' },
   ],
+  unsplashImages: [
+    {
+      url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
+      photographer: 'Anomaly',
+      photographer_url: 'https://unsplash.com/@anomaly?utm_source=joblux&utm_medium=referral',
+      unsplash_url: 'https://unsplash.com/photos/fashion?utm_source=joblux&utm_medium=referral',
+    },
+    {
+      url: 'https://images.unsplash.com/photo-1605517288786-8e9b35f9e6e3?w=600&q=80',
+      photographer: 'Carla Oliveira',
+      photographer_url: 'https://unsplash.com/@carla?utm_source=joblux&utm_medium=referral',
+      unsplash_url: 'https://unsplash.com/photos/atelier?utm_source=joblux&utm_medium=referral',
+    },
+  ],
 }
 
 function getInitials(name: string) {
   const words = name.split(' ')
   if (words.length === 1) return name.slice(0, 2)
   return words.slice(0, 2).map((w: string) => w[0]).join('')
+}
+
+// SVG illustration: Carré scarf
+function IllustrationCarre() {
+  return (
+    <svg width="100%" height="100%" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block' }}>
+      <rect x="20" y="10" width="120" height="120" rx="1" fill="none" stroke="#a58e28" strokeWidth="1.2"/>
+      <rect x="26" y="16" width="108" height="108" rx="1" fill="none" stroke="#a58e28" strokeWidth="0.4" opacity="0.45"/>
+      <rect x="32" y="22" width="96" height="96" rx="1" fill="none" stroke="#a58e28" strokeWidth="0.3" opacity="0.25"/>
+      {/* Corner flourishes */}
+      <path d="M20 32 Q27 25 34 18" fill="none" stroke="#a58e28" strokeWidth="0.6" opacity="0.6"/>
+      <path d="M126 18 Q133 25 140 32" fill="none" stroke="#a58e28" strokeWidth="0.6" opacity="0.6"/>
+      <path d="M20 108 Q27 115 34 122" fill="none" stroke="#a58e28" strokeWidth="0.6" opacity="0.6"/>
+      <path d="M140 108 Q133 115 126 122" fill="none" stroke="#a58e28" strokeWidth="0.6" opacity="0.6"/>
+      {/* Central medallion */}
+      <circle cx="80" cy="70" r="28" fill="none" stroke="#a58e28" strokeWidth="0.6" opacity="0.4"/>
+      <circle cx="80" cy="70" r="20" fill="none" stroke="#a58e28" strokeWidth="0.4" opacity="0.3"/>
+      {/* Chain link motif */}
+      <ellipse cx="80" cy="42" rx="5" ry="7" fill="none" stroke="#a58e28" strokeWidth="0.8" opacity="0.55"/>
+      <ellipse cx="80" cy="98" rx="5" ry="7" fill="none" stroke="#a58e28" strokeWidth="0.8" opacity="0.55"/>
+      <ellipse cx="52" cy="70" rx="7" ry="5" fill="none" stroke="#a58e28" strokeWidth="0.8" opacity="0.55"/>
+      <ellipse cx="108" cy="70" rx="7" ry="5" fill="none" stroke="#a58e28" strokeWidth="0.8" opacity="0.55"/>
+      {/* Border tick marks */}
+      <line x1="20" y1="44" x2="20" y2="50" stroke="#a58e28" strokeWidth="0.4" opacity="0.35"/>
+      <line x1="20" y1="56" x2="20" y2="62" stroke="#a58e28" strokeWidth="0.4" opacity="0.35"/>
+      <line x1="20" y1="78" x2="20" y2="84" stroke="#a58e28" strokeWidth="0.4" opacity="0.35"/>
+      <line x1="20" y1="90" x2="20" y2="96" stroke="#a58e28" strokeWidth="0.4" opacity="0.35"/>
+      <line x1="140" y1="44" x2="140" y2="50" stroke="#a58e28" strokeWidth="0.4" opacity="0.35"/>
+      <line x1="140" y1="56" x2="140" y2="62" stroke="#a58e28" strokeWidth="0.4" opacity="0.35"/>
+      <line x1="140" y1="78" x2="140" y2="84" stroke="#a58e28" strokeWidth="0.4" opacity="0.35"/>
+      <line x1="140" y1="90" x2="140" y2="96" stroke="#a58e28" strokeWidth="0.4" opacity="0.35"/>
+      <text x="80" y="148" fontFamily="Georgia, serif" fontStyle="italic" fontSize="11" fill="#a58e28" opacity="0.75" textAnchor="middle">Le Carré, 1937</text>
+    </svg>
+  )
+}
+
+// SVG illustration: Birkin bag
+function IllustrationBirkin() {
+  return (
+    <svg width="100%" height="100%" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block' }}>
+      {/* Bag body */}
+      <path d="M30 62 Q30 130 30 134 Q30 142 38 142 Q100 142 162 142 Q170 142 170 134 L170 62 Z" fill="none" stroke="#a58e28" strokeWidth="1.4"/>
+      {/* Top flap */}
+      <path d="M30 62 Q100 46 170 62" fill="none" stroke="#a58e28" strokeWidth="1.4"/>
+      {/* Flap inner line */}
+      <path d="M38 66 Q100 52 162 66" fill="none" stroke="#a58e28" strokeWidth="0.4" opacity="0.45"/>
+      {/* Turn lock */}
+      <rect x="86" y="54" width="28" height="18" rx="2.5" fill="none" stroke="#a58e28" strokeWidth="1"/>
+      <circle cx="100" cy="63" r="4" fill="none" stroke="#a58e28" strokeWidth="0.7"/>
+      <line x1="100" y1="59" x2="100" y2="54" stroke="#a58e28" strokeWidth="0.6"/>
+      {/* Handle */}
+      <path d="M56 62 C56 34 144 34 144 62" fill="none" stroke="#a58e28" strokeWidth="1.4" strokeLinecap="round"/>
+      {/* Handle rings */}
+      <circle cx="56" cy="62" r="4" fill="none" stroke="#a58e28" strokeWidth="0.9"/>
+      <circle cx="144" cy="62" r="4" fill="none" stroke="#a58e28" strokeWidth="0.9"/>
+      {/* Saddle stitch sides */}
+      <line x1="34" y1="68" x2="34" y2="138" stroke="#a58e28" strokeWidth="0.4" opacity="0.4" strokeDasharray="3 3"/>
+      <line x1="166" y1="68" x2="166" y2="138" stroke="#a58e28" strokeWidth="0.4" opacity="0.4" strokeDasharray="3 3"/>
+      {/* Subtle shading */}
+      <line x1="42" y1="76" x2="42" y2="136" stroke="#a58e28" strokeWidth="0.2" opacity="0.12"/>
+      <line x1="56" y1="70" x2="56" y2="138" stroke="#a58e28" strokeWidth="0.2" opacity="0.12"/>
+      <line x1="144" y1="70" x2="144" y2="138" stroke="#a58e28" strokeWidth="0.2" opacity="0.12"/>
+      <line x1="158" y1="76" x2="158" y2="136" stroke="#a58e28" strokeWidth="0.2" opacity="0.12"/>
+      {/* Bottom gusset line */}
+      <line x1="32" y1="138" x2="168" y2="138" stroke="#a58e28" strokeWidth="0.4" opacity="0.3"/>
+      <text x="100" y="155" fontFamily="Georgia, serif" fontStyle="italic" fontSize="11" fill="#a58e28" opacity="0.75" textAnchor="middle">Birkin, 1984</text>
+    </svg>
+  )
 }
 
 export default function BrandDetailPage() {
@@ -205,14 +287,12 @@ export default function BrandDetailPage() {
         {/* Overview Tab */}
         {activeTab === 'Overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left col */}
             <div className="lg:col-span-2 space-y-8">
               <div>
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">COMPANY PROFILE</p>
                 <p className="text-sm text-[#888] leading-relaxed mb-3">{brand.description1}</p>
                 <p className="text-sm text-[#888] leading-relaxed">{brand.description2}</p>
               </div>
-
               <div>
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">CAREER PATHS AT {brand.name.toUpperCase()}</p>
                 <div className="flex flex-wrap gap-2">
@@ -221,7 +301,6 @@ export default function BrandDetailPage() {
                   ))}
                 </div>
               </div>
-
               <div>
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">RECENT SIGNALS</p>
                 <div className="space-y-3">
@@ -235,18 +314,13 @@ export default function BrandDetailPage() {
                 </div>
               </div>
             </div>
-
-            {/* Right col */}
             <div className="space-y-4">
-              {/* Leadership */}
               <div className="bg-[#222] rounded-xl p-4">
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">LEADERSHIP</p>
                 <div className="space-y-3">
                   {(brand.leadership || []).map((l: any) => (
                     <div key={l.name} className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[10px] font-medium text-[#666] flex-shrink-0">
-                        {l.initials}
-                      </div>
+                      <div className="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[10px] font-medium text-[#666] flex-shrink-0">{l.initials}</div>
                       <div className="flex-1">
                         <div className="text-sm text-white">{l.name}</div>
                         <div className="text-[11px] text-[#555]">{l.role}</div>
@@ -256,50 +330,25 @@ export default function BrandDetailPage() {
                   ))}
                 </div>
               </div>
-
-              {/* Salaries */}
               <div className="bg-[#222] rounded-xl p-4">
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">SALARY RANGES AT {brand.name.toUpperCase()}</p>
                 <div className="space-y-2">
                   {(brand.salaries || []).map((s: any) => (
                     <div key={s.role} className="flex justify-between items-center">
                       <span className="text-xs text-[#888]">{s.role}</span>
-                      <span
-                        className="text-xs font-medium"
-                        style={{
-                          color: s.blurred ? 'transparent' : '#a58e28',
-                          textShadow: s.blurred ? '0 0 8px #a58e28' : 'none',
-                          filter: s.blurred ? 'blur(4px)' : 'none',
-                          userSelect: s.blurred ? 'none' : 'auto',
-                        }}
-                      >
-                        {s.range}
-                      </span>
+                      <span className="text-xs font-medium" style={{ color: s.blurred ? 'transparent' : '#a58e28', textShadow: s.blurred ? '0 0 8px #a58e28' : 'none', filter: s.blurred ? 'blur(4px)' : 'none', userSelect: s.blurred ? 'none' : 'auto' }}>{s.range}</span>
                     </div>
                   ))}
                 </div>
-                <a href="/careers" className="block mt-3 text-xs text-[#a58e28] hover:underline">
-                  Contribute your salary to see all →
-                </a>
+                <a href="/careers" className="block mt-3 text-xs text-[#a58e28] hover:underline">Contribute your salary to see all →</a>
               </div>
-
-              {/* Financial */}
               <div className="bg-[#222] rounded-xl p-4">
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">FINANCIAL HEALTH</p>
                 {brand.financial && (
                   <div className="space-y-1.5">
-                    <div className="flex justify-between">
-                      <span className="text-xs text-[#555]">Stock</span>
-                      <span className="text-xs text-[#888]">{brand.financial.stock}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-xs text-[#555]">Revenue</span>
-                      <span className="text-xs text-[#888]">{brand.financial.revenue}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-xs text-[#555]">Operating margin</span>
-                      <span className="text-xs text-[#888]">{brand.financial.margin}</span>
-                    </div>
+                    <div className="flex justify-between"><span className="text-xs text-[#555]">Stock</span><span className="text-xs text-[#888]">{brand.financial.stock}</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-[#555]">Revenue</span><span className="text-xs text-[#888]">{brand.financial.revenue}</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-[#555]">Operating margin</span><span className="text-xs text-[#888]">{brand.financial.margin}</span></div>
                   </div>
                 )}
                 <p className="text-[10px] text-[#333] mt-3">Source: public filings, last updated March 2026</p>
@@ -311,9 +360,8 @@ export default function BrandDetailPage() {
         {/* Culture Tab */}
         {activeTab === 'Culture' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left */}
+            {/* Left col */}
             <div className="space-y-6">
-              {/* Founder */}
               {brand.founder && (
                 <div className="flex gap-4">
                   <div className="w-32 h-36 bg-[#222] rounded-lg flex-shrink-0 flex items-center justify-center border border-[#2a2a2a]">
@@ -323,9 +371,7 @@ export default function BrandDetailPage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-normal text-white mb-0.5" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-                      {brand.founder.name}
-                    </h3>
+                    <h3 className="text-lg font-normal text-white mb-0.5" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>{brand.founder.name}</h3>
                     <p className="text-xs text-[#555] mb-2">Founder · {brand.founder.dates} · Est. {brand.founded_year}, {brand.founded_city}</p>
                     {brand.founder.bio.split('\n\n').map((p: string, i: number) => (
                       <p key={i} className="text-sm text-[#777] leading-relaxed mb-2">{p}</p>
@@ -334,18 +380,12 @@ export default function BrandDetailPage() {
                   </div>
                 </div>
               )}
-
-              {/* Quote */}
               {brand.quote && (
                 <div className="border-l-2 border-[#a58e28] pl-4 py-2">
-                  <p className="text-base italic text-[#ccc] mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-                    "{brand.quote.text}"
-                  </p>
+                  <p className="text-base italic text-[#ccc] mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>"{brand.quote.text}"</p>
                   <p className="text-xs text-[#555]">{brand.quote.author}</p>
                 </div>
               )}
-
-              {/* Timeline */}
               <div>
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-4">HERITAGE TIMELINE</p>
                 <div className="space-y-4">
@@ -365,9 +405,8 @@ export default function BrandDetailPage() {
               </div>
             </div>
 
-            {/* Right */}
+            {/* Right col */}
             <div className="space-y-6">
-              {/* Core values */}
               <div>
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">CORE VALUES</p>
                 <div className="grid grid-cols-2 gap-3">
@@ -380,28 +419,99 @@ export default function BrandDetailPage() {
                 </div>
               </div>
 
-              {/* Work culture accordion */}
               <div>
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">WHAT IT'S LIKE TO WORK THERE</p>
                 <div className="space-y-2">
                   {(brand.workCulture || []).map((w: any) => (
                     <div key={w.label} className="bg-[#222] rounded-lg border border-[#2a2a2a] overflow-hidden">
-                      <button
-                        onClick={() => setOpenAccordion(openAccordion === w.label ? null : w.label)}
-                        className="w-full flex items-center justify-between px-4 py-3"
-                      >
+                      <button onClick={() => setOpenAccordion(openAccordion === w.label ? null : w.label)} className="w-full flex items-center justify-between px-4 py-3">
                         <span className="text-xs font-medium text-[#a58e28] tracking-wider">{w.label}</span>
                         <span className="text-[#555] text-lg leading-none">{openAccordion === w.label ? '−' : '+'}</span>
                       </button>
                       {openAccordion === w.label && (
-                        <div className="px-4 pb-4">
-                          <p className="text-sm text-[#777] leading-relaxed">{w.text}</p>
-                        </div>
+                        <div className="px-4 pb-4"><p className="text-sm text-[#777] leading-relaxed">{w.text}</p></div>
                       )}
                     </div>
                   ))}
                 </div>
               </div>
+
+              {/* MAISON WORLD — 2×2 illustration + photo grid */}
+              <div>
+                <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">MAISON WORLD</p>
+                <div className="grid grid-cols-2 gap-[3px] rounded-lg overflow-hidden border border-[#2a2a2a]">
+
+                  {/* Top-left: Carré SVG illustration */}
+                  <div className="bg-[#1e1e1e] aspect-square flex items-center justify-center p-3">
+                    <IllustrationCarre />
+                  </div>
+
+                  {/* Top-right: Unsplash photo 1 */}
+                  <div className="relative aspect-square bg-[#222] overflow-hidden">
+                    {brand.unsplashImages?.[0] ? (
+                      <>
+                        <img
+                          src={brand.unsplashImages[0].url}
+                          alt="Brand atmosphere"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/65 px-2 py-1.5">
+                          <p className="text-[9px] text-[#888]">
+                            Photo by{' '}
+                            <a href={brand.unsplashImages[0].photographer_url} target="_blank" rel="noopener noreferrer" className="text-[#a58e28] hover:underline">
+                              {brand.unsplashImages[0].photographer}
+                            </a>
+                            {' '}on{' '}
+                            <a href={brand.unsplashImages[0].unsplash_url} target="_blank" rel="noopener noreferrer" className="text-[#a58e28] hover:underline">
+                              Unsplash
+                            </a>
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-[10px] text-[#444]">Loading…</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bottom-left: Unsplash photo 2 */}
+                  <div className="relative aspect-square bg-[#222] overflow-hidden">
+                    {brand.unsplashImages?.[1] ? (
+                      <>
+                        <img
+                          src={brand.unsplashImages[1].url}
+                          alt="Brand atelier"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/65 px-2 py-1.5">
+                          <p className="text-[9px] text-[#888]">
+                            Photo by{' '}
+                            <a href={brand.unsplashImages[1].photographer_url} target="_blank" rel="noopener noreferrer" className="text-[#a58e28] hover:underline">
+                              {brand.unsplashImages[1].photographer}
+                            </a>
+                            {' '}on{' '}
+                            <a href={brand.unsplashImages[1].unsplash_url} target="_blank" rel="noopener noreferrer" className="text-[#a58e28] hover:underline">
+                              Unsplash
+                            </a>
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-[10px] text-[#444]">Loading…</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bottom-right: Birkin SVG illustration */}
+                  <div className="bg-[#1e1e1e] aspect-square flex items-center justify-center p-3">
+                    <IllustrationBirkin />
+                  </div>
+
+                </div>
+              </div>
+
             </div>
           </div>
         )}
