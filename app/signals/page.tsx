@@ -113,6 +113,14 @@ const weekStats = [
 ]
 
 const filters = ['All signals', 'Growth', 'Leadership', 'Contraction', 'Expansion', 'M&A']
+const filterColors: Record<string, string> = {
+  'All signals': '#a58e28',
+  'Growth': '#4CAF50',
+  'Leadership': '#FF9800',
+  'Contraction': '#f44336',
+  'Expansion': '#2196F3',
+  'M&A': '#9C27B0',
+}
 
 export default function SignalsPage() {
   const [activeFilter, setActiveFilter] = useState('All signals')
@@ -169,8 +177,8 @@ export default function SignalsPage() {
                   onClick={() => setActiveFilter(f)}
                   className="rounded-full px-4 py-1.5 text-xs transition-colors"
                   style={{
-                    border: activeFilter === f ? '1px solid #a58e28' : '1px solid #2e2e2e',
-                    color: activeFilter === f ? '#a58e28' : '#666',
+                    border: `1px solid ${filterColors[f] || '#2e2e2e'}`,
+                    color: filterColors[f] || '#666',
                     background: 'transparent',
                   }}
                 >
