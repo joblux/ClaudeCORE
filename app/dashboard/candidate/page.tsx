@@ -65,7 +65,7 @@ export default function DashboardPage() {
             <div className="inline-block border border-[#a58e28] text-[#a58e28] text-[10px] font-semibold tracking-[2px] px-3 py-1 rounded mb-2">
               EXECUTIVE
             </div>
-            <Link href="/profile" className="block text-xs text-[#555] hover:text-[#888] transition-colors">
+            <Link href="/dashboard/candidate/profilux" className="block text-xs text-[#555] hover:text-[#888] transition-colors">
               Edit profile →
             </Link>
           </div>
@@ -83,7 +83,7 @@ export default function DashboardPage() {
             </div>
             <div className="text-[11px] text-[#444]">4 sections remaining · Complete to unlock full matching</div>
           </div>
-          <Link href="/profile" className="bg-[#a58e28] text-[#1a1a1a] text-xs font-semibold px-4 py-2 rounded-lg hover:bg-[#c4a832] transition-colors whitespace-nowrap">
+          <Link href="/dashboard/candidate/profilux" className="bg-[#a58e28] text-[#1a1a1a] text-xs font-semibold px-4 py-2 rounded-lg hover:bg-[#c4a832] transition-colors whitespace-nowrap">
             Continue →
           </Link>
         </div>
