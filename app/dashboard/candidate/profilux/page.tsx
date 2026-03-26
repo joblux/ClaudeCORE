@@ -255,7 +255,7 @@ export default function ProfiluxPage() {
       <div style={{
         background: '#111111',
         borderBottom: '1px solid #2a2a2a',
-        padding: '10px 32px',
+        padding: '0 32px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -293,7 +293,7 @@ export default function ProfiluxPage() {
       </div>
 
       {/* HERO — directly below topbar */}
-      <div style={{ background: '#1a1a1a', borderBottom: '1px solid #222', padding: '20px 32px 16px' }}>
+      <div style={{ background: '#1a1a1a', borderBottom: '1px solid #222', padding: '0 32px' }}>
         <div style={{
           maxWidth: '1200px', margin: '0 auto',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px',
