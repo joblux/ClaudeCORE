@@ -23,6 +23,7 @@ export interface UnsplashImage {
   photographer: string
   photographer_url: string
   unsplash_url: string
+  download_location: string
 }
 
 export function mapUnsplashPhoto(photo: any): UnsplashImage {
@@ -36,5 +37,6 @@ export function mapUnsplashPhoto(photo: any): UnsplashImage {
     photographer: photo.user.name,
     photographer_url: photo.user.links.html,
     unsplash_url: photo.links.html,
+    download_location: photo.links.download_location,
   }
 }

@@ -31,6 +31,7 @@ interface UnsplashResult {
   photographer: string
   photographer_url: string
   unsplash_url: string
+  download_location: string
 }
 
 type View = 'library' | 'unsplash'
@@ -133,6 +134,8 @@ export default function AdminMediaPage() {
 
   const saveUnsplash = async (img: UnsplashResult) => {
     setSaving(img.id)
+    // Trigger Unsplash download event (required by API guidelines)
+    await fetch(`/api/media/unsplash/download?download_location=${encodeURIComponent(img.download_location)}`, { method: 'POST' })
     await fetch('/api/media/unsplash', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
