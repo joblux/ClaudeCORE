@@ -307,11 +307,11 @@ export default function AdminMediaPage() {
                   {selected.unsplash_attribution && (
                     <div className="text-xs text-[#888]">
                       Photo by{' '}
-                      <a href={selected.unsplash_attribution.photographer_url} target="_blank" rel="noopener noreferrer" className="text-[#a58e28]">
+                      <a href={`${selected.unsplash_attribution.photographer_url}?utm_source=joblux&utm_medium=referral`} target="_blank" rel="noopener noreferrer" className="text-[#a58e28]">
                         {selected.unsplash_attribution.photographer}
                       </a>{' '}
                       on{' '}
-                      <a href={selected.unsplash_attribution.unsplash_url} target="_blank" rel="noopener noreferrer" className="text-[#a58e28]">
+                      <a href={`${selected.unsplash_attribution.unsplash_url}?utm_source=joblux&utm_medium=referral`} target="_blank" rel="noopener noreferrer" className="text-[#a58e28]">
                         Unsplash
                       </a>
                     </div>
@@ -360,7 +360,7 @@ export default function AdminMediaPage() {
                   </div>
                   <div className="p-2.5">
                     <div className="text-[0.65rem] text-[#888] truncate mb-2">
-                      Photo by <a href={img.photographer_url} target="_blank" rel="noopener noreferrer" className="text-[#a58e28]">{img.photographer}</a>
+                      Photo by <a href={`${img.photographer_url}?utm_source=joblux&utm_medium=referral`} target="_blank" rel="noopener noreferrer" className="text-[#a58e28]">{img.photographer}</a>
                     </div>
                     <button
                       onClick={() => saveUnsplash(img)}
