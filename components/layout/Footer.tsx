@@ -16,7 +16,7 @@ export function Footer() {
 
           {/* Center: Nav links */}
           <nav className="flex flex-wrap items-center justify-center gap-6">
-            {['Brands', 'Insights', 'Signals', 'Events', 'Escape', 'Privacy'].map((label) => (
+            {['Brands', 'Insights', 'Signals', 'Events', 'Privacy'].map((label) => (
               <Link
                 key={label}
                 href={`/${label.toLowerCase()}`}
@@ -26,6 +26,14 @@ export function Footer() {
                 {label}
               </Link>
             ))}
+            <span className="text-[#2a2a2a]">|</span>
+            <Link
+              href="/escape"
+              className="text-[12px] italic text-[#a58e28] hover:text-[#e4b042] transition-colors"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              Escape
+            </Link>
           </nav>
 
           {/* Right: Copyright */}

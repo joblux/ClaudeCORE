@@ -58,16 +58,6 @@ export function Header() {
 
         {/* Right side */}
         <div className="flex items-center justify-end gap-4 flex-shrink-0">
-          <Link
-            href="/escape"
-            className="hidden sm:inline text-[15px] italic text-[#a58e28] hover:text-[#e4b042] transition-colors"
-            style={{ fontFamily: "'Playfair Display', serif" }}
-          >
-            Escape
-          </Link>
-
-          {/* Separator */}
-          <div className="hidden sm:block w-px h-4 bg-[#333]" />
 
           {isAuthenticated ? (
             <UserMenu />
@@ -113,14 +103,6 @@ export function Header() {
             })}
           </nav>
           <div className="px-7 pb-10 space-y-4">
-            <Link
-              href="/escape"
-              onClick={() => setMobileOpen(false)}
-              className="block py-3 text-[15px] italic text-[#a58e28]"
-              style={{ fontFamily: "'Playfair Display', serif" }}
-            >
-              Escape
-            </Link>
             {!isAuthenticated && (
               <Link
                 href="/members"
