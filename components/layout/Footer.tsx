@@ -9,7 +9,7 @@ export function Footer() {
         {/* Brand */}
         <div className="flex flex-col justify-between h-full">
           <div>
-            <div className="mb-3"><Image src="/logos/joblux-header.png" alt="JOBLUX" width={120} height={32} className="h-7 w-auto brightness-0 invert" /></div>
+            <div className="mb-3"><Image src="/logos/joblux-header.png" alt="JOBLUX" width={78} height={21} className="h-[18px] w-auto brightness-0 invert" /></div>
             <p className="text-[13px] text-[#aaa] leading-relaxed mb-6">Luxury Talent Intelligence</p>
             <div className="flex flex-col gap-1.5 mb-2">
               <p className="text-[13px] text-[#777]">No ads.</p>
