@@ -3,13 +3,19 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
+import Link from 'next/link'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-const languages = ['EN', 'FR', 'ES', 'AR', 'ZH', 'RU', 'JA', 'IT']
+const languageOptions = [
+  { code: 'en', label: 'EN', display: 'EN' },
+  { code: 'ar', label: 'AR', display: 'ع' },
+  { code: 'zh', label: 'ZH', display: '中' },
+  { code: 'ja', label: 'JA', display: '日' },
+]
 const tabs = ['Overview', 'Culture', 'Career paths', 'Salaries', 'Signals']
 
 const hermesData = {
@@ -174,7 +180,6 @@ export default function BrandDetailPage() {
   const params = useParams()
   const slug = params?.slug as string
   const [activeTab, setActiveTab] = useState('Overview')
-  const [activeLang, setActiveLang] = useState('EN')
   const [openAccordion, setOpenAccordion] = useState<string | null>(null)
   const [brand, setBrand] = useState<any>(hermesData)
 
@@ -203,22 +208,33 @@ export default function BrandDetailPage() {
           <span className="text-[#888]">{brand.name}</span>
         </div>
 
+        {/* hreflang tags */}
+        <link rel="alternate" hrefLang="en" href={`/brands/${slug}`} />
+        <link rel="alternate" hrefLang="ar" href={`/brands/${slug}/ar`} />
+        <link rel="alternate" hrefLang="zh" href={`/brands/${slug}/zh`} />
+        <link rel="alternate" hrefLang="ja" href={`/brands/${slug}/ja`} />
+        <link rel="alternate" hrefLang="x-default" href={`/brands/${slug}`} />
+
         {/* Language switcher */}
         <div className="flex gap-2 mb-6 flex-wrap">
-          {languages.map(l => (
-            <button
-              key={l}
-              onClick={() => setActiveLang(l)}
-              className="text-xs px-3 py-1 rounded transition-colors"
-              style={{
-                border: activeLang === l ? '1px solid #a58e28' : '1px solid #2a2a2a',
-                color: activeLang === l ? '#a58e28' : '#555',
-                background: activeLang === l ? 'rgba(165,142,40,0.1)' : 'transparent',
-              }}
-            >
-              {l}
-            </button>
-          ))}
+          {languageOptions.map(l => {
+            const href = l.code === 'en' ? `/brands/${slug}` : `/brands/${slug}/${l.code}`
+            const isActive = l.code === 'en'
+            return (
+              <Link
+                key={l.code}
+                href={href}
+                className="text-xs px-3 py-1 rounded transition-colors"
+                style={{
+                  border: isActive ? '1px solid #a58e28' : '1px solid #2a2a2a',
+                  color: isActive ? '#a58e28' : '#555',
+                  background: isActive ? 'rgba(165,142,40,0.1)' : 'transparent',
+                }}
+              >
+                {l.display}
+              </Link>
+            )
+          })}
         </div>
 
         {/* Brand header */}
