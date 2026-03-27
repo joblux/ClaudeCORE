@@ -30,7 +30,7 @@ export default function UserMenu() {
   if (!isAuthenticated) {
     return (
       <Link
-        href="/members"
+        href="/join"
         className="text-[13px] text-[#888] hover:text-white transition-colors"
       >
         Sign in
