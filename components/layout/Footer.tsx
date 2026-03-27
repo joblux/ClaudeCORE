@@ -2,47 +2,69 @@ import Link from 'next/link'
 
 export function Footer() {
   return (
-    <footer className="bg-[#1a1a1a] border-t border-[#2a2a2a]">
-      <div className="px-7 py-8">
-        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          {/* Left: Logo */}
-          <Link href="/" className="flex-shrink-0">
-            <img
-              src="/logos/joblux-header.png"
-              alt="JOBLUX"
-              className="h-[18px] w-auto block"
-            />
-          </Link>
+    <footer className="bg-[#141414] border-t border-[#2a2a2a]">
+      <div className="max-w-[1200px] mx-auto px-7 py-14 grid grid-cols-[240px_1fr_1fr_1fr] gap-12 items-start">
 
-          {/* Center: Nav links */}
-          <nav className="flex flex-wrap items-center justify-center gap-6">
-            {['Brands', 'Insights', 'Signals', 'Events', 'Privacy'].map((label) => (
-              <Link
-                key={label}
-                href={`/${label.toLowerCase()}`}
-                className="text-[12px] text-[#666] hover:text-white transition-colors"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-              >
-                {label}
-              </Link>
-            ))}
-            <span className="text-[#2a2a2a]">|</span>
-            <Link
-              href="/escape"
-              className="text-[12px] italic text-[#a58e28] hover:text-[#e4b042] transition-colors"
-              style={{ fontFamily: "'Playfair Display', serif" }}
-            >
-              Escape
-            </Link>
-          </nav>
+        {/* Brand */}
+        <div className="flex flex-col justify-between h-full">
+          <div>
+            <div className="text-[#a58e28] font-bold tracking-[0.15em] text-[15px] mb-3">JOBLUX.</div>
+            <p className="text-[13px] text-[#aaa] leading-relaxed mb-6">Luxury Talent Intelligence</p>
+            <div className="flex flex-col gap-1.5 mb-2">
+              <p className="text-[13px] text-[#777]">No ads.</p>
+              <p className="text-[13px] text-[#777]">No noise.</p>
+              <p className="text-[13px] text-[#777]">No data reselling.</p>
+              <p className="text-[13px] text-[#777]">Global.</p>
+            </div>
+          </div>
+          <p className="text-[13px] text-[#555] leading-relaxed pt-3">Powered by luxury<br/>industry professionals.</p>
+        </div>
 
-          {/* Right: Copyright */}
-          <p
-            className="text-[12px] text-[#555] flex-shrink-0"
-            style={{ fontFamily: 'Inter, sans-serif' }}
-          >
-            &copy; 2026 JOBLUX
-          </p>
+        {/* Intelligence */}
+        <div>
+          <p className="text-[10px] text-[#777] tracking-[0.14em] uppercase mb-5">Intelligence</p>
+          <div className="flex flex-col gap-3">
+            <Link href="/brands" className="text-[13px] text-[#aaa] hover:text-white transition-colors">WikiLux</Link>
+            <Link href="/insights" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Industry news & analysis</Link>
+            <Link href="/the-brief" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Biweekly newsletter</Link>
+            <Link href="/salaries" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Salary benchmarks</Link>
+            <Link href="/interviews" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Interview experiences</Link>
+            <Link href="/careers" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Careers intelligence</Link>
+          </div>
+        </div>
+
+        {/* Services + Escape */}
+        <div>
+          <p className="text-[10px] text-[#777] tracking-[0.14em] uppercase mb-5">Services</p>
+          <div className="flex flex-col gap-3 mb-9">
+            <Link href="/services" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Executive search</Link>
+            <Link href="/contribute" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Contribute data</Link>
+            <Link href="/join" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Request access</Link>
+          </div>
+          <div className="border-t border-[#222] pt-6">
+            <Link href="/escape" className="text-[16px] text-[#a58e28] italic font-serif block mb-2">Escape</Link>
+            <p className="text-[12px] text-[#666]">Curated travels.</p>
+          </div>
+        </div>
+
+        {/* Company */}
+        <div>
+          <p className="text-[10px] text-[#777] tracking-[0.14em] uppercase mb-5">Company</p>
+          <div className="flex flex-col gap-3">
+            <Link href="/about" className="text-[13px] text-[#aaa] hover:text-white transition-colors">About</Link>
+            <Link href="/faq" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Help & FAQ</Link>
+            <Link href="/privacy" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Privacy</Link>
+            <Link href="/terms" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Terms</Link>
+            <Link href="/contact" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Contact</Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom bar */}
+      <div className="border-t border-[#1e1e1e] px-7 py-4">
+        <div className="max-w-[1200px] mx-auto flex items-center justify-between">
+          <p className="text-[12px] text-[#888]">© 2026 JOBLUX LLC.</p>
+          <p className="text-[12px] text-[#666] italic" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Luxury, decoded.</p>
         </div>
       </div>
     </footer>

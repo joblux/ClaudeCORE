@@ -31,12 +31,12 @@ export function Header() {
           <img
             src="/logos/joblux-header.png"
             alt="JOBLUX"
-            className="h-[26px] w-auto block"
+            className="h-[30px] w-auto block"
           />
         </Link>
 
         {/* Center nav — desktop */}
-        <nav className="hidden md:flex items-center justify-center gap-9">
+        <nav className="hidden md:flex items-center justify-center gap-7">
           {navItems.map((item) => {
             const isActive = pathname.startsWith(item.href)
             return (
@@ -64,8 +64,7 @@ export function Header() {
           ) : (
             <Link
               href="/join"
-              className="hidden sm:inline text-[15px] text-[rgba(255,255,255,0.82)] hover:text-white transition-colors"
-              style={{ fontFamily: 'Inter, sans-serif' }}
+              className="hidden sm:inline text-[13px] text-[rgba(255,255,255,0.82)] border border-[#3a3a3a] px-4 py-1.5 hover:border-[#666] hover:text-white transition-colors tracking-[0.06em] uppercase"
             >
               Connect
             </Link>
