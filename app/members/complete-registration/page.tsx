@@ -67,10 +67,6 @@ export default function CompleteRegistrationPage() {
   return (
     <main className="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-[480px] bg-[#141414] border border-[#1e1e1e] px-9 py-11">
-        <div className="flex justify-center mb-9">
-          <a href="/"><Image src="/logos/joblux-header.png" alt="JOBLUX" width={100} height={28} className="h-7 w-auto brightness-0 invert opacity-80" /></a>
-        </div>
-
         <div className="flex items-center justify-center gap-0 mb-9">
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-black font-bold" style={{ fontSize: '9px' }}>✓</div>

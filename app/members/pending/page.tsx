@@ -39,9 +39,6 @@ export default function PendingPage() {
     return (
       <main className="min-h-screen bg-[#1a1a1a] flex items-center justify-center px-6">
         <div className="max-w-md w-full text-center">
-          <div className="flex justify-center mb-10">
-            <a href="/"><Image src="/logos/joblux-header.png" alt="JOBLUX" width={100} height={28} className="h-7 w-auto opacity-60" /></a>
-          </div>
           <div className="bg-[#222] border border-[#2a2a2a] rounded-sm p-10">
             <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-[#1a1a1a] border border-[#a58e28] flex items-center justify-center">
               <svg className="w-6 h-6 text-[#a58e28]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,9 +61,6 @@ export default function PendingPage() {
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex items-center justify-center px-6">
       <div className="max-w-md w-full text-center">
-        <div className="flex justify-center mb-10">
-          <a href="/"><Image src="/logos/joblux-header.png" alt="JOBLUX" width={100} height={28} className="h-7 w-auto opacity-60" /></a>
-        </div>
         <div className="bg-[#222] border border-[#2a2a2a] rounded-sm p-10">
           <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center">
             <svg className="w-6 h-6 text-[#a58e28]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
