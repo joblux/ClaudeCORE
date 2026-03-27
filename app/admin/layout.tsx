@@ -192,7 +192,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="text-[11px] text-gray-600 truncate">{name || email || 'Admin'}</div>
         </div>
         <Link
-          href="/dashboard"
+          href="/"
           className="flex items-center gap-1.5 text-[11px] text-gray-400 hover:text-[#a58e28] transition-colors"
         >
           <LogOut size={10} />
@@ -268,7 +268,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
       <div className="px-4 py-4 border-t border-[#2a2a2a]">
         <div className="text-xs text-[#888] truncate mb-1">{name || email || 'Admin'}</div>
-        <Link href="/dashboard" className="flex items-center gap-2 text-xs text-[#666] hover:text-[#a58e28] transition-colors">
+        <Link href="/" className="flex items-center gap-2 text-xs text-[#666] hover:text-[#a58e28] transition-colors">
           <LogOut size={12} />
           Exit Admin
         </Link>
