@@ -63,7 +63,7 @@ export function Header() {
             <UserMenu />
           ) : (
             <Link
-              href="/members"
+              href="/join"
               className="hidden sm:inline text-[15px] text-[rgba(255,255,255,0.82)] hover:text-white transition-colors"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
@@ -105,7 +105,7 @@ export function Header() {
           <div className="px-7 pb-10 space-y-4">
             {!isAuthenticated && (
               <Link
-                href="/members"
+                href="/join"
                 onClick={() => setMobileOpen(false)}
                 className="block py-3 text-[15px] text-[rgba(255,255,255,0.82)]"
               >
