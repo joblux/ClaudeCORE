@@ -10,7 +10,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const VALID_TIERS = ['member', 'senior', 'executive', 'business', 'insider']
+const VALID_TIERS = ['rising', 'pro', 'professional', 'business', 'insider']
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
