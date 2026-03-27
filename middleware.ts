@@ -46,10 +46,32 @@ async function getMaintenanceMode(): Promise<boolean> {
   }
 }
 
+const HOLDING_BYPASS = ["/holding", "/api", "/_next", "/logos", "/favicon"];
+
 export default withAuth(
   async function middleware(req) {
     const { pathname } = req.nextUrl;
+    const host = req.headers.get("host") || "";
     const token = req.nextauth.token;
+
+    // Preview mode: ?preview=joblux2026 sets cookie and redirects to /
+    if (req.nextUrl.searchParams.get("preview") === "joblux2026") {
+      const response = NextResponse.redirect(new URL("/", req.url));
+      response.cookies.set("joblux_preview", "true", {
+        path: "/",
+        maxAge: 30 * 24 * 60 * 60,
+      });
+      return response;
+    }
+
+    // Holding page: production domain without preview cookie
+    if (
+      host.includes("joblux.com") &&
+      req.cookies.get("joblux_preview")?.value !== "true" &&
+      !HOLDING_BYPASS.some((p) => pathname.startsWith(p))
+    ) {
+      return NextResponse.redirect(new URL("/holding", req.url));
+    }
 
     // Check maintenance bypass paths
     if (!MAINTENANCE_BYPASS.some((p) => pathname.startsWith(p))) {
@@ -88,7 +110,7 @@ export default withAuth(
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl;
         // Allow unauthenticated access to public pages (maintenance redirect handles them)
-        const publicPaths = ["/", "/about", "/jobs", "/opportunities", "/wikilux", "/bloglux", "/brands", "/signals", "/careers", "/events", "/insights", "/travel", "/[slug]", "/escape", "/interviews", "/salaries", "/coaching", "/the-brief", "/members", "/join", "/offline", "/search", "/companies", "/interview-prep", "/terms", "/privacy", "/faq", "/contact", "/services", "/contribute", "/select-profile", "/sitemap.xml", "/robots.txt", "/rss.xml", "/rss", "/feed", "/feed.xml"];
+        const publicPaths = ["/", "/about", "/holding", "/jobs", "/opportunities", "/wikilux", "/bloglux", "/brands", "/signals", "/careers", "/events", "/insights", "/travel", "/[slug]", "/escape", "/interviews", "/salaries", "/coaching", "/the-brief", "/members", "/join", "/offline", "/search", "/companies", "/interview-prep", "/terms", "/privacy", "/faq", "/contact", "/services", "/contribute", "/select-profile", "/sitemap.xml", "/robots.txt", "/rss.xml", "/rss", "/feed", "/feed.xml"];
         if (publicPaths.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
           return true;
         }
