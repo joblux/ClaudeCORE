@@ -27,7 +27,7 @@ export default function HoldingPage() {
         className="text-[40px] font-light text-white text-center mb-5 max-w-[520px] leading-tight"
         style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
       >
-        Luxury Talents{' '}
+        Luxury Talent{' '}
         <em className="text-[#a58e28]">Intelligence.</em>
       </h1>
 
