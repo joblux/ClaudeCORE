@@ -81,8 +81,8 @@ export default function AdminContributionsPage() {
   })
 
   return (
-    <main className="min-h-screen bg-[#fafaf5]">
-      <section className="border-b border-[#e8e2d8] bg-white">
+    <main className="min-h-screen bg-[#0d1117]">
+      <section className="border-b border-[#e8e2d8] bg-[#161b22]">
         <div className="max-w-5xl mx-auto px-6 py-8">
           <Link href="/admin" className="text-sm text-[#a58e28] hover:text-[#1a1a1a] transition-colors">
             ← Back to Admin
@@ -104,7 +104,7 @@ export default function AdminContributionsPage() {
             placeholder="Search by type, contributor, brand..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full border border-[#e8e2d8] rounded-sm pl-3 pr-3 py-2 text-sm bg-white focus:outline-none focus:border-[#a58e28] transition-colors"
+            className="w-full border border-[#e8e2d8] rounded-sm pl-3 pr-3 py-2 text-sm bg-[#161b22] focus:outline-none focus:border-[#a58e28] transition-colors"
           />
         </div>
 
@@ -117,7 +117,7 @@ export default function AdminContributionsPage() {
               className={`px-4 py-2 text-xs tracking-wide rounded-sm border transition-colors capitalize ${
                 statusFilter === s
                   ? 'bg-[#1a1a1a] text-[#a58e28] border-[#1a1a1a]'
-                  : 'bg-white text-[#666] border-[#e8e2d8] hover:border-[#a58e28]'
+                  : 'bg-[#161b22] text-[#666] border-[#e8e2d8] hover:border-[#a58e28]'
               }`}
             >
               {s}
@@ -131,7 +131,7 @@ export default function AdminContributionsPage() {
             {loading ? (
               <p className="text-sm text-[#999]">Loading…</p>
             ) : contributions.length === 0 ? (
-              <div className="bg-white border border-[#e8e2d8] rounded-sm p-8 text-center">
+              <div className="bg-[#161b22] border border-[#e8e2d8] rounded-sm p-8 text-center">
                 <p className="text-sm text-[#999]">No {statusFilter} contributions.</p>
               </div>
             ) : (
@@ -148,8 +148,8 @@ export default function AdminContributionsPage() {
                     onClick={() => viewDetail(c.id)}
                     className={`w-full text-left p-4 border rounded-sm transition-colors ${
                       selectedId === c.id
-                        ? 'bg-white border-[#a58e28]'
-                        : 'bg-white border-[#e8e2d8] hover:border-[#a58e28]'
+                        ? 'bg-[#161b22] border-[#a58e28]'
+                        : 'bg-[#161b22] border-[#e8e2d8] hover:border-[#a58e28]'
                     }`}
                   >
                     <div className="flex justify-between items-start">
@@ -181,7 +181,7 @@ export default function AdminContributionsPage() {
           {/* Right: Detail */}
           <div>
             {selectedDetail ? (
-              <div className="bg-white border border-[#e8e2d8] rounded-sm p-6 sticky top-24">
+              <div className="bg-[#161b22] border border-[#e8e2d8] rounded-sm p-6 sticky top-24">
                 <h2 className="text-xs font-medium tracking-widest uppercase text-[#a58e28] mb-4">
                   {TYPE_LABELS[selectedDetail.contribution_type]}
                 </h2>
@@ -247,7 +247,7 @@ export default function AdminContributionsPage() {
                 )}
               </div>
             ) : (
-              <div className="bg-white border border-[#e8e2d8] rounded-sm p-8 text-center sticky top-24">
+              <div className="bg-[#161b22] border border-[#e8e2d8] rounded-sm p-8 text-center sticky top-24">
                 <p className="text-sm text-[#999]">Select a contribution to review.</p>
               </div>
             )}

@@ -187,11 +187,11 @@ function FormSection({
   const [open, setOpen] = useState(defaultOpen)
 
   return (
-    <div className="bg-white border border-[#e8e2d8] rounded-sm mb-6 overflow-hidden">
+    <div className="bg-[#161b22] border border-[#e8e2d8] rounded-sm mb-6 overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center justify-between w-full px-6 py-4 text-left hover:bg-[#fafaf5] transition-colors"
+        className="flex items-center justify-between w-full px-6 py-4 text-left hover:bg-[#0d1117] transition-colors"
       >
         <h2 className="text-xs font-medium tracking-widest uppercase text-[#a58e28] m-0">
           {title}
@@ -239,7 +239,7 @@ function Toggle({
         }`}
       >
         <div
-          className={`absolute top-[2px] w-[18px] h-[18px] rounded-full bg-white shadow transition-transform duration-200 ${
+          className={`absolute top-[2px] w-[18px] h-[18px] rounded-full bg-[#161b22] shadow transition-transform duration-200 ${
             checked ? 'translate-x-[20px]' : 'translate-x-[2px]'
           }`}
         />
@@ -315,7 +315,7 @@ function toSlug(text: string): string {
 export default function NewBriefPageWrapper() {
   return (
     <Suspense fallback={
-      <main className="min-h-screen bg-[#fafaf5] flex items-center justify-center">
+      <main className="min-h-screen bg-[#0d1117] flex items-center justify-center">
         <p className="text-sm text-[#999]">Loading...</p>
       </main>
     }>
@@ -501,7 +501,7 @@ function NewBriefPage() {
   // ── Loading state for edit mode ──────────────────────────────────
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#fafaf5] flex items-center justify-center">
+      <main className="min-h-screen bg-[#0d1117] flex items-center justify-center">
         <p className="text-sm text-[#999]">Loading brief...</p>
       </main>
     )
@@ -511,9 +511,9 @@ function NewBriefPage() {
   // RENDER
   // ══════════════════════════════════════════════════════════════════
   return (
-    <main className="min-h-screen bg-[#fafaf5]">
+    <main className="min-h-screen bg-[#0d1117]">
       {/* ── Page header ───────────────────────────────────────────── */}
-      <section className="border-b border-[#e8e2d8] bg-white">
+      <section className="border-b border-[#e8e2d8] bg-[#161b22]">
         <div className="max-w-3xl mx-auto px-6 py-8">
           <Link
             href="/admin/briefs"

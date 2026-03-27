@@ -210,8 +210,8 @@ export default function AdminDashboardPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-[#fafaf5] flex items-center justify-center">
-        <p className="text-sm text-gray-400">Loading dashboard...</p>
+      <div className="min-h-screen bg-[#0d1117] flex items-center justify-center">
+        <p className="text-sm text-[#484f58]">Loading dashboard...</p>
       </div>
     )
   }
@@ -226,19 +226,19 @@ export default function AdminDashboardPage() {
       label: 'PROFILES',
       value: kpis.members,
       sub: kpis.pendingMembers > 0 ? `+${kpis.pendingMembers} pending` : 'All reviewed',
-      subColor: kpis.pendingMembers > 0 ? 'text-green-600' : 'text-gray-400',
+      subColor: kpis.pendingMembers > 0 ? 'text-green-600' : 'text-[#484f58]',
     },
     {
       label: 'ASSIGNMENTS',
       value: kpis.assignments,
       sub: kpis.activeAssignments > 0 ? `${kpis.activeAssignments} active` : 'No active',
-      subColor: kpis.activeAssignments > 0 ? 'text-green-600' : 'text-gray-400',
+      subColor: kpis.activeAssignments > 0 ? 'text-green-600' : 'text-[#484f58]',
     },
     {
       label: 'INTELLIGENCE',
       value: kpis.articles,
       sub: 'articles',
-      subColor: 'text-gray-400',
+      subColor: 'text-[#484f58]',
     },
     {
       label: 'WIKILUX',
@@ -256,12 +256,12 @@ export default function AdminDashboardPage() {
       label: 'INTERVIEWS',
       value: kpis.interviews,
       sub: `${kpis.houses} houses`,
-      subColor: 'text-gray-400',
+      subColor: 'text-[#484f58]',
     },
   ]
 
   return (
-    <div className="min-h-screen bg-[#fafaf5]">
+    <div className="min-h-screen bg-[#0d1117]">
       <div className="px-5 py-4 lg:px-6">
 
         {/* ── Welcome + date ── */}
@@ -269,7 +269,7 @@ export default function AdminDashboardPage() {
           <h1 className="text-lg font-medium text-[#1a1a1a]">
             {getGreeting()}, {firstName}
           </h1>
-          <span className="text-xs text-gray-400 hidden sm:block">{getFormattedDate()}</span>
+          <span className="text-xs text-[#484f58] hidden sm:block">{getFormattedDate()}</span>
         </div>
 
         {/* ── KPI row — 6 metrics ── */}
@@ -287,7 +287,7 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_0.8fr_0.8fr] gap-3 mb-4">
 
           {/* Column 1: ATS Pipeline overview */}
-          <div className="border border-gray-200 rounded-xl p-4 bg-white">
+          <div className="border border-[#30363d] rounded-xl p-4 bg-[#161b22]">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999]">ATS Pipeline</span>
               <Link href="/admin/ats" className="text-[11px] text-[#a58e28] hover:text-[#8a7622] font-medium transition-colors">
@@ -313,18 +313,18 @@ export default function AdminDashboardPage() {
                     )
                   })}
                 </div>
-                <p className="text-xs text-gray-400">{pipelineTotal} candidates across {kpis.activeAssignments} active assignment{kpis.activeAssignments !== 1 ? 's' : ''}</p>
+                <p className="text-xs text-[#484f58]">{pipelineTotal} candidates across {kpis.activeAssignments} active assignment{kpis.activeAssignments !== 1 ? 's' : ''}</p>
               </>
             ) : (
               <div className="py-6 text-center">
-                <p className="text-xs text-gray-400">No active assignments yet.</p>
+                <p className="text-xs text-[#484f58]">No active assignments yet.</p>
                 <p className="text-[0.6rem] font-normal text-[#aaa] mt-1">Pipeline populates when you create search assignments.</p>
               </div>
             )}
           </div>
 
           {/* Column 2: Quick Actions */}
-          <div className="border border-gray-200 rounded-xl p-4 bg-white">
+          <div className="border border-[#30363d] rounded-xl p-4 bg-[#161b22]">
             <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] block mb-3">Quick Actions</span>
             <div className="space-y-1.5">
               {[
@@ -339,10 +339,10 @@ export default function AdminDashboardPage() {
                   <Link
                     key={action.label}
                     href={action.href}
-                    className="flex items-center gap-2.5 bg-gray-50 rounded-lg px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 transition-colors group"
+                    className="flex items-center gap-2.5 bg-gray-50 rounded-lg px-3 py-2 text-xs text-[#c9d1d9] hover:bg-[#1f2937] transition-colors group"
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-[#a58e28] flex-shrink-0" />
-                    <Icon size={13} className="text-gray-400 group-hover:text-[#a58e28] transition-colors flex-shrink-0" />
+                    <Icon size={13} className="text-[#484f58] group-hover:text-[#a58e28] transition-colors flex-shrink-0" />
                     <span className="truncate">{action.label}</span>
                   </Link>
                 )
@@ -351,7 +351,7 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Column 3: System Status */}
-          <div className="border border-gray-200 rounded-xl p-4 bg-white">
+          <div className="border border-[#30363d] rounded-xl p-4 bg-[#161b22]">
             <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] block mb-3">System Status</span>
             <div className="space-y-2.5">
               {SYSTEM_STATUS.map((item) => (
@@ -376,10 +376,10 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
 
           {/* Column 1: Recent Activity */}
-          <div className="border border-gray-200 rounded-xl p-4 bg-white">
+          <div className="border border-[#30363d] rounded-xl p-4 bg-[#161b22]">
             <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] block mb-3">Recent Activity</span>
             {activityFeed.length === 0 ? (
-              <p className="text-xs text-gray-400 py-4 text-center">No recent activity.</p>
+              <p className="text-xs text-[#484f58] py-4 text-center">No recent activity.</p>
             ) : (
               <div className="divide-y divide-gray-100">
                 {activityFeed.map((item, i) => (
@@ -406,7 +406,7 @@ export default function AdminDashboardPage() {
                       <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded ${
                         item.status === 'pending' ? 'bg-amber-50 text-amber-700' :
                         item.status === 'approved' ? 'bg-green-50 text-green-700' :
-                        'bg-gray-50 text-gray-500'
+                        'bg-gray-50 text-[#8b949e]'
                       }`}>
                         {item.status}
                       </span>
@@ -419,7 +419,7 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Column 2: Launch Checklist */}
-          <div className="border border-gray-200 rounded-xl p-4 bg-white">
+          <div className="border border-[#30363d] rounded-xl p-4 bg-[#161b22]">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999]">Launch Checklist</span>
               <span className="text-[11px] font-medium text-[#a58e28]">{CHECKLIST_DONE}/{LAUNCH_CHECKLIST.length} done</span>
@@ -441,7 +441,7 @@ export default function AdminDashboardPage() {
                   ) : (
                     <Circle size={14} className="text-gray-300 flex-shrink-0" />
                   )}
-                  <span className={`text-xs ${item.done ? 'text-gray-400 line-through' : 'text-[#1a1a1a]'}`}>
+                  <span className={`text-xs ${item.done ? 'text-[#484f58] line-through' : 'text-[#1a1a1a]'}`}>
                     {item.label}
                   </span>
                 </div>

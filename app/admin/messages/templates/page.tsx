@@ -189,7 +189,7 @@ export default function AdminMessageTemplatesPage() {
   const isEditorOpen = isCreating || editingId !== null
 
   return (
-    <div className="min-h-screen bg-[#fafaf5]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div className="min-h-screen bg-[#0d1117]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
       <div style={{ maxWidth: 1060, margin: '0 auto', padding: '32px 24px' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>

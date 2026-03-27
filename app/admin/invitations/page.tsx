@@ -244,16 +244,16 @@ export default function AdminInvitationsPage() {
 
   const statusColor = (s: string) => {
     switch (s) {
-      case 'sent': return 'bg-gray-100 text-gray-700'
+      case 'sent': return 'bg-gray-100 text-[#c9d1d9]'
       case 'clicked': return 'bg-blue-50 text-blue-700'
       case 'registered': return 'bg-amber-50 text-amber-700'
       case 'approved': return 'bg-emerald-50 text-emerald-700'
-      default: return 'bg-gray-100 text-gray-600'
+      default: return 'bg-gray-100 text-[#8b949e]'
     }
   }
 
   return (
-    <main className="min-h-screen bg-[#fafaf5]">
+    <main className="min-h-screen bg-[#0d1117]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="mb-6">
@@ -317,7 +317,7 @@ export default function AdminInvitationsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-[#e8e2d8] bg-[#fafaf5]">
+                      <tr className="border-b border-[#e8e2d8] bg-[#0d1117]">
                         <th className="text-left px-4 py-3 text-xs font-medium text-[#888]">Name</th>
                         <th className="text-left px-4 py-3 text-xs font-medium text-[#888]">Email</th>
                         <th className="text-left px-4 py-3 text-xs font-medium text-[#888]">Company</th>
@@ -328,7 +328,7 @@ export default function AdminInvitationsPage() {
                     </thead>
                     <tbody>
                       {invitations.map((inv) => (
-                        <tr key={inv.id} className="border-b border-[#f0ede5] hover:bg-[#fafaf5]/50">
+                        <tr key={inv.id} className="border-b border-[#f0ede5] hover:bg-[#0d1117]/50">
                           <td className="px-4 py-3 text-[#1a1a1a] font-medium">{inv.name || '-'}</td>
                           <td className="px-4 py-3 text-[#555]">{inv.contact_email}</td>
                           <td className="px-4 py-3 text-[#555]">{inv.company || '-'}</td>
@@ -448,7 +448,7 @@ export default function AdminInvitationsPage() {
                 </div>
                 <div className="overflow-x-auto max-h-96 overflow-y-auto">
                   <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-[#fafaf5]">
+                    <thead className="sticky top-0 bg-[#0d1117]">
                       <tr className="border-b border-[#e8e2d8]">
                         <th className="text-left px-4 py-2 text-xs font-medium text-[#888] w-10"></th>
                         <th className="text-left px-4 py-2 text-xs font-medium text-[#888]">Name</th>

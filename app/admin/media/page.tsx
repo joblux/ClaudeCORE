@@ -160,13 +160,13 @@ export default function AdminMediaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fafaf5]">
+    <div className="min-h-screen bg-[#0d1117]">
       <div className="px-6 py-5 lg:px-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-medium text-[#1a1a1a]">Media Library</h1>
-          <p className="text-sm text-gray-400 mt-0.5">{total} file{total !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-[#484f58] mt-0.5">{total} file{total !== 1 ? 's' : ''}</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -245,7 +245,7 @@ export default function AdminMediaPage() {
                     onClick={() => openEdit(item)}
                     className="jl-card group text-left p-0 overflow-hidden"
                   >
-                    <div className="aspect-square relative bg-[#fafaf5]">
+                    <div className="aspect-square relative bg-[#0d1117]">
                       <Image
                         src={item.thumbnail_url || item.file_url}
                         alt={item.alt_text || item.filename}
@@ -281,8 +281,8 @@ export default function AdminMediaPage() {
           {selected && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
               <div className="absolute inset-0 bg-[#1a1a1a]/60" onClick={() => setSelected(null)} />
-              <div className="relative bg-white border border-[#e8e2d8] max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
-                <div className="aspect-video relative bg-[#fafaf5] mb-4">
+              <div className="relative bg-[#161b22] border border-[#e8e2d8] max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
+                <div className="aspect-video relative bg-[#0d1117] mb-4">
                   <Image
                     src={selected.file_url}
                     alt={selected.alt_text || selected.filename}
@@ -349,7 +349,7 @@ export default function AdminMediaPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-3">
               {unsplashResults.map((img) => (
                 <div key={img.id} className="jl-card p-0 overflow-hidden">
-                  <div className="aspect-square relative bg-[#fafaf5]">
+                  <div className="aspect-square relative bg-[#0d1117]">
                     <Image
                       src={img.thumb}
                       alt={img.alt || 'Unsplash photo'}

@@ -281,14 +281,14 @@ export default function AdminAnalyticsPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#fafaf5] flex items-center justify-center">
+      <main className="min-h-screen bg-[#0d1117] flex items-center justify-center">
         <p className="text-sm text-[#999]">Loading analytics...</p>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-[#fafaf5]">
+    <main className="min-h-screen bg-[#0d1117]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-10">
         {/* Header */}
         <div>
@@ -355,7 +355,7 @@ export default function AdminAnalyticsPage() {
                     <tr><td colSpan={2} className="text-[#999] py-2">No data</td></tr>
                   )}
                   {countries.map((c, i) => (
-                    <tr key={c.country} className={i % 2 === 0 ? 'bg-[#fafaf5]' : ''}>
+                    <tr key={c.country} className={i % 2 === 0 ? 'bg-[#0d1117]' : ''}>
                       <td className="py-1.5 text-[#1a1a1a]">{c.country}</td>
                       <td className="py-1.5 text-right font-semibold text-[#1a1a1a]">{c.count}</td>
                     </tr>

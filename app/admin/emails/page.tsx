@@ -110,7 +110,7 @@ export default function AdminEmailsPage() {
       <div className="flex items-center gap-3 mb-6">
         <Mail size={20} className="text-[#B8975C]" />
         <h1 className="text-xl font-semibold text-[#1a1a1a]">Email Templates</h1>
-        <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
+        <span className="text-xs text-[#484f58] bg-gray-100 px-2 py-0.5 rounded">
           {templates.length} templates
         </span>
       </div>
@@ -120,7 +120,7 @@ export default function AdminEmailsPage() {
         <div className="space-y-4">
           {TEMPLATE_GROUPS.map(group => (
             <div key={group.label}>
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+              <h3 className="text-xs font-semibold text-[#484f58] uppercase tracking-wider mb-2">
                 {group.label}
               </h3>
               <div className="space-y-1">
@@ -133,7 +133,7 @@ export default function AdminEmailsPage() {
                       className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
                         isActive
                           ? 'border-[#B8975C] bg-[#B8975C]/5'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                          : 'border-[#30363d] hover:border-gray-300 bg-[#161b22]'
                       }`}
                     >
                       <div className="flex-1 min-w-0">
@@ -141,7 +141,7 @@ export default function AdminEmailsPage() {
                           {TEMPLATE_LABELS[key] || key}
                         </div>
                         {template && (
-                          <div className="text-xs text-gray-400 truncate mt-0.5">
+                          <div className="text-xs text-[#484f58] truncate mt-0.5">
                             {template.subject}
                           </div>
                         )}
@@ -149,7 +149,7 @@ export default function AdminEmailsPage() {
                       <div className="flex items-center gap-1.5 ml-3 flex-shrink-0">
                         <button
                           onClick={() => handlePreview(key)}
-                          className="p-1.5 text-gray-400 hover:text-[#1a1a1a] hover:bg-gray-100 rounded transition-colors"
+                          className="p-1.5 text-[#484f58] hover:text-[#1a1a1a] hover:bg-[#1f2937] rounded transition-colors"
                           title="Preview"
                         >
                           <Eye size={14} />
@@ -157,7 +157,7 @@ export default function AdminEmailsPage() {
                         <button
                           onClick={() => handleSendTest(key)}
                           disabled={sending === key}
-                          className="p-1.5 text-gray-400 hover:text-[#B8975C] hover:bg-[#B8975C]/10 rounded transition-colors disabled:opacity-50"
+                          className="p-1.5 text-[#484f58] hover:text-[#B8975C] hover:bg-[#B8975C]/10 rounded transition-colors disabled:opacity-50"
                           title="Send test to mo@joblux.com"
                         >
                           {sending === key ? (
@@ -182,9 +182,9 @@ export default function AdminEmailsPage() {
         {/* Preview panel */}
         <div className="lg:sticky lg:top-4 lg:self-start">
           {selectedTemplate ? (
-            <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-              <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-gray-200">
-                <span className="text-xs font-medium text-gray-500">
+            <div className="border border-[#30363d] rounded-lg overflow-hidden bg-[#161b22]">
+              <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-[#30363d]">
+                <span className="text-xs font-medium text-[#8b949e]">
                   Preview: {TEMPLATE_LABELS[selectedTemplate] || selectedTemplate}
                 </span>
                 <button
@@ -210,7 +210,7 @@ export default function AdminEmailsPage() {
               </div>
             </div>
           ) : (
-            <div className="border border-dashed border-gray-300 rounded-lg p-12 text-center text-gray-400">
+            <div className="border border-dashed border-gray-300 rounded-lg p-12 text-center text-[#484f58]">
               <Eye size={32} className="mx-auto mb-3 opacity-30" />
               <p className="text-sm">Click Preview on any template to see it here</p>
             </div>

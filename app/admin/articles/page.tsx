@@ -92,20 +92,20 @@ export default function AdminArticlesPage() {
 
   if (isLoading || !isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fafaf5]">
-        <div className="text-sm text-gray-400">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#0d1117]">
+        <div className="text-sm text-[#484f58]">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#fafaf5]">
+    <div className="min-h-screen bg-[#0d1117]">
       <div className="px-6 py-5 lg:px-8">
         {/* Page header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
           <div>
             <h1 className="text-xl font-medium text-[#1a1a1a]">BlogLux</h1>
-            <p className="text-sm text-gray-400 mt-0.5">{articles.length} articles</p>
+            <p className="text-sm text-[#484f58] mt-0.5">{articles.length} articles</p>
           </div>
           <Link
             href="/admin/articles/new"
@@ -125,7 +125,7 @@ export default function AdminArticlesPage() {
               className={`px-3 py-1.5 text-xs rounded-lg whitespace-nowrap transition-colors ${
                 categoryFilter === cat
                   ? 'bg-[#a58e28]/10 text-[#a58e28] font-medium'
-                  : 'text-gray-500 hover:bg-gray-100'
+                  : 'text-[#8b949e] hover:bg-[#1f2937]'
               }`}
             >
               {cat === 'all' ? 'All' : cat}
@@ -135,21 +135,21 @@ export default function AdminArticlesPage() {
 
         {/* Search */}
         <div className="relative mb-4">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#484f58]" />
           <input
             type="text"
             placeholder="Search articles by title, category, author..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm bg-white focus:outline-none focus:border-[#a58e28]/40 transition-colors"
+            className="w-full border border-[#30363d] rounded-lg pl-9 pr-3 py-2 text-sm bg-[#161b22] focus:outline-none focus:border-[#a58e28]/40 transition-colors"
           />
         </div>
 
         {/* Articles table */}
-        <div className="border border-gray-200 rounded-xl overflow-x-auto bg-white" style={{ minWidth: 0 }}>
+        <div className="border border-[#30363d] rounded-xl overflow-x-auto bg-[#161b22]" style={{ minWidth: 0 }}>
           <div style={{ minWidth: 800 }}>
           {/* Header */}
-          <div className="hidden lg:grid bg-gray-50 px-5 py-3 text-[11px] uppercase tracking-wide text-gray-400 font-medium" style={{ gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 0.6fr 0.4fr 0.4fr 0.5fr' }}>
+          <div className="hidden lg:grid bg-gray-50 px-5 py-3 text-[11px] uppercase tracking-wide text-[#484f58] font-medium" style={{ gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 0.6fr 0.4fr 0.4fr 0.5fr' }}>
             <div>Title</div>
             <div>Category</div>
             <div>Author</div>
@@ -161,14 +161,14 @@ export default function AdminArticlesPage() {
           </div>
 
           {loading ? (
-            <div className="px-5 py-12 text-center text-sm text-gray-400">Loading...</div>
+            <div className="px-5 py-12 text-center text-sm text-[#484f58]">Loading...</div>
           ) : filtered.length === 0 ? (
-            <div className="px-5 py-12 text-center text-sm text-gray-400">No articles yet.</div>
+            <div className="px-5 py-12 text-center text-sm text-[#484f58]">No articles yet.</div>
           ) : (
             filtered.map((article) => (
               <div
                 key={article.id}
-                className="grid items-center px-5 py-3 border-t border-gray-100 hover:bg-gray-50/50 transition-colors"
+                className="grid items-center px-5 py-3 border-t border-[#30363d] hover:bg-[#1f2937]/50 transition-colors"
                 style={{ gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 0.6fr 0.4fr 0.4fr 0.5fr' }}
               >
                 {/* Title */}
@@ -178,20 +178,20 @@ export default function AdminArticlesPage() {
                 </div>
 
                 {/* Category */}
-                <div className="hidden lg:block text-xs text-gray-500">{article.category || '—'}</div>
+                <div className="hidden lg:block text-xs text-[#8b949e]">{article.category || '—'}</div>
 
                 {/* Author */}
-                <div className="hidden lg:block text-xs text-gray-500">{article.author_name || '—'}</div>
+                <div className="hidden lg:block text-xs text-[#8b949e]">{article.author_name || '—'}</div>
 
                 {/* Date */}
-                <div className="hidden lg:block text-xs text-gray-400">
+                <div className="hidden lg:block text-xs text-[#484f58]">
                   {formatDate(article.published ? article.published_at : article.created_at)}
                 </div>
 
                 {/* Status */}
                 <div className="hidden lg:block">
                   <span className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded ${
-                    article.published ? 'text-green-700 bg-green-50' : 'text-gray-500 bg-gray-100'
+                    article.published ? 'text-green-700 bg-green-50' : 'text-[#8b949e] bg-gray-100'
                   }`}>
                     {article.published ? 'Published' : 'Draft'}
                   </span>
@@ -240,7 +240,7 @@ export default function AdminArticlesPage() {
                   <button
                     onClick={() => handleDelete(article.id)}
                     disabled={deleting === article.id}
-                    className="text-gray-400 hover:text-red-500 transition-colors disabled:opacity-40"
+                    className="text-[#484f58] hover:text-red-500 transition-colors disabled:opacity-40"
                   >
                     <Trash2 size={14} />
                   </button>

@@ -125,11 +125,11 @@ export default function AdminWikiLuxPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fafaf5]">
+    <div className="min-h-screen bg-[#0d1117]">
       <div className="px-6 py-5 lg:px-8 max-w-5xl">
       <div className="mb-6">
         <h1 className="text-xl font-medium text-[#1a1a1a]">WikiLux Management</h1>
-        <p className="text-sm text-gray-400 mt-0.5">Brand content generation and editorial tools</p>
+        <p className="text-sm text-[#484f58] mt-0.5">Brand content generation and editorial tools</p>
       </div>
 
       {/* Brand search */}
@@ -139,7 +139,7 @@ export default function AdminWikiLuxPage() {
           placeholder="Search brands..."
           value={brandSearch}
           onChange={(e) => setBrandSearch(e.target.value)}
-          className="w-full border border-[#e8e2d8] rounded-sm pl-3 pr-3 py-2 text-sm bg-white focus:outline-none focus:border-[#a58e28] transition-colors"
+          className="w-full border border-[#e8e2d8] rounded-sm pl-3 pr-3 py-2 text-sm bg-[#161b22] focus:outline-none focus:border-[#a58e28] transition-colors"
         />
       </div>
 

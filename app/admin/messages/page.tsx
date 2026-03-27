@@ -293,7 +293,7 @@ export default function AdminMessagesPage() {
   // RENDER
   // =========================================================================
   return (
-    <div className="min-h-screen bg-[#fafaf5]" style={{ fontFamily: 'Inter, system-ui, sans-serif', display: 'flex', flexDirection: 'column' }}>
+    <div className="min-h-screen bg-[#0d1117]" style={{ fontFamily: 'Inter, system-ui, sans-serif', display: 'flex', flexDirection: 'column' }}>
 
       {/* ================================================================= */}
       {/* TWO-PANEL LAYOUT                                                  */}

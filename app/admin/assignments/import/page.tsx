@@ -128,7 +128,7 @@ function MethodCard({
   return (
     <div
       onClick={onClick}
-      className="group border rounded-sm p-6 cursor-pointer transition-all duration-200 hover:shadow-md bg-white"
+      className="group border rounded-sm p-6 cursor-pointer transition-all duration-200 hover:shadow-md bg-[#161b22]"
       style={{ borderColor: BORDER }}
       onMouseEnter={(e) => (e.currentTarget.style.borderColor = GOLD)}
       onMouseLeave={(e) => (e.currentTarget.style.borderColor = BORDER)}
@@ -501,7 +501,7 @@ export default function ImportAssignmentsPage() {
     <main className="min-h-screen" style={{ background: CREAM, fontFamily: 'Inter, system-ui, sans-serif' }}>
 
       {/* ── Page header ─────────────────────────────────────────── */}
-      <section className="bg-white" style={{ borderBottom: `1px solid ${BORDER}` }}>
+      <section className="bg-[#161b22]" style={{ borderBottom: `1px solid ${BORDER}` }}>
         <div className="max-w-4xl mx-auto px-6 py-8">
           <Link
             href="/admin/assignments"
@@ -548,7 +548,7 @@ export default function ImportAssignmentsPage() {
 
         {/* Loading overlay for parsing */}
         {parsing && (
-          <div className="mb-6 p-6 border rounded-sm bg-white text-center" style={{ borderColor: BORDER }}>
+          <div className="mb-6 p-6 border rounded-sm bg-[#161b22] text-center" style={{ borderColor: BORDER }}>
             <div
               className="inline-block w-5 h-5 border-2 rounded-full animate-spin mb-3"
               style={{ borderColor: BORDER, borderTopColor: GOLD }}
@@ -681,7 +681,7 @@ export default function ImportAssignmentsPage() {
 
         {/* URL input panel */}
         {step === 1 && showUrlInput && !parsing && (
-          <div className="mt-6 p-6 border rounded-sm bg-white" style={{ borderColor: BORDER }}>
+          <div className="mt-6 p-6 border rounded-sm bg-[#161b22]" style={{ borderColor: BORDER }}>
             <label className="jl-label">Job Posting URL</label>
             <div className="flex gap-3 mt-1">
               <input
@@ -705,7 +705,7 @@ export default function ImportAssignmentsPage() {
 
         {/* Paste input panel */}
         {step === 1 && showPasteInput && !parsing && (
-          <div className="mt-6 p-6 border rounded-sm bg-white" style={{ borderColor: BORDER }}>
+          <div className="mt-6 p-6 border rounded-sm bg-[#161b22]" style={{ borderColor: BORDER }}>
             <label className="jl-label">Paste Job Description</label>
             <textarea
               className="jl-input w-full min-h-[200px] mt-1"
@@ -727,7 +727,7 @@ export default function ImportAssignmentsPage() {
 
         {/* Bulk URL input panel */}
         {step === 1 && showBulkUrlInput && !parsing && (
-          <div className="mt-6 p-6 border rounded-sm bg-white" style={{ borderColor: BORDER }}>
+          <div className="mt-6 p-6 border rounded-sm bg-[#161b22]" style={{ borderColor: BORDER }}>
             <label className="jl-label">URLs (one per line)</label>
             <textarea
               className="jl-input w-full min-h-[160px] mt-1"
@@ -776,7 +776,7 @@ export default function ImportAssignmentsPage() {
                 </div>
 
                 {/* Mapping table with scrollable preview */}
-                <div className="overflow-x-auto border rounded-sm bg-white" style={{ borderColor: BORDER }}>
+                <div className="overflow-x-auto border rounded-sm bg-[#161b22]" style={{ borderColor: BORDER }}>
                   <table className="w-full text-xs" style={{ minWidth: 600 }}>
                     {/* Column mapping selects */}
                     <thead>
@@ -854,7 +854,7 @@ export default function ImportAssignmentsPage() {
                   </button>
                 </div>
 
-                <div className="border rounded-sm bg-white overflow-hidden" style={{ borderColor: BORDER }}>
+                <div className="border rounded-sm bg-[#161b22] overflow-hidden" style={{ borderColor: BORDER }}>
                   <table className="w-full text-sm">
                     <tbody>
                       {rawData.rows[0] && Object.entries(rawData.rows[0]).map(([key, value]) => (
@@ -909,7 +909,7 @@ export default function ImportAssignmentsPage() {
                 </div>
 
                 {/* Review table */}
-                <div className="border rounded-sm bg-white overflow-hidden" style={{ borderColor: BORDER }}>
+                <div className="border rounded-sm bg-[#161b22] overflow-hidden" style={{ borderColor: BORDER }}>
                   <table className="w-full text-sm">
                     <thead>
                       <tr style={{ borderBottom: `2px solid ${BLACK}` }}>
@@ -929,7 +929,7 @@ export default function ImportAssignmentsPage() {
                         return (
                           <Fragment key={i}>
                             <tr
-                              className="cursor-pointer hover:bg-[#fafaf5] transition-colors"
+                              className="cursor-pointer hover:bg-[#0d1117] transition-colors"
                               style={{ borderBottom: `1px solid ${BORDER}` }}
                               onClick={() => setExpandedRow(isExpanded ? null : i)}
                             >
@@ -1144,7 +1144,7 @@ export default function ImportAssignmentsPage() {
                 <p className="text-sm font-medium mb-4" style={{ color: BLACK }}>
                   Review and Edit Assignment
                 </p>
-                <div className="border rounded-sm bg-white p-6 space-y-4" style={{ borderColor: BORDER }}>
+                <div className="border rounded-sm bg-[#161b22] p-6 space-y-4" style={{ borderColor: BORDER }}>
                   {/* Title */}
                   <div>
                     <label className="jl-label">Title</label>
@@ -1396,7 +1396,7 @@ export default function ImportAssignmentsPage() {
           <div className="text-center">
             {/* Progress bar during import */}
             {importing && (
-              <div className="border rounded-sm bg-white p-8" style={{ borderColor: BORDER }}>
+              <div className="border rounded-sm bg-[#161b22] p-8" style={{ borderColor: BORDER }}>
                 <div
                   className="inline-block w-6 h-6 border-2 rounded-full animate-spin mb-4"
                   style={{ borderColor: BORDER, borderTopColor: GOLD }}
@@ -1418,7 +1418,7 @@ export default function ImportAssignmentsPage() {
 
             {/* Results summary */}
             {results && !importing && (
-              <div className="border rounded-sm bg-white p-8" style={{ borderColor: BORDER }}>
+              <div className="border rounded-sm bg-[#161b22] p-8" style={{ borderColor: BORDER }}>
                 {/* Success count */}
                 {results.success > 0 && (
                   <div className="mb-6">

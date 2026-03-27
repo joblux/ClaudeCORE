@@ -437,7 +437,7 @@ export default function NewArticlePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fafaf5]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div className="min-h-screen bg-[#0d1117]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
 
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
 
