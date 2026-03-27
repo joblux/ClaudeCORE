@@ -9,9 +9,10 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isEscape = pathname.startsWith('/escape')
   const isAdmin = pathname.startsWith('/admin')
+  const isHolding = pathname.startsWith('/holding')
 
-  // Escape and Admin have their own layouts
-  if (isEscape || isAdmin) {
+  // Escape, Admin, and Holding have their own layouts
+  if (isEscape || isAdmin || isHolding) {
     return <>{children}</>
   }
 
