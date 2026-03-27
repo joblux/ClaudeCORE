@@ -16,7 +16,7 @@ const PROFILES = [
   {
     key: 'pro', overline: 'PRO', title: 'Established Professional',
     description: 'For mid-level professionals building real traction in luxury — managers, specialists, buyers, and boutique leaders.',
-    approval: 'Instant access', featured: true,
+    approval: 'Instant access', featured: false,
     features: ['Everything in Rising','Deeper benchmarks by market & sector','Track sectors & brands of interest','Save intelligence for later reference','Express interest in search assignments'],
     cta: 'Select Pro',
   },
@@ -84,8 +84,8 @@ export default function SelectProfilePage() {
 
   if (status === 'loading' || status === 'unauthenticated') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f5f4f0]">
-        <div className="w-8 h-8 border-2 border-[#e8e2d8] border-t-[#a58e28] rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#1a1a1a]">
+        <div className="w-8 h-8 border-2 border-[#2a2a2a] border-t-[#a58e28] rounded-full animate-spin" />
       </div>
     )
   }
@@ -108,7 +108,7 @@ export default function SelectProfilePage() {
         </div>
       </div>
 
-      <div className="bg-[#f5f4f0] py-12 lg:py-16">
+      <div className="bg-[#1a1a1a] py-12 lg:py-16">
         <div className="max-w-[1200px] mx-auto px-7">
           {error && (
             <div className="mb-8 p-4 border border-red-200 bg-red-50 text-center rounded-sm">
@@ -121,7 +121,7 @@ export default function SelectProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-12">
             {bottomRow.map((profile) => <ProfileCard key={profile.key} profile={profile} submitting={submitting} onSelect={handleSelect} />)}
           </div>
-          <div className="border-t border-[#e8e2d8] pt-8 text-center">
+          <div className="border-t border-[#2a2a2a] pt-8 text-center">
             <p className="text-xs text-[#888] leading-relaxed max-w-xl mx-auto">All profiles are free. Depth increases through contribution and relevance. If your profile changes over time, you can request a different access level later.</p>
           </div>
         </div>
@@ -135,26 +135,21 @@ function ProfileCard({ profile, submitting, onSelect }: { profile: (typeof PROFI
   const isDisabled = submitting !== null
   return (
     <div className="relative">
-      {profile.featured && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-          <span className="inline-block bg-[#a58e28] text-white text-[0.55rem] font-semibold tracking-[0.15em] uppercase px-3 py-1">Most common</span>
-        </div>
-      )}
-      <div className={`bg-white rounded-xl p-6 lg:p-7 h-full flex flex-col transition-all duration-200 ${profile.featured ? 'border-2 border-[#a58e28] shadow-md hover:shadow-lg' : 'border border-[#e8e2d8] hover:border-[#a58e28] hover:shadow-md'}`}>
+      <div className="bg-[#222] rounded-xl p-6 lg:p-7 h-full flex flex-col transition-all duration-200 border border-[#2a2a2a] hover:border-[#a58e28] hover:shadow-md">
         <div className="text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-[#a58e28] mb-2">{profile.overline}</div>
-        <h3 className="text-xl font-light text-[#1a1a1a] mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>{profile.title}</h3>
+        <h3 className="text-xl font-light text-white mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>{profile.title}</h3>
         <p className="text-xs text-[#888] leading-relaxed mb-4">{profile.description}</p>
         <p className="text-[0.6rem] text-[#aaa] italic mb-5">{profile.approval}</p>
         <ul className="space-y-2.5 mb-6 flex-1">
           {profile.features.map((feature) => (
             <li key={feature} className="flex items-start gap-2.5">
               <span className="w-[5px] h-[5px] rounded-full bg-[#a58e28] mt-1.5 flex-shrink-0" />
-              <span className="text-xs text-[#666] leading-relaxed">{feature}</span>
+              <span className="text-xs text-[#999] leading-relaxed">{feature}</span>
             </li>
           ))}
         </ul>
         <button onClick={() => onSelect(profile.key)} disabled={isDisabled}
-          className={`w-full py-3 text-[0.7rem] font-semibold tracking-[0.1em] uppercase transition-colors disabled:opacity-50 ${profile.featured ? 'bg-[#a58e28] text-white hover:bg-[#8a7622]' : 'border border-[#1a1a1a] text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white'}`}>
+          className="w-full py-3 text-[0.7rem] font-semibold tracking-[0.1em] uppercase transition-colors disabled:opacity-50 border border-[#555] text-[#ccc] hover:bg-[#333]">
           {isSubmitting ? 'Saving...' : profile.cta}
         </button>
       </div>
