@@ -92,7 +92,7 @@ export default function UserMenu() {
           )}
           <div className="border-t border-[#333] my-1" />
           <button
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={() => signOut({ redirect: false }).then(() => { window.location.href = "/"; })}
             className="block w-full text-left px-4 py-2 text-[13px] text-[#888] hover:bg-[#2a2a2a] hover:text-white transition-colors"
           >
             Sign out

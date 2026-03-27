@@ -25,7 +25,7 @@ export function useMember() {
   };
 }
 
-export function useRequireAuth(redirectTo = "/members") {
+export function useRequireAuth(redirectTo = "/join") {
   const { isAuthenticated, isLoading } = useMember();
   const router = useRouter();
   useEffect(() => {
@@ -39,7 +39,7 @@ export function useRequireAdmin() {
   const router = useRouter();
   useEffect(() => {
     if (!member.isLoading && !member.isAdmin) {
-      router.push(member.isAuthenticated ? "/" : "/members");
+      router.push(member.isAuthenticated ? "/" : "/join");
     }
   }, [member.isLoading, member.isAdmin, member.isAuthenticated, router]);
   return member;
@@ -50,7 +50,7 @@ export function useRequireApproved() {
   const router = useRouter();
   useEffect(() => {
     if (member.isLoading) return;
-    if (!member.isAuthenticated) router.push("/members");
+    if (!member.isAuthenticated) router.push("/join");
     else if (member.isNew) router.push("/join");
     else if (member.isPending) router.push("/members/pending");
   }, [member, router]);
