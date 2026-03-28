@@ -75,7 +75,6 @@ export default function ProfiluxPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
-  const [completedSteps, setCompletedSteps] = useState<number[]>([])
   const [saving, setSaving] = useState(false)
   const [copied, setCopied] = useState(false)
   const [showAddExp, setShowAddExp] = useState(false)
@@ -112,7 +111,6 @@ export default function ProfiluxPage() {
           const data = await res.json()
           if (data.profile) {
             setProfile(prev => ({ ...prev, ...data.profile }))
-            // Don't set completedSteps from load — completeness is calculated live from profile state
           }
         }
       } catch {}
@@ -121,7 +119,7 @@ export default function ProfiluxPage() {
   }, [status])
 
   // Live completeness — recalculates on every profile change
-  const liveCompleted = [
+  const completedSteps = [
     profile.firstName?.trim() && profile.lastName?.trim() && profile.city?.trim() ? 1 : null,
     profile.experience?.length > 0 ? 2 : null,
     profile.specialisations?.length > 0 ? 3 : null,
@@ -130,10 +128,9 @@ export default function ProfiluxPage() {
     profile.availability?.trim() ? 6 : null,
     profile.sharingEnabled ? 7 : null,
   ].filter(Boolean) as number[]
-  const completeness = Math.round((liveCompleted.length / 7) * 100)
+  const completeness = Math.round((completedSteps.length / 7) * 100)
   const circumference = 2 * Math.PI * 20
   const strokeDashoffset = circumference - (completeness / 100) * circumference
-  const completedSteps = liveCompleted
 
   const toggle = (arr: string[], val: string) =>
     arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
