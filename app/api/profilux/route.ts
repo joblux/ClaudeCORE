@@ -24,6 +24,37 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  // If no profilux record yet, seed from members table
+  if (!data) {
+    const { data: member } = await supabase
+      .from('members')
+      .select('first_name, last_name, city, country, job_title, current_employer, bio, phone')
+      .eq('email', session.user.email)
+      .single()
+
+    if (member) {
+      return NextResponse.json({
+        profile: {
+          firstName: member.first_name || '',
+          lastName: member.last_name || '',
+          city: member.city || '',
+          nationality: member.country || '',
+          headline: member.job_title ? `${member.job_title}${member.current_employer ? ' · ' + member.current_employer : ''}` : '',
+          bio: member.bio || '',
+          experience: [],
+          specialisations: [],
+          languages: [],
+          sectors: [],
+          markets: [],
+          salaryExpectation: '',
+          availability: '',
+          sharingEnabled: false,
+          shareSlug: null,
+        }
+      })
+    }
+  }
+
   return NextResponse.json({ profile: data || null })
 }
 
