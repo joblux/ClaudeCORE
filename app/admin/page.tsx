@@ -55,6 +55,7 @@ export default function AdminPage() {
   const [page, setPage] = useState(0);
   const [totalRows, setTotalRows] = useState(0);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [cvPreview, setCvPreview] = useState<string | null>(null);
   const [acting, setActing] = useState<Set<string>>(new Set());
   const [aiReviews, setAiReviews] = useState<Map<string, AIReview>>(new Map());
   const [confidenceFilter, setConfidenceFilter] = useState("all");
@@ -171,6 +172,20 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5]">
+      {cvPreview && (
+        <div className="fixed inset-0 z-[9999] bg-black/80 flex flex-col" onClick={() => setCvPreview(null)}>
+          <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-[#e8e8e8]" onClick={e => e.stopPropagation()}>
+            <span className="text-sm font-medium text-[#111]">CV Preview</span>
+            <div className="flex items-center gap-4">
+              <a href={cvPreview} target="_blank" rel="noopener noreferrer" className="text-sm text-[#444] hover:text-[#111] underline">Open in new tab →</a>
+              <button onClick={() => setCvPreview(null)} className="text-[#999] hover:text-[#111] text-xl font-light leading-none">✕</button>
+            </div>
+          </div>
+          <div className="flex-1 p-4" onClick={e => e.stopPropagation()}>
+            <iframe src={cvPreview} className="w-full h-full rounded-lg border border-[#e8e8e8]" title="CV Preview" />
+          </div>
+        </div>
+      )}
       {/* Topbar */}
       <div className="bg-white border-b border-[#e8e8e8] px-6 py-4 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
@@ -357,18 +372,17 @@ export default function AdminPage() {
                         {getInitials(m)}
                       </div>
                       <div className="min-w-0">
-                        <div className="relative group/cv">
+                        <div className="flex items-center gap-2">
                           <a href={`/admin/members/${m.id}`} className="text-sm font-medium text-[#111] hover:text-[#444] transition-colors truncate block">
                             {displayName(m)}
                           </a>
                           {m.cv_url && (
-                            <div className="absolute left-0 top-6 z-[9999] hidden group-hover/cv:block w-[480px] bg-white border border-[#e8e8e8] rounded-lg shadow-xl overflow-hidden">
-                              <div className="flex items-center justify-between px-3 py-2 border-b border-[#f0f0f0]">
-                                <span className="text-[10px] uppercase tracking-wide text-[#999] font-medium">CV Preview</span>
-                                <a href={m.cv_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#444] hover:text-[#111] underline">Open →</a>
-                              </div>
-                              <iframe src={m.cv_url} className="w-full h-[560px] border-0" title="CV Preview" />
-                            </div>
+                            <button
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCvPreview(m.cv_url!); }}
+                              className="flex-shrink-0 text-[9px] uppercase tracking-wide px-1.5 py-0.5 bg-[#dbeafe] text-[#1d4ed8] rounded hover:bg-[#bfdbfe] transition-colors"
+                            >
+                              CV
+                            </button>
                           )}
                         </div>
                         <div className="text-xs text-[#999] truncate">
