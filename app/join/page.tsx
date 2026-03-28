@@ -100,13 +100,13 @@ function JoinContent() {
       <div className="flex gap-2 justify-center mb-8">
         <button
           onClick={() => { setMode("request"); setEmailSent(false); setEmail(""); }}
-          className={"px-5 py-2 text-[11px] uppercase tracking-widest rounded-full border transition-colors " + (mode === "request" ? "text-white border-[#444]" : "text-[#444] border-transparent hover:text-[#666]")}
+          className={"px-5 py-2 text-[11px] uppercase tracking-widest rounded-full border transition-colors " + (mode === "request" ? "text-white border-[#444]" : "text-[#ccc] border-transparent hover:text-white")}
         >
           Request Access
         </button>
         <button
           onClick={() => { setMode("signin"); setEmailSent(false); setEmail(""); }}
-          className={"px-5 py-2 text-[11px] uppercase tracking-widest rounded-full border transition-colors " + (mode === "signin" ? "text-white border-[#444]" : "text-[#444] border-transparent hover:text-[#666]")}
+          className={"px-5 py-2 text-[11px] uppercase tracking-widest rounded-full border transition-colors " + (mode === "signin" ? "text-white border-[#444]" : "text-[#ccc] border-transparent hover:text-white")}
         >
           Sign In
         </button>
@@ -118,7 +118,7 @@ function JoinContent() {
         <h2 className="text-white font-light text-center mb-1.5" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '20px' }}>
           {mode === "request" ? "Request access to JOBLUX" : "Welcome back."}
         </h2>
-        <p className="text-[#444] text-center mb-7" style={{ fontSize: '12px' }}>
+        <p className="text-[#ccc] text-center mb-7" style={{ fontSize: '12px' }}>
           {mode === "request" ? "By invitation or manual approval only." : "Sign in to your intelligence."}
         </p>
 
@@ -146,12 +146,12 @@ function JoinContent() {
               <MailIcon />
             </div>
             <p className="text-sm text-[#e0e0e0] font-medium mb-1">Check your inbox</p>
-            <p className="text-xs text-[#666]">We sent a sign-in link to <span className="text-[#e0e0e0]">{email}</span></p>
+            <p className="text-xs text-[#ccc]">We sent a sign-in link to <span className="text-white">{email}</span></p>
           </div>
         ) : (
           <>
             <form onSubmit={handleMagicLink}>
-              <label htmlFor="email" className="block text-[9px] text-[#444] uppercase tracking-widest mb-2">Email address</label>
+              <label htmlFor="email" className="block text-[9px] text-[#ccc] uppercase tracking-widest mb-2">Email address</label>
               <input
                 id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com" required
@@ -176,7 +176,7 @@ function JoinContent() {
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => signIn("google", { callbackUrl: "/join" })}
-                className="flex items-center justify-center gap-1.5 py-2.5 border border-[#1e1e1e] bg-[#111] text-[#888] rounded-sm hover:border-[#333] transition-colors"
+                className="flex items-center justify-center gap-1.5 py-2.5 border border-[#1e1e1e] bg-[#111] text-[#ccc] rounded-sm hover:border-[#333] transition-colors"
                 style={{ fontSize: '11px' }}
               >
                 <GoogleIcon />
@@ -184,7 +184,7 @@ function JoinContent() {
               </button>
               <button
                 onClick={() => signIn("linkedin", { callbackUrl: "/join" })}
-                className="flex items-center justify-center gap-1.5 py-2.5 border border-[#1e1e1e] bg-[#111] text-[#888] rounded-sm hover:border-[#333] transition-colors"
+                className="flex items-center justify-center gap-1.5 py-2.5 border border-[#1e1e1e] bg-[#111] text-[#ccc] rounded-sm hover:border-[#333] transition-colors"
                 style={{ fontSize: '11px' }}
               >
                 <LinkedInIcon />
@@ -196,8 +196,8 @@ function JoinContent() {
                 style={{ fontSize: '11px' }}
               >
                 <AppleIcon />
-                <span className="text-[#888]">Apple</span>
-                <span className="text-[#555] italic" style={{ fontSize: '9px' }}>soon</span>
+                <span className="text-[#ccc]">Apple</span>
+                <span className="text-[#ccc] italic" style={{ fontSize: '9px' }}>soon</span>
               </button>
             </div>
           </>
@@ -206,7 +206,7 @@ function JoinContent() {
 
       {/* Help link */}
       <div className="text-center mt-5">
-        <a href="/contact" className="text-[#333] hover:text-[#555] transition-colors" style={{ fontSize: '11px' }}>
+        <a href="/contact" className="text-[#ccc] hover:text-white transition-colors" style={{ fontSize: '11px' }}>
           Need help signing in? &rarr;
         </a>
       </div>
@@ -217,10 +217,10 @@ function JoinContent() {
 export default function JoinPage() {
   return (
     <main className="min-h-screen bg-[#1a1a1a] flex flex-col items-center justify-center px-4 py-8">
-      <p className="text-[#555] uppercase text-center mb-7" style={{ fontSize: '15px', letterSpacing: '0.2em' }}>
+      <p className="text-[#ccc] uppercase text-center mb-7" style={{ fontSize: '15px', letterSpacing: '0.2em' }}>
         Luxury Talent Intelligence
       </p>
-      <Suspense fallback={<div className="text-center text-sm text-[#555] py-8">Loading...</div>}>
+      <Suspense fallback={<div className="text-center text-sm text-[#ccc] py-8">Loading...</div>}>
         <JoinContent />
       </Suspense>
     </main>
