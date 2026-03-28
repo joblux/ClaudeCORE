@@ -104,7 +104,7 @@ export default function CompleteRegistrationPage() {
   }, [status, session, router])
 
   if (status === 'loading') return (
-    <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-start">
+    <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
       <div className="w-6 h-6 border border-[#333] border-t-white rounded-full animate-spin" />
     </div>
   )
@@ -196,7 +196,7 @@ export default function CompleteRegistrationPage() {
   const sectionHeadClass = 'text-[#888] uppercase tracking-widest mb-4 pb-3 border-b border-[#2a2a2a]'
 
   return (
-    <main className="min-h-screen bg-[#0f0f0f] flex items-center justify-start px-4 pt-16 pb-12 py-6">
+    <main className="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-[520px] bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm px-9 pt-8 pb-11">
 
         {/* Progress bar — inside card */}
