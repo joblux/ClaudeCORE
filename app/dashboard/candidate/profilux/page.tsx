@@ -16,14 +16,58 @@ const STEPS = [
 ]
 
 const SECTORS = [
-  'Fashion & Apparel', 'Watches & Jewellery', 'Perfumes & Cosmetics',
-  'Fine Dining & Hospitality', 'Retail Excellence', 'Private Banking',
-  'Real Estate', 'Art & Collectibles', 'Yachting & Aviation', 'Wines & Spirits',
+  // Fashion & Lifestyle
+  'Fashion & Apparel', 'Leather Goods & Accessories', 'Footwear', 'Eyewear', 'Lingerie & Swimwear',
+  // Watches & Jewellery
+  'Fine Jewellery', 'Watches & Horology', 'High Jewellery', 'Silverware',
+  // Beauty & Wellness
+  'Perfumes & Cosmetics', 'Skincare', 'Hair & Grooming', 'Wellness & Spa',
+  // Hospitality & Travel
+  'Luxury Hotels & Resorts', 'Private Members Clubs', 'Cruise & Yachting', 'Private Aviation', 'Travel Retail',
+  // Food & Beverage
+  'Fine Dining & Gastronomy', 'Wines & Champagne', 'Spirits & Cognac', 'Gourmet & Epicerie',
+  // Art & Culture
+  'Art & Collectibles', 'Auction Houses', 'Galleries & Museums', 'Cultural Events',
+  // Real Estate & Interior
+  'Luxury Real Estate', 'Interior Design & Architecture', 'Furniture & Décor', 'Lighting',
+  // Financial & Professional
+  'Private Banking & Wealth Management', 'Family Office', 'Luxury Consulting', 'Legal for Luxury',
+  // Automotive & Mobility
+  'Luxury Automotive', 'Supercars', 'Motorcycles', 'Electric Luxury',
+  // Tech & Innovation
+  'Luxury Tech', 'Wearables', 'Digital Luxury',
+  // Multi-channel
+  'Multi-brand Retail', 'Department Stores', 'Concept Stores', 'Franchise & Licensing', 'Sustainability & Circular Luxury',
 ]
 
 const SPECIALISATIONS = [
-  'Retail Management', 'Client Experience', 'Team Leadership', 'Merchandising',
-  'Visual Identity', 'Training & Development', 'Commercial Strategy', 'Operations',
+  // Sales & Client
+  'Client Advisor', 'Sales Management', 'Key Account Management', 'Business Development',
+  'Wholesale', 'Travel Retail', 'Concession Management', 'Pop-up & Events Sales',
+  'VIP & Private Client', 'After-Sales & Repair',
+  // Retail Operations
+  'Store Management', 'Area & Regional Management', 'Retail Excellence', 'VM & Display',
+  'Loss Prevention', 'Retail Analytics', 'Omnichannel', 'E-commerce Operations',
+  // Creative & Design
+  'Creative Direction', 'Fashion Design', 'Jewellery & Watchmaking Design', 'Art Direction',
+  'Styling', 'Textile & Materials', 'Packaging Design', 'Set & Window Design',
+  // Product & Buying
+  'Buying', 'Merchandising', 'Product Development', 'Planning & Allocation',
+  'Licensing', 'Sourcing & Production',
+  // Marketing & Comms
+  'Brand Management', 'Communications & PR', 'Digital Marketing', 'Social Media & Content',
+  'Influencer & Ambassador', 'Events & Experiential', 'CRM & Loyalty', 'Editorial',
+  // People & Culture
+  'HR & Talent', 'Training & Development', 'Recruitment', 'Retail Coaching', 'Diversity & Inclusion',
+  // Finance & Strategy
+  'Finance & Controlling', 'Strategy & Consulting', 'M&A', 'Investor Relations',
+  'Legal & Compliance', 'Sustainability & CSR',
+  // Tech & Data
+  'IT & Digital', 'Data & Analytics', 'CRM Systems', 'ERP & Retail Tech',
+  // Supply Chain
+  'Supply Chain & Logistics', 'Operations', 'Sourcing', 'Quality Control',
+  // Other
+  'Team Leadership', 'Commercial Strategy', 'Client Experience',
 ]
 
 const MARKETS = [
@@ -31,7 +75,9 @@ const MARKETS = [
 ]
 
 const LANGUAGES = [
-  'French', 'English', 'Italian', 'Spanish', 'Arabic', 'Mandarin', 'Japanese', 'German', 'Russian', 'Portuguese',
+  'French', 'English', 'Italian', 'Spanish', 'Arabic', 'Mandarin', 'Japanese',
+  'German', 'Russian', 'Portuguese', 'Korean', 'Dutch', 'Turkish', 'Swedish',
+  'Polish', 'Hindi', 'Greek', 'Romanian', 'Czech',
 ]
 
 const AVAILABILITY = [
@@ -238,7 +284,7 @@ export default function ProfiluxPage() {
     fontFamily: 'Inter, sans-serif', outline: 'none', boxSizing: 'border-box',
   }
   const labelStyle: React.CSSProperties = {
-    fontSize: '10px', color: '#4a9eff', letterSpacing: '0.1em', marginBottom: '8px', display: 'block', fontWeight: 600, textTransform: 'uppercase' as const,
+    fontSize: '10px', color: '#9B6B4A', letterSpacing: '0.1em', marginBottom: '8px', display: 'block', fontWeight: 600, textTransform: 'uppercase' as const,
   }
   const pillStyle = (active: boolean): React.CSSProperties => ({
     padding: '7px 14px', borderRadius: '3px', fontSize: '12px', cursor: 'pointer',
@@ -263,7 +309,7 @@ export default function ProfiluxPage() {
       {/* TOP BAR — py-28px, no Export PDF */}
       <div style={{ background: '#111111', borderBottom: '1px solid #2a2a2a', padding: '0 32px' }}>
         <div style={{
-          maxWidth: '1200px', margin: '0 auto', padding: '28px 0',
+          maxWidth: '1200px', margin: '0 auto', padding: '20px 0',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -277,11 +323,11 @@ export default function ProfiluxPage() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{
-              background: 'transparent', border: '1px solid #4a9eff', color: '#4a9eff',
+              background: 'transparent', border: '1px solid #9B6B4A', color: '#9B6B4A',
               fontSize: '10px', letterSpacing: '0.1em', padding: '4px 12px', fontWeight: 600,
               borderRadius: '3px',
             }}>
-              {(session?.user as any)?.role?.toUpperCase() || 'MEMBER'}
+              {(({ emerging_professional: 'Emerging Pro', established_professional: 'Established Pro', senior_executive: 'Senior & Executive', luxury_employer: 'Luxury Employer', trusted_contributor: 'Trusted Contributor', professional: 'Established Pro', business: 'Luxury Employer', insider: 'Trusted Contributor', member: 'Member', executive: 'Senior & Executive', admin: 'Admin' } as any)[(session?.user as any)?.role] || (session?.user as any)?.role?.toUpperCase() || 'MEMBER')}
             </span>
             <button onClick={handleSave} disabled={saving} style={{
               background: '#ffffff', border: 'none', color: '#000',
@@ -338,14 +384,14 @@ export default function ProfiluxPage() {
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px', padding: '13px 18px',
                   background: 'transparent', border: 'none',
-                  borderBottom: currentStep === step.id ? '2px solid #ffffff' : completedSteps.includes(step.id) ? '2px solid #4a9eff' : '2px solid transparent',
+                  borderBottom: currentStep === step.id ? '2px solid #ffffff' : completedSteps.includes(step.id) ? '2px solid #9B6B4A' : '2px solid transparent',
                   cursor: 'pointer', whiteSpace: 'nowrap',
                 }}
               >
                 <div style={{
                   width: '22px', height: '22px', borderRadius: '50%', flexShrink: 0,
-                  background: completedSteps.includes(step.id) ? '#4a9eff' : currentStep === step.id ? '#ffffff' : '#222',
-                  border: `1px solid ${completedSteps.includes(step.id) ? '#4a9eff' : currentStep === step.id ? '#ffffff' : '#444'}`,
+                  background: completedSteps.includes(step.id) ? '#9B6B4A' : currentStep === step.id ? '#ffffff' : '#222',
+                  border: `1px solid ${completedSteps.includes(step.id) ? '#9B6B4A' : currentStep === step.id ? '#ffffff' : '#444'}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '10px',
                   color: completedSteps.includes(step.id) ? '#000' : currentStep === step.id ? '#000' : '#555', fontWeight: 700,
@@ -354,7 +400,7 @@ export default function ProfiluxPage() {
                 </div>
                 <span style={{
                   fontSize: '12px', fontFamily: 'Inter, sans-serif',
-                  color: completedSteps.includes(step.id) ? '#4a9eff' : currentStep === step.id ? '#ffffff' : '#666', fontWeight: completedSteps.includes(step.id) || currentStep === step.id ? 600 : 500,
+                  color: completedSteps.includes(step.id) ? '#9B6B4A' : currentStep === step.id ? '#ffffff' : '#666', fontWeight: completedSteps.includes(step.id) || currentStep === step.id ? 600 : 500,
                 }}>
                   {step.label}
                 </span>
@@ -564,7 +610,7 @@ export default function ProfiluxPage() {
                   </div>
                   <label style={{ position: 'relative', width: '40px', height: '22px', flexShrink: 0, cursor: 'pointer' }}>
                     <input type="checkbox" checked={profile.sharingEnabled} onChange={e => handleToggleSharing(e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
-                    <span style={{ position: 'absolute', inset: 0, background: completeness < 100 ? '#1a1a1a' : profile.sharingEnabled ? 'rgba(255,255,255,0.15)' : '#2a2a2a', borderRadius: '11px', border: `1px solid ${completeness < 100 ? '#333' : profile.sharingEnabled ? '#ffffff' : '#333'}` }}>
+                    <span style={{ position: 'absolute', inset: 0, background: completeness !== 100 ? '#1a1a1a' : profile.sharingEnabled ? 'rgba(255,255,255,0.15)' : '#2a2a2a', borderRadius: '11px', border: `1px solid ${completeness !== 100 ? '#333' : profile.sharingEnabled ? '#ffffff' : '#333'}` }}>
                       <span style={{ position: 'absolute', width: '16px', height: '16px', left: profile.sharingEnabled ? '20px' : '2px', top: '2px', background: profile.sharingEnabled ? '#ffffff' : '#555', borderRadius: '50%', transition: '0.2s' }} />
                     </span>
                   </label>
@@ -651,7 +697,7 @@ export default function ProfiluxPage() {
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
                 <span style={{ fontSize: '9px', border: '1px solid #444', color: '#777', padding: '2px 7px', borderRadius: '2px' }}>
-                  {(session?.user as any)?.role?.toUpperCase() || 'MEMBER'}
+                  {(({ emerging_professional: 'Emerging Pro', established_professional: 'Established Pro', senior_executive: 'Senior & Executive', luxury_employer: 'Luxury Employer', trusted_contributor: 'Trusted Contributor', professional: 'Established Pro', business: 'Luxury Employer', insider: 'Trusted Contributor', member: 'Member', executive: 'Senior & Executive', admin: 'Admin' } as any)[(session?.user as any)?.role] || (session?.user as any)?.role?.toUpperCase() || 'MEMBER')}
                 </span>
                 {profile.sectors.slice(0, 2).map(s => (
                   <span key={s} style={{ fontSize: '9px', border: '1px solid #333', color: '#555', padding: '2px 7px', borderRadius: '2px' }}>{s.split(' ')[0]}</span>
