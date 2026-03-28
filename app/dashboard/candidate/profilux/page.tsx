@@ -172,7 +172,7 @@ export default function ProfiluxPage() {
     profile.sectors?.length > 0 ? 4 : null,
     profile.salaryExpectation > 0 ? 5 : null,
     profile.availability?.trim() ? 6 : null,
-    profile.sharingEnabled ? 7 : null,
+    profile.availability?.trim() && profile.salaryExpectation > 0 ? 7 : null,
   ].filter(Boolean) as number[]
   const completeness = Math.round((completedSteps.length / 7) * 100)
   const circumference = 2 * Math.PI * 20
