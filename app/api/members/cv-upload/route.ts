@@ -59,6 +59,17 @@ export async function POST(req: NextRequest) {
       .from('member-cvs')
       .getPublicUrl(data.path)
 
+    // Save to member_documents table so it appears in admin Documents tab
+    await supabase.from('member_documents').insert({
+      member_id: memberId,
+      document_type: 'cv',
+      file_name: file.name,
+      file_url: urlData.publicUrl,
+      file_size: buffer.length,
+      is_primary: true,
+      uploaded_at: new Date().toISOString(),
+    })
+
     return NextResponse.json({ success: true, url: urlData.publicUrl })
   } catch (err) {
     console.error('CV upload error:', err)
