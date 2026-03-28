@@ -347,7 +347,7 @@ export default function ProfiluxPage() {
                   background: completedSteps.includes(step.id) ? '#4a9eff' : currentStep === step.id ? '#ffffff' : '#222',
                   border: `1px solid ${completedSteps.includes(step.id) ? '#4a9eff' : currentStep === step.id ? '#ffffff' : '#444'}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '10px', fontWeight: 500,
+                  fontSize: '10px',
                   color: completedSteps.includes(step.id) ? '#000' : currentStep === step.id ? '#000' : '#555', fontWeight: 700,
                 }}>
                   {completedSteps.includes(step.id) ? '✓' : step.id}
@@ -355,7 +355,6 @@ export default function ProfiluxPage() {
                 <span style={{
                   fontSize: '12px', fontFamily: 'Inter, sans-serif',
                   color: completedSteps.includes(step.id) ? '#4a9eff' : currentStep === step.id ? '#ffffff' : '#666', fontWeight: completedSteps.includes(step.id) || currentStep === step.id ? 600 : 500,
-                  fontWeight: currentStep === step.id ? 500 : 400,
                 }}>
                   {step.label}
                 </span>
