@@ -362,12 +362,12 @@ export default function AdminPage() {
                             {displayName(m)}
                           </a>
                           {m.cv_url && (
-                            <div className="absolute left-0 top-6 z-50 hidden group-hover/cv:block w-[340px] bg-white border border-[#e8e8e8] rounded-lg shadow-lg overflow-hidden">
+                            <div className="absolute left-0 top-6 z-[9999] hidden group-hover/cv:block w-[480px] bg-white border border-[#e8e8e8] rounded-lg shadow-xl overflow-hidden">
                               <div className="flex items-center justify-between px-3 py-2 border-b border-[#f0f0f0]">
                                 <span className="text-[10px] uppercase tracking-wide text-[#999] font-medium">CV Preview</span>
                                 <a href={m.cv_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#444] hover:text-[#111] underline">Open →</a>
                               </div>
-                              <iframe src={m.cv_url} className="w-full h-[420px] border-0" title="CV Preview" />
+                              <iframe src={m.cv_url} className="w-full h-[560px] border-0" title="CV Preview" />
                             </div>
                           )}
                         </div>
