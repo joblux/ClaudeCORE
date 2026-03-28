@@ -65,6 +65,7 @@ interface ProfileData {
   sectors: string[]
   markets: string[]
   salaryExpectation: number
+  salaryCurrency: string
   availability: string
   sharingEnabled: boolean
   shareSlug: string
@@ -92,7 +93,8 @@ export default function ProfiluxPage() {
     languages: [],
     sectors: [],
     markets: [],
-    salaryExpectation: 80000,
+    salaryExpectation: 0,
+    salaryCurrency: 'EUR',
     availability: 'open',
     sharingEnabled: false,
     shareSlug: '',
@@ -110,14 +112,7 @@ export default function ProfiluxPage() {
           const data = await res.json()
           if (data.profile) {
             setProfile(prev => ({ ...prev, ...data.profile }))
-            const completed: number[] = []
-            if (data.profile.firstName) completed.push(1)
-            if (data.profile.experience?.length > 0) completed.push(2)
-            if (data.profile.specialisations?.length > 0) completed.push(3)
-            if (data.profile.sectors?.length > 0) completed.push(4)
-            if (data.profile.salaryExpectation) completed.push(5)
-            if (data.profile.availability) completed.push(6)
-            setCompletedSteps(completed)
+            // Don't set completedSteps from load — completeness is calculated live from profile state
           }
         }
       } catch {}
@@ -125,9 +120,20 @@ export default function ProfiluxPage() {
     if (status === 'authenticated') fetchProfile()
   }, [status])
 
-  const completeness = Math.round((completedSteps.length / 7) * 100)
+  // Live completeness — recalculates on every profile change
+  const liveCompleted = [
+    profile.firstName?.trim() && profile.lastName?.trim() && profile.city?.trim() ? 1 : null,
+    profile.experience?.length > 0 ? 2 : null,
+    profile.specialisations?.length > 0 ? 3 : null,
+    profile.sectors?.length > 0 ? 4 : null,
+    profile.salaryExpectation > 0 ? 5 : null,
+    profile.availability?.trim() ? 6 : null,
+    profile.sharingEnabled ? 7 : null,
+  ].filter(Boolean) as number[]
+  const completeness = Math.round((liveCompleted.length / 7) * 100)
   const circumference = 2 * Math.PI * 20
   const strokeDashoffset = circumference - (completeness / 100) * circumference
+  const completedSteps = liveCompleted
 
   const toggle = (arr: string[], val: string) =>
     arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
@@ -211,9 +217,11 @@ export default function ProfiluxPage() {
     setProfile(prev => ({ ...prev, experience: prev.experience.filter(e => e.id !== id) }))
   }
 
-  const formatSalary = (val: number) => {
-    if (val >= 1000) return `€${Math.round(val / 1000)}K`
-    return `€${val}`
+  const formatSalary = (val: number, currency: string) => {
+    const symbols: Record<string, string> = { EUR: '€', USD: '$', GBP: '£', AED: 'AED ' }
+    const sym = symbols[currency] || '€'
+    if (val >= 1000) return `${sym}${Math.round(val / 1000)}K`
+    return `${sym}${val}`
   }
 
   const initials = profile.firstName && profile.lastName
@@ -233,25 +241,25 @@ export default function ProfiluxPage() {
   if (status === 'loading') return null
 
   const inputStyle: React.CSSProperties = {
-    width: '100%', background: '#1a1a1a', border: '1px solid #2a2a2a',
+    width: '100%', background: '#2a2a2a', border: '1px solid #3a3a3a',
     borderRadius: '4px', color: '#fff', fontSize: '13px', padding: '10px 12px',
     fontFamily: 'Inter, sans-serif', outline: 'none', boxSizing: 'border-box',
   }
   const labelStyle: React.CSSProperties = {
-    fontSize: '11px', color: '#555', letterSpacing: '0.06em', marginBottom: '8px', display: 'block',
+    fontSize: '11px', color: '#aaa', letterSpacing: '0.06em', marginBottom: '8px', display: 'block',
   }
   const pillStyle = (active: boolean): React.CSSProperties => ({
     padding: '7px 14px', borderRadius: '3px', fontSize: '12px', cursor: 'pointer',
-    border: `1px solid ${active ? '#a58e28' : '#333'}`,
-    color: active ? '#a58e28' : '#888',
-    background: active ? 'rgba(165,142,40,0.08)' : 'transparent',
+    border: `1px solid ${active ? '#ffffff' : '#333'}`,
+    color: active ? '#ffffff' : '#888',
+    background: active ? 'rgba(255,255,255,0.08)' : 'transparent',
     fontFamily: 'Inter, sans-serif',
   })
 
   const navBtn = (dir: 'prev' | 'next'): React.CSSProperties => ({
-    background: dir === 'next' ? '#a58e28' : 'transparent',
-    border: dir === 'next' ? 'none' : '1px solid #333',
-    color: dir === 'next' ? '#000' : '#666',
+    background: dir === 'next' ? '#ffffff' : 'transparent',
+    border: dir === 'next' ? 'none' : '1px solid #444',
+    color: dir === 'next' ? '#000' : '#aaa',
     fontSize: '13px', fontWeight: dir === 'next' ? 500 : 400,
     padding: '10px 24px', borderRadius: '4px', cursor: 'pointer',
     fontFamily: 'Inter, sans-serif',
@@ -302,7 +310,7 @@ export default function ProfiluxPage() {
         }}>
           <div>
             <h1 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '28px', margin: '0 0 5px', color: '#fff' }}>
-              Your <span style={{ fontStyle: 'italic', color: '#a58e28' }}>intelligence</span> profile
+              Your <span style={{ fontStyle: 'italic', color: '#ffffff' }}>intelligence</span> profile
             </h1>
             <p style={{ fontSize: '13px', color: '#555', margin: 0, fontWeight: 300 }}>
               A confidential professional dossier, visible only to JOBLUX and who you choose to share with.
@@ -317,10 +325,10 @@ export default function ProfiluxPage() {
             <div style={{ position: 'relative', width: '48px', height: '48px', flexShrink: 0 }}>
               <svg width="48" height="48" viewBox="0 0 48 48" style={{ transform: 'rotate(-90deg)' }}>
                 <circle cx="24" cy="24" r="20" fill="none" stroke="#2a2a2a" strokeWidth="3.5" />
-                <circle cx="24" cy="24" r="20" fill="none" stroke="#a58e28" strokeWidth="3.5"
+                <circle cx="24" cy="24" r="20" fill="none" stroke="#ffffff" strokeWidth="3.5"
                   strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" />
               </svg>
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: '#a58e28', fontWeight: 500 }}>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: '#ffffff', fontWeight: 500 }}>
                 {completeness}
               </div>
             </div>
@@ -338,17 +346,17 @@ export default function ProfiluxPage() {
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px', padding: '13px 18px',
                   background: 'transparent', border: 'none',
-                  borderBottom: currentStep === step.id ? '2px solid #a58e28' : '2px solid transparent',
+                  borderBottom: currentStep === step.id ? '2px solid #ffffff' : '2px solid transparent',
                   cursor: 'pointer', whiteSpace: 'nowrap',
                 }}
               >
                 <div style={{
                   width: '22px', height: '22px', borderRadius: '50%', flexShrink: 0,
-                  background: completedSteps.includes(step.id) || currentStep === step.id ? '#a58e28' : '#222',
-                  border: `1px solid ${completedSteps.includes(step.id) || currentStep === step.id ? '#a58e28' : '#333'}`,
+                  background: completedSteps.includes(step.id) || currentStep === step.id ? '#ffffff' : '#222',
+                  border: `1px solid ${completedSteps.includes(step.id) || currentStep === step.id ? '#ffffff' : '#333'}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '10px', fontWeight: 500,
-                  color: completedSteps.includes(step.id) || currentStep === step.id ? '#000' : '#555',
+                  color: completedSteps.includes(step.id) || currentStep === step.id ? '#000' : '#666',
                 }}>
                   {completedSteps.includes(step.id) ? '✓' : step.id}
                 </div>
@@ -381,20 +389,20 @@ export default function ProfiluxPage() {
               <div style={{ background: '#222', border: '1px solid #333', borderRadius: '6px', padding: '28px' }}>
                 <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 24px' }}>Personal information</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                  <div><label style={labelStyle}>FIRST NAME</label><input value={profile.firstName} onChange={e => setProfile(p => ({ ...p, firstName: e.target.value }))} placeholder="Genny" style={inputStyle} /></div>
-                  <div><label style={labelStyle}>LAST NAME</label><input value={profile.lastName} onChange={e => setProfile(p => ({ ...p, lastName: e.target.value }))} placeholder="Woods" style={inputStyle} /></div>
+                  <div><label style={labelStyle}>FIRST NAME</label><input value={profile.firstName} onChange={e => setProfile(p => ({ ...p, firstName: e.target.value }))} placeholder="·" style={inputStyle} /></div>
+                  <div><label style={labelStyle}>LAST NAME</label><input value={profile.lastName} onChange={e => setProfile(p => ({ ...p, lastName: e.target.value }))} placeholder="·" style={inputStyle} /></div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                  <div><label style={labelStyle}>CURRENT CITY</label><input value={profile.city} onChange={e => setProfile(p => ({ ...p, city: e.target.value }))} placeholder="Paris, France" style={inputStyle} /></div>
-                  <div><label style={labelStyle}>NATIONALITY</label><input value={profile.nationality} onChange={e => setProfile(p => ({ ...p, nationality: e.target.value }))} placeholder="French" style={inputStyle} /></div>
+                  <div><label style={labelStyle}>CURRENT CITY</label><input value={profile.city} onChange={e => setProfile(p => ({ ...p, city: e.target.value }))} placeholder="·" style={inputStyle} /></div>
+                  <div><label style={labelStyle}>NATIONALITY</label><input value={profile.nationality} onChange={e => setProfile(p => ({ ...p, nationality: e.target.value }))} placeholder="·" style={inputStyle} /></div>
                 </div>
                 <div style={{ marginBottom: '16px' }}>
                   <label style={labelStyle}>PROFESSIONAL HEADLINE</label>
-                  <input value={profile.headline} onChange={e => setProfile(p => ({ ...p, headline: e.target.value }))} placeholder="Senior Retail Director · LVMH · Paris" style={inputStyle} />
+                  <input value={profile.headline} onChange={e => setProfile(p => ({ ...p, headline: e.target.value }))} placeholder="·" style={inputStyle} />
                 </div>
                 <div style={{ marginBottom: '24px' }}>
                   <label style={labelStyle}>SHORT BIO <span style={{ color: '#444', fontSize: '10px' }}>(optional)</span></label>
-                  <textarea value={profile.bio} onChange={e => setProfile(p => ({ ...p, bio: e.target.value }))} placeholder="A brief summary of your professional background..." rows={3} style={{ ...inputStyle, resize: 'vertical', minHeight: '80px' }} />
+                  <textarea value={profile.bio} onChange={e => setProfile(p => ({ ...p, bio: e.target.value }))} placeholder="·" rows={3} style={{ ...inputStyle, resize: 'vertical', minHeight: '80px' }} />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #2a2a2a', paddingTop: '20px' }}>
                   <button onClick={() => { markComplete(1); setCurrentStep(2) }} style={navBtn('next')}>Experience →</button>
@@ -411,7 +419,7 @@ export default function ProfiluxPage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <div>
                         <div style={{ fontSize: '14px', fontWeight: 500, color: '#fff' }}>{exp.role}</div>
-                        <div style={{ fontSize: '13px', color: '#a58e28', marginTop: '2px' }}>{exp.brand}{exp.group ? ` · ${exp.group}` : ''}</div>
+                        <div style={{ fontSize: '13px', color: '#cccccc', marginTop: '2px' }}>{exp.brand}{exp.group ? ` · ${exp.group}` : ''}</div>
                         <div style={{ fontSize: '12px', color: '#555', marginTop: '4px' }}>{exp.from}{exp.current ? ' — Present' : exp.to ? ` — ${exp.to}` : ''}{exp.location ? ` · ${exp.location}` : ''}</div>
                       </div>
                       <button onClick={() => removeExperience(exp.id)} style={{ background: 'transparent', border: 'none', color: '#444', fontSize: '11px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Remove</button>
@@ -506,8 +514,13 @@ export default function ProfiluxPage() {
                 <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 8px' }}>Salary expectation</h2>
                 <p style={{ fontSize: '13px', color: '#555', fontWeight: 300, margin: '0 0 28px', lineHeight: 1.7 }}>Used by Mo to match you to appropriately scoped search assignments. Never shown publicly.</p>
                 <label style={labelStyle}>ANNUAL GROSS SALARY EXPECTATION</label>
-                <div style={{ textAlign: 'center', fontSize: '28px', color: '#a58e28', fontWeight: 400, margin: '16px 0' }}>{formatSalary(profile.salaryExpectation)} / year</div>
-                <input type="range" min="40000" max="500000" step="5000" value={profile.salaryExpectation} onChange={e => setProfile(p => ({ ...p, salaryExpectation: Number(e.target.value) }))} style={{ width: '100%', accentColor: '#a58e28', marginBottom: '8px' }} />
+                <div style={{ textAlign: 'center', fontSize: '28px', color: '#ffffff', fontWeight: 400, margin: '16px 0' }}>{formatSalary(profile.salaryExpectation, profile.salaryCurrency)} / year</div>
+                <input type="range" min="0" max="500000" step="5000" value={profile.salaryExpectation} onChange={e => setProfile(p => ({ ...p, salaryExpectation: Number(e.target.value) }))} style={{ width: '100%', accentColor: '#ffffff', marginBottom: '8px' }} />
+                <div style={{ display: 'flex', gap: '8px', marginTop: '12px', justifyContent: 'center' }}>
+                  {['EUR', 'USD', 'GBP', 'AED'].map(c => (
+                    <button key={c} onClick={() => setProfile(p => ({ ...p, salaryCurrency: c }))} style={{ padding: '6px 16px', borderRadius: '3px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${profile.salaryCurrency === c ? '#ffffff' : '#333'}`, color: profile.salaryCurrency === c ? '#ffffff' : '#666', background: profile.salaryCurrency === c ? 'rgba(255,255,255,0.08)' : 'transparent', fontFamily: 'Inter, sans-serif' }}>{c}</button>
+                  ))}
+                </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#555', marginBottom: '28px' }}><span>€40K</span><span>€500K+</span></div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #2a2a2a', paddingTop: '20px' }}>
                   <button onClick={() => setCurrentStep(4)} style={navBtn('prev')}>← Sectors</button>
@@ -568,7 +581,7 @@ export default function ProfiluxPage() {
                 {profile.sharingEnabled && profile.shareSlug && (
                   <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '4px', padding: '14px 16px', marginBottom: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '12px', color: '#666', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>joblux.com/<span style={{ color: '#a58e28' }}>{profile.shareSlug}</span></span>
+                      <span style={{ fontSize: '12px', color: '#666', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>joblux.com/<span style={{ color: '#ffffff' }}>{profile.shareSlug}</span></span>
                       <button onClick={handleResetLink} style={{ background: 'transparent', border: 'none', color: '#444', fontSize: '11px', cursor: 'pointer', fontFamily: 'Inter, sans-serif', textDecoration: 'underline', flexShrink: 0 }}>Reset link</button>
                     </div>
                     <div style={{ fontSize: '11px', color: '#444', fontWeight: 300, lineHeight: 1.6 }}>Resetting instantly revokes anyone who had the previous link.</div>
@@ -625,7 +638,7 @@ export default function ProfiluxPage() {
                   Your intelligence profile is ready. Mo will review it and match you to relevant search assignments confidentially.
                 </p>
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                  <button onClick={handleSave} style={{ background: '#a58e28', border: 'none', color: '#000', fontSize: '13px', fontWeight: 500, padding: '11px 26px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>↓ Download profile</button>
+                  <button onClick={handleSave} style={{ background: '#ffffff', border: 'none', color: '#000', fontSize: '13px', fontWeight: 500, padding: '11px 26px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>↓ Download profile</button>
                   <Link href={`/${profile.shareSlug || ''}`} style={{ background: 'transparent', border: '1px solid #333', color: '#888', fontSize: '13px', padding: '11px 20px', borderRadius: '4px', textDecoration: 'none', display: 'inline-block' }}>View my profile →</Link>
                   <Link href="/dashboard/candidate" style={{ background: 'transparent', border: '1px solid #333', color: '#888', fontSize: '13px', padding: '11px 20px', borderRadius: '4px', textDecoration: 'none', display: 'inline-block' }}>← Dashboard</Link>
                 </div>
