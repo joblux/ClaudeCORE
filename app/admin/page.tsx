@@ -160,8 +160,8 @@ export default function AdminPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0d1117]">
-        <div className="text-sm text-[#484f58]">Loading…</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5]">
+        <div className="text-sm text-[#999]">Loading...</div>
       </div>
     );
   }
@@ -169,29 +169,31 @@ export default function AdminPage() {
   if (!isAdmin) return null;
 
   return (
-    <div className="min-h-screen bg-[#0d1117]">
-      {/* ── Page header row ── */}
-      <div className="px-6 py-5 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
+    <div className="min-h-screen bg-[#f5f5f5]">
+      {/* Topbar */}
+      <div className="bg-white border-b border-[#e8e8e8] px-6 py-4 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div>
-            <h1 className="text-xl font-medium text-[#1a1a1a]">Profiles</h1>
-            <p className="text-sm text-[#484f58] mt-0.5">
-              {counts.total} total · {counts.pending} pending approval
+            <h1 className="text-lg font-semibold text-[#111]">Profiles</h1>
+            <p className="text-sm text-[#999] mt-0.5">
+              {counts.total} total &middot; {counts.pending} pending approval
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button className="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold tracking-wide uppercase border border-[#30363d] rounded-lg text-[#8b949e] hover:bg-[#1f2937] transition-colors">
+            <button className="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold tracking-wide uppercase bg-white border border-[#e0e0e0] rounded-lg text-[#444] hover:bg-[#fafafa] transition-colors">
               <Download size={13} />
               Export
             </button>
-            <button className="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold tracking-wide uppercase bg-[#a58e28] text-white rounded-lg hover:bg-[#8a7622] transition-colors">
+            <button className="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold tracking-wide uppercase bg-[#111] text-white rounded-lg hover:bg-[#333] transition-colors">
               <UserPlus size={13} />
               Invite professional
             </button>
           </div>
         </div>
+      </div>
 
-        {/* ── Analytics strip ── */}
+      <div className="px-6 py-5 lg:px-8">
+        {/* Stat cards */}
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-5">
           {([
             ["Total", counts.total, "all"],
@@ -207,30 +209,30 @@ export default function AdminPage() {
                 if (filter !== "all") { setStatusFilter(filter); setRoleFilter("all"); }
                 else { setStatusFilter("all"); setRoleFilter("all"); }
               }}
-              className="bg-[#161b22] border border-[#30363d] rounded-xl p-3 text-center hover:border-[#a58e28]/30 transition-colors"
+              className="bg-white border border-[#e8e8e8] rounded-lg p-3 text-center hover:border-[#ccc] transition-colors"
             >
-              <div className="text-2xl font-light text-[#a58e28]">{val}</div>
-              <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mt-1">{label}</div>
+              <div className="text-[22px] font-bold text-[#111]">{val}</div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#999] mt-1">{label}</div>
             </button>
           ))}
         </div>
 
-        {/* ── Filter bar ── */}
+        {/* Filter bar */}
         <div className="flex flex-wrap gap-3 mb-4">
           <div className="relative flex-1 min-w-[200px]">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#484f58]" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#bbb]" />
             <input
               type="text"
               placeholder="Search by name, email, role..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full border border-[#30363d] rounded-lg pl-9 pr-3 py-2 text-sm bg-[#161b22] focus:outline-none focus:border-[#a58e28]/40 transition-colors"
+              className="w-full border border-[#e8e8e8] rounded-lg pl-9 pr-3 py-2 text-sm bg-white text-[#111] placeholder-[#bbb] focus:outline-none focus:border-[#ccc] transition-colors"
             />
           </div>
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="border border-[#30363d] rounded-lg px-3 py-2 text-sm bg-[#161b22] cursor-pointer focus:outline-none focus:border-[#a58e28]/40"
+            className="border border-[#e8e8e8] rounded-lg px-3 py-2 text-sm bg-white text-[#444] cursor-pointer focus:outline-none focus:border-[#ccc]"
           >
             <option value="all">All tiers</option>
             <option value="candidate">Candidate</option>
@@ -242,7 +244,7 @@ export default function AdminPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="border border-[#30363d] rounded-lg px-3 py-2 text-sm bg-[#161b22] cursor-pointer focus:outline-none focus:border-[#a58e28]/40"
+            className="border border-[#e8e8e8] rounded-lg px-3 py-2 text-sm bg-white text-[#444] cursor-pointer focus:outline-none focus:border-[#ccc]"
           >
             <option value="all">Status</option>
             <option value="pending">Pending</option>
@@ -253,7 +255,7 @@ export default function AdminPage() {
           <select
             value={confidenceFilter}
             onChange={(e) => setConfidenceFilter(e.target.value)}
-            className="border border-[#30363d] rounded-lg px-3 py-2 text-sm bg-[#161b22] cursor-pointer focus:outline-none focus:border-[#a58e28]/40"
+            className="border border-[#e8e8e8] rounded-lg px-3 py-2 text-sm bg-white text-[#444] cursor-pointer focus:outline-none focus:border-[#ccc]"
           >
             <option value="all">All AI Scores</option>
             <option value="high">High Confidence</option>
@@ -265,16 +267,16 @@ export default function AdminPage() {
 
           {selected.size > 0 && (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-[#484f58]">{selected.size} selected</span>
+              <span className="text-xs text-[#999]">{selected.size} selected</span>
               <button
                 onClick={() => batchUpdate("approved")}
-                className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide bg-[#a58e28] text-white rounded-lg hover:bg-[#8a7622] transition-colors"
+                className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide bg-[#f0fdf4] text-[#15803d] border border-[#bbf7d0] rounded-lg hover:bg-[#dcfce7] transition-colors"
               >
                 Approve
               </button>
               <button
                 onClick={() => batchUpdate("rejected")}
-                className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide bg-[#161b22] text-[#1a1a1a] border border-gray-300 rounded-lg hover:bg-[#1f2937] transition-colors"
+                className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide bg-[#fef2f2] text-[#dc2626] border border-[#fecaca] rounded-lg hover:bg-[#fee2e2] transition-colors"
               >
                 Reject
               </button>
@@ -282,189 +284,187 @@ export default function AdminPage() {
           )}
         </div>
 
-        {/* ── Pending approval banner ── */}
+        {/* Pending approval banner */}
         {counts.pending > 0 && (
-          <div className="bg-[#a58e28]/[0.06] border border-[#a58e28]/20 rounded-lg p-4 mb-5 flex items-center justify-between">
+          <div className="bg-[#fef3c7] border border-[#fde68a] rounded-lg p-4 mb-5 flex items-center justify-between">
             <div>
-              <span className="text-sm font-medium text-[#1a1a1a]">{counts.pending} profile{counts.pending !== 1 ? 's' : ''} awaiting approval</span>
-              <span className="text-sm text-[#8b949e] ml-2">Review pending applications to grow the ecosystem</span>
+              <span className="text-sm font-medium text-[#92400e]">{counts.pending} profile{counts.pending !== 1 ? 's' : ''} awaiting approval</span>
+              <span className="text-sm text-[#b45309] ml-2">Review pending applications to grow the ecosystem</span>
             </div>
             <button
               onClick={() => { setStatusFilter("pending"); setRoleFilter("all"); }}
-              className="text-sm font-medium text-[#a58e28] hover:text-[#8a7622] transition-colors whitespace-nowrap"
+              className="text-sm font-medium text-[#92400e] hover:text-[#78350f] transition-colors whitespace-nowrap"
             >
-              Review now →
+              Review now &rarr;
             </button>
           </div>
         )}
 
-        {/* ── Members table ── */}
-        <div className="border border-[#30363d] rounded-xl overflow-x-auto bg-[#161b22]" style={{ minWidth: 0 }}>
+        {/* Members table */}
+        <div className="border border-[#e8e8e8] rounded-lg overflow-x-auto bg-white" style={{ minWidth: 0 }}>
           <div style={{ minWidth: 800 }}>
-          {/* Table header */}
-          <div className="hidden lg:grid bg-gray-50 px-5 py-3 text-[11px] uppercase tracking-wide text-[#484f58] font-medium" style={{ gridTemplateColumns: '36px 2fr 1.2fr 0.8fr 0.8fr 1fr 0.6fr' }}>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                checked={members.length > 0 && selected.size === members.length}
-                onChange={toggleAll}
-                className="rounded border-gray-300"
-              />
+            {/* Table header */}
+            <div className="hidden lg:grid bg-[#fafafa] px-5 py-3 text-[11px] uppercase tracking-wide text-[#999] font-medium border-b border-[#e8e8e8]" style={{ gridTemplateColumns: '36px 2fr 1.2fr 0.8fr 0.8fr 1fr 0.6fr' }}>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={members.length > 0 && selected.size === members.length}
+                  onChange={toggleAll}
+                  className="rounded border-[#e0e0e0]"
+                />
+              </div>
+              <div>Profile</div>
+              <div>Email</div>
+              <div>Tier</div>
+              <div>Status</div>
+              <div>AI Review</div>
+              <div className="text-right">Actions</div>
             </div>
-            <div>Profile</div>
-            <div>Email</div>
-            <div>Tier</div>
-            <div>Status</div>
-            <div>AI Review</div>
-            <div className="text-right">Actions</div>
-          </div>
 
-          {/* Table body */}
-          {loading ? (
-            <div className="px-5 py-12 text-center text-sm text-[#484f58]">Loading…</div>
-          ) : filteredMembers.length === 0 ? (
-            <div className="px-5 py-12 text-center text-sm text-[#484f58]">No profiles found.</div>
-          ) : (
-            filteredMembers.map((m) => {
-              const busy = acting.has(m.id);
-              const review = aiReviews.get(m.id);
-              const isPending = m.status === "pending";
-              const confidenceColors: Record<string, string> = { high: "bg-green-500", medium: "bg-amber-500", low: "bg-red-500" };
+            {/* Table body */}
+            {loading ? (
+              <div className="px-5 py-12 text-center text-sm text-[#999]">Loading...</div>
+            ) : filteredMembers.length === 0 ? (
+              <div className="px-5 py-12 text-center text-sm text-[#999]">No profiles found.</div>
+            ) : (
+              filteredMembers.map((m) => {
+                const busy = acting.has(m.id);
+                const review = aiReviews.get(m.id);
+                const isPending = m.status === "pending";
+                const confidenceColors: Record<string, string> = { high: "bg-green-500", medium: "bg-amber-500", low: "bg-red-500" };
 
-              return (
-                <div
-                  key={m.id}
-                  className={`grid items-center px-5 py-3 border-t border-[#30363d] hover:bg-[#1f2937]/50 transition-colors ${
-                    isPending ? 'bg-[#a58e28]/[0.02]' : ''
-                  } ${busy ? 'opacity-50' : ''}`}
-                  style={{ gridTemplateColumns: '36px 2fr 1.2fr 0.8fr 0.8fr 1fr 0.6fr' }}
-                >
-                  {/* Checkbox */}
-                  <div className="hidden lg:flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={selected.has(m.id)}
-                      onChange={() => toggleSelect(m.id)}
-                      disabled={busy}
-                      className="rounded border-gray-300"
-                    />
-                  </div>
-
-                  {/* Member (avatar + name + subtitle) */}
-                  <div className="flex items-center gap-3 col-span-2 lg:col-span-1">
-                    <div className="w-[30px] h-[30px] rounded-full bg-[#1a1a1a] text-[#a58e28] text-[10px] font-medium flex items-center justify-center flex-shrink-0">
-                      {getInitials(m)}
+                return (
+                  <div
+                    key={m.id}
+                    className={`grid items-center px-5 py-3 border-t border-[#f0f0f0] hover:bg-[#fafafa] transition-colors ${busy ? 'opacity-50' : ''}`}
+                    style={{ gridTemplateColumns: '36px 2fr 1.2fr 0.8fr 0.8fr 1fr 0.6fr' }}
+                  >
+                    {/* Checkbox */}
+                    <div className="hidden lg:flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={selected.has(m.id)}
+                        onChange={() => toggleSelect(m.id)}
+                        disabled={busy}
+                        className="rounded border-[#e0e0e0]"
+                      />
                     </div>
-                    <div className="min-w-0">
-                      <a href={`/admin/members/${m.id}`} className="text-sm font-medium text-[#1a1a1a] hover:text-[#a58e28] transition-colors truncate block">
-                        {displayName(m)}
-                      </a>
-                      <div className="text-xs text-[#484f58] truncate">
-                        {[m.city, m.country].filter(Boolean).join(", ") || "—"} · {m.profile_completeness ?? 0}% complete
+
+                    {/* Member (avatar + name + subtitle) */}
+                    <div className="flex items-center gap-3 col-span-2 lg:col-span-1">
+                      <div className="w-[30px] h-[30px] rounded-full bg-[#e8e8e8] text-[#666] text-[10px] font-medium flex items-center justify-center flex-shrink-0">
+                        {getInitials(m)}
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Email */}
-                  <div className="hidden lg:block text-sm text-[#8b949e] truncate">{m.email}</div>
-
-                  {/* Tier badge */}
-                  <div className="hidden lg:block">
-                    <TierBadge role={m.role} />
-                  </div>
-
-                  {/* Status */}
-                  <div className="hidden lg:block">
-                    <StatusBadge status={m.status} />
-                  </div>
-
-                  {/* AI Review */}
-                  <div className="hidden lg:block">
-                    {review ? (
-                      <div className="flex items-center gap-1.5">
-                        <span className={`w-2 h-2 rounded-full ${confidenceColors[review.confidence] || 'bg-gray-400'}`} title={review.reasoning} />
-                        <span className="text-[11px] text-[#8b949e] uppercase tracking-wide">
-                          {review.auto_approved ? "Auto" : review.recommendation === "approve" ? "Approve" : "Review"}
-                        </span>
-                        {isPending && (
-                          <button
-                            onClick={() => reassess(m.id)}
-                            disabled={reassessing.has(m.id)}
-                            className="text-[10px] text-[#a58e28] hover:underline ml-1"
-                          >
-                            {reassessing.has(m.id) ? "..." : "Re-assess"}
-                          </button>
-                        )}
-                      </div>
-                    ) : isPending ? (
-                      <button
-                        onClick={() => reassess(m.id)}
-                        disabled={reassessing.has(m.id)}
-                        className="text-[11px] text-[#a58e28] hover:underline"
-                      >
-                        {reassessing.has(m.id) ? "Assessing..." : "Run AI Review"}
-                      </button>
-                    ) : (
-                      <span className="text-xs text-gray-300">—</span>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center justify-end gap-1.5">
-                    {isPending ? (
-                      <>
-                        <button
-                          onClick={() => updateStatus(m.id, "approved")}
-                          disabled={busy}
-                          className="px-3 py-1 text-[11px] font-medium bg-[#a58e28] text-white rounded hover:bg-[#8a7622] transition-colors"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => updateStatus(m.id, "rejected")}
-                          disabled={busy}
-                          className="px-3 py-1 text-[11px] font-medium bg-[#161b22] text-[#8b949e] border border-[#30363d] rounded hover:bg-[#1f2937] transition-colors"
-                        >
-                          Reject
-                        </button>
-                      </>
-                    ) : (
-                      <div className="relative group">
-                        <button className="p-1.5 rounded hover:bg-[#1f2937] transition-colors text-[#484f58] hover:text-[#8b949e]">
-                          <MoreHorizontal size={16} />
-                        </button>
-                        <div className="absolute right-0 top-full mt-1 bg-[#161b22] border border-[#30363d] rounded-lg shadow-lg py-1 min-w-[140px] hidden group-hover:block z-10">
-                          {m.status !== "approved" && (
-                            <button onClick={() => updateStatus(m.id, "approved")} disabled={busy} className="w-full text-left px-3 py-1.5 text-xs text-[#8b949e] hover:bg-[#1f2937]">
-                              Approve
-                            </button>
-                          )}
-                          {m.status !== "rejected" && (
-                            <button onClick={() => updateStatus(m.id, "rejected")} disabled={busy} className="w-full text-left px-3 py-1.5 text-xs text-[#8b949e] hover:bg-[#1f2937]">
-                              Reject
-                            </button>
-                          )}
-                          {(m.status === "approved" || m.status === "rejected") && (
-                            <button onClick={() => updateStatus(m.id, "pending")} disabled={busy} className="w-full text-left px-3 py-1.5 text-xs text-[#8b949e] hover:bg-[#1f2937]">
-                              Reset to Pending
-                            </button>
-                          )}
-                          <a href={`/admin/members/${m.id}`} className="block px-3 py-1.5 text-xs text-[#8b949e] hover:bg-[#1f2937]">
-                            View Profile
-                          </a>
+                      <div className="min-w-0">
+                        <a href={`/admin/members/${m.id}`} className="text-sm font-medium text-[#111] hover:text-[#444] transition-colors truncate block">
+                          {displayName(m)}
+                        </a>
+                        <div className="text-xs text-[#999] truncate">
+                          {[m.city, m.country].filter(Boolean).join(", ") || "\u2014"} &middot; {m.profile_completeness ?? 0}% complete
                         </div>
                       </div>
-                    )}
+                    </div>
+
+                    {/* Email */}
+                    <div className="hidden lg:block text-sm text-[#999] truncate">{m.email}</div>
+
+                    {/* Tier badge */}
+                    <div className="hidden lg:block">
+                      <TierBadge role={m.role} />
+                    </div>
+
+                    {/* Status */}
+                    <div className="hidden lg:block">
+                      <StatusBadge status={m.status} />
+                    </div>
+
+                    {/* AI Review */}
+                    <div className="hidden lg:block">
+                      {review ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className={`w-2 h-2 rounded-full ${confidenceColors[review.confidence] || 'bg-gray-400'}`} title={review.reasoning} />
+                          <span className="text-[11px] text-[#999] uppercase tracking-wide">
+                            {review.auto_approved ? "Auto" : review.recommendation === "approve" ? "Approve" : "Review"}
+                          </span>
+                          {isPending && (
+                            <button
+                              onClick={() => reassess(m.id)}
+                              disabled={reassessing.has(m.id)}
+                              className="text-[10px] text-[#444] hover:underline ml-1"
+                            >
+                              {reassessing.has(m.id) ? "..." : "Re-assess"}
+                            </button>
+                          )}
+                        </div>
+                      ) : isPending ? (
+                        <button
+                          onClick={() => reassess(m.id)}
+                          disabled={reassessing.has(m.id)}
+                          className="text-[11px] text-[#444] hover:underline"
+                        >
+                          {reassessing.has(m.id) ? "Assessing..." : "Run AI Review"}
+                        </button>
+                      ) : (
+                        <span className="text-xs text-[#bbb]">&mdash;</span>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-end gap-1.5">
+                      {isPending ? (
+                        <>
+                          <button
+                            onClick={() => updateStatus(m.id, "approved")}
+                            disabled={busy}
+                            className="px-3 py-1 text-[11px] font-medium bg-[#f0fdf4] text-[#15803d] border border-[#bbf7d0] rounded hover:bg-[#dcfce7] transition-colors"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => updateStatus(m.id, "rejected")}
+                            disabled={busy}
+                            className="px-3 py-1 text-[11px] font-medium bg-[#fef2f2] text-[#dc2626] border border-[#fecaca] rounded hover:bg-[#fee2e2] transition-colors"
+                          >
+                            Reject
+                          </button>
+                        </>
+                      ) : (
+                        <div className="relative group">
+                          <button className="p-1.5 rounded hover:bg-[#f5f5f5] transition-colors text-[#999] hover:text-[#444]">
+                            <MoreHorizontal size={16} />
+                          </button>
+                          <div className="absolute right-0 top-full mt-1 bg-white border border-[#e8e8e8] rounded-lg shadow-lg py-1 min-w-[140px] hidden group-hover:block z-10">
+                            {m.status !== "approved" && (
+                              <button onClick={() => updateStatus(m.id, "approved")} disabled={busy} className="w-full text-left px-3 py-1.5 text-xs text-[#444] hover:bg-[#fafafa]">
+                                Approve
+                              </button>
+                            )}
+                            {m.status !== "rejected" && (
+                              <button onClick={() => updateStatus(m.id, "rejected")} disabled={busy} className="w-full text-left px-3 py-1.5 text-xs text-[#444] hover:bg-[#fafafa]">
+                                Reject
+                              </button>
+                            )}
+                            {(m.status === "approved" || m.status === "rejected") && (
+                              <button onClick={() => updateStatus(m.id, "pending")} disabled={busy} className="w-full text-left px-3 py-1.5 text-xs text-[#444] hover:bg-[#fafafa]">
+                                Reset to Pending
+                              </button>
+                            )}
+                            <a href={`/admin/members/${m.id}`} className="block px-3 py-1.5 text-xs text-[#444] hover:bg-[#fafafa]">
+                              View Profile
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })
-          )}
+                );
+              })
+            )}
           </div>
         </div>
 
-        {/* ── Pagination ── */}
-        <div className="flex justify-between items-center mt-4 text-sm text-[#8b949e]">
+        {/* Pagination */}
+        <div className="flex justify-between items-center mt-4 text-sm text-[#999]">
           <div>
             Showing {totalRows > 0 ? startItem : 0}-{endItem} of {totalRows} profiles
           </div>
@@ -472,19 +472,19 @@ export default function AdminPage() {
             <button
               disabled={page === 0}
               onClick={() => { setPage((p) => p - 1); setSelected(new Set()); }}
-              className="px-3 py-1.5 text-xs border border-[#30363d] rounded-lg bg-[#161b22] disabled:opacity-40 disabled:cursor-default hover:bg-[#1f2937] transition-colors"
+              className="px-3 py-1.5 text-xs border border-[#e0e0e0] rounded-lg bg-white text-[#444] disabled:opacity-40 disabled:cursor-default hover:bg-[#fafafa] transition-colors"
             >
-              ← Prev
+              &larr; Prev
             </button>
-            <span className="text-xs text-[#484f58] px-2">
+            <span className="text-xs text-[#999] px-2">
               {page + 1} / {totalPages}
             </span>
             <button
               disabled={page + 1 >= totalPages}
               onClick={() => { setPage((p) => p + 1); setSelected(new Set()); }}
-              className="px-3 py-1.5 text-xs border border-[#30363d] rounded-lg bg-[#161b22] disabled:opacity-40 disabled:cursor-default hover:bg-[#1f2937] transition-colors"
+              className="px-3 py-1.5 text-xs border border-[#e0e0e0] rounded-lg bg-white text-[#444] disabled:opacity-40 disabled:cursor-default hover:bg-[#fafafa] transition-colors"
             >
-              Next →
+              Next &rarr;
             </button>
           </div>
         </div>
@@ -493,15 +493,15 @@ export default function AdminPage() {
   );
 }
 
-/* ── Status badge component ── */
+/* Status badge */
 function StatusBadge({ status }: { status: string | null }) {
   const styles: Record<string, string> = {
-    pending: "text-amber-700 bg-amber-50",
-    approved: "text-green-700 bg-green-50",
-    rejected: "text-red-700 bg-red-50",
+    pending: "text-[#92400e] bg-[#fef3c7]",
+    approved: "text-[#15803d] bg-[#dcfce7]",
+    rejected: "text-[#dc2626] bg-[#fef2f2]",
     suspended: "text-purple-700 bg-purple-50",
   };
-  const cls = styles[status ?? ""] ?? "text-[#8b949e] bg-gray-100";
+  const cls = styles[status ?? ""] ?? "text-[#999] bg-[#f5f5f5]";
   return (
     <span className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded ${cls}`}>
       {status ?? "unknown"}
@@ -509,19 +509,11 @@ function StatusBadge({ status }: { status: string | null }) {
   );
 }
 
-/* ── Tier badge component ── */
+/* Tier badge */
 function TierBadge({ role }: { role: string | null }) {
-  const styles: Record<string, string> = {
-    admin: "text-[#a58e28] bg-[#a58e28]/10",
-    employer: "text-amber-700 bg-amber-50",
-    influencer: "text-purple-700 bg-purple-50",
-    rising: "text-blue-700 bg-blue-50",
-    candidate: "text-[#8b949e] bg-gray-100",
-  };
-  const cls = styles[role ?? ""] ?? "text-[#8b949e] bg-gray-100";
   return (
-    <span className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded uppercase tracking-wide ${cls}`}>
-      {role ?? "—"}
+    <span className="inline-block text-[11px] font-medium px-2 py-0.5 rounded uppercase tracking-wide text-[#555] bg-[#f5f5f5] border border-[#e8e8e8]">
+      {role ?? "\u2014"}
     </span>
   );
 }
