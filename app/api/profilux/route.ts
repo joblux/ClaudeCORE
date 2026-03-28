@@ -56,7 +56,31 @@ export async function GET() {
     }
   }
 
-  return NextResponse.json({ profile: data || null })
+  if (data) {
+    return NextResponse.json({
+      profile: {
+        firstName: data.first_name || '',
+        lastName: data.last_name || '',
+        city: data.city || '',
+        nationality: data.nationality || '',
+        headline: data.headline || '',
+        bio: data.bio || '',
+        experience: data.experience || [],
+        specialisations: data.specialisations || [],
+        languages: data.languages || [],
+        sectors: data.sectors || [],
+        markets: data.markets || [],
+        salaryExpectation: data.salary_expectation || 0,
+        salaryCurrency: data.salary_currency || 'EUR',
+        availability: data.availability || '',
+        sharingEnabled: data.sharing_enabled || false,
+        shareSlug: data.share_slug || null,
+        photoUrl: data.photo_url || null,
+      }
+    })
+  }
+
+  return NextResponse.json({ profile: null })
 }
 
 export async function POST(req: NextRequest) {
