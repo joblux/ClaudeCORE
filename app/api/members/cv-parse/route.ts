@@ -18,10 +18,13 @@ export async function POST(req: NextRequest) {
     let rawText = ''
 
     if (fileName.endsWith('.pdf')) {
-      const pdfParse = await import('pdf-parse')
-      const parseFn = (pdfParse as any).default || pdfParse
-      const parsed = await parseFn(buffer)
-      rawText = parsed.text
+      try {
+        const pdfParse = require('pdf-parse')
+        const parsed = await pdfParse(buffer)
+        rawText = parsed.text
+      } catch {
+        return NextResponse.json({ error: 'Failed to parse PDF. Try a Word document instead.' }, { status: 422 })
+      }
     } else if (fileName.endsWith('.docx') || fileName.endsWith('.doc')) {
       const mammoth = await import('mammoth')
       const extractFn = (mammoth as any).default?.extractRawText || mammoth.extractRawText

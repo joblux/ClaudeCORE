@@ -40,6 +40,29 @@ const COUNTRIES = [
   "Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe",
 ]
 
+const PHONE_CODES = [
+  { code: '+1', label: '+1 US' },
+  { code: '+44', label: '+44 UK' },
+  { code: '+33', label: '+33 FR' },
+  { code: '+49', label: '+49 DE' },
+  { code: '+39', label: '+39 IT' },
+  { code: '+34', label: '+34 ES' },
+  { code: '+41', label: '+41 CH' },
+  { code: '+32', label: '+32 BE' },
+  { code: '+31', label: '+31 NL' },
+  { code: '+971', label: '+971 AE' },
+  { code: '+966', label: '+966 SA' },
+  { code: '+212', label: '+212 MA' },
+  { code: '+86', label: '+86 CN' },
+  { code: '+81', label: '+81 JP' },
+  { code: '+91', label: '+91 IN' },
+  { code: '+55', label: '+55 BR' },
+  { code: '+52', label: '+52 MX' },
+  { code: '+61', label: '+61 AU' },
+  { code: '+27', label: '+27 ZA' },
+  { code: '+20', label: '+20 EG' },
+]
+
 const SECTORS = [
   'Fashion & Leather Goods','Watches & Jewellery','Beauty & Fragrance','Hospitality & Hotels',
   'Art & Culture','Automotive & Yachts','Real Estate & Architecture','Spirits & Wine',
@@ -65,7 +88,8 @@ export default function CompleteRegistrationPage() {
   // Step 3 — Essentials
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [phone, setPhone] = useState('')
+  const [phoneCode, setPhoneCode] = useState('+33')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [city, setCity] = useState('')
   const [country, setCountry] = useState('')
   const [nationality, setNationality] = useState('')
@@ -111,6 +135,7 @@ export default function CompleteRegistrationPage() {
 
   const role = (session?.user as any)?.role || ''
   const tierLabel = TIER_LABELS[role] || ''
+  const fullPhone = phoneNumber ? `${phoneCode} ${phoneNumber}` : ''
 
   // --- Handlers ---
 
@@ -162,7 +187,7 @@ export default function CompleteRegistrationPage() {
           tier: role,
           firstName,
           lastName,
-          phone: contactPref === 'phone' ? phone : (phone || ''),
+          phone: contactPref === 'phone' ? fullPhone : (fullPhone || ''),
           city,
           country,
           nationality,
@@ -200,12 +225,12 @@ export default function CompleteRegistrationPage() {
   // --- Shared styles ---
   const inputClass = 'w-full px-3 py-3 border border-[#1e1e1e] bg-[#0f0f0f] text-[#ccc] outline-none focus:border-[#333] rounded-sm'
   const selectClass = 'w-full px-3 py-3 border border-[#1e1e1e] bg-[#0f0f0f] text-[#ccc] outline-none focus:border-[#333] rounded-sm appearance-none'
-  const labelClass = 'block text-[#444] uppercase tracking-widest mb-2'
-  const sectionHeadClass = 'text-[#333] uppercase tracking-widest mb-4 pb-3 border-b border-[#1a1a1a]'
+  const labelClass = 'block text-[#aaa] uppercase tracking-widest mb-2'
+  const sectionHeadClass = 'text-[#888] uppercase tracking-widest mb-4 pb-3 border-b border-[#1a1a1a]'
 
   return (
     <main className="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-[520px] bg-[#141414] border border-[#1e1e1e] px-9 py-11">
+      <div className="w-full max-w-[520px] bg-[#1e1e1e] border border-[#1e1e1e] px-9 py-11">
 
         {/* Progress bar — Steps 1-6 */}
         <div className="flex items-center justify-center gap-0 mb-9">
@@ -214,13 +239,13 @@ export default function CompleteRegistrationPage() {
               <div className="flex items-center gap-1.5">
                 <div className={
                   'w-5 h-5 rounded-full flex items-center justify-center font-bold ' +
-                  (s.num < step ? 'bg-white text-black' : s.num === step ? 'bg-[#a58e28] text-black' : 'bg-[#1e1e1e] text-[#444]')
+                  (s.num < step ? 'bg-white text-black' : s.num === step ? 'bg-[#a58e28] text-black' : 'bg-[#1e1e1e] text-[#aaa]')
                 } style={{ fontSize: '9px' }}>
                   {s.num < step ? '✓' : s.num}
                 </div>
                 <span className={
                   'uppercase tracking-widest ' +
-                  (s.num === step ? 'text-white font-semibold' : 'text-[#444]')
+                  (s.num === step ? 'text-white font-semibold' : 'text-[#aaa]')
                 } style={{ fontSize: '9px' }}>{s.label}</span>
               </div>
               {i < STEPS.length - 1 && (
@@ -231,40 +256,45 @@ export default function CompleteRegistrationPage() {
         </div>
 
         {tierLabel && (
-          <div className="text-center text-[#444] uppercase tracking-widest mb-7 pb-5 border-b border-[#1a1a1a]" style={{ fontSize: '10px', letterSpacing: '2px' }}>
+          <div className="text-center text-[#aaa] uppercase tracking-widest mb-7 pb-5 border-b border-[#1a1a1a]" style={{ fontSize: '10px', letterSpacing: '2px' }}>
             {tierLabel} profile
           </div>
         )}
 
-        {error && <div className="mb-5 p-3 border border-[#2a2a2a] text-[#888] rounded-sm" style={{ fontSize: '12px' }}>{error}</div>}
+        {error && <div className="mb-5 p-3 border border-[#2a2a2a] text-[#ccc] rounded-sm" style={{ fontSize: '12px' }}>{error}</div>}
 
         {/* ========== STEP 3 — Essentials ========== */}
         {step === 3 && (
           <div>
             <h2 className="text-white text-center font-normal mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '22px' }}>Your essentials</h2>
-            <p className="text-[#444] text-center mb-8" style={{ fontSize: '12px' }}>Confidential. Seen only by the JOBLUX team.</p>
+            <p className="text-[#aaa] text-center mb-8" style={{ fontSize: '12px' }}>Confidential. Seen only by the JOBLUX team.</p>
 
             <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Personal</div>
 
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div>
                 <label className={labelClass} style={{ fontSize: '9px' }}>First name *</label>
-                <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Sophie" required className={inputClass} style={{ fontSize: '13px' }} />
+                <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="" required className={inputClass} style={{ fontSize: '13px' }} />
               </div>
               <div>
                 <label className={labelClass} style={{ fontSize: '9px' }}>Last name *</label>
-                <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Leclerc" required className={inputClass} style={{ fontSize: '13px' }} />
+                <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="" required className={inputClass} style={{ fontSize: '13px' }} />
               </div>
             </div>
 
             <div className="mb-4">
               <label className={labelClass} style={{ fontSize: '9px' }}>Phone</label>
-              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+33 6 12 34 56 78" className={inputClass} style={{ fontSize: '13px' }} />
+              <div className="flex gap-2">
+                <select value={phoneCode} onChange={e => setPhoneCode(e.target.value)} className={selectClass} style={{ fontSize: '12px', width: '110px', flexShrink: 0 }}>
+                  {PHONE_CODES.map(pc => <option key={pc.code} value={pc.code}>{pc.label}</option>)}
+                </select>
+                <input type="tel" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} placeholder="" className={inputClass} style={{ fontSize: '13px' }} />
+              </div>
             </div>
 
             <div className="mb-4">
               <label className={labelClass} style={{ fontSize: '9px' }}>City *</label>
-              <input type="text" value={city} onChange={e => setCity(e.target.value)} placeholder="Paris" required className={inputClass} style={{ fontSize: '13px' }} />
+              <input type="text" value={city} onChange={e => setCity(e.target.value)} placeholder="" required className={inputClass} style={{ fontSize: '13px' }} />
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-7">
@@ -294,27 +324,27 @@ export default function CompleteRegistrationPage() {
         {step === 4 && (
           <div>
             <h2 className="text-white text-center font-normal mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '22px' }}>Upload your CV</h2>
-            <p className="text-[#444] text-center mb-8" style={{ fontSize: '12px' }}>We'll extract your experience to pre-fill your profile. PDF or Word accepted.</p>
+            <p className="text-[#aaa] text-center mb-8" style={{ fontSize: '12px' }}>We'll extract your experience to pre-fill your profile. PDF or Word accepted.</p>
 
             {cvParsing ? (
               <div className="flex flex-col items-center justify-center py-16">
                 <div className="w-8 h-8 border-2 border-[#333] border-t-[#a58e28] rounded-full animate-spin mb-4" />
-                <p className="text-[#555]" style={{ fontSize: '12px' }}>Parsing your document...</p>
+                <p className="text-[#aaa]" style={{ fontSize: '12px' }}>Parsing your document...</p>
               </div>
             ) : (
               <>
                 <label className="block cursor-pointer">
-                  <div className={'border-2 border-dashed rounded-sm p-12 text-center transition-colors ' + (cvFile ? 'border-[#a58e28] bg-[#a58e2808]' : 'border-[#2a2a2a] hover:border-[#444]')}>
+                  <div className={'border-2 border-dashed rounded-sm p-12 text-center transition-colors ' + (cvFile ? 'border-[#a58e28] bg-[#a58e2808]' : 'border-[#2a2a2a] hover:border-[#aaa]')}>
                     {cvFile ? (
                       <div>
                         <div className="text-[#a58e28] mb-2" style={{ fontSize: '13px' }}>{cvFile.name}</div>
-                        <div className="text-[#444]" style={{ fontSize: '11px' }}>Click to change file</div>
+                        <div className="text-[#aaa]" style={{ fontSize: '11px' }}>Click to change file</div>
                       </div>
                     ) : (
                       <div>
-                        <div className="text-[#555] mb-2" style={{ fontSize: '32px' }}>+</div>
-                        <div className="text-[#555] mb-1" style={{ fontSize: '13px' }}>Drop your CV here or click to browse</div>
-                        <div className="text-[#333]" style={{ fontSize: '11px' }}>PDF or Word (.doc, .docx)</div>
+                        <div className="text-[#aaa] mb-2" style={{ fontSize: '32px' }}>+</div>
+                        <div className="text-[#aaa] mb-1" style={{ fontSize: '13px' }}>Drop your CV here or click to browse</div>
+                        <div className="text-[#888]" style={{ fontSize: '11px' }}>PDF or Word (.doc, .docx)</div>
                       </div>
                     )}
                   </div>
@@ -329,12 +359,12 @@ export default function CompleteRegistrationPage() {
                   />
                 </label>
 
-                {cvError && <div className="mt-4 p-3 border border-[#2a2a2a] text-[#888] rounded-sm" style={{ fontSize: '12px' }}>{cvError}</div>}
+                {cvError && <div className="mt-4 p-3 border border-[#2a2a2a] text-[#ccc] rounded-sm" style={{ fontSize: '12px' }}>{cvError}</div>}
 
                 <button
                   type="button"
                   onClick={() => setStep(5)}
-                  className="w-full mt-6 text-center text-[#444] hover:text-[#666] transition-colors"
+                  className="w-full mt-6 text-center text-[#aaa] hover:text-white transition-colors"
                   style={{ fontSize: '12px' }}
                 >
                   Skip for now &rarr;
@@ -348,7 +378,7 @@ export default function CompleteRegistrationPage() {
         {step === 5 && (
           <div>
             <h2 className="text-white text-center font-normal mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '22px' }}>Review & complete</h2>
-            <p className="text-[#444] text-center mb-8" style={{ fontSize: '12px' }}>Verify extracted information. Edit any field below.</p>
+            <p className="text-[#aaa] text-center mb-8" style={{ fontSize: '12px' }}>Verify extracted information. Edit any field below.</p>
 
             {/* Current position */}
             <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Current position</div>
@@ -366,7 +396,7 @@ export default function CompleteRegistrationPage() {
             {/* Previous positions */}
             <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Previous positions</div>
             {positions.length === 0 && (
-              <p className="text-[#333] mb-4" style={{ fontSize: '11px' }}>No positions detected. Add them manually below.</p>
+              <p className="text-[#888] mb-4" style={{ fontSize: '11px' }}>No positions detected. Add them manually below.</p>
             )}
             {positions.map((pos, i) => (
               <div key={i} className="grid grid-cols-3 gap-2 mb-3">
@@ -374,16 +404,16 @@ export default function CompleteRegistrationPage() {
                 <input type="text" value={pos.company} onChange={e => { const p = [...positions]; p[i] = { ...p[i], company: e.target.value }; setPositions(p) }} placeholder="Company" className={inputClass} style={{ fontSize: '12px' }} />
                 <div className="flex gap-1">
                   <input type="text" value={pos.dates} onChange={e => { const p = [...positions]; p[i] = { ...p[i], dates: e.target.value }; setPositions(p) }} placeholder="Dates" className={inputClass + ' flex-1'} style={{ fontSize: '12px' }} />
-                  <button type="button" onClick={() => setPositions(positions.filter((_, j) => j !== i))} className="text-[#333] hover:text-[#666] px-1" style={{ fontSize: '14px' }}>&times;</button>
+                  <button type="button" onClick={() => setPositions(positions.filter((_, j) => j !== i))} className="text-[#888] hover:text-[#bbb] px-1" style={{ fontSize: '14px' }}>&times;</button>
                 </div>
               </div>
             ))}
-            <button type="button" onClick={() => setPositions([...positions, { title: '', company: '', dates: '' }])} className="text-[#444] hover:text-[#666] mb-5" style={{ fontSize: '11px' }}>+ Add position</button>
+            <button type="button" onClick={() => setPositions([...positions, { title: '', company: '', dates: '' }])} className="text-[#aaa] hover:text-[#ccc] mb-5" style={{ fontSize: '11px' }}>+ Add position</button>
 
             {/* Education */}
             <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Education</div>
             {education.length === 0 && (
-              <p className="text-[#333] mb-4" style={{ fontSize: '11px' }}>No education detected. Add entries manually below.</p>
+              <p className="text-[#888] mb-4" style={{ fontSize: '11px' }}>No education detected. Add entries manually below.</p>
             )}
             {education.map((edu, i) => (
               <div key={i} className="grid grid-cols-3 gap-2 mb-3">
@@ -391,61 +421,61 @@ export default function CompleteRegistrationPage() {
                 <input type="text" value={edu.degree} onChange={e => { const ed = [...education]; ed[i] = { ...ed[i], degree: e.target.value }; setEducation(ed) }} placeholder="Degree" className={inputClass} style={{ fontSize: '12px' }} />
                 <div className="flex gap-1">
                   <input type="text" value={edu.dates} onChange={e => { const ed = [...education]; ed[i] = { ...ed[i], dates: e.target.value }; setEducation(ed) }} placeholder="Dates" className={inputClass + ' flex-1'} style={{ fontSize: '12px' }} />
-                  <button type="button" onClick={() => setEducation(education.filter((_, j) => j !== i))} className="text-[#333] hover:text-[#666] px-1" style={{ fontSize: '14px' }}>&times;</button>
+                  <button type="button" onClick={() => setEducation(education.filter((_, j) => j !== i))} className="text-[#888] hover:text-[#bbb] px-1" style={{ fontSize: '14px' }}>&times;</button>
                 </div>
               </div>
             ))}
-            <button type="button" onClick={() => setEducation([...education, { institution: '', degree: '', dates: '' }])} className="text-[#444] hover:text-[#666] mb-5" style={{ fontSize: '11px' }}>+ Add education</button>
+            <button type="button" onClick={() => setEducation([...education, { institution: '', degree: '', dates: '' }])} className="text-[#aaa] hover:text-[#ccc] mb-5" style={{ fontSize: '11px' }}>+ Add education</button>
 
             {/* Certifications */}
             <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Certifications</div>
             {certifications.length === 0 && (
-              <p className="text-[#333] mb-4" style={{ fontSize: '11px' }}>No certifications detected.</p>
+              <p className="text-[#888] mb-4" style={{ fontSize: '11px' }}>No certifications detected.</p>
             )}
             {certifications.map((cert, i) => (
               <div key={i} className="flex gap-1 mb-2">
                 <input type="text" value={cert} onChange={e => { const c = [...certifications]; c[i] = e.target.value; setCertifications(c) }} placeholder="Certification" className={inputClass + ' flex-1'} style={{ fontSize: '12px' }} />
-                <button type="button" onClick={() => setCertifications(certifications.filter((_, j) => j !== i))} className="text-[#333] hover:text-[#666] px-1" style={{ fontSize: '14px' }}>&times;</button>
+                <button type="button" onClick={() => setCertifications(certifications.filter((_, j) => j !== i))} className="text-[#888] hover:text-[#bbb] px-1" style={{ fontSize: '14px' }}>&times;</button>
               </div>
             ))}
-            <button type="button" onClick={() => setCertifications([...certifications, ''])} className="text-[#444] hover:text-[#666] mb-5" style={{ fontSize: '11px' }}>+ Add certification</button>
+            <button type="button" onClick={() => setCertifications([...certifications, ''])} className="text-[#aaa] hover:text-[#ccc] mb-5" style={{ fontSize: '11px' }}>+ Add certification</button>
 
             {/* Languages */}
             <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Languages</div>
             {languages.length === 0 && (
-              <p className="text-[#333] mb-4" style={{ fontSize: '11px' }}>No languages detected.</p>
+              <p className="text-[#888] mb-4" style={{ fontSize: '11px' }}>No languages detected.</p>
             )}
             {languages.map((lang, i) => (
               <div key={i} className="flex gap-1 mb-2">
                 <input type="text" value={lang} onChange={e => { const l = [...languages]; l[i] = e.target.value; setLanguages(l) }} placeholder="Language" className={inputClass + ' flex-1'} style={{ fontSize: '12px' }} />
-                <button type="button" onClick={() => setLanguages(languages.filter((_, j) => j !== i))} className="text-[#333] hover:text-[#666] px-1" style={{ fontSize: '14px' }}>&times;</button>
+                <button type="button" onClick={() => setLanguages(languages.filter((_, j) => j !== i))} className="text-[#888] hover:text-[#bbb] px-1" style={{ fontSize: '14px' }}>&times;</button>
               </div>
             ))}
-            <button type="button" onClick={() => setLanguages([...languages, ''])} className="text-[#444] hover:text-[#666] mb-7" style={{ fontSize: '11px' }}>+ Add language</button>
+            <button type="button" onClick={() => setLanguages([...languages, ''])} className="text-[#aaa] hover:text-[#ccc] mb-7" style={{ fontSize: '11px' }}>+ Add language</button>
 
             {/* Sectors — max 3 */}
-            <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Sectors <span className="text-[#555] normal-case tracking-normal">(select up to 3)</span></div>
+            <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Sectors <span className="text-[#aaa] normal-case tracking-normal">(select up to 3)</span></div>
             <div className="flex flex-wrap gap-2 mb-7">
               {SECTORS.map(s => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => toggleMulti(sectors, setSectors, s, 3)}
-                  className={'px-3 py-2 border rounded-sm transition-colors ' + (sectors.includes(s) ? 'border-[#a58e28] text-[#a58e28] bg-[#a58e2810]' : 'border-[#1e1e1e] text-[#555] hover:border-[#333]')}
+                  className={'px-3 py-2 border rounded-sm transition-colors ' + (sectors.includes(s) ? 'border-[#a58e28] text-[#a58e28] bg-[#a58e2810]' : 'border-[#333] text-[#ccc] hover:border-[#555]')}
                   style={{ fontSize: '11px' }}
                 >{s}</button>
               ))}
             </div>
 
             {/* Domains — max 2 */}
-            <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Domains <span className="text-[#555] normal-case tracking-normal">(select up to 2)</span></div>
+            <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Domains <span className="text-[#aaa] normal-case tracking-normal">(select up to 2)</span></div>
             <div className="flex flex-wrap gap-2 mb-7">
               {DOMAINS.map(d => (
                 <button
                   key={d}
                   type="button"
                   onClick={() => toggleMulti(domains, setDomains, d, 2)}
-                  className={'px-3 py-2 border rounded-sm transition-colors ' + (domains.includes(d) ? 'border-[#a58e28] text-[#a58e28] bg-[#a58e2810]' : 'border-[#1e1e1e] text-[#555] hover:border-[#333]')}
+                  className={'px-3 py-2 border rounded-sm transition-colors ' + (domains.includes(d) ? 'border-[#a58e28] text-[#a58e28] bg-[#a58e2810]' : 'border-[#333] text-[#ccc] hover:border-[#555]')}
                   style={{ fontSize: '11px' }}
                 >{d}</button>
               ))}
@@ -453,36 +483,36 @@ export default function CompleteRegistrationPage() {
 
             {/* Contact preference */}
             <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>How should we reach you</div>
-            <div className={'flex items-start gap-3 p-3 border cursor-pointer mb-2 rounded-sm ' + (contactPref === 'email' ? 'border-[#333] bg-[#141414]' : 'border-[#1a1a1a] bg-[#111]')} onClick={() => setContactPref('email')}>
+            <div className={'flex items-start gap-3 p-3 border cursor-pointer mb-2 rounded-sm ' + (contactPref === 'email' ? 'border-[#333] bg-[#1e1e1e]' : 'border-[#1a1a1a] bg-[#111]')} onClick={() => setContactPref('email')}>
               <div className={'w-3.5 h-3.5 rounded-full border flex-shrink-0 mt-0.5 ' + (contactPref === 'email' ? 'border-[#777]' : 'border-[#2a2a2a]')} style={contactPref === 'email' ? { background: 'radial-gradient(circle, #fff 40%, transparent 40%)' } : {}} />
               <div>
-                <div className="text-[#aaa] font-medium" style={{ fontSize: '12px' }}>Email only</div>
-                <div className="text-[#444] mt-0.5" style={{ fontSize: '11px' }}>We reach out when relevant opportunities arise</div>
+                <div className="text-white font-medium" style={{ fontSize: '12px' }}>Email only</div>
+                <div className="text-[#aaa] mt-0.5" style={{ fontSize: '11px' }}>We reach out when relevant opportunities arise</div>
               </div>
             </div>
-            <div className={'flex items-start gap-3 p-3 border cursor-pointer mb-7 rounded-sm ' + (contactPref === 'phone' ? 'border-[#333] bg-[#141414]' : 'border-[#1a1a1a] bg-[#111]')} onClick={() => setContactPref('phone')}>
+            <div className={'flex items-start gap-3 p-3 border cursor-pointer mb-7 rounded-sm ' + (contactPref === 'phone' ? 'border-[#333] bg-[#1e1e1e]' : 'border-[#1a1a1a] bg-[#111]')} onClick={() => setContactPref('phone')}>
               <div className={'w-3.5 h-3.5 rounded-full border flex-shrink-0 mt-0.5 ' + (contactPref === 'phone' ? 'border-[#777]' : 'border-[#2a2a2a]')} style={contactPref === 'phone' ? { background: 'radial-gradient(circle, #fff 40%, transparent 40%)' } : {}} />
               <div>
-                <div className="text-[#aaa] font-medium" style={{ fontSize: '12px' }}>Email and phone</div>
-                <div className="text-[#444] mt-0.5" style={{ fontSize: '11px' }}>For time-sensitive or confidential assignments</div>
+                <div className="text-white font-medium" style={{ fontSize: '12px' }}>Email and phone</div>
+                <div className="text-[#aaa] mt-0.5" style={{ fontSize: '11px' }}>For time-sensitive or confidential assignments</div>
               </div>
             </div>
 
             {/* Privacy */}
             <div className="border-l border-[#2a2a2a] pl-4 mb-7">
-              <p className="text-[#333] leading-relaxed" style={{ fontSize: '11px' }}>Your data is confidential. Never sold, never shared without your explicit consent, never used for advertising. Delete your profile at any time.</p>
+              <p className="text-[#888] leading-relaxed" style={{ fontSize: '11px' }}>Your data is confidential. Never sold, never shared without your explicit consent, never used for advertising. Delete your profile at any time.</p>
             </div>
 
             {/* Navigation */}
             <div className="flex gap-3">
-              <button type="button" onClick={() => setStep(4)} className="px-6 py-3.5 border border-[#1e1e1e] text-[#555] uppercase tracking-widest font-semibold rounded-sm hover:border-[#333] transition-colors" style={{ fontSize: '10px', letterSpacing: '2px' }}>
+              <button type="button" onClick={() => setStep(4)} className="px-6 py-3.5 border border-[#1e1e1e] text-[#aaa] uppercase tracking-widest font-semibold rounded-sm hover:border-[#333] transition-colors" style={{ fontSize: '10px', letterSpacing: '2px' }}>
                 Back
               </button>
               <button type="button" onClick={handleSubmit} disabled={isSubmitting} className="flex-1 py-3.5 bg-white text-black uppercase tracking-widest font-semibold disabled:opacity-40 rounded-sm hover:bg-[#f0f0f0] transition-colors" style={{ fontSize: '10px', letterSpacing: '2px' }}>
                 {isSubmitting ? 'Submitting...' : 'Submit my request'}
               </button>
             </div>
-            <p className="text-center mt-4 text-[#2e2e2e]" style={{ fontSize: '11px' }}>All profiles are reviewed by the JOBLUX team.</p>
+            <p className="text-center mt-4 text-[#888]" style={{ fontSize: '11px' }}>All profiles are reviewed by the JOBLUX team.</p>
           </div>
         )}
       </div>

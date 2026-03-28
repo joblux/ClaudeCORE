@@ -95,13 +95,13 @@ export default function SelectProfilePage() {
 
   return (
     <div className="min-h-screen">
-      <div className="bg-[#1a1a1a] py-14 md:py-20">
+      <div className="bg-[#1a1a1a] py-8 md:py-10">
         <div className="max-w-[1200px] mx-auto px-7 text-center">
           <div className="text-[0.65rem] font-semibold tracking-[0.2em] uppercase text-[#a58e28] mb-4">Step 2 of 3 — Select your profile</div>
-          <h1 className="text-3xl md:text-5xl font-light text-white mb-5 leading-tight max-w-3xl mx-auto" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+          <h1 className="text-2xl md:text-4xl font-light text-white mb-5 leading-tight max-w-3xl mx-auto" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
             Access begins with the right profile.
           </h1>
-          <p className="text-sm text-[#888] max-w-2xl mx-auto leading-relaxed">Your profile shapes how you move through JOBLUX. Access is free. Depth grows through contribution.</p>
+          <p className="text-sm text-[#ccc] max-w-2xl mx-auto leading-relaxed">Your profile shapes how you move through JOBLUX. Access is free. Depth grows through contribution.</p>
         </div>
       </div>
 
@@ -119,7 +119,7 @@ export default function SelectProfilePage() {
             {bottomRow.map((profile) => <ProfileCard key={profile.key} profile={profile} submitting={submitting} onSelect={handleSelect} />)}
           </div>
           <div className="border-t border-[#2a2a2a] pt-8 text-center">
-            <p className="text-xs text-[#888] leading-relaxed max-w-xl mx-auto">All profiles are free. Depth increases through contribution and relevance. If your profile changes over time, you can request a different access level later.</p>
+            <p className="text-xs text-[#ccc] leading-relaxed max-w-xl mx-auto">All profiles are free. Depth increases through contribution and relevance. If your profile changes over time, you can request a different access level later.</p>
           </div>
         </div>
       </div>
@@ -135,13 +135,13 @@ function ProfileCard({ profile, submitting, onSelect }: { profile: (typeof PROFI
       <div className="bg-[#222] rounded-xl p-6 lg:p-7 h-full flex flex-col transition-all duration-200 border border-[#2a2a2a] hover:border-[#a58e28] hover:shadow-md">
         <div className="text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-[#a58e28] mb-2">{profile.overline}</div>
         <h3 className="text-xl font-light text-white mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>{profile.title}</h3>
-        <p className="text-xs text-[#888] leading-relaxed mb-4">{profile.description}</p>
+        <p className="text-xs text-[#ccc] leading-relaxed mb-4">{profile.description}</p>
         <p className="text-[0.6rem] text-[#aaa] italic mb-5">{profile.approval}</p>
         <ul className="space-y-2.5 mb-6 flex-1">
           {profile.features.map((feature) => (
             <li key={feature} className="flex items-start gap-2.5">
               <span className="w-[5px] h-[5px] rounded-full bg-[#a58e28] mt-1.5 flex-shrink-0" />
-              <span className="text-xs text-[#999] leading-relaxed">{feature}</span>
+              <span className="text-xs text-[#ccc] leading-relaxed">{feature}</span>
             </li>
           ))}
         </ul>

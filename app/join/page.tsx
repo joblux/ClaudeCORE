@@ -155,7 +155,7 @@ function JoinContent() {
               <input
                 id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com" required
-                className="w-full px-3 py-3 text-[13px] border border-[#1e1e1e] rounded-sm bg-[#0f0f0f] text-[#ccc] placeholder:text-[#333] focus:outline-none focus:border-[#333] transition-colors"
+                className="w-full px-3 py-3 text-[13px] border border-[#1e1e1e] rounded-sm bg-[#0f0f0f] text-[#ccc] placeholder:text-[#555] focus:outline-none focus:border-[#333] transition-colors"
               />
               <button type="submit" disabled={isSubmitting} className="w-full mt-3 py-3 bg-white text-black text-[11px] uppercase tracking-widest font-semibold rounded-sm hover:bg-[#f0f0f0] transition-colors disabled:opacity-50">
                 {isSubmitting ? "Sending..." : "Continue with email"}
@@ -168,7 +168,7 @@ function JoinContent() {
                 <div className="w-full border-t border-[#1e1e1e]" />
               </div>
               <div className="relative flex justify-center">
-                <span className="bg-[#141414] px-4 text-[#333] uppercase tracking-widest" style={{ fontSize: '9px' }}>or</span>
+                <span className="bg-[#141414] px-4 text-[#888] uppercase tracking-widest" style={{ fontSize: '9px' }}>or</span>
               </div>
             </div>
 
