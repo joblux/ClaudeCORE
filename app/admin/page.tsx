@@ -1,14 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { useRequireAdmin } from "@/lib/auth-hooks";
 import { Search, Download, UserPlus, MoreHorizontal } from "lucide-react";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 const PAGE_SIZE = 25;
 
@@ -74,63 +68,29 @@ export default function AdminPage() {
     return m.email[0].toUpperCase();
   };
 
-  const fetchCounts = useCallback(async () => {
-    const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-    const day = now.getDay();
-    const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (day === 0 ? 6 : day - 1)).toISOString();
-
-    const [total, pending, approved, rejected, today, thisWeek] = await Promise.all([
-      supabase.from("members").select("id", { count: "exact", head: true }).eq("registration_completed", true),
-      supabase.from("members").select("id", { count: "exact", head: true }).eq("registration_completed", true).eq("status", "pending"),
-      supabase.from("members").select("id", { count: "exact", head: true }).eq("registration_completed", true).eq("status", "approved"),
-      supabase.from("members").select("id", { count: "exact", head: true }).eq("registration_completed", true).eq("status", "rejected"),
-      supabase.from("members").select("id", { count: "exact", head: true }).eq("registration_completed", true).gte("created_at", startOfDay),
-      supabase.from("members").select("id", { count: "exact", head: true }).eq("registration_completed", true).gte("created_at", startOfWeek),
-    ]);
-
-    setCounts({
-      total: total.count ?? 0,
-      pending: pending.count ?? 0,
-      approved: approved.count ?? 0,
-      rejected: rejected.count ?? 0,
-      today: today.count ?? 0,
-      thisWeek: thisWeek.count ?? 0,
-    });
-  }, []);
-
-  const fetchMembers = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
-    let query = supabase
-      .from("members")
-      .select("id, email, full_name, first_name, last_name, role, status, city, country, bio, avatar_url, auth_provider, created_at, approved_at, last_login, profile_completeness", { count: "exact" })
-      .eq("registration_completed", true)
-      .order("created_at", { ascending: false })
-      .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
-
-    if (statusFilter !== "all") query = query.eq("status", statusFilter);
-    if (roleFilter !== "all") query = query.eq("role", roleFilter);
-    if (search.trim()) {
-      const s = `%${search.trim()}%`;
-      query = query.or(`email.ilike.${s},full_name.ilike.${s},first_name.ilike.${s},last_name.ilike.${s}`);
-    }
-
-    const { data, count } = await query;
-    setMembers(data ?? []);
-    setTotalRows(count ?? 0);
+    const params = new URLSearchParams({
+      page: String(page),
+      status: statusFilter,
+      role: roleFilter,
+      search: search,
+    });
+    try {
+      const res = await fetch(`/api/admin/members?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch');
+      const data = await res.json();
+      setMembers(data.members ?? []);
+      setTotalRows(data.total ?? 0);
+      setCounts(data.counts ?? { total: 0, pending: 0, approved: 0, rejected: 0, today: 0, thisWeek: 0 });
+      if (data.aiReviews) {
+        const map = new Map<string, AIReview>();
+        data.aiReviews.forEach((r: any) => map.set(r.member_id, r));
+        setAiReviews(map);
+      }
+    } catch { /* fetch failed */ }
     setLoading(false);
   }, [page, statusFilter, roleFilter, search]);
-
-  const fetchAIReviews = useCallback(async () => {
-    const { data } = await supabase
-      .from("member_ai_reviews")
-      .select("member_id, confidence, reasoning, recommendation, auto_approved");
-    if (data) {
-      const map = new Map<string, AIReview>();
-      data.forEach((r: any) => map.set(r.member_id, r));
-      setAiReviews(map);
-    }
-  }, []);
 
   const reassess = async (memberId: string) => {
     setReassessing((s) => new Set(s).add(memberId));
@@ -140,45 +100,42 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ member_id: memberId }),
       });
-      await fetchAIReviews();
-      await fetchMembers();
+      await fetchData();
     } catch { /* AI review request may fail */ }
     setReassessing((s) => { const n = new Set(s); n.delete(memberId); return n; });
   };
 
   useEffect(() => {
     if (!isAdmin) return;
-    fetchCounts();
-    fetchMembers();
-    fetchAIReviews();
-  }, [isAdmin, fetchCounts, fetchMembers, fetchAIReviews]);
+    fetchData();
+  }, [isAdmin, fetchData]);
 
   useEffect(() => { setPage(0); setSelected(new Set()); }, [search, statusFilter, roleFilter]);
 
   const updateStatus = async (id: string, newStatus: string) => {
     setActing((s) => new Set(s).add(id));
-    if (newStatus === "approved") {
-      await supabase.from("members").update({ status: newStatus, approved_at: new Date().toISOString() } as any).eq("id", id);
-    } else {
-      await supabase.from("members").update({ status: newStatus } as any).eq("id", id);
-    }
+    await fetch("/api/admin/members", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [id], status: newStatus }),
+    });
     setActing((s) => { const n = new Set(s); n.delete(id); return n; });
     setSelected((s) => { const n = new Set(s); n.delete(id); return n; });
-    await Promise.all([fetchMembers(), fetchCounts()]);
+    await fetchData();
   };
 
   const batchUpdate = async (newStatus: string) => {
     const ids = Array.from(selected);
     if (!ids.length) return;
     setActing(new Set(ids));
-    if (newStatus === "approved") {
-      await supabase.from("members").update({ status: newStatus, approved_at: new Date().toISOString() } as any).in("id", ids);
-    } else {
-      await supabase.from("members").update({ status: newStatus } as any).in("id", ids);
-    }
+    await fetch("/api/admin/members", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids, status: newStatus }),
+    });
     setActing(new Set());
     setSelected(new Set());
-    await Promise.all([fetchMembers(), fetchCounts()]);
+    await fetchData();
   };
 
   const toggleSelect = (id: string) =>
