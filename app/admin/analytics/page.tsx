@@ -9,10 +9,10 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-const GOLD = '#a58e28'
+const GOLD = '#444'
 const BLACK = '#1a1a1a'
 const CREAM = '#fafaf5'
-const BORDER = '#e8e2d8'
+const BORDER = '#e8e8e8'
 
 interface ContentCounts {
   brands: number
@@ -281,14 +281,14 @@ export default function AdminAnalyticsPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#0d1117] flex items-center justify-center">
+      <main className="min-h-screen bg-[#f5f5f5] flex items-center justify-center">
         <p className="text-sm text-[#999]">Loading analytics...</p>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-[#0d1117]">
+    <main className="min-h-screen bg-[#f5f5f5]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-10">
         {/* Header */}
         <div>
@@ -308,8 +308,8 @@ export default function AdminAnalyticsPage() {
               { label: 'Approved Contributions', value: content.contributions },
             ].map((item) => (
               <div key={item.label} className="jl-card p-5 text-center">
-                <p className="text-3xl font-bold text-[#a58e28]">{item.value}</p>
-                <p className="text-xs text-[#888] mt-1">{item.label}</p>
+                <p className="text-3xl font-bold text-[#444444]">{item.value}</p>
+                <p className="text-xs text-[#666666] mt-1">{item.label}</p>
               </div>
             ))}
           </div>
@@ -345,9 +345,9 @@ export default function AdminAnalyticsPage() {
               <h3 className="text-sm font-semibold text-[#1a1a1a] mb-3">Top 10 Countries</h3>
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-[#e8e2d8]">
-                    <th className="text-left py-1 text-[#888] font-medium">Country</th>
-                    <th className="text-right py-1 text-[#888] font-medium">Members</th>
+                  <tr className="border-b border-[#e8e8e8]">
+                    <th className="text-left py-1 text-[#666666] font-medium">Country</th>
+                    <th className="text-right py-1 text-[#666666] font-medium">Members</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -355,7 +355,7 @@ export default function AdminAnalyticsPage() {
                     <tr><td colSpan={2} className="text-[#999] py-2">No data</td></tr>
                   )}
                   {countries.map((c, i) => (
-                    <tr key={c.country} className={i % 2 === 0 ? 'bg-[#0d1117]' : ''}>
+                    <tr key={c.country} className={i % 2 === 0 ? 'bg-[#f5f5f5]' : ''}>
                       <td className="py-1.5 text-[#1a1a1a]">{c.country}</td>
                       <td className="py-1.5 text-right font-semibold text-[#1a1a1a]">{c.count}</td>
                     </tr>
@@ -391,7 +391,7 @@ export default function AdminAnalyticsPage() {
                   {/* Grid lines */}
                   {[0, 0.25, 0.5, 0.75, 1].map((frac) => {
                     const y = svgH - svgPad - frac * (svgH - 2 * svgPad)
-                    return <line key={frac} x1={svgPad} y1={y} x2={svgW - svgPad} y2={y} stroke="#e8e2d8" strokeWidth="0.5" />
+                    return <line key={frac} x1={svgPad} y1={y} x2={svgW - svgPad} y2={y} stroke="#e8e8e8" strokeWidth="0.5" />
                   })}
                   {/* Line */}
                   <polyline
@@ -517,7 +517,7 @@ export default function AdminAnalyticsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="jl-card p-6">
               <h3 className="text-sm font-semibold text-[#1a1a1a] mb-2">Google Analytics 4</h3>
-              <p className="text-xs text-[#888] mb-4">
+              <p className="text-xs text-[#666666] mb-4">
                 Connect your GA4 property to see website traffic, user behaviour, and conversion
                 data directly in this dashboard. Enter your GA4 Measurement ID below to get started.
               </p>
@@ -536,17 +536,17 @@ export default function AdminAnalyticsPage() {
 
             <div className="jl-card p-6">
               <h3 className="text-sm font-semibold text-[#1a1a1a] mb-2">Google Search Console</h3>
-              <p className="text-xs text-[#888] mb-4">
+              <p className="text-xs text-[#666666] mb-4">
                 Connect Search Console to monitor search performance, keyword rankings, and
                 indexing status. This integration will display impressions, clicks, and CTR
                 for your most important pages.
               </p>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#f5f3ed] border border-[#e8e2d8]">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#f5f3ed] border border-[#e8e8e8]">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <circle cx="8" cy="8" r="7" stroke="#a58e28" strokeWidth="1.5" />
-                  <path d="M8 5v3M8 10.5v.5" stroke="#a58e28" strokeWidth="1.5" strokeLinecap="round" />
+                  <circle cx="8" cy="8" r="7" stroke="#444" strokeWidth="1.5" />
+                  <path d="M8 5v3M8 10.5v.5" stroke="#444" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
-                <span className="text-xs text-[#888]">Search Console integration coming soon</span>
+                <span className="text-xs text-[#666666]">Search Console integration coming soon</span>
               </div>
             </div>
           </div>

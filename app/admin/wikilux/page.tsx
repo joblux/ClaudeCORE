@@ -125,11 +125,11 @@ export default function AdminWikiLuxPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d1117]">
+    <div className="min-h-screen bg-[#f5f5f5]">
       <div className="px-6 py-5 lg:px-8 max-w-5xl">
       <div className="mb-6">
         <h1 className="text-xl font-medium text-[#1a1a1a]">WikiLux Management</h1>
-        <p className="text-sm text-[#484f58] mt-0.5">Brand content generation and editorial tools</p>
+        <p className="text-sm text-[#999] mt-0.5">Brand content generation and editorial tools</p>
       </div>
 
       {/* Brand search */}
@@ -139,18 +139,18 @@ export default function AdminWikiLuxPage() {
           placeholder="Search brands..."
           value={brandSearch}
           onChange={(e) => setBrandSearch(e.target.value)}
-          className="w-full border border-[#e8e2d8] rounded-sm pl-3 pr-3 py-2 text-sm bg-[#161b22] focus:outline-none focus:border-[#a58e28] transition-colors"
+          className="w-full border border-[#e8e8e8] rounded-sm pl-3 pr-3 py-2 text-sm bg-[#f5f5f5] focus:outline-none focus:border-[#e8e8e8] transition-colors"
         />
       </div>
 
       {loading ? (
-        <div className="text-center py-16"><div className="inline-block w-8 h-8 border-2 border-[#e8e2d8] border-t-[#a58e28] rounded-full animate-spin" /></div>
+        <div className="text-center py-16"><div className="inline-block w-8 h-8 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin" /></div>
       ) : (
         <>
           {/* STATS GRID */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="jl-card text-center">
-              <div className="jl-serif text-2xl text-[#a58e28]">{BRANDS.length}</div>
+              <div className="jl-serif text-2xl text-[#444444]">{BRANDS.length}</div>
               <div className="jl-overline mt-1">Total Brands</div>
             </div>
             <div className="jl-card text-center">
@@ -173,7 +173,7 @@ export default function AdminWikiLuxPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="jl-card">
                 <h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Regenerate All Brands</h3>
-                <p className="text-xs text-[#888] mb-3">Re-generate all {BRANDS.length} brand pages with fresh AI content. This takes several minutes.</p>
+                <p className="text-xs text-[#666666] mb-3">Re-generate all {BRANDS.length} brand pages with fresh AI content. This takes several minutes.</p>
                 {stats?.last_regen && <p className="text-[0.65rem] text-[#aaa] mb-3">Last full regeneration: {new Date(stats.last_regen).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>}
                 <button onClick={handleRegenAll} disabled={regenerating} className="jl-btn jl-btn-primary text-xs">
                   {regenerating ? 'Regenerating...' : 'Regenerate All'}
@@ -192,7 +192,7 @@ export default function AdminWikiLuxPage() {
                 </div>
               </div>
             </div>
-            {regenResult && <p className="text-xs text-[#a58e28] mt-3">{regenResult}</p>}
+            {regenResult && <p className="text-xs text-[#444444] mt-3">{regenResult}</p>}
           </div>
 
           {/* SEED BRANDS */}
@@ -200,13 +200,13 @@ export default function AdminWikiLuxPage() {
             <div className="jl-section-label"><span>Seed WikiLux Brands</span></div>
             <div className="jl-card">
               <h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Fill Missing Content</h3>
-              <p className="text-xs text-[#888] mb-3">
+              <p className="text-xs text-[#666666] mb-3">
                 Generate rich editorial content (History, Founder, Signature Products, Creative Directors, Brand DNA, Careers) for all {BRANDS.length} brands that don&rsquo;t have it yet. Safe to run multiple times — only fills gaps.
               </p>
               <button onClick={handleSeed} disabled={seeding} className="jl-btn jl-btn-gold text-xs">
                 {seeding ? 'Seeding in progress...' : `Seed WikiLux Brands (${BRANDS.length})`}
               </button>
-              {seedResult && <p className="text-xs text-[#a58e28] mt-3 whitespace-pre-line">{seedResult}</p>}
+              {seedResult && <p className="text-xs text-[#444444] mt-3 whitespace-pre-line">{seedResult}</p>}
             </div>
           </div>
 
@@ -214,7 +214,7 @@ export default function AdminWikiLuxPage() {
           <div className="mb-8">
             <div className="jl-section-label"><span>Editorial Notes</span></div>
             <div className="jl-card">
-              <p className="text-xs text-[#888] mb-3">Add editorial notes to any brand page. These appear as a highlighted &ldquo;Editor&rsquo;s Note&rdquo; section on the public page.</p>
+              <p className="text-xs text-[#666666] mb-3">Add editorial notes to any brand page. These appear as a highlighted &ldquo;Editor&rsquo;s Note&rdquo; section on the public page.</p>
               <div className="space-y-3">
                 <div>
                   <label className="jl-label">Brand</label>
@@ -233,7 +233,7 @@ export default function AdminWikiLuxPage() {
                       <button onClick={handleSaveEditorial} disabled={editSaving} className="jl-btn jl-btn-primary text-xs">
                         {editSaving ? 'Saving...' : 'Save Note'}
                       </button>
-                      {editSuccess && <span className="text-xs text-[#a58e28]">Saved</span>}
+                      {editSuccess && <span className="text-xs text-[#444444]">Saved</span>}
                     </div>
                   </>
                 )}
@@ -247,14 +247,14 @@ export default function AdminWikiLuxPage() {
               <div className="jl-section-label"><span>Most Contributed Brands</span></div>
               <div className="jl-card overflow-x-auto">
                 <table className="w-full text-xs">
-                  <thead><tr className="border-b border-[#e8e2d8]">
-                    <th className="text-left py-2 font-semibold text-[#888] uppercase tracking-wider">Brand</th>
-                    <th className="text-right py-2 font-semibold text-[#888] uppercase tracking-wider">Insights</th>
+                  <thead><tr className="border-b border-[#e8e8e8]">
+                    <th className="text-left py-2 font-semibold text-[#666666] uppercase tracking-wider">Brand</th>
+                    <th className="text-right py-2 font-semibold text-[#666666] uppercase tracking-wider">Insights</th>
                   </tr></thead>
                   <tbody>{stats.top_brands.map((b) => (
                     <tr key={b.slug} className="border-b border-[#f0ece4]">
                       <td className="py-2 text-[#1a1a1a]">{b.brand_name}</td>
-                      <td className="py-2 text-right text-[#a58e28] font-medium">{b.count}</td>
+                      <td className="py-2 text-right text-[#444444] font-medium">{b.count}</td>
                     </tr>
                   ))}</tbody>
                 </table>

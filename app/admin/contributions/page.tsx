@@ -81,10 +81,10 @@ export default function AdminContributionsPage() {
   })
 
   return (
-    <main className="min-h-screen bg-[#0d1117]">
-      <section className="border-b border-[#e8e2d8] bg-[#161b22]">
+    <main className="min-h-screen bg-[#f5f5f5]">
+      <section className="border-b border-[#e8e8e8] bg-[#f5f5f5]">
         <div className="max-w-5xl mx-auto px-6 py-8">
-          <Link href="/admin" className="text-sm text-[#a58e28] hover:text-[#1a1a1a] transition-colors">
+          <Link href="/admin" className="text-sm text-[#444444] hover:text-[#1a1a1a] transition-colors">
             ← Back to Admin
           </Link>
           <h1 className="jl-serif text-2xl md:text-3xl text-[#1a1a1a] mt-4">
@@ -104,7 +104,7 @@ export default function AdminContributionsPage() {
             placeholder="Search by type, contributor, brand..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full border border-[#e8e2d8] rounded-sm pl-3 pr-3 py-2 text-sm bg-[#161b22] focus:outline-none focus:border-[#a58e28] transition-colors"
+            className="w-full border border-[#e8e8e8] rounded-sm pl-3 pr-3 py-2 text-sm bg-[#f5f5f5] focus:outline-none focus:border-[#e8e8e8] transition-colors"
           />
         </div>
 
@@ -116,8 +116,8 @@ export default function AdminContributionsPage() {
               onClick={() => { setStatusFilter(s); setSelectedId(null); setSelectedDetail(null) }}
               className={`px-4 py-2 text-xs tracking-wide rounded-sm border transition-colors capitalize ${
                 statusFilter === s
-                  ? 'bg-[#1a1a1a] text-[#a58e28] border-[#1a1a1a]'
-                  : 'bg-[#161b22] text-[#666] border-[#e8e2d8] hover:border-[#a58e28]'
+                  ? 'bg-[#f5f5f5] text-[#444444] border-[#1a1a1a]'
+                  : 'bg-[#f5f5f5] text-[#666] border-[#e8e8e8] hover:border-[#e8e8e8]'
               }`}
             >
               {s}
@@ -131,7 +131,7 @@ export default function AdminContributionsPage() {
             {loading ? (
               <p className="text-sm text-[#999]">Loading…</p>
             ) : contributions.length === 0 ? (
-              <div className="bg-[#161b22] border border-[#e8e2d8] rounded-sm p-8 text-center">
+              <div className="bg-[#f5f5f5] border border-[#e8e8e8] rounded-sm p-8 text-center">
                 <p className="text-sm text-[#999]">No {statusFilter} contributions.</p>
               </div>
             ) : (
@@ -148,13 +148,13 @@ export default function AdminContributionsPage() {
                     onClick={() => viewDetail(c.id)}
                     className={`w-full text-left p-4 border rounded-sm transition-colors ${
                       selectedId === c.id
-                        ? 'bg-[#161b22] border-[#a58e28]'
-                        : 'bg-[#161b22] border-[#e8e2d8] hover:border-[#a58e28]'
+                        ? 'bg-[#f5f5f5] border-[#e8e8e8]'
+                        : 'bg-[#f5f5f5] border-[#e8e8e8] hover:border-[#e8e8e8]'
                     }`}
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="text-xs text-[#a58e28] mb-1">
+                        <p className="text-xs text-[#444444] mb-1">
                           {TYPE_LABELS[c.contribution_type]} · +{TYPE_POINTS[c.contribution_type]} pts
                         </p>
                         <p className="text-sm font-medium text-[#1a1a1a]">
@@ -181,13 +181,13 @@ export default function AdminContributionsPage() {
           {/* Right: Detail */}
           <div>
             {selectedDetail ? (
-              <div className="bg-[#161b22] border border-[#e8e2d8] rounded-sm p-6 sticky top-24">
-                <h2 className="text-xs font-medium tracking-widest uppercase text-[#a58e28] mb-4">
+              <div className="bg-[#f5f5f5] border border-[#e8e8e8] rounded-sm p-6 sticky top-24">
+                <h2 className="text-xs font-medium tracking-widest uppercase text-[#444444] mb-4">
                   {TYPE_LABELS[selectedDetail.contribution_type]}
                 </h2>
 
                 {/* Member info */}
-                <div className="mb-4 pb-4 border-b border-[#e8e2d8]">
+                <div className="mb-4 pb-4 border-b border-[#e8e8e8]">
                   <p className="text-sm font-medium text-[#1a1a1a]">
                     {selectedDetail.is_anonymous ? 'Anonymous submission' : selectedDetail.members?.full_name}
                   </p>
@@ -217,7 +217,7 @@ export default function AdminContributionsPage() {
 
                 {/* Action buttons (only for pending) */}
                 {selectedDetail.status === 'pending' && (
-                  <div className="pt-4 border-t border-[#e8e2d8] space-y-3">
+                  <div className="pt-4 border-t border-[#e8e8e8] space-y-3">
                     <div>
                       <label className="jl-label">Rejection Reason (optional)</label>
                       <input
@@ -247,7 +247,7 @@ export default function AdminContributionsPage() {
                 )}
               </div>
             ) : (
-              <div className="bg-[#161b22] border border-[#e8e2d8] rounded-sm p-8 text-center sticky top-24">
+              <div className="bg-[#f5f5f5] border border-[#e8e8e8] rounded-sm p-8 text-center sticky top-24">
                 <p className="text-sm text-[#999]">Select a contribution to review.</p>
               </div>
             )}

@@ -48,7 +48,7 @@ function relativeTime(dateStr: string): string {
 const PIPELINE_STAGES = [
   { key: 'applied', label: 'Sourced', color: 'bg-blue-100 text-blue-700' },
   { key: 'screening', label: 'Screening', color: 'bg-amber-100 text-amber-700' },
-  { key: 'shortlisted', label: 'Interview', color: 'bg-[#a58e28]/15 text-[#a58e28]' },
+  { key: 'shortlisted', label: 'Interview', color: 'bg-[#111111]/15 text-[#444444]' },
   { key: 'offer_made', label: 'Placed', color: 'bg-green-100 text-green-700' },
 ]
 
@@ -210,8 +210,8 @@ export default function AdminDashboardPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-[#0d1117] flex items-center justify-center">
-        <p className="text-sm text-[#484f58]">Loading dashboard...</p>
+      <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center">
+        <p className="text-sm text-[#999]">Loading dashboard...</p>
       </div>
     )
   }
@@ -226,19 +226,19 @@ export default function AdminDashboardPage() {
       label: 'PROFILES',
       value: kpis.members,
       sub: kpis.pendingMembers > 0 ? `+${kpis.pendingMembers} pending` : 'All reviewed',
-      subColor: kpis.pendingMembers > 0 ? 'text-green-600' : 'text-[#484f58]',
+      subColor: kpis.pendingMembers > 0 ? 'text-green-600' : 'text-[#999]',
     },
     {
       label: 'ASSIGNMENTS',
       value: kpis.assignments,
       sub: kpis.activeAssignments > 0 ? `${kpis.activeAssignments} active` : 'No active',
-      subColor: kpis.activeAssignments > 0 ? 'text-green-600' : 'text-[#484f58]',
+      subColor: kpis.activeAssignments > 0 ? 'text-green-600' : 'text-[#999]',
     },
     {
       label: 'INTELLIGENCE',
       value: kpis.articles,
       sub: 'articles',
-      subColor: 'text-[#484f58]',
+      subColor: 'text-[#999]',
     },
     {
       label: 'WIKILUX',
@@ -256,12 +256,12 @@ export default function AdminDashboardPage() {
       label: 'INTERVIEWS',
       value: kpis.interviews,
       sub: `${kpis.houses} houses`,
-      subColor: 'text-[#484f58]',
+      subColor: 'text-[#999]',
     },
   ]
 
   return (
-    <div className="min-h-screen bg-[#0d1117]">
+    <div className="min-h-screen bg-[#f5f5f5]">
       <div className="px-5 py-4 lg:px-6">
 
         {/* ── Welcome + date ── */}
@@ -269,7 +269,7 @@ export default function AdminDashboardPage() {
           <h1 className="text-lg font-medium text-[#1a1a1a]">
             {getGreeting()}, {firstName}
           </h1>
-          <span className="text-xs text-[#484f58] hidden sm:block">{getFormattedDate()}</span>
+          <span className="text-xs text-[#999] hidden sm:block">{getFormattedDate()}</span>
         </div>
 
         {/* ── KPI row — 6 metrics ── */}
@@ -287,10 +287,10 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_0.8fr_0.8fr] gap-3 mb-4">
 
           {/* Column 1: ATS Pipeline overview */}
-          <div className="border border-[#30363d] rounded-xl p-4 bg-[#161b22]">
+          <div className="border border-[#e8e8e8] rounded-xl p-4 bg-[#f5f5f5]">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999]">ATS Pipeline</span>
-              <Link href="/admin/ats" className="text-[11px] text-[#a58e28] hover:text-[#8a7622] font-medium transition-colors">
+              <Link href="/admin/ats" className="text-[11px] text-[#444444] hover:text-[#8a7622] font-medium transition-colors">
                 View pipeline →
               </Link>
             </div>
@@ -313,18 +313,18 @@ export default function AdminDashboardPage() {
                     )
                   })}
                 </div>
-                <p className="text-xs text-[#484f58]">{pipelineTotal} candidates across {kpis.activeAssignments} active assignment{kpis.activeAssignments !== 1 ? 's' : ''}</p>
+                <p className="text-xs text-[#999]">{pipelineTotal} candidates across {kpis.activeAssignments} active assignment{kpis.activeAssignments !== 1 ? 's' : ''}</p>
               </>
             ) : (
               <div className="py-6 text-center">
-                <p className="text-xs text-[#484f58]">No active assignments yet.</p>
+                <p className="text-xs text-[#999]">No active assignments yet.</p>
                 <p className="text-[0.6rem] font-normal text-[#aaa] mt-1">Pipeline populates when you create search assignments.</p>
               </div>
             )}
           </div>
 
           {/* Column 2: Quick Actions */}
-          <div className="border border-[#30363d] rounded-xl p-4 bg-[#161b22]">
+          <div className="border border-[#e8e8e8] rounded-xl p-4 bg-[#f5f5f5]">
             <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] block mb-3">Quick Actions</span>
             <div className="space-y-1.5">
               {[
@@ -339,10 +339,10 @@ export default function AdminDashboardPage() {
                   <Link
                     key={action.label}
                     href={action.href}
-                    className="flex items-center gap-2.5 bg-gray-50 rounded-lg px-3 py-2 text-xs text-[#c9d1d9] hover:bg-[#1f2937] transition-colors group"
+                    className="flex items-center gap-2.5 bg-gray-50 rounded-lg px-3 py-2 text-xs text-[#c9d1d9] hover:bg-[#fafafa] transition-colors group"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#a58e28] flex-shrink-0" />
-                    <Icon size={13} className="text-[#484f58] group-hover:text-[#a58e28] transition-colors flex-shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#111111] flex-shrink-0" />
+                    <Icon size={13} className="text-[#999] group-hover:text-[#444444] transition-colors flex-shrink-0" />
                     <span className="truncate">{action.label}</span>
                   </Link>
                 )
@@ -351,7 +351,7 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Column 3: System Status */}
-          <div className="border border-[#30363d] rounded-xl p-4 bg-[#161b22]">
+          <div className="border border-[#e8e8e8] rounded-xl p-4 bg-[#f5f5f5]">
             <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] block mb-3">System Status</span>
             <div className="space-y-2.5">
               {SYSTEM_STATUS.map((item) => (
@@ -376,10 +376,10 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
 
           {/* Column 1: Recent Activity */}
-          <div className="border border-[#30363d] rounded-xl p-4 bg-[#161b22]">
+          <div className="border border-[#e8e8e8] rounded-xl p-4 bg-[#f5f5f5]">
             <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] block mb-3">Recent Activity</span>
             {activityFeed.length === 0 ? (
-              <p className="text-xs text-[#484f58] py-4 text-center">No recent activity.</p>
+              <p className="text-xs text-[#999] py-4 text-center">No recent activity.</p>
             ) : (
               <div className="divide-y divide-gray-100">
                 {activityFeed.map((item, i) => (
@@ -390,14 +390,14 @@ export default function AdminDashboardPage() {
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        item.type === 'member' ? 'bg-[#1a1a1a]' : 'bg-[#a58e28]/10'
+                        item.type === 'member' ? 'bg-[#f5f5f5]' : 'bg-[#111111]/10'
                       }`}>
-                        <span className="text-[7px] font-bold text-[#a58e28]">
+                        <span className="text-[7px] font-bold text-[#444444]">
                           {item.type === 'member' ? 'M' : 'C'}
                         </span>
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors truncate">
+                        <p className="text-sm text-[#1a1a1a] group-hover:text-[#444444] transition-colors truncate">
                           {item.text}
                         </p>
                       </div>
@@ -406,7 +406,7 @@ export default function AdminDashboardPage() {
                       <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded ${
                         item.status === 'pending' ? 'bg-amber-50 text-amber-700' :
                         item.status === 'approved' ? 'bg-green-50 text-green-700' :
-                        'bg-gray-50 text-[#8b949e]'
+                        'bg-gray-50 text-[#999]'
                       }`}>
                         {item.status}
                       </span>
@@ -419,16 +419,16 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Column 2: Launch Checklist */}
-          <div className="border border-[#30363d] rounded-xl p-4 bg-[#161b22]">
+          <div className="border border-[#e8e8e8] rounded-xl p-4 bg-[#f5f5f5]">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999]">Launch Checklist</span>
-              <span className="text-[11px] font-medium text-[#a58e28]">{CHECKLIST_DONE}/{LAUNCH_CHECKLIST.length} done</span>
+              <span className="text-[11px] font-medium text-[#444444]">{CHECKLIST_DONE}/{LAUNCH_CHECKLIST.length} done</span>
             </div>
 
             {/* Progress bar */}
             <div className="w-full h-1.5 bg-gray-100 rounded-full mb-3 overflow-hidden">
               <div
-                className="h-full bg-[#a58e28] rounded-full transition-all"
+                className="h-full bg-[#111111] rounded-full transition-all"
                 style={{ width: `${(CHECKLIST_DONE / LAUNCH_CHECKLIST.length) * 100}%` }}
               />
             </div>
@@ -441,7 +441,7 @@ export default function AdminDashboardPage() {
                   ) : (
                     <Circle size={14} className="text-gray-300 flex-shrink-0" />
                   )}
-                  <span className={`text-xs ${item.done ? 'text-[#484f58] line-through' : 'text-[#1a1a1a]'}`}>
+                  <span className={`text-xs ${item.done ? 'text-[#999] line-through' : 'text-[#1a1a1a]'}`}>
                     {item.label}
                   </span>
                 </div>
@@ -451,7 +451,7 @@ export default function AdminDashboardPage() {
             {!showAllChecklist && hiddenCount > 0 && (
               <button
                 onClick={() => setShowAllChecklist(true)}
-                className="text-[11px] text-[#a58e28] hover:text-[#8a7622] font-medium mt-2 transition-colors"
+                className="text-[11px] text-[#444444] hover:text-[#8a7622] font-medium mt-2 transition-colors"
               >
                 +{hiddenCount} more items →
               </button>

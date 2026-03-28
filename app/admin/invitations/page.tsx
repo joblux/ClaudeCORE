@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRequireAdmin } from '@/lib/auth-hooks'
 
-const GOLD = '#a58e28'
+const GOLD = '#444'
 const BLACK = '#1a1a1a'
 const CREAM = '#fafaf5'
-const BORDER = '#e8e2d8'
+const BORDER = '#e8e8e8'
 
 type Tab = 'all' | 'import' | 'stats'
 
@@ -248,12 +248,12 @@ export default function AdminInvitationsPage() {
       case 'clicked': return 'bg-blue-50 text-blue-700'
       case 'registered': return 'bg-amber-50 text-amber-700'
       case 'approved': return 'bg-emerald-50 text-emerald-700'
-      default: return 'bg-gray-100 text-[#8b949e]'
+      default: return 'bg-gray-100 text-[#999]'
     }
   }
 
   return (
-    <main className="min-h-screen bg-[#0d1117]">
+    <main className="min-h-screen bg-[#f5f5f5]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="mb-6">
@@ -262,7 +262,7 @@ export default function AdminInvitationsPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 border-b border-[#e8e2d8] mb-6">
+        <div className="flex gap-1 border-b border-[#e8e8e8] mb-6">
           {[
             { key: 'all' as Tab, label: 'All Approvals' },
             { key: 'import' as Tab, label: 'Bulk Import' },
@@ -273,8 +273,8 @@ export default function AdminInvitationsPage() {
               onClick={() => setTab(t.key)}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 tab === t.key
-                  ? 'border-[#a58e28] text-[#a58e28]'
-                  : 'border-transparent text-[#888] hover:text-[#1a1a1a]'
+                  ? 'border-[#e8e8e8] text-[#444444]'
+                  : 'border-transparent text-[#666666] hover:text-[#1a1a1a]'
               }`}
             >
               {t.label}
@@ -317,18 +317,18 @@ export default function AdminInvitationsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-[#e8e2d8] bg-[#0d1117]">
-                        <th className="text-left px-4 py-3 text-xs font-medium text-[#888]">Name</th>
-                        <th className="text-left px-4 py-3 text-xs font-medium text-[#888]">Email</th>
-                        <th className="text-left px-4 py-3 text-xs font-medium text-[#888]">Company</th>
-                        <th className="text-left px-4 py-3 text-xs font-medium text-[#888]">Status</th>
-                        <th className="text-left px-4 py-3 text-xs font-medium text-[#888]">Invited By</th>
-                        <th className="text-left px-4 py-3 text-xs font-medium text-[#888]">Sent</th>
+                      <tr className="border-b border-[#e8e8e8] bg-[#f5f5f5]">
+                        <th className="text-left px-4 py-3 text-xs font-medium text-[#666666]">Name</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-[#666666]">Email</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-[#666666]">Company</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-[#666666]">Status</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-[#666666]">Invited By</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-[#666666]">Sent</th>
                       </tr>
                     </thead>
                     <tbody>
                       {invitations.map((inv) => (
-                        <tr key={inv.id} className="border-b border-[#f0ede5] hover:bg-[#0d1117]/50">
+                        <tr key={inv.id} className="border-b border-[#f0ede5] hover:bg-[#f5f5f5]/50">
                           <td className="px-4 py-3 text-[#1a1a1a] font-medium">{inv.name || '-'}</td>
                           <td className="px-4 py-3 text-[#555]">{inv.contact_email}</td>
                           <td className="px-4 py-3 text-[#555]">{inv.company || '-'}</td>
@@ -338,7 +338,7 @@ export default function AdminInvitationsPage() {
                             </span>
                           </td>
                           <td className="px-4 py-3 text-[#555]">{inv.invited_by || '-'}</td>
-                          <td className="px-4 py-3 text-[#888] text-xs">{inv.created_at ? formatDate(inv.created_at) : '-'}</td>
+                          <td className="px-4 py-3 text-[#666666] text-xs">{inv.created_at ? formatDate(inv.created_at) : '-'}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -348,8 +348,8 @@ export default function AdminInvitationsPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between px-4 py-3 border-t border-[#e8e2d8]">
-                  <p className="text-xs text-[#888]">
+                <div className="flex items-center justify-between px-4 py-3 border-t border-[#e8e8e8]">
+                  <p className="text-xs text-[#666666]">
                     Page {page} of {totalPages} ({totalCount} total)
                   </p>
                   <div className="flex gap-2">
@@ -380,12 +380,12 @@ export default function AdminInvitationsPage() {
             {/* Upload area */}
             <div className="jl-card p-6">
               <h3 className="text-sm font-semibold text-[#1a1a1a] mb-3">Upload Contacts</h3>
-              <p className="text-xs text-[#888] mb-4">
+              <p className="text-xs text-[#666666] mb-4">
                 Upload a CSV or XLSX file with columns: <strong>name</strong>, <strong>email</strong>, <strong>company</strong>.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <div
-                  className="flex-1 border-2 border-dashed border-[#e8e2d8] rounded-lg p-8 text-center cursor-pointer hover:border-[#a58e28] transition-colors"
+                  className="flex-1 border-2 border-dashed border-[#e8e8e8] rounded-lg p-8 text-center cursor-pointer hover:border-[#e8e8e8] transition-colors"
                   onClick={() => fileRef.current?.click()}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => {
@@ -404,7 +404,7 @@ export default function AdminInvitationsPage() {
                       if (file) handleFile(file)
                     }}
                   />
-                  <p className="text-sm text-[#888]">
+                  <p className="text-sm text-[#666666]">
                     Click or drag a file here
                   </p>
                   <p className="text-xs text-[#bbb] mt-1">.csv or .xlsx</p>
@@ -423,7 +423,7 @@ export default function AdminInvitationsPage() {
             {/* Preview table */}
             {contacts.length > 0 && (
               <div className="jl-card overflow-hidden">
-                <div className="px-4 py-3 border-b border-[#e8e2d8] flex items-center justify-between">
+                <div className="px-4 py-3 border-b border-[#e8e8e8] flex items-center justify-between">
                   <p className="text-sm font-medium text-[#1a1a1a]">
                     {contacts.filter((c) => c.selected).length} of {contacts.length} contacts selected
                   </p>
@@ -433,7 +433,7 @@ export default function AdminInvitationsPage() {
                         type="checkbox"
                         checked={contacts.every((c) => c.selected)}
                         onChange={toggleAll}
-                        className="accent-[#a58e28]"
+                        className="accent-[#111]"
                       />
                       Select All
                     </label>
@@ -448,12 +448,12 @@ export default function AdminInvitationsPage() {
                 </div>
                 <div className="overflow-x-auto max-h-96 overflow-y-auto">
                   <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-[#0d1117]">
-                      <tr className="border-b border-[#e8e2d8]">
-                        <th className="text-left px-4 py-2 text-xs font-medium text-[#888] w-10"></th>
-                        <th className="text-left px-4 py-2 text-xs font-medium text-[#888]">Name</th>
-                        <th className="text-left px-4 py-2 text-xs font-medium text-[#888]">Email</th>
-                        <th className="text-left px-4 py-2 text-xs font-medium text-[#888]">Company</th>
+                    <thead className="sticky top-0 bg-[#f5f5f5]">
+                      <tr className="border-b border-[#e8e8e8]">
+                        <th className="text-left px-4 py-2 text-xs font-medium text-[#666666] w-10"></th>
+                        <th className="text-left px-4 py-2 text-xs font-medium text-[#666666]">Name</th>
+                        <th className="text-left px-4 py-2 text-xs font-medium text-[#666666]">Email</th>
+                        <th className="text-left px-4 py-2 text-xs font-medium text-[#666666]">Company</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -464,7 +464,7 @@ export default function AdminInvitationsPage() {
                               type="checkbox"
                               checked={c.selected}
                               onChange={() => toggleOne(i)}
-                              className="accent-[#a58e28]"
+                              className="accent-[#111]"
                             />
                           </td>
                           <td className="px-4 py-2 text-[#1a1a1a]">{c.name || '-'}</td>
@@ -516,7 +516,7 @@ export default function AdminInvitationsPage() {
                   {funnelSteps.map((s) => (
                     <div key={s.label} className="jl-card p-5 text-center">
                       <p className="text-3xl font-bold" style={{ color: s.color }}>{s.value}</p>
-                      <p className="text-xs text-[#888] mt-1">{s.label}</p>
+                      <p className="text-xs text-[#666666] mt-1">{s.label}</p>
                     </div>
                   ))}
                 </div>
@@ -540,7 +540,7 @@ export default function AdminInvitationsPage() {
                           </div>
                         </div>
                         {funnelMax > 0 && (
-                          <span className="text-xs text-[#888] w-14 text-right">
+                          <span className="text-xs text-[#666666] w-14 text-right">
                             {((s.value / funnelMax) * 100).toFixed(1)}%
                           </span>
                         )}

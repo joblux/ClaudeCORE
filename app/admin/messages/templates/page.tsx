@@ -189,12 +189,12 @@ export default function AdminMessageTemplatesPage() {
   const isEditorOpen = isCreating || editingId !== null
 
   return (
-    <div className="min-h-screen bg-[#0d1117]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div className="min-h-screen bg-[#f5f5f5]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
       <div style={{ maxWidth: 1060, margin: '0 auto', padding: '32px 24px' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
           <div>
-            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#a58e28', margin: '0 0 6px 0' }}>
+            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#444', margin: '0 0 6px 0' }}>
               Template Library
             </p>
             <h1 style={{ fontSize: 22, fontWeight: 600, color: '#1a1a1a', margin: 0 }}>Message Templates</h1>
@@ -207,7 +207,7 @@ export default function AdminMessageTemplatesPage() {
             disabled={isEditorOpen}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: isEditorOpen ? '#ccc' : '#1a1a1a', color: isEditorOpen ? '#888' : '#a58e28',
+              background: isEditorOpen ? '#ccc' : '#1a1a1a', color: isEditorOpen ? '#888' : '#444',
               fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' as const,
               padding: '10px 20px', border: 'none', cursor: isEditorOpen ? 'default' : 'pointer',
             }}
@@ -219,9 +219,9 @@ export default function AdminMessageTemplatesPage() {
         {/* Editor */}
         {isEditorOpen && (
           <div style={{
-            border: '1px solid #e8e2d8', padding: 24, marginBottom: 32, background: '#faf9f6',
+            border: '1px solid #e8e8e8', padding: 24, marginBottom: 32, background: '#faf9f6',
           }}>
-            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#a58e28', margin: '0 0 16px 0' }}>
+            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#444', margin: '0 0 16px 0' }}>
               {editingId ? 'Edit Template' : 'New Template'}
             </p>
 
@@ -310,7 +310,7 @@ export default function AdminMessageTemplatesPage() {
                     type="button"
                     onClick={() => insertMergeField(field)}
                     style={{
-                      background: '#1a1a1a', color: '#a58e28', border: 'none',
+                      background: '#1a1a1a', color: '#444', border: 'none',
                       padding: '5px 12px', fontSize: 11, fontWeight: 500, cursor: 'pointer',
                       letterSpacing: '0.04em', fontFamily: 'monospace',
                     }}
@@ -324,10 +324,10 @@ export default function AdminMessageTemplatesPage() {
             {/* Preview */}
             {previewHtml !== null && (
               <div style={{
-                background: '#fff', border: '1px solid #e8e2d8', padding: 20, marginBottom: 20,
+                background: '#fff', border: '1px solid #e8e8e8', padding: 20, marginBottom: 20,
                 fontSize: 13, color: '#1a1a1a', lineHeight: 1.7, whiteSpace: 'pre-wrap',
               }}>
-                <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#a58e28', margin: '0 0 12px 0' }}>
+                <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#444', margin: '0 0 12px 0' }}>
                   Preview (with sample data)
                 </p>
                 {previewHtml}
@@ -340,7 +340,7 @@ export default function AdminMessageTemplatesPage() {
                 onClick={handleSave}
                 disabled={saving || !form.name || !form.category || !form.subject || !form.body}
                 style={{
-                  background: saving ? '#888' : '#1a1a1a', color: '#a58e28',
+                  background: saving ? '#888' : '#1a1a1a', color: '#444',
                   border: 'none', padding: '10px 24px', fontSize: 11, fontWeight: 600,
                   letterSpacing: '0.1em', textTransform: 'uppercase' as const, cursor: saving ? 'default' : 'pointer',
                 }}
@@ -351,7 +351,7 @@ export default function AdminMessageTemplatesPage() {
               <button
                 onClick={handlePreview}
                 style={{
-                  background: '#fff', color: '#1a1a1a', border: '1px solid #e8e2d8',
+                  background: '#fff', color: '#1a1a1a', border: '1px solid #e8e8e8',
                   padding: '10px 24px', fontSize: 11, fontWeight: 600,
                   letterSpacing: '0.1em', textTransform: 'uppercase' as const, cursor: 'pointer',
                 }}
@@ -396,7 +396,7 @@ export default function AdminMessageTemplatesPage() {
             <button
               onClick={startCreate}
               style={{
-                background: '#1a1a1a', color: '#a58e28', border: 'none',
+                background: '#1a1a1a', color: '#444', border: 'none',
                 padding: '10px 24px', fontSize: 11, fontWeight: 600,
                 letterSpacing: '0.1em', textTransform: 'uppercase' as const, cursor: 'pointer',
               }}
@@ -408,7 +408,7 @@ export default function AdminMessageTemplatesPage() {
           Object.entries(grouped).map(([categoryKey, categoryTemplates]) => (
             <div key={categoryKey} style={{ marginBottom: 28 }}>
               {/* Category header */}
-              <div style={{ borderTop: '2px solid #a58e28', paddingTop: 10, marginBottom: 12 }}>
+              <div style={{ borderTop: '2px solid #444', paddingTop: 10, marginBottom: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <h3 style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', margin: 0, letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>
                     {getCategoryLabel(categoryKey)}
@@ -416,7 +416,7 @@ export default function AdminMessageTemplatesPage() {
                   <span style={{
                     fontSize: 9, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' as const,
                     padding: '2px 8px', background: getCategoryType(categoryKey) === 'client' ? '#f0ece4' : '#1a1a1a',
-                    color: getCategoryType(categoryKey) === 'client' ? '#888' : '#a58e28',
+                    color: getCategoryType(categoryKey) === 'client' ? '#888' : '#444',
                   }}>
                     {getCategoryType(categoryKey)}
                   </span>
@@ -431,7 +431,7 @@ export default function AdminMessageTemplatesPage() {
                     if (editingId !== template.id && !isCreating) startEdit(template)
                   }}
                   style={{
-                    border: editingId === template.id ? '1px solid #a58e28' : '1px solid #f0ece4',
+                    border: editingId === template.id ? '1px solid #444' : '1px solid #f0ece4',
                     padding: '14px 18px', marginBottom: 8, cursor: 'pointer',
                     background: editingId === template.id ? '#faf9f6' : '#fff',
                     transition: 'border-color 0.15s',
@@ -451,7 +451,7 @@ export default function AdminMessageTemplatesPage() {
                       fontSize: 9, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const,
                       padding: '2px 8px',
                       background: template.participant_type === 'client' ? '#f0ece4' : '#1a1a1a',
-                      color: template.participant_type === 'client' ? '#888' : '#a58e28',
+                      color: template.participant_type === 'client' ? '#888' : '#444',
                     }}>
                       {template.participant_type}
                     </span>
@@ -490,7 +490,7 @@ const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '10px 12px',
   fontSize: 13,
-  border: '1px solid #e8e2d8',
+  border: '1px solid #e8e8e8',
   background: '#fff',
   color: '#1a1a1a',
   fontFamily: 'Inter, system-ui, sans-serif',

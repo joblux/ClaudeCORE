@@ -160,13 +160,13 @@ export default function AdminMediaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d1117]">
+    <div className="min-h-screen bg-[#f5f5f5]">
       <div className="px-6 py-5 lg:px-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-medium text-[#1a1a1a]">Media Library</h1>
-          <p className="text-sm text-[#484f58] mt-0.5">{total} file{total !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-[#999] mt-0.5">{total} file{total !== 1 ? 's' : ''}</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -233,11 +233,11 @@ export default function AdminMediaPage() {
           ) : items.length === 0 ? (
             <div className="text-center py-16">
               <p className="jl-serif text-xl text-[#1a1a1a] mb-2">No media yet</p>
-              <p className="text-sm text-[#888]">Upload images or import from Unsplash</p>
+              <p className="text-sm text-[#666666]">Upload images or import from Unsplash</p>
             </div>
           ) : (
             <>
-              <div className="text-xs text-[#888] mb-3">{total} file{total !== 1 ? 's' : ''}</div>
+              <div className="text-xs text-[#666666] mb-3">{total} file{total !== 1 ? 's' : ''}</div>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-3">
                 {items.map((item) => (
                   <button
@@ -245,7 +245,7 @@ export default function AdminMediaPage() {
                     onClick={() => openEdit(item)}
                     className="jl-card group text-left p-0 overflow-hidden"
                   >
-                    <div className="aspect-square relative bg-[#0d1117]">
+                    <div className="aspect-square relative bg-[#f5f5f5]">
                       <Image
                         src={item.thumbnail_url || item.file_url}
                         alt={item.alt_text || item.filename}
@@ -258,7 +258,7 @@ export default function AdminMediaPage() {
                       <div className="text-xs text-[#1a1a1a] truncate">{item.original_filename}</div>
                       <div className="flex items-center justify-between mt-1">
                         <span className={`${sourceBadge(item.source)} text-[0.5rem]`}>{item.source}</span>
-                        <span className="text-[0.6rem] text-[#ccc]">
+                        <span className="text-[0.6rem] text-[#444444]">
                           {new Date(item.created_at).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })}
                         </span>
                       </div>
@@ -270,7 +270,7 @@ export default function AdminMediaPage() {
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 mt-8">
                   <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="jl-btn text-xs disabled:opacity-30">Previous</button>
-                  <span className="text-xs text-[#888] px-4">Page {page} of {totalPages}</span>
+                  <span className="text-xs text-[#666666] px-4">Page {page} of {totalPages}</span>
                   <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="jl-btn text-xs disabled:opacity-30">Next</button>
                 </div>
               )}
@@ -280,9 +280,9 @@ export default function AdminMediaPage() {
           {/* Edit Modal */}
           {selected && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <div className="absolute inset-0 bg-[#1a1a1a]/60" onClick={() => setSelected(null)} />
-              <div className="relative bg-[#161b22] border border-[#e8e2d8] max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
-                <div className="aspect-video relative bg-[#0d1117] mb-4">
+              <div className="absolute inset-0 bg-[#f5f5f5]/60" onClick={() => setSelected(null)} />
+              <div className="relative bg-[#f5f5f5] border border-[#e8e8e8] max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
+                <div className="aspect-video relative bg-[#f5f5f5] mb-4">
                   <Image
                     src={selected.file_url}
                     alt={selected.alt_text || selected.filename}
@@ -305,19 +305,19 @@ export default function AdminMediaPage() {
                     <input className="jl-input w-full" value={editTags} onChange={(e) => setEditTags(e.target.value)} />
                   </div>
                   {selected.unsplash_attribution && (
-                    <div className="text-xs text-[#888]">
+                    <div className="text-xs text-[#666666]">
                       Photo by{' '}
-                      <a href={`${selected.unsplash_attribution.photographer_url}?utm_source=joblux&utm_medium=referral`} target="_blank" rel="noopener noreferrer" className="text-[#a58e28]">
+                      <a href={`${selected.unsplash_attribution.photographer_url}?utm_source=joblux&utm_medium=referral`} target="_blank" rel="noopener noreferrer" className="text-[#444444]">
                         {selected.unsplash_attribution.photographer}
                       </a>{' '}
                       on{' '}
-                      <a href={`${selected.unsplash_attribution.unsplash_url}?utm_source=joblux&utm_medium=referral`} target="_blank" rel="noopener noreferrer" className="text-[#a58e28]">
+                      <a href={`${selected.unsplash_attribution.unsplash_url}?utm_source=joblux&utm_medium=referral`} target="_blank" rel="noopener noreferrer" className="text-[#444444]">
                         Unsplash
                       </a>
                     </div>
                   )}
                 </div>
-                <div className="flex items-center justify-between mt-6 pt-4 border-t border-[#e8e2d8]">
+                <div className="flex items-center justify-between mt-6 pt-4 border-t border-[#e8e8e8]">
                   <button onClick={() => handleDelete(selected.id)} className="text-xs text-red-500 hover:text-red-700">Delete</button>
                   <div className="flex gap-2">
                     <button onClick={() => setSelected(null)} className="jl-btn jl-btn-outline text-xs">Cancel</button>
@@ -349,7 +349,7 @@ export default function AdminMediaPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-3">
               {unsplashResults.map((img) => (
                 <div key={img.id} className="jl-card p-0 overflow-hidden">
-                  <div className="aspect-square relative bg-[#0d1117]">
+                  <div className="aspect-square relative bg-[#f5f5f5]">
                     <Image
                       src={img.thumb}
                       alt={img.alt || 'Unsplash photo'}
@@ -359,8 +359,8 @@ export default function AdminMediaPage() {
                     />
                   </div>
                   <div className="p-2.5">
-                    <div className="text-[0.65rem] text-[#888] truncate mb-2">
-                      Photo by <a href={`${img.photographer_url}?utm_source=joblux&utm_medium=referral`} target="_blank" rel="noopener noreferrer" className="text-[#a58e28]">{img.photographer}</a>
+                    <div className="text-[0.65rem] text-[#666666] truncate mb-2">
+                      Photo by <a href={`${img.photographer_url}?utm_source=joblux&utm_medium=referral`} target="_blank" rel="noopener noreferrer" className="text-[#444444]">{img.photographer}</a>
                     </div>
                     <button
                       onClick={() => saveUnsplash(img)}
@@ -377,7 +377,7 @@ export default function AdminMediaPage() {
 
           {!unsplashLoading && unsplashResults.length === 0 && unsplashQuery && (
             <div className="text-center py-16">
-              <p className="text-sm text-[#888]">Search Unsplash for high-quality images</p>
+              <p className="text-sm text-[#666666]">Search Unsplash for high-quality images</p>
             </div>
           )}
         </>

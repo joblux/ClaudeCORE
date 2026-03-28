@@ -187,17 +187,17 @@ function FormSection({
   const [open, setOpen] = useState(defaultOpen)
 
   return (
-    <div className="bg-[#161b22] border border-[#e8e2d8] rounded-sm mb-6 overflow-hidden">
+    <div className="bg-[#f5f5f5] border border-[#e8e8e8] rounded-sm mb-6 overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center justify-between w-full px-6 py-4 text-left hover:bg-[#0d1117] transition-colors"
+        className="flex items-center justify-between w-full px-6 py-4 text-left hover:bg-[#f5f5f5] transition-colors"
       >
-        <h2 className="text-xs font-medium tracking-widest uppercase text-[#a58e28] m-0">
+        <h2 className="text-xs font-medium tracking-widest uppercase text-[#444444] m-0">
           {title}
         </h2>
         <svg
-          className={`w-4 h-4 text-[#a58e28] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-[#444444] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -207,7 +207,7 @@ function FormSection({
       </button>
 
       {/* Gold divider line */}
-      <div className="mx-6 border-t border-[#e8e2d8]" />
+      <div className="mx-6 border-t border-[#e8e8e8]" />
 
       {open && <div className="px-6 pb-6 pt-5">{children}</div>}
     </div>
@@ -235,17 +235,17 @@ function Toggle({
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className={`relative flex-shrink-0 mt-0.5 w-10 h-[22px] rounded-full transition-colors duration-200 ${
-          checked ? 'bg-[#a58e28]' : 'bg-[#d4d0c8]'
+          checked ? 'bg-[#111111]' : 'bg-[#d4d0c8]'
         }`}
       >
         <div
-          className={`absolute top-[2px] w-[18px] h-[18px] rounded-full bg-[#161b22] shadow transition-transform duration-200 ${
+          className={`absolute top-[2px] w-[18px] h-[18px] rounded-full bg-[#f5f5f5] shadow transition-transform duration-200 ${
             checked ? 'translate-x-[20px]' : 'translate-x-[2px]'
           }`}
         />
       </div>
       <div>
-        <p className="text-sm font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors">
+        <p className="text-sm font-medium text-[#1a1a1a] group-hover:text-[#444444] transition-colors">
           {label}
         </p>
         {description && (
@@ -281,13 +281,13 @@ function CheckboxGrid({
       {options.map((opt) => (
         <label
           key={opt}
-          className="flex items-center gap-2 text-sm text-[#1a1a1a] cursor-pointer hover:text-[#a58e28] transition-colors"
+          className="flex items-center gap-2 text-sm text-[#1a1a1a] cursor-pointer hover:text-[#444444] transition-colors"
         >
           <input
             type="checkbox"
             checked={selected.includes(opt)}
             onChange={() => toggle(opt)}
-            className="accent-[#a58e28] w-4 h-4"
+            className="accent-[#111] w-4 h-4"
           />
           {opt}
         </label>
@@ -315,7 +315,7 @@ function toSlug(text: string): string {
 export default function NewAssignmentPageWrapper() {
   return (
     <Suspense fallback={
-      <main className="min-h-screen bg-[#0d1117] flex items-center justify-center">
+      <main className="min-h-screen bg-[#f5f5f5] flex items-center justify-center">
         <p className="text-sm text-[#999]">Loading...</p>
       </main>
     }>
@@ -501,7 +501,7 @@ function NewAssignmentPage() {
   // ── Loading state for edit mode ──────────────────────────────────
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#0d1117] flex items-center justify-center">
+      <main className="min-h-screen bg-[#f5f5f5] flex items-center justify-center">
         <p className="text-sm text-[#999]">Loading assignment...</p>
       </main>
     )
@@ -511,13 +511,13 @@ function NewAssignmentPage() {
   // RENDER
   // ══════════════════════════════════════════════════════════════════
   return (
-    <main className="min-h-screen bg-[#0d1117]">
+    <main className="min-h-screen bg-[#f5f5f5]">
       {/* ── Page header ───────────────────────────────────────────── */}
-      <section className="border-b border-[#e8e2d8] bg-[#161b22]">
+      <section className="border-b border-[#e8e8e8] bg-[#f5f5f5]">
         <div className="max-w-3xl mx-auto px-6 py-8">
           <Link
             href="/admin/assignments"
-            className="text-sm text-[#a58e28] hover:text-[#1a1a1a] transition-colors"
+            className="text-sm text-[#444444] hover:text-[#1a1a1a] transition-colors"
           >
             &larr; Back to Assignments
           </Link>

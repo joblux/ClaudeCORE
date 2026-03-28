@@ -93,7 +93,7 @@ export default function EditArticlePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d1117]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div className="min-h-screen bg-[#f5f5f5]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
 
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
 
@@ -105,8 +105,8 @@ export default function EditArticlePage() {
             placeholder="Article title..."
             style={{
               width: '100%', border: 'none', outline: 'none', fontSize: 28,
-              fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 400,
-              color: '#1a1a1a', padding: '8px 0', borderBottom: '1px solid #e8e2d8',
+              fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 400,
+              color: '#1a1a1a', padding: '8px 0', borderBottom: '1px solid #e8e8e8',
             }}
           />
         </div>
@@ -117,7 +117,7 @@ export default function EditArticlePage() {
             <select
               value={form.category}
               onChange={(e) => handleChange('category', e.target.value)}
-              style={{ width: '100%', padding: '10px 12px', fontSize: 14, border: '1px solid #e8e2d8', outline: 'none', background: '#fff', color: '#1a1a1a' }}
+              style={{ width: '100%', padding: '10px 12px', fontSize: 14, border: '1px solid #e8e8e8', outline: 'none', background: '#fff', color: '#1a1a1a' }}
             >
               {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
@@ -128,7 +128,7 @@ export default function EditArticlePage() {
               type="text"
               value={form.author_name}
               onChange={(e) => handleChange('author_name', e.target.value)}
-              style={{ width: '100%', padding: '10px 12px', fontSize: 14, border: '1px solid #e8e2d8', outline: 'none', color: '#1a1a1a' }}
+              style={{ width: '100%', padding: '10px 12px', fontSize: 14, border: '1px solid #e8e8e8', outline: 'none', color: '#1a1a1a' }}
             />
           </div>
         </div>
@@ -143,7 +143,7 @@ export default function EditArticlePage() {
             onChange={(e) => handleChange('excerpt', e.target.value)}
             rows={2}
             placeholder="Brief summary..."
-            style={{ width: '100%', padding: '10px 12px', fontSize: 14, border: '1px solid #e8e2d8', outline: 'none', resize: 'none', color: '#1a1a1a' }}
+            style={{ width: '100%', padding: '10px 12px', fontSize: 14, border: '1px solid #e8e8e8', outline: 'none', resize: 'none', color: '#1a1a1a' }}
           />
         </div>
 
@@ -154,7 +154,7 @@ export default function EditArticlePage() {
             value={form.tags}
             onChange={(e) => handleChange('tags', e.target.value)}
             placeholder="luxury, fashion, career"
-            style={{ width: '100%', padding: '10px 12px', fontSize: 14, border: '1px solid #e8e2d8', outline: 'none', color: '#1a1a1a' }}
+            style={{ width: '100%', padding: '10px 12px', fontSize: 14, border: '1px solid #e8e8e8', outline: 'none', color: '#1a1a1a' }}
           />
         </div>
 
@@ -165,7 +165,7 @@ export default function EditArticlePage() {
             value={form.cover_image}
             onChange={(e) => handleChange('cover_image', e.target.value)}
             placeholder="https://..."
-            style={{ width: '100%', padding: '10px 12px', fontSize: 14, border: '1px solid #e8e2d8', outline: 'none', color: '#1a1a1a' }}
+            style={{ width: '100%', padding: '10px 12px', fontSize: 14, border: '1px solid #e8e8e8', outline: 'none', color: '#1a1a1a' }}
           />
         </div>
 
@@ -176,11 +176,11 @@ export default function EditArticlePage() {
             onChange={(e) => handleChange('content', e.target.value)}
             rows={20}
             placeholder="Write your article here. Use blank lines between paragraphs."
-            style={{ width: '100%', padding: '16px', fontSize: 15, lineHeight: 1.8, border: '1px solid #e8e2d8', outline: 'none', resize: 'vertical', color: '#333', fontFamily: "'Playfair Display', Georgia, serif" }}
+            style={{ width: '100%', padding: '16px', fontSize: 15, lineHeight: 1.8, border: '1px solid #e8e8e8', outline: 'none', resize: 'vertical', color: '#333', fontFamily: 'Inter, system-ui, sans-serif' }}
           />
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #e8e2d8', paddingTop: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #e8e8e8', paddingTop: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#888', cursor: 'pointer' }}>
               <input type="checkbox" checked={form.published} onChange={(e) => handleChange('published', e.target.checked)} />
@@ -211,7 +211,7 @@ export default function EditArticlePage() {
               style={{
                 padding: '10px 24px', fontSize: 11, fontWeight: 600, letterSpacing: '0.1em',
                 textTransform: 'uppercase' as const, border: 'none',
-                background: '#1a1a1a', color: '#a58e28', cursor: 'pointer', opacity: saving ? 0.5 : 1,
+                background: '#1a1a1a', color: '#444', cursor: 'pointer', opacity: saving ? 0.5 : 1,
               }}
             >
               {saving ? 'Saving...' : 'Publish'}

@@ -50,15 +50,15 @@ export default function AdminCommentsPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-16"><div className="inline-block w-8 h-8 border-2 border-[#e8e2d8] border-t-[#a58e28] rounded-full animate-spin" /></div>
+        <div className="text-center py-16"><div className="inline-block w-8 h-8 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin" /></div>
       ) : comments.length === 0 ? (
         <div className="text-center py-16">
           <p className="jl-serif text-lg text-[#1a1a1a] mb-2">No pending comments</p>
-          <p className="text-sm text-[#888]">All comments have been reviewed.</p>
+          <p className="text-sm text-[#666666]">All comments have been reviewed.</p>
         </div>
       ) : (
         <div className="space-y-4">
-          <p className="text-xs text-[#888]">{comments.length} pending comment{comments.length !== 1 ? 's' : ''}</p>
+          <p className="text-xs text-[#666666]">{comments.length} pending comment{comments.length !== 1 ? 's' : ''}</p>
           {comments.map((c) => (
             <div key={c.id} className="jl-card">
               <div className="flex items-center justify-between mb-2">
@@ -66,11 +66,11 @@ export default function AdminCommentsPage() {
                   <span className="font-sans text-xs font-medium text-[#1a1a1a]">{c.member_name}</span>
                   <span className="font-sans text-[0.6rem] text-[#aaa] ml-2">{c.member_email}</span>
                 </div>
-                <span className="font-sans text-[0.6rem] text-[#ccc]">
+                <span className="font-sans text-[0.6rem] text-[#444444]">
                   {new Date(c.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                 </span>
               </div>
-              <div className="font-sans text-[0.65rem] text-[#a58e28] mb-2">on: {c.article_title}</div>
+              <div className="font-sans text-[0.65rem] text-[#444444] mb-2">on: {c.article_title}</div>
               <p className="font-sans text-sm text-[#555] leading-relaxed mb-4">{c.content}</p>
               <div className="flex gap-2">
                 <button

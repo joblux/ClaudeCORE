@@ -34,10 +34,10 @@ interface WpPost { title: string; content: string; excerpt: string; category: st
 interface CsvRow { title: string; content: string; excerpt: string; category: string; author_name: string; tags: string; published: string }
 
 const LABEL: React.CSSProperties = { display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#666', marginBottom: 6 }
-const INPUT: React.CSSProperties = { width: '100%', padding: '10px 12px', fontSize: 14, border: '1px solid #e8e2d8', outline: 'none', color: '#1a1a1a' }
-const BTN_GOLD: React.CSSProperties = { padding: '10px 20px', fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', background: '#1a1a1a', color: '#a58e28', cursor: 'pointer' }
+const INPUT: React.CSSProperties = { width: '100%', padding: '10px 12px', fontSize: 14, border: '1px solid #e8e8e8', outline: 'none', color: '#1a1a1a' }
+const BTN_GOLD: React.CSSProperties = { padding: '10px 20px', fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', background: '#1a1a1a', color: '#444', cursor: 'pointer' }
 const BTN_OUTLINE: React.CSSProperties = { padding: '10px 20px', fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', border: '1px solid #1a1a1a', background: '#fff', color: '#1a1a1a', cursor: 'pointer' }
-const PANEL: React.CSSProperties = { background: '#fafaf5', border: '1px solid #e8e2d8', padding: 24, marginBottom: 32 }
+const PANEL: React.CSSProperties = { background: '#fafaf5', border: '1px solid #e8e8e8', padding: 24, marginBottom: 32 }
 
 export default function NewArticlePage() {
   const { isAdmin, isLoading } = useRequireAdmin()
@@ -437,19 +437,19 @@ export default function NewArticlePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d1117]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div className="min-h-screen bg-[#f5f5f5]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
 
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
 
         {/* ── IMPORT TABS ──────────────────────── */}
-        <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #e8e2d8', marginBottom: 24 }}>
+        <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #e8e8e8', marginBottom: 24 }}>
           {TABS.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               style={{
                 padding: '10px 16px', fontSize: 12, fontWeight: 500, background: 'none', border: 'none',
-                borderBottom: activeTab === tab.key ? '2px solid #a58e28' : '2px solid transparent',
+                borderBottom: activeTab === tab.key ? '2px solid #444' : '2px solid transparent',
                 color: activeTab === tab.key ? '#1a1a1a' : '#999',
                 cursor: 'pointer', transition: 'all 0.15s',
               }}
@@ -485,12 +485,12 @@ export default function NewArticlePage() {
             {wpPosts.length > 0 && (
               <div>
                 <p style={{ fontSize: 12, color: '#1a1a1a', fontWeight: 600, marginBottom: 12 }}>Found {wpPosts.length} published posts:</p>
-                <div style={{ maxHeight: 300, overflow: 'auto', border: '1px solid #e8e2d8', marginBottom: 16 }}>
+                <div style={{ maxHeight: 300, overflow: 'auto', border: '1px solid #e8e8e8', marginBottom: 16 }}>
                   {wpPosts.map((post, i) => (
                     <label key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderBottom: '1px solid #f0ece4', cursor: 'pointer', fontSize: 13 }}>
                       <input type="checkbox" checked={post.selected} onChange={() => setWpPosts((prev) => prev.map((p, j) => j === i ? { ...p, selected: !p.selected } : p))} />
                       <span style={{ color: '#1a1a1a' }}>{post.title}</span>
-                      <span style={{ fontSize: 10, color: '#a58e28', marginLeft: 'auto' }}>{post.category}</span>
+                      <span style={{ fontSize: 10, color: '#444', marginLeft: 'auto' }}>{post.category}</span>
                     </label>
                   ))}
                 </div>
@@ -503,7 +503,7 @@ export default function NewArticlePage() {
               </div>
             )}
             {bulkResult && (
-              <div style={{ marginTop: 12, padding: 12, background: '#fff', border: '1px solid #e8e2d8', fontSize: 12 }}>
+              <div style={{ marginTop: 12, padding: 12, background: '#fff', border: '1px solid #e8e8e8', fontSize: 12 }}>
                 <p style={{ color: '#1a1a1a', fontWeight: 600 }}>{bulkResult.imported} articles imported</p>
                 {bulkResult.errors.length > 0 && bulkResult.errors.map((e, i) => <p key={i} style={{ color: '#cc4444', margin: '4px 0 0' }}>{e}</p>)}
               </div>
@@ -519,14 +519,14 @@ export default function NewArticlePage() {
               <input ref={csvFileRef} type="file" accept=".csv" style={{ ...INPUT, flex: 1 }} />
               <button onClick={handleCsvParse} style={BTN_GOLD}>Parse CSV</button>
             </div>
-            <button onClick={downloadCsvTemplate} style={{ fontSize: 11, color: '#a58e28', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 16, textDecoration: 'underline' }}>
+            <button onClick={downloadCsvTemplate} style={{ fontSize: 11, color: '#444', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 16, textDecoration: 'underline' }}>
               Download CSV template
             </button>
             <p style={{ fontSize: 11, color: '#aaa', marginBottom: 16 }}>Columns: title, content, excerpt, category, author_name, tags, published</p>
             {csvRows.length > 0 && (
               <div>
                 <p style={{ fontSize: 12, color: '#1a1a1a', fontWeight: 600, marginBottom: 12 }}>Found {csvRows.length} articles:</p>
-                <div style={{ overflow: 'auto', border: '1px solid #e8e2d8', marginBottom: 16 }}>
+                <div style={{ overflow: 'auto', border: '1px solid #e8e8e8', marginBottom: 16 }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                     <thead>
                       <tr style={{ borderBottom: '2px solid #1a1a1a' }}>
@@ -541,7 +541,7 @@ export default function NewArticlePage() {
                           <td style={{ padding: '6px 10px', color: '#1a1a1a' }}>{row.title}</td>
                           <td style={{ padding: '6px 10px', color: '#888' }}>{row.category}</td>
                           <td style={{ padding: '6px 10px', color: '#888' }}>{row.author_name}</td>
-                          <td style={{ padding: '6px 10px', color: row.published === 'true' ? '#a58e28' : '#ccc' }}>{row.published === 'true' ? 'Yes' : 'No'}</td>
+                          <td style={{ padding: '6px 10px', color: row.published === 'true' ? '#444' : '#ccc' }}>{row.published === 'true' ? 'Yes' : 'No'}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -553,7 +553,7 @@ export default function NewArticlePage() {
               </div>
             )}
             {bulkResult && activeTab === 'csv' && (
-              <div style={{ marginTop: 12, padding: 12, background: '#fff', border: '1px solid #e8e2d8', fontSize: 12 }}>
+              <div style={{ marginTop: 12, padding: 12, background: '#fff', border: '1px solid #e8e8e8', fontSize: 12 }}>
                 <p style={{ color: '#1a1a1a', fontWeight: 600 }}>{bulkResult.imported} articles imported</p>
                 {bulkResult.errors.length > 0 && bulkResult.errors.map((e, i) => <p key={i} style={{ color: '#cc4444', margin: '4px 0 0' }}>{e}</p>)}
               </div>
@@ -611,7 +611,7 @@ export default function NewArticlePage() {
                 </div>
 
                 {imageProgress && (
-                  <p style={{ fontSize: 12, color: '#a58e28', marginBottom: 12 }}>{imageProgress}</p>
+                  <p style={{ fontSize: 12, color: '#444', marginBottom: 12 }}>{imageProgress}</p>
                 )}
                 {imageErrors.map((err, i) => (
                   <p key={i} style={{ fontSize: 12, color: '#cc4444', marginBottom: 8 }}>{err}</p>
@@ -622,7 +622,7 @@ export default function NewArticlePage() {
                     <button
                       onClick={handleImportWithImages}
                       disabled={imageUploading || !pasteTitle.trim()}
-                      style={{ ...BTN_GOLD, background: '#a58e28', color: '#fff', opacity: imageUploading || !pasteTitle.trim() ? 0.5 : 1 }}
+                      style={{ ...BTN_GOLD, background: '#444', color: '#fff', opacity: imageUploading || !pasteTitle.trim() ? 0.5 : 1 }}
                     >
                       {imageUploading ? 'Uploading...' : 'Import with Images'}
                     </button>
@@ -665,7 +665,7 @@ export default function NewArticlePage() {
           <input
             type="text" value={form.title} onChange={(e) => handleChange('title', e.target.value)}
             placeholder="Article title..."
-            style={{ width: '100%', border: 'none', outline: 'none', fontSize: 28, fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 400, color: '#1a1a1a', padding: '8px 0', borderBottom: '1px solid #e8e2d8' }}
+            style={{ width: '100%', border: 'none', outline: 'none', fontSize: 28, fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 400, color: '#1a1a1a', padding: '8px 0', borderBottom: '1px solid #e8e8e8' }}
           />
         </div>
 
@@ -715,7 +715,7 @@ export default function NewArticlePage() {
           </p>
         )}
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #e8e2d8', paddingTop: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #e8e8e8', paddingTop: 24 }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#888', cursor: 'pointer' }}>
             <input type="checkbox" checked={form.published} onChange={(e) => handleChange('published', e.target.checked)} />
             Publish immediately

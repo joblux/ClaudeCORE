@@ -6,13 +6,13 @@ import { useRequireAdmin } from '@/lib/auth-hooks'
 import { INTERNSHIP_STATUSES } from '@/types/internship'
 import type { InternshipListing } from '@/types/internship'
 
-const GOLD = '#a58e28'
+const GOLD = '#444'
 const BLACK = '#1a1a1a'
 const CREAM = '#fafaf5'
-const BORDER = '#e8e2d8'
+const BORDER = '#e8e8e8'
 
 const STATUS_COLORS: Record<string, string> = {
-  pending_review: '#a58e28',
+  pending_review: '#444',
   approved: '#2a7a3c',
   rejected: '#cc4444',
   expired: '#888',

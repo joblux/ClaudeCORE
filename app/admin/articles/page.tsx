@@ -92,24 +92,24 @@ export default function AdminArticlesPage() {
 
   if (isLoading || !isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0d1117]">
-        <div className="text-sm text-[#484f58]">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5]">
+        <div className="text-sm text-[#999]">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0d1117]">
+    <div className="min-h-screen bg-[#f5f5f5]">
       <div className="px-6 py-5 lg:px-8">
         {/* Page header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
           <div>
             <h1 className="text-xl font-medium text-[#1a1a1a]">BlogLux</h1>
-            <p className="text-sm text-[#484f58] mt-0.5">{articles.length} articles</p>
+            <p className="text-sm text-[#999] mt-0.5">{articles.length} articles</p>
           </div>
           <Link
             href="/admin/articles/new"
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold tracking-wide uppercase bg-[#a58e28] text-white rounded-lg hover:bg-[#8a7622] transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold tracking-wide uppercase bg-[#111111] text-white rounded-lg hover:bg-[#8a7622] transition-colors"
           >
             <PenLine size={13} />
             Write article
@@ -124,8 +124,8 @@ export default function AdminArticlesPage() {
               onClick={() => setCategoryFilter(cat)}
               className={`px-3 py-1.5 text-xs rounded-lg whitespace-nowrap transition-colors ${
                 categoryFilter === cat
-                  ? 'bg-[#a58e28]/10 text-[#a58e28] font-medium'
-                  : 'text-[#8b949e] hover:bg-[#1f2937]'
+                  ? 'bg-[#111111]/10 text-[#444444] font-medium'
+                  : 'text-[#999] hover:bg-[#fafafa]'
               }`}
             >
               {cat === 'all' ? 'All' : cat}
@@ -135,21 +135,21 @@ export default function AdminArticlesPage() {
 
         {/* Search */}
         <div className="relative mb-4">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#484f58]" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" />
           <input
             type="text"
             placeholder="Search articles by title, category, author..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full border border-[#30363d] rounded-lg pl-9 pr-3 py-2 text-sm bg-[#161b22] focus:outline-none focus:border-[#a58e28]/40 transition-colors"
+            className="w-full border border-[#e8e8e8] rounded-lg pl-9 pr-3 py-2 text-sm bg-[#f5f5f5] focus:outline-none focus:border-[#e8e8e8]/40 transition-colors"
           />
         </div>
 
         {/* Articles table */}
-        <div className="border border-[#30363d] rounded-xl overflow-x-auto bg-[#161b22]" style={{ minWidth: 0 }}>
+        <div className="border border-[#e8e8e8] rounded-xl overflow-x-auto bg-[#f5f5f5]" style={{ minWidth: 0 }}>
           <div style={{ minWidth: 800 }}>
           {/* Header */}
-          <div className="hidden lg:grid bg-gray-50 px-5 py-3 text-[11px] uppercase tracking-wide text-[#484f58] font-medium" style={{ gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 0.6fr 0.4fr 0.4fr 0.5fr' }}>
+          <div className="hidden lg:grid bg-gray-50 px-5 py-3 text-[11px] uppercase tracking-wide text-[#999] font-medium" style={{ gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 0.6fr 0.4fr 0.4fr 0.5fr' }}>
             <div>Title</div>
             <div>Category</div>
             <div>Author</div>
@@ -161,37 +161,37 @@ export default function AdminArticlesPage() {
           </div>
 
           {loading ? (
-            <div className="px-5 py-12 text-center text-sm text-[#484f58]">Loading...</div>
+            <div className="px-5 py-12 text-center text-sm text-[#999]">Loading...</div>
           ) : filtered.length === 0 ? (
-            <div className="px-5 py-12 text-center text-sm text-[#484f58]">No articles yet.</div>
+            <div className="px-5 py-12 text-center text-sm text-[#999]">No articles yet.</div>
           ) : (
             filtered.map((article) => (
               <div
                 key={article.id}
-                className="grid items-center px-5 py-3 border-t border-[#30363d] hover:bg-[#1f2937]/50 transition-colors"
+                className="grid items-center px-5 py-3 border-t border-[#e8e8e8] hover:bg-[#fafafa]/50 transition-colors"
                 style={{ gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 0.6fr 0.4fr 0.4fr 0.5fr' }}
               >
                 {/* Title */}
                 <div className="flex items-center gap-2 text-sm font-medium text-[#1a1a1a] truncate pr-4 col-span-2 lg:col-span-1">
-                  {article.featured_homepage && <Star size={13} className="text-[#a58e28] fill-[#a58e28] flex-shrink-0" />}
+                  {article.featured_homepage && <Star size={13} className="text-[#444444] fill-[#111] flex-shrink-0" />}
                   <span className="truncate">{article.title}</span>
                 </div>
 
                 {/* Category */}
-                <div className="hidden lg:block text-xs text-[#8b949e]">{article.category || '—'}</div>
+                <div className="hidden lg:block text-xs text-[#999]">{article.category || '—'}</div>
 
                 {/* Author */}
-                <div className="hidden lg:block text-xs text-[#8b949e]">{article.author_name || '—'}</div>
+                <div className="hidden lg:block text-xs text-[#999]">{article.author_name || '—'}</div>
 
                 {/* Date */}
-                <div className="hidden lg:block text-xs text-[#484f58]">
+                <div className="hidden lg:block text-xs text-[#999]">
                   {formatDate(article.published ? article.published_at : article.created_at)}
                 </div>
 
                 {/* Status */}
                 <div className="hidden lg:block">
                   <span className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded ${
-                    article.published ? 'text-green-700 bg-green-50' : 'text-[#8b949e] bg-gray-100'
+                    article.published ? 'text-green-700 bg-green-50' : 'text-[#999] bg-gray-100'
                   }`}>
                     {article.published ? 'Published' : 'Draft'}
                   </span>
@@ -204,8 +204,8 @@ export default function AdminArticlesPage() {
                     disabled={toggling === article.id}
                     className={`p-1 rounded transition-colors ${
                       article.featured_homepage
-                        ? 'text-[#a58e28] hover:text-[#8a7622]'
-                        : 'text-gray-300 hover:text-[#a58e28]'
+                        ? 'text-[#444444] hover:text-[#8a7622]'
+                        : 'text-gray-300 hover:text-[#444444]'
                     } ${toggling === article.id ? 'opacity-40' : ''}`}
                     title={article.featured_homepage ? 'Remove from homepage' : 'Feature on homepage'}
                   >
@@ -220,8 +220,8 @@ export default function AdminArticlesPage() {
                     disabled={togglingHome === article.id}
                     className={`p-1 rounded transition-colors ${
                       article.homepage_feature
-                        ? 'text-[#a58e28] hover:text-[#8a7622]'
-                        : 'text-gray-300 hover:text-[#a58e28]'
+                        ? 'text-[#444444] hover:text-[#8a7622]'
+                        : 'text-gray-300 hover:text-[#444444]'
                     } ${togglingHome === article.id ? 'opacity-40' : ''}`}
                     title={article.homepage_feature ? 'Remove from homepage feature' : 'Feature on homepage'}
                   >
@@ -233,14 +233,14 @@ export default function AdminArticlesPage() {
                 <div className="flex items-center justify-end gap-2">
                   <Link
                     href={`/admin/articles/${article.id}/edit`}
-                    className="text-[11px] font-medium text-[#a58e28] hover:text-[#8a7622] uppercase tracking-wide transition-colors"
+                    className="text-[11px] font-medium text-[#444444] hover:text-[#8a7622] uppercase tracking-wide transition-colors"
                   >
                     Edit
                   </Link>
                   <button
                     onClick={() => handleDelete(article.id)}
                     disabled={deleting === article.id}
-                    className="text-[#484f58] hover:text-red-500 transition-colors disabled:opacity-40"
+                    className="text-[#999] hover:text-red-500 transition-colors disabled:opacity-40"
                   >
                     <Trash2 size={14} />
                   </button>

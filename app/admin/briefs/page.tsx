@@ -9,7 +9,7 @@ import type { JobBrief } from '@/types/job-brief'
 // Status badge colours
 const statusColors: Record<string, { bg: string; text: string }> = {
   draft:     { bg: '#f5f4f0', text: '#888' },
-  published: { bg: '#1a1a1a', text: '#a58e28' },
+  published: { bg: '#1a1a1a', text: '#444' },
   on_hold:   { bg: '#fff8e6', text: '#c97a2a' },
   closed:    { bg: '#f5f4f0', text: '#555' },
   filled:    { bg: '#e8f5e9', text: '#2a7a3c' },
@@ -74,7 +74,7 @@ export default function AdminBriefsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d1117]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div className="min-h-screen bg-[#f5f5f5]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
 
       {/* Content */}
       <div style={{ maxWidth: 1060, margin: '0 auto', padding: '32px 24px' }}>
@@ -91,7 +91,7 @@ export default function AdminBriefsPage() {
             href="/admin/briefs/new"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: '#1a1a1a', color: '#a58e28', fontSize: 11, fontWeight: 600,
+              background: '#1a1a1a', color: '#444', fontSize: 11, fontWeight: 600,
               letterSpacing: '0.1em', textTransform: 'uppercase' as const,
               padding: '10px 20px', textDecoration: 'none', border: 'none', cursor: 'pointer',
             }}
@@ -106,7 +106,7 @@ export default function AdminBriefsPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             style={{
-              padding: '8px 12px', fontSize: 13, border: '1px solid #e8e2d8',
+              padding: '8px 12px', fontSize: 13, border: '1px solid #e8e8e8',
               background: '#fff', color: '#1a1a1a', minWidth: 140,
             }}
           >
@@ -124,7 +124,7 @@ export default function AdminBriefsPage() {
             onKeyDown={handleSearchKeyDown}
             onBlur={() => setSearch(searchInput)}
             style={{
-              padding: '8px 12px', fontSize: 13, border: '1px solid #e8e2d8',
+              padding: '8px 12px', fontSize: 13, border: '1px solid #e8e8e8',
               background: '#fff', color: '#1a1a1a', flex: 1, minWidth: 200,
             }}
           />
@@ -173,7 +173,7 @@ export default function AdminBriefsPage() {
                       {/* Maison — show "Confidential" if is_confidential */}
                       <td style={{ padding: '12px 12px', color: '#888', fontSize: 12 }}>
                         {brief.is_confidential ? (
-                          <span style={{ fontStyle: 'italic', color: '#a58e28' }}>Confidential</span>
+                          <span style={{ fontStyle: 'italic', color: '#444' }}>Confidential</span>
                         ) : (
                           brief.maison || '—'
                         )}

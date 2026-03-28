@@ -14,10 +14,10 @@ import { TEMPLATE_CATEGORIES } from '@/types/messaging'
 // ---------------------------------------------------------------------------
 // Design tokens (JOBLUX palette)
 // ---------------------------------------------------------------------------
-const GOLD = '#a58e28'
+const GOLD = '#444'
 const BLACK = '#1a1a1a'
 const CREAM = '#fafaf5'
-const BORDER = '#e8e2d8'
+const BORDER = '#e8e8e8'
 const MUTED = '#888'
 const LEFT_WIDTH = 350
 
@@ -293,7 +293,7 @@ export default function AdminMessagesPage() {
   // RENDER
   // =========================================================================
   return (
-    <div className="min-h-screen bg-[#0d1117]" style={{ fontFamily: 'Inter, system-ui, sans-serif', display: 'flex', flexDirection: 'column' }}>
+    <div className="min-h-screen bg-[#f5f5f5]" style={{ fontFamily: 'Inter, system-ui, sans-serif', display: 'flex', flexDirection: 'column' }}>
 
       {/* ================================================================= */}
       {/* TWO-PANEL LAYOUT                                                  */}

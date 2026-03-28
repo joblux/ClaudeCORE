@@ -27,8 +27,8 @@ function slugify(s: string) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-')
 
 const EscInput = ({ label, value, onChange, type = 'text', placeholder }: { label: string; value: any; onChange: (v: string) => void; type?: string; placeholder?: string }) => (
   <div>
-    <label className="block text-xs font-medium text-[#8b949e] mb-1">{label}</label>
-    <input type={type} value={value || ''} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full px-3 py-2 text-sm border border-[#30363d] rounded focus:outline-none focus:ring-1 focus:ring-[#2B4A3E]" />
+    <label className="block text-xs font-medium text-[#999] mb-1">{label}</label>
+    <input type={type} value={value || ''} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full px-3 py-2 text-sm border border-[#e8e8e8] rounded focus:outline-none focus:ring-1 focus:ring-[#2B4A3E]" />
   </div>
 )
 
@@ -41,8 +41,8 @@ const EscToggle = ({ label, checked, onChange }: { label: string; checked: boole
 
 const EscSelect = ({ label, value, onChange, options }: { label: string; value: any; onChange: (v: string) => void; options: { value: string; label: string }[] }) => (
   <div>
-    <label className="block text-xs font-medium text-[#8b949e] mb-1">{label}</label>
-    <select value={value || ''} onChange={e => onChange(e.target.value)} className="w-full px-3 py-2 text-sm border border-[#30363d] rounded focus:outline-none focus:ring-1 focus:ring-[#2B4A3E]">
+    <label className="block text-xs font-medium text-[#999] mb-1">{label}</label>
+    <select value={value || ''} onChange={e => onChange(e.target.value)} className="w-full px-3 py-2 text-sm border border-[#e8e8e8] rounded focus:outline-none focus:ring-1 focus:ring-[#2B4A3E]">
       <option value="">— Select —</option>
       {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
@@ -51,8 +51,8 @@ const EscSelect = ({ label, value, onChange, options }: { label: string; value: 
 
 const EscTextArea = ({ label, value, onChange, rows = 3 }: { label: string; value: any; onChange: (v: string) => void; rows?: number }) => (
   <div>
-    <label className="block text-xs font-medium text-[#8b949e] mb-1">{label}</label>
-    <textarea value={value || ''} onChange={e => onChange(e.target.value)} rows={rows} className="w-full px-3 py-2 text-sm border border-[#30363d] rounded focus:outline-none focus:ring-1 focus:ring-[#2B4A3E]" />
+    <label className="block text-xs font-medium text-[#999] mb-1">{label}</label>
+    <textarea value={value || ''} onChange={e => onChange(e.target.value)} rows={rows} className="w-full px-3 py-2 text-sm border border-[#e8e8e8] rounded focus:outline-none focus:ring-1 focus:ring-[#2B4A3E]" />
   </div>
 )
 
@@ -290,7 +290,7 @@ export default function AdminEscapePage() {
     fetchAll()
   }
 
-  const tabClass = (t: Tab) => `px-4 py-2 text-sm font-medium rounded-t transition-colors ${tab === t ? 'bg-[#161b22] text-[#2B4A3E] border border-b-0 border-[#30363d]' : 'text-[#8b949e] hover:text-[#c9d1d9]'}`
+  const tabClass = (t: Tab) => `px-4 py-2 text-sm font-medium rounded-t transition-colors ${tab === t ? 'bg-[#f5f5f5] text-[#2B4A3E] border border-b-0 border-[#e8e8e8]' : 'text-[#999] hover:text-[#c9d1d9]'}`
 
   const editionLabel = (id: string) => {
     const e = editions.find(e => e.id === id)
@@ -321,8 +321,8 @@ export default function AdminEscapePage() {
           { label: 'Cruises', value: stats.cruises },
           { label: 'New Consultations', value: stats.consultations },
         ].map(s => (
-          <div key={s.label} className="bg-[#161b22] border border-[#30363d] rounded-lg p-4">
-            <div className="text-xs text-[#484f58] uppercase tracking-wider mb-1">{s.label}</div>
+          <div key={s.label} className="bg-[#f5f5f5] border border-[#e8e8e8] rounded-lg p-4">
+            <div className="text-xs text-[#999] uppercase tracking-wider mb-1">{s.label}</div>
             <div className="text-2xl font-medium text-[#1a1a1a]">{s.value}</div>
           </div>
         ))}
@@ -353,7 +353,7 @@ export default function AdminEscapePage() {
         </button>
       </div>
 
-      <div className="bg-[#161b22] border border-[#30363d] rounded-b-lg rounded-tr-lg p-6">
+      <div className="bg-[#f5f5f5] border border-[#e8e8e8] rounded-b-lg rounded-tr-lg p-6">
 
         {/* ===== EDITIONS ===== */}
         {tab === 'editions' && (
@@ -365,7 +365,7 @@ export default function AdminEscapePage() {
               </button>
             </div>
             {editEdition && (
-              <div className="p-4 bg-gray-50 rounded-lg border border-[#30363d] mb-4">
+              <div className="p-4 bg-gray-50 rounded-lg border border-[#e8e8e8] mb-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
                   <EscInput label="Title" value={editEdition.title} onChange={v => setEditEdition({ ...editEdition, title: v })} />
                   <EscInput label="Month (1-12)" value={editEdition.month} onChange={v => setEditEdition({ ...editEdition, month: Number(v) as any })} type="number" />
@@ -376,25 +376,25 @@ export default function AdminEscapePage() {
                 <div className="flex items-center gap-4 mt-3">
                   <EscToggle label="Current Edition" checked={!!editEdition.is_current} onChange={v => setEditEdition({ ...editEdition, is_current: v })} />
                   <button onClick={handleSaveEdition} className="text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">Save</button>
-                  <button onClick={() => setEditEdition(null)} className="text-sm text-[#8b949e] hover:text-[#c9d1d9]">Cancel</button>
+                  <button onClick={() => setEditEdition(null)} className="text-sm text-[#999] hover:text-[#c9d1d9]">Cancel</button>
                 </div>
               </div>
             )}
             <table className="w-full text-sm">
-              <thead><tr className="text-xs text-[#484f58] uppercase text-left"><th className="pb-2">Title</th><th className="pb-2">Month/Year</th><th className="pb-2">Current</th><th className="pb-2 text-right">Actions</th></tr></thead>
+              <thead><tr className="text-xs text-[#999] uppercase text-left"><th className="pb-2">Title</th><th className="pb-2">Month/Year</th><th className="pb-2">Current</th><th className="pb-2 text-right">Actions</th></tr></thead>
               <tbody>
                 {editions.map(e => (
-                  <tr key={e.id} className="border-t border-[#30363d]">
+                  <tr key={e.id} className="border-t border-[#e8e8e8]">
                     <td className="py-2 font-medium">{e.title}</td>
                     <td className="py-2">{e.month}/{e.year}</td>
                     <td className="py-2">{e.is_current ? <Star size={14} className="text-yellow-500 fill-yellow-500" /> : '—'}</td>
                     <td className="py-2 text-right">
-                      <button onClick={() => setEditEdition(e)} className="text-[#484f58] hover:text-[#2B4A3E] mr-2"><Pencil size={14} /></button>
-                      <button onClick={() => handleDeleteEdition(e.id)} className="text-[#484f58] hover:text-red-500"><Trash2 size={14} /></button>
+                      <button onClick={() => setEditEdition(e)} className="text-[#999] hover:text-[#2B4A3E] mr-2"><Pencil size={14} /></button>
+                      <button onClick={() => handleDeleteEdition(e.id)} className="text-[#999] hover:text-red-500"><Trash2 size={14} /></button>
                     </td>
                   </tr>
                 ))}
-                {editions.length === 0 && <tr><td colSpan={4} className="py-6 text-center text-[#484f58]">No editions yet</td></tr>}
+                {editions.length === 0 && <tr><td colSpan={4} className="py-6 text-center text-[#999]">No editions yet</td></tr>}
               </tbody>
             </table>
           </div>
@@ -435,7 +435,7 @@ export default function AdminEscapePage() {
               />
             )}
             {editArticle && (
-              <div className="p-4 bg-gray-50 rounded-lg border border-[#30363d] mb-4">
+              <div className="p-4 bg-gray-50 rounded-lg border border-[#e8e8e8] mb-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
                   <EscInput label="Title" value={editArticle.title} onChange={v => setEditArticle(prev => prev ? { ...prev, title: v, slug: prev.slug || slugify(v) } : prev)} />
                   <EscInput label="Slug" value={editArticle.slug} onChange={v => setEditArticle(prev => prev ? { ...prev, slug: v } : prev)} />
@@ -456,26 +456,26 @@ export default function AdminEscapePage() {
                 <div className="flex items-center gap-4 mt-3">
                   <EscToggle label="Published" checked={!!editArticle.published} onChange={v => setEditArticle(prev => prev ? { ...prev, published: v, published_at: v ? new Date().toISOString() : prev.published_at } : prev)} />
                   <button onClick={handleSaveArticle} className="text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">Save</button>
-                  <button onClick={() => setEditArticle(null)} className="text-sm text-[#8b949e] hover:text-[#c9d1d9]">Cancel</button>
+                  <button onClick={() => setEditArticle(null)} className="text-sm text-[#999] hover:text-[#c9d1d9]">Cancel</button>
                 </div>
               </div>
             )}
             <table className="w-full text-sm">
-              <thead><tr className="text-xs text-[#484f58] uppercase text-left"><th className="pb-2">Title</th><th className="pb-2">Tag</th><th className="pb-2">Edition</th><th className="pb-2">Status</th><th className="pb-2 text-right">Actions</th></tr></thead>
+              <thead><tr className="text-xs text-[#999] uppercase text-left"><th className="pb-2">Title</th><th className="pb-2">Tag</th><th className="pb-2">Edition</th><th className="pb-2">Status</th><th className="pb-2 text-right">Actions</th></tr></thead>
               <tbody>
                 {articles.map(a => (
-                  <tr key={a.id} className="border-t border-[#30363d]">
+                  <tr key={a.id} className="border-t border-[#e8e8e8]">
                     <td className="py-2 font-medium">{a.title}</td>
                     <td className="py-2"><span className="px-2 py-0.5 bg-gray-100 rounded text-xs">{a.tag || '—'}</span></td>
-                    <td className="py-2 text-xs text-[#8b949e]">{editionLabel(a.edition_id)}</td>
-                    <td className="py-2">{a.published ? <span className="text-green-600 text-xs font-medium">Published</span> : <span className="text-[#484f58] text-xs">Draft</span>}</td>
+                    <td className="py-2 text-xs text-[#999]">{editionLabel(a.edition_id)}</td>
+                    <td className="py-2">{a.published ? <span className="text-green-600 text-xs font-medium">Published</span> : <span className="text-[#999] text-xs">Draft</span>}</td>
                     <td className="py-2 text-right">
-                      <button onClick={() => setEditArticle(a)} className="text-[#484f58] hover:text-[#2B4A3E] mr-2"><Pencil size={14} /></button>
-                      <button onClick={() => handleDeleteArticle(a.id)} className="text-[#484f58] hover:text-red-500"><Trash2 size={14} /></button>
+                      <button onClick={() => setEditArticle(a)} className="text-[#999] hover:text-[#2B4A3E] mr-2"><Pencil size={14} /></button>
+                      <button onClick={() => handleDeleteArticle(a.id)} className="text-[#999] hover:text-red-500"><Trash2 size={14} /></button>
                     </td>
                   </tr>
                 ))}
-                {articles.length === 0 && <tr><td colSpan={5} className="py-6 text-center text-[#484f58]">No articles yet</td></tr>}
+                {articles.length === 0 && <tr><td colSpan={5} className="py-6 text-center text-[#999]">No articles yet</td></tr>}
               </tbody>
             </table>
           </div>
@@ -491,7 +491,7 @@ export default function AdminEscapePage() {
               </button>
             </div>
             {editItinerary && (
-              <div className="p-4 bg-gray-50 rounded-lg border border-[#30363d] mb-4">
+              <div className="p-4 bg-gray-50 rounded-lg border border-[#e8e8e8] mb-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
                   <EscInput label="Name" value={editItinerary.name} onChange={v => setEditItinerary({ ...editItinerary, name: v, slug: editItinerary.slug || slugify(v) })} />
                   <EscInput label="Slug" value={editItinerary.slug} onChange={v => setEditItinerary({ ...editItinerary, slug: v })} />
@@ -508,27 +508,27 @@ export default function AdminEscapePage() {
                 <div className="flex items-center gap-4 mt-3">
                   <EscToggle label="Published" checked={!!editItinerary.published} onChange={v => setEditItinerary({ ...editItinerary, published: v })} />
                   <button onClick={handleSaveItinerary} className="text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">Save</button>
-                  <button onClick={() => setEditItinerary(null)} className="text-sm text-[#8b949e] hover:text-[#c9d1d9]">Cancel</button>
+                  <button onClick={() => setEditItinerary(null)} className="text-sm text-[#999] hover:text-[#c9d1d9]">Cancel</button>
                 </div>
               </div>
             )}
             <table className="w-full text-sm">
-              <thead><tr className="text-xs text-[#484f58] uppercase text-left"><th className="pb-2">Name</th><th className="pb-2">Duration</th><th className="pb-2">Style</th><th className="pb-2">Edition</th><th className="pb-2">Status</th><th className="pb-2 text-right">Actions</th></tr></thead>
+              <thead><tr className="text-xs text-[#999] uppercase text-left"><th className="pb-2">Name</th><th className="pb-2">Duration</th><th className="pb-2">Style</th><th className="pb-2">Edition</th><th className="pb-2">Status</th><th className="pb-2 text-right">Actions</th></tr></thead>
               <tbody>
                 {itineraries.map(i => (
-                  <tr key={i.id} className="border-t border-[#30363d]">
+                  <tr key={i.id} className="border-t border-[#e8e8e8]">
                     <td className="py-2 font-medium">{i.name}</td>
                     <td className="py-2">{i.duration}</td>
                     <td className="py-2"><span className="px-2 py-0.5 bg-gray-100 rounded text-xs">{i.style || '—'}</span></td>
-                    <td className="py-2 text-xs text-[#8b949e]">{editionLabel(i.edition_id)}</td>
-                    <td className="py-2">{i.published ? <span className="text-green-600 text-xs font-medium">Published</span> : <span className="text-[#484f58] text-xs">Draft</span>}</td>
+                    <td className="py-2 text-xs text-[#999]">{editionLabel(i.edition_id)}</td>
+                    <td className="py-2">{i.published ? <span className="text-green-600 text-xs font-medium">Published</span> : <span className="text-[#999] text-xs">Draft</span>}</td>
                     <td className="py-2 text-right">
-                      <button onClick={() => setEditItinerary(i)} className="text-[#484f58] hover:text-[#2B4A3E] mr-2"><Pencil size={14} /></button>
-                      <button onClick={() => handleDeleteItinerary(i.id)} className="text-[#484f58] hover:text-red-500"><Trash2 size={14} /></button>
+                      <button onClick={() => setEditItinerary(i)} className="text-[#999] hover:text-[#2B4A3E] mr-2"><Pencil size={14} /></button>
+                      <button onClick={() => handleDeleteItinerary(i.id)} className="text-[#999] hover:text-red-500"><Trash2 size={14} /></button>
                     </td>
                   </tr>
                 ))}
-                {itineraries.length === 0 && <tr><td colSpan={6} className="py-6 text-center text-[#484f58]">No itineraries yet</td></tr>}
+                {itineraries.length === 0 && <tr><td colSpan={6} className="py-6 text-center text-[#999]">No itineraries yet</td></tr>}
               </tbody>
             </table>
           </div>
@@ -544,7 +544,7 @@ export default function AdminEscapePage() {
               </button>
             </div>
             {editHotel && (
-              <div className="p-4 bg-gray-50 rounded-lg border border-[#30363d] mb-4">
+              <div className="p-4 bg-gray-50 rounded-lg border border-[#e8e8e8] mb-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
                   <EscInput label="Name" value={editHotel.name} onChange={v => setEditHotel({ ...editHotel, name: v, slug: editHotel.slug || slugify(v) })} />
                   <EscInput label="Slug" value={editHotel.slug} onChange={v => setEditHotel({ ...editHotel, slug: v })} />
@@ -564,33 +564,33 @@ export default function AdminEscapePage() {
                   <EscToggle label="Preferred" checked={!!editHotel.preferred} onChange={v => setEditHotel({ ...editHotel, preferred: v })} />
                   <EscToggle label="Published" checked={!!editHotel.published} onChange={v => setEditHotel({ ...editHotel, published: v })} />
                   <button onClick={handleSaveHotel} className="text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">Save</button>
-                  <button onClick={() => setEditHotel(null)} className="text-sm text-[#8b949e] hover:text-[#c9d1d9]">Cancel</button>
+                  <button onClick={() => setEditHotel(null)} className="text-sm text-[#999] hover:text-[#c9d1d9]">Cancel</button>
                 </div>
                 {editHotel.id ? (
                   <HotelPhotoManager hotelId={editHotel.id} hotelSlug={editHotel.slug || ''} hotelName={editHotel.name || ''} />
                 ) : (
-                  <p className="mt-4 text-xs text-[#484f58]">Save the hotel first to add photos.</p>
+                  <p className="mt-4 text-xs text-[#999]">Save the hotel first to add photos.</p>
                 )}
               </div>
             )}
             <table className="w-full text-sm">
-              <thead><tr className="text-xs text-[#484f58] uppercase text-left"><th className="pb-2">Name</th><th className="pb-2">City</th><th className="pb-2">Country</th><th className="pb-2">Style</th><th className="pb-2">Preferred</th><th className="pb-2">Status</th><th className="pb-2 text-right">Actions</th></tr></thead>
+              <thead><tr className="text-xs text-[#999] uppercase text-left"><th className="pb-2">Name</th><th className="pb-2">City</th><th className="pb-2">Country</th><th className="pb-2">Style</th><th className="pb-2">Preferred</th><th className="pb-2">Status</th><th className="pb-2 text-right">Actions</th></tr></thead>
               <tbody>
                 {hotels.map(h => (
-                  <tr key={h.id} className="border-t border-[#30363d]">
+                  <tr key={h.id} className="border-t border-[#e8e8e8]">
                     <td className="py-2 font-medium">{h.name}</td>
                     <td className="py-2">{h.city}</td>
                     <td className="py-2">{h.country}</td>
                     <td className="py-2"><span className="px-2 py-0.5 bg-gray-100 rounded text-xs">{h.style_tag || '—'}</span></td>
                     <td className="py-2">{h.preferred ? <Star size={14} className="text-yellow-500 fill-yellow-500" /> : '—'}</td>
-                    <td className="py-2">{h.published ? <span className="text-green-600 text-xs font-medium">Published</span> : <span className="text-[#484f58] text-xs">Draft</span>}</td>
+                    <td className="py-2">{h.published ? <span className="text-green-600 text-xs font-medium">Published</span> : <span className="text-[#999] text-xs">Draft</span>}</td>
                     <td className="py-2 text-right">
-                      <button onClick={() => setEditHotel(h)} className="text-[#484f58] hover:text-[#2B4A3E] mr-2"><Pencil size={14} /></button>
-                      <button onClick={() => handleDeleteHotel(h.id)} className="text-[#484f58] hover:text-red-500"><Trash2 size={14} /></button>
+                      <button onClick={() => setEditHotel(h)} className="text-[#999] hover:text-[#2B4A3E] mr-2"><Pencil size={14} /></button>
+                      <button onClick={() => handleDeleteHotel(h.id)} className="text-[#999] hover:text-red-500"><Trash2 size={14} /></button>
                     </td>
                   </tr>
                 ))}
-                {hotels.length === 0 && <tr><td colSpan={7} className="py-6 text-center text-[#484f58]">No hotels yet</td></tr>}
+                {hotels.length === 0 && <tr><td colSpan={7} className="py-6 text-center text-[#999]">No hotels yet</td></tr>}
               </tbody>
             </table>
           </div>
@@ -606,7 +606,7 @@ export default function AdminEscapePage() {
               </button>
             </div>
             {editCity && (
-              <div className="p-4 bg-gray-50 rounded-lg border border-[#30363d] mb-4">
+              <div className="p-4 bg-gray-50 rounded-lg border border-[#e8e8e8] mb-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
                   <EscInput label="City Name" value={editCity.city_name} onChange={v => setEditCity({ ...editCity, city_name: v, slug: editCity.slug || slugify(v) })} />
                   <EscInput label="Slug" value={editCity.slug} onChange={v => setEditCity({ ...editCity, slug: v })} />
@@ -619,26 +619,26 @@ export default function AdminEscapePage() {
                 <div className="flex items-center gap-4 mt-3">
                   <EscToggle label="Published" checked={!!editCity.published} onChange={v => setEditCity({ ...editCity, published: v })} />
                   <button onClick={handleSaveCity} className="text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">Save</button>
-                  <button onClick={() => setEditCity(null)} className="text-sm text-[#8b949e] hover:text-[#c9d1d9]">Cancel</button>
+                  <button onClick={() => setEditCity(null)} className="text-sm text-[#999] hover:text-[#c9d1d9]">Cancel</button>
                 </div>
               </div>
             )}
             <table className="w-full text-sm">
-              <thead><tr className="text-xs text-[#484f58] uppercase text-left"><th className="pb-2">City</th><th className="pb-2">Country</th><th className="pb-2">Edition</th><th className="pb-2">Status</th><th className="pb-2 text-right">Actions</th></tr></thead>
+              <thead><tr className="text-xs text-[#999] uppercase text-left"><th className="pb-2">City</th><th className="pb-2">Country</th><th className="pb-2">Edition</th><th className="pb-2">Status</th><th className="pb-2 text-right">Actions</th></tr></thead>
               <tbody>
                 {cities.map(c => (
-                  <tr key={c.id} className="border-t border-[#30363d]">
+                  <tr key={c.id} className="border-t border-[#e8e8e8]">
                     <td className="py-2 font-medium">{c.city_name}</td>
                     <td className="py-2">{c.country}</td>
-                    <td className="py-2 text-xs text-[#8b949e]">{editionLabel(c.edition_id)}</td>
-                    <td className="py-2">{c.published ? <span className="text-green-600 text-xs font-medium">Published</span> : <span className="text-[#484f58] text-xs">Draft</span>}</td>
+                    <td className="py-2 text-xs text-[#999]">{editionLabel(c.edition_id)}</td>
+                    <td className="py-2">{c.published ? <span className="text-green-600 text-xs font-medium">Published</span> : <span className="text-[#999] text-xs">Draft</span>}</td>
                     <td className="py-2 text-right">
-                      <button onClick={() => setEditCity(c)} className="text-[#484f58] hover:text-[#2B4A3E] mr-2"><Pencil size={14} /></button>
-                      <button onClick={() => handleDeleteCity(c.id)} className="text-[#484f58] hover:text-red-500"><Trash2 size={14} /></button>
+                      <button onClick={() => setEditCity(c)} className="text-[#999] hover:text-[#2B4A3E] mr-2"><Pencil size={14} /></button>
+                      <button onClick={() => handleDeleteCity(c.id)} className="text-[#999] hover:text-red-500"><Trash2 size={14} /></button>
                     </td>
                   </tr>
                 ))}
-                {cities.length === 0 && <tr><td colSpan={5} className="py-6 text-center text-[#484f58]">No city guides yet</td></tr>}
+                {cities.length === 0 && <tr><td colSpan={5} className="py-6 text-center text-[#999]">No city guides yet</td></tr>}
               </tbody>
             </table>
           </div>
@@ -654,7 +654,7 @@ export default function AdminEscapePage() {
               </button>
             </div>
             {editCruise && (
-              <div className="p-4 bg-gray-50 rounded-lg border border-[#30363d] mb-4">
+              <div className="p-4 bg-gray-50 rounded-lg border border-[#e8e8e8] mb-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
                   <EscInput label="Name" value={editCruise.name} onChange={v => setEditCruise({ ...editCruise, name: v, slug: editCruise.slug || slugify(v) })} />
                   <EscInput label="Slug" value={editCruise.slug} onChange={v => setEditCruise({ ...editCruise, slug: v })} />
@@ -667,27 +667,27 @@ export default function AdminEscapePage() {
                 <div className="flex items-center gap-4 mt-3">
                   <EscToggle label="Published" checked={!!editCruise.published} onChange={v => setEditCruise({ ...editCruise, published: v })} />
                   <button onClick={handleSaveCruise} className="text-sm bg-[#2B4A3E] text-white px-4 py-2 rounded hover:bg-[#1e3a2e]">Save</button>
-                  <button onClick={() => setEditCruise(null)} className="text-sm text-[#8b949e] hover:text-[#c9d1d9]">Cancel</button>
+                  <button onClick={() => setEditCruise(null)} className="text-sm text-[#999] hover:text-[#c9d1d9]">Cancel</button>
                 </div>
               </div>
             )}
             <table className="w-full text-sm">
-              <thead><tr className="text-xs text-[#484f58] uppercase text-left"><th className="pb-2">Name</th><th className="pb-2">Duration</th><th className="pb-2">Style</th><th className="pb-2">Edition</th><th className="pb-2">Status</th><th className="pb-2 text-right">Actions</th></tr></thead>
+              <thead><tr className="text-xs text-[#999] uppercase text-left"><th className="pb-2">Name</th><th className="pb-2">Duration</th><th className="pb-2">Style</th><th className="pb-2">Edition</th><th className="pb-2">Status</th><th className="pb-2 text-right">Actions</th></tr></thead>
               <tbody>
                 {cruises.map(c => (
-                  <tr key={c.id} className="border-t border-[#30363d]">
+                  <tr key={c.id} className="border-t border-[#e8e8e8]">
                     <td className="py-2 font-medium">{c.name}</td>
                     <td className="py-2">{c.duration}</td>
                     <td className="py-2"><span className="px-2 py-0.5 bg-gray-100 rounded text-xs">{c.style || '—'}</span></td>
-                    <td className="py-2 text-xs text-[#8b949e]">{editionLabel(c.edition_id)}</td>
-                    <td className="py-2">{c.published ? <span className="text-green-600 text-xs font-medium">Published</span> : <span className="text-[#484f58] text-xs">Draft</span>}</td>
+                    <td className="py-2 text-xs text-[#999]">{editionLabel(c.edition_id)}</td>
+                    <td className="py-2">{c.published ? <span className="text-green-600 text-xs font-medium">Published</span> : <span className="text-[#999] text-xs">Draft</span>}</td>
                     <td className="py-2 text-right">
-                      <button onClick={() => setEditCruise(c)} className="text-[#484f58] hover:text-[#2B4A3E] mr-2"><Pencil size={14} /></button>
-                      <button onClick={() => handleDeleteCruise(c.id)} className="text-[#484f58] hover:text-red-500"><Trash2 size={14} /></button>
+                      <button onClick={() => setEditCruise(c)} className="text-[#999] hover:text-[#2B4A3E] mr-2"><Pencil size={14} /></button>
+                      <button onClick={() => handleDeleteCruise(c.id)} className="text-[#999] hover:text-red-500"><Trash2 size={14} /></button>
                     </td>
                   </tr>
                 ))}
-                {cruises.length === 0 && <tr><td colSpan={6} className="py-6 text-center text-[#484f58]">No cruises yet</td></tr>}
+                {cruises.length === 0 && <tr><td colSpan={6} className="py-6 text-center text-[#999]">No cruises yet</td></tr>}
               </tbody>
             </table>
           </div>
@@ -700,21 +700,21 @@ export default function AdminEscapePage() {
               <h2 className="text-sm font-semibold text-[#c9d1d9]">Consultations</h2>
               <div className="flex gap-1">
                 {['all', 'new', 'in_progress', 'replied', 'completed'].map(f => (
-                  <button key={f} onClick={() => setConsultFilter(f)} className={`px-3 py-1 text-xs rounded ${consultFilter === f ? 'bg-[#2B4A3E] text-white' : 'bg-gray-100 text-[#8b949e] hover:bg-gray-200'}`}>
+                  <button key={f} onClick={() => setConsultFilter(f)} className={`px-3 py-1 text-xs rounded ${consultFilter === f ? 'bg-[#2B4A3E] text-white' : 'bg-gray-100 text-[#999] hover:bg-gray-200'}`}>
                     {f === 'all' ? 'All' : f === 'in_progress' ? 'In Progress' : f.charAt(0).toUpperCase() + f.slice(1)}
                   </button>
                 ))}
               </div>
             </div>
             <table className="w-full text-sm">
-              <thead><tr className="text-xs text-[#484f58] uppercase text-left"><th className="pb-2">Name</th><th className="pb-2">Email</th><th className="pb-2">Source</th><th className="pb-2">Styles</th><th className="pb-2">Date</th><th className="pb-2">Status</th></tr></thead>
+              <thead><tr className="text-xs text-[#999] uppercase text-left"><th className="pb-2">Name</th><th className="pb-2">Email</th><th className="pb-2">Source</th><th className="pb-2">Styles</th><th className="pb-2">Date</th><th className="pb-2">Status</th></tr></thead>
               <tbody>
                 {filteredConsultations.map(c => (
                   <>
-                    <tr key={c.id} className="border-t border-[#30363d] cursor-pointer hover:bg-[#1f2937]" onClick={() => setExpandedConsult(expandedConsult === c.id ? null : c.id)}>
+                    <tr key={c.id} className="border-t border-[#e8e8e8] cursor-pointer hover:bg-[#fafafa]" onClick={() => setExpandedConsult(expandedConsult === c.id ? null : c.id)}>
                       <td className="py-2 font-medium">{c.first_name} {c.last_name}</td>
                       <td className="py-2">{c.email}</td>
-                      <td className="py-2 text-xs text-[#8b949e]">{c.source_page || c.source_context || '—'}</td>
+                      <td className="py-2 text-xs text-[#999]">{c.source_page || c.source_context || '—'}</td>
                       <td className="py-2">
                         <div className="flex gap-1 flex-wrap">
                           {(c.travel_styles || []).map((s: string) => (
@@ -722,9 +722,9 @@ export default function AdminEscapePage() {
                           ))}
                         </div>
                       </td>
-                      <td className="py-2 text-xs text-[#8b949e]">{new Date(c.created_at).toLocaleDateString()}</td>
+                      <td className="py-2 text-xs text-[#999]">{new Date(c.created_at).toLocaleDateString()}</td>
                       <td className="py-2">
-                        <select value={c.status} onChange={e => { e.stopPropagation(); handleConsultStatus(c.id, e.target.value) }} onClick={e => e.stopPropagation()} className="text-xs border border-[#30363d] rounded px-2 py-1 bg-[#161b22]">
+                        <select value={c.status} onChange={e => { e.stopPropagation(); handleConsultStatus(c.id, e.target.value) }} onClick={e => e.stopPropagation()} className="text-xs border border-[#e8e8e8] rounded px-2 py-1 bg-[#f5f5f5]">
                           <option value="new">New</option>
                           <option value="in_progress">In Progress</option>
                           <option value="replied">Replied</option>
@@ -736,11 +736,11 @@ export default function AdminEscapePage() {
                       <tr key={`${c.id}-detail`} className="bg-gray-50">
                         <td colSpan={6} className="p-4">
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                            <div><span className="text-xs text-[#484f58] block">Phone</span>{c.phone || '—'}</div>
-                            <div><span className="text-xs text-[#484f58] block">Language</span>{c.preferred_language || '—'}</div>
-                            <div><span className="text-xs text-[#484f58] block">Budget</span>{c.budget_range || '—'}</div>
-                            <div><span className="text-xs text-[#484f58] block">Preferred Dates</span>{c.preferred_dates || '—'}</div>
-                            <div><span className="text-xs text-[#484f58] block">Destinations</span>
+                            <div><span className="text-xs text-[#999] block">Phone</span>{c.phone || '—'}</div>
+                            <div><span className="text-xs text-[#999] block">Language</span>{c.preferred_language || '—'}</div>
+                            <div><span className="text-xs text-[#999] block">Budget</span>{c.budget_range || '—'}</div>
+                            <div><span className="text-xs text-[#999] block">Preferred Dates</span>{c.preferred_dates || '—'}</div>
+                            <div><span className="text-xs text-[#999] block">Destinations</span>
                               <div className="flex gap-1 flex-wrap mt-1">
                                 {(c.destinations || []).map((d: string) => (
                                   <span key={d} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">{d}</span>
@@ -748,16 +748,16 @@ export default function AdminEscapePage() {
                                 {(!c.destinations || c.destinations.length === 0) && '—'}
                               </div>
                             </div>
-                            <div><span className="text-xs text-[#484f58] block">Source Context</span>{c.source_context || '—'}</div>
-                            <div className="col-span-2 md:col-span-3"><span className="text-xs text-[#484f58] block">Special Needs</span>{c.special_needs || '—'}</div>
-                            <div className="col-span-2 md:col-span-3"><span className="text-xs text-[#484f58] block">Notes</span>{c.notes || '—'}</div>
+                            <div><span className="text-xs text-[#999] block">Source Context</span>{c.source_context || '—'}</div>
+                            <div className="col-span-2 md:col-span-3"><span className="text-xs text-[#999] block">Special Needs</span>{c.special_needs || '—'}</div>
+                            <div className="col-span-2 md:col-span-3"><span className="text-xs text-[#999] block">Notes</span>{c.notes || '—'}</div>
                           </div>
                         </td>
                       </tr>
                     )}
                   </>
                 ))}
-                {filteredConsultations.length === 0 && <tr><td colSpan={6} className="py-6 text-center text-[#484f58]">No consultations found</td></tr>}
+                {filteredConsultations.length === 0 && <tr><td colSpan={6} className="py-6 text-center text-[#999]">No consultations found</td></tr>}
               </tbody>
             </table>
           </div>

@@ -19,10 +19,10 @@ import type { Application, PipelineStage } from '@/types/application'
 /* ------------------------------------------------------------------ */
 /*  Design tokens                                                      */
 /* ------------------------------------------------------------------ */
-const GOLD = '#a58e28'
+const GOLD = '#444'
 const BLACK = '#1a1a1a'
 const CREAM = '#fafaf5'
-const BORDER = '#e8e2d8'
+const BORDER = '#e8e8e8'
 
 /* ------------------------------------------------------------------ */
 /*  Utility helpers                                                    */
