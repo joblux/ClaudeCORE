@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 
 const TIER_LABELS: Record<string, string> = {
   rising: 'Rising', pro: 'Pro', professional: 'Pro+', business: 'Business', insider: 'Insider',
@@ -85,6 +85,7 @@ export default function CompleteRegistrationPage() {
   const [cvUploading, setCvUploading] = useState(false)
   const [cvUrl, setCvUrl] = useState('')
   const [cvError, setCvError] = useState('')
+  const [savedIncomplete, setSavedIncomplete] = useState(false)
 
   // General
   const [error, setError] = useState('')
@@ -114,7 +115,7 @@ export default function CompleteRegistrationPage() {
   const fullPhone = phoneNumber ? `${phoneCode} ${phoneNumber}` : ''
 
   // --- Submit registration ---
-  const submitRegistration = async (uploadedCvUrl?: string) => {
+  const submitRegistration = async (uploadedCvUrl?: string, memberStatus: 'pending' | 'incomplete' = 'pending') => {
     setIsSubmitting(true)
     setError('')
     try {
@@ -131,6 +132,7 @@ export default function CompleteRegistrationPage() {
           nationality,
           contactPref: 'email',
           cv_url: uploadedCvUrl || cvUrl || null,
+          status: memberStatus,
         }),
       })
       if (!res.ok) {
@@ -138,7 +140,12 @@ export default function CompleteRegistrationPage() {
         throw new Error(d.error || 'Something went wrong')
       }
       await update()
-      router.push('/members/pending')
+      if (memberStatus === 'incomplete') {
+        setSavedIncomplete(true)
+        setIsSubmitting(false)
+      } else {
+        router.push('/members/pending')
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
       setIsSubmitting(false)
@@ -179,9 +186,9 @@ export default function CompleteRegistrationPage() {
     }
   }
 
-  // --- Skip CV ---
-  const handleSkipCv = () => {
-    submitRegistration()
+  // --- No CV right now ---
+  const handleNoCv = () => {
+    submitRegistration(undefined, 'incomplete')
   }
 
   // --- Shared styles ---
@@ -327,15 +334,41 @@ export default function CompleteRegistrationPage() {
                   Don&apos;t have your CV handy? You can export it from LinkedIn, Indeed or any job platform as a PDF.
                 </p>
 
-                <button
-                  type="button"
-                  onClick={handleSkipCv}
-                  disabled={isSubmitting}
-                  className="w-full text-center text-[#aaa] hover:text-white transition-colors disabled:opacity-50"
-                  style={{ fontSize: '12px' }}
-                >
-                  Skip for now &rarr;
-                </button>
+                {savedIncomplete ? (
+                  <div className="mt-4">
+                    <div className="p-4 border border-[#2a2a2a] rounded-sm mb-4">
+                      <p className="text-[#ccc] text-center" style={{ fontSize: '13px' }}>Your application is saved. Come back when your CV is ready.</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => signOut({ callbackUrl: '/' })}
+                        className="flex-1 py-3 border border-[#2a2a2a] text-[#aaa] uppercase tracking-widest font-semibold rounded-sm hover:border-[#444] transition-colors"
+                        style={{ fontSize: '10px', letterSpacing: '2px' }}
+                      >
+                        Save & log out
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => router.push('/dashboard')}
+                        className="flex-1 py-3 bg-white text-black uppercase tracking-widest font-semibold rounded-sm hover:bg-[#f0f0f0] transition-colors"
+                        style={{ fontSize: '10px', letterSpacing: '2px' }}
+                      >
+                        Continue browsing
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleNoCv}
+                    disabled={isSubmitting}
+                    className="w-full text-center text-[#aaa] hover:text-white transition-colors disabled:opacity-50"
+                    style={{ fontSize: '12px' }}
+                  >
+                    I don&apos;t have my CV right now &rarr;
+                  </button>
+                )}
               </>
             )}
           </div>

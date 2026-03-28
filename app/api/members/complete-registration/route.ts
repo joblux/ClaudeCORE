@@ -25,14 +25,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid tier' }, { status: 400 })
     }
 
-    const { firstName, lastName, contactPref, phone, city, country, nationality, cv_url } = body
+    const { firstName, lastName, contactPref, phone, city, country, nationality, cv_url, status: requestedStatus } = body
     const fullName = [firstName, lastName].filter(Boolean).join(' ') || null
+    const memberStatus = requestedStatus === 'incomplete' ? 'incomplete' : 'pending'
 
     // Build update object
     const updateData: any = {
       role: tier,
-      status: 'pending',
-      registration_completed: true,
+      status: memberStatus,
+      registration_completed: memberStatus === 'pending',
       tier_selected: true,
       full_name: fullName,
       first_name: firstName || null,
