@@ -592,99 +592,157 @@ export default function ProfiluxPage() {
               </div>
             )}
 
-            {/* STEP 7: SHARE */}
+            {/* STEP 7: COMPLETION + SHARING */}
             {currentStep === 7 && (
-              <div style={{ background: '#222', border: '1px solid #333', borderRadius: '6px', padding: '28px', marginBottom: '20px' }}>
-                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 8px' }}>Profile sharing</h2>
-                <p style={{ fontSize: '13px', color: '#555', fontWeight: 300, margin: '0 0 28px', lineHeight: 1.7 }}>Your profile is private by default. You decide if, when, and with whom you share it.</p>
-                <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '4px', padding: '16px 18px', display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '28px' }}>
-                  <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', fontSize: '13px', flexShrink: 0 }}>🔒</div>
+              <div style={{ marginBottom: '20px' }}>
+
+                {/* COMPLETION HEADER */}
+                <div style={{ background: '#111', border: '1px solid #1D9E75', borderRadius: '8px', padding: '28px 32px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', color: '#fff', flexShrink: 0 }}>✓</div>
                   <div>
-                    <div style={{ fontSize: '13px', color: '#ccc', marginBottom: '2px' }}>Your profile is private</div>
-                    <div style={{ fontSize: '11px', color: '#555', fontWeight: 300 }}>Not indexed by Google, Bing, or any search engine.</div>
+                    <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '22px', color: '#fff', margin: '0 0 6px' }}>Your Profilux is complete.</h2>
+                    <p style={{ fontSize: '13px', color: '#aaa', margin: 0, lineHeight: 1.7 }}>JOBLUX will now match you to confidential search assignments. Sharing your profile is optional — entirely your choice.</p>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <div>
-                    <div style={{ fontSize: '13px', color: '#ccc' }}>Enable sharing</div>
-                    <div style={{ fontSize: '11px', color: '#555', fontWeight: 300, marginTop: '2px' }}>Activate your private link to share with specific people</div>
+
+                {/* 6-PANEL GRID */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
+
+                  {/* PANEL 1: Profile preview */}
+                  <div style={{ background: '#141414', border: '0.5px solid #2a2a2a', borderRadius: '8px', padding: '22px', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ fontSize: '10px', color: '#888', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px' }}>Your profile</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                      <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#2a2a2a', border: '0.5px solid #444', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#999', flexShrink: 0 }}>
+                        {profile.firstName?.[0] || ''}{profile.lastName?.[0] || ''}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '14px', color: '#fff', fontWeight: 500 }}>{profile.firstName} {profile.lastName}</div>
+                        <div style={{ fontSize: '11px', color: '#aaa', marginTop: '2px' }}>{profile.headline || 'No headline yet'}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0', fontSize: '12px', flex: 1, marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '0.5px solid #222' }}>
+                        <span style={{ color: '#888' }}>Sectors</span>
+                        <span style={{ color: '#ccc' }}>{profile.sectors?.slice(0, 2).join(' · ') || '—'}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '0.5px solid #222' }}>
+                        <span style={{ color: '#888' }}>Markets</span>
+                        <span style={{ color: '#ccc' }}>{profile.markets?.slice(0, 2).join(' · ') || '—'}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0' }}>
+                        <span style={{ color: '#888' }}>Availability</span>
+                        <span style={{ color: '#1D9E75' }}>{profile.availability ? 'Considering opportunities' : '—'}</span>
+                      </div>
+                    </div>
+                    {profile.shareSlug && profile.sharingEnabled ? (
+                      <a href={`/${profile.shareSlug}`} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textAlign: 'center', padding: '9px', border: '0.5px solid #444', borderRadius: '5px', fontSize: '12px', color: '#ccc', textDecoration: 'none' }}>View profile →</a>
+                    ) : (
+                      <div style={{ display: 'block', textAlign: 'center', padding: '9px', border: '0.5px solid #2a2a2a', borderRadius: '5px', fontSize: '12px', color: '#444' }}>Enable sharing to view</div>
+                    )}
                   </div>
-                  <label style={{ position: 'relative', width: '40px', height: '22px', flexShrink: 0, cursor: 'pointer' }}>
-                    <input type="checkbox" checked={profile.sharingEnabled} onChange={e => { if (completeness !== 100 && e.target.checked) return; handleToggleSharing(e.target.checked) }} style={{ opacity: 0, width: 0, height: 0 }} />
-                    <span style={{ position: 'absolute', inset: 0, background: completeness !== 100 ? '#1a1a1a' : profile.sharingEnabled ? 'rgba(255,255,255,0.15)' : '#2a2a2a', borderRadius: '11px', border: `1px solid ${completeness !== 100 ? '#333' : profile.sharingEnabled ? '#ffffff' : '#333'}` }}>
-                      <span style={{ position: 'absolute', width: '16px', height: '16px', left: profile.sharingEnabled ? '20px' : '2px', top: '2px', background: profile.sharingEnabled ? '#ffffff' : '#555', borderRadius: '50%', transition: '0.2s' }} />
-                    </span>
-                  </label>
-                </div>
-                {profile.sharingEnabled && profile.shareSlug && (
-                  <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '4px', padding: '14px 16px', marginBottom: '20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '12px', color: '#666', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>joblux.com/<span style={{ color: '#ffffff' }}>{profile.shareSlug}</span></span>
-                      <button onClick={handleResetLink} style={{ background: 'transparent', border: 'none', color: '#444', fontSize: '11px', cursor: 'pointer', fontFamily: 'Inter, sans-serif', textDecoration: 'underline', flexShrink: 0 }}>Reset link</button>
+
+                  {/* PANEL 2: Download PDF */}
+                  <div style={{ background: '#141414', border: '0.5px solid #2a2a2a', borderRadius: '8px', padding: '22px', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ fontSize: '10px', color: '#888', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px' }}>Download</div>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '16px', color: '#fff', margin: '0 0 10px' }}>Export your profile</h3>
+                      <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.8, margin: '0 0 16px' }}>Download a formatted JOBLUX profile document. Print-ready. No salary included.</p>
+                      <div style={{ background: '#0f0f0f', border: '0.5px solid #222', borderRadius: '5px', padding: '12px 14px' }}>
+                        <div style={{ fontSize: '12px', color: '#ccc', marginBottom: '3px' }}>PDF · Formatted document</div>
+                        <div style={{ fontSize: '11px', color: '#777' }}>Name · Role · Experience · Expertise</div>
+                      </div>
                     </div>
-                    <div style={{ fontSize: '11px', color: '#444', fontWeight: 300, lineHeight: 1.6 }}>Resetting instantly revokes anyone who had the previous link.</div>
+                    <button onClick={handleSave} disabled={saving} style={{ display: 'block', width: '100%', textAlign: 'center', padding: '10px', background: '#fff', border: 'none', borderRadius: '5px', fontSize: '12px', color: '#000', fontWeight: 600, cursor: 'pointer', marginTop: '16px', fontFamily: 'Inter, sans-serif' }}>
+                      {saving ? 'Saving...' : '↓ Download PDF'}
+                    </button>
                   </div>
-                )}
-                {profile.sharingEnabled && (
-                  <>
-                    <div style={{ borderTop: '1px solid #2a2a2a', margin: '20px 0 16px' }} />
-                    <label style={labelStyle}>SHARE VIA</label>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
-                      {[
-                        { icon: '⎘', title: copied ? '✓ Copied!' : 'Copy link', desc: 'Copy your private profile URL to clipboard', action: handleCopyLink },
-                        { icon: '↓', title: 'Download PDF', desc: 'Export a formatted JOBLUX profile document', action: handleSave },
-                        { icon: '✉', title: 'Send by email', desc: 'Opens your email client with your profile link pre-filled', action: handleEmailShare },
-                      ].map(btn => (
-                        <button key={btn.title} onClick={btn.action} style={{ display: 'flex', alignItems: 'center', gap: '14px', background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '4px', padding: '13px 16px', cursor: 'pointer', textAlign: 'left', fontFamily: 'Inter, sans-serif', width: '100%' }}>
-                          <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#aaaaaa', flexShrink: 0 }}>{btn.icon}</div>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '13px', color: '#ccc', marginBottom: '2px' }}>{btn.title}</div>
-                            <div style={{ fontSize: '11px', color: '#555', fontWeight: 300 }}>{btn.desc}</div>
-                          </div>
-                          <span style={{ fontSize: '12px', color: '#333' }}>→</span>
-                        </button>
-                      ))}
+
+                  {/* PANEL 3: Enable sharing */}
+                  <div style={{ background: '#141414', border: `0.5px solid ${profile.sharingEnabled ? '#1D9E75' : '#2a2a2a'}`, borderRadius: '8px', padding: '22px', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ fontSize: '10px', color: profile.sharingEnabled ? '#1D9E75' : '#888', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px' }}>
+                      {profile.sharingEnabled ? 'Sharing active' : 'Enable sharing'}
                     </div>
-                  </>
-                )}
-                <div style={{ background: '#111', border: '1px solid #2a2a2a', borderRadius: '4px', padding: '16px 18px', marginBottom: '20px' }}>
-                  <div style={{ fontSize: '10px', color: '#555', letterSpacing: '0.08em', marginBottom: '10px' }}>OUR COMMITMENT TO YOU</div>
-                  {[
-                    'Your profile is never indexed by Google, Bing, or any search engine',
-                    'JOBLUX never shares your data with third parties',
-                    'Your profile is never used to promote JOBLUX publicly',
-                    'You can delete your profile and all data at any time',
-                  ].map(item => (
-                    <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '12px', color: '#555', fontWeight: 300, lineHeight: 1.6, marginBottom: '7px' }}>
-                      <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#444', flexShrink: 0, marginTop: '7px' }} />
-                      {item}
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '16px', color: '#fff', margin: '0 0 10px' }}>Share confidentially</h3>
+                      <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.8, margin: '0 0 16px' }}>Generate a private link. Not indexed. Not public. Only people you send it to can view it.</p>
+                      <div style={{ background: '#0f0f0f', border: '0.5px solid #222', borderRadius: '5px', padding: '12px 14px' }}>
+                        <div style={{ fontSize: '12px', color: profile.sharingEnabled ? '#1D9E75' : '#ccc', marginBottom: '3px' }}>
+                          {profile.sharingEnabled ? 'Sharing enabled' : 'Profile is private'}
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#777' }}>
+                          {profile.sharingEnabled ? 'Link is active' : 'Toggle on to generate your private link'}
+                        </div>
+                      </div>
                     </div>
-                  ))}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px', paddingTop: '14px', borderTop: '0.5px solid #222' }}>
+                      <span style={{ fontSize: '13px', color: '#ccc' }}>Enable sharing</span>
+                      <label style={{ position: 'relative', width: '44px', height: '24px', flexShrink: 0, cursor: 'pointer' }}>
+                        <input type="checkbox" checked={profile.sharingEnabled} onChange={e => handleToggleSharing(e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
+                        <span style={{ position: 'absolute', inset: 0, background: profile.sharingEnabled ? '#1D9E75' : '#2a2a2a', borderRadius: '12px', border: `0.5px solid ${profile.sharingEnabled ? '#1D9E75' : '#444'}`, transition: '0.2s' }}>
+                          <span style={{ position: 'absolute', width: '18px', height: '18px', left: profile.sharingEnabled ? '22px' : '2px', top: '2px', background: '#fff', borderRadius: '50%', transition: '0.2s' }} />
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* PANEL 4: Copy link */}
+                  <div style={{ background: '#141414', border: '0.5px solid #2a2a2a', borderRadius: '8px', padding: '22px', display: 'flex', flexDirection: 'column', opacity: profile.sharingEnabled ? 1 : 0.45 }}>
+                    <div style={{ fontSize: '10px', color: '#888', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px' }}>Copy link</div>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '16px', color: '#fff', margin: '0 0 10px' }}>Your private URL</h3>
+                      <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.8, margin: '0 0 16px' }}>Copy your link and send it via WhatsApp, LinkedIn, or any channel you choose.</p>
+                      <div style={{ background: '#0f0f0f', border: '0.5px solid #222', borderRadius: '5px', padding: '12px 14px' }}>
+                        <span style={{ fontSize: '12px', color: '#888', fontFamily: 'monospace' }}>
+                          {profile.shareSlug ? `joblux.com/${profile.shareSlug}` : 'joblux.com/p/—'}
+                        </span>
+                      </div>
+                    </div>
+                    <button onClick={handleCopyLink} disabled={!profile.sharingEnabled || !profile.shareSlug} style={{ display: 'block', width: '100%', textAlign: 'center', padding: '10px', background: 'transparent', border: '0.5px solid #444', borderRadius: '5px', fontSize: '12px', color: profile.sharingEnabled ? '#ccc' : '#666', cursor: profile.sharingEnabled ? 'pointer' : 'not-allowed', marginTop: '16px', fontFamily: 'Inter, sans-serif' }}>
+                      {copied ? '✓ Copied!' : 'Copy to clipboard'}
+                    </button>
+                  </div>
+
+                  {/* PANEL 5: Send by email */}
+                  <div style={{ background: '#141414', border: '0.5px solid #2a2a2a', borderRadius: '8px', padding: '22px', display: 'flex', flexDirection: 'column', opacity: profile.sharingEnabled ? 1 : 0.45 }}>
+                    <div style={{ fontSize: '10px', color: '#888', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px' }}>Send by email</div>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '16px', color: '#fff', margin: '0 0 10px' }}>Share via email</h3>
+                      <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.8, margin: '0 0 16px' }}>Opens your email client with your profile link pre-filled. Recipient sees name, role, expertise — no salary exposed.</p>
+                      <div style={{ background: '#0f0f0f', border: '0.5px solid #222', borderRadius: '5px', padding: '10px 14px' }}>
+                        <div style={{ fontSize: '11px', color: '#777' }}>Link sent directly — discreet and personal</div>
+                      </div>
+                    </div>
+                    <button onClick={handleEmailShare} disabled={!profile.sharingEnabled || !profile.shareSlug} style={{ display: 'block', width: '100%', textAlign: 'center', padding: '10px', background: 'transparent', border: '0.5px solid #444', borderRadius: '5px', fontSize: '12px', color: profile.sharingEnabled ? '#ccc' : '#666', cursor: profile.sharingEnabled ? 'pointer' : 'not-allowed', marginTop: '16px', fontFamily: 'Inter, sans-serif' }}>
+                      Send profile →
+                    </button>
+                  </div>
+
+                  {/* PANEL 6: Reset link */}
+                  <div style={{ background: '#141414', border: '0.5px solid #2a2a2a', borderRadius: '8px', padding: '22px', display: 'flex', flexDirection: 'column', opacity: profile.sharingEnabled ? 1 : 0.45 }}>
+                    <div style={{ fontSize: '10px', color: '#888', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px' }}>Reset access</div>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '16px', color: '#fff', margin: '0 0 10px' }}>Generate new link</h3>
+                      <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.8, margin: '0 0 16px' }}>Instantly revokes access for anyone with the current link. A new private URL is generated immediately.</p>
+                      <div style={{ background: '#0f0f0f', border: '0.5px solid #222', borderRadius: '5px', padding: '12px 14px' }}>
+                        <div style={{ fontSize: '11px', color: '#777', lineHeight: 1.6 }}>Use this if you want to revoke access without disabling sharing entirely.</div>
+                      </div>
+                    </div>
+                    <button onClick={handleResetLink} disabled={!profile.sharingEnabled || !profile.shareSlug} style={{ display: 'block', width: '100%', textAlign: 'center', padding: '10px', background: 'transparent', border: '0.5px solid #444', borderRadius: '5px', fontSize: '12px', color: profile.sharingEnabled ? '#ccc' : '#666', cursor: profile.sharingEnabled ? 'pointer' : 'not-allowed', marginTop: '16px', fontFamily: 'Inter, sans-serif' }}>
+                      Generate new link →
+                    </button>
+                  </div>
+
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'flex-start', borderTop: '1px solid #2a2a2a', paddingTop: '20px' }}>
-                  <button onClick={() => setCurrentStep(6)} style={navBtn('prev')}>← Availability</button>
+
+                {/* Back nav */}
+                <div style={{ display: 'flex', justifyContent: 'flex-start', borderTop: '1px solid #2a2a2a', paddingTop: '20px', marginTop: '20px' }}>
+                  <button onClick={() => setCurrentStep(6)} style={{ background: 'transparent', border: '1px solid #333', color: '#888', fontSize: '13px', padding: '9px 18px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>← Availability</button>
                 </div>
+
               </div>
             )}
 
-            {/* COMPLETION */}
-            {currentStep === 7 && completedSteps.length >= 6 && (
-              <div style={{ background: '#222', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '32px 28px', textAlign: 'center' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '50%', border: '1px solid #ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '18px', color: '#ffffff' }}>✓</div>
-                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '22px', color: '#fff', margin: '0 0 8px' }}>Profile complete</h2>
-                <p style={{ fontSize: '13px', color: '#555', fontWeight: 300, lineHeight: 1.7, margin: '0 0 24px', maxWidth: '360px', marginLeft: 'auto', marginRight: 'auto' }}>
-                  Your intelligence profile is ready. Mo will review it and match you to relevant search assignments confidentially.
-                </p>
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                  <button onClick={() => window.print()} style={{ background: '#ffffff', border: 'none', color: '#000', fontSize: '13px', fontWeight: 500, padding: '11px 26px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>↓ Download profile</button>
-                  <Link href={profile.shareSlug ? `/${profile.shareSlug}` : '#'} style={{ background: 'transparent', border: `1px solid ${profile.shareSlug ? '#555' : '#2a2a2a'}`, color: profile.shareSlug ? '#ccc' : '#444', fontSize: '13px', padding: '11px 20px', borderRadius: '4px', textDecoration: 'none', display: 'inline-block', pointerEvents: profile.shareSlug ? 'auto' : 'none' as any }}>View my profile →</Link>
-                  <Link href="/dashboard/candidate" style={{ background: 'transparent', border: '1px solid #333', color: '#888', fontSize: '13px', padding: '11px 20px', borderRadius: '4px', textDecoration: 'none', display: 'inline-block' }}>⟵ Dashboard</Link>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* SIDEBAR — no gold on avatar or badge */}
+                  {/* SIDEBAR — no gold on avatar or badge */}
           <div style={{ position: 'sticky', top: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ background: '#111', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '20px' }}>
               <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#2a2a2a', border: '1px solid #444', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', color: '#888', marginBottom: '12px', fontWeight: 500 }}>
