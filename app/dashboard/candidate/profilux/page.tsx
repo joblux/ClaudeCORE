@@ -285,7 +285,7 @@ export default function ProfiluxPage() {
     fontFamily: 'Inter, sans-serif', outline: 'none', boxSizing: 'border-box',
   }
   const labelStyle: React.CSSProperties = {
-    fontSize: '10px', color: '#9B6B4A', letterSpacing: '0.1em', marginBottom: '8px', display: 'block', fontWeight: 600, textTransform: 'uppercase' as const,
+    fontSize: '10px', color: '#1D9E75', letterSpacing: '0.1em', marginBottom: '8px', display: 'block', fontWeight: 600, textTransform: 'uppercase' as const,
   }
   const pillStyle = (active: boolean): React.CSSProperties => ({
     padding: '7px 14px', borderRadius: '3px', fontSize: '12px', cursor: 'pointer',
@@ -324,7 +324,7 @@ export default function ProfiluxPage() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{
-              background: 'transparent', border: '1px solid #9B6B4A', color: '#9B6B4A',
+              background: 'transparent', border: '1px solid #1D9E75', color: '#1D9E75',
               fontSize: '10px', letterSpacing: '0.1em', padding: '4px 12px', fontWeight: 600,
               borderRadius: '3px',
             }}>
@@ -385,14 +385,14 @@ export default function ProfiluxPage() {
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px', padding: '13px 18px',
                   background: 'transparent', border: 'none',
-                  borderBottom: currentStep === step.id ? '2px solid #ffffff' : completedSteps.includes(step.id) ? '2px solid #9B6B4A' : '2px solid transparent',
+                  borderBottom: currentStep === step.id ? '2px solid #ffffff' : completedSteps.includes(step.id) ? '2px solid #1D9E75' : '2px solid transparent',
                   cursor: 'pointer', whiteSpace: 'nowrap',
                 }}
               >
                 <div style={{
                   width: '22px', height: '22px', borderRadius: '50%', flexShrink: 0,
-                  background: completedSteps.includes(step.id) ? '#9B6B4A' : currentStep === step.id ? '#ffffff' : '#222',
-                  border: `1px solid ${completedSteps.includes(step.id) ? '#9B6B4A' : currentStep === step.id ? '#ffffff' : '#444'}`,
+                  background: completedSteps.includes(step.id) ? '#1D9E75' : currentStep === step.id ? '#ffffff' : '#222',
+                  border: `1px solid ${completedSteps.includes(step.id) ? '#1D9E75' : currentStep === step.id ? '#ffffff' : '#444'}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '10px',
                   color: completedSteps.includes(step.id) ? '#000' : currentStep === step.id ? '#000' : '#555', fontWeight: 700,
@@ -401,7 +401,7 @@ export default function ProfiluxPage() {
                 </div>
                 <span style={{
                   fontSize: '12px', fontFamily: 'Inter, sans-serif',
-                  color: completedSteps.includes(step.id) ? '#9B6B4A' : currentStep === step.id ? '#ffffff' : '#666', fontWeight: completedSteps.includes(step.id) || currentStep === step.id ? 600 : 500,
+                  color: completedSteps.includes(step.id) ? '#1D9E75' : currentStep === step.id ? '#ffffff' : '#666', fontWeight: completedSteps.includes(step.id) || currentStep === step.id ? 600 : 500,
                 }}>
                   {step.label}
                 </span>
@@ -553,7 +553,7 @@ export default function ProfiluxPage() {
                 <p style={{ fontSize: '13px', color: '#555', fontWeight: 300, margin: '0 0 28px', lineHeight: 1.7 }}>Used by Mo to match you to appropriately scoped search assignments. Never shown publicly.</p>
                 <label style={labelStyle}>ANNUAL GROSS SALARY EXPECTATION</label>
                 <div style={{ textAlign: 'center', fontSize: '28px', color: '#ffffff', fontWeight: 400, margin: '16px 0' }}>{formatSalary(profile.salaryExpectation, profile.salaryCurrency)} / year</div>
-                <input type="range" min="0" max="500000" step="5000" value={profile.salaryExpectation} onChange={e => setProfile(p => ({ ...p, salaryExpectation: Number(e.target.value) }))} style={{ width: '100%', accentColor: '#9B6B4A', marginBottom: '8px' }} />
+                <input type="range" min="0" max="500000" step="5000" value={profile.salaryExpectation} onChange={e => setProfile(p => ({ ...p, salaryExpectation: Number(e.target.value) }))} style={{ width: '100%', accentColor: '#1D9E75', marginBottom: '8px' }} />
                 <div style={{ display: 'flex', gap: '8px', marginTop: '12px', justifyContent: 'center' }}>
                   {['EUR', 'USD', 'GBP', 'AED'].map(c => (
                     <button key={c} onClick={() => setProfile(p => ({ ...p, salaryCurrency: c }))} style={{ padding: '6px 16px', borderRadius: '3px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${profile.salaryCurrency === c ? '#ffffff' : '#333'}`, color: profile.salaryCurrency === c ? '#ffffff' : '#666', background: profile.salaryCurrency === c ? 'rgba(255,255,255,0.08)' : 'transparent', fontFamily: 'Inter, sans-serif' }}>{c}</button>
