@@ -82,7 +82,7 @@ const LANGUAGES = [
 
 const AVAILABILITY = [
   { value: 'active', label: 'Actively looking', desc: 'Open to opportunities now' },
-  { value: 'open', label: 'Open to approaches', desc: 'Not actively searching but will consider' },
+  { value: 'open', label: 'Considering opportunities', desc: 'Not actively searching but will consider' },
   { value: 'passive', label: 'Passively exploring', desc: 'Happy where I am but curious' },
   { value: 'unavailable', label: 'Not available', desc: 'Not open to opportunities at this time' },
 ]

@@ -213,16 +213,10 @@ export default function CompleteRegistrationPage() {
           {STEPS.map((s, i) => (
             <div key={s.num} className="flex items-center">
               <div className="flex items-center gap-1.5">
-                <div className={
-                  'w-5 h-5 rounded-full flex items-center justify-start font-bold ' +
-                  (s.num < step ? 'bg-white text-black' : s.num === step ? 'bg-[#a58e28] text-black' : 'bg-[#333] text-[#888]')
-                } style={{ fontSize: '9px' }}>
-                  {s.num < step ? '\u2713' : s.num}
-                </div>
                 <span className={
                   'uppercase tracking-widest ' +
-                  (s.num === step ? 'text-white font-semibold' : s.num < step ? 'text-[#ccc]' : 'text-[#888]')
-                } style={{ fontSize: '9px' }}>{s.label}</span>
+                  (s.num === step ? 'text-white font-bold' : s.num < step ? 'text-[#ccc]' : 'text-[#555]')
+                } style={{ fontSize: '10px', letterSpacing: '0.12em' }}>{s.label}</span>
               </div>
               {i < STEPS.length - 1 && (
                 <div className={'w-5 h-px mx-1.5 ' + (s.num < step ? 'bg-white' : 'bg-[#333]')} />
