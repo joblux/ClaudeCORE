@@ -81,12 +81,12 @@ export default function AdminPage() {
     const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (day === 0 ? 6 : day - 1)).toISOString();
 
     const [total, pending, approved, rejected, today, thisWeek] = await Promise.all([
-      supabase.from("members").select("id", { count: "exact", head: true }),
-      supabase.from("members").select("id", { count: "exact", head: true }).eq("status", "pending"),
-      supabase.from("members").select("id", { count: "exact", head: true }).eq("status", "approved"),
-      supabase.from("members").select("id", { count: "exact", head: true }).eq("status", "rejected"),
-      supabase.from("members").select("id", { count: "exact", head: true }).gte("created_at", startOfDay),
-      supabase.from("members").select("id", { count: "exact", head: true }).gte("created_at", startOfWeek),
+      supabase.from("members").select("id", { count: "exact", head: true }).eq("registration_completed", true),
+      supabase.from("members").select("id", { count: "exact", head: true }).eq("registration_completed", true).eq("status", "pending"),
+      supabase.from("members").select("id", { count: "exact", head: true }).eq("registration_completed", true).eq("status", "approved"),
+      supabase.from("members").select("id", { count: "exact", head: true }).eq("registration_completed", true).eq("status", "rejected"),
+      supabase.from("members").select("id", { count: "exact", head: true }).eq("registration_completed", true).gte("created_at", startOfDay),
+      supabase.from("members").select("id", { count: "exact", head: true }).eq("registration_completed", true).gte("created_at", startOfWeek),
     ]);
 
     setCounts({
@@ -104,6 +104,7 @@ export default function AdminPage() {
     let query = supabase
       .from("members")
       .select("id, email, full_name, first_name, last_name, role, status, city, country, bio, avatar_url, auth_provider, created_at, approved_at, last_login, profile_completeness", { count: "exact" })
+      .eq("registration_completed", true)
       .order("created_at", { ascending: false })
       .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
 
