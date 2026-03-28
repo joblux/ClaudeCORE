@@ -14,27 +14,19 @@ import {
 
 const NAV_SECTIONS = [
   {
-    label: 'Overview',
-    items: [
-      { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-      { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-    ],
-  },
-  {
     label: 'Members',
     items: [
       { label: 'Profiles', href: '/admin', icon: Users, exact: true, countKey: 'pending_members' },
-      { label: 'Access Approvals', href: '/admin/invitations', icon: Send, countKey: 'pending_approvals' },
+      { label: 'Access Approvals', href: '/admin/access-approvals', icon: Send, countKey: 'pending_approvals' },
       { label: 'Messages', href: '/admin/messages', icon: MessageSquare, countKey: 'unread_messages' },
       { label: 'Contributions', href: '/admin/contributions', icon: Star, countKey: 'pending_contributions' },
     ],
   },
   {
-    label: 'Search',
+    label: 'Analytics',
     items: [
-      { label: 'Assignments', href: '/admin/assignments', icon: Briefcase },
-      { label: 'ATS Pipeline', href: '/admin/ats', icon: Kanban },
-      { label: 'Consultations', href: '/admin/escape/consultations', icon: ClipboardList, countKey: 'pending_consultations' },
+      { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+      { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
     ],
   },
   {
@@ -42,15 +34,23 @@ const NAV_SECTIONS = [
     items: [
       { label: 'WikiLux', href: '/admin/wikilux', icon: BookOpen },
       { label: 'Insights', href: '/admin/articles', icon: FileText },
-      { label: 'Editorial Review', href: '/admin/bloglux/comments', icon: MessageCircle, countKey: 'pending_comments' },
-      { label: 'Intelligence Queue', href: '/admin/articles/new', icon: PenLine },
-      { label: 'Salary Intelligence', href: '/salaries', icon: DollarSign },
+      { label: 'Editorial Review', href: '/admin/editorial-review', icon: MessageCircle, countKey: 'pending_comments' },
+      { label: 'Intelligence Queue', href: '/admin/intelligence-queue', icon: PenLine },
+      { label: 'Salary Intelligence', href: '/admin/salary-intelligence', icon: DollarSign },
       { label: 'Media Library', href: '/admin/media', icon: Images },
       { label: 'Escape', href: '/admin/escape', icon: Compass },
     ],
   },
   {
-    label: 'Support & Settings',
+    label: 'Recruitment',
+    items: [
+      { label: 'Assignments', href: '/admin/assignments', icon: Briefcase },
+      { label: 'ATS Pipeline', href: '/admin/ats', icon: Kanban },
+      { label: 'Consultations', href: '/admin/consultations', icon: ClipboardList, countKey: 'pending_consultations' },
+    ],
+  },
+  {
+    label: 'Support',
     items: [
       { label: 'Contact Messages', href: '/admin/contact', icon: Mail, countKey: 'new_contact' },
       { label: 'Platform Settings', href: '/admin/settings', icon: Settings },
@@ -66,13 +66,14 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   '/admin/ats': { title: 'ATS Pipeline', subtitle: 'Applicant tracking' },
   '/admin/messages': { title: 'Messages', subtitle: 'Member communications' },
   '/admin/contributions': { title: 'Contributions', subtitle: 'Member submissions' },
-  '/admin/escape/consultations': { title: 'Consultations', subtitle: 'Travel consultation requests' },
-  '/admin/invitations': { title: 'Access Approvals', subtitle: 'Pending member requests' },
+  '/admin/consultations': { title: 'Consultations', subtitle: 'Travel consultation requests' },
+  '/admin/access-approvals': { title: 'Access Approvals', subtitle: 'Pending member requests' },
   '/admin/articles': { title: 'Insights', subtitle: 'Published intelligence' },
-  '/admin/articles/new': { title: 'Intelligence Queue', subtitle: 'Draft & schedule' },
-  '/admin/bloglux/comments': { title: 'Editorial Review', subtitle: 'Comments & moderation' },
+  '/admin/intelligence-queue': { title: 'Intelligence Queue', subtitle: 'Draft & schedule' },
+  '/admin/editorial-review': { title: 'Editorial Review', subtitle: 'Comments & moderation' },
   '/admin/wikilux': { title: 'WikiLux', subtitle: 'Brand encyclopedia' },
   '/admin/escape': { title: 'Escape', subtitle: 'Travel content management' },
+  '/admin/salary-intelligence': { title: 'Salary Intelligence', subtitle: 'Compensation data' },
   '/admin/media': { title: 'Media Library', subtitle: 'Assets & uploads' },
   '/admin/contact': { title: 'Contact Messages', subtitle: 'Inbound enquiries' },
   '/admin/emails': { title: 'Email Templates', subtitle: 'Transactional emails' },
