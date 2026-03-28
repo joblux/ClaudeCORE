@@ -279,7 +279,7 @@ export default function ProfiluxPage() {
             <span style={{
               background: 'transparent', border: '1px solid #4a9eff', color: '#4a9eff',
               fontSize: '10px', letterSpacing: '0.1em', padding: '4px 12px', fontWeight: 600,
-              borderRadius: '3px', fontWeight: 500,
+              borderRadius: '3px',
             }}>
               {(session?.user as any)?.role?.toUpperCase() || 'MEMBER'}
             </span>
