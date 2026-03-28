@@ -135,11 +135,7 @@ export default function ProfiluxPage() {
   const toggle = (arr: string[], val: string) =>
     arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
 
-  const markComplete = (step: number) => {
-    if (!completedSteps.includes(step)) {
-      setCompletedSteps(prev => [...prev, step])
-    }
-  }
+
 
   const handleSave = async () => {
     setSaving(true)
@@ -207,7 +203,6 @@ export default function ProfiluxPage() {
     setProfile(prev => ({ ...prev, experience: [...prev.experience, entry] }))
     setNewExp({ current: false })
     setShowAddExp(false)
-    markComplete(2)
   }
 
   const removeExperience = (id: string) => {
@@ -402,7 +397,7 @@ export default function ProfiluxPage() {
                   <textarea value={profile.bio} onChange={e => setProfile(p => ({ ...p, bio: e.target.value }))} placeholder="·" rows={3} style={{ ...inputStyle, resize: 'vertical', minHeight: '80px' }} />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #2a2a2a', paddingTop: '20px' }}>
-                  <button onClick={() => { markComplete(1); setCurrentStep(2) }} style={navBtn('next')}>Experience →</button>
+                  <button onClick={() => { setCurrentStep(2) }} style={navBtn('next')}>Experience →</button>
                 </div>
               </div>
             )}
@@ -456,7 +451,7 @@ export default function ProfiluxPage() {
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #2a2a2a', paddingTop: '20px', marginTop: '8px' }}>
                   <button onClick={() => setCurrentStep(1)} style={navBtn('prev')}>← Personal</button>
-                  <button onClick={() => { markComplete(2); setCurrentStep(3) }} style={navBtn('next')}>Expertise →</button>
+                  <button onClick={() => { setCurrentStep(3) }} style={navBtn('next')}>Expertise →</button>
                 </div>
               </div>
             )}
@@ -478,7 +473,7 @@ export default function ProfiluxPage() {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #2a2a2a', paddingTop: '20px' }}>
                   <button onClick={() => setCurrentStep(2)} style={navBtn('prev')}>← Experience</button>
-                  <button onClick={() => { markComplete(3); setCurrentStep(4) }} style={navBtn('next')}>Sectors →</button>
+                  <button onClick={() => { setCurrentStep(4) }} style={navBtn('next')}>Sectors →</button>
                 </div>
               </div>
             )}
@@ -500,7 +495,7 @@ export default function ProfiluxPage() {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #2a2a2a', paddingTop: '20px' }}>
                   <button onClick={() => setCurrentStep(3)} style={navBtn('prev')}>← Expertise</button>
-                  <button onClick={() => { markComplete(4); setCurrentStep(5) }} style={navBtn('next')}>Salary →</button>
+                  <button onClick={() => { setCurrentStep(5) }} style={navBtn('next')}>Salary →</button>
                 </div>
               </div>
             )}
@@ -521,7 +516,7 @@ export default function ProfiluxPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#555', marginBottom: '28px' }}><span>€40K</span><span>€500K+</span></div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #2a2a2a', paddingTop: '20px' }}>
                   <button onClick={() => setCurrentStep(4)} style={navBtn('prev')}>← Sectors</button>
-                  <button onClick={() => { markComplete(5); setCurrentStep(6) }} style={navBtn('next')}>Availability →</button>
+                  <button onClick={() => { setCurrentStep(6) }} style={navBtn('next')}>Availability →</button>
                 </div>
               </div>
             )}
@@ -533,9 +528,9 @@ export default function ProfiluxPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
                   {AVAILABILITY.map(opt => (
                     <button key={opt.value} onClick={() => setProfile(p => ({ ...p, availability: opt.value }))}
-                      style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', border: `1px solid ${profile.availability === opt.value ? '#a58e28' : '#2a2a2a'}`, background: profile.availability === opt.value ? 'rgba(165,142,40,0.04)' : 'transparent', borderRadius: '4px', padding: '14px 16px', cursor: 'pointer', textAlign: 'left', fontFamily: 'Inter, sans-serif' }}>
-                      <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: `1px solid ${profile.availability === opt.value ? '#a58e28' : '#444'}`, marginTop: '2px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {profile.availability === opt.value && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#a58e28' }} />}
+                      style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', border: `1px solid ${profile.availability === opt.value ? '#ffffff' : '#2a2a2a'}`, background: profile.availability === opt.value ? 'rgba(165,142,40,0.04)' : 'transparent', borderRadius: '4px', padding: '14px 16px', cursor: 'pointer', textAlign: 'left', fontFamily: 'Inter, sans-serif' }}>
+                      <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: `1px solid ${profile.availability === opt.value ? '#ffffff' : '#444'}`, marginTop: '2px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {profile.availability === opt.value && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ffffff' }} />}
                       </div>
                       <div>
                         <div style={{ fontSize: '13px', color: profile.availability === opt.value ? '#fff' : '#bbb', marginBottom: '3px' }}>{opt.label}</div>
@@ -546,7 +541,7 @@ export default function ProfiluxPage() {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #2a2a2a', paddingTop: '20px' }}>
                   <button onClick={() => setCurrentStep(5)} style={navBtn('prev')}>← Salary</button>
-                  <button onClick={() => { markComplete(6); setCurrentStep(7) }} style={navBtn('next')}>Share →</button>
+                  <button onClick={() => { setCurrentStep(7) }} style={navBtn('next')}>Share →</button>
                 </div>
               </div>
             )}
@@ -570,8 +565,8 @@ export default function ProfiluxPage() {
                   </div>
                   <label style={{ position: 'relative', width: '40px', height: '22px', flexShrink: 0, cursor: 'pointer' }}>
                     <input type="checkbox" checked={profile.sharingEnabled} onChange={e => handleToggleSharing(e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
-                    <span style={{ position: 'absolute', inset: 0, background: profile.sharingEnabled ? 'rgba(165,142,40,0.2)' : '#2a2a2a', borderRadius: '11px', border: `1px solid ${profile.sharingEnabled ? '#a58e28' : '#333'}` }}>
-                      <span style={{ position: 'absolute', width: '16px', height: '16px', left: profile.sharingEnabled ? '20px' : '2px', top: '2px', background: profile.sharingEnabled ? '#a58e28' : '#555', borderRadius: '50%', transition: '0.2s' }} />
+                    <span style={{ position: 'absolute', inset: 0, background: profile.sharingEnabled ? 'rgba(255,255,255,0.15)' : '#2a2a2a', borderRadius: '11px', border: `1px solid ${profile.sharingEnabled ? '#ffffff' : '#333'}` }}>
+                      <span style={{ position: 'absolute', width: '16px', height: '16px', left: profile.sharingEnabled ? '20px' : '2px', top: '2px', background: profile.sharingEnabled ? '#ffffff' : '#555', borderRadius: '50%', transition: '0.2s' }} />
                     </span>
                   </label>
                 </div>
@@ -595,7 +590,7 @@ export default function ProfiluxPage() {
                         { icon: '✉', title: 'Send by email', desc: 'Opens your email client with your profile link pre-filled', action: handleEmailShare },
                       ].map(btn => (
                         <button key={btn.title} onClick={btn.action} style={{ display: 'flex', alignItems: 'center', gap: '14px', background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '4px', padding: '13px 16px', cursor: 'pointer', textAlign: 'left', fontFamily: 'Inter, sans-serif', width: '100%' }}>
-                          <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#a58e28', flexShrink: 0 }}>{btn.icon}</div>
+                          <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#aaaaaa', flexShrink: 0 }}>{btn.icon}</div>
                           <div style={{ flex: 1 }}>
                             <div style={{ fontSize: '13px', color: '#ccc', marginBottom: '2px' }}>{btn.title}</div>
                             <div style={{ fontSize: '11px', color: '#555', fontWeight: 300 }}>{btn.desc}</div>
@@ -629,7 +624,7 @@ export default function ProfiluxPage() {
             {/* COMPLETION */}
             {currentStep === 7 && completedSteps.length >= 6 && (
               <div style={{ background: '#222', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '32px 28px', textAlign: 'center' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '50%', border: '1px solid #a58e28', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '18px', color: '#a58e28' }}>✓</div>
+                <div style={{ width: '44px', height: '44px', borderRadius: '50%', border: '1px solid #ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '18px', color: '#ffffff' }}>✓</div>
                 <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '22px', color: '#fff', margin: '0 0 8px' }}>Profile complete</h2>
                 <p style={{ fontSize: '13px', color: '#555', fontWeight: 300, lineHeight: 1.7, margin: '0 0 24px', maxWidth: '360px', marginLeft: 'auto', marginRight: 'auto' }}>
                   Your intelligence profile is ready. Mo will review it and match you to relevant search assignments confidentially.
