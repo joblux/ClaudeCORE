@@ -210,7 +210,7 @@ function JoinContent() {
 
 export default function JoinPage() {
   return (
-    <main className="min-h-screen bg-[#1a1a1a] flex flex-col items-center justify-start px-4 pt-16 pb-8">
+    <main className="bg-[#1a1a1a] flex flex-col items-center justify-start px-4 pt-16 pb-16">
       <p className="text-[#888] uppercase text-center mb-4" style={{ fontSize: '15px', letterSpacing: '0.2em' }}>
         Luxury Talent Intelligence
       </p>
