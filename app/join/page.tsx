@@ -96,33 +96,29 @@ function JoinContent() {
 
   return (
     <div className="w-full max-w-[400px] mx-auto">
-      {/* Toggle */}
       <div className="flex gap-2 justify-center mb-8">
         <button
           onClick={() => { setMode("request"); setEmailSent(false); setEmail(""); }}
-          className={"px-5 py-2 text-[11px] uppercase tracking-widest rounded-full border transition-colors " + (mode === "request" ? "text-white border-[#444]" : "text-[#ccc] border-transparent hover:text-white")}
+          className={"px-5 py-2 text-[11px] uppercase tracking-widest rounded-full border transition-colors " + (mode === "request" ? "text-white border-[#555]" : "text-[#666] border-transparent hover:text-[#aaa]")}
         >
           Request Access
         </button>
         <button
           onClick={() => { setMode("signin"); setEmailSent(false); setEmail(""); }}
-          className={"px-5 py-2 text-[11px] uppercase tracking-widest rounded-full border transition-colors " + (mode === "signin" ? "text-white border-[#444]" : "text-[#ccc] border-transparent hover:text-white")}
+          className={"px-5 py-2 text-[11px] uppercase tracking-widest rounded-full border transition-colors " + (mode === "signin" ? "text-white border-[#555]" : "text-[#666] border-transparent hover:text-[#aaa]")}
         >
           Sign In
         </button>
       </div>
 
-      {/* Card */}
-      <div className="bg-[#141414] border border-[#1e1e1e] rounded px-8 py-9">
-        {/* Heading */}
+      <div className="bg-[#1e1e1e] border border-[#2e2e2e] rounded-lg px-8 py-9">
         <h2 className="text-white font-light text-center mb-1.5" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '20px' }}>
           {mode === "request" ? "Request access to JOBLUX" : "Welcome back."}
         </h2>
-        <p className="text-[#ccc] text-center mb-7" style={{ fontSize: '12px' }}>
+        <p className="text-[#888] text-center mb-7" style={{ fontSize: '12px' }}>
           {mode === "request" ? "By invitation or manual approval only." : "Sign in to your intelligence."}
         </p>
 
-        {/* Error banners */}
         {error === "pending" && (
           <div className="mb-5 p-3 bg-[#1a1a0f] border border-[#3a3520] rounded text-[12px] text-[#d4c878]">
             Your application is under review. You&apos;ll receive an email once approved.
@@ -139,44 +135,43 @@ function JoinContent() {
           </div>
         )}
 
-        {/* Email form or confirmation */}
         {emailSent ? (
           <div className="text-center py-4">
             <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[#1a1a0f] flex items-center justify-center">
               <MailIcon />
             </div>
-            <p className="text-sm text-[#e0e0e0] font-medium mb-1">Check your inbox</p>
-            <p className="text-xs text-[#ccc]">We sent a sign-in link to <span className="text-white">{email}</span></p>
+            <p className="text-sm text-white font-medium mb-1">Check your inbox</p>
+            <p className="text-xs text-[#888]">We sent a sign-in link to <span className="text-white">{email}</span></p>
           </div>
         ) : (
           <>
             <form onSubmit={handleMagicLink}>
-              <label htmlFor="email" className="block text-[9px] text-[#ccc] uppercase tracking-widest mb-2">Email address</label>
+              <label htmlFor="email" className="block text-[10px] text-white uppercase tracking-widest mb-2 font-medium">
+                Email address
+              </label>
               <input
                 id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com" required
-                className="w-full px-3 py-3 text-[13px] border border-[#1e1e1e] rounded-sm bg-[#0f0f0f] text-[#ccc] placeholder:text-[#555] focus:outline-none focus:border-[#333] transition-colors"
+                className="w-full px-4 py-3 text-[14px] border border-[#3a3a3a] rounded-md bg-[#2a2a2a] text-white placeholder:text-[#555] focus:outline-none focus:border-[#a58e28] transition-colors"
               />
-              <button type="submit" disabled={isSubmitting} className="w-full mt-3 py-3 bg-white text-black text-[11px] uppercase tracking-widest font-semibold rounded-sm hover:bg-[#f0f0f0] transition-colors disabled:opacity-50">
+              <button type="submit" disabled={isSubmitting} className="w-full mt-3 py-3 bg-white text-black text-[11px] uppercase tracking-widest font-semibold rounded-md hover:bg-[#f0f0f0] transition-colors disabled:opacity-50">
                 {isSubmitting ? "Sending..." : "Continue with email"}
               </button>
             </form>
 
-            {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[#1e1e1e]" />
+                <div className="w-full border-t border-[#2e2e2e]" />
               </div>
               <div className="relative flex justify-center">
-                <span className="bg-[#141414] px-4 text-[#888] uppercase tracking-widest" style={{ fontSize: '9px' }}>or</span>
+                <span className="bg-[#1e1e1e] px-4 text-[#555] uppercase tracking-widest" style={{ fontSize: '9px' }}>or</span>
               </div>
             </div>
 
-            {/* OAuth buttons row */}
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => signIn("google", { callbackUrl: "/join" })}
-                className="flex items-center justify-center gap-1.5 py-2.5 border border-[#1e1e1e] bg-[#111] text-[#ccc] rounded-sm hover:border-[#333] transition-colors"
+                className="flex items-center justify-center gap-1.5 py-2.5 border border-[#3a3a3a] bg-[#2a2a2a] text-white rounded-md hover:border-[#555] hover:bg-[#333] transition-colors"
                 style={{ fontSize: '11px' }}
               >
                 <GoogleIcon />
@@ -184,7 +179,7 @@ function JoinContent() {
               </button>
               <button
                 onClick={() => signIn("linkedin", { callbackUrl: "/join" })}
-                className="flex items-center justify-center gap-1.5 py-2.5 border border-[#1e1e1e] bg-[#111] text-[#ccc] rounded-sm hover:border-[#333] transition-colors"
+                className="flex items-center justify-center gap-1.5 py-2.5 border border-[#3a3a3a] bg-[#2a2a2a] text-white rounded-md hover:border-[#555] hover:bg-[#333] transition-colors"
                 style={{ fontSize: '11px' }}
               >
                 <LinkedInIcon />
@@ -192,21 +187,20 @@ function JoinContent() {
               </button>
               <button
                 disabled
-                className="flex items-center justify-center gap-1 py-2.5 border border-[#1e1e1e] bg-[#111] rounded-sm opacity-50 cursor-not-allowed"
+                className="flex items-center justify-center gap-1 py-2.5 border border-[#2e2e2e] bg-[#222] rounded-md opacity-40 cursor-not-allowed"
                 style={{ fontSize: '11px' }}
               >
                 <AppleIcon />
-                <span className="text-[#ccc]">Apple</span>
-                <span className="text-[#ccc] italic" style={{ fontSize: '9px' }}>soon</span>
+                <span className="text-[#888]">Apple</span>
+                <span className="text-[#666] italic" style={{ fontSize: '9px' }}>soon</span>
               </button>
             </div>
           </>
         )}
       </div>
 
-      {/* Help link */}
       <div className="text-center mt-5">
-        <a href="/contact" className="text-[#ccc] hover:text-white transition-colors" style={{ fontSize: '11px' }}>
+        <a href="/contact" className="text-[#666] hover:text-[#aaa] transition-colors" style={{ fontSize: '11px' }}>
           Need help signing in? &rarr;
         </a>
       </div>
@@ -216,11 +210,11 @@ function JoinContent() {
 
 export default function JoinPage() {
   return (
-    <main className="min-h-screen bg-[#1a1a1a] flex flex-col items-center justify-start px-4 pt-16 pb-12">
-      <p className="text-[#ccc] uppercase text-center mb-4" style={{ fontSize: '15px', letterSpacing: '0.2em' }}>
+    <main className="min-h-screen bg-[#1a1a1a] flex flex-col items-center justify-start px-4 pt-16 pb-8">
+      <p className="text-[#888] uppercase text-center mb-4" style={{ fontSize: '15px', letterSpacing: '0.2em' }}>
         Luxury Talent Intelligence
       </p>
-      <Suspense fallback={<div className="text-center text-sm text-[#ccc] py-8">Loading...</div>}>
+      <Suspense fallback={<div className="text-center text-sm text-[#888] py-8">Loading...</div>}>
         <JoinContent />
       </Suspense>
     </main>
