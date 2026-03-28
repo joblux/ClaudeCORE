@@ -10,11 +10,10 @@ const TIER_LABELS: Record<string, string> = {
 
 const STEPS = [
   { num: 1, label: 'Sign in' },
-  { num: 2, label: 'Profile' },
+  { num: 2, label: 'Tier' },
   { num: 3, label: 'Essentials' },
-  { num: 4, label: 'CV upload' },
-  { num: 5, label: 'Review' },
-  { num: 6, label: 'Pending' },
+  { num: 4, label: 'CV' },
+  { num: 5, label: 'Pending' },
 ]
 
 const COUNTRIES = [
@@ -41,48 +40,35 @@ const COUNTRIES = [
 ]
 
 const PHONE_CODES = [
-  { code: '+1', label: '+1 US' },
-  { code: '+44', label: '+44 UK' },
-  { code: '+33', label: '+33 FR' },
-  { code: '+49', label: '+49 DE' },
-  { code: '+39', label: '+39 IT' },
-  { code: '+34', label: '+34 ES' },
-  { code: '+41', label: '+41 CH' },
-  { code: '+32', label: '+32 BE' },
-  { code: '+31', label: '+31 NL' },
-  { code: '+971', label: '+971 AE' },
-  { code: '+966', label: '+966 SA' },
-  { code: '+212', label: '+212 MA' },
-  { code: '+86', label: '+86 CN' },
-  { code: '+81', label: '+81 JP' },
-  { code: '+91', label: '+91 IN' },
-  { code: '+55', label: '+55 BR' },
-  { code: '+52', label: '+52 MX' },
-  { code: '+61', label: '+61 AU' },
-  { code: '+27', label: '+27 ZA' },
-  { code: '+20', label: '+20 EG' },
+  { code: '+1', label: '\u{1F1FA}\u{1F1F8} +1' },
+  { code: '+44', label: '\u{1F1EC}\u{1F1E7} +44' },
+  { code: '+33', label: '\u{1F1EB}\u{1F1F7} +33' },
+  { code: '+49', label: '\u{1F1E9}\u{1F1EA} +49' },
+  { code: '+39', label: '\u{1F1EE}\u{1F1F9} +39' },
+  { code: '+34', label: '\u{1F1EA}\u{1F1F8} +34' },
+  { code: '+41', label: '\u{1F1E8}\u{1F1ED} +41' },
+  { code: '+32', label: '\u{1F1E7}\u{1F1EA} +32' },
+  { code: '+31', label: '\u{1F1F3}\u{1F1F1} +31' },
+  { code: '+46', label: '\u{1F1F8}\u{1F1EA} +46' },
+  { code: '+971', label: '\u{1F1E6}\u{1F1EA} +971' },
+  { code: '+966', label: '\u{1F1F8}\u{1F1E6} +966' },
+  { code: '+212', label: '\u{1F1F2}\u{1F1E6} +212' },
+  { code: '+213', label: '\u{1F1E9}\u{1F1FF} +213' },
+  { code: '+216', label: '\u{1F1F9}\u{1F1F3} +216' },
+  { code: '+20', label: '\u{1F1EA}\u{1F1EC} +20' },
+  { code: '+86', label: '\u{1F1E8}\u{1F1F3} +86' },
+  { code: '+81', label: '\u{1F1EF}\u{1F1F5} +81' },
+  { code: '+91', label: '\u{1F1EE}\u{1F1F3} +91' },
+  { code: '+55', label: '\u{1F1E7}\u{1F1F7} +55' },
+  { code: '+52', label: '\u{1F1F2}\u{1F1FD} +52' },
+  { code: '+61', label: '\u{1F1E6}\u{1F1FA} +61' },
+  { code: '+27', label: '\u{1F1FF}\u{1F1E6} +27' },
 ]
-
-const SECTORS = [
-  'Fashion & Leather Goods','Watches & Jewellery','Beauty & Fragrance','Hospitality & Hotels',
-  'Art & Culture','Automotive & Yachts','Real Estate & Architecture','Spirits & Wine',
-  'Retail & Distribution','Consulting & Services',
-]
-
-const DOMAINS = [
-  'Retail & Client Experience','Buying & Merchandising','Marketing & Communications','Product & Design',
-  'Finance & Controlling','HR & Talent','Operations & Supply Chain','Digital & E-commerce',
-  'Executive Leadership','Wholesale & Distribution','PR & Events','Legal & Compliance',
-]
-
-type Position = { title: string; company: string; dates: string }
-type Education = { institution: string; degree: string; dates: string }
 
 export default function CompleteRegistrationPage() {
   const router = useRouter()
   const { data: session, status, update } = useSession()
 
-  // Step state
   const [step, setStep] = useState(3)
 
   // Step 3 — Essentials
@@ -94,21 +80,11 @@ export default function CompleteRegistrationPage() {
   const [country, setCountry] = useState('')
   const [nationality, setNationality] = useState('')
 
-  // Step 4 — CV
+  // Step 4 — CV Upload
   const [cvFile, setCvFile] = useState<File | null>(null)
-  const [cvParsing, setCvParsing] = useState(false)
+  const [cvUploading, setCvUploading] = useState(false)
+  const [cvUrl, setCvUrl] = useState('')
   const [cvError, setCvError] = useState('')
-
-  // Step 5 — Extracted + editable
-  const [jobTitle, setJobTitle] = useState('')
-  const [company, setCompany] = useState('')
-  const [positions, setPositions] = useState<Position[]>([])
-  const [education, setEducation] = useState<Education[]>([])
-  const [certifications, setCertifications] = useState<string[]>([])
-  const [languages, setLanguages] = useState<string[]>([])
-  const [sectors, setSectors] = useState<string[]>([])
-  const [domains, setDomains] = useState<string[]>([])
-  const [contactPref, setContactPref] = useState('email')
 
   // General
   const [error, setError] = useState('')
@@ -137,46 +113,8 @@ export default function CompleteRegistrationPage() {
   const tierLabel = TIER_LABELS[role] || ''
   const fullPhone = phoneNumber ? `${phoneCode} ${phoneNumber}` : ''
 
-  // --- Handlers ---
-
-  const handleStep3Next = () => {
-    if (!firstName || !lastName || !city || !country || !nationality) {
-      setError('Please fill in all required fields.')
-      return
-    }
-    setError('')
-    setStep(4)
-  }
-
-  const handleCvUpload = async (file: File) => {
-    setCvFile(file)
-    setCvParsing(true)
-    setCvError('')
-    try {
-      const formData = new FormData()
-      formData.append('cv', file)
-      const res = await fetch('/api/members/cv-parse', { method: 'POST', body: formData })
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}))
-        throw new Error(d.error || 'Failed to parse CV')
-      }
-      const data = await res.json()
-      const ex = data.extracted
-      if (ex.currentJobTitle) setJobTitle(ex.currentJobTitle)
-      if (ex.currentCompany) setCompany(ex.currentCompany)
-      if (ex.positions?.length) setPositions(ex.positions)
-      if (ex.education?.length) setEducation(ex.education)
-      if (ex.certifications?.length) setCertifications(ex.certifications)
-      if (ex.languages?.length) setLanguages(ex.languages)
-      setCvParsing(false)
-      setStep(5)
-    } catch (err: unknown) {
-      setCvError(err instanceof Error ? err.message : 'Failed to parse CV')
-      setCvParsing(false)
-    }
-  }
-
-  const handleSubmit = async () => {
+  // --- Submit registration ---
+  const submitRegistration = async (uploadedCvUrl?: string) => {
     setIsSubmitting(true)
     setError('')
     try {
@@ -187,19 +125,12 @@ export default function CompleteRegistrationPage() {
           tier: role,
           firstName,
           lastName,
-          phone: contactPref === 'phone' ? fullPhone : (fullPhone || ''),
+          phone: fullPhone,
           city,
           country,
           nationality,
-          jobTitle,
-          company,
-          contactPref,
-          positions,
-          education,
-          certifications,
-          languages,
-          sectors: sectors.map((s, i) => ({ name: s, rank: i + 1 })),
-          domains: domains.map((d, i) => ({ name: d, rank: i + 1 })),
+          contactPref: 'email',
+          cv_url: uploadedCvUrl || cvUrl || null,
         }),
       })
       if (!res.ok) {
@@ -214,54 +145,85 @@ export default function CompleteRegistrationPage() {
     }
   }
 
-  const toggleMulti = (list: string[], setList: (v: string[]) => void, item: string, max: number) => {
-    if (list.includes(item)) {
-      setList(list.filter(i => i !== item))
-    } else if (list.length < max) {
-      setList([...list, item])
+  // --- Step 3 next ---
+  const handleStep3Next = () => {
+    if (!firstName || !lastName || !city || !country || !nationality) {
+      setError('Please fill in all required fields.')
+      return
+    }
+    setError('')
+    setStep(4)
+  }
+
+  // --- CV upload ---
+  const handleCvUpload = async (file: File) => {
+    setCvFile(file)
+    setCvUploading(true)
+    setCvError('')
+    try {
+      const formData = new FormData()
+      formData.append('cv', file)
+      const res = await fetch('/api/members/cv-upload', { method: 'POST', body: formData })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}))
+        throw new Error(d.error || 'Upload failed')
+      }
+      const data = await res.json()
+      setCvUrl(data.url)
+      setCvUploading(false)
+      await submitRegistration(data.url)
+    } catch (err: unknown) {
+      setCvError(err instanceof Error ? err.message : 'Upload failed')
+      setCvUploading(false)
+      setCvFile(null)
     }
   }
 
+  // --- Skip CV ---
+  const handleSkipCv = () => {
+    submitRegistration()
+  }
+
   // --- Shared styles ---
-  const inputClass = 'w-full px-3 py-3 border border-[#1e1e1e] bg-[#0f0f0f] text-[#ccc] outline-none focus:border-[#333] rounded-sm'
-  const selectClass = 'w-full px-3 py-3 border border-[#1e1e1e] bg-[#0f0f0f] text-[#ccc] outline-none focus:border-[#333] rounded-sm appearance-none'
+  const inputClass = 'w-full px-3 py-3 border border-[#2a2a2a] bg-[#0f0f0f] text-[#ccc] outline-none focus:border-[#444] rounded-sm'
+  const selectClass = 'w-full px-3 py-3 border border-[#2a2a2a] bg-[#0f0f0f] text-[#ccc] outline-none focus:border-[#444] rounded-sm appearance-none'
   const labelClass = 'block text-[#aaa] uppercase tracking-widest mb-2'
-  const sectionHeadClass = 'text-[#888] uppercase tracking-widest mb-4 pb-3 border-b border-[#1a1a1a]'
+  const sectionHeadClass = 'text-[#888] uppercase tracking-widest mb-4 pb-3 border-b border-[#2a2a2a]'
 
   return (
-    <main className="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-[520px] bg-[#1e1e1e] border border-[#1e1e1e] px-9 py-11">
+    <main className="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-4 py-6">
+      <div className="w-full max-w-[520px] bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm px-9 pt-8 pb-11">
 
-        {/* Progress bar — Steps 1-6 */}
-        <div className="flex items-center justify-center gap-0 mb-9">
+        {/* Progress bar — inside card */}
+        <div className="flex items-center justify-center gap-0 mb-8">
           {STEPS.map((s, i) => (
             <div key={s.num} className="flex items-center">
               <div className="flex items-center gap-1.5">
                 <div className={
                   'w-5 h-5 rounded-full flex items-center justify-center font-bold ' +
-                  (s.num < step ? 'bg-white text-black' : s.num === step ? 'bg-[#a58e28] text-black' : 'bg-[#1e1e1e] text-[#aaa]')
+                  (s.num < step ? 'bg-white text-black' : s.num === step ? 'bg-[#a58e28] text-black' : 'bg-[#333] text-[#888]')
                 } style={{ fontSize: '9px' }}>
-                  {s.num < step ? '✓' : s.num}
+                  {s.num < step ? '\u2713' : s.num}
                 </div>
                 <span className={
                   'uppercase tracking-widest ' +
-                  (s.num === step ? 'text-white font-semibold' : 'text-[#aaa]')
+                  (s.num === step ? 'text-white font-semibold' : s.num < step ? 'text-[#ccc]' : 'text-[#888]')
                 } style={{ fontSize: '9px' }}>{s.label}</span>
               </div>
               {i < STEPS.length - 1 && (
-                <div className={'w-4 h-px mx-1 ' + (s.num < step ? 'bg-white' : 'bg-[#2a2a2a]')} />
+                <div className={'w-5 h-px mx-1.5 ' + (s.num < step ? 'bg-white' : 'bg-[#333]')} />
               )}
             </div>
           ))}
         </div>
 
         {tierLabel && (
-          <div className="text-center text-[#aaa] uppercase tracking-widest mb-7 pb-5 border-b border-[#1a1a1a]" style={{ fontSize: '10px', letterSpacing: '2px' }}>
+          <div className="text-center text-[#aaa] uppercase tracking-widest mb-7 pb-5 border-b border-[#2a2a2a]" style={{ fontSize: '10px', letterSpacing: '2px' }}>
             {tierLabel} profile
           </div>
         )}
 
-        {error && <div className="mb-5 p-3 border border-[#2a2a2a] text-[#ccc] rounded-sm" style={{ fontSize: '12px' }}>{error}</div>}
+        {error && <div className="mb-5 p-3 border border-red-800 text-red-400 rounded-sm" style={{ fontSize: '12px' }}>{error}</div>}
 
         {/* ========== STEP 3 — Essentials ========== */}
         {step === 3 && (
@@ -285,7 +247,7 @@ export default function CompleteRegistrationPage() {
             <div className="mb-4">
               <label className={labelClass} style={{ fontSize: '9px' }}>Phone</label>
               <div className="flex gap-2">
-                <select value={phoneCode} onChange={e => setPhoneCode(e.target.value)} className={selectClass} style={{ fontSize: '12px', width: '110px', flexShrink: 0 }}>
+                <select value={phoneCode} onChange={e => setPhoneCode(e.target.value)} className={selectClass} style={{ fontSize: '12px', width: '120px', flexShrink: 0 }}>
                   {PHONE_CODES.map(pc => <option key={pc.code} value={pc.code}>{pc.label}</option>)}
                 </select>
                 <input type="tel" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} placeholder="" className={inputClass} style={{ fontSize: '13px' }} />
@@ -324,26 +286,26 @@ export default function CompleteRegistrationPage() {
         {step === 4 && (
           <div>
             <h2 className="text-white text-center font-normal mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '22px' }}>Upload your CV</h2>
-            <p className="text-[#aaa] text-center mb-8" style={{ fontSize: '12px' }}>We'll extract your experience to pre-fill your profile. PDF or Word accepted.</p>
+            <p className="text-[#aaa] text-center mb-8" style={{ fontSize: '12px' }}>Strongly recommended. PDF or Word accepted.</p>
 
-            {cvParsing ? (
+            {cvUploading || isSubmitting ? (
               <div className="flex flex-col items-center justify-center py-16">
                 <div className="w-8 h-8 border-2 border-[#333] border-t-[#a58e28] rounded-full animate-spin mb-4" />
-                <p className="text-[#aaa]" style={{ fontSize: '12px' }}>Parsing your document...</p>
+                <p className="text-[#aaa]" style={{ fontSize: '12px' }}>{cvUploading ? 'Uploading your document...' : 'Submitting your application...'}</p>
               </div>
             ) : (
               <>
                 <label className="block cursor-pointer">
-                  <div className={'border-2 border-dashed rounded-sm p-12 text-center transition-colors ' + (cvFile ? 'border-[#a58e28] bg-[#a58e2808]' : 'border-[#2a2a2a] hover:border-[#aaa]')}>
-                    {cvFile ? (
+                  <div className={'border-2 border-dashed rounded-sm p-12 text-center transition-colors ' + (cvFile && cvUrl ? 'border-[#a58e28] bg-[#a58e2808]' : 'border-[#333] hover:border-[#555]')}>
+                    {cvFile && cvUrl ? (
                       <div>
                         <div className="text-[#a58e28] mb-2" style={{ fontSize: '13px' }}>{cvFile.name}</div>
-                        <div className="text-[#aaa]" style={{ fontSize: '11px' }}>Click to change file</div>
+                        <div className="text-[#aaa]" style={{ fontSize: '11px' }}>Uploaded successfully</div>
                       </div>
                     ) : (
                       <div>
                         <div className="text-[#aaa] mb-2" style={{ fontSize: '32px' }}>+</div>
-                        <div className="text-[#aaa] mb-1" style={{ fontSize: '13px' }}>Drop your CV here or click to browse</div>
+                        <div className="text-[#ccc] mb-1" style={{ fontSize: '13px' }}>Drop your CV here or click to browse</div>
                         <div className="text-[#888]" style={{ fontSize: '11px' }}>PDF or Word (.doc, .docx)</div>
                       </div>
                     )}
@@ -359,160 +321,23 @@ export default function CompleteRegistrationPage() {
                   />
                 </label>
 
-                {cvError && <div className="mt-4 p-3 border border-[#2a2a2a] text-[#ccc] rounded-sm" style={{ fontSize: '12px' }}>{cvError}</div>}
+                {cvError && <div className="mt-4 p-3 border border-red-800 text-red-400 rounded-sm" style={{ fontSize: '12px' }}>{cvError}</div>}
+
+                <p className="text-[#888] text-center mt-6 mb-4" style={{ fontSize: '11px' }}>
+                  Don&apos;t have your CV handy? You can export it from LinkedIn, Indeed or any job platform as a PDF.
+                </p>
 
                 <button
                   type="button"
-                  onClick={() => setStep(5)}
-                  className="w-full mt-6 text-center text-[#aaa] hover:text-white transition-colors"
+                  onClick={handleSkipCv}
+                  disabled={isSubmitting}
+                  className="w-full text-center text-[#aaa] hover:text-white transition-colors disabled:opacity-50"
                   style={{ fontSize: '12px' }}
                 >
                   Skip for now &rarr;
                 </button>
               </>
             )}
-          </div>
-        )}
-
-        {/* ========== STEP 5 — Review & Complete ========== */}
-        {step === 5 && (
-          <div>
-            <h2 className="text-white text-center font-normal mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '22px' }}>Review & complete</h2>
-            <p className="text-[#aaa] text-center mb-8" style={{ fontSize: '12px' }}>Verify extracted information. Edit any field below.</p>
-
-            {/* Current position */}
-            <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Current position</div>
-            <div className="grid grid-cols-2 gap-3 mb-5">
-              <div>
-                <label className={labelClass} style={{ fontSize: '9px' }}>Job title</label>
-                <input type="text" value={jobTitle} onChange={e => setJobTitle(e.target.value)} placeholder="Retail Manager" className={inputClass} style={{ fontSize: '13px' }} />
-              </div>
-              <div>
-                <label className={labelClass} style={{ fontSize: '9px' }}>Company</label>
-                <input type="text" value={company} onChange={e => setCompany(e.target.value)} placeholder="Hermes" className={inputClass} style={{ fontSize: '13px' }} />
-              </div>
-            </div>
-
-            {/* Previous positions */}
-            <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Previous positions</div>
-            {positions.length === 0 && (
-              <p className="text-[#888] mb-4" style={{ fontSize: '11px' }}>No positions detected. Add them manually below.</p>
-            )}
-            {positions.map((pos, i) => (
-              <div key={i} className="grid grid-cols-3 gap-2 mb-3">
-                <input type="text" value={pos.title} onChange={e => { const p = [...positions]; p[i] = { ...p[i], title: e.target.value }; setPositions(p) }} placeholder="Title" className={inputClass} style={{ fontSize: '12px' }} />
-                <input type="text" value={pos.company} onChange={e => { const p = [...positions]; p[i] = { ...p[i], company: e.target.value }; setPositions(p) }} placeholder="Company" className={inputClass} style={{ fontSize: '12px' }} />
-                <div className="flex gap-1">
-                  <input type="text" value={pos.dates} onChange={e => { const p = [...positions]; p[i] = { ...p[i], dates: e.target.value }; setPositions(p) }} placeholder="Dates" className={inputClass + ' flex-1'} style={{ fontSize: '12px' }} />
-                  <button type="button" onClick={() => setPositions(positions.filter((_, j) => j !== i))} className="text-[#888] hover:text-[#bbb] px-1" style={{ fontSize: '14px' }}>&times;</button>
-                </div>
-              </div>
-            ))}
-            <button type="button" onClick={() => setPositions([...positions, { title: '', company: '', dates: '' }])} className="text-[#aaa] hover:text-[#ccc] mb-5" style={{ fontSize: '11px' }}>+ Add position</button>
-
-            {/* Education */}
-            <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Education</div>
-            {education.length === 0 && (
-              <p className="text-[#888] mb-4" style={{ fontSize: '11px' }}>No education detected. Add entries manually below.</p>
-            )}
-            {education.map((edu, i) => (
-              <div key={i} className="grid grid-cols-3 gap-2 mb-3">
-                <input type="text" value={edu.institution} onChange={e => { const ed = [...education]; ed[i] = { ...ed[i], institution: e.target.value }; setEducation(ed) }} placeholder="Institution" className={inputClass} style={{ fontSize: '12px' }} />
-                <input type="text" value={edu.degree} onChange={e => { const ed = [...education]; ed[i] = { ...ed[i], degree: e.target.value }; setEducation(ed) }} placeholder="Degree" className={inputClass} style={{ fontSize: '12px' }} />
-                <div className="flex gap-1">
-                  <input type="text" value={edu.dates} onChange={e => { const ed = [...education]; ed[i] = { ...ed[i], dates: e.target.value }; setEducation(ed) }} placeholder="Dates" className={inputClass + ' flex-1'} style={{ fontSize: '12px' }} />
-                  <button type="button" onClick={() => setEducation(education.filter((_, j) => j !== i))} className="text-[#888] hover:text-[#bbb] px-1" style={{ fontSize: '14px' }}>&times;</button>
-                </div>
-              </div>
-            ))}
-            <button type="button" onClick={() => setEducation([...education, { institution: '', degree: '', dates: '' }])} className="text-[#aaa] hover:text-[#ccc] mb-5" style={{ fontSize: '11px' }}>+ Add education</button>
-
-            {/* Certifications */}
-            <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Certifications</div>
-            {certifications.length === 0 && (
-              <p className="text-[#888] mb-4" style={{ fontSize: '11px' }}>No certifications detected.</p>
-            )}
-            {certifications.map((cert, i) => (
-              <div key={i} className="flex gap-1 mb-2">
-                <input type="text" value={cert} onChange={e => { const c = [...certifications]; c[i] = e.target.value; setCertifications(c) }} placeholder="Certification" className={inputClass + ' flex-1'} style={{ fontSize: '12px' }} />
-                <button type="button" onClick={() => setCertifications(certifications.filter((_, j) => j !== i))} className="text-[#888] hover:text-[#bbb] px-1" style={{ fontSize: '14px' }}>&times;</button>
-              </div>
-            ))}
-            <button type="button" onClick={() => setCertifications([...certifications, ''])} className="text-[#aaa] hover:text-[#ccc] mb-5" style={{ fontSize: '11px' }}>+ Add certification</button>
-
-            {/* Languages */}
-            <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Languages</div>
-            {languages.length === 0 && (
-              <p className="text-[#888] mb-4" style={{ fontSize: '11px' }}>No languages detected.</p>
-            )}
-            {languages.map((lang, i) => (
-              <div key={i} className="flex gap-1 mb-2">
-                <input type="text" value={lang} onChange={e => { const l = [...languages]; l[i] = e.target.value; setLanguages(l) }} placeholder="Language" className={inputClass + ' flex-1'} style={{ fontSize: '12px' }} />
-                <button type="button" onClick={() => setLanguages(languages.filter((_, j) => j !== i))} className="text-[#888] hover:text-[#bbb] px-1" style={{ fontSize: '14px' }}>&times;</button>
-              </div>
-            ))}
-            <button type="button" onClick={() => setLanguages([...languages, ''])} className="text-[#aaa] hover:text-[#ccc] mb-7" style={{ fontSize: '11px' }}>+ Add language</button>
-
-            {/* Sectors — max 3 */}
-            <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Sectors <span className="text-[#aaa] normal-case tracking-normal">(select up to 3)</span></div>
-            <div className="flex flex-wrap gap-2 mb-7">
-              {SECTORS.map(s => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => toggleMulti(sectors, setSectors, s, 3)}
-                  className={'px-3 py-2 border rounded-sm transition-colors ' + (sectors.includes(s) ? 'border-[#a58e28] text-[#a58e28] bg-[#a58e2810]' : 'border-[#333] text-[#ccc] hover:border-[#555]')}
-                  style={{ fontSize: '11px' }}
-                >{s}</button>
-              ))}
-            </div>
-
-            {/* Domains — max 2 */}
-            <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>Domains <span className="text-[#aaa] normal-case tracking-normal">(select up to 2)</span></div>
-            <div className="flex flex-wrap gap-2 mb-7">
-              {DOMAINS.map(d => (
-                <button
-                  key={d}
-                  type="button"
-                  onClick={() => toggleMulti(domains, setDomains, d, 2)}
-                  className={'px-3 py-2 border rounded-sm transition-colors ' + (domains.includes(d) ? 'border-[#a58e28] text-[#a58e28] bg-[#a58e2810]' : 'border-[#333] text-[#ccc] hover:border-[#555]')}
-                  style={{ fontSize: '11px' }}
-                >{d}</button>
-              ))}
-            </div>
-
-            {/* Contact preference */}
-            <div className={sectionHeadClass} style={{ fontSize: '9px', letterSpacing: '2px' }}>How should we reach you</div>
-            <div className={'flex items-start gap-3 p-3 border cursor-pointer mb-2 rounded-sm ' + (contactPref === 'email' ? 'border-[#333] bg-[#1e1e1e]' : 'border-[#1a1a1a] bg-[#111]')} onClick={() => setContactPref('email')}>
-              <div className={'w-3.5 h-3.5 rounded-full border flex-shrink-0 mt-0.5 ' + (contactPref === 'email' ? 'border-[#777]' : 'border-[#2a2a2a]')} style={contactPref === 'email' ? { background: 'radial-gradient(circle, #fff 40%, transparent 40%)' } : {}} />
-              <div>
-                <div className="text-white font-medium" style={{ fontSize: '12px' }}>Email only</div>
-                <div className="text-[#aaa] mt-0.5" style={{ fontSize: '11px' }}>We reach out when relevant opportunities arise</div>
-              </div>
-            </div>
-            <div className={'flex items-start gap-3 p-3 border cursor-pointer mb-7 rounded-sm ' + (contactPref === 'phone' ? 'border-[#333] bg-[#1e1e1e]' : 'border-[#1a1a1a] bg-[#111]')} onClick={() => setContactPref('phone')}>
-              <div className={'w-3.5 h-3.5 rounded-full border flex-shrink-0 mt-0.5 ' + (contactPref === 'phone' ? 'border-[#777]' : 'border-[#2a2a2a]')} style={contactPref === 'phone' ? { background: 'radial-gradient(circle, #fff 40%, transparent 40%)' } : {}} />
-              <div>
-                <div className="text-white font-medium" style={{ fontSize: '12px' }}>Email and phone</div>
-                <div className="text-[#aaa] mt-0.5" style={{ fontSize: '11px' }}>For time-sensitive or confidential assignments</div>
-              </div>
-            </div>
-
-            {/* Privacy */}
-            <div className="border-l border-[#2a2a2a] pl-4 mb-7">
-              <p className="text-[#888] leading-relaxed" style={{ fontSize: '11px' }}>Your data is confidential. Never sold, never shared without your explicit consent, never used for advertising. Delete your profile at any time.</p>
-            </div>
-
-            {/* Navigation */}
-            <div className="flex gap-3">
-              <button type="button" onClick={() => setStep(4)} className="px-6 py-3.5 border border-[#1e1e1e] text-[#aaa] uppercase tracking-widest font-semibold rounded-sm hover:border-[#333] transition-colors" style={{ fontSize: '10px', letterSpacing: '2px' }}>
-                Back
-              </button>
-              <button type="button" onClick={handleSubmit} disabled={isSubmitting} className="flex-1 py-3.5 bg-white text-black uppercase tracking-widest font-semibold disabled:opacity-40 rounded-sm hover:bg-[#f0f0f0] transition-colors" style={{ fontSize: '10px', letterSpacing: '2px' }}>
-                {isSubmitting ? 'Submitting...' : 'Submit my request'}
-              </button>
-            </div>
-            <p className="text-center mt-4 text-[#888]" style={{ fontSize: '11px' }}>All profiles are reviewed by the JOBLUX team.</p>
           </div>
         )}
       </div>

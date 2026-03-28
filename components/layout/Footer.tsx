@@ -12,13 +12,13 @@ export function Footer() {
             <div className="mb-3"><Image src="/logos/joblux-header.png" alt="JOBLUX" width={86} height={23} className="h-5 w-auto brightness-0 invert" /></div>
             <p className="text-[13px] text-[#aaa] leading-relaxed mb-6">Luxury Talent Intelligence</p>
             <div className="flex flex-col gap-1.5 mb-2">
-              <p className="text-[13px] text-[#777]">No ads.</p>
-              <p className="text-[13px] text-[#777]">No noise.</p>
-              <p className="text-[13px] text-[#777]">No data reselling.</p>
-              <p className="text-[13px] text-[#777]">Global.</p>
+              <p className="text-[13px] text-[#aaa]">No ads.</p>
+              <p className="text-[13px] text-[#aaa]">No noise.</p>
+              <p className="text-[13px] text-[#aaa]">No data reselling.</p>
+              <p className="text-[13px] text-[#aaa]">Global.</p>
             </div>
           </div>
-          <p className="text-[13px] text-[#555] leading-relaxed pt-3">Powered by luxury<br/>industry professionals.</p>
+          <p className="text-[13px] text-[#aaa] leading-relaxed pt-3">Powered by luxury<br/>industry professionals.</p>
         </div>
 
         {/* Intelligence */}
@@ -44,7 +44,7 @@ export function Footer() {
           </div>
           <div className="border-t border-[#222] pt-6">
             <Link href="/escape" className="text-[16px] text-[#a58e28] italic font-serif block mb-2">Escape</Link>
-            <p className="text-[12px] text-[#666]">Curated travels.</p>
+            <p className="text-[12px] text-[#aaa]">Curated travels.</p>
           </div>
         </div>
 
@@ -65,7 +65,7 @@ export function Footer() {
       <div className="border-t border-[#1e1e1e] px-7 py-4">
         <div className="max-w-[1200px] mx-auto flex items-center justify-between">
           <p className="text-[12px] text-[#888]">© 2026 JOBLUX LLC.</p>
-          <p className="text-[12px] text-[#666] italic" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Luxury, decoded.</p>
+          <p className="text-[12px] text-[#aaa] italic" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Luxury, decoded.</p>
         </div>
       </div>
     </footer>

@@ -216,8 +216,8 @@ function JoinContent() {
 
 export default function JoinPage() {
   return (
-    <main className="min-h-screen bg-[#1a1a1a] flex flex-col items-center justify-center px-4 py-8">
-      <p className="text-[#ccc] uppercase text-center mb-7" style={{ fontSize: '15px', letterSpacing: '0.2em' }}>
+    <main className="min-h-screen bg-[#1a1a1a] flex flex-col items-center justify-center px-4 py-4">
+      <p className="text-[#ccc] uppercase text-center mb-4" style={{ fontSize: '15px', letterSpacing: '0.2em' }}>
         Luxury Talent Intelligence
       </p>
       <Suspense fallback={<div className="text-center text-sm text-[#ccc] py-8">Loading...</div>}>
