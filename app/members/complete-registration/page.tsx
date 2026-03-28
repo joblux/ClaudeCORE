@@ -209,7 +209,7 @@ export default function CompleteRegistrationPage() {
       <div className="w-full max-w-[520px] bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm px-9 pt-8 pb-11">
 
         {/* Progress bar — inside card */}
-        <div className="flex items-center justify-start gap-0 mb-8">
+        <div className="flex items-center justify-center gap-0 mb-8">
           {STEPS.map((s, i) => (
             <div key={s.num} className="flex items-center">
               <div className="flex items-center gap-1.5">

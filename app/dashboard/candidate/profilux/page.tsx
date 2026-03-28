@@ -238,7 +238,7 @@ export default function ProfiluxPage() {
     fontFamily: 'Inter, sans-serif', outline: 'none', boxSizing: 'border-box',
   }
   const labelStyle: React.CSSProperties = {
-    fontSize: '11px', color: '#aaa', letterSpacing: '0.06em', marginBottom: '8px', display: 'block',
+    fontSize: '10px', color: '#4a9eff', letterSpacing: '0.1em', marginBottom: '8px', display: 'block', fontWeight: 600, textTransform: 'uppercase' as const,
   }
   const pillStyle = (active: boolean): React.CSSProperties => ({
     padding: '7px 14px', borderRadius: '3px', fontSize: '12px', cursor: 'pointer',
@@ -268,7 +268,7 @@ export default function ProfiluxPage() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <Link href="/dashboard/candidate" style={{ color: '#aaa', fontSize: '12px', textDecoration: 'none' }}>
-              ← Dashboard
+              ⟵ Dashboard
             </Link>
             <div style={{ width: '1px', height: '14px', background: '#2a2a2a' }} />
             <span style={{ fontSize: '12px', color: '#999' }}>
@@ -277,15 +277,15 @@ export default function ProfiluxPage() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{
-              background: '#2a2a2a', border: '1px solid #666', color: '#ffffff',
-              fontSize: '10px', letterSpacing: '0.08em', padding: '3px 10px',
+              background: 'transparent', border: '1px solid #4a9eff', color: '#4a9eff',
+              fontSize: '10px', letterSpacing: '0.1em', padding: '4px 12px', fontWeight: 600,
               borderRadius: '3px', fontWeight: 500,
             }}>
               {(session?.user as any)?.role?.toUpperCase() || 'MEMBER'}
             </span>
             <button onClick={handleSave} disabled={saving} style={{
-              background: 'transparent', border: '1px solid #555', color: '#ccc',
-              fontSize: '11px', padding: '5px 12px', borderRadius: '4px',
+              background: '#ffffff', border: 'none', color: '#000',
+              fontSize: '11px', fontWeight: 700, padding: '6px 14px', borderRadius: '4px',
               cursor: 'pointer', fontFamily: 'Inter, sans-serif',
             }}>
               {saving ? 'Saving...' : 'Save draft'}
@@ -338,23 +338,23 @@ export default function ProfiluxPage() {
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px', padding: '13px 18px',
                   background: 'transparent', border: 'none',
-                  borderBottom: currentStep === step.id ? '2px solid #ffffff' : '2px solid transparent',
+                  borderBottom: currentStep === step.id ? '2px solid #ffffff' : completedSteps.includes(step.id) ? '2px solid #4a9eff' : '2px solid transparent',
                   cursor: 'pointer', whiteSpace: 'nowrap',
                 }}
               >
                 <div style={{
                   width: '22px', height: '22px', borderRadius: '50%', flexShrink: 0,
-                  background: completedSteps.includes(step.id) || currentStep === step.id ? '#ffffff' : '#222',
-                  border: `1px solid ${completedSteps.includes(step.id) || currentStep === step.id ? '#ffffff' : '#333'}`,
+                  background: completedSteps.includes(step.id) ? '#4a9eff' : currentStep === step.id ? '#ffffff' : '#222',
+                  border: `1px solid ${completedSteps.includes(step.id) ? '#4a9eff' : currentStep === step.id ? '#ffffff' : '#444'}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '10px', fontWeight: 500,
-                  color: completedSteps.includes(step.id) || currentStep === step.id ? '#000' : '#666',
+                  color: completedSteps.includes(step.id) ? '#000' : currentStep === step.id ? '#000' : '#555', fontWeight: 700,
                 }}>
                   {completedSteps.includes(step.id) ? '✓' : step.id}
                 </div>
                 <span style={{
                   fontSize: '12px', fontFamily: 'Inter, sans-serif',
-                  color: currentStep === step.id ? '#fff' : completedSteps.includes(step.id) ? '#777' : '#555',
+                  color: completedSteps.includes(step.id) ? '#4a9eff' : currentStep === step.id ? '#ffffff' : '#666', fontWeight: completedSteps.includes(step.id) || currentStep === step.id ? 600 : 500,
                   fontWeight: currentStep === step.id ? 500 : 400,
                 }}>
                   {step.label}
@@ -565,7 +565,7 @@ export default function ProfiluxPage() {
                   </div>
                   <label style={{ position: 'relative', width: '40px', height: '22px', flexShrink: 0, cursor: 'pointer' }}>
                     <input type="checkbox" checked={profile.sharingEnabled} onChange={e => handleToggleSharing(e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
-                    <span style={{ position: 'absolute', inset: 0, background: profile.sharingEnabled ? 'rgba(255,255,255,0.15)' : '#2a2a2a', borderRadius: '11px', border: `1px solid ${profile.sharingEnabled ? '#ffffff' : '#333'}` }}>
+                    <span style={{ position: 'absolute', inset: 0, background: completeness < 100 ? '#1a1a1a' : profile.sharingEnabled ? 'rgba(255,255,255,0.15)' : '#2a2a2a', borderRadius: '11px', border: `1px solid ${completeness < 100 ? '#333' : profile.sharingEnabled ? '#ffffff' : '#333'}` }}>
                       <span style={{ position: 'absolute', width: '16px', height: '16px', left: profile.sharingEnabled ? '20px' : '2px', top: '2px', background: profile.sharingEnabled ? '#ffffff' : '#555', borderRadius: '50%', transition: '0.2s' }} />
                     </span>
                   </label>
@@ -632,7 +632,7 @@ export default function ProfiluxPage() {
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                   <button onClick={handleSave} style={{ background: '#ffffff', border: 'none', color: '#000', fontSize: '13px', fontWeight: 500, padding: '11px 26px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>↓ Download profile</button>
                   <Link href={`/${profile.shareSlug || ''}`} style={{ background: 'transparent', border: '1px solid #333', color: '#888', fontSize: '13px', padding: '11px 20px', borderRadius: '4px', textDecoration: 'none', display: 'inline-block' }}>View my profile →</Link>
-                  <Link href="/dashboard/candidate" style={{ background: 'transparent', border: '1px solid #333', color: '#888', fontSize: '13px', padding: '11px 20px', borderRadius: '4px', textDecoration: 'none', display: 'inline-block' }}>← Dashboard</Link>
+                  <Link href="/dashboard/candidate" style={{ background: 'transparent', border: '1px solid #333', color: '#888', fontSize: '13px', padding: '11px 20px', borderRadius: '4px', textDecoration: 'none', display: 'inline-block' }}>⟵ Dashboard</Link>
                 </div>
               </div>
             )}

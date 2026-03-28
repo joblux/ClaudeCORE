@@ -83,7 +83,7 @@ export default function DashboardPage() {
             </div>
             <div className="text-[11px] text-[#444]">4 sections remaining · Complete to unlock full matching</div>
           </div>
-          <Link href="/dashboard/candidate/profilux" className="bg-[#a58e28] text-[#1a1a1a] text-xs font-semibold px-4 py-2 rounded-lg hover:bg-[#c4a832] transition-colors whitespace-nowrap">
+          <Link href="/dashboard/candidate/profilux" className="bg-white text-[#1a1a1a] text-xs font-semibold px-4 py-2 rounded-lg hover:bg-[#c4a832] transition-colors whitespace-nowrap">
             Continue →
           </Link>
         </div>
