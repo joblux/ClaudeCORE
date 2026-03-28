@@ -7,8 +7,8 @@ import { signOut } from 'next-auth/react'
 import { useRequireAdmin } from '@/lib/auth-hooks'
 import {
   LayoutDashboard, BarChart3, Briefcase, Kanban, MessageSquare,
-  Users, Star, Send, FileText, BookOpen, DollarSign, FileCode,
-  Menu, X, LogOut, Power, Images, PenLine, MessageCircle, Mail,
+  Users, Star, Send, FileText, BookOpen, DollarSign,
+  Menu, X, LogOut, Images, PenLine, MessageCircle, Mail,
   Compass, ClipboardList, Settings
 } from 'lucide-react'
 
@@ -42,11 +42,11 @@ const NAV_SECTIONS = [
     items: [
       { label: 'WikiLux', href: '/admin/wikilux', icon: BookOpen },
       { label: 'Insights', href: '/admin/articles', icon: FileText },
-      { label: 'Editorial Review', href: '/admin/bloglux/comments', icon: MessageCircle, countKey: 'pending_comments', badgeColor: 'blue' },
+      { label: 'Editorial Review', href: '/admin/bloglux/comments', icon: MessageCircle, countKey: 'pending_comments' },
       { label: 'Intelligence Queue', href: '/admin/articles/new', icon: PenLine },
       { label: 'Salary Intelligence', href: '/salaries', icon: DollarSign },
       { label: 'Media Library', href: '/admin/media', icon: Images },
-      { label: 'Escape', href: '/admin/escape', icon: Compass, highlight: true },
+      { label: 'Escape', href: '/admin/escape', icon: Compass },
     ],
   },
   {
@@ -111,8 +111,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0d1117] flex items-center justify-center">
-        <div className="w-5 h-5 border border-[#30363d] border-t-[#58a6ff] rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center">
+        <div className="w-5 h-5 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin" />
       </div>
     )
   }
@@ -133,36 +133,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <nav className="flex-1 overflow-y-auto py-3 px-2.5">
       {NAV_SECTIONS.map((section) => (
         <div key={section.label} className="mb-5">
-          <div className="text-[10px] tracking-[0.14em] uppercase text-[#484f58] px-2.5 mb-2 font-medium">
+          <div className="text-[10px] tracking-[0.14em] uppercase text-[#aaa] px-2.5 mb-2 font-semibold">
             {section.label}
           </div>
           {section.items.map((item) => {
             const Icon = item.icon
             const active = isActive(item.href, (item as any).exact)
             const count = (item as any).countKey ? counts[(item as any).countKey] : 0
-            const isBlue = (item as any).badgeColor === 'blue'
-            const isHighlight = (item as any).highlight
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={mobile ? () => setMobileOpen(false) : undefined}
-                className={`flex items-center gap-2.5 py-[7px] px-2.5 rounded mb-[1px] text-[13px] transition-colors ${
+                className={`flex items-center gap-2.5 py-[7px] px-2.5 rounded-md mb-[1px] text-[13px] transition-colors no-underline ${
                   active
-                    ? 'bg-[#1f2937] text-white border-l-[3px] border-[#58a6ff] pl-[7px]'
-                    : isHighlight
-                      ? 'text-[#58a6ff] hover:bg-[#1f2937]/50 hover:text-[#79c0ff] border-l-[3px] border-transparent pl-[7px]'
-                      : 'text-[#8b949e] hover:bg-[#1f2937]/50 hover:text-[#e6edf3] border-l-[3px] border-transparent pl-[7px]'
+                    ? 'bg-[#f0f0f0] text-[#111] font-medium'
+                    : 'text-[#666] hover:bg-[#f5f5f5] hover:text-[#111]'
                 }`}
               >
                 <Icon size={15} className="flex-shrink-0" />
                 <span className="flex-1 truncate">{item.label}</span>
                 {count > 0 && (
-                  <span className={`text-[10px] font-bold px-1.5 py-[1px] rounded-full min-w-[18px] text-center ${
-                    isBlue
-                      ? 'bg-[#58a6ff] text-[#0d1117]'
-                      : 'bg-[#f0883e] text-[#0d1117]'
-                  }`}>
+                  <span className="text-[10px] font-bold px-1.5 py-[1px] rounded-full min-w-[18px] text-center bg-[#111] text-white">
                     {count}
                   </span>
                 )}
@@ -178,19 +170,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const renderSidebarFooter = () => (
     <>
       {/* Live indicator */}
-      <div className="px-4 py-3 border-t border-[#30363d]">
+      <div className="px-4 py-3 border-t border-[#e8e8e8]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${maintenanceMode ? 'bg-red-500' : 'bg-[#3fb950]'}`} />
-            <span className="text-[11px] text-[#8b949e]">
-              {maintenanceMode ? 'Offline' : 'Live'} · luxuryrecruiter.com
+            <span className={`w-2 h-2 rounded-full ${maintenanceMode ? 'bg-red-500' : 'bg-green-500'}`} />
+            <span className="text-[11px] text-[#999]">
+              {maintenanceMode ? 'Offline' : 'Live'} &middot; luxuryrecruiter.com
             </span>
           </div>
           <button
             onClick={toggleMaintenance}
             disabled={maintenanceLoading}
             className={`relative w-8 h-[18px] rounded-full transition-colors ${
-              maintenanceMode ? 'bg-red-500/60' : 'bg-[#3fb950]/60'
+              maintenanceMode ? 'bg-red-400' : 'bg-green-400'
             } ${maintenanceLoading ? 'opacity-50' : ''}`}
             title={maintenanceMode ? 'Site is offline — click to go live' : 'Site is live — click to go offline'}
           >
@@ -204,19 +196,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* Admin profile + sign out */}
-      <div className="px-4 py-3 border-t border-[#30363d]">
+      <div className="px-4 py-3 border-t border-[#e8e8e8]">
         <div className="flex items-center gap-2.5 mb-3">
-          <div className="w-8 h-8 rounded-full bg-[#21262d] border border-[#30363d] text-white text-[11px] font-medium flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-full bg-[#e8e8e8] text-[#666] text-[11px] font-medium flex items-center justify-center flex-shrink-0">
             {initials}
           </div>
           <div className="min-w-0">
-            <div className="text-[13px] text-[#e6edf3] truncate">{name || email || 'Admin'}</div>
-            <div className="text-[11px] text-[#484f58]">Administrator</div>
+            <div className="text-[13px] text-[#111] truncate">{name || email || 'Admin'}</div>
+            <div className="text-[11px] text-[#999]">Administrator</div>
           </div>
         </div>
         <button
           onClick={() => signOut({ redirect: false }).then(() => { window.location.href = '/'; })}
-          className="w-full flex items-center justify-center gap-2 py-2 text-[12px] text-[#f85149] border border-[#3d1f1f] bg-[#2d1212] rounded hover:bg-[#3d1f1f] transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-2 text-[12px] text-[#dc2626] border border-[#fecaca] bg-[#fef2f2] rounded-md hover:bg-[#fee2e2] transition-colors"
         >
           <LogOut size={12} />
           Sign out
@@ -227,12 +219,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   /* ── Desktop sidebar ── */
   const desktopSidebar = (
-    <aside className="hidden lg:flex lg:flex-col w-[220px] min-h-screen bg-[#161b22] border-r border-[#30363d] flex-shrink-0">
+    <aside className="hidden lg:flex lg:flex-col w-[220px] min-h-screen bg-white border-r border-[#e8e8e8] flex-shrink-0">
       {/* Logo + badge */}
-      <div className="px-4 py-4 border-b border-[#30363d]">
-        <Link href="/admin/dashboard" className="flex items-center gap-2.5">
-          <span className="text-[16px] font-bold tracking-[0.08em] text-[#e6edf3]">JOBLUX</span>
-          <span className="text-[10px] tracking-wide px-2 py-0.5 bg-[#2d1b00] text-[#f0883e] border border-[#3d2200] rounded font-medium">
+      <div className="px-4 py-4 border-b border-[#e8e8e8]">
+        <Link href="/admin/dashboard" className="flex items-center gap-2.5 no-underline">
+          <span className="text-[16px] font-bold tracking-[0.08em] text-[#111]">JOBLUX</span>
+          <span className="text-[10px] tracking-wide px-2 py-0.5 bg-[#f5f5f5] text-[#555] border border-[#e8e8e8] rounded font-medium">
             ADMIN
           </span>
         </Link>
@@ -245,15 +237,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   /* ── Mobile sidebar ── */
   const mobileSidebar = (
-    <aside className="w-[280px] min-h-screen bg-[#161b22] flex flex-col flex-shrink-0">
-      <div className="px-5 py-4 border-b border-[#30363d] flex items-center justify-between">
-        <Link href="/admin/dashboard" className="flex items-center gap-2.5">
-          <span className="text-[16px] font-bold tracking-[0.08em] text-[#e6edf3]">JOBLUX</span>
-          <span className="text-[10px] tracking-wide px-2 py-0.5 bg-[#2d1b00] text-[#f0883e] border border-[#3d2200] rounded font-medium">
+    <aside className="w-[280px] min-h-screen bg-white flex flex-col flex-shrink-0">
+      <div className="px-5 py-4 border-b border-[#e8e8e8] flex items-center justify-between">
+        <Link href="/admin/dashboard" className="flex items-center gap-2.5 no-underline">
+          <span className="text-[16px] font-bold tracking-[0.08em] text-[#111]">JOBLUX</span>
+          <span className="text-[10px] tracking-wide px-2 py-0.5 bg-[#f5f5f5] text-[#555] border border-[#e8e8e8] rounded font-medium">
             ADMIN
           </span>
         </Link>
-        <button onClick={() => setMobileOpen(false)} className="text-[#8b949e] hover:text-[#e6edf3] p-1">
+        <button onClick={() => setMobileOpen(false)} className="text-[#999] hover:text-[#111] p-1">
           <X size={18} />
         </button>
       </div>
@@ -263,14 +255,68 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   )
 
   return (
-    <div className="flex min-h-screen bg-[#0d1117]">
+    <div className="flex min-h-screen bg-[#f5f5f5]">
+      {/* Global admin style overrides */}
+      <style>{`
+        .admin-content [style*="color: #a58e28"],
+        .admin-content [style*="color:#a58e28"] { color: #444 !important; }
+        .admin-content [style*="color: rgb(165, 142, 40)"] { color: #444 !important; }
+        .admin-content [style*="border-color: #a58e28"],
+        .admin-content [style*="border-color:#a58e28"] { border-color: #e8e8e8 !important; }
+        .admin-content [style*="border-top-color: #a58e28"],
+        .admin-content [style*="border-top-color:#a58e28"] { border-top-color: #111 !important; }
+        .admin-content [style*="background-color: #a58e28"],
+        .admin-content [style*="background-color:#a58e28"],
+        .admin-content [style*="background: #a58e28"],
+        .admin-content [style*="background:#a58e28"] { background-color: #111 !important; }
+        .admin-content [style*="background: #0d1117"],
+        .admin-content [style*="background:#0d1117"],
+        .admin-content [style*="background-color: #0d1117"],
+        .admin-content [style*="background-color:#0d1117"] { background-color: #f5f5f5 !important; }
+        .admin-content [style*="background: #161b22"],
+        .admin-content [style*="background:#161b22"],
+        .admin-content [style*="background-color: #161b22"],
+        .admin-content [style*="background-color:#161b22"] { background-color: #fff !important; }
+        .admin-content [style*="background: #1a1a1a"],
+        .admin-content [style*="background:#1a1a1a"],
+        .admin-content [style*="background-color: #1a1a1a"],
+        .admin-content [style*="background-color:#1a1a1a"] { background-color: #111 !important; }
+        .admin-content [style*="background: #0f0f0f"],
+        .admin-content [style*="background:#0f0f0f"],
+        .admin-content [style*="background-color: #0f0f0f"],
+        .admin-content [style*="background-color:#0f0f0f"] { background-color: #f5f5f5 !important; }
+        .admin-content [style*="background: #141414"],
+        .admin-content [style*="background:#141414"],
+        .admin-content [style*="background-color: #141414"],
+        .admin-content [style*="background-color:#141414"] { background-color: #f5f5f5 !important; }
+        .admin-content [style*="border-color: #30363d"],
+        .admin-content [style*="border-color:#30363d"],
+        .admin-content [style*="border: 1px solid #30363d"] { border-color: #e8e8e8 !important; }
+        .admin-content [style*="color: #e6edf3"],
+        .admin-content [style*="color:#e6edf3"] { color: #111 !important; }
+        .admin-content [style*="color: #8b949e"],
+        .admin-content [style*="color:#8b949e"] { color: #999 !important; }
+        .admin-content [style*="color: #484f58"],
+        .admin-content [style*="color:#484f58"] { color: #999 !important; }
+        .admin-content [style*="font-family: Playfair"],
+        .admin-content [style*="font-family:Playfair"],
+        .admin-content [style*="font-family: 'Playfair"] { font-family: system-ui, -apple-system, sans-serif !important; }
+        .admin-content [style*="background: #fafaf5"],
+        .admin-content [style*="background:#fafaf5"],
+        .admin-content [style*="background-color: #fafaf5"],
+        .admin-content [style*="background-color:#fafaf5"] { background-color: #f5f5f5 !important; }
+        .admin-content [style*="border-color: #e8e2d8"],
+        .admin-content [style*="border-color:#e8e2d8"],
+        .admin-content [style*="border: 1px solid #e8e2d8"] { border-color: #e8e8e8 !important; }
+      `}</style>
+
       {/* Desktop sidebar */}
       {desktopSidebar}
 
       {/* Mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
+          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
           <div className="relative z-10 w-[280px] h-full">{mobileSidebar}</div>
         </div>
       )}
@@ -278,41 +324,41 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main content */}
       <div className="flex-1 min-w-0">
         {/* Mobile header */}
-        <div className="lg:hidden bg-[#161b22] px-4 py-3 flex items-center justify-between sticky top-0 z-40 border-b border-[#30363d]">
-          <span className="text-[15px] font-bold tracking-[0.08em] text-[#e6edf3]">JOBLUX</span>
+        <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between sticky top-0 z-40 border-b border-[#e8e8e8]">
+          <span className="text-[15px] font-bold tracking-[0.08em] text-[#111]">JOBLUX</span>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="text-[#8b949e] hover:text-[#e6edf3] p-2"
+            className="text-[#999] hover:text-[#111] p-2"
           >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
 
         {/* Desktop top bar */}
-        <div className="hidden lg:flex items-center justify-between px-6 h-[52px] bg-[#161b22] border-b border-[#30363d]">
+        <div className="hidden lg:flex items-center justify-between px-6 h-[52px] bg-white border-b border-[#e8e8e8]">
           <div className="flex items-center gap-3">
-            <h1 className="text-[14px] font-medium text-[#e6edf3]">{currentPage.title}</h1>
-            <span className="text-[12px] text-[#484f58]">{currentPage.subtitle}</span>
+            <h1 className="text-[14px] font-semibold text-[#111]">{currentPage.title}</h1>
+            <span className="text-[12px] text-[#999]">{currentPage.subtitle}</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-[11px] text-[#484f58]">luxuryrecruiter.com</span>
+            <span className="text-[11px] text-[#999]">luxuryrecruiter.com</span>
             <div className="flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${maintenanceMode ? 'bg-red-500' : 'bg-[#3fb950]'}`} />
-              <span className={`text-[10px] font-medium ${maintenanceMode ? 'text-red-400' : 'text-[#3fb950]'}`}>
+              <span className={`w-2 h-2 rounded-full ${maintenanceMode ? 'bg-red-500' : 'bg-green-500'}`} />
+              <span className={`text-[10px] font-medium ${maintenanceMode ? 'text-red-500' : 'text-green-600'}`}>
                 {maintenanceMode ? 'Offline' : 'Live'}
               </span>
             </div>
-            <div className="w-px h-4 bg-[#30363d]" />
-            <span className="text-[10px] tracking-wide px-2 py-0.5 bg-[#2d1b00] text-[#f0883e] border border-[#3d2200] rounded font-medium">
+            <div className="w-px h-4 bg-[#e8e8e8]" />
+            <span className="text-[10px] tracking-wide px-2 py-0.5 bg-[#f5f5f5] text-[#555] border border-[#e8e8e8] rounded font-medium">
               ADMIN
             </span>
-            <div className="w-[28px] h-[28px] rounded-full bg-[#21262d] border border-[#30363d] text-white text-[10px] font-medium flex items-center justify-center">
+            <div className="w-[28px] h-[28px] rounded-full bg-[#e8e8e8] text-[#666] text-[10px] font-medium flex items-center justify-center">
               {initials}
             </div>
           </div>
         </div>
 
-        <main className="min-h-screen p-6">
+        <main className="admin-content min-h-screen">
           {children}
         </main>
       </div>
