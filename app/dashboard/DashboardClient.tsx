@@ -9,8 +9,8 @@ import { CURRENCY_SYMBOLS } from '@/lib/assignment-options'
 const TIER_LABELS: Record<string, string> = {
   rising: 'Rising',
   pro: 'Pro',
-  professional: 'Pro+',
-  executive: 'Pro+',
+  professional: 'Established Professional',
+  executive: 'Senior & Executive',
   business: 'Business',
   insider: 'Insider',
   admin: 'Admin',

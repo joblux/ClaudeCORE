@@ -21,11 +21,11 @@ const PROFILES = [
     cta: 'Select Pro',
   },
   {
-    key: 'professional', overline: 'PRO+', title: 'Senior & Executive',
+    key: 'professional', overline: 'SENIOR & EXECUTIVE', title: 'Senior & Executive',
     description: 'For senior professionals and leadership profiles whose experience carries greater strategic relevance.',
     approval: 'Reviewed by JOBLUX', featured: false,
     features: ['Everything in Pro','Comprehensive sector-level intelligence','Strategic compensation visibility','Priority for confidential assignments','Deepest intelligence layer'],
-    cta: 'Select Pro+',
+    cta: 'Select Senior & Executive',
   },
   {
     key: 'business', overline: 'BUSINESS', title: 'Luxury Employer',

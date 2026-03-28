@@ -20,7 +20,7 @@ interface Props {
 }
 
 const TIER_LABELS: Record<string, string> = {
-  basic: 'Member', rising: 'Rising', pro: 'Pro', professional: 'Pro+',
+  basic: 'Member', rising: 'Emerging Professional', pro: 'Established Professional', professional: 'Established Professional',
   executive: 'Executive', business: 'Business', insider: 'Insider',
 }
 

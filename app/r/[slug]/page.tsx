@@ -66,7 +66,7 @@ interface ResumeData {
 const TIER_LABELS: Record<string, string> = {
   rising: 'Rising',
   pro: 'Pro',
-  professional: 'Pro+',
+  professional: 'Established Professional',
   executive: 'Executive',
   business: 'Business',
   insider: 'Insider',
