@@ -222,6 +222,7 @@ export default function ProfiluxPage() {
   }
 
   const handleToggleSharing = async (enabled: boolean) => {
+    if (completeness !== 100 && enabled) return
     setProfile(prev => ({ ...prev, sharingEnabled: enabled }))
     if (enabled && !profile.shareSlug) {
       try {
@@ -552,7 +553,7 @@ export default function ProfiluxPage() {
                 <p style={{ fontSize: '13px', color: '#555', fontWeight: 300, margin: '0 0 28px', lineHeight: 1.7 }}>Used by Mo to match you to appropriately scoped search assignments. Never shown publicly.</p>
                 <label style={labelStyle}>ANNUAL GROSS SALARY EXPECTATION</label>
                 <div style={{ textAlign: 'center', fontSize: '28px', color: '#ffffff', fontWeight: 400, margin: '16px 0' }}>{formatSalary(profile.salaryExpectation, profile.salaryCurrency)} / year</div>
-                <input type="range" min="0" max="500000" step="5000" value={profile.salaryExpectation} onChange={e => setProfile(p => ({ ...p, salaryExpectation: Number(e.target.value) }))} style={{ width: '100%', accentColor: '#ffffff', marginBottom: '8px' }} />
+                <input type="range" min="0" max="500000" step="5000" value={profile.salaryExpectation} onChange={e => setProfile(p => ({ ...p, salaryExpectation: Number(e.target.value) }))} style={{ width: '100%', accentColor: '#9B6B4A', marginBottom: '8px' }} />
                 <div style={{ display: 'flex', gap: '8px', marginTop: '12px', justifyContent: 'center' }}>
                   {['EUR', 'USD', 'GBP', 'AED'].map(c => (
                     <button key={c} onClick={() => setProfile(p => ({ ...p, salaryCurrency: c }))} style={{ padding: '6px 16px', borderRadius: '3px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${profile.salaryCurrency === c ? '#ffffff' : '#333'}`, color: profile.salaryCurrency === c ? '#ffffff' : '#666', background: profile.salaryCurrency === c ? 'rgba(255,255,255,0.08)' : 'transparent', fontFamily: 'Inter, sans-serif' }}>{c}</button>
@@ -609,7 +610,7 @@ export default function ProfiluxPage() {
                     <div style={{ fontSize: '11px', color: '#555', fontWeight: 300, marginTop: '2px' }}>Activate your private link to share with specific people</div>
                   </div>
                   <label style={{ position: 'relative', width: '40px', height: '22px', flexShrink: 0, cursor: 'pointer' }}>
-                    <input type="checkbox" checked={profile.sharingEnabled} onChange={e => handleToggleSharing(e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
+                    <input type="checkbox" checked={profile.sharingEnabled} onChange={e => { if (completeness !== 100 && e.target.checked) return; handleToggleSharing(e.target.checked) }} style={{ opacity: 0, width: 0, height: 0 }} />
                     <span style={{ position: 'absolute', inset: 0, background: completeness !== 100 ? '#1a1a1a' : profile.sharingEnabled ? 'rgba(255,255,255,0.15)' : '#2a2a2a', borderRadius: '11px', border: `1px solid ${completeness !== 100 ? '#333' : profile.sharingEnabled ? '#ffffff' : '#333'}` }}>
                       <span style={{ position: 'absolute', width: '16px', height: '16px', left: profile.sharingEnabled ? '20px' : '2px', top: '2px', background: profile.sharingEnabled ? '#ffffff' : '#555', borderRadius: '50%', transition: '0.2s' }} />
                     </span>
@@ -675,8 +676,8 @@ export default function ProfiluxPage() {
                   Your intelligence profile is ready. Mo will review it and match you to relevant search assignments confidentially.
                 </p>
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                  <button onClick={handleSave} style={{ background: '#ffffff', border: 'none', color: '#000', fontSize: '13px', fontWeight: 500, padding: '11px 26px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>↓ Download profile</button>
-                  <Link href={`/${profile.shareSlug || ''}`} style={{ background: 'transparent', border: '1px solid #333', color: '#888', fontSize: '13px', padding: '11px 20px', borderRadius: '4px', textDecoration: 'none', display: 'inline-block' }}>View my profile →</Link>
+                  <button onClick={() => window.print()} style={{ background: '#ffffff', border: 'none', color: '#000', fontSize: '13px', fontWeight: 500, padding: '11px 26px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>↓ Download profile</button>
+                  <Link href={profile.shareSlug ? `/${profile.shareSlug}` : '#'} style={{ background: 'transparent', border: `1px solid ${profile.shareSlug ? '#555' : '#2a2a2a'}`, color: profile.shareSlug ? '#ccc' : '#444', fontSize: '13px', padding: '11px 20px', borderRadius: '4px', textDecoration: 'none', display: 'inline-block', pointerEvents: profile.shareSlug ? 'auto' : 'none' as any }}>View my profile →</Link>
                   <Link href="/dashboard/candidate" style={{ background: 'transparent', border: '1px solid #333', color: '#888', fontSize: '13px', padding: '11px 20px', borderRadius: '4px', textDecoration: 'none', display: 'inline-block' }}>⟵ Dashboard</Link>
                 </div>
               </div>
