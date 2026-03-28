@@ -88,7 +88,7 @@ function JoinContent() {
 
   if (status === "loading" || status === "authenticated") {
     return (
-      <div className="flex items-center justify-center py-16">
+      <div className="flex items-center justify-start py-16">
         <div className="w-5 h-5 border border-[#333] border-t-[#a58e28] rounded-full animate-spin" />
       </div>
     );
@@ -96,7 +96,7 @@ function JoinContent() {
 
   return (
     <div className="w-full max-w-[400px] mx-auto">
-      <div className="flex gap-2 justify-center mb-8">
+      <div className="flex gap-2 justify-start mb-8">
         <button
           onClick={() => { setMode("request"); setEmailSent(false); setEmail(""); }}
           className={"px-5 py-2 text-[11px] uppercase tracking-widest rounded-full border transition-colors " + (mode === "request" ? "text-white border-[#555]" : "text-[#666] border-transparent hover:text-[#aaa]")}
@@ -137,7 +137,7 @@ function JoinContent() {
 
         {emailSent ? (
           <div className="text-center py-4">
-            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[#1a1a0f] flex items-center justify-center">
+            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[#1a1a0f] flex items-center justify-start">
               <MailIcon />
             </div>
             <p className="text-sm text-white font-medium mb-1">Check your inbox</p>
@@ -163,7 +163,7 @@ function JoinContent() {
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-[#2e2e2e]" />
               </div>
-              <div className="relative flex justify-center">
+              <div className="relative flex justify-start">
                 <span className="bg-[#1e1e1e] px-4 text-[#555] uppercase tracking-widest" style={{ fontSize: '9px' }}>or</span>
               </div>
             </div>
@@ -171,7 +171,7 @@ function JoinContent() {
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => signIn("google", { callbackUrl: "/join" })}
-                className="flex items-center justify-center gap-1.5 py-2.5 border border-[#3a3a3a] bg-[#2a2a2a] text-white rounded-md hover:border-[#555] hover:bg-[#333] transition-colors"
+                className="flex items-center justify-start gap-1.5 py-2.5 border border-[#3a3a3a] bg-[#2a2a2a] text-white rounded-md hover:border-[#555] hover:bg-[#333] transition-colors"
                 style={{ fontSize: '11px' }}
               >
                 <GoogleIcon />
@@ -179,7 +179,7 @@ function JoinContent() {
               </button>
               <button
                 onClick={() => signIn("linkedin", { callbackUrl: "/join" })}
-                className="flex items-center justify-center gap-1.5 py-2.5 border border-[#3a3a3a] bg-[#2a2a2a] text-white rounded-md hover:border-[#555] hover:bg-[#333] transition-colors"
+                className="flex items-center justify-start gap-1.5 py-2.5 border border-[#3a3a3a] bg-[#2a2a2a] text-white rounded-md hover:border-[#555] hover:bg-[#333] transition-colors"
                 style={{ fontSize: '11px' }}
               >
                 <LinkedInIcon />
@@ -187,7 +187,7 @@ function JoinContent() {
               </button>
               <button
                 disabled
-                className="flex items-center justify-center gap-1 py-2.5 border border-[#2e2e2e] bg-[#222] rounded-md opacity-40 cursor-not-allowed"
+                className="flex items-center justify-start gap-1 py-2.5 border border-[#2e2e2e] bg-[#222] rounded-md opacity-40 cursor-not-allowed"
                 style={{ fontSize: '11px' }}
               >
                 <AppleIcon />
@@ -210,7 +210,7 @@ function JoinContent() {
 
 export default function JoinPage() {
   return (
-    <main className="bg-[#1a1a1a] flex flex-col items-center justify-start px-4 pt-16 pb-16">
+    <main className="bg-[#1a1a1a] flex flex-col items-center justify-start px-4 pt-16 pb-12 pt-16 pb-16">
       <p className="text-[#888] uppercase text-center mb-4" style={{ fontSize: '15px', letterSpacing: '0.2em' }}>
         Luxury Talent Intelligence
       </p>

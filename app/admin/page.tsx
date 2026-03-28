@@ -18,6 +18,7 @@ type Member = {
   country: string | null;
   bio: string | null;
   avatar_url: string | null;
+  cv_url: string | null;
   auth_provider: string | null;
   created_at: string;
   approved_at: string | null;
@@ -356,9 +357,20 @@ export default function AdminPage() {
                         {getInitials(m)}
                       </div>
                       <div className="min-w-0">
-                        <a href={`/admin/members/${m.id}`} className="text-sm font-medium text-[#111] hover:text-[#444] transition-colors truncate block">
-                          {displayName(m)}
-                        </a>
+                        <div className="relative group/cv">
+                          <a href={`/admin/members/${m.id}`} className="text-sm font-medium text-[#111] hover:text-[#444] transition-colors truncate block">
+                            {displayName(m)}
+                          </a>
+                          {m.cv_url && (
+                            <div className="absolute left-0 top-6 z-50 hidden group-hover/cv:block w-[340px] bg-white border border-[#e8e8e8] rounded-lg shadow-lg overflow-hidden">
+                              <div className="flex items-center justify-between px-3 py-2 border-b border-[#f0f0f0]">
+                                <span className="text-[10px] uppercase tracking-wide text-[#999] font-medium">CV Preview</span>
+                                <a href={m.cv_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#444] hover:text-[#111] underline">Open →</a>
+                              </div>
+                              <iframe src={m.cv_url} className="w-full h-[420px] border-0" title="CV Preview" />
+                            </div>
+                          )}
+                        </div>
                         <div className="text-xs text-[#999] truncate">
                           {[m.city, m.country].filter(Boolean).join(", ") || "\u2014"} &middot; {m.profile_completeness ?? 0}% complete
                         </div>

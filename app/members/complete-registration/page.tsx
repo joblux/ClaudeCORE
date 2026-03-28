@@ -104,7 +104,7 @@ export default function CompleteRegistrationPage() {
   }, [status, session, router])
 
   if (status === 'loading') return (
-    <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
+    <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-start">
       <div className="w-6 h-6 border border-[#333] border-t-white rounded-full animate-spin" />
     </div>
   )
@@ -196,16 +196,16 @@ export default function CompleteRegistrationPage() {
   const sectionHeadClass = 'text-[#888] uppercase tracking-widest mb-4 pb-3 border-b border-[#2a2a2a]'
 
   return (
-    <main className="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-4 py-6">
+    <main className="min-h-screen bg-[#0f0f0f] flex items-center justify-start px-4 pt-16 pb-12 py-6">
       <div className="w-full max-w-[520px] bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm px-9 pt-8 pb-11">
 
         {/* Progress bar — inside card */}
-        <div className="flex items-center justify-center gap-0 mb-8">
+        <div className="flex items-center justify-start gap-0 mb-8">
           {STEPS.map((s, i) => (
             <div key={s.num} className="flex items-center">
               <div className="flex items-center gap-1.5">
                 <div className={
-                  'w-5 h-5 rounded-full flex items-center justify-center font-bold ' +
+                  'w-5 h-5 rounded-full flex items-center justify-start font-bold ' +
                   (s.num < step ? 'bg-white text-black' : s.num === step ? 'bg-[#a58e28] text-black' : 'bg-[#333] text-[#888]')
                 } style={{ fontSize: '9px' }}>
                   {s.num < step ? '\u2713' : s.num}
@@ -285,7 +285,7 @@ export default function CompleteRegistrationPage() {
             <p className="text-[#aaa] text-center mb-8" style={{ fontSize: '12px' }}>Strongly recommended. PDF or Word accepted.</p>
 
             {cvUploading || isSubmitting ? (
-              <div className="flex flex-col items-center justify-center py-16">
+              <div className="flex flex-col items-center justify-start py-16">
                 <div className="w-8 h-8 border-2 border-[#333] border-t-[#a58e28] rounded-full animate-spin mb-4" />
                 <p className="text-[#aaa]" style={{ fontSize: '12px' }}>{cvUploading ? 'Uploading your document...' : 'Submitting your application...'}</p>
               </div>

@@ -37,10 +37,10 @@ export default function PendingPage() {
 
   if (approved) {
     return (
-      <main className="min-h-screen bg-[#1a1a1a] flex items-center justify-center px-6">
+      <main className="min-h-screen bg-[#1a1a1a] flex items-center justify-start px-6">
         <div className="max-w-md w-full text-center">
           <div className="bg-[#222] border border-[#2a2a2a] rounded-sm p-10">
-            <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-[#1a1a1a] border border-[#a58e28] flex items-center justify-center">
+            <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-[#1a1a1a] border border-[#a58e28] flex items-center justify-start">
               <svg className="w-6 h-6 text-[#a58e28]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
               </svg>
@@ -59,10 +59,10 @@ export default function PendingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#1a1a1a] flex items-center justify-center px-6">
+    <main className="min-h-screen bg-[#1a1a1a] flex items-center justify-start px-6">
       <div className="max-w-md w-full text-center">
         <div className="bg-[#222] border border-[#2a2a2a] rounded-sm p-10">
-          <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center">
+          <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-start">
             <svg className="w-6 h-6 text-[#a58e28]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -72,7 +72,7 @@ export default function PendingPage() {
           </h3>
           <p className="text-sm text-[#999] mb-2 leading-relaxed">Your request is under review.</p>
           <p className="text-xs text-[#999] leading-relaxed mb-8">We personally review every profile. You&apos;ll receive an email once your access is confirmed — typically within 24 hours.</p>
-          <div className="flex items-center justify-center gap-2 text-xs text-[#bbb] mb-8">
+          <div className="flex items-center justify-start gap-2 text-xs text-[#bbb] mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-[#a58e28] animate-pulse" />
             Checking for updates...
           </div>

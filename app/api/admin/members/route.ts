@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
   // Members query
   let query = supabase
     .from('members')
-    .select('id, email, full_name, first_name, last_name, role, status, city, country, bio, avatar_url, auth_provider, created_at, approved_at, last_login, profile_completeness', { count: 'exact' })
+    .select('id, email, full_name, first_name, last_name, role, status, city, country, bio, avatar_url, auth_provider, created_at, approved_at, last_login, profile_completeness, cv_url', { count: 'exact' })
     .eq('registration_completed', true)
     .order('created_at', { ascending: false })
     .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
