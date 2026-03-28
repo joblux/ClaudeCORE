@@ -75,11 +75,11 @@ export default function DashboardPage() {
         <div className="bg-[#222] border border-[rgba(165,142,40,0.2)] rounded-xl p-4 flex items-center gap-5 mb-8">
           <div className="flex-shrink-0">
             <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-1">PROFILUX</div>
-            <div className="text-xs text-[#555]">Your confidential professional profile — 45% complete</div>
+            <div className="text-xs text-[#555]">Your confidential professional profile — complete to unlock full matching</div>
           </div>
           <div className="flex-1">
             <div className="h-[3px] bg-[#2a2a2a] rounded-full mb-1">
-              <div className="h-full bg-[#a58e28] rounded-full" style={{ width: '45%' }} />
+              <div className="h-full bg-[#555] rounded-full" style={{ width: '0%' }} />
             </div>
             <div className="text-[11px] text-[#444]">4 sections remaining · Complete to unlock full matching</div>
           </div>
