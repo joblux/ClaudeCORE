@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
 import { useRequireAdmin } from "@/lib/auth-hooks";
 import type {
   MemberProfile,
@@ -11,11 +10,6 @@ import type {
   MemberLanguage,
   MemberDocument,
 } from "@/types/member-profile";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 const GOLD = "#a58e28";
 const BLACK = "#1a1a1a";
@@ -187,45 +181,25 @@ export default function MemberProfilePage() {
     setError(false);
 
     try {
-      // Fetch member
-      const { data: m, error: mErr } = await supabase
-        .from("members")
-        .select("*")
-        .eq("id", memberId)
-        .single();
-
-      if (mErr || !m) {
+      const res = await fetch(`/api/admin/members/${memberId}`);
+      if (!res.ok) {
         setError(true);
         setLoading(false);
         return;
       }
 
-      // Fetch related records in parallel
-      const [workRes, eduRes, langRes, docRes] = await Promise.all([
-        supabase.from("work_experiences").select("*").eq("member_id", memberId).order("sort_order", { ascending: true }),
-        supabase.from("education_records").select("*").eq("member_id", memberId).order("sort_order", { ascending: true }),
-        supabase.from("member_languages").select("*").eq("member_id", memberId).order("created_at", { ascending: true }),
-        supabase.from("member_documents").select("*").eq("member_id", memberId).order("uploaded_at", { ascending: false }),
-      ]);
-
+      const data = await res.json();
       const profile: MemberProfile = {
-        ...m,
-        work_experiences: (workRes.data as WorkExperience[]) ?? [],
-        education_records: (eduRes.data as EducationRecord[]) ?? [],
-        languages: (langRes.data as MemberLanguage[]) ?? [],
-        documents: (docRes.data as MemberDocument[]) ?? [],
+        ...data.member,
+        work_experiences: (data.member.work_experiences as WorkExperience[]) ?? [],
+        education_records: (data.member.education_records as EducationRecord[]) ?? [],
+        languages: (data.member.languages as MemberLanguage[]) ?? [],
+        documents: (data.member.documents as MemberDocument[]) ?? [],
       };
 
       setMember(profile);
-      setNotes((m as any).notes ?? "");
-
-      // Fetch AI review
-      const { data: reviewData } = await supabase
-        .from("member_ai_reviews")
-        .select("*")
-        .eq("member_id", memberId)
-        .single();
-      if (reviewData) setAiReview(reviewData);
+      setNotes(data.member.notes ?? "");
+      if (data.aiReview) setAiReview(data.aiReview);
     } catch {
       setError(true);
     }
@@ -240,9 +214,11 @@ export default function MemberProfilePage() {
   const updateStatus = async (newStatus: string) => {
     if (!member) return;
     setActing(true);
-    const update: Record<string, any> = { status: newStatus };
-    if (newStatus === "approved") update.approved_at = new Date().toISOString();
-    await supabase.from("members").update(update).eq("id", member.id);
+    await fetch(`/api/admin/members/${member.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "update_status", status: newStatus }),
+    });
     await fetchProfile();
     setActing(false);
   };
@@ -269,7 +245,11 @@ export default function MemberProfilePage() {
     if (!member) return;
     setNotesSaving(true);
     setNotesSaved(false);
-    await supabase.from("members").update({ notes } as any).eq("id", member.id);
+    await fetch(`/api/admin/members/${member.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "save_notes", notes }),
+    });
     setNotesSaving(false);
     setNotesSaved(true);
     setTimeout(() => setNotesSaved(false), 2500);
