@@ -78,7 +78,6 @@ export default function CompleteRegistrationPage() {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [city, setCity] = useState('')
   const [country, setCountry] = useState('')
-  const [nationality, setNationality] = useState('')
 
   // Step 4 — CV Upload
   const [cvFile, setCvFile] = useState<File | null>(null)
@@ -129,7 +128,6 @@ export default function CompleteRegistrationPage() {
           phone: fullPhone,
           city,
           country,
-          nationality,
           contactPref: 'email',
           cv_url: uploadedCvUrl || cvUrl || null,
           status: memberStatus,
@@ -154,7 +152,7 @@ export default function CompleteRegistrationPage() {
 
   // --- Step 3 next ---
   const handleStep3Next = () => {
-    if (!firstName || !lastName || !city || !country || !nationality) {
+    if (!firstName || !lastName || !city || !country) {
       setError('Please fill in all required fields.')
       return
     }
@@ -266,21 +264,12 @@ export default function CompleteRegistrationPage() {
               <input type="text" value={city} onChange={e => setCity(e.target.value)} placeholder="" required className={inputClass} style={{ fontSize: '13px' }} />
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mb-7">
-              <div>
-                <label className={labelClass} style={{ fontSize: '9px' }}>Country *</label>
-                <select value={country} onChange={e => setCountry(e.target.value)} required className={selectClass} style={{ fontSize: '13px' }}>
-                  <option value="">Select country</option>
-                  {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className={labelClass} style={{ fontSize: '9px' }}>Nationality *</label>
-                <select value={nationality} onChange={e => setNationality(e.target.value)} required className={selectClass} style={{ fontSize: '13px' }}>
-                  <option value="">Select nationality</option>
-                  {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
+            <div className="mb-7">
+              <label className={labelClass} style={{ fontSize: '9px' }}>Country *</label>
+              <select value={country} onChange={e => setCountry(e.target.value)} required className={selectClass} style={{ fontSize: '13px' }}>
+                <option value="">Select country</option>
+                {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
             </div>
 
             <button type="button" onClick={handleStep3Next} className="w-full py-3.5 bg-white text-black uppercase tracking-widest font-semibold rounded-sm hover:bg-[#f0f0f0] transition-colors" style={{ fontSize: '10px', letterSpacing: '2px' }}>
