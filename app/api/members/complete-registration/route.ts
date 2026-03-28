@@ -25,8 +25,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid tier' }, { status: 400 })
     }
 
-    const { firstName, lastName, jobTitle, company, contactPref, phone } = body
+    const { firstName, lastName, jobTitle, company, contactPref, phone, city, country, nationality, positions, education, certifications, languages } = body
     const fullName = [firstName, lastName].filter(Boolean).join(' ') || null
+
+    // Build keywords from extracted CV data
+    const keywords: string[] = []
+    if (positions && Array.isArray(positions)) {
+      for (const p of positions) {
+        if (p.title) keywords.push(p.title)
+        if (p.company) keywords.push(p.company)
+      }
+    }
+    if (certifications && Array.isArray(certifications)) {
+      keywords.push(...certifications.filter(Boolean))
+    }
+    if (languages && Array.isArray(languages)) {
+      keywords.push(...languages.filter(Boolean))
+    }
 
     // Build update object
     const updateData: any = {
@@ -40,7 +55,15 @@ export async function POST(req: NextRequest) {
       job_title: jobTitle || null,
       maison: company || null,
       contact_preference: contactPref || 'email',
-      phone: contactPref === 'phone' ? (phone || null) : null,
+      phone: phone || null,
+      city: city || null,
+      country: country || null,
+      nationality: nationality || null,
+      keywords: keywords.length > 0 ? keywords : null,
+      positions: positions && Array.isArray(positions) && positions.length > 0 ? positions : null,
+      education: education && Array.isArray(education) && education.length > 0 ? education : null,
+      certifications: certifications && Array.isArray(certifications) && certifications.length > 0 ? certifications : null,
+      languages: languages && Array.isArray(languages) && languages.length > 0 ? languages : null,
     }
 
     // Update member
