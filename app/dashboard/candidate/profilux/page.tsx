@@ -267,24 +267,24 @@ export default function ProfiluxPage() {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <Link href="/dashboard/candidate" style={{ color: '#555', fontSize: '12px', textDecoration: 'none' }}>
+            <Link href="/dashboard/candidate" style={{ color: '#aaa', fontSize: '12px', textDecoration: 'none' }}>
               ← Dashboard
             </Link>
             <div style={{ width: '1px', height: '14px', background: '#2a2a2a' }} />
-            <span style={{ fontSize: '12px', color: '#666' }}>
-              Profilux · <span style={{ color: '#888' }}>Building your profile</span>
+            <span style={{ fontSize: '12px', color: '#999' }}>
+              Profilux · <span style={{ color: '#ccc' }}>Building your profile</span>
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{
-              background: '#222', border: '1px solid #444', color: '#777',
+              background: '#2a2a2a', border: '1px solid #666', color: '#ffffff',
               fontSize: '10px', letterSpacing: '0.08em', padding: '3px 10px',
               borderRadius: '3px', fontWeight: 500,
             }}>
               {(session?.user as any)?.role?.toUpperCase() || 'MEMBER'}
             </span>
             <button onClick={handleSave} disabled={saving} style={{
-              background: 'transparent', border: '1px solid #2a2a2a', color: '#666',
+              background: 'transparent', border: '1px solid #555', color: '#ccc',
               fontSize: '11px', padding: '5px 12px', borderRadius: '4px',
               cursor: 'pointer', fontFamily: 'Inter, sans-serif',
             }}>

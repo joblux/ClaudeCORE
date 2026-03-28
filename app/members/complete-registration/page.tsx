@@ -5,7 +5,16 @@ import { useRouter } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 
 const TIER_LABELS: Record<string, string> = {
-  rising: 'Rising', pro: 'Pro', professional: 'Pro+', business: 'Business', insider: 'Insider',
+  emerging_professional: 'Emerging Professional',
+  established_professional: 'Established Professional',
+  senior_executive: 'Senior & Executive',
+  luxury_employer: 'Luxury Employer',
+  trusted_contributor: 'Trusted Contributor',
+  rising: 'Emerging Professional',
+  pro: 'Established Professional',
+  professional: 'Established Professional',
+  business: 'Luxury Employer',
+  insider: 'Trusted Contributor',
 }
 
 const STEPS = [
