@@ -286,7 +286,7 @@ export default function ProfiluxPage() {
               Dashboard
             </Link>
             <div style={{ fontSize: '11px', color: '#fff', letterSpacing: '0.12em', fontWeight: 500 }}>PROFILUX</div>
-            <div style={{ fontSize: '12px', color: saving ? '#aaa' : '#1D9E75', fontFamily: 'Inter, sans-serif', letterSpacing: '0.04em', minWidth: '70px', textAlign: 'right' }}>
+            <div style={{ fontSize: '12px', color: saving ? '#aaa' : '#fff', fontFamily: 'Inter, sans-serif', letterSpacing: '0.04em', minWidth: '70px', textAlign: 'right' }}>
               {saving ? 'Saving...' : 'Saved ✓'}
             </div>
           </div>
@@ -537,7 +537,7 @@ export default function ProfiluxPage() {
               {/* COMPLETION HEADER */}
               <div style={{ background: '#111', border: '1px solid #1D9E75', borderRadius: '8px', padding: '28px 32px', display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '20px' }}>
                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>
-                  checkmark
+                  ✓
                 </div>
                 <div>
                   <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '22px', color: '#fff', margin: '0 0 4px' }}>Profile complete</h2>
@@ -699,7 +699,7 @@ export default function ProfiluxPage() {
             <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '15px', color: '#fff', marginBottom: '2px' }}>
               {profile.firstName || profile.lastName ? `${profile.firstName} ${profile.lastName}`.trim() : 'Your name'}
             </div>
-            <div style={{ fontSize: '11px', color: '#777', marginBottom: '10px', fontWeight: 300 }}>
+            <div style={{ fontSize: '11px', color: '#aaa', marginBottom: '10px', fontWeight: 300 }}>
               {profile.headline || 'Your headline'}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
@@ -716,22 +716,22 @@ export default function ProfiluxPage() {
                 { k: 'Sharing', v: profile.sharingEnabled ? 'Link active' : 'Private' },
               ].map(row => (
                 <div key={row.k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '7px' }}>
-                  <span style={{ color: '#555' }}>{row.k}</span>
-                  <span style={{ color: '#777' }}>{row.v}</span>
+                  <span style={{ color: '#aaa' }}>{row.k}</span>
+                  <span style={{ color: '#ccc' }}>{row.v}</span>
                 </div>
               ))}
             </div>
-            <div style={{ borderTop: '1px solid #1f1f1f', paddingTop: '10px', marginTop: '4px', fontSize: '10px', color: '#444', fontWeight: 300 }}>
+            <div style={{ borderTop: '1px solid #1f1f1f', paddingTop: '10px', marginTop: '4px', fontSize: '10px', color: '#666', fontWeight: 300 }}>
               Profile preview - as seen by JOBLUX
             </div>
           </div>
 
           {/* Tip card */}
           <div style={{ background: '#111', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '18px' }}>
-            <div style={{ fontSize: '10px', color: '#666', letterSpacing: '0.08em', marginBottom: '9px' }}>
+            <div style={{ fontSize: '10px', color: '#aaa', letterSpacing: '0.08em', marginBottom: '9px' }}>
               {tipText[currentStep]?.label || 'NOTE'}
             </div>
-            <div style={{ fontSize: '12px', color: '#555', lineHeight: 1.7, fontWeight: 300 }}>
+            <div style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.7, fontWeight: 300 }}>
               {tipText[currentStep]?.text || ''}
             </div>
           </div>
