@@ -106,11 +106,8 @@ export default function SelectProfilePage() {
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            {topRow.map((profile) => <ProfileCard key={profile.key} profile={profile} submitting={submitting} onSelect={handleSelect} />)}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-12">
-            {bottomRow.map((profile) => <ProfileCard key={profile.key} profile={profile} submitting={submitting} onSelect={handleSelect} />)}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
+            {PROFILES.map((profile) => <ProfileCard key={profile.key} profile={profile} submitting={submitting} onSelect={handleSelect} />)}
           </div>
           <div className="border-t border-[#2a2a2a] pt-8 text-center">
             <p className="text-xs text-[#ccc] leading-relaxed max-w-xl mx-auto">All profiles are free. Depth increases through contribution and relevance. If your profile changes over time, you can request a different access level later.</p>
