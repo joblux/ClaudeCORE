@@ -164,7 +164,7 @@ export default function ProfiluxPage() {
     if (status === 'authenticated') fetchProfile()
   }, [status])
 
-  // Live completeness — recalculates on every profile change
+  // Live completeness - recalculates on every profile change
   const completedSteps = [
     profile.firstName?.trim() && profile.lastName?.trim() && profile.city?.trim() ? 1 : null,
     profile.experience?.length > 0 ? 2 : null,
@@ -307,7 +307,7 @@ export default function ProfiluxPage() {
   return (
     <div style={{ background: '#1a1a1a', minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: '#fff' }}>
 
-      {/* TOP BAR — py-28px, no Export PDF */}
+      {/* TOP BAR - py-28px, no Export PDF */}
       <div style={{ background: '#111111', borderBottom: '1px solid #2a2a2a', padding: '0 32px' }}>
         <div style={{
           maxWidth: '1200px', margin: '0 auto', padding: '20px 0',
@@ -458,7 +458,7 @@ export default function ProfiluxPage() {
                       <div>
                         <div style={{ fontSize: '14px', fontWeight: 500, color: '#fff' }}>{exp.role}</div>
                         <div style={{ fontSize: '13px', color: '#cccccc', marginTop: '2px' }}>{exp.brand}{exp.group ? ` · ${exp.group}` : ''}</div>
-                        <div style={{ fontSize: '12px', color: '#555', marginTop: '4px' }}>{exp.from}{exp.current ? ' — Present' : exp.to ? ` — ${exp.to}` : ''}{exp.location ? ` · ${exp.location}` : ''}</div>
+                        <div style={{ fontSize: '12px', color: '#555', marginTop: '4px' }}>{exp.from}{exp.current ? ' - Present' : exp.to ? ` - ${exp.to}` : ''}{exp.location ? ` · ${exp.location}` : ''}</div>
                       </div>
                       <button onClick={() => removeExperience(exp.id)} style={{ background: 'transparent', border: 'none', color: '#444', fontSize: '11px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Remove</button>
                     </div>
@@ -601,7 +601,7 @@ export default function ProfiluxPage() {
                   <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', color: '#fff', flexShrink: 0 }}>✓</div>
                   <div>
                     <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '22px', color: '#fff', margin: '0 0 6px' }}>Your Profilux is complete.</h2>
-                    <p style={{ fontSize: '13px', color: '#aaa', margin: 0, lineHeight: 1.7 }}>JOBLUX will now match you to confidential search assignments. Sharing your profile is optional — entirely your choice.</p>
+                    <p style={{ fontSize: '13px', color: '#aaa', margin: 0, lineHeight: 1.7 }}>JOBLUX will now match you to confidential search assignments. Sharing your profile is optional - entirely your choice.</p>
                   </div>
                 </div>
 
@@ -623,15 +623,15 @@ export default function ProfiluxPage() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0', fontSize: '12px', flex: 1, marginBottom: '16px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '0.5px solid #222' }}>
                         <span style={{ color: '#888' }}>Sectors</span>
-                        <span style={{ color: '#ccc' }}>{profile.sectors?.slice(0, 2).join(' · ') || '—'}</span>
+                        <span style={{ color: '#ccc' }}>{profile.sectors?.slice(0, 2).join(' · ') || '-'}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '0.5px solid #222' }}>
                         <span style={{ color: '#888' }}>Markets</span>
-                        <span style={{ color: '#ccc' }}>{profile.markets?.slice(0, 2).join(' · ') || '—'}</span>
+                        <span style={{ color: '#ccc' }}>{profile.markets?.slice(0, 2).join(' · ') || '-'}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0' }}>
                         <span style={{ color: '#888' }}>Availability</span>
-                        <span style={{ color: '#1D9E75' }}>{profile.availability ? 'Considering opportunities' : '—'}</span>
+                        <span style={{ color: '#1D9E75' }}>{profile.availability ? 'Considering opportunities' : '-'}</span>
                       </div>
                     </div>
                     {profile.shareSlug && profile.sharingEnabled ? (
@@ -693,7 +693,7 @@ export default function ProfiluxPage() {
                       <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.8, margin: '0 0 16px' }}>Copy your link and send it via WhatsApp, LinkedIn, or any channel you choose.</p>
                       <div style={{ background: '#0f0f0f', border: '0.5px solid #222', borderRadius: '5px', padding: '12px 14px' }}>
                         <span style={{ fontSize: '12px', color: '#888', fontFamily: 'monospace' }}>
-                          {profile.shareSlug ? `joblux.com/${profile.shareSlug}` : 'joblux.com/p/—'}
+                          {profile.shareSlug ? `joblux.com/${profile.shareSlug}` : 'joblux.com/p/-'}
                         </span>
                       </div>
                     </div>
@@ -707,9 +707,9 @@ export default function ProfiluxPage() {
                     <div style={{ fontSize: '10px', color: '#888', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px' }}>Send by email</div>
                     <div style={{ flex: 1 }}>
                       <h3 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '16px', color: '#fff', margin: '0 0 10px' }}>Share via email</h3>
-                      <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.8, margin: '0 0 16px' }}>Opens your email client with your profile link pre-filled. Recipient sees name, role, expertise — no salary exposed.</p>
+                      <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.8, margin: '0 0 16px' }}>Opens your email client with your profile link pre-filled. Recipient sees name, role, expertise - no salary exposed.</p>
                       <div style={{ background: '#0f0f0f', border: '0.5px solid #222', borderRadius: '5px', padding: '10px 14px' }}>
-                        <div style={{ fontSize: '11px', color: '#777' }}>Link sent directly — discreet and personal</div>
+                        <div style={{ fontSize: '11px', color: '#777' }}>Link sent directly - discreet and personal</div>
                       </div>
                     </div>
                     <button onClick={handleEmailShare} disabled={!profile.sharingEnabled || !profile.shareSlug} style={{ display: 'block', width: '100%', textAlign: 'center', padding: '10px', background: 'transparent', border: '0.5px solid #444', borderRadius: '5px', fontSize: '12px', color: profile.sharingEnabled ? '#ccc' : '#666', cursor: profile.sharingEnabled ? 'pointer' : 'not-allowed', marginTop: '16px', fontFamily: 'Inter, sans-serif' }}>
@@ -742,7 +742,7 @@ export default function ProfiluxPage() {
               </div>
             )}
 
-                  {/* SIDEBAR — no gold on avatar or badge */}
+                  {/* SIDEBAR - no gold on avatar or badge */}
           <div style={{ position: 'sticky', top: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ background: '#111', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '20px' }}>
               <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#2a2a2a', border: '1px solid #444', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', color: '#888', marginBottom: '12px', fontWeight: 500 }}>
