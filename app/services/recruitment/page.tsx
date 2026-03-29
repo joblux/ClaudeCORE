@@ -127,7 +127,7 @@ export default function RecruitmentPage() {
             <div className="border border-[#1e1e1e] rounded-lg p-10 text-center bg-[#111] mt-12">
               <p className="text-[0.6rem] tracking-[3px] uppercase text-[#a58e28] mb-3">Start a confidential search</p>
               <p className="text-sm text-[#666] mb-6">Tell us about the role. Every conversation is fully confidential.</p>
-              <Link href="/join" className="inline-block text-[0.75rem] font-medium tracking-wide text-[#a58e28] border border-[rgba(165,142,40,0.35)] rounded px-6 py-3 hover:bg-[rgba(165,142,40,0.06)] transition-colors">
+              <Link href="/connect" className="inline-block text-[0.75rem] font-medium tracking-wide text-[#a58e28] border border-[rgba(165,142,40,0.35)] rounded px-6 py-3 hover:bg-[rgba(165,142,40,0.06)] transition-colors">
                 Get in touch →
               </Link>
             </div>
