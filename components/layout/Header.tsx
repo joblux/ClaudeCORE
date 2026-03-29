@@ -60,27 +60,25 @@ export function Header() {
         </nav>
 
         {/* Right side */}
-        <div className="hidden md:flex items-center justify-end gap-0 flex-shrink-0">
+        <div className="hidden md:flex items-center justify-end flex-shrink-0" style={{ height: '71px' }}>
           {isAuthenticated ? (
             <UserMenu />
           ) : (
-            <>
+            <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
               <Link
                 href="/join"
-                className="text-[15px] text-[rgba(255,255,255,0.82)] hover:text-white transition-colors tracking-wide"
-                style={{ fontFamily: 'Inter, sans-serif' }}
+                style={{ fontFamily: 'Inter, sans-serif', fontSize: '15px', color: 'rgba(255,255,255,0.55)', lineHeight: '1', display: 'flex', alignItems: 'center', height: '100%' }}
               >
                 Sign in
               </Link>
-              <div className="w-[2px] h-[20px] bg-[#a58e28] rounded-sm mx-[18px]" />
+              <div style={{ width: '2px', height: '18px', background: '#a58e28', borderRadius: '2px', margin: '0 18px', flexShrink: 0, alignSelf: 'center' }} />
               <Link
                 href="/connect"
-                className="text-[15px] font-medium text-[rgba(255,255,255,0.82)] hover:text-white transition-colors tracking-wide"
-                style={{ fontFamily: 'Inter, sans-serif' }}
+                style={{ fontFamily: 'Inter, sans-serif', fontSize: '15px', fontWeight: '500', color: 'rgba(255,255,255,0.9)', lineHeight: '1', display: 'flex', alignItems: 'center', height: '100%' }}
               >
                 Sign up
               </Link>
-            </>
+            </div>
           )}
         </div>
 
