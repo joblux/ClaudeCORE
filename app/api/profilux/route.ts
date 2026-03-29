@@ -57,10 +57,24 @@ export async function GET() {
   }
 
   if (data) {
+    // If first/last name empty in profilux, fall back to members table
+    let firstName = data.first_name || ''
+    let lastName = data.last_name || ''
+    if (!firstName && !lastName) {
+      const { data: member } = await supabase
+        .from('members')
+        .select('first_name, last_name')
+        .eq('email', session.user.email)
+        .single()
+      if (member) {
+        firstName = member.first_name || ''
+        lastName = member.last_name || ''
+      }
+    }
     return NextResponse.json({
       profile: {
-        firstName: data.first_name || '',
-        lastName: data.last_name || '',
+        firstName,
+        lastName,
         city: data.city || '',
         nationality: data.nationality || '',
         headline: data.headline || '',
