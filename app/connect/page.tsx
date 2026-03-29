@@ -2,8 +2,8 @@ import Link from 'next/link'
 
 export default function ConnectPage() {
   return (
-    <div className="min-h-screen bg-[#0f0f0f] flex flex-col">
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-2">
+    <div className="bg-[#0f0f0f] flex flex-col">
+      <div className="grid grid-cols-1 md:grid-cols-2">
 
         <Link href="/join" className="group flex flex-col border-b md:border-b-0 md:border-r border-[#1e1e1e] bg-[#0f0f0f] hover:bg-[#121208] transition-colors duration-300">
           <div className="max-w-[600px] ml-auto w-full px-8 md:px-16 pt-16 pb-8">
