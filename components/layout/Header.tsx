@@ -22,8 +22,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 bg-[#1a1a1a] border-b border-[#2a2a2a]">
       <div
-        className="max-w-[1200px] mx-auto px-7 py-[28px]"
-        style={{ display: 'grid', gridTemplateColumns: '160px 1fr 220px', alignItems: 'center' }}
+        className="max-w-[1200px] mx-auto px-7"
+        style={{ display: 'grid', gridTemplateColumns: '160px 1fr 200px', alignItems: 'center', height: '71px' }}
       >
 
         {/* Logo */}
@@ -36,62 +36,70 @@ export function Header() {
         </Link>
 
         {/* Center nav — desktop */}
-        <nav className="hidden md:flex items-center justify-center gap-7">
+        <nav className="hidden md:flex items-center justify-center gap-7 h-full">
           {navItems.map((item) => {
             const isActive = pathname.startsWith(item.href)
             return (
               <Link
                 key={item.label}
                 href={item.href}
-                className={`text-[15px] font-normal tracking-wide transition-colors ${
-                  isActive
-                    ? 'text-white underline underline-offset-[6px] decoration-[1.5px]'
-                    : 'text-[rgba(255,255,255,0.82)] hover:text-white'
-                }`}
+                className="flex flex-col items-center justify-center gap-[5px] h-full"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
-                {item.label}
+                <span className={`text-[15px] font-normal tracking-wide transition-colors ${
+                  isActive ? 'text-white' : 'text-[rgba(255,255,255,0.82)] hover:text-white'
+                }`}>
+                  {item.label}
+                </span>
+                {isActive && (
+                  <span className="block h-[1.5px] w-full bg-white rounded-sm" />
+                )}
               </Link>
             )
           })}
         </nav>
 
         {/* Right side */}
-        <div className="flex items-center justify-end gap-4 flex-shrink-0">
-
+        <div className="hidden md:flex items-center justify-end gap-0 flex-shrink-0">
           {isAuthenticated ? (
             <UserMenu />
           ) : (
             <>
               <Link
                 href="/join"
-                className="hidden sm:inline text-[13px] text-[rgba(255,255,255,0.55)] hover:text-white transition-colors tracking-[0.06em]"
+                className="text-[15px] text-[rgba(255,255,255,0.82)] hover:text-white transition-colors tracking-wide"
+                style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 Sign in
               </Link>
+              <div className="w-[2px] h-[20px] bg-[#a58e28] rounded-sm mx-[18px]" />
               <Link
                 href="/connect"
-                className="hidden sm:inline text-[13px] text-[rgba(255,255,255,0.82)] border border-[#3a3a3a] px-4 py-1.5 hover:border-[#666] hover:text-white transition-colors tracking-[0.06em] uppercase"
+                className="text-[15px] font-medium text-[rgba(255,255,255,0.82)] hover:text-white transition-colors tracking-wide"
+                style={{ fontFamily: 'Inter, sans-serif' }}
               >
-                Connect
+                Sign up
               </Link>
             </>
           )}
+        </div>
 
-          {/* Mobile hamburger */}
+        {/* Mobile hamburger */}
+        <div className="md:hidden flex items-center justify-end">
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden flex items-center justify-center w-10 h-10 text-[24px] text-[rgba(255,255,255,0.82)] hover:text-white"
+            className="flex items-center justify-center w-10 h-10 text-[24px] text-[rgba(255,255,255,0.82)] hover:text-white"
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           >
             {mobileOpen ? '\u2715' : '\u2630'}
           </button>
         </div>
+
       </div>
 
       {/* Mobile nav overlay */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 top-[53px] bg-[#1a1a1a] z-50 flex flex-col">
+        <div className="md:hidden fixed inset-0 top-[71px] bg-[#1a1a1a] z-50 flex flex-col">
           <nav className="flex-1 px-7 py-8 space-y-1">
             {navItems.map((item) => {
               const isActive = pathname.startsWith(item.href)
@@ -109,15 +117,12 @@ export function Header() {
               )
             })}
           </nav>
-          <div className="px-7 pb-10 space-y-4">
+          <div className="px-7 pb-10 flex gap-6">
             {!isAuthenticated && (
-              <Link
-                href="/connect"
-                onClick={() => setMobileOpen(false)}
-                className="block py-3 text-[15px] text-[rgba(255,255,255,0.82)]"
-              >
-                Connect
-              </Link>
+              <>
+                <Link href="/join" onClick={() => setMobileOpen(false)} className="text-[15px] text-[rgba(255,255,255,0.82)]">Sign in</Link>
+                <Link href="/connect" onClick={() => setMobileOpen(false)} className="text-[15px] font-medium text-white">Sign up</Link>
+              </>
             )}
           </div>
         </div>
