@@ -78,7 +78,7 @@ export default function SelectProfilePage() {
     }
   }
 
-  if (status === 'loading' || status === 'unauthenticated') {
+  if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-start bg-[#1a1a1a]">
         <div className="w-8 h-8 border-2 border-[#2a2a2a] border-t-[#a58e28] rounded-full animate-spin" />
