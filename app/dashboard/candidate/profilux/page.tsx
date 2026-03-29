@@ -545,7 +545,57 @@ export default function ProfiluxPage() {
                 </div>
               </div>
 
-              {/* 6-PANEL GRID */}
+              {/* INCOMPLETE — show missing steps */}
+              {completeness < 100 && (
+                <div style={{ background: '#111', border: '1px solid #2a2a2a', borderRadius: '8px', padding: '24px 28px', marginBottom: '20px' }}>
+                  <div style={{ fontSize: '11px', color: '#aaa', letterSpacing: '0.1em', textTransform: 'uppercase' as const, marginBottom: '16px' }}>What's missing</div>
+                  {(!profile.firstName?.trim() || !profile.lastName?.trim()) && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: '1px solid #1e1e1e' }}>
+                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#333', flexShrink: 0 }} />
+                      <div style={{ fontSize: '13px', color: '#aaa', flex: 1 }}>First and last name</div>
+                      <button onClick={() => setCurrentStep(1)} style={{ fontSize: '12px', color: '#1D9E75', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Go to Personal →</button>
+                    </div>
+                  )}
+                  {profile.experience?.length === 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: '1px solid #1e1e1e' }}>
+                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#333', flexShrink: 0 }} />
+                      <div style={{ fontSize: '13px', color: '#aaa', flex: 1 }}>Career history</div>
+                      <button onClick={() => setCurrentStep(2)} style={{ fontSize: '12px', color: '#1D9E75', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Go to Experience →</button>
+                    </div>
+                  )}
+                  {profile.specialisations?.length === 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: '1px solid #1e1e1e' }}>
+                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#333', flexShrink: 0 }} />
+                      <div style={{ fontSize: '13px', color: '#aaa', flex: 1 }}>Functional expertise</div>
+                      <button onClick={() => setCurrentStep(3)} style={{ fontSize: '12px', color: '#1D9E75', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Go to Expertise →</button>
+                    </div>
+                  )}
+                  {profile.sectors?.length === 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: '1px solid #1e1e1e' }}>
+                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#333', flexShrink: 0 }} />
+                      <div style={{ fontSize: '13px', color: '#aaa', flex: 1 }}>Sectors</div>
+                      <button onClick={() => setCurrentStep(4)} style={{ fontSize: '12px', color: '#1D9E75', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Go to Sectors →</button>
+                    </div>
+                  )}
+                  {profile.salaryExpectation === 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: '1px solid #1e1e1e' }}>
+                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#333', flexShrink: 0 }} />
+                      <div style={{ fontSize: '13px', color: '#aaa', flex: 1 }}>Salary expectation</div>
+                      <button onClick={() => setCurrentStep(5)} style={{ fontSize: '12px', color: '#1D9E75', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Go to Salary →</button>
+                    </div>
+                  )}
+                  {!profile.availability?.trim() && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0' }}>
+                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#333', flexShrink: 0 }} />
+                      <div style={{ fontSize: '13px', color: '#aaa', flex: 1 }}>Availability</div>
+                      <button onClick={() => setCurrentStep(6)} style={{ fontSize: '12px', color: '#1D9E75', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Go to Availability →</button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 6-PANEL GRID — dimmed until 100% */}
+              <div style={{ opacity: completeness === 100 ? 1 : 0.25, pointerEvents: completeness === 100 ? 'auto' : 'none' as const }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
 
                 {/* PANEL 1: Profile preview */}
