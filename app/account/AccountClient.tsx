@@ -1,5 +1,11 @@
 'use client'
-import { redirect } from "next/navigation"
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
 export default function AccountClient({ member }: { member: any }) {
-  redirect("/dashboard")
+  const router = useRouter()
+  useEffect(() => {
+    router.replace('/dashboard')
+  }, [router])
+  return null
 }
