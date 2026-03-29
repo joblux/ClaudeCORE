@@ -43,9 +43,7 @@ export default function SelectProfilePage() {
   const [submitting, setSubmitting] = useState<string | null>(null)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    if (status === 'unauthenticated') router.push('/join')
-  }, [status, router])
+
 
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
@@ -57,6 +55,10 @@ export default function SelectProfilePage() {
   }, [status, session, router])
 
   const handleSelect = async (profileKey: string) => {
+    if (status === 'unauthenticated') {
+      router.push('/join?tier=' + profileKey)
+      return
+    }
     setSubmitting(profileKey)
     setError('')
     try {
