@@ -27,13 +27,7 @@ const PROFILES = [
     features: ['Everything in Pro','Comprehensive sector-level intelligence','Strategic compensation visibility','Priority for confidential assignments','Deepest intelligence layer'],
     cta: 'Select Senior & Executive',
   },
-  {
-    key: 'business', overline: 'BUSINESS', title: 'Luxury Employer',
-    description: 'For brands, maisons, and operators seeking manager-and-up hiring support through JOBLUX.',
-    approval: 'Reviewed by JOBLUX', featured: false,
-    features: ['Submit confidential search briefs','Market compensation intelligence','Work with JOBLUX recruitment consultants','Talent movement signals across sectors','Dedicated account discretion'],
-    cta: 'Request Business Access',
-  },
+
   {
     key: 'insider', overline: 'INSIDER', title: 'Trusted Contributor',
     description: 'For experienced professionals, content partners, and intelligence contributors whose knowledge strengthens the ecosystem.',
