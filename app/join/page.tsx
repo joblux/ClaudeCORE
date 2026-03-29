@@ -35,7 +35,7 @@ function JoinContent() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const [mode, setMode] = useState<"request" | "signin">("request");
+  const [mode] = useState<"request" | "signin">("request");
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const ref = searchParams.get("ref");
@@ -96,20 +96,7 @@ function JoinContent() {
 
   return (
     <div className="w-full max-w-[400px] mx-auto">
-      <div className="flex gap-2 justify-start mb-8">
-        <button
-          onClick={() => { setMode("request"); setEmailSent(false); setEmail(""); }}
-          className={"px-5 py-2 text-[11px] uppercase tracking-widest rounded-full border transition-colors " + (mode === "request" ? "text-white border-[#555]" : "text-[#666] border-transparent hover:text-[#aaa]")}
-        >
-          Request Access
-        </button>
-        <button
-          onClick={() => { setMode("signin"); setEmailSent(false); setEmail(""); }}
-          className={"px-5 py-2 text-[11px] uppercase tracking-widest rounded-full border transition-colors " + (mode === "signin" ? "text-white border-[#555]" : "text-[#666] border-transparent hover:text-[#aaa]")}
-        >
-          Sign In
-        </button>
-      </div>
+
 
       <div className="bg-[#1e1e1e] border border-[#2e2e2e] rounded-lg px-8 py-9">
         <h2 className="text-white font-light text-center mb-1.5" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '20px' }}>

@@ -62,12 +62,20 @@ export function Header() {
           {isAuthenticated ? (
             <UserMenu />
           ) : (
-            <Link
-              href="/connect"
-              className="hidden sm:inline text-[13px] text-[rgba(255,255,255,0.82)] border border-[#3a3a3a] px-4 py-1.5 hover:border-[#666] hover:text-white transition-colors tracking-[0.06em] uppercase"
-            >
-              Connect
-            </Link>
+            <>
+              <Link
+                href="/join"
+                className="hidden sm:inline text-[13px] text-[rgba(255,255,255,0.55)] hover:text-white transition-colors tracking-[0.06em]"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/connect"
+                className="hidden sm:inline text-[13px] text-[rgba(255,255,255,0.82)] border border-[#3a3a3a] px-4 py-1.5 hover:border-[#666] hover:text-white transition-colors tracking-[0.06em] uppercase"
+              >
+                Connect
+              </Link>
+            </>
           )}
 
           {/* Mobile hamburger */}
