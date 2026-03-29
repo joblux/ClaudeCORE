@@ -30,7 +30,7 @@ export default function ConnectPage() {
           </div>
         </Link>
 
-        <Link href="/join" className="group flex flex-col justify-between bg-[#0a0f0c] hover:bg-[#0c130f] transition-colors duration-300">
+        <Link href="/select-profile" className="group flex flex-col justify-between bg-[#0a0f0c] hover:bg-[#0c130f] transition-colors duration-300">
           <div className="max-w-[600px] mr-auto w-full px-8 md:px-16 pt-20 pb-6">
             <p className="text-[0.6rem] tracking-[2.5px] uppercase font-medium text-[#1D9E75] mb-8">Professionals, Experts & Contributors</p>
             <h2 className="text-3xl md:text-4xl font-light text-white leading-snug mb-6" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
