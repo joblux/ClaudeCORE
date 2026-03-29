@@ -276,50 +276,48 @@ export default function ProfiluxPage() {
   return (
     <div style={{ background: '#1a1a1a', minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: '#fff' }}>
 
-      {/* TOP BAR */}
-      <div style={{ background: '#111111', borderBottom: '1px solid #2a2a2a', padding: '0 32px' }}>
-        <div style={{
-          maxWidth: '1200px', margin: '0 auto', padding: '20px 0',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        }}>
-          <Link href="/dashboard" style={{ fontSize: '13px', color: '#555', textDecoration: 'none', fontFamily: 'Inter, sans-serif' }}>
-            Dashboard
-          </Link>
-          <div style={{ fontSize: '11px', color: '#444', letterSpacing: '0.06em' }}>PROFILUX</div>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            style={{ background: '#fff', border: 'none', color: '#000', fontSize: '12px', padding: '7px 18px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontWeight: 500 }}
-          >
-            {saving ? 'Saving...' : 'Save'}
-          </button>
-        </div>
-      </div>
+      {/* MAIN WRAPPER */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 32px' }}>
 
-      {/* STEPS BAR */}
-      <div style={{ background: '#111', borderBottom: '1px solid #1e1e1e', padding: '0 32px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '0' }}>
-          {STEPS.map((step, i) => (
-            <button
-              key={step.id}
-              onClick={() => setCurrentStep(step.id)}
-              style={{
-                background: 'transparent', border: 'none', cursor: 'pointer',
-                padding: '14px 20px', fontSize: '11px', fontFamily: 'Inter, sans-serif',
-                color: currentStep === step.id ? '#fff' : completedSteps.includes(step.id) ? '#1D9E75' : '#444',
-                borderBottom: currentStep === step.id ? '2px solid #fff' : '2px solid transparent',
-                fontWeight: currentStep === step.id ? 500 : 400,
-                letterSpacing: '0.04em',
-              }}
-            >
-              {completedSteps.includes(step.id) && currentStep !== step.id ? 'checkmark ' : ''}{step.label}
-            </button>
-          ))}
+        {/* TOP BAR - constrained to form column width */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 240px', gap: '32px' }}>
+          <div style={{ background: '#111111', borderBottom: '1px solid #2a2a2a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0' }}>
+            <Link href="/dashboard" style={{ fontSize: '13px', color: '#aaa', textDecoration: 'none', fontFamily: 'Inter, sans-serif' }}>
+              Dashboard
+            </Link>
+            <div style={{ fontSize: '11px', color: '#fff', letterSpacing: '0.12em', fontWeight: 500 }}>PROFILUX</div>
+            <div style={{ fontSize: '12px', color: saving ? '#aaa' : '#1D9E75', fontFamily: 'Inter, sans-serif', letterSpacing: '0.04em', minWidth: '70px', textAlign: 'right' }}>
+              {saving ? 'Saving...' : 'Saved ✓'}
+            </div>
+          </div>
+          <div style={{ background: '#111111', borderBottom: '1px solid #2a2a2a' }} />
         </div>
-      </div>
 
-      {/* MAIN */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px 32px 80px', display: 'grid', gridTemplateColumns: '1fr 240px', gap: '32px' }}>
+        {/* STEPS BAR - constrained to form column width */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 240px', gap: '32px', marginBottom: '32px' }}>
+          <div style={{ background: '#111', borderBottom: '1px solid #1e1e1e', display: 'flex', alignItems: 'center' }}>
+            {STEPS.map((step) => (
+              <button
+                key={step.id}
+                onClick={() => setCurrentStep(step.id)}
+                style={{
+                  background: 'transparent', border: 'none', cursor: 'pointer',
+                  padding: '14px 16px', fontSize: '11px', fontFamily: 'Inter, sans-serif',
+                  color: currentStep === step.id ? '#fff' : completedSteps.includes(step.id) ? '#1D9E75' : '#aaa',
+                  borderBottom: currentStep === step.id ? '2px solid #fff' : '2px solid transparent',
+                  fontWeight: currentStep === step.id ? 500 : 400,
+                  letterSpacing: '0.04em', whiteSpace: 'nowrap',
+                }}
+              >
+                {completedSteps.includes(step.id) && currentStep !== step.id ? '✓ ' : ''}{step.label}
+              </button>
+            ))}
+          </div>
+          <div style={{ background: '#111', borderBottom: '1px solid #1e1e1e' }} />
+        </div>
+
+      {/* MAIN GRID */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 240px', gap: '32px', paddingBottom: '80px' }}>
 
         {/* LEFT - STEPS CONTENT */}
         <div>
@@ -757,6 +755,7 @@ export default function ProfiluxPage() {
 
         </div>
 
+      </div>
       </div>
     </div>
   )
