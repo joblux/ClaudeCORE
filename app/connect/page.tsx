@@ -5,7 +5,7 @@ export default function ConnectPage() {
     <div className="bg-[#0f0f0f] flex flex-col">
       <div className="grid grid-cols-1 md:grid-cols-2">
 
-        <Link href="/join" className="group flex flex-col border-b md:border-b-0 md:border-r border-[#1e1e1e] bg-[#0f0f0f] hover:bg-[#121208] transition-colors duration-300">
+        <Link href="/join/employer" className="group flex flex-col border-b md:border-b-0 md:border-r border-[#1e1e1e] bg-[#0f0f0f] hover:bg-[#121208] transition-colors duration-300">
           <div className="max-w-[600px] ml-auto w-full px-8 md:px-16 pt-16 pb-8">
             <p className="text-[0.6rem] tracking-[2.5px] uppercase font-medium text-[#a58e28] mb-8">Employers & Luxury Brands</p>
             <h2 className="text-3xl md:text-4xl font-light text-white leading-snug mb-6" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>

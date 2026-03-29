@@ -110,7 +110,7 @@ export default withAuth(
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl;
         // Allow unauthenticated access to public pages (maintenance redirect handles them)
-        const publicPaths = ["/", "/about", "/holding", "/jobs", "/opportunities", "/wikilux", "/bloglux", "/brands", "/signals", "/careers", "/events", "/insights", "/travel", "/[slug]", "/escape", "/interviews", "/salaries", "/coaching", "/the-brief", "/members", "/join", "/offline", "/search", "/companies", "/interview-prep", "/terms", "/privacy", "/faq", "/contact", "/services", "/contribute", "/select-profile", "/connect", "/sitemap.xml", "/robots.txt", "/rss.xml", "/rss", "/feed", "/feed.xml"];
+        const publicPaths = ["/", "/about", "/holding", "/jobs", "/opportunities", "/wikilux", "/bloglux", "/brands", "/signals", "/careers", "/events", "/insights", "/travel", "/[slug]", "/escape", "/interviews", "/salaries", "/coaching", "/the-brief", "/members", "/join", "/offline", "/search", "/companies", "/interview-prep", "/terms", "/privacy", "/faq", "/contact", "/services", "/contribute", "/select-profile", "/connect", "/join/employer", "/sitemap.xml", "/robots.txt", "/rss.xml", "/rss", "/feed", "/feed.xml"];
         if (publicPaths.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
           return true;
         }
