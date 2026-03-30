@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
+import { sendEmail } from '@/lib/ses'
+import { welcomeApprovalEmail } from '@/lib/email-templates'
 import { authOptions } from '@/lib/auth'
 
 const supabase = createClient(
@@ -101,6 +103,24 @@ export async function PATCH(req: NextRequest) {
       .in('id', ids)
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Send welcome email on approval
+    if (newStatus === 'approved') {
+      for (const id of ids) {
+        try {
+          const { data: member } = await supabase
+            .from('members')
+            .select('email, first_name, role')
+            .eq('id', id)
+            .single()
+          if (member?.email) {
+            const tier = member.role === 'business' ? 'Luxury Employer' : member.role || 'member'
+            const { html, text } = welcomeApprovalEmail({ firstName: member.first_name, tier })
+            await sendEmail({ to: member.email, subject: 'Welcome to JOBLUX', body: text, bodyHtml: html })
+          }
+        } catch (e) { console.error('Approval email failed for', id, e) }
+      }
+    }
 
     return NextResponse.json({ success: true })
   } catch {
