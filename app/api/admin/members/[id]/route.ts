@@ -18,56 +18,72 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const memberId = params.id
+  // Handle params safely (works in both Next.js 14 and 15)
+  const resolvedParams = await Promise.resolve(params)
+  const memberId = resolvedParams.id
 
-  const { data: member, error: memberErr } = await supabaseAdmin
-    .from('members')
-    .select('*')
-    .eq('id', memberId)
-    .single()
-
-  if (memberErr || !member) {
-    return NextResponse.json({ error: 'Member not found' }, { status: 404 })
+  if (!memberId) {
+    return NextResponse.json({ error: 'Missing member ID' }, { status: 400 })
   }
 
-  const [workRes, eduRes, langRes, docRes, reviewRes] = await Promise.all([
-    supabaseAdmin
-      .from('work_experiences')
+  try {
+    const { data: member, error: memberErr } = await supabaseAdmin
+      .from('members')
       .select('*')
-      .eq('member_id', memberId)
-      .order('sort_order', { ascending: true }),
-    supabaseAdmin
-      .from('education_records')
-      .select('*')
-      .eq('member_id', memberId)
-      .order('sort_order', { ascending: true }),
-    supabaseAdmin
-      .from('member_languages')
-      .select('*')
-      .eq('member_id', memberId)
-      .order('created_at', { ascending: true }),
-    supabaseAdmin
-      .from('member_documents')
-      .select('*')
-      .eq('member_id', memberId)
-      .order('uploaded_at', { ascending: false }),
-    supabaseAdmin
-      .from('member_ai_reviews')
-      .select('*')
-      .eq('member_id', memberId)
-      .single(),
-  ])
+      .eq('id', memberId)
+      .maybeSingle()
 
-  return NextResponse.json({
-    member: {
-      ...member,
-      work_experiences: workRes.data ?? [],
-      education_records: eduRes.data ?? [],
-      languages: langRes.data ?? [],
-      documents: docRes.data ?? [],
-    },
-    aiReview: reviewRes.data ?? null,
-  })
+    if (memberErr) {
+      console.error('Member fetch error:', memberErr)
+      return NextResponse.json({ error: 'Failed to fetch member' }, { status: 500 })
+    }
+
+    if (!member) {
+      return NextResponse.json({ error: 'Member not found' }, { status: 404 })
+    }
+
+    const [workRes, eduRes, langRes, docRes, reviewRes] = await Promise.all([
+      supabaseAdmin
+        .from('work_experiences')
+        .select('*')
+        .eq('member_id', memberId)
+        .order('sort_order', { ascending: true }),
+      supabaseAdmin
+        .from('education_records')
+        .select('*')
+        .eq('member_id', memberId)
+        .order('sort_order', { ascending: true }),
+      supabaseAdmin
+        .from('member_languages')
+        .select('*')
+        .eq('member_id', memberId)
+        .order('created_at', { ascending: true }),
+      supabaseAdmin
+        .from('member_documents')
+        .select('*')
+        .eq('member_id', memberId)
+        .order('uploaded_at', { ascending: false }),
+      supabaseAdmin
+        .from('member_ai_reviews')
+        .select('*')
+        .eq('member_id', memberId)
+        .maybeSingle(),
+    ])
+
+    return NextResponse.json({
+      member: {
+        ...member,
+        work_experiences: workRes.data ?? [],
+        education_records: eduRes.data ?? [],
+        languages: langRes.data ?? [],
+        documents: docRes.data ?? [],
+      },
+      aiReview: reviewRes.data ?? null,
+    })
+  } catch (err) {
+    console.error('GET /api/admin/members/[id] error:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 export async function PATCH(
@@ -79,6 +95,9 @@ export async function PATCH(
   if (!session || role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const resolvedParams = await Promise.resolve(params)
+  const memberId = resolvedParams.id
 
   try {
     const body = await req.json()
@@ -95,7 +114,7 @@ export async function PATCH(
       const { error } = await supabaseAdmin
         .from('members')
         .update(update)
-        .eq('id', params.id)
+        .eq('id', memberId)
 
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       return NextResponse.json({ success: true })
@@ -106,7 +125,7 @@ export async function PATCH(
       const { error } = await supabaseAdmin
         .from('members')
         .update({ notes } as any)
-        .eq('id', params.id)
+        .eq('id', memberId)
 
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       return NextResponse.json({ success: true })
