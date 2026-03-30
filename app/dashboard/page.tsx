@@ -16,8 +16,10 @@ export default function DashboardRouter() {
 
     if (role === 'admin') {
       router.push('/admin')
-    } else if (role === 'business' || role === 'insider_contributor' || role === 'insider_key_speaker' || role === 'insider') {
+    } else if (role === 'business') {
       router.push('/dashboard/business')
+    } else if (role === 'insider' || role === 'insider_contributor' || role === 'insider_key_speaker') {
+      router.push('/dashboard/insider')
     } else {
       router.push('/dashboard/candidate')
     }

@@ -48,31 +48,7 @@ const COUNTRIES = [
   "Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe",
 ]
 
-const PHONE_CODES = [
-  { code: '+1', label: '\u{1F1FA}\u{1F1F8} +1' },
-  { code: '+44', label: '\u{1F1EC}\u{1F1E7} +44' },
-  { code: '+33', label: '\u{1F1EB}\u{1F1F7} +33' },
-  { code: '+49', label: '\u{1F1E9}\u{1F1EA} +49' },
-  { code: '+39', label: '\u{1F1EE}\u{1F1F9} +39' },
-  { code: '+34', label: '\u{1F1EA}\u{1F1F8} +34' },
-  { code: '+41', label: '\u{1F1E8}\u{1F1ED} +41' },
-  { code: '+32', label: '\u{1F1E7}\u{1F1EA} +32' },
-  { code: '+31', label: '\u{1F1F3}\u{1F1F1} +31' },
-  { code: '+46', label: '\u{1F1F8}\u{1F1EA} +46' },
-  { code: '+971', label: '\u{1F1E6}\u{1F1EA} +971' },
-  { code: '+966', label: '\u{1F1F8}\u{1F1E6} +966' },
-  { code: '+212', label: '\u{1F1F2}\u{1F1E6} +212' },
-  { code: '+213', label: '\u{1F1E9}\u{1F1FF} +213' },
-  { code: '+216', label: '\u{1F1F9}\u{1F1F3} +216' },
-  { code: '+20', label: '\u{1F1EA}\u{1F1EC} +20' },
-  { code: '+86', label: '\u{1F1E8}\u{1F1F3} +86' },
-  { code: '+81', label: '\u{1F1EF}\u{1F1F5} +81' },
-  { code: '+91', label: '\u{1F1EE}\u{1F1F3} +91' },
-  { code: '+55', label: '\u{1F1E7}\u{1F1F7} +55' },
-  { code: '+52', label: '\u{1F1F2}\u{1F1FD} +52' },
-  { code: '+61', label: '\u{1F1E6}\u{1F1FA} +61' },
-  { code: '+27', label: '\u{1F1FF}\u{1F1E6} +27' },
-]
+import { PHONE_CODES, detectPhoneCode } from '@/lib/phone-codes'
 
 export default function CompleteRegistrationPage() {
   const router = useRouter()
@@ -83,7 +59,7 @@ export default function CompleteRegistrationPage() {
   // Step 3 — Essentials
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [phoneCode, setPhoneCode] = useState('+33')
+  const [phoneCode, setPhoneCode] = useState(() => detectPhoneCode())
   const [phoneNumber, setPhoneNumber] = useState('')
   const [city, setCity] = useState('')
   const [country, setCountry] = useState('')

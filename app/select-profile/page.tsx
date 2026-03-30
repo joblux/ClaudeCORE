@@ -7,33 +7,33 @@ import Image from 'next/image'
 
 const PROFILES = [
   {
-    key: 'rising', overline: 'RISING', title: 'Emerging Professional',
+    key: 'rising', overline: 'EMERGING', title: 'Emerging Professional',
     description: 'For those at the beginning of their luxury journey — analysts, assistants, coordinators, and recent graduates.',
     approval: 'Reviewed by JOBLUX', featured: false,
     features: ['Salary intelligence across markets','Interview experiences at major maisons','Brand intelligence — 500+ houses','The Brief — biweekly intelligence digest','Contribute salary data & experiences'],
-    cta: 'Select Rising',
+    cta: 'Select Emerging',
   },
   {
-    key: 'pro', overline: 'PRO', title: 'Established Professional',
+    key: 'pro', overline: 'ESTABLISHED', title: 'Established Professional',
     description: 'For mid-level professionals building real traction in luxury — managers, specialists, buyers, and boutique leaders.',
     approval: 'Reviewed by JOBLUX', featured: false,
-    features: ['Everything in Rising','Deeper benchmarks by market & sector','Track sectors & brands of interest','Save intelligence for later reference','Express interest in search assignments'],
-    cta: 'Select Pro',
+    features: ['Everything in Emerging','Deeper benchmarks by market & sector','Track sectors & brands of interest','Save intelligence for later reference','Express interest in search assignments'],
+    cta: 'Select Established',
   },
   {
-    key: 'professional', overline: 'SENIOR & EXECUTIVE', title: 'Senior & Executive',
+    key: 'executive', overline: 'SENIOR & EXECUTIVE', title: 'Senior & Executive',
     description: 'For senior professionals and leadership profiles whose experience carries greater strategic relevance.',
     approval: 'Reviewed by JOBLUX', featured: false,
-    features: ['Everything in Pro','Comprehensive sector-level intelligence','Strategic compensation visibility','Priority for confidential assignments','Deepest intelligence layer'],
+    features: ['Everything in Established','Comprehensive sector-level intelligence','Strategic compensation visibility','Priority for confidential assignments','Deepest intelligence layer'],
     cta: 'Select Senior & Executive',
   },
 
   {
-    key: 'insider', overline: 'INSIDER', title: 'Trusted Contributor',
+    key: 'insider', overline: 'TRUSTED CONTRIBUTOR', title: 'Trusted Contributor',
     description: 'For experienced professionals, content partners, and intelligence contributors whose knowledge strengthens the ecosystem.',
     approval: 'Reviewed by JOBLUX', featured: false,
     features: ['Shape the intelligence ecosystem directly','Contribute insights & editorial perspective','Deepest access to all intelligence layers','Review and enrich platform intelligence','Recognised as a trusted industry voice'],
-    cta: 'Request Insider Access',
+    cta: 'Request Contributor Access',
   },
 ]
 
@@ -42,8 +42,6 @@ export default function SelectProfilePage() {
   const { data: session, status } = useSession()
   const [submitting, setSubmitting] = useState<string | null>(null)
   const [error, setError] = useState('')
-
-
 
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
@@ -85,9 +83,6 @@ export default function SelectProfilePage() {
       </div>
     )
   }
-
-  const topRow = PROFILES.slice(0, 3)
-  const bottomRow = PROFILES.slice(3)
 
   return (
     <div className="min-h-screen">

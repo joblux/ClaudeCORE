@@ -3,6 +3,7 @@
 import { Suspense, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { PHONE_CODES, detectPhoneCode } from '@/lib/phone-codes'
 
 const TRAVEL_STYLES = [
   'Accessible Travel', 'Active Travel', 'Adventure Travel', 'All-Inclusive Travel',
@@ -23,6 +24,7 @@ function PlanForm() {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
+  const [phoneCode, setPhoneCode] = useState(() => detectPhoneCode())
   const [phone, setPhone] = useState('')
   const [preferredLanguage, setPreferredLanguage] = useState('')
   const [selectedStyles, setSelectedStyles] = useState<string[]>([])
@@ -52,7 +54,7 @@ function PlanForm() {
           first_name: firstName.trim(),
           last_name: lastName.trim(),
           email: email.trim(),
-          phone: phone.trim() || null,
+          phone: phone.trim() ? `${phoneCode} ${phone.trim()}` : null,
           preferred_language: preferredLanguage.trim() || null,
           travel_styles: selectedStyles,
           destinations: destinations.trim() || null,
@@ -204,13 +206,21 @@ function PlanForm() {
             >
               Phone
             </label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+1 (000) 000-0000"
-              className={inputClass}
-            />
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <select
+                value={phoneCode}
+                onChange={(e) => setPhoneCode(e.target.value)}
+                style={{ width: '120px', flexShrink: 0, fontSize: '13px', padding: '10px 12px', border: '1px solid #e0dcd4', borderRadius: '4px', background: '#fff', color: '#1A1A1A' }}
+              >
+                {PHONE_CODES.map(pc => <option key={pc.code} value={pc.code}>{pc.label}</option>)}
+              </select>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className={inputClass}
+              />
+            </div>
           </div>
 
           <div>

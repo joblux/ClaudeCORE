@@ -10,7 +10,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const VALID_TIERS = ['rising', 'pro', 'professional', 'business', 'insider']
+const VALID_TIERS = ['rising', 'pro', 'executive', 'business', 'insider']
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
@@ -93,7 +93,6 @@ export async function POST(req: NextRequest) {
     const tierLabels: Record<string, string> = {
       rising: 'Emerging Professional',
       pro: 'Established Professional',
-      professional: 'Established Professional',
       executive: 'Senior & Executive',
       business: 'Luxury Employer',
       insider: 'Trusted Contributor',

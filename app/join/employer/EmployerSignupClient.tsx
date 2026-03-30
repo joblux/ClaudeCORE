@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { PHONE_CODES, detectPhoneCode } from '@/lib/phone-codes'
 
 const ORG_TYPES = [
   'Luxury group',
@@ -43,6 +44,7 @@ export default function EmployerSignupClient() {
   const [email, setEmail] = useState("")
   const [title, setTitle] = useState("")
   const [country, setCountry] = useState("")
+  const [phoneCode, setPhoneCode] = useState(() => detectPhoneCode())
   const [phone, setPhone] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -66,7 +68,7 @@ export default function EmployerSignupClient() {
       const res = await fetch("/api/members/employer-signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ company, orgType, firstName, lastName, email, title, country, phone }),
+        body: JSON.stringify({ company, orgType, firstName, lastName, email, title, country, phone: phone ? `${phoneCode} ${phone}` : '' }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -174,7 +176,12 @@ export default function EmployerSignupClient() {
             </div>
             <div>
               <label className={labelClass}>Phone</label>
-              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className={inputClass} />
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <select value={phoneCode} onChange={e => setPhoneCode(e.target.value)} className={selectClass} style={{ width: '120px', flexShrink: 0 }}>
+                  {PHONE_CODES.map(pc => <option key={pc.code} value={pc.code}>{pc.label}</option>)}
+                </select>
+                <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className={inputClass} />
+              </div>
             </div>
           </div>
 
