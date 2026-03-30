@@ -66,7 +66,7 @@ export default function ConnectPage() {
                   {item.link ? (
                     <Link href={item.link} className="text-[#888] underline underline-offset-4 decoration-[#444] hover:text-[#ccc] transition-colors">{item.text}</Link>
                   ) : (
-                    <span className={item.muted ? 'text-[#333] italic' : 'text-[#555]'}>{item.text}</span>
+                    <span className='text-[#555]'>{item.text}</span>
                   )}
                 </li>
               ))}
