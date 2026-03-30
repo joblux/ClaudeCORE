@@ -106,9 +106,17 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
         .update(updates)
         .eq("id", user.id)
         .select()
-        .single();
+        .maybeSingle();
       if (error) throw error;
-      return mapMemberToAdapterUser(data);
+      if (data) return mapMemberToAdapterUser(data);
+      // If no rows updated, fetch the existing member
+      const { data: existing } = await supabase
+        .from("members")
+        .select()
+        .eq("id", user.id)
+        .single();
+      if (existing) return mapMemberToAdapterUser(existing);
+      throw new Error("Member not found for updateUser");
     },
 
     async deleteUser(userId: string): Promise<void> {
