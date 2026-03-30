@@ -35,7 +35,7 @@ export default function ConnectPage() {
               ))}
             </ul>
           </div>
-          <div className="max-w-[600px] ml-auto w-full px-8 md:px-16 pb-12">
+          <div className="max-w-[600px] ml-auto w-full px-8 md:px-16 pb-12 mt-auto">
             <span className="inline-block text-[0.75rem] font-medium tracking-wide text-[#a58e28] border border-[rgba(165,142,40,0.35)] rounded px-5 py-3 group-hover:bg-[rgba(165,142,40,0.06)] transition-colors">
               Request access →
             </span>
@@ -44,7 +44,7 @@ export default function ConnectPage() {
 
         <Link href="/select-profile" className="group flex flex-col bg-[#0a0f0c] hover:bg-[#0c130f] transition-colors duration-300">
           <div className="max-w-[600px] mr-auto w-full px-8 md:px-16 pt-16 pb-8">
-            <p className="text-[0.6rem] tracking-[2.5px] uppercase font-medium text-[#1D9E75] mb-8">Professionals, Experts & Contributors</p>
+            <p className="text-[0.6rem] tracking-[2.5px] uppercase font-medium text-[#1D9E75] mb-8">Professionals, Students & Contributors</p>
             <h2 className="text-3xl md:text-4xl font-light text-white leading-snug mb-6" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
               I work in or advise<br />the luxury industry
             </h2>
@@ -59,7 +59,7 @@ export default function ConnectPage() {
                 { text: 'Follow signals across 500+ luxury houses', link: null },
                 { text: 'Read exclusive industry news', link: null },
                 { text: 'Be considered for exclusive assignments', link: null },
-                { text: 'And more...', link: null, muted: true },
+                { text: 'Private details never listed or published.', link: null },
               ].map((item) => (
                 <li key={item.text} className="flex items-start gap-3 text-sm">
                   <span className="mt-[7px] w-[4px] h-[4px] rounded-full bg-[#1a2e26] flex-shrink-0" />
@@ -72,7 +72,7 @@ export default function ConnectPage() {
               ))}
             </ul>
           </div>
-          <div className="max-w-[600px] mr-auto w-full px-8 md:px-16 pb-12">
+          <div className="max-w-[600px] mr-auto w-full px-8 md:px-16 pb-12 mt-auto">
             <span className="inline-block text-[0.75rem] font-medium tracking-wide text-[#1D9E75] border border-[rgba(29,158,117,0.35)] rounded px-5 py-3 group-hover:bg-[rgba(29,158,117,0.06)] transition-colors">
               Request access →
             </span>
