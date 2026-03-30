@@ -100,10 +100,10 @@ function JoinContent() {
 
       <div className="bg-[#1e1e1e] border border-[#2e2e2e] rounded-lg px-8 py-9">
         <h2 className="text-white font-light text-center mb-1.5" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '20px' }}>
-          {mode === "request" ? "Request access to JOBLUX" : "Welcome back."}
+          "Sign in to JOBLUX"
         </h2>
         <p className="text-[#888] text-center mb-7" style={{ fontSize: '12px' }}>
-          {mode === "request" ? "By invitation or manual approval only." : "Sign in to your intelligence."}
+          "Access your intelligence dashboard."
         </p>
 
         {error === "pending" && (
@@ -186,8 +186,14 @@ function JoinContent() {
         )}
       </div>
 
-      <div className="text-center mt-5">
-        <a href="/contact" className="text-[#999] hover:text-[#aaa] transition-colors" style={{ fontSize: '11px' }}>
+      <div className="text-center mt-5 space-y-2">
+        <p style={{ fontSize: '12px' }} className="text-[#999]">
+          Don&apos;t have access?{" "}
+          <a href="/connect" className="text-[#a58e28] underline underline-offset-3 hover:text-[#ccc] transition-colors">
+            Request access
+          </a>
+        </p>
+        <a href="/faq" className="block text-[#777] hover:text-[#aaa] transition-colors" style={{ fontSize: '11px' }}>
           Need help signing in? &rarr;
         </a>
       </div>
@@ -198,8 +204,8 @@ function JoinContent() {
 export default function JoinPage() {
   return (
     <main className="bg-[#1a1a1a] flex flex-col items-center justify-start px-4 pt-16 pb-12 pt-16 pb-16">
-      <p className="text-[#888] uppercase text-center mb-4" style={{ fontSize: '15px', letterSpacing: '0.2em' }}>
-        Luxury Talent Intelligence
+      <p className="text-[10px] tracking-[3px] uppercase text-[#777] text-center mb-4">
+        Welcome back
       </p>
       <Suspense fallback={<div className="text-center text-sm text-[#888] py-8">Loading...</div>}>
         <JoinContent />
