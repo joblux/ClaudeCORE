@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     const pending = employerPendingEmail({ firstName, companyName: company })
     sendEmail({
       to: email,
-      subject: "JOBLUX — We received your request",
+      subject: "We received your request",
       body: pending.text,
       bodyHtml: pending.html,
     }).catch(() => {})
