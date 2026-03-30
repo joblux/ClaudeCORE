@@ -21,9 +21,9 @@ export default function AboutPage() {
           Twenty years in luxury.<br className="hidden md:block" /> One platform.
         </h1>
         <p className="text-[15px] leading-relaxed text-white/55 border-l-2 border-[#a58e28] pl-6 max-w-2xl">
-          JOBLUX was co-founded by Mohammed Alex Mazour and Alex Mason — a luxury
-          executive search consultant and a technologist who have spent two decades
-          building dedicated tools and services for the luxury industry.
+          JOBLUX was co-founded by Mohammed Alex Mazour and Alex Mason — a manager-to-executive level search consultant and a web specialist
+          who have spent two decades building dedicated tools and services for the
+          luxury industry.
         </p>
       </section>
 
@@ -56,7 +56,7 @@ export default function AboutPage() {
             </p>
             <p className="text-sm leading-relaxed text-white/50 max-w-2xl">
               After a career in Parisian luxury retail, Mohammed Alex Mazour moves
-              to London as a luxury recruitment consultant. He meets Alex Mason, a
+              to London as a luxury retail recruitment consultant. He meets Alex Mason, a
               London-based developer with a sharp eye for building platforms.
               Together they see what the industry is missing: a recruitment service
               built exclusively for luxury.
@@ -255,7 +255,7 @@ export default function AboutPage() {
             starts here.
           </p>
           <Link
-            href="/join"
+            href="/connect"
             className="inline-block border border-[#a58e28]/50 text-[#a58e28] text-sm tracking-wide px-7 py-3 rounded hover:bg-[#a58e28]/10 transition-colors"
           >
             Request access
