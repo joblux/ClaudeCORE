@@ -39,7 +39,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   try {
     const { html, text } = welcomeApprovalEmail({
       firstName: member.first_name,
-      tier: member.role || "member",
+      tier: member.role === 'business' ? 'Luxury Employer' : member.role || 'member',
     });
     await sendEmail({
       to: member.email,

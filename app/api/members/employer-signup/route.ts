@@ -55,20 +55,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    // Send admin notification
-    const { html, text } = adminNewMemberEmail({
+    // Send pending confirmation to employer (#7)
+    const pending = employerPendingEmail({ firstName, companyName: company })
+    sendEmail({
+      to: email,
+      subject: "JOBLUX — We received your request",
+      body: pending.text,
+      bodyHtml: pending.html,
+    }).catch(() => {})
+
+    // Send admin notification (#9)
+    const admin = adminNewEmployerEmail({
       name: fullName,
       email,
-      tier: "Luxury Employer",
-      company,
-      registrationDate: new Date().toISOString().split("T")[0],
+      companyName: company,
+      orgType: orgType || undefined,
+      jobTitle: title || undefined,
     })
-
     sendEmail({
       to: ADMIN_ALERT_EMAIL,
-      subject: `New JOBLUX access request — ${fullName}`,
-      body: text,
-      bodyHtml: html,
+      subject: `New JOBLUX employer request — ${fullName} (${company})`,
+      body: admin.text,
+      bodyHtml: admin.html,
     }).catch(() => {})
 
     return NextResponse.json({ success: true })
