@@ -46,7 +46,7 @@ const SAMPLE_DATA: Record<string, () => { html: string; text: string; subject: s
     return { html, text, subject: 'Thank you for your contribution' }
   },
   contribution_approved: () => {
-    const { html, text } = contributionApprovedEmail({ firstName: 'Sophie', contributionType: 'salary_data', pointsAwarded: 10 })
+    const { html, text } = contributionApprovedEmail({ firstName: 'Sophie', contributionType: 'salary_data' })
     return { html, text, subject: 'Your contribution is now live' }
   },
   contribution_rejected: () => {
