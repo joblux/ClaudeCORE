@@ -382,7 +382,7 @@ export default function FaqPage() {
                       className="overflow-hidden transition-all duration-300"
                       style={{ maxHeight: isOpen ? '500px' : '0px' }}
                     >
-                      <p className="text-sm text-[#555] leading-relaxed pt-3">
+                      <p className="text-sm text-[#999] leading-relaxed pt-3">
                         {item.a}
                       </p>
                     </div>
@@ -580,7 +580,7 @@ export default function FaqPage() {
         <div className="border-t border-[#e8e2d8] mt-12 pt-12">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="jl-serif text-xl font-light text-[#1a1a1a] mb-3">Discreet enquiries welcome</h2>
-            <p className="font-sans text-sm text-[#666] leading-relaxed mb-8">
+            <p className="font-sans text-sm text-[#999] leading-relaxed mb-8">
               Whether you are a maison considering a confidential search, a professional exploring a move, or an executive seeking bespoke travel — we respond to every enquiry personally.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">

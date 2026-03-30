@@ -66,7 +66,7 @@ export default function BusinessDashboard() {
         <div className="flex-1 overflow-y-auto">
           {navItems.map(group => (
             <div key={group.section}>
-              <div className="px-5 pt-4 pb-1.5 text-[9px] font-semibold tracking-[2px] text-[#333]">{group.section}</div>
+              <div className="px-5 pt-4 pb-1.5 text-[9px] font-semibold tracking-[2px] text-[#777]">{group.section}</div>
               {group.items.map(item => (
                 <button
                   key={item.id}
@@ -91,7 +91,7 @@ export default function BusinessDashboard() {
 
         <div className="p-4 border-t border-[#222]">
           <div className="rounded-lg p-3" style={{ background: 'rgba(165,142,40,0.08)', border: '1px solid rgba(165,142,40,0.2)' }}>
-            <p className="text-[11px] text-[#555] leading-relaxed mb-2">Need to discuss a search or brief Mo on a new role?</p>
+            <p className="text-[11px] text-[#999] leading-relaxed mb-2">Need to discuss a search or brief Mo on a new role?</p>
             <button className="w-full bg-[#a58e28] text-[#1a1a1a] text-[11px] font-semibold py-1.5 rounded">Contact Mo →</button>
           </div>
         </div>
@@ -102,7 +102,7 @@ export default function BusinessDashboard() {
         <div className="flex items-start justify-between mb-7">
           <div>
             <h1 className="text-xl font-normal text-white mb-1" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>Hermès — Search overview</h1>
-            <p className="text-sm text-[#555]">Thursday, March 26, 2026 · 3 active searches in progress</p>
+            <p className="text-sm text-[#999]">Thursday, March 26, 2026 · 3 active searches in progress</p>
           </div>
           <div className="border border-[#2196F3] text-[#2196F3] text-[10px] font-semibold tracking-[2px] px-3 py-1 rounded">BUSINESS</div>
         </div>
@@ -112,8 +112,8 @@ export default function BusinessDashboard() {
           {[['3', 'Active searches', 'Managed by JOBLUX'], ['12', 'Candidates in pipeline', '↑ 3 new this week'], ['1', 'Offer pending', 'Head of Digital · Paris'], ['5', 'Contributions made', 'Salary + culture data']].map(([num, label, sub]) => (
             <div key={label} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4">
               <div className="text-2xl font-normal text-[#a58e28] mb-1">{num}</div>
-              <div className="text-[11px] text-[#555]">{label}</div>
-              <div className="text-[11px] text-[#444] mt-0.5">{sub}</div>
+              <div className="text-[11px] text-[#999]">{label}</div>
+              <div className="text-[11px] text-[#999] mt-0.5">{sub}</div>
             </div>
           ))}
         </div>
@@ -122,15 +122,15 @@ export default function BusinessDashboard() {
         <div className="flex items-center gap-3 mb-4">
           <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">YOUR BRAND PROFILE</span>
           <div className="flex-1 h-px bg-[#2a2a2a]" />
-          <Link href="/brands/hermes" className="text-xs text-[#555] hover:text-[#888]">View on WikiLux →</Link>
+          <Link href="/brands/hermes" className="text-xs text-[#999] hover:text-[#888]">View on WikiLux →</Link>
         </div>
         <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 flex items-center gap-4 mb-7">
           <div className="w-11 h-11 rounded-full bg-[#2a2a2a] flex items-center justify-center text-base font-medium text-[#888] flex-shrink-0">H</div>
           <div className="flex-1">
             <div className="text-sm font-medium text-white mb-0.5" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>Hermès International</div>
-            <div className="text-[11px] text-[#555]">Independent (public: RMS.PA) · Founded 1837, Paris · ~20,000 employees · 47 profile views this month</div>
+            <div className="text-[11px] text-[#999]">Independent (public: RMS.PA) · Founded 1837, Paris · ~20,000 employees · 47 profile views this month</div>
           </div>
-          <button className="text-[11px] text-[#666] border border-[#2a2a2a] rounded-lg px-3 py-1.5 hover:border-[#444] hover:text-[#888] transition-colors">Edit brand page →</button>
+          <button className="text-[11px] text-[#999] border border-[#2a2a2a] rounded-lg px-3 py-1.5 hover:border-[#444] hover:text-[#888] transition-colors">Edit brand page →</button>
         </div>
 
         {/* Active searches */}
@@ -145,17 +145,17 @@ export default function BusinessDashboard() {
                 <div>
                   <span className="text-[10px] font-semibold tracking-wider px-2 py-0.5 rounded inline-block mb-2" style={{ background: s.statusBg, color: s.statusColor, border: `1px solid ${s.statusBorder}` }}>{s.status}</span>
                   <div className="text-sm font-medium text-[#e0e0e0] mb-1">{s.title}</div>
-                  <div className="flex gap-2 text-[11px] text-[#444]">
+                  <div className="flex gap-2 text-[11px] text-[#999]">
                     <span>{s.location}</span><span>·</span><span>{s.salary}</span><span>·</span><span>Opened {s.opened}</span>
                   </div>
                 </div>
-                <div className="text-[11px] text-[#444]">Updated {s.updated}</div>
+                <div className="text-[11px] text-[#999]">Updated {s.updated}</div>
               </div>
               <div className="grid grid-cols-5 gap-1.5">
                 {pipelineStages.map((stage, i) => (
                   <div key={stage} className="text-center bg-[#1a1a1a] border border-[#222] rounded-lg py-2">
                     <div className="text-lg font-normal mb-0.5" style={{ color: s.pipeline[i] > 0 && i === 3 ? '#FF9800' : '#fff' }}>{s.pipeline[i]}</div>
-                    <div className="text-[9px] text-[#444] tracking-wide">{stage}</div>
+                    <div className="text-[9px] text-[#999] tracking-wide">{stage}</div>
                   </div>
                 ))}
               </div>
@@ -169,15 +169,15 @@ export default function BusinessDashboard() {
             <div className="flex items-center gap-3 mb-4">
               <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">RECENT CANDIDATES</span>
               <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <button className="text-xs text-[#555]">Full pipeline →</button>
+              <button className="text-xs text-[#999]">Full pipeline →</button>
             </div>
             <div className="divide-y divide-[#1e1e1e]">
               {candidates.map(c => (
                 <div key={c.name} className="flex items-center py-3">
-                  <div className="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[10px] font-medium text-[#666] mr-3 flex-shrink-0">{c.initials}</div>
+                  <div className="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[10px] font-medium text-[#999] mr-3 flex-shrink-0">{c.initials}</div>
                   <div className="flex-1">
                     <div className="text-sm text-[#ccc]">{c.name}</div>
-                    <div className="text-[11px] text-[#444]">{c.role}</div>
+                    <div className="text-[11px] text-[#999]">{c.role}</div>
                   </div>
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded" style={{ background: c.stageBg, color: c.stageColor }}>{c.stage}</span>
                 </div>
@@ -189,14 +189,14 @@ export default function BusinessDashboard() {
             <div className="flex items-center gap-3 mb-4">
               <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">MARKET SIGNALS</span>
               <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <Link href="/signals" className="text-xs text-[#555]">All signals →</Link>
+              <Link href="/signals" className="text-xs text-[#999]">All signals →</Link>
             </div>
             <div className="divide-y divide-[#1e1e1e]">
               {signals.map((s, i) => (
                 <div key={i} className="flex gap-3 py-3">
                   <span className="w-[6px] h-[6px] rounded-full flex-shrink-0 mt-1" style={{ background: s.color }} />
                   <span className="text-xs text-[#777] flex-1 leading-relaxed">{s.text}</span>
-                  <span className="text-[10px] text-[#444] whitespace-nowrap">{s.time}</span>
+                  <span className="text-[10px] text-[#999] whitespace-nowrap">{s.time}</span>
                 </div>
               ))}
             </div>
@@ -209,7 +209,7 @@ export default function BusinessDashboard() {
             <div className="flex items-center gap-3 mb-4">
               <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">MY CONTRIBUTIONS</span>
               <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <button className="text-xs text-[#555]">Add data →</button>
+              <button className="text-xs text-[#999]">Add data →</button>
             </div>
             <div className="divide-y divide-[#1e1e1e]">
               {contributions.map((c, i) => (
@@ -221,7 +221,7 @@ export default function BusinessDashboard() {
               ))}
             </div>
             <div className="mt-3 border border-dashed border-[#2a2a2a] rounded-lg p-3 text-center">
-              <p className="text-[11px] text-[#444] mb-2">Contribute more data to strengthen your brand profile on WikiLux</p>
+              <p className="text-[11px] text-[#999] mb-2">Contribute more data to strengthen your brand profile on WikiLux</p>
               <button className="text-[11px] text-[#a58e28] border border-[rgba(165,142,40,0.3)] rounded px-3 py-1">+ Add contribution</button>
             </div>
           </div>
@@ -230,7 +230,7 @@ export default function BusinessDashboard() {
             <div className="flex items-center gap-3 mb-4">
               <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">SALARY BENCHMARKS</span>
               <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <Link href="/careers" className="text-xs text-[#555]">Full data →</Link>
+              <Link href="/careers" className="text-xs text-[#999]">Full data →</Link>
             </div>
             <div className="divide-y divide-[#1e1e1e]">
               {benchmarks.map(b => (

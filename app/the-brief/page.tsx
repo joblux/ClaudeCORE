@@ -77,7 +77,7 @@ export default function TheBriefPage() {
               {status === 'error' && (
                 <p className="font-sans text-xs text-red-400 mt-2 text-left">{message}</p>
               )}
-              <p className="font-sans text-[0.65rem] text-[#555] mt-3">
+              <p className="font-sans text-[0.65rem] text-[#999] mt-3">
                 Free · No spam · Unsubscribe anytime · Join 10,000+ luxury professionals
               </p>
             </form>

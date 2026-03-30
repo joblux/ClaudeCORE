@@ -282,7 +282,7 @@ export default function JobsPage() {
         {/* ── Employer CTA ───────────────────────────────────────── */}
         <div className="mt-10 p-6 bg-[#fafaf5] border border-[#e8e2d8] text-center">
           <div className="jl-overline-gold mb-2">For Employers</div>
-          <p className="font-sans text-sm text-[#666] mb-4">
+          <p className="font-sans text-sm text-[#999] mb-4">
             Submit a confidential hiring brief. JOBLUX presents pre-screened candidates from our vetted network.
           </p>
           <div className="flex items-center justify-center gap-3">

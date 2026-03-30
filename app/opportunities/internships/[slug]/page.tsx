@@ -191,7 +191,7 @@ export default async function InternshipDetailPage({
               {internship.description && (
                 <>
                   <div className="jl-section-label"><span>About the Role</span></div>
-                  <div className="font-sans text-sm text-[#333] leading-relaxed mb-10 whitespace-pre-line jl-prose">
+                  <div className="font-sans text-sm text-[#777] leading-relaxed mb-10 whitespace-pre-line jl-prose">
                     {internship.description}
                   </div>
                 </>
@@ -205,7 +205,7 @@ export default async function InternshipDetailPage({
                     {responsibilityLines.map((line, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <span className="text-[#a58e28] mt-0.5 flex-shrink-0">&bull;</span>
-                        <span className="font-sans text-sm text-[#555] leading-relaxed">{line}</span>
+                        <span className="font-sans text-sm text-[#999] leading-relaxed">{line}</span>
                       </li>
                     ))}
                   </ul>
@@ -220,7 +220,7 @@ export default async function InternshipDetailPage({
                     {requirementLines.map((line, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <span className="text-[#a58e28] mt-0.5 flex-shrink-0">&bull;</span>
-                        <span className="font-sans text-sm text-[#555] leading-relaxed">{line}</span>
+                        <span className="font-sans text-sm text-[#999] leading-relaxed">{line}</span>
                       </li>
                     ))}
                   </ul>
@@ -235,7 +235,7 @@ export default async function InternshipDetailPage({
                     {niceToHaveLines.map((line, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <span className="text-[#a58e28] mt-0.5 flex-shrink-0">&bull;</span>
-                        <span className="font-sans text-sm text-[#555] leading-relaxed">{line}</span>
+                        <span className="font-sans text-sm text-[#999] leading-relaxed">{line}</span>
                       </li>
                     ))}
                   </ul>

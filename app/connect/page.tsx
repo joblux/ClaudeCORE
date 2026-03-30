@@ -29,7 +29,7 @@ export default function ConnectPage() {
                   {item.link ? (
                     <Link href={item.link} className="text-[#888] underline underline-offset-4 decoration-[#444] hover:text-[#ccc] transition-colors">{item.text}</Link>
                   ) : (
-                    <span className={item.muted ? 'text-[#333] italic' : 'text-[#555]'}>{item.text}</span>
+                    <span className={item.muted ? 'text-[#777] italic' : 'text-[#999]'}>{item.text}</span>
                   )}
                 </li>
               ))}
@@ -66,7 +66,7 @@ export default function ConnectPage() {
                   {item.link ? (
                     <Link href={item.link} className="text-[#888] underline underline-offset-4 decoration-[#444] hover:text-[#ccc] transition-colors">{item.text}</Link>
                   ) : (
-                    <span className='text-[#555]'>{item.text}</span>
+                    <span className='text-[#999]'>{item.text}</span>
                   )}
                 </li>
               ))}
@@ -85,9 +85,9 @@ export default function ConnectPage() {
         <p className="text-[11px] text-[#3a3a3a] mb-2 tracking-wide">
           No noise&nbsp;&nbsp;·&nbsp;&nbsp;No ads&nbsp;&nbsp;·&nbsp;&nbsp;No data reselling
         </p>
-        <p className="text-xs text-[#2e2e2e]">
+        <p className="text-xs text-[#777]">
           Already have access?{" "}
-          <Link href="/join" className="text-[#666] underline hover:text-[#aaa] transition-colors">
+          <Link href="/join" className="text-[#999] underline hover:text-[#aaa] transition-colors">
             Sign in here
           </Link>
         </p>

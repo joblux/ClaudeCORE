@@ -19,7 +19,7 @@ export default function HoldingPage() {
         className="h-[42px] w-auto mb-3"
       />
 
-      <p className="text-[11px] tracking-[0.18em] uppercase text-[#444] mb-14">
+      <p className="text-[11px] tracking-[0.18em] uppercase text-[#999] mb-14">
         Luxury, decoded.
       </p>
 
@@ -31,7 +31,7 @@ export default function HoldingPage() {
         <em className="text-[#a58e28]">Intelligence.</em>
       </h1>
 
-      <p className="text-[14px] text-[#555] text-center mb-9">
+      <p className="text-[14px] text-[#999] text-center mb-9">
         Relaunching soon.
       </p>
 
@@ -39,7 +39,7 @@ export default function HoldingPage() {
         {tags.map((tag) => (
           <span
             key={tag}
-            className="text-[10px] tracking-[0.12em] uppercase text-[#444] border border-[#2a2a2a] px-3 py-1.5 rounded-[2px]"
+            className="text-[10px] tracking-[0.12em] uppercase text-[#999] border border-[#2a2a2a] px-3 py-1.5 rounded-[2px]"
           >
             {tag}
           </span>

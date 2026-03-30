@@ -159,7 +159,7 @@ export default async function ArticlePage({ params }: Props) {
             <div className="flex items-center gap-3 mb-4">
               <span className="jl-badge-gold text-[0.55rem]">{getCategoryLabel(article.category)}</span>
               {article.read_time && <span className="font-sans text-[0.6rem] text-[#888]">{article.read_time} min read</span>}
-              {article.views_count > 0 && <span className="font-sans text-[0.6rem] text-[#666]">{article.views_count} views</span>}
+              {article.views_count > 0 && <span className="font-sans text-[0.6rem] text-[#999]">{article.views_count} views</span>}
             </div>
             <h1 className="jl-serif text-3xl md:text-[3rem] font-light text-white mb-5 leading-tight">
               {article.title}
@@ -182,7 +182,7 @@ export default async function ArticlePage({ params }: Props) {
         </div>
         {article.hero_image_caption && (
           <div className="absolute bottom-2 right-4 z-10">
-            <span className="text-[0.55rem] text-[#666]">{article.hero_image_caption}</span>
+            <span className="text-[0.55rem] text-[#999]">{article.hero_image_caption}</span>
           </div>
         )}
       </div>

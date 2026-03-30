@@ -75,7 +75,7 @@ export default function BlogluxClient({ initialArticles }: { initialArticles: Ar
             className={`font-sans text-[0.65rem] font-medium tracking-wider uppercase px-3 py-1.5 border transition-colors whitespace-nowrap flex-shrink-0 ${
               activeCategory === 'All'
                 ? 'border-[#a58e28] text-[#a58e28]'
-                : 'border-[#e8e2d8] text-[#888] hover:border-[#aaa] hover:text-[#555]'
+                : 'border-[#e8e2d8] text-[#888] hover:border-[#aaa] hover:text-[#999]'
             }`}
           >
             All
@@ -87,7 +87,7 @@ export default function BlogluxClient({ initialArticles }: { initialArticles: Ar
               className={`font-sans text-[0.65rem] font-medium tracking-wider uppercase px-3 py-1.5 border transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeCategory === cat.value
                   ? 'border-[#a58e28] text-[#a58e28]'
-                  : 'border-[#e8e2d8] text-[#888] hover:border-[#aaa] hover:text-[#555]'
+                  : 'border-[#e8e2d8] text-[#888] hover:border-[#aaa] hover:text-[#999]'
               }`}
             >
               {cat.label}

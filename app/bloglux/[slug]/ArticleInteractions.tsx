@@ -164,7 +164,7 @@ export default function ArticleInteractions({ articleId, articleTitle, articleSl
                         <span className="jl-badge-outline text-[0.5rem]">{TIER_LABELS[comment.contributor_tier] || 'Member'}</span>
                         <span className="font-sans text-[0.6rem] text-[#ccc] ml-auto">{timeAgo(comment.created_at)}</span>
                       </div>
-                      <p className="font-sans text-sm text-[#555] leading-relaxed">{comment.content}</p>
+                      <p className="font-sans text-sm text-[#999] leading-relaxed">{comment.content}</p>
                       {isAuthenticated && isApproved && (
                         <button
                           onClick={() => { setReplyTo(replyTo === comment.id ? null : comment.id); setReplyText('') }}
@@ -206,7 +206,7 @@ export default function ArticleInteractions({ articleId, articleTitle, articleSl
                               <span className="font-sans text-xs font-medium text-[#1a1a1a]">{reply.contributor_name}</span>
                               <span className="font-sans text-[0.6rem] text-[#ccc]">{timeAgo(reply.created_at)}</span>
                             </div>
-                            <p className="font-sans text-xs text-[#555] leading-relaxed">{reply.content}</p>
+                            <p className="font-sans text-xs text-[#999] leading-relaxed">{reply.content}</p>
                           </div>
                         ))}
                       </div>

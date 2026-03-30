@@ -1088,7 +1088,7 @@ export default function ProfileClient({ email }: { email: string }) {
                     {firstName || lastName ? `${firstName} ${lastName}`.trim() : 'Complete Your Profile'}
                   </h1>
                   {headline && (
-                    <p className="font-sans text-sm text-[#666] mt-1">{headline}</p>
+                    <p className="font-sans text-sm text-[#999] mt-1">{headline}</p>
                   )}
                   {(city || country) && (
                     <p className="font-sans text-xs text-[#999] mt-0.5">{[city, country].filter(Boolean).join(', ')}</p>
@@ -1415,7 +1415,7 @@ export default function ProfileClient({ email }: { email: string }) {
                         <h3 className="font-sans text-sm font-semibold text-[#1a1a1a]">
                           {exp.job_title}
                         </h3>
-                        <p className="font-sans text-sm text-[#666] mt-0.5">
+                        <p className="font-sans text-sm text-[#999] mt-0.5">
                           {exp.company}
                           {(exp.city || exp.country) && (
                             <span className="text-[#999]">
@@ -1658,7 +1658,7 @@ export default function ProfileClient({ email }: { email: string }) {
                         <h3 className="font-sans text-sm font-semibold text-[#1a1a1a]">
                           {edu.institution}
                         </h3>
-                        <p className="font-sans text-sm text-[#666] mt-0.5">
+                        <p className="font-sans text-sm text-[#999] mt-0.5">
                           {edu.degree_level} &mdash; {edu.field_of_study}
                         </p>
                         <p className="font-sans text-xs text-[#888] mt-1">
@@ -2157,7 +2157,7 @@ export default function ProfileClient({ email }: { email: string }) {
                     ref={fileInputRef}
                     type="file"
                     accept={ACCEPTED_FILE_TYPES}
-                    className="font-sans text-sm text-[#666] file:mr-3 file:py-2 file:px-4 file:border file:border-[#e8e2d8] file:bg-white file:text-[#1a1a1a] file:font-sans file:text-xs file:font-medium file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-[#fafaf5]"
+                    className="font-sans text-sm text-[#999] file:mr-3 file:py-2 file:px-4 file:border file:border-[#e8e2d8] file:bg-white file:text-[#1a1a1a] file:font-sans file:text-xs file:font-medium file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-[#fafaf5]"
                   />
                   <p className="font-sans text-xs text-[#888] mt-1">
                     Accepted: PDF, DOC, DOCX, RTF, TXT, JPG, PNG. Max 10 MB.

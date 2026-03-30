@@ -139,7 +139,7 @@ function JoinContent() {
               <input
                 id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com" required
-                className="w-full px-4 py-3 text-[14px] border border-[#3a3a3a] rounded-md bg-[#2a2a2a] text-white placeholder:text-[#555] focus:outline-none focus:border-[#a58e28] transition-colors"
+                className="w-full px-4 py-3 text-[14px] border border-[#3a3a3a] rounded-md bg-[#2a2a2a] text-white placeholder:text-[#999] focus:outline-none focus:border-[#a58e28] transition-colors"
               />
               <button type="submit" disabled={isSubmitting} className="w-full mt-3 py-3 bg-white text-black text-[11px] uppercase tracking-widest font-semibold rounded-md hover:bg-[#f0f0f0] transition-colors disabled:opacity-50">
                 {isSubmitting ? "Sending..." : "Continue with email"}
@@ -151,7 +151,7 @@ function JoinContent() {
                 <div className="w-full border-t border-[#2e2e2e]" />
               </div>
               <div className="relative flex justify-start">
-                <span className="bg-[#1e1e1e] px-4 text-[#555] uppercase tracking-widest" style={{ fontSize: '9px' }}>or</span>
+                <span className="bg-[#1e1e1e] px-4 text-[#999] uppercase tracking-widest" style={{ fontSize: '9px' }}>or</span>
               </div>
             </div>
 
@@ -179,7 +179,7 @@ function JoinContent() {
               >
                 <AppleIcon />
                 <span className="text-[#888]">Apple</span>
-                <span className="text-[#666] italic" style={{ fontSize: '9px' }}>soon</span>
+                <span className="text-[#999] italic" style={{ fontSize: '9px' }}>soon</span>
               </button>
             </div>
           </>
@@ -187,7 +187,7 @@ function JoinContent() {
       </div>
 
       <div className="text-center mt-5">
-        <a href="/contact" className="text-[#666] hover:text-[#aaa] transition-colors" style={{ fontSize: '11px' }}>
+        <a href="/contact" className="text-[#999] hover:text-[#aaa] transition-colors" style={{ fontSize: '11px' }}>
           Need help signing in? &rarr;
         </a>
       </div>

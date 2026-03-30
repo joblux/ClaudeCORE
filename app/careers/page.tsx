@@ -121,7 +121,7 @@ export default function CareersPage() {
         <h1 className="text-4xl font-normal text-white mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           Careers
         </h1>
-        <p className="text-sm text-[#555] mb-6">
+        <p className="text-sm text-[#999] mb-6">
           Confidential opportunities, salary intelligence, and interview preparation — everything for your next move.
         </p>
 
@@ -153,7 +153,7 @@ export default function CareersPage() {
             {/* Banner */}
             <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 flex items-start gap-4 mb-6">
               <div className="w-9 h-9 rounded-full bg-[#2a2a2a] flex items-center justify-center text-base flex-shrink-0">🔒</div>
-              <p className="text-xs text-[#666] leading-relaxed">
+              <p className="text-xs text-[#999] leading-relaxed">
                 <span className="text-[#bbb] font-medium">These are exclusive JOBLUX search assignments.</span> Brand names are disclosed after initial screening to protect the confidentiality of all parties. Every role is verified, active, and at manager level or above.
               </p>
             </div>
@@ -168,7 +168,7 @@ export default function CareersPage() {
               ].map(s => (
                 <div key={s.label} className="bg-[#222] border border-[#2a2a2a] rounded-lg p-4 text-center">
                   <div className="text-2xl font-normal text-[#a58e28] mb-1">{s.num}</div>
-                  <div className="text-[11px] text-[#555]">{s.label}</div>
+                  <div className="text-[11px] text-[#999]">{s.label}</div>
                 </div>
               ))}
             </div>
@@ -206,17 +206,17 @@ export default function CareersPage() {
                     </div>
                     <div className="text-right">
                       <div className="text-sm font-medium text-[#a58e28]">{a.salary}</div>
-                      <div className="text-[11px] text-[#555] mt-0.5">{a.salary_note}</div>
+                      <div className="text-[11px] text-[#999] mt-0.5">{a.salary_note}</div>
                     </div>
                   </div>
                   <h3 className="text-base font-medium text-white mb-2 leading-snug">{a.title}</h3>
-                  <p className="text-sm text-[#666] leading-relaxed mb-3">{a.body}</p>
+                  <p className="text-sm text-[#999] leading-relaxed mb-3">{a.body}</p>
                   <div className="flex items-center gap-2 flex-wrap mb-2">
-                    <span className="text-[11px] text-[#555]">{a.location}</span>
-                    <span className="text-[11px] text-[#333]">·</span>
-                    <span className="text-[11px] text-[#555]">{a.sector}</span>
-                    <span className="text-[11px] text-[#333]">·</span>
-                    <span className="text-[11px] text-[#555]">{a.experience}</span>
+                    <span className="text-[11px] text-[#999]">{a.location}</span>
+                    <span className="text-[11px] text-[#777]">·</span>
+                    <span className="text-[11px] text-[#999]">{a.sector}</span>
+                    <span className="text-[11px] text-[#777]">·</span>
+                    <span className="text-[11px] text-[#999]">{a.experience}</span>
                   </div>
                   <span className="text-[10px] text-[#3a3a3a] border border-[#2a2a2a] rounded px-2 py-1">
                     Brand disclosed after screening
@@ -235,7 +235,7 @@ export default function CareersPage() {
               <h2 className="text-2xl font-normal text-white mb-3" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
                 Unlock salary intelligence
               </h2>
-              <p className="text-sm text-[#666] leading-relaxed max-w-md mx-auto mb-8">
+              <p className="text-sm text-[#999] leading-relaxed max-w-md mx-auto mb-8">
                 Real compensation data contributed by luxury professionals like you. Not estimates — verified numbers from people who actually earn them.
               </p>
               <div className="flex justify-center gap-12 mb-8">
@@ -248,17 +248,17 @@ export default function CareersPage() {
                     <div className="w-8 h-8 rounded-full border border-[#a58e28] text-[#a58e28] text-sm flex items-center justify-center mx-auto mb-2">
                       {s.num}
                     </div>
-                    <div className="text-[11px] text-[#555] max-w-[80px] leading-relaxed">{s.label}</div>
+                    <div className="text-[11px] text-[#999] max-w-[80px] leading-relaxed">{s.label}</div>
                   </div>
                 ))}
               </div>
               <button className="bg-[#a58e28] text-[#1a1a1a] text-sm font-semibold px-7 py-2.5 rounded-lg mb-4 hover:bg-[#c4a832] transition-colors">
                 Contribute my salary
               </button>
-              <p className="text-[11px] text-[#444] mb-5">Takes 30 seconds. Completely anonymous. Never shared with employers.</p>
+              <p className="text-[11px] text-[#999] mb-5">Takes 30 seconds. Completely anonymous. Never shared with employers.</p>
               <div className="flex justify-center gap-6">
                 {['1,840 verified contributions', '92 brands covered', '14 countries'].map(s => (
-                  <span key={s} className="text-[11px] text-[#555] flex items-center gap-1">
+                  <span key={s} className="text-[11px] text-[#999] flex items-center gap-1">
                     <span className="text-[#a58e28]">•</span> {s}
                   </span>
                 ))}
@@ -291,7 +291,7 @@ export default function CareersPage() {
               <thead>
                 <tr className="border-b border-[#2a2a2a]">
                   {['ROLE', 'BRAND', 'LOCATION', 'REPORTS', 'TREND', 'RANGE'].map(h => (
-                    <th key={h} className="text-left text-[10px] font-semibold tracking-[1.5px] text-[#444] pb-3 px-3 last:text-right">{h}</th>
+                    <th key={h} className="text-left text-[10px] font-semibold tracking-[1.5px] text-[#999] pb-3 px-3 last:text-right">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -325,7 +325,7 @@ export default function CareersPage() {
         {activeTab === 'interview' && (
           <div className="flex flex-col items-center justify-center py-24">
             <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">INTERVIEW PREP</p>
-            <p className="text-sm text-[#444]">Coming in the next phase</p>
+            <p className="text-sm text-[#999]">Coming in the next phase</p>
           </div>
         )}
 

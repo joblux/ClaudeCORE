@@ -85,9 +85,9 @@ export function TranslatedBrandPage({ brand, content, lang, slug }: TranslatedBr
         <div className="jl-container py-14 relative z-10">
           <div className="flex items-center gap-2 mb-6">
             <Link href="/wikilux" className="jl-overline text-[#888] hover:text-[#a58e28] transition-colors">WikiLux</Link>
-            <span className="text-[#555] text-xs">/</span>
+            <span className="text-[#999] text-xs">/</span>
             <Link href={`/wikilux/${slug}`} className="jl-overline text-[#888] hover:text-[#a58e28] transition-colors">{brand.name}</Link>
-            <span className="text-[#555] text-xs">/</span>
+            <span className="text-[#999] text-xs">/</span>
             <span className="jl-overline text-[#a58e28]">{lang.toUpperCase()}</span>
           </div>
           <h1 className="jl-serif text-[2.5rem] md:text-[4rem] font-light text-white mb-3 leading-tight">{brand.name}</h1>

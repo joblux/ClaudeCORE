@@ -59,13 +59,13 @@ export default function DashboardPage() {
             <h1 className="text-2xl font-normal text-white mb-1" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
               Good morning, {firstName}
             </h1>
-            <p className="text-sm text-[#555]">{today} · Here's your intelligence briefing</p>
+            <p className="text-sm text-[#999]">{today} · Here's your intelligence briefing</p>
           </div>
           <div className="text-right">
             <div className="inline-block border border-[#a58e28] text-[#a58e28] text-[10px] font-semibold tracking-[2px] px-3 py-1 rounded mb-2">
               EXECUTIVE
             </div>
-            <Link href="/dashboard/candidate/profilux" className="block text-xs text-[#555] hover:text-[#888] transition-colors">
+            <Link href="/dashboard/candidate/profilux" className="block text-xs text-[#999] hover:text-[#888] transition-colors">
               Edit profile →
             </Link>
           </div>
@@ -75,13 +75,13 @@ export default function DashboardPage() {
         <div className="bg-[#222] border border-[rgba(165,142,40,0.2)] rounded-xl p-4 flex items-center gap-5 mb-8">
           <div className="flex-shrink-0">
             <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-1">PROFILUX</div>
-            <div className="text-xs text-[#555]">Your confidential professional profile — complete to unlock full matching</div>
+            <div className="text-xs text-[#999]">Your confidential professional profile — complete to unlock full matching</div>
           </div>
           <div className="flex-1">
             <div className="h-[3px] bg-[#2a2a2a] rounded-full mb-1">
               <div className="h-full bg-[#555] rounded-full" style={{ width: '0%' }} />
             </div>
-            <div className="text-[11px] text-[#444]">4 sections remaining · Complete to unlock full matching</div>
+            <div className="text-[11px] text-[#999]">4 sections remaining · Complete to unlock full matching</div>
           </div>
           <Link href="/dashboard/candidate/profilux" className="bg-white text-[#1a1a1a] text-xs font-semibold px-4 py-2 rounded-lg hover:bg-[#c4a832] transition-colors whitespace-nowrap">
             Continue →
@@ -92,7 +92,7 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3 mb-4">
           <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">MATCHED ROLES</span>
           <div className="flex-1 h-px bg-[#2a2a2a]" />
-          <Link href="/careers" className="text-xs text-[#555] hover:text-[#888] transition-colors">View all in Careers →</Link>
+          <Link href="/careers" className="text-xs text-[#999] hover:text-[#888] transition-colors">View all in Careers →</Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
           {roles.map(role => (
@@ -107,7 +107,7 @@ export default function DashboardPage() {
                 <span className="text-sm font-medium text-[#a58e28]">{role.salary}</span>
               </div>
               <div className="text-sm font-medium text-[#e0e0e0] mb-1.5">{role.title}</div>
-              <div className="flex gap-2 text-[11px] text-[#444]">
+              <div className="flex gap-2 text-[11px] text-[#999]">
                 <span>{role.location}</span><span>·</span><span>{role.sector}</span><span>·</span><span>{role.experience}</span>
               </div>
             </div>
@@ -120,12 +120,12 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3 mb-4">
               <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">WATCHLIST</span>
               <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <button className="text-xs text-[#555] hover:text-[#888]">Edit brands →</button>
+              <button className="text-xs text-[#999] hover:text-[#888]">Edit brands →</button>
             </div>
             <div className="divide-y divide-[#1e1e1e]">
               {placeholderWatchlist.map(b => (
                 <div key={b.id} className="flex items-center py-3 cursor-pointer">
-                  <div className="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[10px] font-medium text-[#666] flex-shrink-0 mr-3">
+                  <div className="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[10px] font-medium text-[#999] flex-shrink-0 mr-3">
                     {b.initials}
                   </div>
                   <div className="flex-1">
@@ -142,14 +142,14 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3 mb-4">
               <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">LATEST SIGNALS</span>
               <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <Link href="/signals" className="text-xs text-[#555] hover:text-[#888]">All signals →</Link>
+              <Link href="/signals" className="text-xs text-[#999] hover:text-[#888]">All signals →</Link>
             </div>
             <div className="divide-y divide-[#1e1e1e]">
               {signals.map(s => (
                 <div key={s.id} className="flex gap-3 py-3">
                   <span className="w-[6px] h-[6px] rounded-full flex-shrink-0 mt-1" style={{ background: s.color }} />
                   <span className="text-xs text-[#777] flex-1 leading-relaxed">{s.text}</span>
-                  <span className="text-[10px] text-[#444] whitespace-nowrap">{s.time}</span>
+                  <span className="text-[10px] text-[#999] whitespace-nowrap">{s.time}</span>
                 </div>
               ))}
             </div>
@@ -162,7 +162,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3 mb-4">
               <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">MY CONTRIBUTIONS</span>
               <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <Link href="/careers" className="text-xs text-[#555] hover:text-[#888]">Add data →</Link>
+              <Link href="/careers" className="text-xs text-[#999] hover:text-[#888]">Add data →</Link>
             </div>
             <div className="divide-y divide-[#1e1e1e]">
               {placeholderContributions.map(c => (
@@ -176,7 +176,7 @@ export default function DashboardPage() {
               ))}
             </div>
             <div className="mt-3 border border-dashed border-[#2a2a2a] rounded-lg p-3 text-center">
-              <p className="text-[11px] text-[#444] mb-2">Contribute salary data to unlock 1,840+ verified ranges</p>
+              <p className="text-[11px] text-[#999] mb-2">Contribute salary data to unlock 1,840+ verified ranges</p>
               <Link href="/careers" className="text-[11px] text-[#a58e28] border border-[rgba(165,142,40,0.3)] rounded px-3 py-1 hover:bg-[rgba(165,142,40,0.1)] transition-colors">
                 + Add contribution
               </Link>
@@ -187,18 +187,18 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3 mb-4">
               <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">UPCOMING EVENTS</span>
               <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <Link href="/events" className="text-xs text-[#555] hover:text-[#888]">Full calendar →</Link>
+              <Link href="/events" className="text-xs text-[#999] hover:text-[#888]">Full calendar →</Link>
             </div>
             <div className="divide-y divide-[#1e1e1e]">
               {placeholderEvents.map(e => (
                 <div key={e.id} className="flex gap-4 py-3">
                   <div className="text-center min-w-[36px]">
                     <div className="text-xl font-light text-white leading-none">{e.day}</div>
-                    <div className="text-[9px] text-[#555] tracking-wider mt-0.5">{e.month}</div>
+                    <div className="text-[9px] text-[#999] tracking-wider mt-0.5">{e.month}</div>
                   </div>
                   <div>
                     <div className="text-xs text-[#ccc] leading-snug mb-0.5">{e.title}</div>
-                    <div className="text-[11px] text-[#444]">{e.location}</div>
+                    <div className="text-[11px] text-[#999]">{e.location}</div>
                     <div className="text-[10px] text-[#a58e28] mt-0.5">{e.sector}</div>
                   </div>
                 </div>

@@ -206,7 +206,7 @@ export default function EditInternshipPage() {
           <h1 className="jl-serif text-2xl md:text-3xl text-[#1a1a1a]">
             Edit Internship
           </h1>
-          <p className="text-sm text-[#666] mt-1">
+          <p className="text-sm text-[#999] mt-1">
             Update the details of your internship submission.
           </p>
         </div>

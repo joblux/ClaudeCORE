@@ -25,7 +25,7 @@ export default function DashboardRouter() {
 
   return (
     <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
-      <div className="text-[#555] text-sm">Loading your dashboard...</div>
+      <div className="text-[#999] text-sm">Loading your dashboard...</div>
     </div>
   )
 }

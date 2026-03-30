@@ -84,7 +84,7 @@ export default function SalariesClient({ initialEntries, initialTotal, initialSt
                   className={`flex items-center gap-1.5 px-5 py-3.5 text-xs tracking-wide border-b-2 transition-colors whitespace-nowrap ${
                     isActive
                       ? 'border-[#a58e28] text-[#a58e28] font-semibold'
-                      : 'border-transparent text-[#888] hover:text-[#555]'
+                      : 'border-transparent text-[#888] hover:text-[#999]'
                   }`}
                 >
                   {isLocked && (
@@ -346,7 +346,7 @@ function BrowseTab({ accessLevel, initialEntries, initialTotal, initialStats, in
         </div>
         <div className="jl-card">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-[#1a1a1a] mb-3">How It Works</h3>
-          <ol className="space-y-2 text-xs text-[#666] leading-relaxed">
+          <ol className="space-y-2 text-xs text-[#999] leading-relaxed">
             <li className="flex gap-2"><span className="text-[#a58e28] font-semibold flex-shrink-0">01</span>AI-generated benchmarks from market data</li>
             <li className="flex gap-2"><span className="text-[#a58e28] font-semibold flex-shrink-0">02</span>Enriched with web research and industry reports</li>
             <li className="flex gap-2"><span className="text-[#a58e28] font-semibold flex-shrink-0">03</span>Verified by anonymous member contributions</li>
@@ -446,9 +446,9 @@ function BenchmarkTab() {
               <SalaryRangeBar min={result.salary_min} max={result.salary_max} median={result.salary_median} percentile25={result.percentile_25} percentile75={result.percentile_75} userSalary={currentSalary ? parseInt(currentSalary) : null} currency={result.currency} height={12} />
             </div>
             <div className="grid grid-cols-3 gap-4 text-center border-t border-[#f0ece4] pt-4">
-              <div><div className="jl-label">25th Percentile</div><div className="text-sm font-semibold text-[#555]">{formatSalaryFull(result.percentile_25, result.currency)}</div></div>
+              <div><div className="jl-label">25th Percentile</div><div className="text-sm font-semibold text-[#999]">{formatSalaryFull(result.percentile_25, result.currency)}</div></div>
               <div><div className="jl-label">Median</div><div className="text-sm font-semibold text-[#a58e28]">{formatSalaryFull(result.salary_median, result.currency)}</div></div>
-              <div><div className="jl-label">75th Percentile</div><div className="text-sm font-semibold text-[#555]">{formatSalaryFull(result.percentile_75, result.currency)}</div></div>
+              <div><div className="jl-label">75th Percentile</div><div className="text-sm font-semibold text-[#999]">{formatSalaryFull(result.percentile_75, result.currency)}</div></div>
             </div>
             {result.user_percentile != null && (
               <div className="mt-4 p-3 bg-[#fafaf5] border border-[#e8e2d8] rounded-sm text-center">
@@ -626,13 +626,13 @@ function CalculatorTab() {
           {result.factors.length > 0 && (
             <div className="jl-card">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[#1a1a1a] mb-3">What Affects Your Estimate</h3>
-              <ul className="space-y-2">{result.factors.map((f, i) => <li key={i} className="flex items-start gap-2 text-xs text-[#555]"><span className="text-[#a58e28] mt-0.5 flex-shrink-0">&bull;</span>{f}</li>)}</ul>
+              <ul className="space-y-2">{result.factors.map((f, i) => <li key={i} className="flex items-start gap-2 text-xs text-[#999]"><span className="text-[#a58e28] mt-0.5 flex-shrink-0">&bull;</span>{f}</li>)}</ul>
             </div>
           )}
           {result.recommendations.length > 0 && (
             <div className="jl-card border-[#a58e28] bg-[#fafaf5]">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[#1a1a1a] mb-3">To Increase Your Earning Potential</h3>
-              <ul className="space-y-2">{result.recommendations.map((r, i) => <li key={i} className="flex items-start gap-2 text-xs text-[#555]"><span className="text-[#a58e28] font-semibold flex-shrink-0">{String(i + 1).padStart(2, '0')}</span>{r}</li>)}</ul>
+              <ul className="space-y-2">{result.recommendations.map((r, i) => <li key={i} className="flex items-start gap-2 text-xs text-[#999]"><span className="text-[#a58e28] font-semibold flex-shrink-0">{String(i + 1).padStart(2, '0')}</span>{r}</li>)}</ul>
             </div>
           )}
         </div>

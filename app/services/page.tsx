@@ -39,7 +39,7 @@ export default function ServicesPage() {
             <h1 className="jl-serif text-3xl md:text-5xl font-light text-white mb-6 leading-tight">
               The business behind the intelligence
             </h1>
-            <p className="font-sans text-sm text-white/50 max-w-xl leading-relaxed">
+            <p className="font-sans text-sm text-white/70 max-w-xl leading-relaxed">
               JOBLUX is a confidential careers intelligence gateway. The intelligence is
               free. The private services are the business.
             </p>

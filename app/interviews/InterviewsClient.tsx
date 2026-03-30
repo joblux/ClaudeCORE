@@ -370,7 +370,7 @@ export default function InterviewsClient({
                     <li key={b.slug}>
                       <Link
                         href={`/interviews/${b.slug}`}
-                        className="flex items-center gap-2 text-sm text-[#555] hover:text-[#a58e28] transition-colors"
+                        className="flex items-center gap-2 text-sm text-[#999] hover:text-[#a58e28] transition-colors"
                       >
                         <span className="text-xs text-[#ccc] w-5">{String(i + 1).padStart(2, '0')}</span>
                         {b.name}
@@ -397,7 +397,7 @@ export default function InterviewsClient({
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[#1a1a1a] mb-4">
                 How It Works
               </h3>
-              <ol className="space-y-3 text-xs text-[#666] leading-relaxed">
+              <ol className="space-y-3 text-xs text-[#999] leading-relaxed">
                 <li className="flex gap-2">
                   <span className="text-[#a58e28] font-semibold flex-shrink-0">01</span>
                   Contribute your interview experience anonymously

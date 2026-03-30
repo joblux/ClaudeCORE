@@ -215,7 +215,7 @@ export default function CompleteRegistrationPage() {
               <div className="flex items-center gap-1.5">
                 <span className={
                   'uppercase tracking-widest ' +
-                  (s.num === step ? 'text-white font-bold' : s.num < step ? 'text-[#ccc]' : 'text-[#555]')
+                  (s.num === step ? 'text-white font-bold' : s.num < step ? 'text-[#ccc]' : 'text-[#999]')
                 } style={{ fontSize: '10px', letterSpacing: '0.12em' }}>{s.label}</span>
               </div>
               {i < STEPS.length - 1 && (

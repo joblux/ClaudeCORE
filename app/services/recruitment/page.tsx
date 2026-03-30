@@ -24,7 +24,7 @@ export default function RecruitmentPage() {
             <h1 className="text-4xl lg:text-5xl font-light text-white leading-tight mb-6" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
               Private executive search<br />for the luxury market
             </h1>
-            <p className="text-sm text-[#666] leading-relaxed max-w-xl">
+            <p className="text-sm text-[#999] leading-relaxed max-w-xl">
               We find, approach, and present the right candidates — with full discretion at every stage. No job boards. No noise. One placement at a time.
             </p>
           </div>
@@ -63,7 +63,7 @@ export default function RecruitmentPage() {
                 <div key={item.step} className="border border-[#1e1e1e] rounded-lg p-6 bg-[#111]">
                   <p className="text-[10px] font-semibold tracking-widest text-[#a58e28] mb-2">{item.step}</p>
                   <h3 className="text-[15px] font-medium text-white mb-2">{item.title}</h3>
-                  <p className="text-sm text-[#666] leading-relaxed">{item.desc}</p>
+                  <p className="text-sm text-[#999] leading-relaxed">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -71,7 +71,7 @@ export default function RecruitmentPage() {
             {/* WHAT WE COVER */}
             <p className="text-[0.6rem] tracking-[3px] uppercase text-[#3a3a3a] border-t border-[#1e1e1e] pt-5 mb-6">What we cover</p>
             <div className="border border-[#1e1e1e] rounded-lg p-6 bg-[#111] mb-12">
-              <p className="text-sm text-[#666] leading-relaxed mb-6">
+              <p className="text-sm text-[#999] leading-relaxed mb-6">
                 Manager to C-suite positions across the full spectrum of luxury. Every search handled by consultants with genuine industry knowledge — not generalist recruiters with a luxury desk.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-8">
@@ -88,12 +88,12 @@ export default function RecruitmentPage() {
             <div className="space-y-3">
               <div className="border border-[#1e1e1e] rounded-lg p-6 bg-[#111]">
                 <h3 className="text-[14px] font-medium text-white mb-2">Intelligence-informed recruitment</h3>
-                <p className="text-sm text-[#666] leading-relaxed">Every search is powered by proprietary salary data, market intelligence, and cultural insight. We know what the best candidates earn, where they are, and what it takes to move them.</p>
+                <p className="text-sm text-[#999] leading-relaxed">Every search is powered by proprietary salary data, market intelligence, and cultural insight. We know what the best candidates earn, where they are, and what it takes to move them.</p>
               </div>
 
               <div className="border border-[#1e1e1e] rounded-lg p-6 bg-[#111]">
                 <h3 className="text-[14px] font-medium text-white mb-2">Luxury-only focus</h3>
-                <p className="text-sm text-[#666] leading-relaxed mb-5">JOBLUX does not recruit outside the luxury market. This singular focus means deeper relationships, better candidate access, and an understanding of maison culture that generalist firms cannot match.</p>
+                <p className="text-sm text-[#999] leading-relaxed mb-5">JOBLUX does not recruit outside the luxury market. This singular focus means deeper relationships, better candidate access, and an understanding of maison culture that generalist firms cannot match.</p>
                 <p className="text-[10px] tracking-widest uppercase text-[#3a3a3a] mb-3 italic">A sample of what is currently active — most assignments are never advertised.</p>
                 <div className="space-y-2">
                   {[
@@ -105,28 +105,28 @@ export default function RecruitmentPage() {
                       <div>
                         <p className="text-[9px] font-semibold tracking-[2px] uppercase text-[#a58e28] mb-1">{a.level}</p>
                         <p className="text-[13px] text-[#ccc] mb-1">{a.title}</p>
-                        <p className="text-[11px] text-[#444]">{a.meta}</p>
+                        <p className="text-[11px] text-[#999]">{a.meta}</p>
                       </div>
-                      <span className="text-[12px] text-[#555] whitespace-nowrap">{a.salary}</span>
+                      <span className="text-[12px] text-[#999] whitespace-nowrap">{a.salary}</span>
                     </div>
                   ))}
                 </div>
-                <p className="text-[11px] text-[#2e2e2e] italic mt-3">
+                <p className="text-[11px] text-[#777] italic mt-3">
                   Brand names disclosed after initial conversation.{' '}
-                  <Link href="/careers" className="text-[#555] underline underline-offset-3 hover:text-[#888] transition-colors">See all active assignments →</Link>
+                  <Link href="/careers" className="text-[#999] underline underline-offset-3 hover:text-[#888] transition-colors">See all active assignments →</Link>
                 </p>
               </div>
 
               <div className="border border-[#1e1e1e] rounded-lg p-6 bg-[#111]">
                 <h3 className="text-[14px] font-medium text-white mb-2">Full discretion, always</h3>
-                <p className="text-sm text-[#666] leading-relaxed">Many positions we fill are never publicly posted. We operate with the same confidentiality expected inside the maisons themselves — protecting both employer and candidate at every stage.</p>
+                <p className="text-sm text-[#999] leading-relaxed">Many positions we fill are never publicly posted. We operate with the same confidentiality expected inside the maisons themselves — protecting both employer and candidate at every stage.</p>
               </div>
             </div>
 
             {/* CTA */}
             <div className="border border-[#1e1e1e] rounded-lg p-10 text-center bg-[#111] mt-12">
               <p className="text-[0.6rem] tracking-[3px] uppercase text-[#a58e28] mb-3">Start a confidential search</p>
-              <p className="text-sm text-[#666] mb-6">Tell us about the role. Every conversation is fully confidential.</p>
+              <p className="text-sm text-[#999] mb-6">Tell us about the role. Every conversation is fully confidential.</p>
               <Link href="/connect" className="inline-block text-[0.75rem] font-medium tracking-wide text-[#a58e28] border border-[rgba(165,142,40,0.35)] rounded px-6 py-3 hover:bg-[rgba(165,142,40,0.06)] transition-colors">
                 Get in touch →
               </Link>

@@ -311,7 +311,7 @@ export default function JobDetailPage() {
                     <p className="text-xs text-[#888] mt-1">{brief.salary_period}</p>
                   )}
                   {brief.bonus_commission && (
-                    <p className="text-sm text-[#666] mt-2">{brief.bonus_commission}</p>
+                    <p className="text-sm text-[#999] mt-2">{brief.bonus_commission}</p>
                   )}
                 </div>
               )}
@@ -320,7 +320,7 @@ export default function JobDetailPage() {
               {brief.description && (
                 <>
                   <div className="jl-section-label"><span>About the Role</span></div>
-                  <div className="font-sans text-sm text-[#333] leading-relaxed mb-10 whitespace-pre-line">
+                  <div className="font-sans text-sm text-[#777] leading-relaxed mb-10 whitespace-pre-line">
                     {brief.description}
                   </div>
                 </>
@@ -334,7 +334,7 @@ export default function JobDetailPage() {
                     {responsibilityLines.map((line, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <span className="text-[#a58e28] mt-0.5 flex-shrink-0">&bull;</span>
-                        <span className="font-sans text-sm text-[#555] leading-relaxed">{line}</span>
+                        <span className="font-sans text-sm text-[#999] leading-relaxed">{line}</span>
                       </li>
                     ))}
                   </ul>
@@ -349,7 +349,7 @@ export default function JobDetailPage() {
                     {requirementLines.map((line, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <span className="text-[#a58e28] mt-0.5 flex-shrink-0">&bull;</span>
-                        <span className="font-sans text-sm text-[#555] leading-relaxed">{line}</span>
+                        <span className="font-sans text-sm text-[#999] leading-relaxed">{line}</span>
                       </li>
                     ))}
                   </ul>
@@ -364,7 +364,7 @@ export default function JobDetailPage() {
                     {niceToHaveLines.map((line, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <span className="text-[#a58e28] mt-0.5 flex-shrink-0">&bull;</span>
-                        <span className="font-sans text-sm text-[#555] leading-relaxed">{line}</span>
+                        <span className="font-sans text-sm text-[#999] leading-relaxed">{line}</span>
                       </li>
                     ))}
                   </ul>
@@ -375,7 +375,7 @@ export default function JobDetailPage() {
               {brief.about_maison && !brief.is_confidential && (
                 <>
                   <div className="jl-section-label"><span>About the Maison</span></div>
-                  <div className="font-sans text-sm text-[#333] leading-relaxed mb-10 whitespace-pre-line">
+                  <div className="font-sans text-sm text-[#777] leading-relaxed mb-10 whitespace-pre-line">
                     {brief.about_maison}
                   </div>
                 </>

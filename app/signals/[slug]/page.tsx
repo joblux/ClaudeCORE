@@ -97,7 +97,7 @@ export default function SignalDetailPage() {
     return (
       <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
         <div className="text-center">
-          <p className="text-[15px] text-[#666] mb-4">Signal not found.</p>
+          <p className="text-[15px] text-[#999] mb-4">Signal not found.</p>
           <Link href="/signals" className="text-[13px] text-[#a58e28] hover:text-[#c4a830] transition-colors">
             ← Back to Signals
           </Link>
@@ -114,7 +114,7 @@ export default function SignalDetailPage() {
       <div className="max-w-[720px] mx-auto px-7 pt-10 pb-16">
 
         {/* Back link */}
-        <Link href="/signals" className="text-[13px] text-[#555] hover:text-[#a58e28] transition-colors mb-8 inline-block">
+        <Link href="/signals" className="text-[13px] text-[#999] hover:text-[#a58e28] transition-colors mb-8 inline-block">
           ← Back to Signals
         </Link>
 
@@ -126,7 +126,7 @@ export default function SignalDetailPage() {
           >
             {label}
           </span>
-          {signal.brand && <span className="text-[13px] text-[#666]">{signal.brand}</span>}
+          {signal.brand && <span className="text-[13px] text-[#999]">{signal.brand}</span>}
         </div>
 
         {/* Headline */}
@@ -135,11 +135,11 @@ export default function SignalDetailPage() {
         </h1>
 
         {/* Date + region */}
-        <div className="flex items-center gap-4 mb-8 text-[12px] text-[#555]">
+        <div className="flex items-center gap-4 mb-8 text-[12px] text-[#999]">
           {signal.published_at && <span>{formatDate(signal.published_at)}</span>}
           {signal.region && (
             <>
-              <span className="text-[#333]">·</span>
+              <span className="text-[#777]">·</span>
               <span>{signal.region}</span>
             </>
           )}
@@ -168,34 +168,34 @@ export default function SignalDetailPage() {
 
         {/* Related content placeholders */}
         <div className="border-t border-[#222] pt-8 mb-8">
-          <p className="text-[10px] text-[#444] uppercase tracking-[0.14em] mb-4">Related</p>
+          <p className="text-[10px] text-[#999] uppercase tracking-[0.14em] mb-4">Related</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-[#141414] border border-[#1e1e1e] rounded p-4">
-              <p className="text-[10px] text-[#555] uppercase tracking-wider mb-2">WikiLux</p>
-              <p className="text-[13px] text-[#666]">{signal.brand || 'Brand'} profile</p>
+              <p className="text-[10px] text-[#999] uppercase tracking-wider mb-2">WikiLux</p>
+              <p className="text-[13px] text-[#999]">{signal.brand || 'Brand'} profile</p>
             </div>
             <div className="bg-[#141414] border border-[#1e1e1e] rounded p-4">
-              <p className="text-[10px] text-[#555] uppercase tracking-wider mb-2">Careers</p>
-              <p className="text-[13px] text-[#666]">Related opportunities</p>
+              <p className="text-[10px] text-[#999] uppercase tracking-wider mb-2">Careers</p>
+              <p className="text-[13px] text-[#999]">Related opportunities</p>
             </div>
             <div className="bg-[#141414] border border-[#1e1e1e] rounded p-4">
-              <p className="text-[10px] text-[#555] uppercase tracking-wider mb-2">Events</p>
-              <p className="text-[13px] text-[#666]">Upcoming events</p>
+              <p className="text-[10px] text-[#999] uppercase tracking-wider mb-2">Events</p>
+              <p className="text-[13px] text-[#999]">Upcoming events</p>
             </div>
           </div>
         </div>
 
         {/* Share row */}
         <div className="border-t border-[#222] pt-6">
-          <div className="flex items-center gap-1 text-[12px] text-[#555]">
+          <div className="flex items-center gap-1 text-[12px] text-[#999]">
             <button onClick={handleCopyLink} className="hover:text-[#a58e28] transition-colors">
               {copied ? 'Copied' : 'Copy link'}
             </button>
-            <span className="text-[#333]">·</span>
+            <span className="text-[#777]">·</span>
             <button onClick={handleLinkedIn} className="hover:text-[#a58e28] transition-colors">
               Share on LinkedIn
             </button>
-            <span className="text-[#333]">·</span>
+            <span className="text-[#777]">·</span>
             <button onClick={handleEmail} className="hover:text-[#a58e28] transition-colors">
               Send to a colleague
             </button>

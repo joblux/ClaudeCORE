@@ -118,7 +118,7 @@ export default function InsightsPage() {
         <h1 className="text-4xl font-normal text-white mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           Insights
         </h1>
-        <p className="text-sm text-[#555] mb-6">Analysis, research, and intelligence from inside the luxury industry.</p>
+        <p className="text-sm text-[#999] mb-6">Analysis, research, and intelligence from inside the luxury industry.</p>
 
         {/* Tabs */}
         <div className="flex border-b border-[#2a2a2a] mb-8">
@@ -151,10 +151,10 @@ export default function InsightsPage() {
                     <h2 className="text-2xl font-normal text-white mb-3 leading-snug cursor-pointer hover:text-[#ccc]" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
                       The end of the logo era: why quiet luxury is reshaping hiring across Europe's maisons
                     </h2>
-                    <p className="text-sm text-[#666] leading-relaxed mb-4">
+                    <p className="text-sm text-[#999] leading-relaxed mb-4">
                       As brands like Bottega Veneta and Loro Piana outperform logo-heavy competitors, a new archetype of luxury professional is emerging — one fluent in craft, restraint, and long-term brand building.
                     </p>
-                    <div className="flex items-center gap-3 text-xs text-[#444] mb-4">
+                    <div className="flex items-center gap-3 text-xs text-[#999] mb-4">
                       <span className="text-[#888]">JOBLUX Editorial</span>
                       <span>·</span>
                       <span>March 24, 2026</span>
@@ -181,8 +181,8 @@ export default function InsightsPage() {
                     <h3 className="text-sm font-normal text-[#e0e0e0] leading-snug mb-2 group-hover:text-[#ccc] transition-colors" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
                       {article.title}
                     </h3>
-                    <p className="text-xs text-[#555] leading-relaxed mb-2">{article.excerpt}</p>
-                    <div className="flex gap-2 text-[11px] text-[#444]">
+                    <p className="text-xs text-[#999] leading-relaxed mb-2">{article.excerpt}</p>
+                    <div className="flex gap-2 text-[11px] text-[#999]">
                       <span>{article.date}</span>
                       <span>·</span>
                       <span>{article.read_time}</span>
@@ -205,7 +205,7 @@ export default function InsightsPage() {
                     <div>
                       <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-1">{r.label}</div>
                       <div className="text-sm font-medium text-[#e0e0e0] mb-1 leading-snug">{r.title}</div>
-                      <div className="text-[11px] text-[#444]">{r.meta}</div>
+                      <div className="text-[11px] text-[#999]">{r.meta}</div>
                     </div>
                   </div>
                 ))}
@@ -223,12 +223,12 @@ export default function InsightsPage() {
                       "{v.quote}"
                     </p>
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[10px] font-medium text-[#666] flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[10px] font-medium text-[#999] flex-shrink-0">
                         {v.initials}
                       </div>
                       <div>
                         <div className="text-xs text-[#888]">{v.name}</div>
-                        <div className="text-[11px] text-[#444]">{v.role}</div>
+                        <div className="text-[11px] text-[#999]">{v.role}</div>
                       </div>
                     </div>
                   </div>
@@ -248,7 +248,7 @@ export default function InsightsPage() {
                       <div>
                         <div className="text-[10px] text-[#a58e28] tracking-wider mb-1">{a.cat}</div>
                         <div className="text-xs text-[#ccc] leading-snug group-hover:text-white transition-colors">{a.title}</div>
-                        <div className="text-[11px] text-[#444] mt-1">{a.date}</div>
+                        <div className="text-[11px] text-[#999] mt-1">{a.date}</div>
                       </div>
                     </Link>
                   ))}
@@ -260,7 +260,7 @@ export default function InsightsPage() {
                 <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-4">TOPICS</div>
                 <div className="flex flex-wrap gap-2">
                   {topics.map(t => (
-                    <span key={t} className="text-[11px] text-[#555] border border-[#2a2a2a] rounded-full px-3 py-1 cursor-pointer hover:border-[#444] hover:text-[#888] transition-colors">
+                    <span key={t} className="text-[11px] text-[#999] border border-[#2a2a2a] rounded-full px-3 py-1 cursor-pointer hover:border-[#444] hover:text-[#888] transition-colors">
                       {t}
                     </span>
                   ))}
@@ -270,7 +270,7 @@ export default function InsightsPage() {
               {/* The Brief */}
               <div>
                 <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">THE BRIEF</div>
-                <p className="text-xs text-[#555] leading-relaxed mb-3">
+                <p className="text-xs text-[#999] leading-relaxed mb-3">
                   Biweekly intelligence for luxury professionals. Signals, salary moves, and assignments — direct to your inbox.
                 </p>
                 <input
@@ -299,7 +299,7 @@ export default function InsightsPage() {
                 <div>
                   <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-1">{r.label}</div>
                   <div className="text-sm font-medium text-[#e0e0e0] mb-1 leading-snug">{r.title}</div>
-                  <div className="text-[11px] text-[#444]">{r.meta}</div>
+                  <div className="text-[11px] text-[#999]">{r.meta}</div>
                 </div>
               </div>
             ))}
@@ -315,12 +315,12 @@ export default function InsightsPage() {
                   "{v.quote}"
                 </p>
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[10px] font-medium text-[#666] flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[10px] font-medium text-[#999] flex-shrink-0">
                     {v.initials}
                   </div>
                   <div>
                     <div className="text-xs text-[#888]">{v.name}</div>
-                    <div className="text-[11px] text-[#444]">{v.role}</div>
+                    <div className="text-[11px] text-[#999]">{v.role}</div>
                   </div>
                 </div>
               </div>
@@ -332,7 +332,7 @@ export default function InsightsPage() {
         {activeTab === 'Luxury map' && (
           <div className="flex flex-col items-center justify-center py-24">
             <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">LUXURY MAP</p>
-            <p className="text-sm text-[#444]">Interactive global luxury industry map — coming soon</p>
+            <p className="text-sm text-[#999]">Interactive global luxury industry map — coming soon</p>
           </div>
         )}
 

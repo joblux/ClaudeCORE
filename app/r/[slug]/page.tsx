@@ -323,7 +323,7 @@ export default async function ResumePage({
 
             {/* Current role + company */}
             {(currentRole || currentCompany) && (
-              <p className="mt-3 text-[#555] text-base">
+              <p className="mt-3 text-[#999] text-base">
                 {currentRole}
                 {currentRole && currentCompany && ' at '}
                 {currentCompany && <span className="font-semibold">{currentCompany}</span>}
@@ -380,7 +380,7 @@ export default async function ResumePage({
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-[#555] mt-0.5">
+                        <p className="text-sm text-[#999] mt-0.5">
                           {exp.job_title}
                           {expLocation && (
                             <span className="text-[#888]"> · {expLocation}</span>
@@ -416,7 +416,7 @@ export default async function ResumePage({
                       <p className="font-semibold text-[#1a1a1a] text-sm">
                         {edu.institution || 'Institution'}
                       </p>
-                      <p className="text-sm text-[#555] mt-0.5">
+                      <p className="text-sm text-[#999] mt-0.5">
                         {[edu.degree_level, edu.field_of_study].filter(Boolean).join(' in ')}
                         {edu.graduation_year && (
                           <span className="text-[#888]"> · {edu.graduation_year}</span>

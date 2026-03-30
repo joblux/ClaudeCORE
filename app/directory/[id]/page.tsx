@@ -125,7 +125,7 @@ export default function MemberProfilePage() {
             </div>
             <div className="flex-1">
               <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a] mb-2">{displayName}</h1>
-              <p className="font-sans text-sm text-[#666] mb-1">
+              <p className="font-sans text-sm text-[#999] mb-1">
                 {m.headline || m.job_title || 'Luxury Professional'}
               </p>
               {employer && (
@@ -170,7 +170,7 @@ export default function MemberProfilePage() {
             {/* About */}
             {m.bio && (
               <ProfileSection title="About">
-                <p className="text-sm text-[#555] leading-relaxed whitespace-pre-line">{m.bio}</p>
+                <p className="text-sm text-[#999] leading-relaxed whitespace-pre-line">{m.bio}</p>
               </ProfileSection>
             )}
 
@@ -282,7 +282,7 @@ export default function MemberProfilePage() {
                   {m.education_records.map((e) => (
                     <div key={e.id}>
                       <h4 className="font-sans text-sm font-semibold text-[#1a1a1a]">{e.institution}</h4>
-                      <p className="text-xs text-[#666]">
+                      <p className="text-xs text-[#999]">
                         {[e.degree_level, e.field_of_study].filter(Boolean).join(' in ')}
                         {e.graduation_year ? ` · ${e.graduation_year}` : ''}
                       </p>
@@ -408,7 +408,7 @@ function InfoField({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <div className="jl-label mb-0.5">{label}</div>
-      <p className="text-sm text-[#555]">{value}</p>
+      <p className="text-sm text-[#999]">{value}</p>
     </div>
   )
 }

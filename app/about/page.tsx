@@ -20,7 +20,7 @@ export default function AboutPage() {
         <h1 className="font-playfair text-4xl md:text-[42px] font-normal leading-tight mb-6 text-white">
           Twenty years in luxury.<br className="hidden md:block" /> One platform.
         </h1>
-        <p className="text-[15px] leading-relaxed text-white/55 border-l-2 border-[#a58e28] pl-6 max-w-2xl">
+        <p className="text-[15px] leading-relaxed text-white/70 border-l-2 border-[#a58e28] pl-6 max-w-2xl">
           JOBLUX was co-founded by Mohammed Alex Mazour and Alex Mason — a manager-to-executive level search consultant and a web specialist
           who have spent two decades building dedicated tools and services for the
           luxury industry.
@@ -54,7 +54,7 @@ export default function AboutPage() {
             <p className="font-playfair text-lg mb-2 text-white">
               Two worlds meet in London
             </p>
-            <p className="text-sm leading-relaxed text-white/50 max-w-2xl">
+            <p className="text-sm leading-relaxed text-white/70 max-w-2xl">
               After a career in Parisian luxury retail, Mohammed Alex Mazour moves
               to London as a luxury retail recruitment consultant. He meets Alex Mason, a
               London-based developer with a sharp eye for building platforms.
@@ -72,7 +72,7 @@ export default function AboutPage() {
             <p className="font-playfair text-lg mb-2 text-white">
               The first platform
             </p>
-            <p className="text-sm leading-relaxed text-white/50 max-w-2xl">
+            <p className="text-sm leading-relaxed text-white/70 max-w-2xl">
               joblux.com launches as the first niche job board dedicated exclusively
               to luxury brands. Mohammed brings the industry expertise and client
               relationships. Alex builds the technology. Present in the UK, France,
@@ -89,7 +89,7 @@ export default function AboutPage() {
             <p className="font-playfair text-lg mb-2 text-white">
               Going global
             </p>
-            <p className="text-sm leading-relaxed text-white/50 max-w-2xl">
+            <p className="text-sm leading-relaxed text-white/70 max-w-2xl">
               The job board evolves into a multilingual professional network for the
               luxury industry — profiles, connections, and industry discussions
               across fashion, hospitality, watches, beauty, and beyond.
@@ -105,7 +105,7 @@ export default function AboutPage() {
             <p className="font-playfair text-lg mb-2 text-white">
               Quality over volume
             </p>
-            <p className="text-sm leading-relaxed text-white/50 max-w-2xl">
+            <p className="text-sm leading-relaxed text-white/70 max-w-2xl">
               JOBLUX opens an office in New York and narrows its recruiting services
               to management-level and executive positions only. No more volume
               hiring. Discretion, depth, and long-term fit become the only currency.
@@ -121,7 +121,7 @@ export default function AboutPage() {
             <p className="font-playfair text-lg mb-2 text-white">
               Intelligence, not noise
             </p>
-            <p className="text-sm leading-relaxed text-white/50 max-w-2xl">
+            <p className="text-sm leading-relaxed text-white/70 max-w-2xl">
               JOBLUX relaunches as a luxury talent intelligence platform. No social
               feed, no ads, no data reselling. A confidential space where
               professionals access brand intelligence on 500+ maisons, keep their
@@ -145,7 +145,7 @@ export default function AboutPage() {
         <h2 className="font-playfair text-3xl font-normal mb-5 text-white">
           Luxury talent intelligence
         </h2>
-        <p className="text-sm leading-relaxed text-white/50 max-w-2xl mb-8">
+        <p className="text-sm leading-relaxed text-white/70 max-w-2xl mb-8">
           A career intelligence platform for the luxury industry — delivering brand
           intelligence, salary data, daily market signals, and confidential
           executive search to professionals worldwide.
@@ -166,7 +166,7 @@ export default function AboutPage() {
               <p className="text-[13px] font-medium text-white mb-1">
                 {item.name}
               </p>
-              <p className="text-xs text-white/35 leading-relaxed">
+              <p className="text-xs text-white/60 leading-relaxed">
                 {item.desc}
               </p>
             </div>
@@ -187,7 +187,7 @@ export default function AboutPage() {
         <h2 className="font-playfair text-3xl font-normal mb-5 text-white">
           No ads. No noise. No compromise.
         </h2>
-        <p className="text-sm leading-relaxed text-white/50 max-w-2xl mb-7">
+        <p className="text-sm leading-relaxed text-white/70 max-w-2xl mb-7">
           JOBLUX is an independent, privately held business. The intelligence
           platform generates trust and inbound demand. That trust supports our core
           service: confidential executive search for luxury maisons — manager to
@@ -223,7 +223,7 @@ export default function AboutPage() {
                 <p className="text-[13px] font-medium text-white mb-0.5">
                   {item.title}
                 </p>
-                <p className="text-xs text-white/35 leading-relaxed">
+                <p className="text-xs text-white/60 leading-relaxed">
                   {item.desc}
                 </p>
               </div>
@@ -250,7 +250,7 @@ export default function AboutPage() {
           <h2 className="font-playfair text-2xl font-normal mb-3 text-white">
             Connect with JOBLUX
           </h2>
-          <p className="text-sm text-white/40 mb-7 max-w-sm mx-auto">
+          <p className="text-sm text-white/70 mb-7 max-w-sm mx-auto">
             Whether you&apos;re a luxury professional or an employer, the next step
             starts here.
           </p>

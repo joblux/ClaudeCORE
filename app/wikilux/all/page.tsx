@@ -98,7 +98,7 @@ function WikiLuxAllContent() {
               className={`font-sans text-[0.65rem] font-medium tracking-wider uppercase px-3 py-1.5 border transition-colors ${
                 activeSector === sector
                   ? 'border-[#a58e28] text-[#a58e28] bg-[#a58e28]/5'
-                  : 'border-[#e8e2d8] text-[#888] hover:border-[#aaa] hover:text-[#555]'
+                  : 'border-[#e8e2d8] text-[#888] hover:border-[#aaa] hover:text-[#999]'
               }`}
             >
               {sector === 'All' ? `All (${BRANDS.length})` : `${sector} (${BRANDS.filter((b) => b.sector === sector).length})`}

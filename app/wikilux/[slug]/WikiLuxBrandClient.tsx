@@ -362,7 +362,7 @@ export default function WikiLuxBrandClient({
         <div className="jl-container py-14 relative z-10">
           <div className="flex items-center gap-2 mb-6">
             <Link href="/wikilux" className="jl-overline text-[#888] hover:text-[#a58e28] transition-colors">WikiLux</Link>
-            <span className="text-[#555] text-xs">/</span>
+            <span className="text-[#999] text-xs">/</span>
             <span className="jl-overline text-[#a58e28]">{brand.name}</span>
           </div>
           <div className="flex items-start gap-6">
@@ -395,7 +395,7 @@ export default function WikiLuxBrandClient({
         </div>
         {heroImage && (
           <div className="absolute bottom-2 right-4 z-10">
-            <span className="text-[0.55rem] text-[#666]">Photo by <a href={heroImage.photographer_url + '?utm_source=joblux&utm_medium=referral'} target="_blank" rel="noopener noreferrer" className="text-[#888] hover:text-[#a58e28]">{heroImage.photographer}</a> on <a href={heroImage.unsplash_url + '?utm_source=joblux&utm_medium=referral'} target="_blank" rel="noopener noreferrer" className="text-[#888] hover:text-[#a58e28]">Unsplash</a></span>
+            <span className="text-[0.55rem] text-[#999]">Photo by <a href={heroImage.photographer_url + '?utm_source=joblux&utm_medium=referral'} target="_blank" rel="noopener noreferrer" className="text-[#888] hover:text-[#a58e28]">{heroImage.photographer}</a> on <a href={heroImage.unsplash_url + '?utm_source=joblux&utm_medium=referral'} target="_blank" rel="noopener noreferrer" className="text-[#888] hover:text-[#a58e28]">Unsplash</a></span>
           </div>
         )}
       </div>
@@ -530,7 +530,7 @@ export default function WikiLuxBrandClient({
                     {!displayContent.key_facts && displayContent.facts && displayContent.facts.length > 0 && (
                       <div className="border border-[#e8e2d8] p-5">
                         <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-4">Key Facts</span>
-                        <ul className="space-y-3">{displayContent.facts.map((fact, i) => (<li key={i} className="flex items-start gap-2"><span className="text-[#a58e28] mt-0.5 flex-shrink-0">&bull;</span><span className="font-sans text-xs text-[#555] leading-relaxed">{fact}</span></li>))}</ul>
+                        <ul className="space-y-3">{displayContent.facts.map((fact, i) => (<li key={i} className="flex items-start gap-2"><span className="text-[#a58e28] mt-0.5 flex-shrink-0">&bull;</span><span className="font-sans text-xs text-[#999] leading-relaxed">{fact}</span></li>))}</ul>
                       </div>
                     )}
                     {displayContent.stock && (
@@ -690,15 +690,15 @@ export default function WikiLuxBrandClient({
               <div className="jl-container py-10">
                 <div className="jl-section-label"><span>&#10022; Hiring Intelligence</span></div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                  <div><h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Culture</h3><div className="font-sans text-sm text-[#555] leading-relaxed space-y-3">{displayContent.hiring_intelligence.culture.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}</div></div>
-                  <div><h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Candidate Profiles</h3><div className="font-sans text-sm text-[#555] leading-relaxed space-y-3">{displayContent.hiring_intelligence.profiles.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}</div></div>
+                  <div><h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Culture</h3><div className="font-sans text-sm text-[#999] leading-relaxed space-y-3">{displayContent.hiring_intelligence.culture.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}</div></div>
+                  <div><h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Candidate Profiles</h3><div className="font-sans text-sm text-[#999] leading-relaxed space-y-3">{displayContent.hiring_intelligence.profiles.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}</div></div>
                 </div>
-                {displayContent.hiring_intelligence.process && (<div className="mb-8"><h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Recruitment Process</h3><p className="font-sans text-sm text-[#555] leading-relaxed">{displayContent.hiring_intelligence.process}</p></div>)}
+                {displayContent.hiring_intelligence.process && (<div className="mb-8"><h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Recruitment Process</h3><p className="font-sans text-sm text-[#999] leading-relaxed">{displayContent.hiring_intelligence.process}</p></div>)}
                 {displayContent.hiring_intelligence.tips && displayContent.hiring_intelligence.tips.length > 0 && (
                   <div className="relative">
                     <h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Insider Tips</h3>
                     <div className={!isAuthenticated ? 'blur-sm select-none' : ''}>
-                      <ol className="space-y-3">{displayContent.hiring_intelligence.tips.map((tip, i) => (<li key={i} className="flex items-start gap-3"><span className="jl-serif text-lg text-[#a58e28] leading-none mt-0.5 flex-shrink-0 w-6">{i + 1}</span><span className="font-sans text-sm text-[#555] leading-relaxed">{tip}</span></li>))}</ol>
+                      <ol className="space-y-3">{displayContent.hiring_intelligence.tips.map((tip, i) => (<li key={i} className="flex items-start gap-3"><span className="jl-serif text-lg text-[#a58e28] leading-none mt-0.5 flex-shrink-0 w-6">{i + 1}</span><span className="font-sans text-sm text-[#999] leading-relaxed">{tip}</span></li>))}</ol>
                     </div>
                     {!isAuthenticated && (
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -727,7 +727,7 @@ export default function WikiLuxBrandClient({
                     <span className="jl-badge text-[0.5rem]">Editorial</span>
                     <span className="font-sans text-[0.6rem] text-[#888]">Editor&rsquo;s Note</span>
                   </div>
-                  <div className="font-sans text-sm text-[#555] leading-relaxed whitespace-pre-line">{editorialNotes}</div>
+                  <div className="font-sans text-sm text-[#999] leading-relaxed whitespace-pre-line">{editorialNotes}</div>
                 </div>
               </div>
             </div>
@@ -746,7 +746,7 @@ export default function WikiLuxBrandClient({
                         <span className="jl-badge text-[0.5rem]">{insight.insight_type}</span>
                         <span className="jl-badge-outline text-[0.5rem]">{TIER_LABELS[insight.contributor_tier] || 'Member'}</span>
                       </div>
-                      <p className="font-sans text-sm text-[#555] leading-relaxed mb-3">{insight.content}</p>
+                      <p className="font-sans text-sm text-[#999] leading-relaxed mb-3">{insight.content}</p>
                       <div className="flex items-center justify-between">
                         <span className="font-sans text-[0.65rem] text-[#aaa]">
                           {insight.contributor_name}

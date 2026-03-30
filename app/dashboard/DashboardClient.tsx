@@ -178,7 +178,7 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
               <span className="inline-flex items-center px-2.5 py-1 bg-[#a58e28]/10 text-[#a58e28] text-[0.65rem] font-semibold tracking-[0.12em] uppercase rounded-full">
                 {tierLabel}
               </span>
-              {!isBusiness && <span className="text-sm text-[#555]">{tierSubtitle}</span>}
+              {!isBusiness && <span className="text-sm text-[#999]">{tierSubtitle}</span>}
               {contributionPoints > 0 && !isBusiness && (
                 <span className="text-[0.6rem] text-[#aaa]">{contributionPoints} points</span>
               )}
@@ -256,12 +256,12 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
 
               {loading ? (
                 <div className="bg-white border border-gray-200/60 rounded-xl p-8 text-center">
-                  <p className="text-sm text-[#555]">Loading assignments...</p>
+                  <p className="text-sm text-[#999]">Loading assignments...</p>
                 </div>
               ) : assignments.length === 0 ? (
                 <div className="bg-white border border-gray-200/60 rounded-xl p-10 text-center">
                   <p className="text-base font-medium text-[#1a1a1a] mb-2">No active search briefs</p>
-                  <p className="text-sm text-[#555] leading-relaxed mb-6">
+                  <p className="text-sm text-[#999] leading-relaxed mb-6">
                     Submit a search brief and our team will begin identifying candidates.
                   </p>
                   <Link href="/admin/briefs/new" className="inline-flex px-6 py-2.5 bg-[#a58e28] text-white text-[0.7rem] font-semibold tracking-wider uppercase rounded-md hover:bg-[#8a7622] transition-colors">
@@ -282,7 +282,7 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
                               {a.title}
                             </h3>
                             <div className="flex items-center gap-2 mt-1">
-                              <span className="text-sm text-[#555]">{a.city || '—'}</span>
+                              <span className="text-sm text-[#999]">{a.city || '—'}</span>
                               <span className={`text-[0.6rem] font-semibold uppercase tracking-[0.12em] px-2 py-0.5 rounded ${
                                 a.status === 'active' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-[#999]'
                               }`}>{a.status}</span>
@@ -309,7 +309,7 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
                   <div className="h-full bg-[#a58e28] rounded-full transition-all duration-700" style={{ width: `${profileCompleteness}%` }} />
                 </div>
-                {completenessHint && <p className="text-sm text-[#555]">{completenessHint}</p>}
+                {completenessHint && <p className="text-sm text-[#999]">{completenessHint}</p>}
                 {profileCompleteness < 100 && (
                   <Link href="/profile" className="inline-flex items-center gap-1 text-sm text-[#a58e28] font-medium mt-2 hover:text-[#7a6a1e] transition-colors">
                     Complete profile <ArrowRight className="w-3 h-3" />
@@ -340,7 +340,7 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
                   <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999]">Messages</h4>
                   <Link href="/dashboard/messages" className="text-sm text-[#a58e28] hover:text-[#7a6a1e] font-medium transition-colors">View all</Link>
                 </div>
-                <p className="text-sm text-[#555]">Messages from the JOBLUX recruitment team.</p>
+                <p className="text-sm text-[#999]">Messages from the JOBLUX recruitment team.</p>
               </div>
             </div>
           </div>
@@ -401,12 +401,12 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
 
             {loading ? (
               <div className="bg-white border border-gray-200/60 rounded-xl p-8 text-center">
-                <p className="text-sm text-[#555]">Loading assignments...</p>
+                <p className="text-sm text-[#999]">Loading assignments...</p>
               </div>
             ) : opportunities.length === 0 ? (
               <div className="bg-white border border-gray-200/60 rounded-xl p-10 text-center">
                 <p className="text-base font-medium text-[#1a1a1a] mb-2">No tracked assignments. Browse current assignments to find relevant positions.</p>
-                <p className="text-sm text-[#555] leading-relaxed mb-6">Browse assignments to find positions relevant to your career.</p>
+                <p className="text-sm text-[#999] leading-relaxed mb-6">Browse assignments to find positions relevant to your career.</p>
                 <Link href="/opportunities" className="inline-flex px-6 py-2.5 bg-[#a58e28] text-white text-[0.7rem] font-semibold tracking-wider uppercase rounded-md hover:bg-[#8a7622] transition-colors">
                   Browse Assignments
                 </Link>
@@ -426,8 +426,8 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
                             )}
                             <h3 className="text-base font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors truncate">{opp.title}</h3>
                             <div className="flex flex-wrap items-center gap-2 mt-1">
-                              {(opp.city || opp.country) && <span className="text-sm text-[#555]">{[opp.city, opp.country].filter(Boolean).join(', ')}</span>}
-                              {salary && <span className="text-sm text-[#555]">{salary}</span>}
+                              {(opp.city || opp.country) && <span className="text-sm text-[#999]">{[opp.city, opp.country].filter(Boolean).join(', ')}</span>}
+                              {salary && <span className="text-sm text-[#999]">{salary}</span>}
                               <span className="text-[0.6rem] text-[#aaa]">{timeAgo(opp.activated_at)}</span>
                             </div>
                           </div>
@@ -456,7 +456,7 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
               <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
                 <div className="h-full bg-[#a58e28] rounded-full transition-all duration-700" style={{ width: `${profileCompleteness}%` }} />
               </div>
-              {completenessHint && <p className="text-sm text-[#555]">{completenessHint}</p>}
+              {completenessHint && <p className="text-sm text-[#999]">{completenessHint}</p>}
               {profileCompleteness < 100 && (
                 <Link href="/profile" className="inline-flex items-center gap-1 text-sm text-[#a58e28] font-medium mt-2 hover:text-[#7a6a1e] transition-colors">
                   Complete profile <ArrowRight className="w-3 h-3" />
@@ -487,27 +487,27 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
                 <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999]">Messages</h4>
                 <Link href="/dashboard/messages" className="text-sm text-[#a58e28] hover:text-[#7a6a1e] font-medium transition-colors">View all</Link>
               </div>
-              <p className="text-sm text-[#555]">Messages from the JOBLUX recruitment team.</p>
+              <p className="text-sm text-[#999]">Messages from the JOBLUX recruitment team.</p>
             </div>
 
             {/* Contribution Progress */}
             <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
               <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-3">Contribution Progress</h4>
-              <p className="text-sm text-[#555]">Track your salary, interview, and insight contributions.</p>
+              <p className="text-sm text-[#999]">Track your salary, interview, and insight contributions.</p>
               <p className="text-[0.6rem] text-[#aaa] mt-2 italic">Coming soon</p>
             </div>
 
             {/* Tracked Sectors & Brands */}
             <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
               <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-3">Tracked Sectors & Brands</h4>
-              <p className="text-sm text-[#555]">Follow brands and sectors to receive targeted intelligence.</p>
+              <p className="text-sm text-[#999]">Follow brands and sectors to receive targeted intelligence.</p>
               <p className="text-[0.6rem] text-[#aaa] mt-2 italic">Coming soon</p>
             </div>
 
             {/* Saved Intelligence */}
             <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
               <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-3">Saved Intelligence</h4>
-              <p className="text-sm text-[#555]">Nothing saved yet. Bookmark intelligence as you browse.</p>
+              <p className="text-sm text-[#999]">Nothing saved yet. Bookmark intelligence as you browse.</p>
               <p className="text-[0.6rem] text-[#aaa] mt-2 italic">Coming soon</p>
             </div>
 
@@ -523,7 +523,7 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
             {/* Discreet Requests */}
             <div className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6">
               <h4 className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-3">Discreet Requests</h4>
-              <p className="text-sm text-[#555]">Private enquiries and expressions of interest.</p>
+              <p className="text-sm text-[#999]">Private enquiries and expressions of interest.</p>
               <p className="text-[0.6rem] text-[#aaa] mt-2 italic">Coming soon</p>
             </div>
           </div>
@@ -538,17 +538,17 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
             <Link href="/wikilux" className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6 group hover:border-[#a58e28]/40 transition-all">
               <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#a58e28] mb-2">Brand Intelligence</div>
               <h3 className="text-lg font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors mb-1">Wiki</h3>
-              <p className="text-sm text-[#555] leading-relaxed">500+ luxury brand profiles</p>
+              <p className="text-sm text-[#999] leading-relaxed">500+ luxury brand profiles</p>
             </Link>
             <Link href="/salaries" className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6 group hover:border-[#a58e28]/40 transition-all">
               <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#a58e28] mb-2">Career Intelligence</div>
               <h3 className="text-lg font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors mb-1">Salary Benchmarks</h3>
-              <p className="text-sm text-[#555] leading-relaxed">Compare compensation by role and market</p>
+              <p className="text-sm text-[#999] leading-relaxed">Compare compensation by role and market</p>
             </Link>
             <Link href="/interviews" className="bg-white border border-gray-200/60 rounded-xl p-5 lg:p-6 group hover:border-[#a58e28]/40 transition-all">
               <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#a58e28] mb-2">Interview Intelligence</div>
               <h3 className="text-lg font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors mb-1">Inside the Maisons</h3>
-              <p className="text-sm text-[#555] leading-relaxed">Real interview experiences from 150+ houses</p>
+              <p className="text-sm text-[#999] leading-relaxed">Real interview experiences from 150+ houses</p>
             </Link>
           </div>
         </div>
@@ -568,7 +568,7 @@ export default function DashboardClient({ firstName, role, email, isAdmin }: Pro
               ].map((card) => (
                 <Link key={card.title} href={card.href} className="bg-white border border-[#a58e28]/30 rounded-xl p-5 group hover:border-[#a58e28] transition-all">
                   <h3 className="text-lg font-medium text-[#a58e28] mb-2">{card.title}</h3>
-                  <p className="text-sm text-[#555] leading-relaxed">{card.desc}</p>
+                  <p className="text-sm text-[#999] leading-relaxed">{card.desc}</p>
                 </Link>
               ))}
             </div>

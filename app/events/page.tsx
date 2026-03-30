@@ -171,7 +171,7 @@ export default function EventsPage() {
         <h1 className="text-4xl font-normal text-white mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           Events
         </h1>
-        <p className="text-sm text-[#555] mb-6">
+        <p className="text-sm text-[#999] mb-6">
           Luxury industry events, trade fairs, and professional gatherings — curated for senior professionals.
         </p>
 
@@ -195,7 +195,7 @@ export default function EventsPage() {
                   </button>
                 ))}
               </div>
-              <select className="bg-[#222] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-xs text-[#666] outline-none cursor-pointer">
+              <select className="bg-[#222] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-xs text-[#999] outline-none cursor-pointer">
                 <option>All months</option>
                 <option>April 2026</option>
                 <option>May 2026</option>
@@ -208,7 +208,7 @@ export default function EventsPage() {
               {[['87', 'events this year'], ['24', 'upcoming'], ['18', 'cities'], ['12', 'sectors']].map(([n, l]) => (
                 <span key={l} className="text-xs">
                   <span className="text-[#999]">{n}</span>
-                  <span className="text-[#555]"> {l}</span>
+                  <span className="text-[#999]"> {l}</span>
                 </span>
               ))}
             </div>
@@ -230,8 +230,8 @@ export default function EventsPage() {
                         {/* Date */}
                         <Link href={eventHref} className="text-center">
                           <div className="text-3xl font-light text-white leading-none">{event.day}</div>
-                          <div className="text-[10px] text-[#555] tracking-wider mt-1">{event.month_short}</div>
-                          <div className="text-[10px] text-[#444] mt-0.5">{event.dow}</div>
+                          <div className="text-[10px] text-[#999] tracking-wider mt-1">{event.month_short}</div>
+                          <div className="text-[10px] text-[#999] mt-0.5">{event.dow}</div>
                         </Link>
 
                         {/* Main */}
@@ -254,8 +254,8 @@ export default function EventsPage() {
                               {event.title}
                             </div>
                           </Link>
-                          <div className="text-xs text-[#555] mb-2">{event.organizer}</div>
-                          <div className="flex gap-3 text-[11px] text-[#444] flex-wrap">
+                          <div className="text-xs text-[#999] mb-2">{event.organizer}</div>
+                          <div className="flex gap-3 text-[11px] text-[#999] flex-wrap">
                             <span>{event.dates}</span>
                             <span>·</span>
                             <span>{event.location}</span>
@@ -267,7 +267,7 @@ export default function EventsPage() {
                         {/* Right */}
                         <div className="text-right min-w-[110px]">
                           <div className="text-xs text-[#777]">{event.city}</div>
-                          <div className="text-[11px] text-[#444] mt-1">{event.attendance}</div>
+                          <div className="text-[11px] text-[#999] mt-1">{event.attendance}</div>
                           <button
                             onClick={(e) => { e.preventDefault(); generateICS(event); }}
                             className="mt-2 text-[11px] text-[#a58e28] border border-[rgba(165,142,40,0.3)] rounded px-2 py-1 hover:bg-[rgba(165,142,40,0.1)] transition-colors"
@@ -291,9 +291,9 @@ export default function EventsPage() {
               <div className="space-y-3">
                 {thisWeek.map(e => (
                   <div key={e.title} className="pb-3 border-b border-[#222] last:border-b-0">
-                    <div className="text-[10px] text-[#444] mb-1">{e.dates}</div>
+                    <div className="text-[10px] text-[#999] mb-1">{e.dates}</div>
                     <div className="text-xs text-[#ccc] cursor-pointer hover:text-white transition-colors">{e.title}</div>
-                    <div className="text-[11px] text-[#444] mt-1">{e.location}</div>
+                    <div className="text-[11px] text-[#999] mt-1">{e.location}</div>
                   </div>
                 ))}
               </div>
@@ -305,9 +305,9 @@ export default function EventsPage() {
               <div className="space-y-3">
                 {nextMonth.map(e => (
                   <div key={e.title} className="pb-3 border-b border-[#222] last:border-b-0">
-                    <div className="text-[10px] text-[#444] mb-1">{e.dates}</div>
+                    <div className="text-[10px] text-[#999] mb-1">{e.dates}</div>
                     <div className="text-xs text-[#ccc] cursor-pointer hover:text-white transition-colors">{e.title}</div>
-                    <div className="text-[11px] text-[#444] mt-1">{e.location}</div>
+                    <div className="text-[11px] text-[#999] mt-1">{e.location}</div>
                   </div>
                 ))}
               </div>
@@ -320,7 +320,7 @@ export default function EventsPage() {
                 {byCity.map(c => (
                   <div key={c.city} className="flex justify-between">
                     <span className="text-xs text-[#777]">{c.city}</span>
-                    <span className="text-xs text-[#444]">{c.count} events</span>
+                    <span className="text-xs text-[#999]">{c.count} events</span>
                   </div>
                 ))}
               </div>
@@ -329,7 +329,7 @@ export default function EventsPage() {
             {/* Submit */}
             <div>
               <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">SUBMIT AN EVENT</div>
-              <p className="text-xs text-[#555] leading-relaxed mb-3">
+              <p className="text-xs text-[#999] leading-relaxed mb-3">
                 Know of a luxury industry event we should add? Submit it for review.
               </p>
               <button className="w-full border border-[#a58e28] text-[#a58e28] text-xs rounded-lg py-2.5 hover:bg-[rgba(165,142,40,0.1)] transition-colors">

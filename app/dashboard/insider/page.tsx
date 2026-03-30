@@ -60,7 +60,7 @@ export default function InsiderDashboard() {
         <div className="flex-1 overflow-y-auto">
           {navItems.map(group => (
             <div key={group.section}>
-              <div className="px-5 pt-4 pb-1.5 text-[9px] font-semibold tracking-[2px] text-[#333]">{group.section}</div>
+              <div className="px-5 pt-4 pb-1.5 text-[9px] font-semibold tracking-[2px] text-[#777]">{group.section}</div>
               {group.items.map((item: any) => (
                 <button
                   key={item.id}
@@ -84,7 +84,7 @@ export default function InsiderDashboard() {
 
         <div className="p-4 border-t border-[#222]">
           <div className="rounded-lg p-3" style={{ background: 'rgba(156,39,176,0.08)', border: '1px solid rgba(156,39,176,0.2)' }}>
-            <p className="text-[11px] text-[#555] leading-relaxed mb-2">Your contributions power the JOBLUX intelligence engine.</p>
+            <p className="text-[11px] text-[#999] leading-relaxed mb-2">Your contributions power the JOBLUX intelligence engine.</p>
             <button className="w-full bg-[#9C27B0] text-white text-[11px] font-semibold py-1.5 rounded">+ Add contribution</button>
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function InsiderDashboard() {
         <div className="flex items-start justify-between mb-7">
           <div>
             <h1 className="text-xl font-normal text-white mb-1" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>Welcome back, {firstName}</h1>
-            <p className="text-sm text-[#555]">Thursday, March 26, 2026 · Your intelligence contributions at a glance</p>
+            <p className="text-sm text-[#999]">Thursday, March 26, 2026 · Your intelligence contributions at a glance</p>
           </div>
           <div className="border border-[#9C27B0] text-[#9C27B0] text-[10px] font-semibold tracking-[2px] px-3 py-1 rounded">INSIDER CONTRIBUTOR</div>
         </div>
@@ -105,8 +105,8 @@ export default function InsiderDashboard() {
           {[['12', 'Total contributions', 'Salary, culture, interview'], ['847', 'Data points unlocked', 'By your contributions'], ['3', 'Articles published', 'Insider voice'], ['2.4K', 'Article views', '↑ 18% this month']].map(([num, label, sub]) => (
             <div key={label} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4">
               <div className="text-2xl font-normal text-[#a58e28] mb-1">{num}</div>
-              <div className="text-[11px] text-[#555]">{label}</div>
-              <div className="text-[11px] text-[#444] mt-0.5">{sub}</div>
+              <div className="text-[11px] text-[#999]">{label}</div>
+              <div className="text-[11px] text-[#999] mt-0.5">{sub}</div>
             </div>
           ))}
         </div>
@@ -117,7 +117,7 @@ export default function InsiderDashboard() {
             <div className="flex items-center gap-3 mb-4">
               <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">CONTRIBUTION QUEUE</span>
               <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <button className="text-xs text-[#555]">View all →</button>
+              <button className="text-xs text-[#999]">View all →</button>
             </div>
             <div className="space-y-3">
               {contributionQueue.map(c => (
@@ -127,7 +127,7 @@ export default function InsiderDashboard() {
                     <span className="text-[11px]" style={{ color: c.statusColor }}>{c.status}</span>
                   </div>
                   <div className="text-sm text-[#ccc] mb-1 font-medium">{c.title}</div>
-                  <div className="text-[11px] text-[#444] mb-3">{c.meta}</div>
+                  <div className="text-[11px] text-[#999] mb-3">{c.meta}</div>
                   {c.verified ? (
                     <button className="text-[11px] text-[#a58e28] border border-[rgba(165,142,40,0.3)] rounded px-3 py-1">View →</button>
                   ) : (
@@ -136,10 +136,10 @@ export default function InsiderDashboard() {
                 </div>
               ))}
               <div className="border border-dashed border-[#2a2a2a] rounded-lg p-3 text-center">
-                <p className="text-[11px] text-[#444] mb-2">Add more data to strengthen the platform and your Insider status</p>
+                <p className="text-[11px] text-[#999] mb-2">Add more data to strengthen the platform and your Insider status</p>
                 <div className="flex gap-2 justify-center">
                   {['+ Salary', '+ Culture', '+ Interview'].map(t => (
-                    <button key={t} className="text-[11px] text-[#555] border border-[#2a2a2a] rounded px-2 py-1 hover:border-[#a58e28] hover:text-[#a58e28] transition-colors">{t}</button>
+                    <button key={t} className="text-[11px] text-[#999] border border-[#2a2a2a] rounded px-2 py-1 hover:border-[#a58e28] hover:text-[#a58e28] transition-colors">{t}</button>
                   ))}
                 </div>
               </div>
@@ -171,7 +171,7 @@ export default function InsiderDashboard() {
             <div className="flex items-center gap-3 mb-4">
               <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">EDITORIAL QUEUE</span>
               <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <button className="text-xs text-[#555]">Write new →</button>
+              <button className="text-xs text-[#999]">Write new →</button>
             </div>
             <div className="divide-y divide-[#1e1e1e]">
               {editorialItems.map(e => (
@@ -180,7 +180,7 @@ export default function InsiderDashboard() {
                     <div className="text-xs text-[#ccc] leading-snug flex-1 mr-3">{e.title}</div>
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded flex-shrink-0" style={{ background: e.statusBg, color: e.statusColor }}>{e.status}</span>
                   </div>
-                  <div className="flex gap-2 text-[11px] text-[#444]">
+                  <div className="flex gap-2 text-[11px] text-[#999]">
                     <span>{e.date}</span>
                     {e.views && <><span>·</span><span className="text-[#a58e28]">{e.views}</span></>}
                   </div>
@@ -196,24 +196,24 @@ export default function InsiderDashboard() {
             <div className="flex items-center gap-3 mb-4">
               <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">SIGNAL COMMENTARY</span>
               <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <Link href="/signals" className="text-xs text-[#555]">Browse signals →</Link>
+              <Link href="/signals" className="text-xs text-[#999]">Browse signals →</Link>
             </div>
             <div className="divide-y divide-[#1e1e1e]">
               {signalComments.map(c => (
                 <div key={c.id} className="py-3">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ background: c.signalColor }} />
-                    <span className="text-xs text-[#555]">{c.signal}</span>
+                    <span className="text-xs text-[#999]">{c.signal}</span>
                   </div>
                   <p className="text-xs text-[#777] italic leading-relaxed mb-2 pl-4" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>{c.comment}</p>
                   <div className="flex items-center gap-3 pl-4">
-                    <button className="text-[11px] text-[#555] border border-[#2a2a2a] rounded px-2 py-0.5">Edit</button>
+                    <button className="text-[11px] text-[#999] border border-[#2a2a2a] rounded px-2 py-0.5">Edit</button>
                     <span className="text-[11px] text-[#4CAF50]">Published · {c.views}</span>
                   </div>
                 </div>
               ))}
             </div>
-            <button className="mt-3 w-full text-[11px] text-[#555] border border-[#2a2a2a] rounded-lg py-2 hover:border-[#444] hover:text-[#888] transition-colors">+ Comment on a signal</button>
+            <button className="mt-3 w-full text-[11px] text-[#999] border border-[#2a2a2a] rounded-lg py-2 hover:border-[#444] hover:text-[#888] transition-colors">+ Comment on a signal</button>
           </div>
         </div>
 

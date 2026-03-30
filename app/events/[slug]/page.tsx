@@ -121,7 +121,7 @@ export default function EventDetailPage() {
     return (
       <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
         <div className="text-center">
-          <p className="text-[15px] text-[#666] mb-4">Event not found.</p>
+          <p className="text-[15px] text-[#999] mb-4">Event not found.</p>
           <Link href="/events" className="text-[13px] text-[#a58e28] hover:text-[#c4a830] transition-colors">
             ← Back to Events
           </Link>
@@ -141,7 +141,7 @@ export default function EventDetailPage() {
       <div className="max-w-[720px] mx-auto px-7 pt-10 pb-16">
 
         {/* Back link */}
-        <Link href="/events" className="text-[13px] text-[#555] hover:text-[#a58e28] transition-colors mb-8 inline-block">
+        <Link href="/events" className="text-[13px] text-[#999] hover:text-[#a58e28] transition-colors mb-8 inline-block">
           ← Back to Events
         </Link>
 
@@ -173,23 +173,23 @@ export default function EventDetailPage() {
         )}
 
         {/* Meta */}
-        <div className="flex flex-wrap gap-x-5 gap-y-2 mb-6 text-[13px] text-[#666]">
+        <div className="flex flex-wrap gap-x-5 gap-y-2 mb-6 text-[13px] text-[#999]">
           {dateRange && <span>{dateRange}</span>}
           {event.location && (
             <>
-              <span className="text-[#333]">·</span>
+              <span className="text-[#777]">·</span>
               <span>{event.location}</span>
             </>
           )}
           {event.venue && (
             <>
-              <span className="text-[#333]">·</span>
+              <span className="text-[#777]">·</span>
               <span>{event.venue}</span>
             </>
           )}
           {event.type && (
             <>
-              <span className="text-[#333]">·</span>
+              <span className="text-[#777]">·</span>
               <span>{event.type}</span>
             </>
           )}
@@ -197,7 +197,7 @@ export default function EventDetailPage() {
 
         {/* Attendance */}
         {event.attendance && (
-          <p className="text-[12px] text-[#555] mb-6">{event.attendance}</p>
+          <p className="text-[12px] text-[#999] mb-6">{event.attendance}</p>
         )}
 
         {/* Add to calendar */}
@@ -226,37 +226,37 @@ export default function EventDetailPage() {
           <h3 className="text-[15px] text-white mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
             Why this matters for your career
           </h3>
-          <p className="text-[13px] text-[#555] leading-relaxed">
+          <p className="text-[13px] text-[#999] leading-relaxed">
             Our editorial team is preparing intelligence on this event. Check back soon for analysis on hiring trends, networking opportunities, and career implications.
           </p>
         </div>
 
         {/* Related content placeholders */}
         <div className="border-t border-[#222] pt-8 mb-8">
-          <p className="text-[10px] text-[#444] uppercase tracking-[0.14em] mb-4">Related</p>
+          <p className="text-[10px] text-[#999] uppercase tracking-[0.14em] mb-4">Related</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-[#141414] border border-[#1e1e1e] rounded p-4">
-              <p className="text-[10px] text-[#555] uppercase tracking-wider mb-2">Brands attending</p>
-              <p className="text-[13px] text-[#666]">Coming soon</p>
+              <p className="text-[10px] text-[#999] uppercase tracking-wider mb-2">Brands attending</p>
+              <p className="text-[13px] text-[#999]">Coming soon</p>
             </div>
             <div className="bg-[#141414] border border-[#1e1e1e] rounded p-4">
-              <p className="text-[10px] text-[#555] uppercase tracking-wider mb-2">Related signals</p>
-              <p className="text-[13px] text-[#666]">Coming soon</p>
+              <p className="text-[10px] text-[#999] uppercase tracking-wider mb-2">Related signals</p>
+              <p className="text-[13px] text-[#999]">Coming soon</p>
             </div>
           </div>
         </div>
 
         {/* Share row */}
         <div className="border-t border-[#222] pt-6">
-          <div className="flex items-center gap-1 text-[12px] text-[#555]">
+          <div className="flex items-center gap-1 text-[12px] text-[#999]">
             <button onClick={handleCopyLink} className="hover:text-[#a58e28] transition-colors">
               {copied ? 'Copied' : 'Copy link'}
             </button>
-            <span className="text-[#333]">·</span>
+            <span className="text-[#777]">·</span>
             <button onClick={handleLinkedIn} className="hover:text-[#a58e28] transition-colors">
               Share on LinkedIn
             </button>
-            <span className="text-[#333]">·</span>
+            <span className="text-[#777]">·</span>
             <button onClick={handleEmail} className="hover:text-[#a58e28] transition-colors">
               Send to a colleague
             </button>

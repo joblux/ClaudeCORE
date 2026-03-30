@@ -88,21 +88,21 @@ export default function EmployerSignupClient() {
   if (submitted) {
     return (
       <main className="min-h-screen bg-[#0f0f0f] flex flex-col items-center justify-center px-4 py-16">
-        <p className="text-[10px] tracking-[3.5px] uppercase text-[#666] mb-7">Luxury Talent Intelligence</p>
+        <p className="text-[10px] tracking-[3.5px] uppercase text-[#999] mb-7">Luxury Talent Intelligence</p>
         <div className="w-full max-w-[420px] bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl px-8 py-10 text-center">
           <div className="w-12 h-12 rounded-full bg-[#1a1a0f] border border-[#a58e28] flex items-center justify-center text-[#a58e28] text-xl mx-auto mb-5">✓</div>
           <h2 className="text-xl font-light text-white mb-3" style={{ fontFamily: "Playfair Display, Georgia, serif" }}>Request received.</h2>
           <p className="text-sm text-[#888] leading-relaxed mb-3">We'll review your details and be in touch within 24 hours.</p>
-          <p className="text-[10px] text-[#444]">No noise. No ads. No data reselling.</p>
+          <p className="text-[10px] text-[#999]">No noise. No ads. No data reselling.</p>
         </div>
-        <Link href="/" className="text-[10px] text-[#555] underline underline-offset-4 mt-5 hover:text-[#888] transition-colors">← Back to JOBLUX</Link>
+        <Link href="/" className="text-[10px] text-[#999] underline underline-offset-4 mt-5 hover:text-[#888] transition-colors">← Back to JOBLUX</Link>
       </main>
     )
   }
 
   return (
     <main className="min-h-screen bg-[#0f0f0f] flex flex-col items-center justify-center px-4 py-16">
-      <p className="text-[10px] tracking-[3.5px] uppercase text-[#666] mb-7">Luxury Talent Intelligence</p>
+      <p className="text-[10px] tracking-[3.5px] uppercase text-[#999] mb-7">Luxury Talent Intelligence</p>
 
       <div className="w-full max-w-[420px] bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl px-8 py-9">
         <h1 className="text-[22px] font-light text-white text-center mb-6" style={{ fontFamily: "Playfair Display, Georgia, serif" }}>
@@ -139,8 +139,8 @@ export default function EmployerSignupClient() {
           </div>
 
           <div className="border-t border-[#2a2a2a] pt-4 mb-3">
-            <p className="text-[9px] text-[#666] uppercase tracking-[2px]">Your details</p>
-            <p className="text-[10px] text-[#444] italic mt-1 mb-3">Not published or listed.</p>
+            <p className="text-[9px] text-[#999] uppercase tracking-[2px]">Your details</p>
+            <p className="text-[10px] text-[#999] italic mt-1 mb-3">Not published or listed.</p>
           </div>
 
           <div className="grid grid-cols-2 gap-3 mb-3">
@@ -184,10 +184,10 @@ export default function EmployerSignupClient() {
             </button>
           </div>
 
-          <p className="text-[10px] text-[#555] text-center mb-4 leading-relaxed">We'll be in touch within 24 hours.</p>
+          <p className="text-[10px] text-[#999] text-center mb-4 leading-relaxed">We'll be in touch within 24 hours.</p>
 
           <div className="border-t border-[#222] pt-4 text-center">
-            <p className="text-[11px] text-[#444]">
+            <p className="text-[11px] text-[#999]">
               Already have access?{" "}
               <Link href="/join" className="text-[#777] underline underline-offset-3 hover:text-[#aaa] transition-colors">Sign in here →</Link>
             </p>
@@ -195,7 +195,7 @@ export default function EmployerSignupClient() {
         </form>
       </div>
 
-      <Link href="/connect" className="text-[10px] text-[#555] underline underline-offset-4 mt-5 hover:text-[#888] transition-colors">← Back to connect</Link>
+      <Link href="/connect" className="text-[10px] text-[#999] underline underline-offset-4 mt-5 hover:text-[#888] transition-colors">← Back to connect</Link>
     </main>
   )
 }

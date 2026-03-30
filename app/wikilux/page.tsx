@@ -86,7 +86,7 @@ export default function WikiLuxPage() {
 
       <div className="jl-container py-10">
 
-        <p className="font-sans text-sm text-[#666] leading-relaxed mb-8 max-w-2xl">The brand intelligence directory is built on public data, AI research, and — most importantly — confidential contributions from professionals who have worked inside these houses.</p>
+        <p className="font-sans text-sm text-[#999] leading-relaxed mb-8 max-w-2xl">The brand intelligence directory is built on public data, AI research, and — most importantly — confidential contributions from professionals who have worked inside these houses.</p>
 
         <WikiLuxSearch brands={BRANDS} categories={categories} />
 

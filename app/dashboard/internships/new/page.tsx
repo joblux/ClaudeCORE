@@ -145,7 +145,7 @@ export default function NewInternshipPage() {
           <h1 className="jl-serif text-2xl md:text-3xl text-[#1a1a1a]">
             Post an Internship
           </h1>
-          <p className="text-sm text-[#666] mt-1">
+          <p className="text-sm text-[#999] mt-1">
             Submit an internship opportunity for review by the JOBLUX team. Once approved, it will be visible to our ecosystem.
           </p>
         </div>

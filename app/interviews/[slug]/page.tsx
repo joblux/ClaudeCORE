@@ -196,25 +196,25 @@ export default function BrandInterviewsPage() {
                         {detail.process_duration && (
                           <div>
                             <div className="jl-label mb-1">Process Duration</div>
-                            <p className="text-sm text-[#555]">{detail.process_duration}</p>
+                            <p className="text-sm text-[#999]">{detail.process_duration}</p>
                           </div>
                         )}
                         {detail.process_description && (
                           <div>
                             <div className="jl-label mb-1">Process Description</div>
-                            <p className="text-sm text-[#555] leading-relaxed whitespace-pre-line">{detail.process_description}</p>
+                            <p className="text-sm text-[#999] leading-relaxed whitespace-pre-line">{detail.process_description}</p>
                           </div>
                         )}
                         {detail.questions_asked && (
                           <div>
                             <div className="jl-label mb-1">Questions Asked</div>
-                            <p className="text-sm text-[#555] leading-relaxed whitespace-pre-line">{detail.questions_asked}</p>
+                            <p className="text-sm text-[#999] leading-relaxed whitespace-pre-line">{detail.questions_asked}</p>
                           </div>
                         )}
                         {detail.tips && (
                           <div>
                             <div className="jl-label mb-1">Tips</div>
-                            <p className="text-sm text-[#555] leading-relaxed whitespace-pre-line">{detail.tips}</p>
+                            <p className="text-sm text-[#999] leading-relaxed whitespace-pre-line">{detail.tips}</p>
                           </div>
                         )}
                       </div>

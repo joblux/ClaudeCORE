@@ -267,7 +267,7 @@ export default async function OpportunityDetailPage({ params }: { params: { slug
                     <p className="text-xs text-[#888] mt-1">{assignment.salary_period}</p>
                   )}
                   {assignment.bonus_commission && (
-                    <p className="text-sm text-[#666] mt-2">{assignment.bonus_commission}</p>
+                    <p className="text-sm text-[#999] mt-2">{assignment.bonus_commission}</p>
                   )}
                 </div>
               )}
@@ -276,7 +276,7 @@ export default async function OpportunityDetailPage({ params }: { params: { slug
               {assignment.description && (
                 <>
                   <div className="jl-section-label"><span>About the Role</span></div>
-                  <div className="font-sans text-sm text-[#333] leading-relaxed mb-10 whitespace-pre-line">
+                  <div className="font-sans text-sm text-[#777] leading-relaxed mb-10 whitespace-pre-line">
                     {assignment.description}
                   </div>
                 </>
@@ -290,7 +290,7 @@ export default async function OpportunityDetailPage({ params }: { params: { slug
                     {responsibilityLines.map((line, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <span className="text-[#a58e28] mt-0.5 flex-shrink-0">&bull;</span>
-                        <span className="font-sans text-sm text-[#555] leading-relaxed">{line}</span>
+                        <span className="font-sans text-sm text-[#999] leading-relaxed">{line}</span>
                       </li>
                     ))}
                   </ul>
@@ -305,7 +305,7 @@ export default async function OpportunityDetailPage({ params }: { params: { slug
                     {requirementLines.map((line, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <span className="text-[#a58e28] mt-0.5 flex-shrink-0">&bull;</span>
-                        <span className="font-sans text-sm text-[#555] leading-relaxed">{line}</span>
+                        <span className="font-sans text-sm text-[#999] leading-relaxed">{line}</span>
                       </li>
                     ))}
                   </ul>
@@ -320,7 +320,7 @@ export default async function OpportunityDetailPage({ params }: { params: { slug
                     {niceToHaveLines.map((line, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <span className="text-[#a58e28] mt-0.5 flex-shrink-0">&bull;</span>
-                        <span className="font-sans text-sm text-[#555] leading-relaxed">{line}</span>
+                        <span className="font-sans text-sm text-[#999] leading-relaxed">{line}</span>
                       </li>
                     ))}
                   </ul>
@@ -331,7 +331,7 @@ export default async function OpportunityDetailPage({ params }: { params: { slug
               {assignment.about_maison && !assignment.is_confidential && (
                 <>
                   <div className="jl-section-label"><span>About the Maison</span></div>
-                  <div className="font-sans text-sm text-[#333] leading-relaxed mb-10 whitespace-pre-line">
+                  <div className="font-sans text-sm text-[#777] leading-relaxed mb-10 whitespace-pre-line">
                     {assignment.about_maison}
                   </div>
                 </>

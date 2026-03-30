@@ -263,7 +263,7 @@ export default function ContributePage() {
           <h1 className="jl-serif text-3xl md:text-4xl text-[#1a1a1a] mb-3">
             Intelligence is built on contribution
           </h1>
-          <p className="text-[#666] max-w-xl">
+          <p className="text-[#999] max-w-xl">
             JOBLUX is free because professionals contribute what they know. A salary figure. An interview experience. A market signal. Every contribution sharpens the intelligence for everyone.
           </p>
         </div>
@@ -299,9 +299,9 @@ export default function ContributePage() {
                   <div className="mt-6 pt-4 border-t border-[#e8e2d8]">
                     <p className="text-xs text-[#999] mb-2">Your Contributions</p>
                     <div className="space-y-1 text-sm">
-                      <div className="flex justify-between"><span className="text-[#666]">Approved</span><span className="text-[#1a1a1a] font-medium">{points.summary?.approved || 0}</span></div>
-                      <div className="flex justify-between"><span className="text-[#666]">Pending</span><span className="text-[#a58e28]">{points.summary?.pending || 0}</span></div>
-                      <div className="flex justify-between"><span className="text-[#666]">Total</span><span className="text-[#1a1a1a]">{points.summary?.total || 0}</span></div>
+                      <div className="flex justify-between"><span className="text-[#999]">Approved</span><span className="text-[#1a1a1a] font-medium">{points.summary?.approved || 0}</span></div>
+                      <div className="flex justify-between"><span className="text-[#999]">Pending</span><span className="text-[#a58e28]">{points.summary?.pending || 0}</span></div>
+                      <div className="flex justify-between"><span className="text-[#999]">Total</span><span className="text-[#1a1a1a]">{points.summary?.total || 0}</span></div>
                     </div>
                   </div>
                 </>
@@ -310,7 +310,7 @@ export default function ContributePage() {
                   <h2 className="text-xs font-medium tracking-widest uppercase text-[#a58e28] mb-4">
                     How it works
                   </h2>
-                  <div className="space-y-4 text-sm text-[#666]">
+                  <div className="space-y-4 text-sm text-[#999]">
                     <div className="flex gap-3">
                       <span className="w-6 h-6 rounded-full bg-[#a58e28]/10 text-[#a58e28] text-xs font-semibold flex items-center justify-center flex-shrink-0">1</span>
                       <span>Fill out the form with your data</span>
@@ -327,9 +327,9 @@ export default function ContributePage() {
                   <div className="mt-6 pt-4 border-t border-[#e8e2d8]">
                     <p className="text-xs text-[#999] mb-2">Points Per Contribution</p>
                     <div className="space-y-1 text-sm">
-                      <div className="flex justify-between"><span className="text-[#666]">Salary data</span><span className="text-[#a58e28]">+10 pts</span></div>
-                      <div className="flex justify-between"><span className="text-[#666]">Interview experience</span><span className="text-[#a58e28]">+10 pts</span></div>
-                      <div className="flex justify-between"><span className="text-[#666]">Market signal</span><span className="text-[#a58e28]">+10 pts</span></div>
+                      <div className="flex justify-between"><span className="text-[#999]">Salary data</span><span className="text-[#a58e28]">+10 pts</span></div>
+                      <div className="flex justify-between"><span className="text-[#999]">Interview experience</span><span className="text-[#a58e28]">+10 pts</span></div>
+                      <div className="flex justify-between"><span className="text-[#999]">Market signal</span><span className="text-[#a58e28]">+10 pts</span></div>
                     </div>
                   </div>
                 </>
@@ -380,7 +380,7 @@ export default function ContributePage() {
                   className={`px-4 py-3 text-sm transition-colors border-b-2 -mb-px ${
                     activeTab === tab.id
                       ? 'border-[#a58e28] text-[#1a1a1a] font-medium'
-                      : 'border-transparent text-[#999] hover:text-[#666]'
+                      : 'border-transparent text-[#999] hover:text-[#999]'
                   }`}
                 >
                   {tab.label}
@@ -528,7 +528,7 @@ export default function ContributePage() {
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={interview.is_anonymous} onChange={(e) => setInterview({ ...interview, is_anonymous: e.target.checked })} className="accent-[#a58e28]" />
-                  <span className="text-sm text-[#666]">Post anonymously</span>
+                  <span className="text-sm text-[#999]">Post anonymously</span>
                 </label>
               </div>
             )}
@@ -588,7 +588,7 @@ export default function ContributePage() {
             <h2 className="jl-serif text-xl text-[#1a1a1a] mb-2 text-center">
               To submit your contribution, create your JOBLUX profile.
             </h2>
-            <p className="text-sm text-[#666] text-center mb-6">
+            <p className="text-sm text-[#999] text-center mb-6">
               Your data has been saved. Sign in and you&rsquo;ll return here to submit.
             </p>
             <div className="space-y-3">

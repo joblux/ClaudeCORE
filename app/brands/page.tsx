@@ -78,7 +78,7 @@ export default function BrandsPage() {
         <h1 className="text-4xl font-normal text-white mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           Brand intelligence
         </h1>
-        <p className="text-sm text-[#555] mb-7">
+        <p className="text-sm text-[#999] mb-7">
           Career intelligence across 150+ luxury brands. Salaries, culture, leadership, financial health — in 9 languages.
         </p>
 
@@ -112,7 +112,7 @@ export default function BrandsPage() {
           {[['154', 'brands'], ['12', 'sectors'], ['9', 'languages'], ['47', 'hiring now'], ['8', 'new signals today']].map(([n, l]) => (
             <span key={l} className="text-xs">
               <span className="text-[#999]">{n}</span>
-              <span className="text-[#555]"> {l}</span>
+              <span className="text-[#999]"> {l}</span>
             </span>
           ))}
         </div>
@@ -129,12 +129,12 @@ export default function BrandsPage() {
               >
                 {/* Top */}
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[11px] font-medium text-[#666] flex-shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[11px] font-medium text-[#999] flex-shrink-0">
                     {getInitials(brand.name)}
                   </div>
                   <div>
                     <div className="text-sm font-medium text-[#e0e0e0]">{brand.name}</div>
-                    <div className="text-[11px] text-[#444] mt-0.5">{brand.parent_group}</div>
+                    <div className="text-[11px] text-[#999] mt-0.5">{brand.parent_group}</div>
                   </div>
                 </div>
 

@@ -173,13 +173,13 @@ export default function SignalsPage() {
             <h1 className="text-[32px] text-white mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
               Signals
             </h1>
-            <p className="text-[13px] text-[#555] max-w-[500px] leading-relaxed">
+            <p className="text-[13px] text-[#999] max-w-[500px] leading-relaxed">
               Real-time intelligence across 150+ luxury brands. Leadership moves, financial shifts, hiring signals, expansion — verified and contextualized.
             </p>
           </div>
           <div className="hidden md:flex items-center gap-2 mt-2">
             <span className="w-2 h-2 rounded-full bg-[#3fb950]" />
-            <span className="text-[12px] text-[#555]">Updated {formatDate(new Date())} · CET</span>
+            <span className="text-[12px] text-[#999]">Updated {formatDate(new Date())} · CET</span>
           </div>
         </div>
 
@@ -192,7 +192,7 @@ export default function SignalsPage() {
               className={`rounded-full px-4 py-1.5 text-[12px] transition-colors ${
                 activeFilter === f
                   ? 'bg-[#a58e28] text-white'
-                  : 'bg-transparent text-[#666] border border-[#2a2a2a] hover:border-[#555] hover:text-[#999]'
+                  : 'bg-transparent text-[#999] border border-[#2a2a2a] hover:border-[#555] hover:text-[#999]'
               }`}
             >
               {f}
@@ -205,7 +205,7 @@ export default function SignalsPage() {
           {TICKERS.map(t => (
             <div key={t.ticker} className="flex items-center gap-2 flex-shrink-0">
               <span className="text-[12px] text-[#888] font-medium">{t.name}</span>
-              <span className="text-[11px] text-[#555]">{t.ticker}</span>
+              <span className="text-[11px] text-[#999]">{t.ticker}</span>
             </div>
           ))}
         </div>
@@ -215,10 +215,10 @@ export default function SignalsPage() {
 
           {/* LEFT — Signal feed */}
           <div className="min-w-0">
-            <p className="text-[10px] text-[#555] uppercase tracking-[0.14em] mb-4">Today&apos;s signals</p>
+            <p className="text-[10px] text-[#999] uppercase tracking-[0.14em] mb-4">Today&apos;s signals</p>
 
             {filtered.length === 0 && (
-              <p className="text-[13px] text-[#555] py-8">No signals match this filter.</p>
+              <p className="text-[13px] text-[#999] py-8">No signals match this filter.</p>
             )}
 
             {filtered.map(signal => {
@@ -233,8 +233,8 @@ export default function SignalsPage() {
                     >
                       {label}
                     </span>
-                    {signal.brand && <span className="text-[12px] text-[#555]">{signal.brand}</span>}
-                    <span className="text-[11px] text-[#444] ml-auto flex-shrink-0">
+                    {signal.brand && <span className="text-[12px] text-[#999]">{signal.brand}</span>}
+                    <span className="text-[11px] text-[#999] ml-auto flex-shrink-0">
                       {signal.published_at ? timeAgo(signal.published_at) : ''}
                     </span>
                   </div>
@@ -243,11 +243,11 @@ export default function SignalsPage() {
                       {signal.headline}
                     </h3>
                   </Link>
-                  <p className="text-[12px] text-[#666] leading-relaxed mb-3">
+                  <p className="text-[12px] text-[#999] leading-relaxed mb-3">
                     {signal.summary || (signal as any).context_paragraph || ''}
                   </p>
                   <div className="flex items-center justify-between">
-                    {signal.region && <span className="text-[11px] text-[#444]">{signal.region}</span>}
+                    {signal.region && <span className="text-[11px] text-[#999]">{signal.region}</span>}
                     <Link
                       href={`/signals/${signal.slug || signal.id}`}
                       className="text-[12px] text-[#a58e28] hover:text-[#c4a830] transition-colors ml-auto"
@@ -271,7 +271,7 @@ export default function SignalsPage() {
                   <div key={m.name} className="flex items-center justify-between">
                     <span className="text-[13px] text-[#ccc]">{m.name}</span>
                     <div className="flex items-center gap-3">
-                      <span className="text-[12px] text-[#666]">{m.price}</span>
+                      <span className="text-[12px] text-[#999]">{m.price}</span>
                       <span className={`text-[12px] font-medium ${m.positive ? 'text-[#3fb950]' : 'text-[#f85149]'}`}>
                         {m.change}
                       </span>
@@ -288,7 +288,7 @@ export default function SignalsPage() {
                 {TALENT_RADAR.map((t, i) => (
                   <div key={i} className="border-l-2 border-[#58a6ff] pl-3">
                     <p className="text-[12px] text-[#ccc] leading-relaxed">{t.text}</p>
-                    <p className="text-[10px] text-[#444] mt-1">{t.time}</p>
+                    <p className="text-[10px] text-[#999] mt-1">{t.time}</p>
                   </div>
                 ))}
               </div>
@@ -300,7 +300,7 @@ export default function SignalsPage() {
               <div className="space-y-3">
                 {COMING_THIS_WEEK.map((e, i) => (
                   <div key={i} className="flex items-start gap-3">
-                    <span className="text-[11px] text-[#555] font-medium w-8 flex-shrink-0 pt-[1px]">{e.day}</span>
+                    <span className="text-[11px] text-[#999] font-medium w-8 flex-shrink-0 pt-[1px]">{e.day}</span>
                     <p className="text-[12px] text-[#ccc] leading-relaxed">{e.event}</p>
                   </div>
                 ))}
