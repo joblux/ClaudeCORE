@@ -1,250 +1,213 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 
-const searches = [
-  { id: '1', status: 'ACTIVE', statusColor: '#4CAF50', statusBg: 'rgba(76,175,80,0.1)', statusBorder: 'rgba(76,175,80,0.2)', title: 'Director of retail operations, Europe', location: 'Paris, Europe-wide', salary: '€120K–150K', opened: 'Mar 10', updated: '2h ago', pipeline: [8, 4, 2, 0, 0] },
-  { id: '2', status: 'OFFER STAGE', statusColor: '#FF9800', statusBg: 'rgba(255,152,0,0.1)', statusBorder: 'rgba(255,152,0,0.2)', title: 'Head of digital, Europe', location: 'Paris', salary: '€90K–110K', opened: 'Feb 28', updated: 'Today', pipeline: [14, 6, 3, 1, 0] },
-  { id: '3', status: 'NEW', statusColor: '#2196F3', statusBg: 'rgba(33,150,243,0.1)', statusBorder: 'rgba(33,150,243,0.2)', title: 'Artisan workshop manager, Normandy', location: 'Normandy, France', salary: '€55K–70K', opened: 'Mar 24', updated: '1d ago', pipeline: [3, 0, 0, 0, 0] },
-]
-
-const pipelineStages = ['LONGLIST', 'SCREENING', 'INTERVIEW', 'OFFER', 'PLACED']
-
-const candidates = [
-  { initials: 'SM', name: 'Sophie M.', role: 'Director of Retail · 16 yrs exp', stage: 'INTERVIEW', stageColor: '#FF9800', stageBg: 'rgba(255,152,0,0.1)' },
-  { initials: 'JP', name: 'Jean-Pierre L.', role: 'Head of Digital · 12 yrs exp', stage: 'OFFER', stageColor: '#4CAF50', stageBg: 'rgba(76,175,80,0.1)' },
-  { initials: 'AK', name: 'Amira K.', role: 'Director of Retail · 14 yrs exp', stage: 'SCREENING', stageColor: '#2196F3', stageBg: 'rgba(33,150,243,0.1)' },
-]
-
-const signals = [
-  { color: '#f44336', text: 'Burberry cuts 400 roles — strong candidates now in market', time: '6h ago' },
-  { color: '#FF9800', text: 'Kering CD reshuffle — senior creative talent available', time: '5h ago' },
-  { color: '#2196F3', text: 'Richemont YNAP sale — digital talent entering market', time: '2d ago' },
-]
-
-const contributions = [
-  { icon: '💰', text: 'Salary data · Store Director, Paris · Hermès', status: 'VERIFIED' },
-  { icon: '💰', text: 'Salary data · Retail Director, Europe · Hermès', status: 'VERIFIED' },
-  { icon: '🏢', text: 'Culture insight · Work environment at Hermès Paris HQ', status: 'VERIFIED' },
-  { icon: '🎤', text: 'Interview process · Director level hiring at Hermès', status: 'PENDING' },
-]
-
-const benchmarks = [
-  { role: 'Store Director · Paris', range: '€85K–110K', trend: '+4% YoY' },
-  { role: 'Head of Digital · Paris', range: '€90K–120K', trend: '+7% YoY' },
-  { role: 'Retail Director · Europe', range: '€95K–130K', trend: '+3% YoY' },
-  { role: 'Workshop Manager · France', range: '€55K–70K', trend: '+2% YoY' },
-]
+type MemberData = {
+  first_name: string | null
+  last_name: string | null
+  company_name: string | null
+  job_title: string | null
+  org_type: string | null
+  country: string | null
+  city: string | null
+  email: string
+  avatar_url: string | null
+  status: string
+  approved_at: string | null
+}
 
 const navItems = [
-  { section: 'SEARCHES', items: [{ icon: '⌂', label: 'Overview', id: 'overview', badge: null }, { icon: '◎', label: 'Active searches', id: 'searches', badge: '3' }, { icon: '◉', label: 'Candidate pipeline', id: 'pipeline', badge: null }] },
-  { section: 'INTELLIGENCE', items: [{ icon: '⚡', label: 'Market signals', id: 'signals', badge: null }, { icon: '💰', label: 'Salary benchmarks', id: 'benchmarks', badge: null }, { icon: '◫', label: 'Brand page', id: 'brand', badge: null }] },
-  { section: 'CONTRIBUTE', items: [{ icon: '✎', label: 'My contributions', id: 'contributions', badge: null }, { icon: '+', label: 'Add salary data', id: 'add-salary', badge: null }, { icon: '+', label: 'Add culture insight', id: 'add-culture', badge: null }, { icon: '+', label: 'Add interview data', id: 'add-interview', badge: null }] },
-  { section: 'ACCOUNT', items: [{ icon: '✉', label: 'Inbox', id: 'inbox', badge: '2' }, { icon: '⚙', label: 'Settings', id: 'settings', badge: null }] },
+  { section: 'SEARCHES', items: [
+    { label: 'Overview', id: 'overview' },
+    { label: 'Active searches', id: 'searches' },
+  ]},
+  { section: 'INTELLIGENCE', items: [
+    { label: 'Market signals', id: 'signals' },
+    { label: 'Salary benchmarks', id: 'benchmarks' },
+  ]},
+  { section: 'CONTRIBUTE', items: [
+    { label: 'My contributions', id: 'contributions' },
+    { label: 'Add salary data', id: 'add-salary' },
+    { label: 'Add culture insight', id: 'add-culture' },
+    { label: 'Add interview data', id: 'add-interview' },
+  ]},
+  { section: 'ACCOUNT', items: [
+    { label: 'Settings', id: 'settings' },
+  ]},
 ]
 
 export default function BusinessDashboard() {
   const { data: session } = useSession()
   const [activeNav, setActiveNav] = useState('overview')
+  const [member, setMember] = useState<MemberData | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchMember() {
+      try {
+        const res = await fetch('/api/members/me')
+        if (res.ok) {
+          const data = await res.json()
+          setMember(data)
+        }
+      } catch (e) {
+        console.error('Failed to fetch member data:', e)
+      } finally {
+        setLoading(false)
+      }
+    }
+    if (session) fetchMember()
+  }, [session])
+
+  const firstName = member?.first_name || (session?.user as any)?.firstName || session?.user?.name?.split(' ')[0] || ''
+  const lastName = member?.last_name || ''
+  const companyName = member?.company_name || 'Your company'
+  const jobTitle = member?.job_title || ''
+  const initials = [firstName, lastName].filter(Boolean).map(n => n[0]).join('').toUpperCase() || 'E'
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0f0f0f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: '#999', fontSize: 14, fontFamily: 'Inter, sans-serif' }}>Loading...</div>
+      </div>
+    )
+  }
 
   return (
-    <div className="flex min-h-screen bg-[#1a1a1a]" style={{ marginTop: '-1px' }}>
-
-      {/* Sidebar */}
-      <div className="w-[220px] flex-shrink-0 bg-[#111] border-r border-[#222] flex flex-col">
-        <div className="px-5 py-5 border-b border-[#222]">
-          <span className="text-xs font-semibold tracking-[4px] text-white">JOBLUX.</span>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#0f0f0f', fontFamily: 'Inter, sans-serif' }}>
+      <aside style={{ width: 220, background: '#141414', borderRight: '1px solid #1e1e1e', padding: '24px 0', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '0 20px 24px', borderBottom: '1px solid #1e1e1e' }}>
+          <Link href="/" style={{ textDecoration: 'none' }}>
+            <span style={{ fontFamily: 'Playfair Display, serif', fontSize: 18, fontWeight: 400, color: '#a58e28', letterSpacing: '2px' }}>JOBLUX.</span>
+          </Link>
         </div>
-        <div className="px-5 py-4 border-b border-[#222]">
-          <div className="w-9 h-9 rounded-full bg-[#2196F3] flex items-center justify-center text-[11px] font-semibold text-white mb-2">HR</div>
-          <div className="text-sm text-[#e0e0e0] mb-0.5">Hermès HR Team</div>
-          <div className="text-[10px] text-[#2196F3] font-semibold tracking-wider">BUSINESS</div>
+        <div style={{ padding: '20px 20px 16px' }}>
+          <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#a58e28', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 10 }}>{initials}</div>
+          <div style={{ fontSize: 14, fontWeight: 500, color: '#fff' }}>{[firstName, lastName].filter(Boolean).join(' ') || 'Employer'}</div>
+          <div style={{ fontSize: 11, color: '#a58e28', fontWeight: 600, letterSpacing: '0.5px', marginTop: 2 }}>LUXURY EMPLOYER</div>
+          {companyName !== 'Your company' && <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>{companyName}</div>}
         </div>
-
-        <div className="flex-1 overflow-y-auto">
-          {navItems.map(group => (
-            <div key={group.section}>
-              <div className="px-5 pt-4 pb-1.5 text-[9px] font-semibold tracking-[2px] text-[#777]">{group.section}</div>
-              {group.items.map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveNav(item.id)}
-                  className="w-full flex items-center gap-2.5 px-5 py-2.5 text-xs transition-colors"
-                  style={{
-                    color: activeNav === item.id ? '#fff' : '#555',
-                    background: activeNav === item.id ? '#1e1e1e' : 'transparent',
-                    borderLeft: activeNav === item.id ? '2px solid #2196F3' : '2px solid transparent',
-                  }}
-                >
-                  <span className="w-4 text-center text-sm">{item.icon}</span>
-                  <span className="flex-1 text-left">{item.label}</span>
-                  {item.badge && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#FF9800] text-[#1a1a1a]">{item.badge}</span>
-                  )}
-                </button>
+        <nav style={{ flex: 1, padding: '0 12px' }}>
+          {navItems.map(section => (
+            <div key={section.section} style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: '#555', letterSpacing: '1.5px', padding: '8px 8px 4px' }}>{section.section}</div>
+              {section.items.map(item => (
+                <button key={item.id} onClick={() => setActiveNav(item.id)} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 13, background: activeNav === item.id ? '#1e1e1e' : 'transparent', color: activeNav === item.id ? '#fff' : '#999' }}>{item.label}</button>
               ))}
             </div>
           ))}
+        </nav>
+        <div style={{ padding: '16px 20px', borderTop: '1px solid #1e1e1e' }}>
+          <Link href="/recruitment" style={{ display: 'block', padding: '10px 0', textAlign: 'center', fontSize: 12, fontWeight: 500, color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)', borderRadius: 6, textDecoration: 'none' }}>Contact your dedicated consultant</Link>
+          <button onClick={() => signOut({ callbackUrl: '/' })} style={{ display: 'block', width: '100%', marginTop: 8, padding: '8px 0', textAlign: 'center', fontSize: 11, color: '#666', background: 'none', border: 'none', cursor: 'pointer' }}>Sign out</button>
         </div>
+      </aside>
 
-        <div className="p-4 border-t border-[#222]">
-          <div className="rounded-lg p-3" style={{ background: 'rgba(165,142,40,0.08)', border: '1px solid rgba(165,142,40,0.2)' }}>
-            <p className="text-[11px] text-[#999] leading-relaxed mb-2">Need to discuss a search or brief Mo on a new role?</p>
-            <button className="w-full bg-[#a58e28] text-[#1a1a1a] text-[11px] font-semibold py-1.5 rounded">Contact Mo →</button>
+      <main style={{ flex: 1, padding: '32px 40px', maxWidth: 1000 }}>
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 26, fontWeight: 400, color: '#fff', margin: 0 }}>Welcome back, {firstName || 'there'}</h1>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)', padding: '4px 12px', borderRadius: 4, letterSpacing: '0.5px' }}>LUXURY EMPLOYER</span>
           </div>
-        </div>
-      </div>
-
-      {/* Main */}
-      <div className="flex-1 p-8 overflow-y-auto">
-        <div className="flex items-start justify-between mb-7">
-          <div>
-            <h1 className="text-xl font-normal text-white mb-1" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>Hermès — Search overview</h1>
-            <p className="text-sm text-[#999]">Thursday, March 26, 2026 · 3 active searches in progress</p>
-          </div>
-          <div className="border border-[#2196F3] text-[#2196F3] text-[10px] font-semibold tracking-[2px] px-3 py-1 rounded">BUSINESS</div>
+          <p style={{ fontSize: 13, color: '#999', marginTop: 6 }}>{today}</p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-3 mb-7">
-          {[['3', 'Active searches', 'Managed by JOBLUX'], ['12', 'Candidates in pipeline', '↑ 3 new this week'], ['1', 'Offer pending', 'Head of Digital · Paris'], ['5', 'Contributions made', 'Salary + culture data']].map(([num, label, sub]) => (
-            <div key={label} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4">
-              <div className="text-2xl font-normal text-[#a58e28] mb-1">{num}</div>
-              <div className="text-[11px] text-[#999]">{label}</div>
-              <div className="text-[11px] text-[#999] mt-0.5">{sub}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Brand strip */}
-        <div className="flex items-center gap-3 mb-4">
-          <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">YOUR BRAND PROFILE</span>
-          <div className="flex-1 h-px bg-[#2a2a2a]" />
-          <Link href="/brands/hermes" className="text-xs text-[#999] hover:text-[#888]">View on WikiLux →</Link>
-        </div>
-        <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 flex items-center gap-4 mb-7">
-          <div className="w-11 h-11 rounded-full bg-[#2a2a2a] flex items-center justify-center text-base font-medium text-[#888] flex-shrink-0">H</div>
-          <div className="flex-1">
-            <div className="text-sm font-medium text-white mb-0.5" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>Hermès International</div>
-            <div className="text-[11px] text-[#999]">Independent (public: RMS.PA) · Founded 1837, Paris · ~20,000 employees · 47 profile views this month</div>
-          </div>
-          <button className="text-[11px] text-[#999] border border-[#2a2a2a] rounded-lg px-3 py-1.5 hover:border-[#444] hover:text-[#888] transition-colors">Edit brand page →</button>
-        </div>
-
-        {/* Active searches */}
-        <div className="flex items-center gap-3 mb-4">
-          <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">ACTIVE SEARCH ASSIGNMENTS</span>
-          <div className="flex-1 h-px bg-[#2a2a2a]" />
-        </div>
-        <div className="space-y-3 mb-7">
-          {searches.map(s => (
-            <div key={s.id} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <span className="text-[10px] font-semibold tracking-wider px-2 py-0.5 rounded inline-block mb-2" style={{ background: s.statusBg, color: s.statusColor, border: `1px solid ${s.statusBorder}` }}>{s.status}</span>
-                  <div className="text-sm font-medium text-[#e0e0e0] mb-1">{s.title}</div>
-                  <div className="flex gap-2 text-[11px] text-[#999]">
-                    <span>{s.location}</span><span>·</span><span>{s.salary}</span><span>·</span><span>Opened {s.opened}</span>
-                  </div>
-                </div>
-                <div className="text-[11px] text-[#999]">Updated {s.updated}</div>
+        {activeNav === 'overview' && (<>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 32 }}>
+            {[{ label: 'Active searches', value: '0', sub: 'Managed by JOBLUX' }, { label: 'Contributions', value: '0', sub: 'Salary + culture data' }, { label: 'Signals', value: '\u2014', sub: 'Market intelligence' }].map(c => (
+              <div key={c.label} style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 8, padding: '20px 24px' }}>
+                <div style={{ fontSize: 28, fontWeight: 300, color: '#a58e28' }}>{c.value}</div>
+                <div style={{ fontSize: 13, color: '#fff', marginTop: 4 }}>{c.label}</div>
+                <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>{c.sub}</div>
               </div>
-              <div className="grid grid-cols-5 gap-1.5">
-                {pipelineStages.map((stage, i) => (
-                  <div key={stage} className="text-center bg-[#1a1a1a] border border-[#222] rounded-lg py-2">
-                    <div className="text-lg font-normal mb-0.5" style={{ color: s.pipeline[i] > 0 && i === 3 ? '#FF9800' : '#fff' }}>{s.pipeline[i]}</div>
-                    <div className="text-[9px] text-[#999] tracking-wide">{stage}</div>
-                  </div>
-                ))}
+            ))}
+          </div>
+          <div style={{ marginBottom: 32 }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#a58e28', letterSpacing: '1.5px', marginBottom: 12 }}>ACTIVE SEARCH ASSIGNMENTS</div>
+            <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 8, padding: '40px 24px', textAlign: 'center' }}>
+              <div style={{ fontSize: 14, color: '#ccc', marginBottom: 8 }}>No active searches yet</div>
+              <p style={{ fontSize: 13, color: '#999', marginBottom: 16, maxWidth: 400, margin: '0 auto 16px' }}>When you submit a brief, your dedicated JOBLUX consultant will manage the search and you will track progress here.</p>
+              <Link href="/recruitment" style={{ display: 'inline-block', padding: '10px 24px', fontSize: 12, fontWeight: 500, color: '#fff', background: '#a58e28', borderRadius: 6, textDecoration: 'none' }}>Submit a brief</Link>
+            </div>
+          </div>
+          <div style={{ marginBottom: 32 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: '#a58e28', letterSpacing: '1.5px' }}>MARKET SIGNALS</div>
+              <Link href="/signals" style={{ fontSize: 12, color: '#999', textDecoration: 'none' }}>View all →</Link>
+            </div>
+            <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 8, padding: '24px', textAlign: 'center' }}>
+              <p style={{ fontSize: 13, color: '#999' }}>Market intelligence relevant to your sector will appear here.</p>
+            </div>
+          </div>
+          <div style={{ marginBottom: 32 }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#a58e28', letterSpacing: '1.5px', marginBottom: 12 }}>YOUR CONTRIBUTIONS</div>
+            <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 8, padding: '32px 24px', textAlign: 'center' }}>
+              <div style={{ fontSize: 14, color: '#ccc', marginBottom: 8 }}>Share your expertise</div>
+              <p style={{ fontSize: 13, color: '#999', marginBottom: 16, maxWidth: 420, margin: '0 auto 16px' }}>Your salary data, culture insights, and interview experiences help build the most accurate luxury industry intelligence.</p>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Link href="/contribute/salary" style={{ padding: '8px 16px', fontSize: 12, color: '#ccc', border: '1px solid #333', borderRadius: 6, textDecoration: 'none' }}>Add salary data</Link>
+                <Link href="/contribute/culture" style={{ padding: '8px 16px', fontSize: 12, color: '#ccc', border: '1px solid #333', borderRadius: 6, textDecoration: 'none' }}>Add culture insight</Link>
+                <Link href="/contribute/interview" style={{ padding: '8px 16px', fontSize: 12, color: '#ccc', border: '1px solid #333', borderRadius: 6, textDecoration: 'none' }}>Add interview data</Link>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        </>)}
 
-        {/* Candidates + Signals */}
-        <div className="grid grid-cols-2 gap-5 mb-5">
-          <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">RECENT CANDIDATES</span>
-              <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <button className="text-xs text-[#999]">Full pipeline →</button>
-            </div>
-            <div className="divide-y divide-[#1e1e1e]">
-              {candidates.map(c => (
-                <div key={c.name} className="flex items-center py-3">
-                  <div className="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[10px] font-medium text-[#999] mr-3 flex-shrink-0">{c.initials}</div>
-                  <div className="flex-1">
-                    <div className="text-sm text-[#ccc]">{c.name}</div>
-                    <div className="text-[11px] text-[#999]">{c.role}</div>
-                  </div>
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded" style={{ background: c.stageBg, color: c.stageColor }}>{c.stage}</span>
-                </div>
-              ))}
+        {activeNav === 'searches' && (
+          <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 8, padding: '40px 24px', textAlign: 'center' }}>
+            <div style={{ fontSize: 14, color: '#ccc', marginBottom: 8 }}>No active searches</div>
+            <p style={{ fontSize: 13, color: '#999', marginBottom: 16 }}>Submit a brief to start your first executive search.</p>
+            <Link href="/recruitment" style={{ display: 'inline-block', padding: '10px 24px', fontSize: 12, fontWeight: 500, color: '#fff', background: '#a58e28', borderRadius: 6, textDecoration: 'none' }}>Submit a brief</Link>
+          </div>
+        )}
+
+        {activeNav === 'signals' && (
+          <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 8, padding: '24px', textAlign: 'center' }}>
+            <p style={{ fontSize: 13, color: '#999' }}>Market intelligence for your sector will appear here.</p>
+            <Link href="/signals" style={{ display: 'inline-block', marginTop: 12, fontSize: 12, color: '#a58e28', textDecoration: 'none' }}>Browse all signals →</Link>
+          </div>
+        )}
+
+        {activeNav === 'benchmarks' && (
+          <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 8, padding: '24px', textAlign: 'center' }}>
+            <p style={{ fontSize: 13, color: '#999' }}>Salary benchmarks for roles in your sector will appear here.</p>
+            <Link href="/salary" style={{ display: 'inline-block', marginTop: 12, fontSize: 12, color: '#a58e28', textDecoration: 'none' }}>Browse salary data →</Link>
+          </div>
+        )}
+
+        {activeNav === 'contributions' && (
+          <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 8, padding: '32px 24px', textAlign: 'center' }}>
+            <div style={{ fontSize: 14, color: '#ccc', marginBottom: 8 }}>No contributions yet</div>
+            <p style={{ fontSize: 13, color: '#999', marginBottom: 16 }}>Share salary data, culture insights, or interview experiences to enrich the platform.</p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link href="/contribute/salary" style={{ padding: '8px 16px', fontSize: 12, color: '#ccc', border: '1px solid #333', borderRadius: 6, textDecoration: 'none' }}>Add salary data</Link>
+              <Link href="/contribute/culture" style={{ padding: '8px 16px', fontSize: 12, color: '#ccc', border: '1px solid #333', borderRadius: 6, textDecoration: 'none' }}>Add culture insight</Link>
             </div>
           </div>
+        )}
 
-          <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">MARKET SIGNALS</span>
-              <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <Link href="/signals" className="text-xs text-[#999]">All signals →</Link>
-            </div>
-            <div className="divide-y divide-[#1e1e1e]">
-              {signals.map((s, i) => (
-                <div key={i} className="flex gap-3 py-3">
-                  <span className="w-[6px] h-[6px] rounded-full flex-shrink-0 mt-1" style={{ background: s.color }} />
-                  <span className="text-xs text-[#777] flex-1 leading-relaxed">{s.text}</span>
-                  <span className="text-[10px] text-[#999] whitespace-nowrap">{s.time}</span>
-                </div>
-              ))}
-            </div>
+        {(activeNav === 'add-salary' || activeNav === 'add-culture' || activeNav === 'add-interview') && (
+          <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 8, padding: '40px 24px', textAlign: 'center' }}>
+            <div style={{ fontSize: 14, color: '#ccc', marginBottom: 8 }}>Coming soon</div>
+            <p style={{ fontSize: 13, color: '#999' }}>This feature is being finalized.</p>
           </div>
-        </div>
+        )}
 
-        {/* Contributions + Salary */}
-        <div className="grid grid-cols-2 gap-5">
-          <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">MY CONTRIBUTIONS</span>
-              <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <button className="text-xs text-[#999]">Add data →</button>
-            </div>
-            <div className="divide-y divide-[#1e1e1e]">
-              {contributions.map((c, i) => (
-                <div key={i} className="flex items-center gap-3 py-3">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0" style={{ background: 'rgba(165,142,40,0.08)', border: '1px solid rgba(165,142,40,0.15)' }}>{c.icon}</div>
-                  <span className="text-xs text-[#777] flex-1">{c.text}</span>
-                  <span className="text-[10px] font-semibold" style={{ color: c.status === 'VERIFIED' ? '#4CAF50' : '#FF9800' }}>{c.status}</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-3 border border-dashed border-[#2a2a2a] rounded-lg p-3 text-center">
-              <p className="text-[11px] text-[#999] mb-2">Contribute more data to strengthen your brand profile on WikiLux</p>
-              <button className="text-[11px] text-[#a58e28] border border-[rgba(165,142,40,0.3)] rounded px-3 py-1">+ Add contribution</button>
-            </div>
+        {activeNav === 'settings' && (
+          <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 8, padding: '24px' }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#a58e28', letterSpacing: '1.5px', marginBottom: 16 }}>ACCOUNT</div>
+            {[{ label: 'Name', value: [firstName, lastName].filter(Boolean).join(' ') || '\u2014' }, { label: 'Email', value: member?.email || session?.user?.email || '\u2014' }, { label: 'Company', value: companyName !== 'Your company' ? companyName : '\u2014' }, { label: 'Job title', value: jobTitle || '\u2014' }, { label: 'Country', value: member?.country || '\u2014' }, { label: 'Status', value: member?.status === 'approved' ? 'Active' : member?.status || '\u2014' }].map(r => (
+              <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #1e1e1e' }}>
+                <span style={{ fontSize: 13, color: '#999' }}>{r.label}</span>
+                <span style={{ fontSize: 13, color: '#fff' }}>{r.value}</span>
+              </div>
+            ))}
           </div>
-
-          <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">SALARY BENCHMARKS</span>
-              <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <Link href="/careers" className="text-xs text-[#999]">Full data →</Link>
-            </div>
-            <div className="divide-y divide-[#1e1e1e]">
-              {benchmarks.map(b => (
-                <div key={b.role} className="flex justify-between items-center py-3">
-                  <span className="text-xs text-[#888]">{b.role}</span>
-                  <span className="text-xs font-medium text-[#a58e28]">{b.range}</span>
-                  <span className="text-[11px] text-[#4CAF50]">{b.trend}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-      </div>
+        )}
+      </main>
     </div>
   )
 }
