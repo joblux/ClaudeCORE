@@ -66,7 +66,7 @@ const SAMPLE_DATA: Record<string, () => { html: string; text: string; subject: s
     return { html, text, subject: 'We received your travel request' }
   },
   contact_confirmation: () => {
-    const { html, text } = contactConfirmationEmail({ firstName: 'Thomas', referenceNumber: 'CTF-2026-0042' })
+    const { html, text } = contactConfirmationEmail({ firstName: 'Thomas' })
     return { html, text, subject: 'We received your message' }
   },
   admin_new_member: () => {
