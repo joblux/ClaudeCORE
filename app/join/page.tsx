@@ -100,10 +100,10 @@ function JoinContent() {
 
       <div className="bg-[#1e1e1e] border border-[#2e2e2e] rounded-lg px-8 py-9">
         <h2 className="text-white font-light text-center mb-1.5" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '20px' }}>
-          "Sign in to JOBLUX"
+          Sign in to JOBLUX
         </h2>
         <p className="text-[#888] text-center mb-7" style={{ fontSize: '12px' }}>
-          "Access your intelligence dashboard."
+          Access your intelligence dashboard.
         </p>
 
         {error === "pending" && (
