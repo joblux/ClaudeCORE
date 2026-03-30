@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'About JOBLUX — Built by an Insider, for Insiders',
+  title: 'About JOBLUX — Twenty Years in Luxury',
   description:
-    'JOBLUX is a confidential careers intelligence gateway for the luxury industry, founded by executive search consultant Mohammed M\'zaour.',
+    'JOBLUX is a luxury talent intelligence platform co-founded by Mohammed Alex Mazour and Alex Mason. Two decades of executive search and technology for the luxury industry.',
   alternates: { canonical: 'https://www.joblux.com/about' },
 }
 
@@ -13,189 +13,253 @@ export default function AboutPage() {
     <main className="min-h-screen bg-[#1a1a1a] text-white">
 
       {/* ── Hero ── */}
-      <section className="max-w-4xl mx-auto px-6 pt-24 pb-16">
-        <p className="text-[11px] tracking-[0.14em] uppercase text-[#a58e28] mb-4 font-medium">
+      <section className="max-w-[880px] mx-auto px-7 pt-24 pb-16">
+        <p className="text-[10px] tracking-[0.2em] uppercase text-[#a58e28] mb-4 font-medium">
           About JOBLUX
         </p>
-        <h1 className="font-playfair text-4xl md:text-5xl font-normal leading-tight mb-8">
-          Built by an insider.<br className="hidden md:block" /> For insiders.
+        <h1 className="font-playfair text-4xl md:text-[42px] font-normal leading-tight mb-6 text-white">
+          Twenty years in luxury.<br className="hidden md:block" /> One platform.
         </h1>
-        <p className="text-lg leading-relaxed text-white/60 border-l-2 border-[#a58e28] pl-6 max-w-2xl">
-          JOBLUX was founded by Mohammed M&apos;zaour — an executive search consultant
-          and travel advisor who has spent two decades placing senior leaders across
-          the luxury industry.
+        <p className="text-[15px] leading-relaxed text-white/55 border-l-2 border-[#a58e28] pl-6 max-w-2xl">
+          JOBLUX was co-founded by Mohammed Alex Mazour and Alex Mason — a luxury
+          executive search consultant and a technologist who have spent two decades
+          building dedicated tools and services for the luxury industry.
         </p>
       </section>
 
       {/* ── Divider ── */}
-      <div className="max-w-4xl mx-auto px-6">
-        <div className="border-t border-white/10" />
+      <div className="max-w-[880px] mx-auto px-7">
+        <div className="border-t border-white/[0.06]" />
       </div>
 
-      {/* ── What JOBLUX is ── */}
-      <section className="max-w-4xl mx-auto px-6 py-20">
-        <p className="text-[11px] tracking-[0.14em] uppercase text-[#a58e28] mb-4 font-medium">
-          What JOBLUX is
+      {/* ── Timeline ── */}
+      <section className="max-w-[880px] mx-auto px-7 py-16">
+        <p className="text-[10px] tracking-[0.2em] uppercase text-[#a58e28] mb-4 font-medium">
+          Our story
         </p>
-        <h2 className="font-playfair text-3xl font-normal mb-6 leading-snug">
-          A confidential careers intelligence gateway
+        <h2 className="font-playfair text-3xl font-normal mb-10 text-white">
+          From a Paris store floor to a global platform
         </h2>
-        <p className="text-sm leading-relaxed text-white/55 max-w-2xl">
-          A confidential careers intelligence gateway for the luxury industry.
-          Not a job board. Not a social network. Not a membership platform.
-          A selective, intelligence-led portal where the industry&apos;s knowledge
-          is gathered through contribution and returned as insight.
-        </p>
-      </section>
 
-      {/* ── Divider ── */}
-      <div className="max-w-4xl mx-auto px-6">
-        <div className="border-t border-white/10" />
-      </div>
+        <div className="relative pl-12">
+          {/* Vertical line */}
+          <div className="absolute left-4 top-2 bottom-2 w-px bg-[#a58e28]/25" />
 
-      {/* ── How it works ── */}
-      <section className="max-w-4xl mx-auto px-6 py-20">
-        <p className="text-[11px] tracking-[0.14em] uppercase text-[#a58e28] mb-4 font-medium">
-          How it works
-        </p>
-        <h2 className="font-playfair text-3xl font-normal mb-6 leading-snug">
-          Free intelligence, powered by contribution
-        </h2>
-        <p className="text-sm leading-relaxed text-white/55 mb-10 max-w-2xl">
-          Professionals access salary data, interview intelligence, and brand
-          insights — for free. In return, they contribute what they know. A salary
-          figure. An interview experience. A market signal. This builds the most
-          authoritative body of luxury industry careers intelligence available
-          anywhere.
-        </p>
-
-        {/* Highlighted box */}
-        <div className="border border-[#a58e28]/40 bg-[#a58e28]/[0.06] rounded-xl p-6 max-w-2xl">
-          <div className="flex flex-wrap items-center gap-3 text-sm font-medium text-[#a58e28]">
-            <span>Contribution</span>
-            <span className="text-[#a58e28]/50">&rarr;</span>
-            <span>Intelligence</span>
-            <span className="text-[#a58e28]/50">&rarr;</span>
-            <span>Authority</span>
-            <span className="text-[#a58e28]/50">&rarr;</span>
-            <span>Trust</span>
-            <span className="text-[#a58e28]/50">&rarr;</span>
-            <span>Private Services</span>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Divider ── */}
-      <div className="max-w-4xl mx-auto px-6">
-        <div className="border-t border-white/10" />
-      </div>
-
-      {/* ── The business behind the intelligence ── */}
-      <section className="max-w-4xl mx-auto px-6 py-20">
-        <p className="text-[11px] tracking-[0.14em] uppercase text-[#a58e28] mb-4 font-medium">
-          The business behind the intelligence
-        </p>
-        <h2 className="font-playfair text-3xl font-normal mb-6 leading-snug">
-          Intelligence is the front door
-        </h2>
-        <p className="text-sm leading-relaxed text-white/55 mb-5 max-w-2xl">
-          JOBLUX is a private business, not a nonprofit. The intelligence gateway
-          generates trust and inbound demand. That trust converts into two services:
-          confidential executive search for luxury maisons, and bespoke travel
-          advisory for luxury executives.
-        </p>
-        <p className="text-sm leading-relaxed text-white/55 mb-10 max-w-2xl">
-          No ads. No membership fees. No job posting charges. The intelligence is
-          the front door. The private services are the business.
-        </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl">
-          <div className="border border-white/10 border-t-[#a58e28] border-t-2 rounded-xl p-6 bg-white/[0.02]">
-            <p className="text-sm font-medium text-white mb-2">Executive search</p>
-            <p className="text-sm leading-relaxed text-white/50">
-              Confidential recruitment for luxury maisons — manager to C-suite, worldwide.
+          {/* 2006 */}
+          <div className="relative mb-11">
+            <div className="absolute -left-10 top-1 w-[9px] h-[9px] rounded-full bg-[#a58e28]" />
+            <p className="text-[11px] tracking-[0.15em] text-[#a58e28] font-medium mb-1.5">
+              2006
+            </p>
+            <p className="font-playfair text-lg mb-2 text-white">
+              Two worlds meet in London
+            </p>
+            <p className="text-sm leading-relaxed text-white/50 max-w-2xl">
+              After a career in Parisian luxury retail, Mohammed Alex Mazour moves
+              to London as a luxury recruitment consultant. He meets Alex Mason, a
+              London-based developer with a sharp eye for building platforms.
+              Together they see what the industry is missing: a recruitment service
+              built exclusively for luxury.
             </p>
           </div>
-          <div className="border border-white/10 border-t-[#a58e28] border-t-2 rounded-xl p-6 bg-white/[0.02]">
-            <p className="text-sm font-medium text-white mb-2">Travel advisory</p>
-            <p className="text-sm leading-relaxed text-white/50">
-              Bespoke itineraries for luxury industry professionals and executives.
+
+          {/* 2012 */}
+          <div className="relative mb-11">
+            <div className="absolute -left-10 top-1 w-[9px] h-[9px] rounded-full bg-[#a58e28]" />
+            <p className="text-[11px] tracking-[0.15em] text-[#a58e28] font-medium mb-1.5">
+              2012
+            </p>
+            <p className="font-playfair text-lg mb-2 text-white">
+              The first platform
+            </p>
+            <p className="text-sm leading-relaxed text-white/50 max-w-2xl">
+              joblux.com launches as the first niche job board dedicated exclusively
+              to luxury brands. Mohammed brings the industry expertise and client
+              relationships. Alex builds the technology. Present in the UK, France,
+              and the United States from day one.
+            </p>
+          </div>
+
+          {/* 2018 */}
+          <div className="relative mb-11">
+            <div className="absolute -left-10 top-1 w-[9px] h-[9px] rounded-full bg-[#a58e28]" />
+            <p className="text-[11px] tracking-[0.15em] text-[#a58e28] font-medium mb-1.5">
+              2018
+            </p>
+            <p className="font-playfair text-lg mb-2 text-white">
+              Going global
+            </p>
+            <p className="text-sm leading-relaxed text-white/50 max-w-2xl">
+              The job board evolves into a multilingual professional network for the
+              luxury industry — profiles, connections, and industry discussions
+              across fashion, hospitality, watches, beauty, and beyond.
+            </p>
+          </div>
+
+          {/* 2019 */}
+          <div className="relative mb-11">
+            <div className="absolute -left-10 top-1 w-[9px] h-[9px] rounded-full bg-[#a58e28]" />
+            <p className="text-[11px] tracking-[0.15em] text-[#a58e28] font-medium mb-1.5">
+              2019
+            </p>
+            <p className="font-playfair text-lg mb-2 text-white">
+              Quality over volume
+            </p>
+            <p className="text-sm leading-relaxed text-white/50 max-w-2xl">
+              JOBLUX opens an office in New York and narrows its recruiting services
+              to management-level and executive positions only. No more volume
+              hiring. Discretion, depth, and long-term fit become the only currency.
+            </p>
+          </div>
+
+          {/* 2026 */}
+          <div className="relative">
+            <div className="absolute -left-10 top-1 w-[9px] h-[9px] rounded-full bg-white border-2 border-[#a58e28]" />
+            <p className="text-[11px] tracking-[0.15em] text-[#a58e28] font-medium mb-1.5">
+              2026
+            </p>
+            <p className="font-playfair text-lg mb-2 text-white">
+              Intelligence, not noise
+            </p>
+            <p className="text-sm leading-relaxed text-white/50 max-w-2xl">
+              JOBLUX relaunches as a luxury talent intelligence platform. No social
+              feed, no ads, no data reselling. A confidential space where
+              professionals access brand intelligence on 500+ maisons, keep their
+              details fully private, and connect with opportunities entirely on
+              their own terms.
             </p>
           </div>
         </div>
       </section>
 
       {/* ── Divider ── */}
-      <div className="max-w-4xl mx-auto px-6">
-        <div className="border-t border-white/10" />
+      <div className="max-w-[880px] mx-auto px-7">
+        <div className="border-t border-white/[0.06]" />
       </div>
 
-      {/* ── The story behind the relaunch ── */}
-      <section className="max-w-4xl mx-auto px-6 py-20">
-        <p className="text-[11px] tracking-[0.14em] uppercase text-[#a58e28] mb-4 font-medium">
-          The story behind the relaunch
+      {/* ── What JOBLUX is today ── */}
+      <section className="max-w-[880px] mx-auto px-7 py-16">
+        <p className="text-[10px] tracking-[0.2em] uppercase text-[#a58e28] mb-4 font-medium">
+          What JOBLUX is today
         </p>
-        <h2 className="font-playfair text-3xl font-normal mb-6 leading-snug">
-          Twenty years in the making
+        <h2 className="font-playfair text-3xl font-normal mb-5 text-white">
+          Luxury talent intelligence
         </h2>
-        <div className="space-y-5 text-sm leading-relaxed text-white/55 max-w-2xl">
-          <p>
-            Luxury Recruiter began more than twenty years ago when a luxury retail professional
-            in Paris met a web developer in London and together created one of the first specialist
-            recruitment consultancies dedicated to the luxury sector. Over time, that consultancy
-            evolved into a global luxury job board, then into a niche professional platform. Each
-            phase answered the market at a particular moment.
-          </p>
-          <p>
-            This relaunch is a further evolution — and a clarification. Today, the need is no longer
-            for more noise, more generic listings, or another social platform. The need is for better
-            intelligence, greater discretion, and a more trusted ecosystem around luxury careers,
-            hiring, and professional life.
-          </p>
-          <p>
-            Luxury Recruiter is now being shaped as a confidential, contribution-led platform where
-            access is free for now and depth is earned through contribution. By gathering salary
-            insight, interview intelligence, market perspective, and sector knowledge, the ecosystem
-            becomes more valuable to professionals, brands, and decision-makers alike. That authority
-            supports two private service businesses: manager-and-up recruitment mandates and
-            high-touch travel advisory.
-          </p>
-          <p>
-            If, in time, this evolves into something larger, it will not be by imitating LinkedIn or
-            Indeed. It will be by building something quieter, smarter, and more valuable first.
-          </p>
+        <p className="text-sm leading-relaxed text-white/50 max-w-2xl mb-8">
+          A career intelligence platform for the luxury industry — delivering brand
+          intelligence, salary data, daily market signals, and confidential
+          executive search to professionals worldwide.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-2xl">
+          {[
+            { name: 'WikiLux', desc: '500+ luxury brands decoded' },
+            { name: 'Signals', desc: 'Daily industry intelligence' },
+            { name: 'Careers', desc: 'Confidential executive search' },
+            { name: 'Profilux', desc: 'Profile builder for luxury' },
+            { name: 'Escape', desc: 'Curated travel magazine' },
+            { name: 'The Brief', desc: '250K+ biweekly briefing' },
+          ].map((item) => (
+            <div
+              key={item.name}
+              className="border border-white/[0.08] rounded-lg p-4"
+            >
+              <p className="text-[13px] font-medium text-white mb-1">
+                {item.name}
+              </p>
+              <p className="text-xs text-white/35 leading-relaxed">
+                {item.desc}
+              </p>
+            </div>
+          ))}
         </div>
+      </section>
 
-        {/* Closing quote */}
-        <p className="font-playfair text-xl italic text-[#a58e28] mt-10 max-w-xl">
+      {/* ── Divider ── */}
+      <div className="max-w-[880px] mx-auto px-7">
+        <div className="border-t border-white/[0.06]" />
+      </div>
+
+      {/* ── How we work ── */}
+      <section className="max-w-[880px] mx-auto px-7 py-16">
+        <p className="text-[10px] tracking-[0.2em] uppercase text-[#a58e28] mb-4 font-medium">
+          How we work
+        </p>
+        <h2 className="font-playfair text-3xl font-normal mb-5 text-white">
+          No ads. No noise. No compromise.
+        </h2>
+        <p className="text-sm leading-relaxed text-white/50 max-w-2xl mb-7">
+          JOBLUX is an independent, privately held business. The intelligence
+          platform generates trust and inbound demand. That trust supports our core
+          service: confidential executive search for luxury maisons — manager to
+          C-suite, worldwide.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
+          {[
+            {
+              title: 'No data reselling',
+              desc: 'Your information is never sold or shared with third parties.',
+            },
+            {
+              title: 'No unwanted messaging',
+              desc: 'No one can contact you unless you allow it. Full control.',
+            },
+            {
+              title: 'No ads or sponsored content',
+              desc: 'Intelligence only. Never advertising.',
+            },
+            {
+              title: 'Your details stay private',
+              desc: 'Your profile, your data, your terms.',
+            },
+          ].map((item) => (
+            <div
+              key={item.title}
+              className="border border-white/[0.08] rounded-lg px-5 py-4 flex items-start gap-3"
+            >
+              <span className="text-[#a58e28] text-base leading-none flex-shrink-0 mt-0.5">
+                &#10005;
+              </span>
+              <div>
+                <p className="text-[13px] font-medium text-white mb-0.5">
+                  {item.title}
+                </p>
+                <p className="text-xs text-white/35 leading-relaxed">
+                  {item.desc}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Divider ── */}
+      <div className="max-w-[880px] mx-auto px-7">
+        <div className="border-t border-white/[0.06]" />
+      </div>
+
+      {/* ── Quote ── */}
+      <section className="max-w-[880px] mx-auto px-7 pt-14 pb-16">
+        <p className="font-playfair text-xl italic text-[#a58e28] max-w-md leading-relaxed">
           &ldquo;Depth before scale. Intelligence before noise.&rdquo;
         </p>
       </section>
 
-      {/* ── CTA block ── */}
-      <section className="max-w-4xl mx-auto px-6 pb-28">
-        <div className="border border-white/10 rounded-xl p-8 bg-white/[0.02] text-center">
-          <h2 className="font-playfair text-2xl font-normal mb-3">
-            Ready to step inside?
+      {/* ── CTA ── */}
+      <section className="max-w-[880px] mx-auto px-7 pb-20">
+        <div className="border border-white/[0.08] rounded-xl p-10 bg-white/[0.02] text-center">
+          <h2 className="font-playfair text-2xl font-normal mb-3 text-white">
+            Connect with JOBLUX
           </h2>
-          <p className="text-sm text-white/50 mb-8 max-w-md mx-auto">
-            Whether you&apos;re seeking confidential career intelligence or exploring
-            private services, the next step begins here.
+          <p className="text-sm text-white/40 mb-7 max-w-sm mx-auto">
+            Whether you&apos;re a luxury professional or an employer, the next step
+            starts here.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/join"
-              className="inline-block border border-[#a58e28] text-[#a58e28] text-sm tracking-wide px-6 py-3 rounded hover:bg-[#a58e28]/10 transition-colors"
-            >
-              Request confidential access
-            </Link>
-            <Link
-              href="/services"
-              className="inline-block border border-white/20 text-white/60 text-sm tracking-wide px-6 py-3 rounded hover:bg-white/5 transition-colors"
-            >
-              Discuss private services
-            </Link>
-          </div>
+          <Link
+            href="/join"
+            className="inline-block border border-[#a58e28]/50 text-[#a58e28] text-sm tracking-wide px-7 py-3 rounded hover:bg-[#a58e28]/10 transition-colors"
+          >
+            Request access
+          </Link>
         </div>
       </section>
 
