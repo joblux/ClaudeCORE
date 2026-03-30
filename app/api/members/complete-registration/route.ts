@@ -79,16 +79,25 @@ export async function POST(req: NextRequest) {
 
     // Send admin notification for all tiers
     const memberName = data.full_name || data.email
+    const tierLabels: Record<string, string> = {
+      rising: 'Emerging Professional',
+      pro: 'Established Professional',
+      professional: 'Established Professional',
+      executive: 'Senior & Executive',
+      business: 'Luxury Employer',
+      insider: 'Trusted Contributor',
+    }
+    const tierDisplay = tierLabels[tier] || tier
     const { html, text } = adminNewMemberEmail({
       name: memberName,
       email: data.email,
-      tier: tier.charAt(0).toUpperCase() + tier.slice(1),
-      company: 'Not provided',
+      tier: tierDisplay,
+      company: [city, country].filter(Boolean).join(', ') || undefined,
       registrationDate: new Date().toISOString().split('T')[0],
     })
     sendEmail({
       to: ADMIN_ALERT_EMAIL,
-      subject: `New access request: ${memberName} (${tier})`,
+      subject: `New JOBLUX access request — ${memberName}`,
       body: text,
       bodyHtml: html,
     }).catch(() => {})

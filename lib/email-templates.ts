@@ -790,11 +790,11 @@ export function adminNewMemberEmail(params: {
     params.company ? adminRow('Company', params.company) : '',
     adminRow('Date', params.registrationDate),
     `</table>`,
-    adminButton('Review in admin', `${SITE_URL}/admin/profiles`),
+    adminButton('Review in admin', `${SITE_URL}/admin`),
   ].join(''))
   return {
     html,
-    text: `New access request: ${params.name} (${params.tier})\nEmail: ${params.email}${params.jobTitle ? '\nTitle: ' + params.jobTitle : ''}${params.company ? '\nCompany: ' + params.company : ''}\nDate: ${params.registrationDate}\n\nReview: ${SITE_URL}/admin/profiles`,
+    text: `New JOBLUX access request — ${params.name}\nTier: ${params.tier}\nEmail: ${params.email}${params.jobTitle ? '\nTitle: ' + params.jobTitle : ''}${params.company && params.company !== 'Not provided' ? '\nCompany: ' + params.company : ''}\nDate: ${params.registrationDate}\n\nReview: ${SITE_URL}/admin`,
   }
 }
 
@@ -814,11 +814,11 @@ export function adminNewEmployerEmail(params: {
     params.orgType ? adminRow('Type', params.orgType) : '',
     params.jobTitle ? adminRow('Title', params.jobTitle) : '',
     `</table>`,
-    adminButton('Review in admin', `${SITE_URL}/admin/profiles`),
+    adminButton('Review in admin', `${SITE_URL}/admin`),
   ].join(''))
   return {
     html,
-    text: `New employer request: ${params.name} — ${params.companyName}\nEmail: ${params.email}${params.orgType ? '\nType: ' + params.orgType : ''}${params.jobTitle ? '\nTitle: ' + params.jobTitle : ''}\n\nReview: ${SITE_URL}/admin/profiles`,
+    text: `New JOBLUX access request — ${params.name} (${params.companyName})\nEmail: ${params.email}${params.orgType ? '\nType: ' + params.orgType : ''}${params.jobTitle ? '\nTitle: ' + params.jobTitle : ''}\n\nReview: ${SITE_URL}/admin`,
   }
 }
 
