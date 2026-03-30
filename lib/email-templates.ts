@@ -240,7 +240,7 @@ export function welcomeApprovalEmail(params: {
       greeting ? p(greeting) : '',
       h1('Welcome to JOBLUX'),
       p(`Your ${tierDisplay} access is now active. You have full access to career intelligence, salary data, brand insights, and confidential opportunities.`),
-      button('Go to your dashboard', `${SITE_URL}/dashboard`),
+      button('Sign in to JOBLUX', `${SITE_URL}/join`),
     ].join(''),
     reason: 'You received this because your JOBLUX access request was approved.',
   })
@@ -297,7 +297,7 @@ export function employerApprovalEmail(params: {
       greeting ? p(greeting) : '',
       h1('Your employer access is active'),
       p(`Welcome to JOBLUX${params.companyName ? ` — ${params.companyName} is now connected` : ''}. You have access to salary benchmarks, talent intelligence, and our confidential search services.`),
-      button('Go to your dashboard', `${SITE_URL}/dashboard`),
+      button('Sign in to JOBLUX', `${SITE_URL}/join`),
     ].join(''),
     reason: 'You received this because your JOBLUX employer access was approved.',
   })
