@@ -116,7 +116,7 @@ export async function PATCH(req: NextRequest) {
           if (member?.email) {
             const tier = member.role === 'business' ? 'Luxury Employer' : member.role || 'member'
             const { html, text } = welcomeApprovalEmail({ firstName: member.first_name, tier })
-            await sendEmail({ to: member.email, subject: 'Welcome to JOBLUX', body: text, bodyHtml: html })
+            await sendEmail({ to: member.email, subject: 'Your JOBLUX access is active', body: text, bodyHtml: html })
           }
         } catch (e) { console.error('Approval email failed for', id, e) }
       }

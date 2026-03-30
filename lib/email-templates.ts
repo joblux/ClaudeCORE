@@ -238,13 +238,14 @@ export function welcomeApprovalEmail(params: {
   const html = layout({
     content: [
       greeting ? p(greeting) : '',
-      h1('Welcome to JOBLUX'),
-      p(`Your ${tierDisplay} access is now active. You have full access to career intelligence, salary data, brand insights, and confidential opportunities.`),
-      button('Sign in to JOBLUX', `${SITE_URL}/join`),
+      h1('Your access is active'),
+      p(`Your ${tierDisplay} access has been approved. You now have full access to career intelligence, salary data, brand insights, and confidential opportunities.`),
+      p('To get started, click below to sign in. You\'ll receive a secure link to verify your email and access your dashboard.'),
+      button('Sign in to get started', `${SITE_URL}/join`),
     ].join(''),
     reason: 'You received this because your JOBLUX access request was approved.',
   })
-  return { html, text: `${greeting ? greeting + '\n\n' : ''}Welcome to JOBLUX\n\nYour ${tierDisplay} access is now active.\n\nDashboard: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Your access is active\n\nYour ${tierDisplay} access has been approved. Sign in to get started.\n\nDashboard: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
 export function registrationDeclinedEmail(params: {
