@@ -88,7 +88,7 @@ export const authOptions: NextAuthOptions = {
       if (email) {
         const { data: member, error } = await supabaseAdmin
           .from("members")
-          .select("id, role, status, first_name, last_name, registration_completed")
+          .select("id, role, status, first_name, last_name, registration_completed, tier_selected")
           .eq("email", email)
           .single();
         if (error) {
@@ -101,6 +101,7 @@ export const authOptions: NextAuthOptions = {
           token.firstName = member.first_name;
           token.lastName = member.last_name;
           token.registrationCompleted = member.registration_completed;
+          token.tierSelected = member.tier_selected;
         } else {
           token.status = "new";
         }
@@ -115,6 +116,7 @@ export const authOptions: NextAuthOptions = {
       session.user.firstName = token.firstName as string | undefined;
       session.user.lastName = token.lastName as string | undefined;
       session.user.registrationCompleted = token.registrationCompleted as boolean | undefined;
+      session.user.tierSelected = token.tierSelected as boolean | undefined;
       return session;
     },
 

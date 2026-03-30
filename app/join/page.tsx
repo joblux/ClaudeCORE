@@ -53,13 +53,19 @@ function JoinContent() {
       const regCompleted = (session.user as any).registrationCompleted;
       const userStatus = (session.user as any).status;
       const role = (session.user as any).role;
+      const tierSelected = (session.user as any).tierSelected;
+
       if (role === "admin") {
         router.push("/admin");
       } else if (regCompleted && userStatus === "approved") {
         router.push("/dashboard");
       } else if (regCompleted && userStatus === "pending") {
         router.push("/members/pending");
+      } else if (tierSelected && !regCompleted) {
+        // User already picked a tier but hasn't finished the form
+        router.push("/members/complete-registration");
       } else {
+        // Brand new user — needs to pick a tier
         router.push("/select-profile");
       }
     }
