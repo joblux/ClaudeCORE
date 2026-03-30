@@ -37,16 +37,19 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
   // Send welcome email
   try {
+    const tier = member.role === 'business' ? 'Luxury Employer' : member.role || 'member';
+    console.log("Sending approval email to:", member.email, "tier:", tier);
     const { html, text } = welcomeApprovalEmail({
       firstName: member.first_name,
-      tier: member.role === 'business' ? 'Luxury Employer' : member.role || 'member',
+      tier,
     });
-    await sendEmail({
+    const result = await sendEmail({
       to: member.email,
       subject: "Welcome to JOBLUX",
       body: text,
       bodyHtml: html,
     });
+    console.log("Approval email result:", JSON.stringify(result));
   } catch (emailError) {
     console.error("Failed to send approval email:", emailError);
   }
