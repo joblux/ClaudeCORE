@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { sendEmail } from '@/lib/ses'
-import { adminNewMemberEmail, ADMIN_ALERT_EMAIL } from '@/lib/email-templates'
+import { adminNewMemberEmail, registrationPendingEmail, ADMIN_ALERT_EMAIL } from '@/lib/email-templates'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -77,7 +77,18 @@ export async function POST(req: NextRequest) {
       await supabase.from('member_domains').insert(domainRows)
     }
 
-    // Send admin notification for all tiers
+    // ── Send confirmation email to the USER ──
+    if (memberStatus === 'pending' && data.email) {
+      const pending = registrationPendingEmail({ firstName: firstName || undefined })
+      sendEmail({
+        to: data.email,
+        subject: 'We received your request',
+        body: pending.text,
+        bodyHtml: pending.html,
+      }).catch(() => {})
+    }
+
+    // ── Send admin notification ──
     const memberName = data.full_name || data.email
     const tierLabels: Record<string, string> = {
       rising: 'Emerging Professional',

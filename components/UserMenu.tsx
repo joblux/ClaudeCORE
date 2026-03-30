@@ -27,15 +27,14 @@ export default function UserMenu() {
     );
   }
 
-  if (!isAuthenticated || status === 'pending') {
-    return (
-      <Link
-        href="/join"
-        className="text-[13px] text-[rgba(255,255,255,0.82)] border border-[#3a3a3a] px-4 py-1.5 hover:border-[#666] hover:text-white transition-colors tracking-[0.06em] uppercase"
-      >
-        Connect
-      </Link>
-    );
+  // Not logged in — Header.tsx handles showing Sign in | Sign up
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  // Pending user — show nothing in the header
+  if (status === 'pending') {
+    return null;
   }
 
   const displayName = firstName || name?.split(" ")[0] || "Member";

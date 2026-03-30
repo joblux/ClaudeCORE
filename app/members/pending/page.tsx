@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 
 export default function PendingPage() {
   const { data: session, update } = useSession()
@@ -17,6 +16,7 @@ export default function PendingPage() {
     if (userStatus === 'approved') router.push('/dashboard')
   }, [userStatus, router])
 
+  // Silent background check — no visible spinner
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
@@ -31,7 +31,7 @@ export default function PendingPage() {
           }
         }
       } catch {}
-    }, 5000)
+    }, 10000)
     return () => clearInterval(interval)
   }, [update])
 
@@ -72,20 +72,16 @@ export default function PendingPage() {
           </h3>
           <p className="text-sm text-[#999] mb-2 leading-relaxed">Your request is under review.</p>
           <p className="text-xs text-[#999] leading-relaxed mb-8">We personally review every profile. You&apos;ll receive an email once your access is confirmed — typically within 24 hours.</p>
-          <div className="flex items-center justify-center gap-2 text-xs text-[#bbb] mb-8">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#a58e28] animate-pulse" />
-            Checking for updates...
-          </div>
           <div className="border-t border-[#2a2a2a] pt-6">
-            <p className="text-xs text-[#bbb] leading-relaxed">
+            <p className="text-xs text-[#ccc] leading-relaxed">
               In the meantime, explore{' '}
-              <Link href="/brands" className="text-[#a58e28] hover:text-white transition-colors">brand intelligence</Link>
+              <Link href="/wikilux" className="text-[#a58e28] hover:text-white transition-colors">brand intelligence</Link>
               {' '}or read{' '}
-              <Link href="/insights" className="text-[#a58e28] hover:text-white transition-colors">the latest insights</Link>.
+              <Link href="/bloglux" className="text-[#a58e28] hover:text-white transition-colors">the latest insights</Link>.
             </p>
           </div>
         </div>
-        <Link href="/" className="text-sm text-[#aaa] hover:text-white transition-colors mt-6 inline-block">← Return to homepage</Link>
+        <Link href="/" className="text-sm text-[#999] hover:text-white transition-colors mt-6 inline-block">← Return to homepage</Link>
       </div>
     </main>
   )
