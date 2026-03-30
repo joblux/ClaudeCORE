@@ -1007,3 +1007,4 @@ export function recruitmentUpdateEmail(params: {
 // Export admin email address
 // ────────────────────────────────────────────
 export const ADMIN_ALERT_EMAIL = ADMIN_EMAIL
+// v2
