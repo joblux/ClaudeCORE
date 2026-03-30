@@ -140,7 +140,6 @@ export async function PUT(
         const { html, text } = contributionApprovedEmail({
           firstName: approvedMember.first_name,
           contributionType: contribution.contribution_type,
-          pointsAwarded: points,
         })
         sendEmail({
           to: approvedMember.email,
