@@ -1,34 +1,42 @@
 /**
- * JOBLUX branded email templates.
- * All 17 templates return { html, text } for SES dual-format sending.
+ * JOBLUX branded email templates — signature style.
+ * White background, black logo signature, gold accent line.
+ * All templates return { html, text } for SES dual-format sending.
  *
- * Design tokens:
- *   Black header:  #1a1a1a
- *   Gold accent:   #B8975C
- *   Body bg:       #f5f5f5
- *   Card bg:       #ffffff
- *   Text:          #333333
- *   Muted:         #888888
- *   Button:        bg #1a1a1a, color #ffffff, radius 4px
+ * Design:
+ *   Top accent:    2px #B8975C gold line
+ *   Background:    #ffffff
+ *   Text:          #1a1a1a (heading), #555 (body), #aaa (muted)
+ *   Gold accent:   #B8975C (tagline only)
+ *   Button:        bg #1a1a1a, color #ffffff, radius 3px
+ *   Footer:        Black SVG logo + gold tagline + help link + address
  */
 
 const SITE_URL = 'https://joblux.com'
-const HELP_URL = `${SITE_URL}/help`
-const ADMIN_EMAIL = 'mo@joblux.com'
+const HELP_URL = `${SITE_URL}/faq`
+const ADMIN_EMAIL = 'luxuryistime@gmail.com'
 
 // ────────────────────────────────────────────
-// Master layout
+// SVG logo (black, inline for email clients)
+// ────────────────────────────────────────────
+
+const LOGO_SVG = `<svg width="100" height="24" viewBox="-2.47 13.94 297.03 66.06" fill="#1a1a1a" xmlns="http://www.w3.org/2000/svg" style="display:block;margin-bottom:6px;"><path d="M1.38 80L-2.47 71.53Q-0.31 70.22 1.23 68.78Q2.78 67.34 3.78 65.61Q4.78 63.88 5.25 61.73Q5.72 59.59 5.72 56.88V14.59H15.63V55.09Q15.63 58.34 15.34 61.02Q15.06 63.69 14.42 65.92Q13.78 68.16 12.70 70.03Q11.63 71.91 10.05 73.59Q8.47 75.28 6.33 76.84Q4.19 78.41 1.38 80ZM20.41 38.88Q20.41 33.34 22.44 28.75Q24.47 24.16 28.14 20.86Q31.81 17.56 36.95 15.75Q42.09 13.94 48.34 13.94Q54.56 13.94 59.72 15.75Q64.88 17.56 68.55 20.86Q72.22 24.16 74.25 28.75Q76.28 33.34 76.28 38.88Q76.28 44.44 74.25 49.08Q72.22 53.72 68.55 57.06Q64.88 60.41 59.72 62.27Q54.56 64.13 48.34 64.13Q42.09 64.13 36.95 62.27Q31.81 60.41 28.14 57.06Q24.47 53.72 22.44 49.08Q20.41 44.44 20.41 38.88ZM30.31 38.88Q30.31 42.66 31.67 45.69Q33.03 48.72 35.45 50.86Q37.88 53 41.17 54.16Q44.47 55.31 48.34 55.31Q52.22 55.31 55.52 54.16Q58.81 53 61.22 50.86Q63.63 48.72 65 45.69Q66.38 42.66 66.38 38.88Q66.38 35.09 65 32.09Q63.63 29.09 61.22 27.02Q58.81 24.94 55.52 23.84Q52.22 22.75 48.34 22.75Q44.47 22.75 41.17 23.84Q37.88 24.94 35.45 27.02Q33.03 29.09 31.67 32.09Q30.31 35.09 30.31 38.88ZM82.28 63.44V14.59H108.38Q113.16 14.59 116.70 15.61Q120.25 16.63 122.59 18.41Q124.94 20.19 126.08 22.64Q127.22 25.09 127.22 27.94Q127.22 32.59 124.28 36.09Q127.66 38.09 129.31 41.28Q130.97 44.47 130.97 48.53Q130.97 51.94 129.83 54.69Q128.69 57.44 126.36 59.39Q124.03 61.34 120.48 62.39Q116.94 63.44 112.13 63.44H82.28ZM92.19 33.34H112.19Q113.47 33.34 114.69 33.44Q116.78 31.44 116.78 28.88Q116.78 26.22 114.70 24.77Q112.63 23.31 108.63 23.31H92.19V33.34ZM92.19 54.81H112.38Q116.38 54.81 118.45 53.09Q120.53 51.38 120.53 48.25Q120.53 45.13 118.45 43.38Q116.38 41.63 112.38 41.63H92.19V54.81ZM136 63.44V14.59H145.91V54.75H174.31V63.44H136ZM177.06 42.69V14.59H186.97V41.50Q186.97 44.81 187.88 47.39Q188.78 49.97 190.58 51.75Q192.38 53.53 195.03 54.45Q197.69 55.38 201.22 55.38Q204.72 55.38 207.39 54.45Q210.06 53.53 211.86 51.75Q213.66 49.97 214.56 47.39Q215.47 44.81 215.47 41.50V14.59H225.38V42.69Q225.38 47.50 223.75 51.44Q222.13 55.38 219.03 58.19Q215.94 61 211.45 62.53Q206.97 64.06 201.22 64.06Q195.47 64.06 190.98 62.53Q186.50 61 183.41 58.19Q180.31 55.38 178.69 51.44Q177.06 47.50 177.06 42.69ZM226 63.44L246.31 38.63 227.53 14.59H239.66L252.63 31.41 265.66 14.59H277.59L258.47 38.53 278.25 63.44H266.09L252.19 45.88 237.97 63.44H226ZM279.72 58.03Q279.72 56.78 280.23 55.67Q280.75 54.56 281.72 53.73Q282.69 52.91 284.06 52.44Q285.44 51.97 287.16 51.97Q288.88 51.97 290.25 52.44Q291.63 52.91 292.58 53.73Q293.53 54.56 294.05 55.67Q294.56 56.78 294.56 58.03Q294.56 59.28 294.05 60.39Q293.53 61.50 292.58 62.31Q291.63 63.13 290.25 63.61Q288.88 64.09 287.16 64.09Q285.44 64.09 284.06 63.61Q282.69 63.13 281.72 62.31Q280.75 61.50 280.23 60.39Q279.72 59.28 279.72 58.03Z"/></svg>`
+
+// ────────────────────────────────────────────
+// Master layout — signature style
 // ────────────────────────────────────────────
 
 interface LayoutOptions {
   content: string
-  /** Reason line at bottom: "You received this email because…" */
   reason: string
-  /** Show unsubscribe link (newsletter only) */
   showUnsubscribe?: boolean
 }
 
 function layout({ content, reason, showUnsubscribe }: LayoutOptions): string {
+  const unsubLinks = showUnsubscribe
+    ? `<a href="${SITE_URL}/unsubscribe" style="color:#999;text-decoration:underline;">Unsubscribe</a> &middot; <a href="${SITE_URL}/preferences" style="color:#999;text-decoration:underline;">Manage preferences</a> &middot; `
+    : ''
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,34 +48,25 @@ function layout({ content, reason, showUnsubscribe }: LayoutOptions): string {
 <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#f5f5f5;">
 <tr><td align="center" style="padding:32px 16px;">
 
-<!-- Container -->
-<table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:0;">
+<table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;background-color:#ffffff;border-top:2px solid #B8975C;">
 
-<!-- Header -->
-<tr><td style="background-color:#1a1a1a;padding:24px 32px;text-align:center;">
-<div style="font-family:'Gill Sans','Gill Sans MT',Calibri,Arial,sans-serif;font-size:26px;font-weight:600;color:#ffffff;letter-spacing:4px;">JOBLUX</div>
-<div style="font-size:10px;color:#B8975C;letter-spacing:3px;margin-top:4px;text-transform:uppercase;">Luxury Talent Intelligence</div>
-</td></tr>
-
-<!-- Body -->
-<tr><td style="padding:36px 32px 28px;">
+<tr><td style="padding:40px 36px 28px;">
 ${content}
 </td></tr>
 
-<!-- Footer -->
-<tr><td style="padding:24px 32px;border-top:1px solid #e8e8e8;">
+<tr><td style="padding:0 36px 32px;">
 <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-<tr><td style="text-align:center;">
-<p style="font-size:13px;color:#888;margin:0 0 8px;"><a href="${HELP_URL}" style="color:#B8975C;text-decoration:none;">Questions? Visit our help centre</a></p>
-${showUnsubscribe ? `<p style="font-size:12px;color:#aaa;margin:0 0 8px;"><a href="${SITE_URL}/unsubscribe" style="color:#aaa;text-decoration:underline;">Unsubscribe</a></p>` : ''}
-<p style="font-size:11px;color:#bbb;margin:0 0 4px;">JOBLUX LLC &middot; Luxury Talent Intelligence</p>
-<p style="font-size:11px;color:#ccc;margin:0;">${reason}</p>
+<tr><td style="border-top:1px solid #eee;padding-top:24px;">
+${LOGO_SVG}
+<p style="font-size:11px;color:#B8975C;font-family:Arial,Helvetica,sans-serif;margin:0 0 10px;letter-spacing:0.5px;">Luxury Talent Intelligence</p>
+<p style="font-size:11px;color:#999;font-family:Arial,Helvetica,sans-serif;margin:0 0 8px;">${unsubLinks}<a href="${HELP_URL}" style="color:#999;text-decoration:underline;">Need help?</a></p>
+<p style="font-size:11px;color:#bbb;font-family:Arial,Helvetica,sans-serif;margin:0 0 3px;">JOBLUX LLC &middot; 424 Park Avenue South, New York, NY 10016</p>
+<p style="font-size:11px;color:#ccc;font-family:Arial,Helvetica,sans-serif;margin:0;">${reason}</p>
 </td></tr>
 </table>
 </td></tr>
 
 </table>
-<!-- /Container -->
 
 </td></tr>
 </table>
@@ -75,37 +74,81 @@ ${showUnsubscribe ? `<p style="font-size:12px;color:#aaa;margin:0 0 8px;"><a hre
 </html>`
 }
 
-/** Standard CTA button */
+// ────────────────────────────────────────────
+// Admin layout — minimal, no gold
+// ────────────────────────────────────────────
+
+function adminLayout(content: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#f5f5f5;">
+<tr><td align="center" style="padding:24px 16px;">
+<table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;background-color:#ffffff;border-top:2px solid #1a1a1a;">
+<tr><td style="padding:24px 28px;">
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+<tr><td>
+<span style="font-family:Arial,sans-serif;font-size:16px;color:#1a1a1a;letter-spacing:2px;font-weight:600;">JOBLUX</span>
+<span style="font-size:11px;color:#B8975C;margin-left:8px;">Admin</span>
+</td></tr>
+</table>
+</td></tr>
+<tr><td style="padding:0 28px 24px;">
+${content}
+</td></tr>
+<tr><td style="padding:12px 28px;border-top:1px solid #eee;text-align:center;">
+<p style="font-size:11px;color:#bbb;margin:0;">JOBLUX Admin Notifications</p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`
+}
+
+// ────────────────────────────────────────────
+// HTML helpers
+// ────────────────────────────────────────────
+
 function button(label: string, url: string): string {
   return `<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin:24px 0;">
-<tr><td align="center">
-<a href="${url}" style="display:inline-block;background-color:#1a1a1a;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 24px;border-radius:4px;letter-spacing:0.5px;">${label}</a>
+<tr><td>
+<a href="${url}" style="display:inline-block;background-color:#1a1a1a;color:#ffffff;font-size:13px;font-weight:500;text-decoration:none;padding:11px 28px;border-radius:3px;letter-spacing:0.3px;">${label}</a>
 </td></tr>
 </table>`
 }
 
-/** Heading */
 function h1(text: string): string {
-  return `<h1 style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:400;color:#1a1a1a;margin:0 0 16px;line-height:1.4;">${text}</h1>`
+  return `<p style="font-size:16px;font-weight:500;color:#1a1a1a;margin:0 0 16px;line-height:1.4;font-family:Arial,Helvetica,sans-serif;">${text}</p>`
 }
 
-/** Body paragraph */
 function p(text: string): string {
-  return `<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">${text}</p>`
+  return `<p style="font-size:14px;color:#555;line-height:1.8;margin:0 0 16px;font-family:Arial,Helvetica,sans-serif;">${text}</p>`
 }
 
-/** Muted paragraph */
 function muted(text: string): string {
-  return `<p style="font-size:13px;color:#888;line-height:1.5;margin:0 0 12px;">${text}</p>`
+  return `<p style="font-size:12px;color:#aaa;line-height:1.6;margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;">${text}</p>`
 }
 
-/** Gold divider */
 function divider(): string {
-  return `<hr style="border:none;border-top:1px solid #e8e8e8;margin:24px 0;">`
+  return `<hr style="border:none;border-top:1px solid #eee;margin:24px 0;">`
+}
+
+function adminRow(label: string, value: string): string {
+  return `<tr><td style="padding:4px 8px;font-size:13px;color:#888;width:120px;vertical-align:top;">${label}</td><td style="padding:4px 8px;font-size:14px;color:#333;">${value}</td></tr>`
+}
+
+function adminButton(label: string, url: string): string {
+  return `<table cellpadding="0" cellspacing="0" role="presentation" style="margin:16px 0;">
+<tr><td>
+<a href="${url}" style="display:inline-block;background-color:#1a1a1a;color:#ffffff;font-size:13px;font-weight:500;text-decoration:none;padding:10px 20px;border-radius:3px;">${label}</a>
+</td></tr>
+</table>`
 }
 
 // ────────────────────────────────────────────
-// Plain-text helper — strips HTML to text
+// Plain-text helper
 // ────────────────────────────────────────────
 
 function stripHtml(html: string): string {
@@ -116,7 +159,7 @@ function stripHtml(html: string): string {
     .replace(/<\/tr>/gi, '\n')
     .replace(/<a[^>]*href="([^"]*)"[^>]*>[^<]*<\/a>/gi, '$1')
     .replace(/<[^>]+>/g, '')
-    .replace(/&middot;/g, '·')
+    .replace(/&middot;/g, '\u00B7')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
@@ -138,84 +181,389 @@ export interface EmailContent {
 // AUTH EMAILS (1–2)
 // ────────────────────────────────────────────
 
-/** #1 Magic link sign-in */
 export function magicLinkEmail(url: string): EmailContent {
   const html = layout({
     content: [
       h1('Sign in to JOBLUX'),
-      p('Click the button below to sign in to your account.'),
-      button('Sign In', url),
+      p('Click the button below to access your account.'),
+      button('Sign in', url),
       muted('This link expires in 24 hours.'),
       muted('If you didn\'t request this, you can safely ignore this email.'),
     ].join(''),
     reason: 'You received this because a sign-in was requested for your account.',
   })
-  return { html, text: `Sign in to JOBLUX\n\nClick here to sign in: ${url}\n\nThis link expires in 24 hours.\nIf you didn't request this, ignore this email.\n\nJOBLUX LLC · Luxury Talent Intelligence` }
+  return { html, text: `Sign in to JOBLUX\n\nClick here to sign in: ${url}\n\nThis link expires in 24 hours.\nIf you didn't request this, ignore this email.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
-/** #2 Email verification */
 export function emailVerificationEmail(url: string): EmailContent {
   const html = layout({
     content: [
       h1('Verify your email address'),
       p('Please confirm your email address by clicking the button below.'),
-      button('Verify Email', url),
+      button('Verify email', url),
       muted('If you didn\'t create an account on JOBLUX, you can safely ignore this email.'),
     ].join(''),
     reason: 'You received this because an account was created with this email address.',
   })
-  return { html, text: `Verify your email address\n\nClick here to verify: ${url}\n\nIf you didn't create an account on JOBLUX, ignore this email.\n\nJOBLUX LLC · Luxury Talent Intelligence` }
+  return { html, text: `Verify your email address\n\nClick here to verify: ${url}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
 // ────────────────────────────────────────────
-// ONBOARDING EMAILS (3–4)
+// ONBOARDING EMAILS (3–5)
 // ────────────────────────────────────────────
 
-/** #3 Welcome on approval */
+export function registrationPendingEmail(params: {
+  firstName?: string
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1('We received your request'),
+      p('Thank you for your interest in JOBLUX. Your request is being reviewed and you\'ll hear from us shortly.'),
+      p('In the meantime, you can explore our public intelligence — brand insights, market signals, and industry news are available without an account.'),
+      button('Explore JOBLUX', SITE_URL),
+    ].join(''),
+    reason: 'You received this because you submitted an access request to JOBLUX.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}We received your request\n\nThank you for your interest in JOBLUX. Your request is being reviewed.\n\nExplore: ${SITE_URL}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
 export function welcomeApprovalEmail(params: {
   firstName?: string
   tier: string
 }): EmailContent {
-  const greeting = params.firstName ? `Dear ${params.firstName},` : ''
+  const greeting = params.firstName ? `${params.firstName},` : ''
   const tierDisplay = params.tier.charAt(0).toUpperCase() + params.tier.slice(1)
   const html = layout({
     content: [
       greeting ? p(greeting) : '',
       h1('Welcome to JOBLUX'),
-      p(`Your ${tierDisplay} access is now active. You have full access to confidential positions, salary intelligence, WikiLux brand insights, and all member features.`),
-      p('Your dashboard is ready — explore what\'s available to you.'),
-      button('Explore Your Dashboard', `${SITE_URL}/dashboard`),
+      p(`Your ${tierDisplay} access is now active. You have full access to career intelligence, salary data, brand insights, and confidential opportunities.`),
+      button('Go to your dashboard', `${SITE_URL}/dashboard`),
     ].join(''),
     reason: 'You received this because your JOBLUX access request was approved.',
   })
-  return { html, text: `${greeting ? greeting + '\n\n' : ''}Welcome to JOBLUX\n\nYour ${tierDisplay} access is now active. You have full access to confidential positions, salary intelligence, WikiLux brand insights, and all member features.\n\nExplore your dashboard: ${SITE_URL}/dashboard\n\nJOBLUX LLC · Luxury Talent Intelligence` }
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Welcome to JOBLUX\n\nYour ${tierDisplay} access is now active.\n\nDashboard: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
-/** #4 Registration declined */
 export function registrationDeclinedEmail(params: {
   firstName?: string
   reason?: string
 }): EmailContent {
-  const greeting = params.firstName ? `Dear ${params.firstName},` : ''
+  const greeting = params.firstName ? `${params.firstName},` : ''
   const html = layout({
     content: [
       greeting ? p(greeting) : '',
-      h1('Update on your JOBLUX access request'),
-      p('Thank you for your interest in JOBLUX. After careful review, we are unable to approve your access request at this time.'),
+      h1('Update on your access request'),
+      p('Thank you for your interest in JOBLUX. After review, we are unable to approve your request at this time.'),
       params.reason ? p(params.reason) : '',
-      p('We appreciate your understanding. If you have questions or believe this decision should be reconsidered, please don\'t hesitate to reach out.'),
-      button('Visit Help Centre', HELP_URL),
+      p('If you have questions or believe this should be reconsidered, please reach out.'),
+      button('Contact us', HELP_URL),
     ].join(''),
     reason: 'You received this because you submitted an access request to JOBLUX.',
   })
-  return { html, text: `${greeting ? greeting + '\n\n' : ''}Update on your JOBLUX access request\n\nThank you for your interest in JOBLUX. After careful review, we are unable to approve your access request at this time.\n${params.reason ? '\n' + params.reason + '\n' : ''}\nIf you have questions, visit our help centre: ${HELP_URL}\n\nJOBLUX LLC · Luxury Talent Intelligence` }
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Update on your access request\n\nAfter review, we are unable to approve your request at this time.\n${params.reason ? '\n' + params.reason + '\n' : ''}\nContact: ${HELP_URL}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
 // ────────────────────────────────────────────
-// CONTRIBUTION EMAILS (5–7)
+// EMPLOYER EMAILS (7–9)
 // ────────────────────────────────────────────
 
-/** #5 Contribution submitted confirmation */
+export function employerPendingEmail(params: {
+  firstName?: string
+  companyName?: string
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1('We received your request'),
+      p(`Thank you for connecting${params.companyName ? ` on behalf of ${params.companyName}` : ''}. Your request is being reviewed and we\'ll be in touch shortly.`),
+      button('Explore JOBLUX', SITE_URL),
+    ].join(''),
+    reason: 'You received this because you submitted an employer access request to JOBLUX.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}We received your request\n\nThank you for connecting${params.companyName ? ` on behalf of ${params.companyName}` : ''}. We'll be in touch shortly.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+export function employerApprovalEmail(params: {
+  firstName?: string
+  companyName?: string
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1('Your employer access is active'),
+      p(`Welcome to JOBLUX${params.companyName ? ` — ${params.companyName} is now connected` : ''}. You have access to salary benchmarks, talent intelligence, and our confidential search services.`),
+      button('Go to your dashboard', `${SITE_URL}/dashboard`),
+    ].join(''),
+    reason: 'You received this because your JOBLUX employer access was approved.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Your employer access is active\n\nWelcome to JOBLUX${params.companyName ? ` — ${params.companyName} is now connected` : ''}.\n\nDashboard: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+// ────────────────────────────────────────────
+// EXECUTIVE SEARCH — EMPLOYER SIDE (10, 12–15)
+// ────────────────────────────────────────────
+
+export function briefReceivedEmail(params: {
+  firstName?: string
+  roleTitle?: string
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1('We received your brief'),
+      p(`Thank you for submitting ${params.roleTitle ? `the brief for <strong>${params.roleTitle}</strong>` : 'your search brief'}. A member of our team will be in touch within 48 hours to discuss next steps.`),
+      p('Every conversation is fully confidential.'),
+    ].join(''),
+    reason: 'You received this because you submitted a search brief on JOBLUX.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}We received your brief\n\nThank you for submitting your search brief. We'll be in touch within 48 hours.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+export function searchUpdateEmail(params: {
+  firstName?: string
+  roleTitle: string
+  message: string
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1(`Update: ${params.roleTitle}`),
+      p(params.message),
+      button('View on JOBLUX', `${SITE_URL}/dashboard`),
+    ].join(''),
+    reason: 'You received this because you have an active search with JOBLUX.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Update: ${params.roleTitle}\n\n${params.message}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+export function candidateSharedEmail(params: {
+  firstName?: string
+  roleTitle: string
+  candidateCount: number
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1('Candidates ready for review'),
+      p(`We\'ve prepared ${params.candidateCount} candidate${params.candidateCount > 1 ? 's' : ''} for <strong>${params.roleTitle}</strong>. Profiles are ready for your review on the platform.`),
+      button('Review candidates', `${SITE_URL}/dashboard`),
+    ].join(''),
+    reason: 'You received this because you have an active search with JOBLUX.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Candidates ready for review\n\n${params.candidateCount} candidate(s) for ${params.roleTitle}.\n\nReview: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+export function placementConfirmedEmployerEmail(params: {
+  firstName?: string
+  roleTitle: string
+  candidateName: string
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1('Placement confirmed'),
+      p(`We\'re pleased to confirm the placement of <strong>${params.candidateName}</strong> for <strong>${params.roleTitle}</strong>.`),
+      p('Thank you for trusting JOBLUX with this search. We look forward to working together again.'),
+    ].join(''),
+    reason: 'You received this because a placement was confirmed through JOBLUX.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Placement confirmed\n\n${params.candidateName} for ${params.roleTitle}.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+// ────────────────────────────────────────────
+// EXECUTIVE SEARCH — CANDIDATE SIDE (16–20)
+// ────────────────────────────────────────────
+
+export function candidateMatchedEmail(params: {
+  firstName?: string
+  roleTitle: string
+  sector?: string
+  location?: string
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1('An opportunity for you'),
+      p(`Based on your profile, we\'d like to discuss a confidential opportunity: <strong>${params.roleTitle}</strong>${params.location ? ` in ${params.location}` : ''}${params.sector ? ` (${params.sector})` : ''}.`),
+      p('This is a discreet enquiry — your details have not been shared. If you\'re interested, we\'ll tell you more.'),
+      button('View details', `${SITE_URL}/dashboard`),
+    ].join(''),
+    reason: 'You received this because your JOBLUX profile matched an active search.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}An opportunity for you\n\n${params.roleTitle}${params.location ? ' in ' + params.location : ''}${params.sector ? ' (' + params.sector + ')' : ''}\n\nThis is a discreet enquiry. View details: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+export function interviewScheduledEmail(params: {
+  firstName?: string
+  roleTitle: string
+  date?: string
+  details?: string
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1('Interview scheduled'),
+      p(`An interview has been arranged for <strong>${params.roleTitle}</strong>${params.date ? ` on ${params.date}` : ''}.`),
+      params.details ? p(params.details) : '',
+      button('View on JOBLUX', `${SITE_URL}/dashboard`),
+    ].join(''),
+    reason: 'You received this because you have an active application on JOBLUX.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Interview scheduled\n\n${params.roleTitle}${params.date ? ' on ' + params.date : ''}${params.details ? '\n' + params.details : ''}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+export function applicationStatusEmail(params: {
+  firstName?: string
+  roleTitle: string
+  statusMessage: string
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1(`Update: ${params.roleTitle}`),
+      p(params.statusMessage),
+      button('View details', `${SITE_URL}/dashboard`),
+    ].join(''),
+    reason: 'You received this because you have an active application on JOBLUX.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Update: ${params.roleTitle}\n\n${params.statusMessage}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+export function offerExtendedEmail(params: {
+  firstName?: string
+  roleTitle: string
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1('An offer has been extended'),
+      p(`We\'re pleased to inform you that an offer has been extended for <strong>${params.roleTitle}</strong>. Please review the details on your dashboard.`),
+      button('View offer', `${SITE_URL}/dashboard`),
+    ].join(''),
+    reason: 'You received this because you have an active application on JOBLUX.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}An offer has been extended for ${params.roleTitle}.\n\nView: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+export function placementConfirmedCandidateEmail(params: {
+  firstName?: string
+  roleTitle: string
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1('Congratulations'),
+      p(`Your placement for <strong>${params.roleTitle}</strong> has been confirmed. We\'re delighted to have been part of this next chapter in your career.`),
+      p('We wish you every success.'),
+    ].join(''),
+    reason: 'You received this because a placement was confirmed through JOBLUX.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Congratulations\n\nYour placement for ${params.roleTitle} has been confirmed.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+// ────────────────────────────────────────────
+// PROFILE & ACCOUNT (21–25)
+// ────────────────────────────────────────────
+
+export function profiluxReminderEmail(params: {
+  firstName?: string
+  completionPercent: number
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1('Complete your Profilux'),
+      p(`Your profile is ${params.completionPercent}% complete. A full profile helps us match you with the right opportunities and intelligence.`),
+      button('Continue building', `${SITE_URL}/dashboard/candidate/profilux`),
+    ].join(''),
+    reason: 'You received this because your JOBLUX profile is incomplete.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Complete your Profilux\n\nYour profile is ${params.completionPercent}% complete.\n\nContinue: ${SITE_URL}/dashboard/candidate/profilux\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+export function profiluxCompleteEmail(params: {
+  firstName?: string
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1('Your Profilux is complete'),
+      p('Your profile is now fully built. You\'re visible to our search team and eligible for the most relevant opportunities.'),
+      button('View your profile', `${SITE_URL}/dashboard/candidate/profilux`),
+    ].join(''),
+    reason: 'You received this because your JOBLUX Profilux reached 100%.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Your Profilux is complete\n\nYou're now visible to our search team.\n\nView: ${SITE_URL}/dashboard/candidate/profilux\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+export function profileSharedEmail(params: {
+  senderName: string
+  profileUrl: string
+}): EmailContent {
+  const html = layout({
+    content: [
+      h1('A profile has been shared with you'),
+      p(`<strong>${params.senderName}</strong> shared their JOBLUX profile with you.`),
+      button('View profile', params.profileUrl),
+    ].join(''),
+    reason: 'You received this because someone shared their JOBLUX profile with you.',
+  })
+  return { html, text: `A profile has been shared with you\n\n${params.senderName} shared their JOBLUX profile.\n\nView: ${params.profileUrl}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+export function dataExportEmail(params: {
+  firstName?: string
+  downloadUrl: string
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1('Your data export is ready'),
+      p('The data you requested is ready to download. This link is valid for 48 hours.'),
+      button('Download your data', params.downloadUrl),
+    ].join(''),
+    reason: 'You received this because you requested a data export from JOBLUX.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Your data export is ready\n\nDownload: ${params.downloadUrl}\n\nThis link is valid for 48 hours.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+export function accountDeletedEmail(params: {
+  firstName?: string
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1('Your account has been deleted'),
+      p('Your JOBLUX account and all associated data have been permanently removed.'),
+      p('If this was a mistake, please contact us within 30 days.'),
+    ].join(''),
+    reason: 'You received this because your JOBLUX account was deleted.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Your account has been deleted\n\nAll data has been permanently removed. Contact us within 30 days if this was a mistake.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+// ────────────────────────────────────────────
+// CONTRIBUTIONS (26–28)
+// ────────────────────────────────────────────
+
 export function contributionSubmittedEmail(params: {
   firstName?: string
   contributionType: string
@@ -226,25 +574,22 @@ export function contributionSubmittedEmail(params: {
     interview_experience: 'interview experience',
   }
   const typeLabel = typeLabels[params.contributionType] || 'contribution'
-  const greeting = params.firstName ? `Dear ${params.firstName},` : ''
+  const greeting = params.firstName ? `${params.firstName},` : ''
   const html = layout({
     content: [
       greeting ? p(greeting) : '',
       h1('Thank you for your contribution'),
-      p(`Your ${typeLabel} has been submitted and is under review. Our team carefully reviews every contribution to maintain the quality of JOBLUX intelligence.`),
-      p('We\'ll notify you once your contribution has been reviewed.'),
-      button('View Your Dashboard', `${SITE_URL}/dashboard`),
+      p(`Your ${typeLabel} has been submitted and is under review.`),
+      button('View your dashboard', `${SITE_URL}/dashboard`),
     ].join(''),
     reason: 'You received this because you submitted a contribution on JOBLUX.',
   })
-  return { html, text: `${greeting ? greeting + '\n\n' : ''}Thank you for your contribution\n\nYour ${typeLabel} has been submitted and is under review. We'll notify you once it's been reviewed.\n\nView your dashboard: ${SITE_URL}/dashboard\n\nJOBLUX LLC · Luxury Talent Intelligence` }
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Thank you for your contribution\n\nYour ${typeLabel} is under review.\n\nDashboard: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
-/** #6 Contribution approved */
 export function contributionApprovedEmail(params: {
   firstName?: string
   contributionType: string
-  pointsAwarded: number
 }): EmailContent {
   const typeLabels: Record<string, string> = {
     wikilux_insight: 'brand insight',
@@ -252,21 +597,18 @@ export function contributionApprovedEmail(params: {
     interview_experience: 'interview experience',
   }
   const typeLabel = typeLabels[params.contributionType] || 'contribution'
-  const greeting = params.firstName ? `Dear ${params.firstName},` : ''
+  const greeting = params.firstName ? `${params.firstName},` : ''
   const html = layout({
     content: [
       greeting ? p(greeting) : '',
-      h1('Your contribution is now live'),
-      p(`Thank you for contributing to JOBLUX intelligence. Your ${typeLabel} has been approved and is now available to the community.`),
-      p(`You\'ve earned <strong style="color:#B8975C;">${params.pointsAwarded} points</strong> for this contribution.`),
-      button('View Your Contributions', `${SITE_URL}/dashboard`),
+      h1('Your contribution is live'),
+      p(`Your ${typeLabel} has been approved and is now part of JOBLUX intelligence. Thank you for contributing.`),
     ].join(''),
-    reason: 'You received this because a contribution you submitted on JOBLUX was reviewed.',
+    reason: 'You received this because a contribution you submitted was reviewed.',
   })
-  return { html, text: `${greeting ? greeting + '\n\n' : ''}Your contribution is now live\n\nYour ${typeLabel} has been approved. You've earned ${params.pointsAwarded} points.\n\nView your contributions: ${SITE_URL}/dashboard\n\nJOBLUX LLC · Luxury Talent Intelligence` }
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Your contribution is live\n\nYour ${typeLabel} has been approved.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
-/** #7 Contribution rejected */
 export function contributionRejectedEmail(params: {
   firstName?: string
   contributionType: string
@@ -278,282 +620,97 @@ export function contributionRejectedEmail(params: {
     interview_experience: 'interview experience',
   }
   const typeLabel = typeLabels[params.contributionType] || 'contribution'
-  const greeting = params.firstName ? `Dear ${params.firstName},` : ''
+  const greeting = params.firstName ? `${params.firstName},` : ''
   const html = layout({
     content: [
       greeting ? p(greeting) : '',
       h1('Update on your contribution'),
-      p(`Thank you for submitting a ${typeLabel}. After review, we were unable to publish this contribution at this time.`),
+      p(`Your ${typeLabel} was not published at this time.`),
       params.reason ? p(params.reason) : '',
-      p('We value your engagement with the JOBLUX community and encourage you to continue contributing.'),
-      button('Visit Help Centre', HELP_URL),
     ].join(''),
-    reason: 'You received this because a contribution you submitted on JOBLUX was reviewed.',
+    reason: 'You received this because a contribution you submitted was reviewed.',
   })
-  return { html, text: `${greeting ? greeting + '\n\n' : ''}Update on your contribution\n\nYour ${typeLabel} was not published at this time.\n${params.reason ? '\n' + params.reason + '\n' : ''}\nVisit our help centre: ${HELP_URL}\n\nJOBLUX LLC · Luxury Talent Intelligence` }
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Update on your contribution\n\nYour ${typeLabel} was not published.\n${params.reason ? '\n' + params.reason + '\n' : ''}\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
 // ────────────────────────────────────────────
-// ASSIGNMENT / RECRUITMENT EMAILS (8–9)
+// SOCIAL & INVITES (29–31)
 // ────────────────────────────────────────────
 
-/** #8 Assignment application confirmation */
-export function applicationConfirmationEmail(params: {
-  firstName?: string
-  assignmentTitle: string
+export function inviteColleagueEmail(params: {
+  inviterName: string
+  inviteUrl: string
 }): EmailContent {
-  const greeting = params.firstName ? `Dear ${params.firstName},` : ''
+  const html = layout({
+    content: [
+      h1('You\'ve been invited to JOBLUX'),
+      p(`<strong>${params.inviterName}</strong> thinks you\'d benefit from JOBLUX — a confidential career intelligence platform for the luxury industry.`),
+      button('Accept invitation', params.inviteUrl),
+    ].join(''),
+    reason: `You received this because ${params.inviterName} invited you to JOBLUX.`,
+  })
+  return { html, text: `You've been invited to JOBLUX\n\n${params.inviterName} thinks you'd benefit from JOBLUX.\n\nAccept: ${params.inviteUrl}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+export function inviteAcceptedEmail(params: {
+  inviterFirstName?: string
+  newMemberName: string
+}): EmailContent {
+  const greeting = params.inviterFirstName ? `${params.inviterFirstName},` : ''
   const html = layout({
     content: [
       greeting ? p(greeting) : '',
-      h1('Application received'),
-      p(`Your profile has been submitted for <strong>${params.assignmentTitle}</strong>.`),
-      p('You can track the status of your application on your dashboard.'),
-      button('View Dashboard', `${SITE_URL}/dashboard`),
+      h1('Your colleague joined JOBLUX'),
+      p(`<strong>${params.newMemberName}</strong> accepted your invitation and is now on the platform.`),
     ].join(''),
-    reason: 'You received this because you applied for a position on JOBLUX.',
+    reason: 'You received this because someone you invited joined JOBLUX.',
   })
-  return { html, text: `${greeting ? greeting + '\n\n' : ''}Application received\n\nYour profile has been submitted for ${params.assignmentTitle}. Track the status on your dashboard.\n\n${SITE_URL}/dashboard\n\nJOBLUX LLC · Luxury Talent Intelligence` }
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Your colleague joined JOBLUX\n\n${params.newMemberName} accepted your invitation.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
-/** #9 Recruitment update (flexible status email) */
-export function recruitmentUpdateEmail(params: {
-  firstName?: string
-  assignmentTitle: string
-  statusMessage: string
+export function sendToFriendEmail(params: {
+  senderName: string
+  articleTitle: string
+  articleUrl: string
+  personalNote?: string
 }): EmailContent {
-  const greeting = params.firstName ? `Dear ${params.firstName},` : ''
   const html = layout({
     content: [
-      greeting ? p(greeting) : '',
-      h1('Update on your candidacy'),
-      p(`Regarding your application for <strong>${params.assignmentTitle}</strong>:`),
-      p(params.statusMessage),
-      button('View Details', `${SITE_URL}/dashboard`),
+      h1(`${params.senderName} shared an article with you`),
+      p(`<strong>${params.articleTitle}</strong>`),
+      params.personalNote ? p(`<em>"${params.personalNote}"</em>`) : '',
+      button('Read on JOBLUX', params.articleUrl),
     ].join(''),
-    reason: 'You received this because you have an active application on JOBLUX.',
+    reason: `You received this because ${params.senderName} shared a JOBLUX article with you.`,
   })
-  return { html, text: `${greeting ? greeting + '\n\n' : ''}Update on your candidacy\n\nRegarding ${params.assignmentTitle}:\n\n${params.statusMessage}\n\nView details: ${SITE_URL}/dashboard\n\nJOBLUX LLC · Luxury Talent Intelligence` }
+  return { html, text: `${params.senderName} shared an article with you\n\n${params.articleTitle}\n${params.personalNote ? '\n"' + params.personalNote + '"\n' : ''}\nRead: ${params.articleUrl}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
 // ────────────────────────────────────────────
-// ESCAPE EMAIL (10)
+// ESCAPE (32–33)
 // ────────────────────────────────────────────
 
-/** #10 Escape consultation confirmation */
 export function escapeConsultationEmail(params: {
   firstName?: string
 }): EmailContent {
-  const greeting = params.firstName ? `Dear ${params.firstName},` : ''
+  const greeting = params.firstName ? `${params.firstName},` : ''
   const html = layout({
     content: [
       greeting ? p(greeting) : '',
       h1('We received your travel request'),
-      p('Thank you for reaching out through JOBLUX Escape.'),
-      p('A travel advisor will review your request and contact you within 48 hours for a complimentary consultation.'),
+      p('Thank you for reaching out through JOBLUX Escape. A travel advisor will review your request and be in touch within 48 hours.'),
       divider(),
       muted('Travel advisory services provided by independent advisors affiliated with Fora Travel, Inc.'),
     ].join(''),
     reason: 'You received this because you submitted a travel request through JOBLUX Escape.',
   })
-  return { html, text: `${greeting ? greeting + '\n\n' : ''}We received your travel request\n\nThank you for reaching out through JOBLUX Escape. A travel advisor will review your request and contact you within 48 hours for a complimentary consultation.\n\nTravel advisory services provided by independent advisors affiliated with Fora Travel, Inc.\n\nJOBLUX LLC · Luxury Talent Intelligence` }
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}We received your travel request\n\nA travel advisor will be in touch within 48 hours.\n\nTravel advisory by Fora Travel, Inc.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
 // ────────────────────────────────────────────
-// SUPPORT EMAIL (11)
+// NEWSLETTER (34)
 // ────────────────────────────────────────────
 
-/** #11 Contact form confirmation */
-export function contactConfirmationEmail(params: {
-  firstName?: string
-  referenceNumber?: string
-}): EmailContent {
-  const greeting = params.firstName ? `Dear ${params.firstName},` : ''
-  const html = layout({
-    content: [
-      greeting ? p(greeting) : '',
-      h1('We received your message'),
-      p('Our team will review your message and get back to you shortly.'),
-      params.referenceNumber ? muted(`Reference: ${params.referenceNumber}`) : '',
-    ].join(''),
-    reason: 'You received this because you sent a message through the JOBLUX contact form.',
-  })
-  return { html, text: `${greeting ? greeting + '\n\n' : ''}We received your message\n\nOur team will get back to you shortly.${params.referenceNumber ? '\nReference: ' + params.referenceNumber : ''}\n\nJOBLUX LLC · Luxury Talent Intelligence` }
-}
-
-// ────────────────────────────────────────────
-// ADMIN ALERT EMAILS (12–16)
-// ────────────────────────────────────────────
-
-function adminLayout(content: string): string {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background-color:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#f5f5f5;">
-<tr><td align="center" style="padding:24px 16px;">
-<table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;background-color:#ffffff;">
-<tr><td style="background-color:#1a1a1a;padding:16px 24px;">
-<span style="font-family:Arial,sans-serif;font-size:18px;color:#ffffff;letter-spacing:3px;font-weight:600;">JOBLUX</span>
-<span style="font-size:11px;color:#B8975C;margin-left:12px;">Admin Alert</span>
-</td></tr>
-<tr><td style="padding:24px;">
-${content}
-</td></tr>
-<tr><td style="padding:12px 24px;border-top:1px solid #eee;text-align:center;">
-<p style="font-size:11px;color:#bbb;margin:0;">JOBLUX Admin Notifications</p>
-</td></tr>
-</table>
-</td></tr>
-</table>
-</body>
-</html>`
-}
-
-function adminRow(label: string, value: string): string {
-  return `<tr><td style="padding:4px 8px;font-size:13px;color:#888;width:120px;vertical-align:top;">${label}</td><td style="padding:4px 8px;font-size:14px;color:#333;">${value}</td></tr>`
-}
-
-function adminButton(label: string, url: string): string {
-  return `<table cellpadding="0" cellspacing="0" role="presentation" style="margin:16px 0;">
-<tr><td>
-<a href="${url}" style="display:inline-block;background-color:#1a1a1a;color:#ffffff;font-size:13px;font-weight:600;text-decoration:none;padding:10px 20px;border-radius:4px;">${label}</a>
-</td></tr>
-</table>`
-}
-
-/** #12 Admin: New member pending approval */
-export function adminNewMemberEmail(params: {
-  name: string
-  email: string
-  tier: string
-  company?: string
-  registrationDate: string
-}): EmailContent {
-  const html = adminLayout([
-    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New Access Request</h2>`,
-    `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
-    adminRow('Name', params.name),
-    adminRow('Email', params.email),
-    adminRow('Tier', params.tier),
-    params.company ? adminRow('Company', params.company) : '',
-    adminRow('Registered', params.registrationDate),
-    `</table>`,
-    adminButton('Review in Admin', `${SITE_URL}/admin/profiles`),
-  ].join(''))
-  return {
-    html,
-    text: `New access request: ${params.name} (${params.tier})\n\nEmail: ${params.email}${params.company ? '\nCompany: ' + params.company : ''}\nRegistered: ${params.registrationDate}\n\nReview: ${SITE_URL}/admin/profiles`,
-  }
-}
-
-/** #13 Admin: New contribution submitted */
-export function adminNewContributionEmail(params: {
-  contributionType: string
-  contributorName: string
-  brand?: string
-}): EmailContent {
-  const typeLabels: Record<string, string> = {
-    wikilux_insight: 'Brand Insight',
-    salary_data: 'Salary Data',
-    interview_experience: 'Interview Experience',
-  }
-  const typeLabel = typeLabels[params.contributionType] || params.contributionType
-  const html = adminLayout([
-    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New Contribution</h2>`,
-    `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
-    adminRow('Type', typeLabel),
-    adminRow('From', params.contributorName),
-    params.brand ? adminRow('Brand', params.brand) : '',
-    `</table>`,
-    adminButton('Review in Admin', `${SITE_URL}/admin/contributions`),
-  ].join(''))
-  return {
-    html,
-    text: `New contribution: ${typeLabel} from ${params.contributorName}${params.brand ? ' (' + params.brand + ')' : ''}\n\nReview: ${SITE_URL}/admin/contributions`,
-  }
-}
-
-/** #14 Admin: New assignment application */
-export function adminNewApplicationEmail(params: {
-  applicantName: string
-  applicantEmail: string
-  tier: string
-  assignmentTitle: string
-}): EmailContent {
-  const html = adminLayout([
-    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New Application</h2>`,
-    `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
-    adminRow('Applicant', params.applicantName),
-    adminRow('Email', params.applicantEmail),
-    adminRow('Tier', params.tier),
-    adminRow('Position', params.assignmentTitle),
-    `</table>`,
-    adminButton('Review in Admin', `${SITE_URL}/admin/assignments`),
-  ].join(''))
-  return {
-    html,
-    text: `New application: ${params.applicantName} for ${params.assignmentTitle}\n\nEmail: ${params.applicantEmail}\nTier: ${params.tier}\n\nReview: ${SITE_URL}/admin/assignments`,
-  }
-}
-
-/** #15 Admin: New Escape consultation */
-export function adminNewEscapeEmail(params: {
-  name: string
-  email: string
-  tripType?: string
-  destination?: string
-  budget?: string
-  dates?: string
-  tier?: string
-}): EmailContent {
-  const html = adminLayout([
-    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New Travel Request</h2>`,
-    `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
-    adminRow('Name', params.name),
-    adminRow('Email', params.email),
-    params.tripType ? adminRow('Trip Type', params.tripType) : '',
-    params.destination ? adminRow('Destination', params.destination) : '',
-    params.budget ? adminRow('Budget', params.budget) : '',
-    params.dates ? adminRow('Dates', params.dates) : '',
-    adminRow('Tier', params.tier || 'Visitor'),
-    `</table>`,
-    adminButton('View in Admin', `${SITE_URL}/admin/consultations`),
-  ].join(''))
-  return {
-    html,
-    text: `New travel request: ${params.name} — ${params.destination || 'TBD'}\n\nEmail: ${params.email}${params.tripType ? '\nType: ' + params.tripType : ''}${params.budget ? '\nBudget: ' + params.budget : ''}${params.dates ? '\nDates: ' + params.dates : ''}\nTier: ${params.tier || 'Visitor'}\n\nView: ${SITE_URL}/admin/consultations`,
-  }
-}
-
-/** #16 Admin: New contact message */
-export function adminNewContactEmail(params: {
-  name: string
-  email: string
-  subject: string
-  messagePreview: string
-}): EmailContent {
-  const html = adminLayout([
-    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New Contact Message</h2>`,
-    `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
-    adminRow('Name', params.name),
-    adminRow('Email', params.email),
-    adminRow('Subject', params.subject),
-    `</table>`,
-    `<div style="margin:16px 0;padding:12px;background:#f9f9f9;border-left:3px solid #B8975C;font-size:14px;color:#555;line-height:1.6;">${params.messagePreview}</div>`,
-    adminButton('View in Admin', `${SITE_URL}/admin/contact`),
-  ].join(''))
-  return {
-    html,
-    text: `New contact: ${params.name} — ${params.subject}\n\nEmail: ${params.email}\n\n${params.messagePreview}\n\nView: ${SITE_URL}/admin/contact`,
-  }
-}
-
-// ────────────────────────────────────────────
-// NEWSLETTER (17)
-// ────────────────────────────────────────────
-
-/** #17 The Brief — newsletter template */
 export function theBriefEmail(params: {
   date: string
   bodyHtml: string
@@ -566,26 +723,20 @@ export function theBriefEmail(params: {
 }): EmailContent {
   const escapeSection = params.escapePick ? [
     divider(),
-    `<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:8px;">`,
-    `<tr><td>`,
-    `<p style="font-size:11px;color:#B8975C;letter-spacing:2px;text-transform:uppercase;margin:0 0 8px;">Escape Pick</p>`,
-    params.escapePick.imageUrl ? `<img src="${params.escapePick.imageUrl}" alt="${params.escapePick.destination}" style="width:100%;max-width:536px;height:auto;border-radius:4px;margin:0 0 12px;" />` : '',
-    `<p style="font-size:17px;color:#1a1a1a;font-weight:600;margin:0 0 8px;">${params.escapePick.destination}</p>`,
-    `<p style="font-size:14px;color:#555;line-height:1.6;margin:0 0 12px;">${params.escapePick.teaser}</p>`,
+    `<p style="font-size:11px;color:#B8975C;letter-spacing:2px;text-transform:uppercase;font-family:Arial,Helvetica,sans-serif;margin:0 0 8px;">Escape pick</p>`,
+    params.escapePick.imageUrl ? `<img src="${params.escapePick.imageUrl}" alt="${params.escapePick.destination}" style="width:100%;max-width:528px;height:auto;border-radius:3px;margin:0 0 12px;" />` : '',
+    `<p style="font-size:16px;color:#1a1a1a;font-weight:500;margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;">${params.escapePick.destination}</p>`,
+    `<p style="font-size:14px;color:#555;line-height:1.6;margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;">${params.escapePick.teaser}</p>`,
     button('Explore', params.escapePick.url),
-    `</td></tr>`,
-    `</table>`,
   ].join('') : ''
 
   const html = layout({
     content: [
-      `<div style="text-align:center;margin-bottom:24px;">`,
-      `<p style="font-family:Georgia,'Times New Roman',serif;font-size:24px;color:#1a1a1a;letter-spacing:3px;margin:0 0 4px;">THE BRIEF</p>`,
-      `<p style="font-size:13px;color:#888;margin:0 0 2px;">Luxury intelligence, biweekly.</p>`,
-      `<p style="font-size:12px;color:#B8975C;margin:0;">${params.date}</p>`,
-      `</div>`,
+      `<p style="font-size:11px;color:#B8975C;font-family:Arial,Helvetica,sans-serif;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px;">The Brief</p>`,
+      `<p style="font-size:20px;color:#1a1a1a;line-height:1.4;margin:0 0 6px;font-family:Georgia,'Times New Roman',serif;">Luxury intelligence, biweekly.</p>`,
+      `<p style="font-size:12px;color:#999;margin:0 0 24px;font-family:Arial,Helvetica,sans-serif;">${params.date}</p>`,
       divider(),
-      `<div style="font-size:15px;color:#333;line-height:1.7;">${params.bodyHtml}</div>`,
+      `<div style="font-size:14px;color:#555;line-height:1.8;font-family:Arial,Helvetica,sans-serif;">${params.bodyHtml}</div>`,
       escapeSection,
     ].join(''),
     reason: 'You\'re receiving this because you have JOBLUX access.',
@@ -593,7 +744,198 @@ export function theBriefEmail(params: {
   })
   return {
     html,
-    text: `THE BRIEF — Luxury intelligence, biweekly.\n${params.date}\n\n${stripHtml(params.bodyHtml)}${params.escapePick ? '\n\n---\nEscape Pick: ' + params.escapePick.destination + '\n' + params.escapePick.teaser + '\n' + params.escapePick.url : ''}\n\nJOBLUX LLC · Luxury Talent Intelligence\nUnsubscribe: ${SITE_URL}/unsubscribe`,
+    text: `THE BRIEF \u2014 Luxury intelligence, biweekly.\n${params.date}\n\n${stripHtml(params.bodyHtml)}${params.escapePick ? '\n\n---\nEscape: ' + params.escapePick.destination + '\n' + params.escapePick.teaser + '\n' + params.escapePick.url : ''}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence\nUnsubscribe: ${SITE_URL}/unsubscribe`,
+  }
+}
+
+// ────────────────────────────────────────────
+// CONTACT FORM (35)
+// ────────────────────────────────────────────
+
+export function contactConfirmationEmail(params: {
+  firstName?: string
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1('We received your message'),
+      p('Our team will review your message and get back to you shortly.'),
+    ].join(''),
+    reason: 'You received this because you sent a message through the JOBLUX help page.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}We received your message\n\nOur team will get back to you shortly.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+// ────────────────────────────────────────────
+// ADMIN ALERTS (6, 9, 11, etc.)
+// ────────────────────────────────────────────
+
+export function adminNewMemberEmail(params: {
+  name: string
+  email: string
+  tier: string
+  company?: string
+  jobTitle?: string
+  registrationDate: string
+}): EmailContent {
+  const html = adminLayout([
+    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New access request</h2>`,
+    `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
+    adminRow('Name', params.name),
+    adminRow('Email', params.email),
+    adminRow('Tier', params.tier),
+    params.jobTitle ? adminRow('Title', params.jobTitle) : '',
+    params.company ? adminRow('Company', params.company) : '',
+    adminRow('Date', params.registrationDate),
+    `</table>`,
+    adminButton('Review in admin', `${SITE_URL}/admin/profiles`),
+  ].join(''))
+  return {
+    html,
+    text: `New access request: ${params.name} (${params.tier})\nEmail: ${params.email}${params.jobTitle ? '\nTitle: ' + params.jobTitle : ''}${params.company ? '\nCompany: ' + params.company : ''}\nDate: ${params.registrationDate}\n\nReview: ${SITE_URL}/admin/profiles`,
+  }
+}
+
+export function adminNewEmployerEmail(params: {
+  name: string
+  email: string
+  companyName: string
+  orgType?: string
+  jobTitle?: string
+}): EmailContent {
+  const html = adminLayout([
+    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New employer request</h2>`,
+    `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
+    adminRow('Name', params.name),
+    adminRow('Email', params.email),
+    adminRow('Company', params.companyName),
+    params.orgType ? adminRow('Type', params.orgType) : '',
+    params.jobTitle ? adminRow('Title', params.jobTitle) : '',
+    `</table>`,
+    adminButton('Review in admin', `${SITE_URL}/admin/profiles`),
+  ].join(''))
+  return {
+    html,
+    text: `New employer request: ${params.name} — ${params.companyName}\nEmail: ${params.email}${params.orgType ? '\nType: ' + params.orgType : ''}${params.jobTitle ? '\nTitle: ' + params.jobTitle : ''}\n\nReview: ${SITE_URL}/admin/profiles`,
+  }
+}
+
+export function adminNewBriefEmail(params: {
+  employerName: string
+  companyName: string
+  roleTitle: string
+}): EmailContent {
+  const html = adminLayout([
+    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New search brief</h2>`,
+    `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
+    adminRow('From', params.employerName),
+    adminRow('Company', params.companyName),
+    adminRow('Role', params.roleTitle),
+    `</table>`,
+    adminButton('View in admin', `${SITE_URL}/admin/assignments`),
+  ].join(''))
+  return {
+    html,
+    text: `New search brief: ${params.roleTitle} at ${params.companyName}\nFrom: ${params.employerName}\n\nView: ${SITE_URL}/admin/assignments`,
+  }
+}
+
+export function adminNewContributionEmail(params: {
+  contributionType: string
+  contributorName: string
+  brand?: string
+}): EmailContent {
+  const typeLabels: Record<string, string> = {
+    wikilux_insight: 'Brand Insight',
+    salary_data: 'Salary Data',
+    interview_experience: 'Interview Experience',
+  }
+  const typeLabel = typeLabels[params.contributionType] || params.contributionType
+  const html = adminLayout([
+    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New contribution</h2>`,
+    `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
+    adminRow('Type', typeLabel),
+    adminRow('From', params.contributorName),
+    params.brand ? adminRow('Brand', params.brand) : '',
+    `</table>`,
+    adminButton('Review in admin', `${SITE_URL}/admin/contributions`),
+  ].join(''))
+  return {
+    html,
+    text: `New contribution: ${typeLabel} from ${params.contributorName}${params.brand ? ' (' + params.brand + ')' : ''}\n\nReview: ${SITE_URL}/admin/contributions`,
+  }
+}
+
+export function adminNewEscapeEmail(params: {
+  name: string
+  email: string
+  tripType?: string
+  destination?: string
+  budget?: string
+  dates?: string
+  tier?: string
+}): EmailContent {
+  const html = adminLayout([
+    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New travel request</h2>`,
+    `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
+    adminRow('Name', params.name),
+    adminRow('Email', params.email),
+    params.tripType ? adminRow('Type', params.tripType) : '',
+    params.destination ? adminRow('Destination', params.destination) : '',
+    params.budget ? adminRow('Budget', params.budget) : '',
+    params.dates ? adminRow('Dates', params.dates) : '',
+    adminRow('Tier', params.tier || 'Visitor'),
+    `</table>`,
+    adminButton('View in admin', `${SITE_URL}/admin/consultations`),
+  ].join(''))
+  return {
+    html,
+    text: `New travel request: ${params.name} \u2014 ${params.destination || 'TBD'}\nEmail: ${params.email}${params.tripType ? '\nType: ' + params.tripType : ''}${params.budget ? '\nBudget: ' + params.budget : ''}${params.dates ? '\nDates: ' + params.dates : ''}\nTier: ${params.tier || 'Visitor'}\n\nView: ${SITE_URL}/admin/consultations`,
+  }
+}
+
+export function adminNewContactEmail(params: {
+  name: string
+  email: string
+  subject: string
+  messagePreview: string
+}): EmailContent {
+  const html = adminLayout([
+    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New contact message</h2>`,
+    `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
+    adminRow('Name', params.name),
+    adminRow('Email', params.email),
+    adminRow('Subject', params.subject),
+    `</table>`,
+    `<div style="margin:16px 0;padding:12px;background:#f9f9f9;border-left:3px solid #B8975C;font-size:14px;color:#555;line-height:1.6;">${params.messagePreview}</div>`,
+    adminButton('View in admin', `${SITE_URL}/admin/contact`),
+  ].join(''))
+  return {
+    html,
+    text: `New contact: ${params.name} \u2014 ${params.subject}\nEmail: ${params.email}\n\n${params.messagePreview}\n\nView: ${SITE_URL}/admin/contact`,
+  }
+}
+
+export function adminNewApplicationEmail(params: {
+  applicantName: string
+  applicantEmail: string
+  tier: string
+  assignmentTitle: string
+}): EmailContent {
+  const html = adminLayout([
+    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New application</h2>`,
+    `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
+    adminRow('Applicant', params.applicantName),
+    adminRow('Email', params.applicantEmail),
+    adminRow('Tier', params.tier),
+    adminRow('Position', params.assignmentTitle),
+    `</table>`,
+    adminButton('Review in admin', `${SITE_URL}/admin/assignments`),
+  ].join(''))
+  return {
+    html,
+    text: `New application: ${params.applicantName} for ${params.assignmentTitle}\nEmail: ${params.applicantEmail}\nTier: ${params.tier}\n\nReview: ${SITE_URL}/admin/assignments`,
   }
 }
 
@@ -601,7 +943,6 @@ export function theBriefEmail(params: {
 // Legacy compatibility wrappers
 // ────────────────────────────────────────────
 
-/** Wrap a message body in the JOBLUX branded email template (legacy) */
 export function wrapInEmailTemplate({
   body,
   ctaUrl,
@@ -612,31 +953,57 @@ export function wrapInEmailTemplate({
   ctaLabel?: string
 }): string {
   const bodyHtml = body.replace(/\n/g, '<br>')
-  const html = layout({
+  return layout({
     content: [
-      `<div style="font-size:15px;color:#333;line-height:1.7;">${bodyHtml}</div>`,
+      `<div style="font-size:14px;color:#555;line-height:1.8;font-family:Arial,Helvetica,sans-serif;">${bodyHtml}</div>`,
       ctaUrl ? button(ctaLabel || 'View on JOBLUX', ctaUrl) : '',
     ].join(''),
     reason: 'You received this email from JOBLUX.',
   })
-  return html
 }
 
-/** Generate notification email for a candidate receiving a message */
 export function candidateNotificationEmail(body: string): string {
   return wrapInEmailTemplate({
     body,
     ctaUrl: `${SITE_URL}/dashboard/messages`,
-    ctaLabel: 'View Messages',
+    ctaLabel: 'View messages',
   })
 }
 
-/** Generate notification email for a client receiving a message */
 export function clientNotificationEmail(body: string): string {
   return wrapInEmailTemplate({ body })
 }
 
+export function applicationConfirmationEmail(params: {
+  firstName?: string
+  assignmentTitle: string
+}): EmailContent {
+  const greeting = params.firstName ? `${params.firstName},` : ''
+  const html = layout({
+    content: [
+      greeting ? p(greeting) : '',
+      h1('Application received'),
+      p(`Your profile has been submitted for <strong>${params.assignmentTitle}</strong>. You can track the status on your dashboard.`),
+      button('View dashboard', `${SITE_URL}/dashboard`),
+    ].join(''),
+    reason: 'You received this because you applied for a position on JOBLUX.',
+  })
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Application received\n\nSubmitted for ${params.assignmentTitle}.\n\nDashboard: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+}
+
+export function recruitmentUpdateEmail(params: {
+  firstName?: string
+  assignmentTitle: string
+  statusMessage: string
+}): EmailContent {
+  return applicationStatusEmail({
+    firstName: params.firstName,
+    roleTitle: params.assignmentTitle,
+    statusMessage: params.statusMessage,
+  })
+}
+
 // ────────────────────────────────────────────
-// Export admin email address for use in triggers
+// Export admin email address
 // ────────────────────────────────────────────
 export const ADMIN_ALERT_EMAIL = ADMIN_EMAIL
