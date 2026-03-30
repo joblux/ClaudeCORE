@@ -1,223 +1,313 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { createClient } from '@supabase/supabase-js'
 import { useSession } from 'next-auth/react'
 
-const contributionQueue = [
-  { id: '1', type: 'SALARY DATA', typeColor: '#a58e28', typeBg: 'rgba(165,142,40,0.1)', typeBorder: 'rgba(165,142,40,0.2)', title: 'VP Merchandising · Paris · Hermès', meta: '€95K–120K · Awaiting verification', status: 'Under review', statusColor: '#FF9800', verified: false },
-  { id: '2', type: 'CULTURE INSIGHT', typeColor: '#4CAF50', typeBg: 'rgba(76,175,80,0.1)', typeBorder: 'rgba(76,175,80,0.2)', title: 'Work culture at LVMH Fashion Group, Paris', meta: 'Published on WikiLux · 234 views', status: 'Verified', statusColor: '#4CAF50', verified: true },
-  { id: '3', type: 'INTERVIEW DATA', typeColor: '#2196F3', typeBg: 'rgba(33,150,243,0.1)', typeBorder: 'rgba(33,150,243,0.2)', title: 'Director-level interview process · Cartier Paris', meta: 'Published on Careers · 612 views', status: 'Verified', statusColor: '#4CAF50', verified: true },
-]
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
-const editorialItems = [
-  { id: '1', title: 'Why the next wave of luxury talent will come from hospitality, not fashion', status: 'UNDER REVIEW', statusColor: '#FF9800', statusBg: 'rgba(255,152,0,0.1)', date: 'Submitted Mar 24', views: null, isDraft: false },
-  { id: '2', title: 'The Richemont management school — why its alumni are in demand everywhere', status: 'PUBLISHED', statusColor: '#4CAF50', statusBg: 'rgba(76,175,80,0.1)', date: 'Mar 10, 2026', views: '1,243 views', isDraft: false },
-  { id: '3', title: 'What Hermès really looks for in senior hires — an insider perspective', status: 'PUBLISHED', statusColor: '#4CAF50', statusBg: 'rgba(76,175,80,0.1)', date: 'Feb 28, 2026', views: '892 views', isDraft: false },
-  { id: '4', title: 'Draft — The LVMH vs Kering career path debate', status: 'DRAFT', statusColor: '#666', statusBg: 'rgba(96,96,96,0.2)', date: 'Last edited Mar 25', views: null, isDraft: true },
-]
+function timeAgo(dateStr: string | null): string {
+  if (!dateStr) return ''
+  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24))
+  if (days === 0) return 'Today'
+  if (days === 1) return 'Yesterday'
+  if (days < 30) return `${days}d ago`
+  return `${Math.floor(days / 30)}mo ago`
+}
 
-const signalComments = [
-  { id: '1', signalColor: '#FF9800', signal: 'Kering appoints Blazy as CD of Chanel', comment: '"This is the most significant cross-group move in a decade. Expect Bottega to struggle for 18 months while a new creative vision is established..."', views: '312 views' },
-  { id: '2', signalColor: '#f44336', signal: 'Burberry confirms 400 role reductions', comment: '"The cuts are deeper than reported. HQ functions are affected but so are regional director roles in EMEA. If you\'re at manager level in London..."', views: '487 views' },
-]
+const SIGNAL_COLORS: Record<string, string> = {
+  talent: '#2196F3', market: '#4CAF50', brand: '#FF9800', finance: '#9C27B0',
+}
 
-const impactStats = [
-  { label: 'Contributions verified', value: '11 / 12', delta: null },
-  { label: 'Salary data points', value: '8 entries', delta: '+2 this month' },
-  { label: 'Culture insights', value: '2 published', delta: null },
-  { label: 'Interview guides', value: '2 published', delta: null },
-  { label: 'Total data views', value: '1,847', delta: '↑ 12%' },
-  { label: 'Insider rank', value: 'Top 15%', delta: null, highlight: true },
-]
+const STATUS_LABELS: Record<string, { label: string; color: string }> = {
+  pending: { label: 'UNDER REVIEW', color: '#FF9800' },
+  approved: { label: 'VERIFIED', color: '#4CAF50' },
+  rejected: { label: 'REJECTED', color: '#f44336' },
+}
 
 const navItems = [
-  { section: 'DASHBOARD', items: [{ icon: '⌂', label: 'Overview', id: 'overview', badge: null }, { icon: '◎', label: 'My contributions', id: 'contributions', badge: '12' }, { icon: '✎', label: 'Editorial queue', id: 'editorial', badgeGold: '2' }, { icon: '📊', label: 'Impact tracker', id: 'impact', badge: null }] },
-  { section: 'CONTRIBUTE', items: [{ icon: '+', label: 'Add salary data', id: 'add-salary', badge: null }, { icon: '+', label: 'Add culture insight', id: 'add-culture', badge: null }, { icon: '+', label: 'Add interview data', id: 'add-interview', badge: null }, { icon: '✍', label: 'Write Insider voice', id: 'write', badge: null }, { icon: '💬', label: 'Comment on signal', id: 'comment', badge: null }] },
-  { section: 'EXPLORE', items: [{ icon: '⚡', label: 'Signals', id: 'signals-link', badge: null }, { icon: '◫', label: 'Brands', id: 'brands-link', badge: null }, { icon: '◷', label: 'Events', id: 'events-link', badge: null }] },
-  { section: 'ACCOUNT', items: [{ icon: '✉', label: 'Inbox', id: 'inbox', badge: '1' }, { icon: '⚙', label: 'Settings', id: 'settings', badge: null }] },
+  { section: 'DASHBOARD', items: [
+    { label: 'Overview', id: 'overview' },
+    { label: 'My contributions', id: 'contributions' },
+    { label: 'Impact tracker', id: 'impact' },
+  ]},
+  { section: 'CONTRIBUTE', items: [
+    { label: 'Add salary data', id: 'add-salary' },
+    { label: 'Add interview data', id: 'add-interview' },
+    { label: 'Add market signal', id: 'add-signal' },
+  ]},
+  { section: 'EXPLORE', items: [
+    { label: 'Signals', id: 'signals-link' },
+    { label: 'Brands', id: 'brands-link' },
+    { label: 'Events', id: 'events-link' },
+  ]},
 ]
+
+function EmptyCard({ title, description, actionLabel, actionHref }: {
+  title: string; description: string; actionLabel?: string; actionHref?: string
+}) {
+  return (
+    <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '36px 24px', textAlign: 'center' }}>
+      <div style={{ fontSize: 14, color: '#ccc', marginBottom: 6 }}>{title}</div>
+      <p style={{ fontSize: 13, color: '#999', marginBottom: actionLabel ? 14 : 0, maxWidth: 400, margin: '0 auto' + (actionLabel ? ' 14px' : '') }}>{description}</p>
+      {actionLabel && actionHref && (
+        <Link href={actionHref} style={{ display: 'inline-block', padding: '9px 20px', fontSize: 12, fontWeight: 500, color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)', borderRadius: 4, textDecoration: 'none' }}>
+          {actionLabel}
+        </Link>
+      )}
+    </div>
+  )
+}
 
 export default function InsiderDashboard() {
   const { data: session } = useSession()
+  const memberId = (session?.user as any)?.memberId
+
+  const [loading, setLoading] = useState(true)
+  const [contributions, setContributions] = useState<any[]>([])
+  const [contributionStats, setContributionStats] = useState<any>(null)
+  const [signals, setSignals] = useState<any[]>([])
   const [activeNav, setActiveNav] = useState('overview')
+
   const firstName = (session?.user?.name || 'there').split(' ')[0]
 
+  useEffect(() => {
+    if (!session) return
+
+    async function fetchAll() {
+      try {
+        // My contributions
+        if (memberId) {
+          const contribRes = await fetch('/api/contributions?limit=20')
+          if (contribRes.ok) {
+            const cData = await contribRes.json()
+            const mine = (cData.contributions || []).filter((c: any) => c.member_id === memberId)
+            setContributions(mine)
+          }
+
+          const pointsRes = await fetch('/api/contributions/my-points')
+          if (pointsRes.ok) setContributionStats(await pointsRes.json())
+        }
+
+        // Latest signals
+        const { data: sigData } = await supabase
+          .from('signals')
+          .select('id, slug, title, category, brand, published_at')
+          .order('published_at', { ascending: false })
+          .limit(5)
+        if (sigData) setSignals(sigData)
+
+      } catch (err) {
+        console.error('Insider dashboard fetch error:', err)
+      }
+      setLoading(false)
+    }
+
+    fetchAll()
+  }, [session, memberId])
+
+  // Navigate to external pages for explore links
+  useEffect(() => {
+    if (activeNav === 'signals-link') { window.location.href = '/signals'; return }
+    if (activeNav === 'brands-link') { window.location.href = '/wikilux'; return }
+    if (activeNav === 'events-link') { window.location.href = '/events'; return }
+    if (activeNav === 'add-salary' || activeNav === 'add-interview' || activeNav === 'add-signal') {
+      window.location.href = '/contribute'
+      return
+    }
+  }, [activeNav])
+
+  // Derived stats
+  const approvedCount = contributions.filter(c => c.status === 'approved').length
+  const pendingCount = contributions.filter(c => c.status === 'pending').length
+  const totalPoints = contributionStats?.points || 0
+  const salaryCount = contributions.filter(c => c.contribution_type === 'salary_data').length
+  const interviewCount = contributions.filter(c => c.contribution_type === 'interview_experience').length
+  const signalCount = contributions.filter(c => c.contribution_type === 'wikilux_insight').length
+
   return (
-    <div className="flex min-h-screen bg-[#1a1a1a]">
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#0f0f0f', fontFamily: 'Inter, sans-serif' }}>
 
       {/* Sidebar */}
-      <div className="w-[220px] flex-shrink-0 bg-[#111] border-r border-[#222] flex flex-col">
-        <div className="px-5 py-5 border-b border-[#222]">
-          <span className="text-xs font-semibold tracking-[4px] text-white">JOBLUX.</span>
-        </div>
-        <div className="px-5 py-4 border-b border-[#222]">
-          <div className="w-9 h-9 rounded-full bg-[#9C27B0] flex items-center justify-center text-[11px] font-semibold text-white mb-2">JD</div>
-          <div className="text-sm text-[#e0e0e0] mb-0.5">{firstName}</div>
-          <div className="text-[10px] text-[#9C27B0] font-semibold tracking-wider">INSIDER CONTRIBUTOR</div>
+      <div style={{ width: 220, flexShrink: 0, background: '#111', borderRight: '1px solid #1e1e1e', display: 'flex', flexDirection: 'column' }}>
+        {/* Profile */}
+        <div style={{ padding: '24px 16px 20px', borderBottom: '1px solid #1e1e1e' }}>
+          <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 600, color: '#ccc', marginBottom: 8 }}>
+            {firstName[0]?.toUpperCase() || 'T'}
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 500, color: '#fff' }}>{firstName}</div>
+          <div style={{ fontSize: 11, color: '#a58e28', marginTop: 4 }}>TRUSTED CONTRIBUTOR</div>
+          <div style={{ marginTop: 8, fontSize: 24, fontWeight: 300, color: '#fff' }}>{totalPoints}<span style={{ fontSize: 11, color: '#999', marginLeft: 4 }}>pts</span></div>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
-          {navItems.map(group => (
-            <div key={group.section}>
-              <div className="px-5 pt-4 pb-1.5 text-[9px] font-semibold tracking-[2px] text-[#777]">{group.section}</div>
-              {group.items.map((item: any) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveNav(item.id)}
-                  className="w-full flex items-center gap-2.5 px-5 py-2.5 text-xs transition-colors"
-                  style={{
-                    color: activeNav === item.id ? '#fff' : '#555',
-                    background: activeNav === item.id ? '#1e1e1e' : 'transparent',
-                    borderLeft: activeNav === item.id ? '2px solid #9C27B0' : '2px solid transparent',
-                  }}
-                >
-                  <span className="w-4 text-center text-sm">{item.icon}</span>
-                  <span className="flex-1 text-left">{item.label}</span>
-                  {item.badge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#9C27B0] text-white">{item.badge}</span>}
-                  {item.badgeGold && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#a58e28] text-[#1a1a1a]">{item.badgeGold}</span>}
+        {/* Nav */}
+        <nav style={{ flex: 1, padding: '12px 8px' }}>
+          {navItems.map(section => (
+            <div key={section.section} style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: '#555', letterSpacing: '1.5px', padding: '6px 8px 4px' }}>{section.section}</div>
+              {section.items.map(item => (
+                <button key={item.id} onClick={() => setActiveNav(item.id)} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '7px 8px', borderRadius: 4, border: 'none', cursor: 'pointer', fontSize: 13, background: activeNav === item.id ? '#1e1e1e' : 'transparent', color: activeNav === item.id ? '#fff' : '#999' }}>
+                  {item.label}
                 </button>
               ))}
             </div>
           ))}
-        </div>
-
-        <div className="p-4 border-t border-[#222]">
-          <div className="rounded-lg p-3" style={{ background: 'rgba(156,39,176,0.08)', border: '1px solid rgba(156,39,176,0.2)' }}>
-            <p className="text-[11px] text-[#999] leading-relaxed mb-2">Your contributions power the JOBLUX intelligence engine.</p>
-            <button className="w-full bg-[#9C27B0] text-white text-[11px] font-semibold py-1.5 rounded">+ Add contribution</button>
-          </div>
-        </div>
+        </nav>
       </div>
 
       {/* Main */}
-      <div className="flex-1 p-8 overflow-y-auto">
-        <div className="flex items-start justify-between mb-7">
-          <div>
-            <h1 className="text-xl font-normal text-white mb-1" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>Welcome back, {firstName}</h1>
-            <p className="text-sm text-[#999]">Thursday, March 26, 2026 · Your intelligence contributions at a glance</p>
+      <main style={{ flex: 1, padding: '32px 40px', maxWidth: 900 }}>
+        <div style={{ marginBottom: 28 }}>
+          <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 24, fontWeight: 400, color: '#fff', margin: 0 }}>
+            {loading ? 'Loading...' : `Welcome back, ${firstName}`}
+          </h1>
+          <p style={{ fontSize: 13, color: '#999', marginTop: 4 }}>Your contributor dashboard</p>
+        </div>
+
+        {/* ── OVERVIEW ── */}
+        {activeNav === 'overview' && (<>
+          {/* Stats grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 28 }}>
+            {[
+              { label: 'Total contributions', value: String(contributions.length), sub: `${approvedCount} verified · ${pendingCount} pending` },
+              { label: 'Points earned', value: String(totalPoints), sub: contributionStats?.next_level ? `${contributionStats.next_level.points_needed} pts to ${contributionStats.next_level.level}` : 'Keep contributing' },
+              { label: 'By type', value: `${salaryCount}S · ${interviewCount}I · ${signalCount}M`, sub: 'Salary · Interview · Signal' },
+            ].map(c => (
+              <div key={c.label} style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '18px 20px' }}>
+                <div style={{ fontSize: 24, fontWeight: 300, color: '#fff' }}>{c.value}</div>
+                <div style={{ fontSize: 13, color: '#ccc', marginTop: 4 }}>{c.label}</div>
+                <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>{c.sub}</div>
+              </div>
+            ))}
           </div>
-          <div className="border border-[#9C27B0] text-[#9C27B0] text-[10px] font-semibold tracking-[2px] px-3 py-1 rounded">INSIDER CONTRIBUTOR</div>
-        </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-3 mb-7">
-          {[['12', 'Total contributions', 'Salary, culture, interview'], ['847', 'Data points unlocked', 'By your contributions'], ['3', 'Articles published', 'Insider voice'], ['2.4K', 'Article views', '↑ 18% this month']].map(([num, label, sub]) => (
-            <div key={label} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4">
-              <div className="text-2xl font-normal text-[#a58e28] mb-1">{num}</div>
-              <div className="text-[11px] text-[#999]">{label}</div>
-              <div className="text-[11px] text-[#999] mt-0.5">{sub}</div>
+          {/* Recent contributions */}
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <div style={{ fontSize: 11, fontWeight: 500, color: '#999', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Recent contributions</div>
+              <Link href="/contribute" style={{ fontSize: 12, color: '#999', textDecoration: 'none' }}>+ Add new →</Link>
             </div>
-          ))}
-        </div>
+            {contributions.length > 0 ? (
+              <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '4px 20px' }}>
+                {contributions.slice(0, 5).map((c, i) => {
+                  const typeIcons: Record<string, string> = { salary_data: '💰', interview_experience: '🎤', wikilux_insight: '💡' }
+                  const typeLabels: Record<string, string> = { salary_data: 'Salary data', interview_experience: 'Interview experience', wikilux_insight: 'Market signal' }
+                  const st = STATUS_LABELS[c.status] || { label: (c.status || '').toUpperCase(), color: '#999' }
+                  return (
+                    <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: i < Math.min(contributions.length, 5) - 1 ? '1px solid #1e1e1e' : 'none' }}>
+                      <span style={{ fontSize: 16 }}>{typeIcons[c.contribution_type] || '📊'}</span>
+                      <div style={{ flex: 1 }}>
+                        <span style={{ fontSize: 13, color: '#ccc', display: 'block' }}>{typeLabels[c.contribution_type] || c.contribution_type} · {c.brand_name || 'General'}</span>
+                        <span style={{ fontSize: 11, color: '#999' }}>{timeAgo(c.created_at)}</span>
+                      </div>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: st.color }}>{st.label}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <EmptyCard
+                title="No contributions yet"
+                description="As a Trusted Contributor, your salary data, interview experiences, and market signals are what powers JOBLUX intelligence."
+                actionLabel="+ Add your first contribution"
+                actionHref="/contribute"
+              />
+            )}
+          </div>
 
-        {/* Contribution queue + Impact tracker */}
-        <div className="grid grid-cols-[2fr_1fr] gap-5 mb-5">
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">CONTRIBUTION QUEUE</span>
-              <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <button className="text-xs text-[#999]">View all →</button>
+          {/* Latest signals */}
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <div style={{ fontSize: 11, fontWeight: 500, color: '#999', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Latest signals</div>
+              <Link href="/signals" style={{ fontSize: 12, color: '#999', textDecoration: 'none' }}>All signals →</Link>
             </div>
-            <div className="space-y-3">
-              {contributionQueue.map(c => (
-                <div key={c.id} className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg p-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-[10px] font-semibold tracking-wider px-2 py-0.5 rounded" style={{ background: c.typeBg, color: c.typeColor, border: `1px solid ${c.typeBorder}` }}>{c.type}</span>
-                    <span className="text-[11px]" style={{ color: c.statusColor }}>{c.status}</span>
-                  </div>
-                  <div className="text-sm text-[#ccc] mb-1 font-medium">{c.title}</div>
-                  <div className="text-[11px] text-[#999] mb-3">{c.meta}</div>
-                  {c.verified ? (
-                    <button className="text-[11px] text-[#a58e28] border border-[rgba(165,142,40,0.3)] rounded px-3 py-1">View →</button>
-                  ) : (
-                    <span className="text-[11px] text-[#FF9800]">Under review by JOBLUX</span>
-                  )}
-                </div>
-              ))}
-              <div className="border border-dashed border-[#2a2a2a] rounded-lg p-3 text-center">
-                <p className="text-[11px] text-[#999] mb-2">Add more data to strengthen the platform and your Insider status</p>
-                <div className="flex gap-2 justify-center">
-                  {['+ Salary', '+ Culture', '+ Interview'].map(t => (
-                    <button key={t} className="text-[11px] text-[#999] border border-[#2a2a2a] rounded px-2 py-1 hover:border-[#a58e28] hover:text-[#a58e28] transition-colors">{t}</button>
-                  ))}
-                </div>
+            {signals.length > 0 ? (
+              <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '4px 20px' }}>
+                {signals.map((s, i) => (
+                  <Link key={s.id} href={`/signals/${s.slug || s.id}`} style={{ display: 'flex', gap: 10, padding: '12px 0', borderBottom: i < signals.length - 1 ? '1px solid #1e1e1e' : 'none', textDecoration: 'none', alignItems: 'flex-start' }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: SIGNAL_COLORS[s.category] || '#888', flexShrink: 0, marginTop: 5 }} />
+                    <span style={{ fontSize: 13, color: '#ccc', flex: 1, lineHeight: 1.4 }}>{s.title}</span>
+                    <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap' }}>{timeAgo(s.published_at)}</span>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <EmptyCard title="No signals yet" description="Market intelligence will appear here as it gets published." />
+            )}
+          </div>
+        </>)}
+
+        {/* ── CONTRIBUTIONS tab ── */}
+        {activeNav === 'contributions' && (
+          contributions.length > 0 ? (
+            <div>
+              <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '4px 20px', marginBottom: 14 }}>
+                {contributions.map((c, i) => {
+                  const typeIcons: Record<string, string> = { salary_data: '💰', interview_experience: '🎤', wikilux_insight: '💡' }
+                  const typeLabels: Record<string, string> = { salary_data: 'Salary data', interview_experience: 'Interview experience', wikilux_insight: 'Market signal' }
+                  const st = STATUS_LABELS[c.status] || { label: (c.status || '').toUpperCase(), color: '#999' }
+                  return (
+                    <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: i < contributions.length - 1 ? '1px solid #1e1e1e' : 'none' }}>
+                      <span style={{ fontSize: 16 }}>{typeIcons[c.contribution_type] || '📊'}</span>
+                      <div style={{ flex: 1 }}>
+                        <span style={{ fontSize: 13, color: '#ccc', display: 'block' }}>{typeLabels[c.contribution_type] || c.contribution_type} · {c.brand_name || 'General'}</span>
+                        <span style={{ fontSize: 11, color: '#999' }}>{timeAgo(c.created_at)}</span>
+                      </div>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: st.color }}>{st.label}</span>
+                    </div>
+                  )
+                })}
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <Link href="/contribute" style={{ fontSize: 12, color: '#a58e28', textDecoration: 'none' }}>+ Add another contribution</Link>
               </div>
             </div>
-          </div>
+          ) : (
+            <EmptyCard
+              title="No contributions yet"
+              description="Start contributing salary data, interview experiences, or market signals."
+              actionLabel="+ Add contribution"
+              actionHref="/contribute"
+            />
+          )
+        )}
 
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">IMPACT TRACKER</span>
-              <div className="flex-1 h-px bg-[#2a2a2a]" />
-            </div>
-            <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4">
-              {impactStats.map(s => (
-                <div key={s.label} className="flex items-center justify-between py-2.5 border-b border-[#1e1e1e] last:border-b-0">
-                  <span className="text-xs text-[#777]">{s.label}</span>
-                  <div className="text-right">
-                    <span className="text-xs font-medium" style={{ color: s.highlight ? '#9C27B0' : '#e0e0e0' }}>{s.value}</span>
-                    {s.delta && <span className="text-[10px] text-[#4CAF50] ml-2">{s.delta}</span>}
-                  </div>
+        {/* ── IMPACT tab ── */}
+        {activeNav === 'impact' && (
+          <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '24px' }}>
+            <div style={{ fontSize: 11, fontWeight: 500, color: '#999', letterSpacing: '0.5px', marginBottom: 14, textTransform: 'uppercase' }}>Impact overview</div>
+            {[
+              { label: 'Total contributions', value: String(contributions.length) },
+              { label: 'Approved', value: String(approvedCount) },
+              { label: 'Pending review', value: String(pendingCount) },
+              { label: 'Salary data points', value: String(salaryCount) },
+              { label: 'Interview experiences', value: String(interviewCount) },
+              { label: 'Market signals', value: String(signalCount) },
+              { label: 'Total points', value: String(totalPoints) },
+            ].map(r => (
+              <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #1e1e1e' }}>
+                <span style={{ fontSize: 13, color: '#999' }}>{r.label}</span>
+                <span style={{ fontSize: 13, color: '#fff', fontWeight: 500 }}>{r.value}</span>
+              </div>
+            ))}
+            {contributionStats?.next_level && (
+              <div style={{ marginTop: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#999', marginBottom: 4 }}>
+                  <span>Next level: {contributionStats.next_level.level}</span>
+                  <span>{contributionStats.next_level.points_needed} pts to go</span>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Editorial queue + Signal commentary */}
-        <div className="grid grid-cols-2 gap-5">
-          <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">EDITORIAL QUEUE</span>
-              <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <button className="text-xs text-[#999]">Write new →</button>
-            </div>
-            <div className="divide-y divide-[#1e1e1e]">
-              {editorialItems.map(e => (
-                <div key={e.id} className="py-3">
-                  <div className="flex justify-between items-start mb-1">
-                    <div className="text-xs text-[#ccc] leading-snug flex-1 mr-3">{e.title}</div>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded flex-shrink-0" style={{ background: e.statusBg, color: e.statusColor }}>{e.status}</span>
-                  </div>
-                  <div className="flex gap-2 text-[11px] text-[#999]">
-                    <span>{e.date}</span>
-                    {e.views && <><span>·</span><span className="text-[#a58e28]">{e.views}</span></>}
-                  </div>
-                  {e.isDraft && (
-                    <button className="mt-2 bg-[#9C27B0] text-white text-[11px] font-semibold px-3 py-1 rounded">Continue writing →</button>
-                  )}
+                <div style={{ width: '100%', height: 4, background: '#2a2a2a', borderRadius: 2, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', background: '#a58e28', borderRadius: 2, width: `${Math.min(100, (totalPoints / contributionStats.next_level.points_required) * 100)}%` }} />
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
-
-          <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">SIGNAL COMMENTARY</span>
-              <div className="flex-1 h-px bg-[#2a2a2a]" />
-              <Link href="/signals" className="text-xs text-[#999]">Browse signals →</Link>
-            </div>
-            <div className="divide-y divide-[#1e1e1e]">
-              {signalComments.map(c => (
-                <div key={c.id} className="py-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ background: c.signalColor }} />
-                    <span className="text-xs text-[#999]">{c.signal}</span>
-                  </div>
-                  <p className="text-xs text-[#777] italic leading-relaxed mb-2 pl-4" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>{c.comment}</p>
-                  <div className="flex items-center gap-3 pl-4">
-                    <button className="text-[11px] text-[#999] border border-[#2a2a2a] rounded px-2 py-0.5">Edit</button>
-                    <span className="text-[11px] text-[#4CAF50]">Published · {c.views}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <button className="mt-3 w-full text-[11px] text-[#999] border border-[#2a2a2a] rounded-lg py-2 hover:border-[#444] hover:text-[#888] transition-colors">+ Comment on a signal</button>
-          </div>
-        </div>
-
-      </div>
+        )}
+      </main>
     </div>
   )
 }
