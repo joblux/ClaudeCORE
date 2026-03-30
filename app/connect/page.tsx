@@ -22,14 +22,14 @@ export default function ConnectPage() {
                 { text: 'Read exclusive industry news', link: null },
                 { text: 'Work directly with our search team', link: null },
                 { text: 'Request a manager and up level search', link: '/services/recruitment' },
-                { text: 'And more...', link: null, muted: true },
+                { text: 'Private details never listed or published.', link: null },
               ].map((item) => (
                 <li key={item.text} className="flex items-start gap-3 text-sm">
                   <span className="mt-[7px] w-[4px] h-[4px] rounded-full bg-[#2a2a2a] flex-shrink-0" />
                   {item.link ? (
                     <Link href={item.link} className="text-[#888] underline underline-offset-4 decoration-[#444] hover:text-[#ccc] transition-colors">{item.text}</Link>
                   ) : (
-                    <span className={item.muted ? 'text-[#777] italic' : 'text-[#999]'}>{item.text}</span>
+                    <span className='text-[#999]'>{item.text}</span>
                   )}
                 </li>
               ))}
@@ -82,7 +82,7 @@ export default function ConnectPage() {
       </div>
 
       <div className="border-t border-[#1e1e1e] py-4 text-center">
-        <p className="text-[11px] text-[#3a3a3a] mb-2 tracking-wide">
+        <p className="text-[11px] text-[#777] mb-2 tracking-wide">
           No noise&nbsp;&nbsp;·&nbsp;&nbsp;No ads&nbsp;&nbsp;·&nbsp;&nbsp;No data reselling
         </p>
         <p className="text-xs text-[#777]">
