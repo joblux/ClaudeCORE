@@ -1,39 +1,136 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Sparkles, CheckCircle, Settings as SettingsIcon, DollarSign, FileText, TrendingUp, Briefcase } from 'lucide-react'
 
-interface QueueItem {
-  id: string
-  type: string
-  content_type: string | null
-  title: string
-  content: any
-  status: string
-  generated_at: string
-}
+export default function LUXAIAdminPage() {
+  const [activeTab, setActiveTab] = useState('generation')
+  
+  // Approval Queue state
+  const [queue, setQueue] = useState<any[]>([])
+  const [loadingQueue, setLoadingQueue] = useState(false)
+  const [queueTab, setQueueTab] = useState('all')
+  
+  // Settings state
+  const [settings, setSettings] = useState<any>(null)
+  const [loadingSettings, setLoadingSettings] = useState(false)
+  const [savingSettings, setSavingSettings] = useState(false)
+  
+  // Usage state
+  const [usage, setUsage] = useState<any>(null)
+  const [loadingUsage, setLoadingUsage] = useState(false)
+  
+  // Generation state
+  const [generating, setGenerating] = useState<string | null>(null)
 
-export default function LUXAIPage() {
-  const [queue, setQueue] = useState<QueueItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('all')
-
+  // Load data when switching tabs
   useEffect(() => {
-    fetch('/api/admin/luxai/queue')
-      .then(r => r.json())
-      .then(data => {
-        setQueue(data.queue || [])
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
-  }, [])
+    if (activeTab === 'approval' && queue.length === 0) {
+      loadQueue()
+    } else if (activeTab === 'settings' && !settings) {
+      loadSettings()
+    } else if (activeTab === 'usage' && !usage) {
+      loadUsage()
+    }
+  }, [activeTab])
 
-  const filteredQueue = queue.filter(item => {
-    if (activeTab === 'all') return true
-    if (activeTab === 'signals') return item.type === 'signal'
-    if (activeTab === 'salary') return item.type.includes('salary')
-    if (activeTab === 'interview') return item.type === 'interview_detail'
-    return true
-  })
+  async function loadQueue() {
+    setLoadingQueue(true)
+    try {
+      const res = await fetch('/api/admin/luxai/queue')
+      const data = await res.json()
+      setQueue(data.queue || [])
+    } catch (error) {
+      console.error('Failed to load queue:', error)
+    }
+    setLoadingQueue(false)
+  }
+
+  async function loadSettings() {
+    setLoadingSettings(true)
+    try {
+      const res = await fetch('/api/admin/luxai/settings')
+      const data = await res.json()
+      setSettings(data.settings || {
+        signal_generation_enabled: false,
+        signal_daily_target: 6,
+        salary_benchmark_enabled: true,
+        salary_compare_enabled: true,
+        salary_calculator_enabled: true,
+        salary_require_approval: true,
+        interview_generation_enabled: true,
+        interview_require_approval: true,
+        model: 'claude-haiku-3-5-20241022',
+        max_tokens: 2000
+      })
+    } catch (error) {
+      console.error('Failed to load settings:', error)
+    }
+    setLoadingSettings(false)
+  }
+
+  async function loadUsage() {
+    setLoadingUsage(true)
+    try {
+      const res = await fetch('/api/admin/luxai/usage')
+      const data = await res.json()
+      setUsage(data)
+    } catch (error) {
+      console.error('Failed to load usage:', error)
+    }
+    setLoadingUsage(false)
+  }
+
+  async function handleGenerate(type: string, count?: number) {
+    if (!confirm(`Generate ${type}? This will use Claude Haiku 3.5 API.`)) return
+    
+    setGenerating(type)
+    try {
+      const endpoint = type === 'wikilux-all' ? '/api/luxai/regenerate-wikilux'
+        : type === 'article' ? '/api/luxai/generate-article'
+        : type === 'signals' ? '/api/luxai/generate-signals'
+        : null
+
+      if (!endpoint) {
+        alert('Generation endpoint not configured yet')
+        return
+      }
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count: count || 5 }),
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        alert(`✓ Generated successfully! ${data.count || 1} items added to queue.`)
+        if (activeTab === 'approval') loadQueue()
+      } else {
+        alert(`✗ Generation failed: ${data.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      alert(`✗ Generation failed: Network error. Make sure ANTHROPIC_API_KEY is set in Coolify.`)
+    } finally {
+      setGenerating(null)
+    }
+  }
+
+  async function handleSaveSettings() {
+    setSavingSettings(true)
+    try {
+      await fetch('/api/admin/luxai/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings),
+      })
+      alert('Settings saved successfully')
+    } catch (error) {
+      alert('Failed to save settings')
+    }
+    setSavingSettings(false)
+  }
 
   async function handleApprove(id: string) {
     try {
@@ -43,12 +140,14 @@ export default function LUXAIPage() {
         body: JSON.stringify({ id }),
       })
       setQueue(queue.filter(q => q.id !== id))
+      alert('✓ Approved and published')
     } catch (error) {
       alert('Failed to approve')
     }
   }
 
   async function handleReject(id: string) {
+    if (!confirm('Reject this item?')) return
     try {
       await fetch('/api/admin/luxai/reject', {
         method: 'POST',
@@ -56,6 +155,7 @@ export default function LUXAIPage() {
         body: JSON.stringify({ id }),
       })
       setQueue(queue.filter(q => q.id !== id))
+      alert('✓ Rejected')
     } catch (error) {
       alert('Failed to reject')
     }
@@ -63,141 +163,737 @@ export default function LUXAIPage() {
 
   function getBadgeStyle(contentType: string | null) {
     switch (contentType?.toUpperCase()) {
-      case 'TALENT':
-        return 'bg-[#3B82F6] text-white'
-      case 'MARKET':
-        return 'bg-[#10B981] text-white'
-      case 'BRAND':
-        return 'bg-[#F59E0B] text-white'
-      case 'FINANCE':
-        return 'bg-[#8B5CF6] text-white'
-      case 'SALARY':
-        return 'bg-[#EC4899] text-white'
-      case 'INTERVIEW':
-        return 'bg-[#06B6D4] text-white'
-      default:
-        return 'bg-[#3B82F6] text-white'
+      case 'TALENT': return 'bg-[#3B82F6] text-white'
+      case 'MARKET': return 'bg-[#10B981] text-white'
+      case 'BRAND': return 'bg-[#F59E0B] text-white'
+      case 'FINANCE': return 'bg-[#8B5CF6] text-white'
+      case 'SALARY': return 'bg-[#EC4899] text-white'
+      case 'INTERVIEW': return 'bg-[#06B6D4] text-white'
+      default: return 'bg-[#3B82F6] text-white'
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <div className="w-5 h-5 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin" />
-      </div>
-    )
-  }
+  const filteredQueue = queue.filter(item => {
+    if (queueTab === 'all') return true
+    if (queueTab === 'signals') return item.type === 'signal'
+    if (queueTab === 'salary') return item.type.includes('salary')
+    if (queueTab === 'interview') return item.type === 'interview_detail'
+    return true
+  })
 
-  const tabCounts = {
-    all: queue.length,
-    signals: queue.filter(q => q.type === 'signal').length,
-    salary: queue.filter(q => q.type.includes('salary')).length,
-    interview: queue.filter(q => q.type === 'interview_detail').length,
-  }
+  const tabs = [
+    { id: 'generation', label: 'Generation', icon: Sparkles },
+    { id: 'approval', label: 'Approval Queue', icon: CheckCircle },
+    { id: 'settings', label: 'Settings', icon: SettingsIcon },
+    { id: 'usage', label: 'Usage & Costs', icon: DollarSign },
+  ]
 
   return (
-    <div className="p-8">
-      <div className="max-w-[1200px]">
-        <div className="mb-8">
-          <h2 className="text-[28px] font-semibold text-[#111] mb-2">LUXAI Approval Queue</h2>
-          <p className="text-sm text-[#666]">Review AI-generated content before publishing</p>
+    <div className="min-h-screen bg-[#f5f5f5]">
+      {/* Header */}
+      <div className="bg-white border-b border-[#e8e8e8]">
+        <div className="px-8 py-6">
+          <h1 className="text-[32px] font-semibold text-[#111] mb-2">LUXAI</h1>
+          <p className="text-sm text-[#666]">AI engine management - Generation, approval, and cost tracking</p>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-0 border-b border-[#e8e8e8] mb-6">
-          {[
-            { id: 'all', label: 'All' },
-            { id: 'signals', label: 'Signals' },
-            { id: 'salary', label: 'Salary' },
-            { id: 'interview', label: 'Interview' },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`pb-3 mr-8 text-sm relative transition-colors ${
-                activeTab === tab.id ? 'text-[#111] font-medium' : 'text-[#666]'
-              }`}
-            >
-              {tab.label}
-              <span className="text-xs text-[#999] ml-1.5">{tabCounts[tab.id as keyof typeof tabCounts]}</span>
-              {activeTab === tab.id && (
-                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#111]" />
-              )}
-            </button>
-          ))}
+        <div className="px-8 flex gap-8 border-t border-[#e8e8e8]">
+          {tabs.map(tab => {
+            const Icon = tab.icon
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-1 py-4 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-[#111] text-[#111]'
+                    : 'border-transparent text-[#666] hover:text-[#111]'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            )
+          })}
         </div>
+      </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
-          <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
-            <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Pending Review</div>
-            <div className="text-[32px] font-semibold text-[#111]">{queue.length}</div>
-          </div>
-          <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
-            <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Approved (7d)</div>
-            <div className="text-[32px] font-semibold text-[#111]">0</div>
-          </div>
-          <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
-            <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Rejected (7d)</div>
-            <div className="text-[32px] font-semibold text-[#111]">0</div>
-          </div>
-          <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
-            <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Avg Review Time</div>
-            <div className="text-[32px] font-semibold text-[#111]">2.4m</div>
-          </div>
-        </div>
+      {/* Tab Content */}
+      <div>
+        {/* GENERATION TAB */}
+        {activeTab === 'generation' && (
+          <div className="p-8">
+            <div className="max-w-[1200px]">
+              <div className="mb-8">
+                <h2 className="text-[28px] font-semibold text-[#111] mb-2">AI Generation</h2>
+                <p className="text-sm text-[#666]">Generate content using Claude Haiku 3.5 across all platform sections</p>
+              </div>
 
-        {/* Queue Items */}
-        <div className="space-y-3">
-          {filteredQueue.length === 0 ? (
-            <div className="bg-white border border-[#e8e8e8] rounded-lg p-12 text-center">
-              <p className="text-[#999] text-sm mb-4">No pending items in queue</p>
-              <p className="text-xs text-[#666] mb-2">Generate test signals:</p>
-              <code className="text-xs bg-[#f5f5f5] px-3 py-1.5 rounded inline-block">
-                curl -X POST https://joblux.com/api/luxai/generate-signal
-              </code>
-            </div>
-          ) : (
-            filteredQueue.map(item => (
-              <div key={item.id} className="bg-white border border-[#e8e8e8] rounded-lg p-5 hover:border-[#ccc] transition-colors">
-                <div className="mb-3">
-                  <span className={`inline-block text-[10px] font-semibold px-2 py-1 rounded uppercase tracking-wide ${getBadgeStyle(item.content_type)}`}>
-                    {item.content_type || 'SIGNAL'}
-                  </span>
+              {/* WikiLux Brands */}
+              <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-5">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-[#666]" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-semibold text-[#111] mb-1">WikiLux Brands</h3>
+                    <p className="text-sm text-[#666] leading-relaxed">
+                      Regenerates AI content for luxury brand pages (history, founder, signature products, creative directors, career opportunities)
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-base font-medium text-[#111] mb-1">{item.title}</h3>
-                <p className="text-xs text-[#999] mb-4">
-                  Generated {new Date(item.generated_at).toLocaleString()} via LUXAI
-                </p>
-                <div className="text-sm text-[#444] mb-4 leading-relaxed">
-                  {typeof item.content === 'string' 
-                    ? item.content 
-                    : item.content.content || JSON.stringify(item.content).substring(0, 300)
-                  }
+
+                <div className="bg-[#f5f5f5] rounded-lg p-4 mb-4">
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">Cost</div>
+                      <div className="text-[#111] font-medium">~$0.15 for all 150 brands</div>
+                    </div>
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">When to Use</div>
+                      <div className="text-[#111] font-medium">Monthly refresh or after adding brands</div>
+                    </div>
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">How It Works</div>
+                      <div className="text-[#111] font-medium">AI reads brand data → generates content → saves to wikilux_content</div>
+                    </div>
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">Result</div>
+                      <div className="text-[#111] font-medium">Content visible on /wikilux/[brand] pages</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex gap-2">
+
+                <div className="flex gap-3">
                   <button
-                    onClick={() => handleApprove(item.id)}
-                    className="bg-[#10B981] text-white text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#059669] transition-colors"
+                    onClick={() => handleGenerate('wikilux-all')}
+                    disabled={generating !== null}
+                    className="px-4 py-2.5 bg-[#111] text-white rounded-md text-sm font-medium hover:bg-[#333] disabled:opacity-50 transition-colors"
                   >
-                    Approve & Publish
+                    {generating === 'wikilux-all' ? 'Regenerating...' : 'REGENERATE ALL BRANDS (150)'}
                   </button>
                   <button
-                    className="bg-white border border-[#e8e8e8] text-[#111] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#f5f5f5] transition-colors"
+                    disabled={generating !== null}
+                    className="px-4 py-2.5 bg-white border border-[#e8e8e8] text-[#111] rounded-md text-sm font-medium hover:bg-[#f5f5f5] disabled:opacity-50 transition-colors"
                   >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleReject(item.id)}
-                    className="bg-white border border-[#e8e8e8] text-[#EF4444] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#FEE2E2] transition-colors"
-                  >
-                    Reject
+                    REGENERATE SINGLE BRAND ▼
                   </button>
                 </div>
               </div>
-            ))
-          )}
-        </div>
+
+              {/* BlogLux Articles */}
+              <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-5">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-[#666]" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-semibold text-[#111] mb-1">BlogLux Articles</h3>
+                    <p className="text-sm text-[#666] leading-relaxed">
+                      Generates thought leadership articles about luxury careers, industry trends, brand analysis
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-[#f5f5f5] rounded-lg p-4 mb-4">
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">Cost</div>
+                      <div className="text-[#111] font-medium">~$0.01 per article</div>
+                    </div>
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">Topics</div>
+                      <div className="text-[#111] font-medium">Industry trends, career advice, brand analysis</div>
+                    </div>
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">How It Works</div>
+                      <div className="text-[#111] font-medium">AI generates → saves as draft → you review/edit → publish</div>
+                    </div>
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">Result</div>
+                      <div className="text-[#111] font-medium">Article appears in Intelligence section</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleGenerate('article')}
+                    disabled={generating !== null}
+                    className="px-4 py-2.5 bg-[#111] text-white rounded-md text-sm font-medium hover:bg-[#333] disabled:opacity-50 transition-colors"
+                  >
+                    {generating === 'article' ? 'Generating...' : 'GENERATE ARTICLE'}
+                  </button>
+                  <select className="px-4 py-2.5 bg-white border border-[#e8e8e8] rounded-md text-sm font-medium">
+                    <option>Career Trends</option>
+                    <option>Brand Analysis</option>
+                    <option>Market Insights</option>
+                    <option>Hiring Strategy</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Signals */}
+              <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-5">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-[#666]" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-semibold text-[#111] mb-1">Signals</h3>
+                    <p className="text-sm text-[#666] leading-relaxed">
+                      Generates luxury industry news signals from monitoring WWD, BOF, Vogue Business, FT, Bloomberg, Reuters
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-[#f5f5f5] rounded-lg p-4 mb-4">
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">Cost</div>
+                      <div className="text-[#111] font-medium">~$0.02 for 5 signals</div>
+                    </div>
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">Categories</div>
+                      <div className="text-[#111] font-medium">TALENT, MARKET, BRAND, FINANCE</div>
+                    </div>
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">How It Works</div>
+                      <div className="text-[#111] font-medium">AI monitors news → generates signals → you approve → publishes</div>
+                    </div>
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">Result</div>
+                      <div className="text-[#111] font-medium">Signals appear on /signals page with color badges</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[#FEF3C7] border border-[#FDE68A] rounded-lg p-3 mb-4">
+                  <p className="text-xs text-[#92400E] leading-relaxed">
+                    <strong>Hybrid Approach:</strong> These buttons are optional. For cost savings (~$0), manually create 1-2 signals/day instead of auto-generating. Manual creation coming soon.
+                  </p>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleGenerate('signals', 5)}
+                    disabled={generating !== null}
+                    className="px-4 py-2.5 bg-[#111] text-white rounded-md text-sm font-medium hover:bg-[#333] disabled:opacity-50 transition-colors"
+                  >
+                    {generating === 'signals' ? 'Generating...' : 'GENERATE SIGNALS (5)'}
+                  </button>
+                  <button
+                    disabled={generating !== null}
+                    className="px-4 py-2.5 bg-white border border-[#e8e8e8] text-[#111] rounded-md text-sm font-medium hover:bg-[#f5f5f5] disabled:opacity-50 transition-colors"
+                  >
+                    GENERATE SINGLE SIGNAL
+                  </button>
+                </div>
+              </div>
+
+              {/* Salary Intelligence */}
+              <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-5">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] flex items-center justify-center">
+                    <DollarSign className="w-5 h-5 text-[#666]" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-semibold text-[#111] mb-1">Salary Intelligence</h3>
+                    <p className="text-sm text-[#666] leading-relaxed">
+                      Generates salary benchmarks, comparisons, and personalized estimates when users request them on /careers
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-[#f5f5f5] rounded-lg p-4 mb-4">
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">Cost</div>
+                      <div className="text-[#111] font-medium">~$0.30-0.50/month total</div>
+                    </div>
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">Trigger</div>
+                      <div className="text-[#111] font-medium">User clicks Benchmark/Compare/Calculator on /careers</div>
+                    </div>
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">How It Works</div>
+                      <div className="text-[#111] font-medium">User request → API calls Claude → generates data → (optional approval)</div>
+                    </div>
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">Result</div>
+                      <div className="text-[#111] font-medium">User sees salary intelligence (or after approval if enabled)</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between py-3 px-4 bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-[#10B981]"></div>
+                    <span className="text-sm font-medium text-[#065F46]">ON-DEMAND ONLY</span>
+                  </div>
+                  <span className="text-xs text-[#065F46]">Triggered by user requests, not auto-generated</span>
+                </div>
+              </div>
+
+              {/* Interview Intelligence */}
+              <div className="bg-white border border-[#e8e8e8] rounded-lg p-6">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] flex items-center justify-center">
+                    <Briefcase className="w-5 h-5 text-[#666]" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-semibold text-[#111] mb-1">Interview Intelligence</h3>
+                    <p className="text-sm text-[#666] leading-relaxed">
+                      Expands basic interview data into full experiences when users contribute their interview stories
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-[#f5f5f5] rounded-lg p-4 mb-4">
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">Cost</div>
+                      <div className="text-[#111] font-medium">Included in ~$0.30-0.50/month budget</div>
+                    </div>
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">Trigger</div>
+                      <div className="text-[#111] font-medium">User submits basic interview info</div>
+                    </div>
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">How It Works</div>
+                      <div className="text-[#111] font-medium">User contribution → AI expands → (optional approval) → publishes</div>
+                    </div>
+                    <div>
+                      <div className="text-[#999] uppercase tracking-wide mb-1">Result</div>
+                      <div className="text-[#111] font-medium">Rich interview experiences on /careers</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between py-3 px-4 bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-[#10B981]"></div>
+                    <span className="text-sm font-medium text-[#065F46]">ON-DEMAND ONLY</span>
+                  </div>
+                  <span className="text-xs text-[#065F46]">Triggered by user contributions, not auto-generated</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* APPROVAL QUEUE TAB */}
+        {activeTab === 'approval' && (
+          <div className="p-8">
+            <div className="max-w-[1200px]">
+              <div className="mb-8">
+                <h2 className="text-[28px] font-semibold text-[#111] mb-2">Approval Queue</h2>
+                <p className="text-sm text-[#666]">Review AI-generated content before publishing</p>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex gap-0 border-b border-[#e8e8e8] mb-6">
+                {[
+                  { id: 'all', label: 'All' },
+                  { id: 'signals', label: 'Signals' },
+                  { id: 'salary', label: 'Salary' },
+                  { id: 'interview', label: 'Interview' },
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setQueueTab(tab.id)}
+                    className={`pb-3 mr-8 text-sm relative transition-colors ${
+                      queueTab === tab.id ? 'text-[#111] font-medium' : 'text-[#666]'
+                    }`}
+                  >
+                    {tab.label}
+                    <span className="text-xs text-[#999] ml-1.5">
+                      {tab.id === 'all' ? queue.length
+                        : tab.id === 'signals' ? queue.filter(q => q.type === 'signal').length
+                        : tab.id === 'salary' ? queue.filter(q => q.type.includes('salary')).length
+                        : queue.filter(q => q.type === 'interview_detail').length}
+                    </span>
+                    {queueTab === tab.id && (
+                      <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#111]" />
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-4 gap-4 mb-8">
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
+                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Pending Review</div>
+                  <div className="text-[32px] font-semibold text-[#111]">{queue.length}</div>
+                </div>
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
+                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Approved (7d)</div>
+                  <div className="text-[32px] font-semibold text-[#111]">0</div>
+                </div>
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
+                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Rejected (7d)</div>
+                  <div className="text-[32px] font-semibold text-[#111]">0</div>
+                </div>
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
+                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Avg Review Time</div>
+                  <div className="text-[32px] font-semibold text-[#111]">2.4m</div>
+                </div>
+              </div>
+
+              {/* Queue Items */}
+              {loadingQueue ? (
+                <div className="flex items-center justify-center p-12">
+                  <div className="w-5 h-5 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin" />
+                </div>
+              ) : filteredQueue.length === 0 ? (
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-12 text-center">
+                  <p className="text-[#999] text-sm mb-4">No pending items in queue</p>
+                  <p className="text-xs text-[#666] mb-2">Generate content using the Generation tab</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {filteredQueue.map(item => (
+                    <div key={item.id} className="bg-white border border-[#e8e8e8] rounded-lg p-5 hover:border-[#ccc] transition-colors">
+                      <div className="mb-3">
+                        <span className={`inline-block text-[10px] font-semibold px-2 py-1 rounded uppercase tracking-wide ${getBadgeStyle(item.content_type)}`}>
+                          {item.content_type || 'SIGNAL'}
+                        </span>
+                      </div>
+                      <h3 className="text-base font-medium text-[#111] mb-1">{item.title}</h3>
+                      <p className="text-xs text-[#999] mb-4">
+                        Generated {new Date(item.generated_at).toLocaleString()} via LUXAI
+                      </p>
+                      <div className="text-sm text-[#444] mb-4 leading-relaxed">
+                        {typeof item.content === 'string' 
+                          ? item.content 
+                          : item.content.content || JSON.stringify(item.content).substring(0, 300)
+                        }
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleApprove(item.id)}
+                          className="bg-[#10B981] text-white text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#059669] transition-colors"
+                        >
+                          Approve & Publish
+                        </button>
+                        <button className="bg-white border border-[#e8e8e8] text-[#111] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#f5f5f5] transition-colors">
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleReject(item.id)}
+                          className="bg-white border border-[#e8e8e8] text-[#EF4444] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#FEE2E2] transition-colors"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* SETTINGS TAB */}
+        {activeTab === 'settings' && settings && (
+          <div className="p-8">
+            <div className="max-w-[900px]">
+              <div className="mb-8">
+                <h2 className="text-[28px] font-semibold text-[#111] mb-2">LUXAI Settings</h2>
+                <p className="text-sm text-[#666]">Configure AI generation parameters and automation rules</p>
+              </div>
+
+              {/* Signal Generation */}
+              <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-5">
+                <h3 className="text-base font-semibold text-[#111] mb-4">Signal Generation</h3>
+                
+                <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
+                  <div>
+                    <div className="text-sm font-medium text-[#111] mb-1">Auto-generate daily signals</div>
+                    <div className="text-xs text-[#666]">LUXAI will generate 5-8 signals per day based on news sources</div>
+                  </div>
+                  <button
+                    onClick={() => setSettings({...settings, signal_generation_enabled: !settings.signal_generation_enabled})}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      settings.signal_generation_enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
+                    }`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.signal_generation_enabled ? 'translate-x-6' : 'translate-x-1'
+                    }`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
+                  <div>
+                    <div className="text-sm font-medium text-[#111] mb-1">Target signals per day</div>
+                    <div className="text-xs text-[#666]">Number of signals to generate daily</div>
+                  </div>
+                  <input
+                    type="number"
+                    value={settings.signal_daily_target}
+                    onChange={(e) => setSettings({...settings, signal_daily_target: parseInt(e.target.value)})}
+                    className="w-20 px-2.5 py-1.5 border border-[#e8e8e8] rounded text-sm"
+                    min="1"
+                    max="20"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between py-3">
+                  <div>
+                    <div className="text-sm font-medium text-[#111] mb-1">News sources</div>
+                    <div className="text-xs text-[#666]">WWD, BOF, Vogue Business, FT, Bloomberg, Reuters</div>
+                  </div>
+                  <button className="px-4 py-2 bg-white border border-[#e8e8e8] rounded-md text-sm font-medium text-[#111] hover:bg-[#f5f5f5] transition-colors">
+                    Configure
+                  </button>
+                </div>
+              </div>
+
+              {/* Salary Intelligence */}
+              <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-5">
+                <h3 className="text-base font-semibold text-[#111] mb-4">Salary Intelligence</h3>
+                
+                <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
+                  <div>
+                    <div className="text-sm font-medium text-[#111] mb-1">Enable benchmark tool</div>
+                    <div className="text-xs text-[#666]">Allow LUXAI to generate salary benchmarks</div>
+                  </div>
+                  <button
+                    onClick={() => setSettings({...settings, salary_benchmark_enabled: !settings.salary_benchmark_enabled})}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      settings.salary_benchmark_enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
+                    }`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.salary_benchmark_enabled ? 'translate-x-6' : 'translate-x-1'
+                    }`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
+                  <div>
+                    <div className="text-sm font-medium text-[#111] mb-1">Enable compare tool</div>
+                    <div className="text-xs text-[#666]">Allow LUXAI to generate salary comparisons</div>
+                  </div>
+                  <button
+                    onClick={() => setSettings({...settings, salary_compare_enabled: !settings.salary_compare_enabled})}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      settings.salary_compare_enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
+                    }`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.salary_compare_enabled ? 'translate-x-6' : 'translate-x-1'
+                    }`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
+                  <div>
+                    <div className="text-sm font-medium text-[#111] mb-1">Enable calculator tool</div>
+                    <div className="text-xs text-[#666]">Allow LUXAI to generate personalized estimates</div>
+                  </div>
+                  <button
+                    onClick={() => setSettings({...settings, salary_calculator_enabled: !settings.salary_calculator_enabled})}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      settings.salary_calculator_enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
+                    }`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.salary_calculator_enabled ? 'translate-x-6' : 'translate-x-1'
+                    }`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between py-3">
+                  <div>
+                    <div className="text-sm font-medium text-[#111] mb-1">Require approval for salary tools</div>
+                    <div className="text-xs text-[#666]">All salary outputs go through approval queue</div>
+                  </div>
+                  <button
+                    onClick={() => setSettings({...settings, salary_require_approval: !settings.salary_require_approval})}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      settings.salary_require_approval ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
+                    }`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.salary_require_approval ? 'translate-x-6' : 'translate-x-1'
+                    }`} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Interview Intelligence */}
+              <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-5">
+                <h3 className="text-base font-semibold text-[#111] mb-4">Interview Intelligence</h3>
+                
+                <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
+                  <div>
+                    <div className="text-sm font-medium text-[#111] mb-1">Generate interview details</div>
+                    <div className="text-xs text-[#666]">LUXAI expands basic interview data into full experiences</div>
+                  </div>
+                  <button
+                    onClick={() => setSettings({...settings, interview_generation_enabled: !settings.interview_generation_enabled})}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      settings.interview_generation_enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
+                    }`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.interview_generation_enabled ? 'translate-x-6' : 'translate-x-1'
+                    }`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between py-3">
+                  <div>
+                    <div className="text-sm font-medium text-[#111] mb-1">Require approval for interview content</div>
+                    <div className="text-xs text-[#666]">All interview details go through approval queue</div>
+                  </div>
+                  <button
+                    onClick={() => setSettings({...settings, interview_require_approval: !settings.interview_require_approval})}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      settings.interview_require_approval ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
+                    }`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.interview_require_approval ? 'translate-x-6' : 'translate-x-1'
+                    }`} />
+                  </button>
+                </div>
+              </div>
+
+              {/* AI Model */}
+              <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-8">
+                <h3 className="text-base font-semibold text-[#111] mb-4">AI Model</h3>
+                
+                <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
+                  <div>
+                    <div className="text-sm font-medium text-[#111] mb-1">Primary model</div>
+                    <div className="text-xs text-[#666]">Claude Haiku 3.5 (recommended for cost)</div>
+                  </div>
+                  <select
+                    value={settings.model}
+                    onChange={(e) => setSettings({...settings, model: e.target.value})}
+                    className="px-2.5 py-1.5 border border-[#e8e8e8] rounded text-sm"
+                  >
+                    <option value="claude-haiku-3-5-20241022">Claude Haiku 3.5</option>
+                    <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center justify-between py-3">
+                  <div>
+                    <div className="text-sm font-medium text-[#111] mb-1">Max tokens per request</div>
+                    <div className="text-xs text-[#666]">Cost control limit</div>
+                  </div>
+                  <input
+                    type="number"
+                    value={settings.max_tokens}
+                    onChange={(e) => setSettings({...settings, max_tokens: parseInt(e.target.value)})}
+                    className="w-24 px-2.5 py-1.5 border border-[#e8e8e8] rounded text-sm"
+                    min="100"
+                    max="10000"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={handleSaveSettings}
+                  disabled={savingSettings}
+                  className="px-6 py-2.5 bg-[#111] text-white rounded-md text-sm font-medium hover:bg-[#333] disabled:opacity-50 transition-colors"
+                >
+                  {savingSettings ? 'Saving...' : 'Save Settings'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* USAGE TAB */}
+        {activeTab === 'usage' && usage && (
+          <div className="p-8">
+            <div className="max-w-[1200px]">
+              <div className="mb-8">
+                <h2 className="text-[28px] font-semibold text-[#111] mb-2">Usage & Costs</h2>
+                <p className="text-sm text-[#666]">LUXAI API usage and spending overview</p>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-4 gap-4 mb-8">
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
+                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">This Month</div>
+                  <div className="text-[32px] font-semibold text-[#111] mb-1">${usage.stats.this_month.toFixed(2)}</div>
+                  <div className="text-[13px] font-medium text-[#10B981]">{usage.stats.this_month_requests} requests</div>
+                </div>
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
+                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Last Month</div>
+                  <div className="text-[32px] font-semibold text-[#111] mb-1">${usage.stats.last_month.toFixed(2)}</div>
+                  <div className="text-[13px] font-medium text-[#10B981]">{usage.stats.last_month_requests} requests</div>
+                </div>
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
+                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Avg Cost/Request</div>
+                  <div className="text-[32px] font-semibold text-[#111] mb-1">${usage.stats.avg_cost.toFixed(4)}</div>
+                  <div className="text-[13px] font-medium text-[#10B981]">Claude Haiku</div>
+                </div>
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
+                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Projected (Month)</div>
+                  <div className="text-[32px] font-semibold text-[#111] mb-1">${(usage.stats.this_month * 1.06).toFixed(2)}</div>
+                  <div className="text-[13px] font-medium text-[#10B981]">+5.7%</div>
+                </div>
+              </div>
+
+              {/* Request Log Table */}
+              <div className="bg-white border border-[#e8e8e8] rounded-lg overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[#e8e8e8]">
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Timestamp</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Type</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Model</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Tokens</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Cost</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {usage.history.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-12 text-center text-sm text-[#999]">No requests yet</td>
+                      </tr>
+                    ) : (
+                      usage.history.map((item: any) => (
+                        <tr key={item.id} className="border-b border-[#e8e8e8] hover:bg-[#fafafa] transition-colors">
+                          <td className="px-6 py-4 text-sm text-[#666]">{new Date(item.created_at).toLocaleString('en-US', { 
+                            year: 'numeric', 
+                            month: '2-digit', 
+                            day: '2-digit', 
+                            hour: '2-digit', 
+                            minute: '2-digit', 
+                            second: '2-digit',
+                            hour12: false 
+                          })}</td>
+                          <td className="px-6 py-4 text-sm text-[#111]">{item.type}</td>
+                          <td className="px-6 py-4 text-sm text-[#666]">Haiku 3.5</td>
+                          <td className="px-6 py-4 text-sm text-[#666]">{item.tokens_used?.toLocaleString() || '-'}</td>
+                          <td className="px-6 py-4 text-sm text-[#111] font-medium">${item.cost_usd?.toFixed(4) || '0.0000'}</td>
+                          <td className="px-6 py-4 text-sm">
+                            {item.status === 'success' ? (
+                              <span className="inline-block bg-[#D1FAE5] text-[#065F46] text-xs font-semibold px-2 py-1 rounded">Success</span>
+                            ) : (
+                              <span className="inline-block bg-[#FEE2E2] text-[#991B1B] text-xs font-semibold px-2 py-1 rounded">Error</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
