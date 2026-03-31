@@ -1,103 +1,64 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions)
-  const isAdmin = (session?.user as any)?.role === 'admin'
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const period = req.nextUrl.searchParams.get('period') || '7d'
-  const days = period === '90d' ? 90 : period === '30d' ? 30 : 7
-  const since = new Date()
-  since.setDate(since.getDate() - days)
-  const sinceISO = since.toISOString()
-
+export async function GET() {
   try {
-    // Total counts
-    const { count: totalGenerated } = await supabase
-      .from('luxai_queue')
-      .select('*', { count: 'exact', head: true })
-      .gte('generated_at', sinceISO)
+    const now = new Date()
+    const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const lastDayLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
 
-    const { count: totalApproved } = await supabase
-      .from('luxai_queue')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'approved')
-      .gte('generated_at', sinceISO)
+    // This month stats
+    const { data: thisMonth } = await supabase
+      .from('luxai_history')
+      .select('cost_usd, tokens_used')
+      .gte('created_at', firstDayThisMonth.toISOString())
+      .eq('status', 'success')
 
-    const { count: totalRejected } = await supabase
-      .from('luxai_queue')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'rejected')
-      .gte('generated_at', sinceISO)
+    // Last month stats
+    const { data: lastMonth } = await supabase
+      .from('luxai_history')
+      .select('cost_usd')
+      .gte('created_at', firstDayLastMonth.toISOString())
+      .lte('created_at', lastDayLastMonth.toISOString())
+      .eq('status', 'success')
 
-    // All items in period for aggregation
-    const { data: items } = await supabase
-      .from('luxai_queue')
-      .select('type, content_type, generated_at, tokens_used, cost, model')
-      .gte('generated_at', sinceISO)
-      .order('generated_at', { ascending: true })
+    // Request history (last 50)
+    const { data: history } = await supabase
+      .from('luxai_history')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50)
 
-    const allItems = items || []
-
-    // Total cost
-    const totalCost = allItems.reduce((sum, i) => sum + (i.cost || 0), 0)
-
-    // Daily aggregation
-    const dailyMap = new Map<string, { count: number; cost: number }>()
-    for (const item of allItems) {
-      const date = item.generated_at.split('T')[0]
-      const existing = dailyMap.get(date) || { count: 0, cost: 0 }
-      existing.count++
-      existing.cost += item.cost || 0
-      dailyMap.set(date, existing)
-    }
-    const daily = Array.from(dailyMap.entries()).map(([date, data]) => ({ date, ...data }))
-
-    // By type
-    const typeMap = new Map<string, { count: number; cost: number }>()
-    for (const item of allItems) {
-      const type = item.content_type || item.type || 'unknown'
-      const existing = typeMap.get(type) || { count: 0, cost: 0 }
-      existing.count++
-      existing.cost += item.cost || 0
-      typeMap.set(type, existing)
-    }
-    const by_type = Array.from(typeMap.entries()).map(([type, data]) => ({ type, ...data }))
-
-    // By model
-    const modelMap = new Map<string, { tokens: number; cost: number }>()
-    for (const item of allItems) {
-      const model = item.model || 'unknown'
-      const existing = modelMap.get(model) || { tokens: 0, cost: 0 }
-      existing.tokens += item.tokens_used || 0
-      existing.cost += item.cost || 0
-      modelMap.set(model, existing)
-    }
-    const by_model = Array.from(modelMap.entries()).map(([model, data]) => ({ model, ...data }))
+    const thisMonthCost = thisMonth?.reduce((sum, item) => sum + (item.cost_usd || 0), 0) || 0
+    const lastMonthCost = lastMonth?.reduce((sum, item) => sum + (item.cost_usd || 0), 0) || 0
+    const avgCost = thisMonth && thisMonth.length > 0 ? thisMonthCost / thisMonth.length : 0
 
     return NextResponse.json({
-      usage: {
-        total_generated: totalGenerated || 0,
-        total_approved: totalApproved || 0,
-        total_rejected: totalRejected || 0,
-        total_cost: totalCost,
-        daily,
-        by_type,
-        by_model,
+      stats: {
+        this_month: thisMonthCost,
+        last_month: lastMonthCost,
+        avg_cost: avgCost,
+        this_month_requests: thisMonth?.length || 0,
+        last_month_requests: lastMonth?.length || 0,
       },
+      history: history || [],
     })
   } catch (error) {
-    console.error('Failed to fetch LUXAI usage:', error)
-    return NextResponse.json({ usage: null }, { status: 500 })
+    return NextResponse.json({ 
+      stats: { 
+        this_month: 0, 
+        last_month: 0, 
+        avg_cost: 0,
+        this_month_requests: 0,
+        last_month_requests: 0
+      }, 
+      history: [] 
+    })
   }
 }

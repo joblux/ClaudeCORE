@@ -2,39 +2,27 @@
 
 import { useEffect, useState } from 'react'
 
-interface LuxaiSettings {
-  auto_approve_signals: boolean
-  auto_approve_salary: boolean
-  auto_approve_interview: boolean
-  generation_enabled: boolean
-  daily_generation_limit: number
-  model: string
-  temperature: number
-  content_types: string[]
-}
-
-const DEFAULT_SETTINGS: LuxaiSettings = {
-  auto_approve_signals: false,
-  auto_approve_salary: false,
-  auto_approve_interview: false,
-  generation_enabled: true,
-  daily_generation_limit: 50,
-  model: 'gpt-4o',
-  temperature: 0.7,
-  content_types: ['signal', 'salary_benchmark', 'interview_detail'],
-}
-
 export default function LUXAISettingsPage() {
-  const [settings, setSettings] = useState<LuxaiSettings>(DEFAULT_SETTINGS)
+  const [settings, setSettings] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     fetch('/api/admin/luxai/settings')
       .then(r => r.json())
       .then(data => {
-        if (data.settings) setSettings({ ...DEFAULT_SETTINGS, ...data.settings })
+        setSettings(data.settings || {
+          signal_generation_enabled: true,
+          signal_daily_target: 6,
+          salary_benchmark_enabled: true,
+          salary_compare_enabled: true,
+          salary_calculator_enabled: true,
+          salary_require_approval: false,
+          interview_generation_enabled: true,
+          interview_require_approval: true,
+          model: 'claude-haiku-3-5-20241022',
+          max_tokens: 1500
+        })
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -42,16 +30,14 @@ export default function LUXAISettingsPage() {
 
   async function handleSave() {
     setSaving(true)
-    setSaved(false)
     try {
       await fetch('/api/admin/luxai/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings),
       })
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
-    } catch {
+      alert('Settings saved successfully')
+    } catch (error) {
       alert('Failed to save settings')
     }
     setSaving(false)
@@ -59,7 +45,7 @@ export default function LUXAISettingsPage() {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center">
+      <div className="flex items-center justify-center p-12">
         <div className="w-5 h-5 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin" />
       </div>
     )
@@ -67,146 +53,214 @@ export default function LUXAISettingsPage() {
 
   return (
     <div className="p-8">
-      <div className="max-w-[800px]">
-        <h2 className="text-2xl font-semibold text-[#111] mb-2">LUXAI Settings</h2>
-        <p className="text-sm text-[#666] mb-8">Configure AI generation and approval workflows</p>
+      <div className="max-w-[900px]">
+        <div className="mb-8">
+          <h2 className="text-[28px] font-semibold text-[#111] mb-2">LUXAI Settings</h2>
+          <p className="text-sm text-[#666]">Configure AI generation parameters and automation rules</p>
+        </div>
 
-        {/* Generation */}
-        <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-6">
-          <h3 className="text-sm font-semibold text-[#111] mb-4 uppercase tracking-wide">Generation</h3>
-
-          <div className="space-y-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-[#111] font-medium">Enable Generation</div>
-                <div className="text-xs text-[#999] mt-0.5">Allow LUXAI to generate new content</div>
-              </div>
-              <button
-                onClick={() => setSettings(s => ({ ...s, generation_enabled: !s.generation_enabled }))}
-                className={`relative w-10 h-[22px] rounded-full transition-colors ${
-                  settings.generation_enabled ? 'bg-[#10B981]' : 'bg-[#d4d4d4]'
-                }`}
-              >
-                <span className={`absolute top-[2px] left-[2px] w-[18px] h-[18px] rounded-full bg-white transition-transform shadow-sm ${
-                  settings.generation_enabled ? 'translate-x-[18px]' : 'translate-x-0'
-                }`} />
-              </button>
-            </div>
-
+        {/* Signal Generation */}
+        <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-5">
+          <h3 className="text-base font-semibold text-[#111] mb-4">Signal Generation</h3>
+          
+          <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
             <div>
-              <label className="text-sm text-[#111] font-medium block mb-1.5">Daily Generation Limit</label>
-              <input
-                type="number"
-                value={settings.daily_generation_limit}
-                onChange={e => setSettings(s => ({ ...s, daily_generation_limit: parseInt(e.target.value) || 0 }))}
-                className="w-32 px-3 py-2 text-sm border border-[#e8e8e8] rounded-md focus:outline-none focus:border-[#111]"
-              />
-              <p className="text-xs text-[#999] mt-1">Maximum items generated per day</p>
+              <div className="text-sm font-medium text-[#111] mb-1">Auto-generate daily signals</div>
+              <div className="text-xs text-[#666]">LUXAI will generate 5-8 signals per day based on news sources</div>
             </div>
+            <button
+              onClick={() => setSettings({...settings, signal_generation_enabled: !settings.signal_generation_enabled})}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                settings.signal_generation_enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
+              }`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                settings.signal_generation_enabled ? 'translate-x-6' : 'translate-x-1'
+              }`} />
+            </button>
+          </div>
 
+          <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
             <div>
-              <label className="text-sm text-[#111] font-medium block mb-1.5">Model</label>
-              <select
-                value={settings.model}
-                onChange={e => setSettings(s => ({ ...s, model: e.target.value }))}
-                className="w-48 px-3 py-2 text-sm border border-[#e8e8e8] rounded-md focus:outline-none focus:border-[#111] bg-white"
-              >
-                <option value="gpt-4o">GPT-4o</option>
-                <option value="gpt-4o-mini">GPT-4o Mini</option>
-                <option value="claude-sonnet-4-20250514">Claude Sonnet</option>
-                <option value="claude-haiku-4-5-20251001">Claude Haiku</option>
-              </select>
+              <div className="text-sm font-medium text-[#111] mb-1">Target signals per day</div>
+              <div className="text-xs text-[#666]">Number of signals to generate daily</div>
             </div>
+            <input
+              type="number"
+              value={settings.signal_daily_target}
+              onChange={(e) => setSettings({...settings, signal_daily_target: parseInt(e.target.value)})}
+              className="w-20 px-2.5 py-1.5 border border-[#e8e8e8] rounded text-sm"
+              min="1"
+              max="20"
+            />
+          </div>
 
+          <div className="flex items-center justify-between py-3">
             <div>
-              <label className="text-sm text-[#111] font-medium block mb-1.5">Temperature: {settings.temperature}</label>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                value={settings.temperature}
-                onChange={e => setSettings(s => ({ ...s, temperature: parseFloat(e.target.value) }))}
-                className="w-64"
-              />
-              <p className="text-xs text-[#999] mt-1">Lower = more focused, Higher = more creative</p>
+              <div className="text-sm font-medium text-[#111] mb-1">News sources</div>
+              <div className="text-xs text-[#666]">WWD, BOF, Vogue Business, FT, Bloomberg, Reuters</div>
             </div>
+            <button className="px-4 py-2 bg-white border border-[#e8e8e8] rounded-md text-sm font-medium text-[#111] hover:bg-[#f5f5f5] transition-colors">
+              Configure
+            </button>
           </div>
         </div>
 
-        {/* Auto-Approval */}
-        <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-6">
-          <h3 className="text-sm font-semibold text-[#111] mb-4 uppercase tracking-wide">Auto-Approval</h3>
-          <p className="text-xs text-[#999] mb-5">Skip the approval queue and publish automatically</p>
+        {/* Salary Intelligence */}
+        <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-5">
+          <h3 className="text-base font-semibold text-[#111] mb-4">Salary Intelligence</h3>
+          
+          <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
+            <div>
+              <div className="text-sm font-medium text-[#111] mb-1">Enable benchmark tool</div>
+              <div className="text-xs text-[#666]">Allow LUXAI to generate salary benchmarks</div>
+            </div>
+            <button
+              onClick={() => setSettings({...settings, salary_benchmark_enabled: !settings.salary_benchmark_enabled})}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                settings.salary_benchmark_enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
+              }`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                settings.salary_benchmark_enabled ? 'translate-x-6' : 'translate-x-1'
+              }`} />
+            </button>
+          </div>
 
-          <div className="space-y-4">
-            {[
-              { key: 'auto_approve_signals' as const, label: 'Signals', desc: 'Market, talent, brand & finance signals' },
-              { key: 'auto_approve_salary' as const, label: 'Salary Intelligence', desc: 'Benchmarks, comparisons & calculators' },
-              { key: 'auto_approve_interview' as const, label: 'Interview Details', desc: 'AI-generated interview content' },
-            ].map(item => (
-              <div key={item.key} className="flex items-center justify-between py-1">
-                <div>
-                  <div className="text-sm text-[#111]">{item.label}</div>
-                  <div className="text-xs text-[#999] mt-0.5">{item.desc}</div>
-                </div>
-                <button
-                  onClick={() => setSettings(s => ({ ...s, [item.key]: !s[item.key] }))}
-                  className={`relative w-10 h-[22px] rounded-full transition-colors ${
-                    settings[item.key] ? 'bg-[#10B981]' : 'bg-[#d4d4d4]'
-                  }`}
-                >
-                  <span className={`absolute top-[2px] left-[2px] w-[18px] h-[18px] rounded-full bg-white transition-transform shadow-sm ${
-                    settings[item.key] ? 'translate-x-[18px]' : 'translate-x-0'
-                  }`} />
-                </button>
-              </div>
-            ))}
+          <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
+            <div>
+              <div className="text-sm font-medium text-[#111] mb-1">Enable compare tool</div>
+              <div className="text-xs text-[#666]">Allow LUXAI to generate salary comparisons</div>
+            </div>
+            <button
+              onClick={() => setSettings({...settings, salary_compare_enabled: !settings.salary_compare_enabled})}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                settings.salary_compare_enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
+              }`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                settings.salary_compare_enabled ? 'translate-x-6' : 'translate-x-1'
+              }`} />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
+            <div>
+              <div className="text-sm font-medium text-[#111] mb-1">Enable calculator tool</div>
+              <div className="text-xs text-[#666]">Allow LUXAI to generate personalized estimates</div>
+            </div>
+            <button
+              onClick={() => setSettings({...settings, salary_calculator_enabled: !settings.salary_calculator_enabled})}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                settings.salary_calculator_enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
+              }`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                settings.salary_calculator_enabled ? 'translate-x-6' : 'translate-x-1'
+              }`} />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between py-3">
+            <div>
+              <div className="text-sm font-medium text-[#111] mb-1">Require approval for salary tools</div>
+              <div className="text-xs text-[#666]">All salary outputs go through approval queue</div>
+            </div>
+            <button
+              onClick={() => setSettings({...settings, salary_require_approval: !settings.salary_require_approval})}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                settings.salary_require_approval ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
+              }`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                settings.salary_require_approval ? 'translate-x-6' : 'translate-x-1'
+              }`} />
+            </button>
           </div>
         </div>
 
-        {/* Content Types */}
+        {/* Interview Intelligence */}
+        <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-5">
+          <h3 className="text-base font-semibold text-[#111] mb-4">Interview Intelligence</h3>
+          
+          <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
+            <div>
+              <div className="text-sm font-medium text-[#111] mb-1">Generate interview details</div>
+              <div className="text-xs text-[#666]">LUXAI expands basic interview data into full experiences</div>
+            </div>
+            <button
+              onClick={() => setSettings({...settings, interview_generation_enabled: !settings.interview_generation_enabled})}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                settings.interview_generation_enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
+              }`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                settings.interview_generation_enabled ? 'translate-x-6' : 'translate-x-1'
+              }`} />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between py-3">
+            <div>
+              <div className="text-sm font-medium text-[#111] mb-1">Require approval for interview content</div>
+              <div className="text-xs text-[#666]">All interview details go through approval queue</div>
+            </div>
+            <button
+              onClick={() => setSettings({...settings, interview_require_approval: !settings.interview_require_approval})}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                settings.interview_require_approval ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
+              }`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                settings.interview_require_approval ? 'translate-x-6' : 'translate-x-1'
+              }`} />
+            </button>
+          </div>
+        </div>
+
+        {/* AI Model */}
         <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-8">
-          <h3 className="text-sm font-semibold text-[#111] mb-4 uppercase tracking-wide">Active Content Types</h3>
+          <h3 className="text-base font-semibold text-[#111] mb-4">AI Model</h3>
+          
+          <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
+            <div>
+              <div className="text-sm font-medium text-[#111] mb-1">Primary model</div>
+              <div className="text-xs text-[#666]">Claude Haiku 3.5 (recommended for cost)</div>
+            </div>
+            <select
+              value={settings.model}
+              onChange={(e) => setSettings({...settings, model: e.target.value})}
+              className="px-2.5 py-1.5 border border-[#e8e8e8] rounded text-sm"
+            >
+              <option value="claude-haiku-3-5-20241022">Claude Haiku 3.5</option>
+              <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+            </select>
+          </div>
 
-          <div className="space-y-3">
-            {[
-              { value: 'signal', label: 'Signals' },
-              { value: 'salary_benchmark', label: 'Salary Benchmarks' },
-              { value: 'salary_compare', label: 'Salary Comparisons' },
-              { value: 'salary_calculator', label: 'Salary Calculator' },
-              { value: 'interview_detail', label: 'Interview Details' },
-            ].map(ct => (
-              <label key={ct.value} className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.content_types.includes(ct.value)}
-                  onChange={e => {
-                    setSettings(s => ({
-                      ...s,
-                      content_types: e.target.checked
-                        ? [...s.content_types, ct.value]
-                        : s.content_types.filter(t => t !== ct.value),
-                    }))
-                  }}
-                  className="w-4 h-4 rounded border-[#d4d4d4]"
-                />
-                <span className="text-sm text-[#111]">{ct.label}</span>
-              </label>
-            ))}
+          <div className="flex items-center justify-between py-3">
+            <div>
+              <div className="text-sm font-medium text-[#111] mb-1">Max tokens per request</div>
+              <div className="text-xs text-[#666]">Cost control limit</div>
+            </div>
+            <input
+              type="number"
+              value={settings.max_tokens}
+              onChange={(e) => setSettings({...settings, max_tokens: parseInt(e.target.value)})}
+              className="w-24 px-2.5 py-1.5 border border-[#e8e8e8] rounded text-sm"
+              min="100"
+              max="10000"
+            />
           </div>
         </div>
 
-        {/* Save */}
-        <div className="flex items-center gap-3">
+        <div className="flex justify-end">
           <button
             onClick={handleSave}
             disabled={saving}
-            className="bg-[#111] text-white text-sm font-medium px-6 py-2.5 rounded-md hover:bg-[#333] transition-colors disabled:opacity-50"
+            className="px-6 py-2.5 bg-[#111] text-white rounded-md text-sm font-medium hover:bg-[#333] disabled:opacity-50 transition-colors"
           >
             {saving ? 'Saving...' : 'Save Settings'}
           </button>
-          {saved && <span className="text-sm text-[#10B981] font-medium">Settings saved</span>}
         </div>
       </div>
     </div>

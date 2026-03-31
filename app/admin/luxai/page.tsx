@@ -61,9 +61,28 @@ export default function LUXAIPage() {
     }
   }
 
+  function getBadgeStyle(contentType: string | null) {
+    switch (contentType?.toUpperCase()) {
+      case 'TALENT':
+        return 'bg-[#3B82F6] text-white'
+      case 'MARKET':
+        return 'bg-[#10B981] text-white'
+      case 'BRAND':
+        return 'bg-[#F59E0B] text-white'
+      case 'FINANCE':
+        return 'bg-[#8B5CF6] text-white'
+      case 'SALARY':
+        return 'bg-[#EC4899] text-white'
+      case 'INTERVIEW':
+        return 'bg-[#06B6D4] text-white'
+      default:
+        return 'bg-[#3B82F6] text-white'
+    }
+  }
+
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center">
+      <div className="flex items-center justify-center p-12">
         <div className="w-5 h-5 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin" />
       </div>
     )
@@ -79,9 +98,12 @@ export default function LUXAIPage() {
   return (
     <div className="p-8">
       <div className="max-w-[1200px]">
-        <h2 className="text-2xl font-semibold text-[#111] mb-2">LUXAI Approval Queue</h2>
-        <p className="text-sm text-[#666] mb-8">Review AI-generated content before publishing</p>
+        <div className="mb-8">
+          <h2 className="text-[28px] font-semibold text-[#111] mb-2">LUXAI Approval Queue</h2>
+          <p className="text-sm text-[#666]">Review AI-generated content before publishing</p>
+        </div>
 
+        {/* Tabs */}
         <div className="flex gap-0 border-b border-[#e8e8e8] mb-6">
           {[
             { id: 'all', label: 'All' },
@@ -105,6 +127,7 @@ export default function LUXAIPage() {
           ))}
         </div>
 
+        {/* Stats Grid */}
         <div className="grid grid-cols-4 gap-4 mb-8">
           <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
             <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Pending Review</div>
@@ -124,6 +147,7 @@ export default function LUXAIPage() {
           </div>
         </div>
 
+        {/* Queue Items */}
         <div className="space-y-3">
           {filteredQueue.length === 0 ? (
             <div className="bg-white border border-[#e8e8e8] rounded-lg p-12 text-center">
@@ -135,27 +159,37 @@ export default function LUXAIPage() {
             </div>
           ) : (
             filteredQueue.map(item => (
-              <div key={item.id} className="bg-white border border-[#e8e8e8] rounded-lg p-5">
+              <div key={item.id} className="bg-white border border-[#e8e8e8] rounded-lg p-5 hover:border-[#ccc] transition-colors">
+                <div className="mb-3">
+                  <span className={`inline-block text-[10px] font-semibold px-2 py-1 rounded uppercase tracking-wide ${getBadgeStyle(item.content_type)}`}>
+                    {item.content_type || 'SIGNAL'}
+                  </span>
+                </div>
                 <h3 className="text-base font-medium text-[#111] mb-1">{item.title}</h3>
-                <p className="text-xs text-[#999] mb-3">
-                  {item.type} · Generated {new Date(item.generated_at).toLocaleString()}
+                <p className="text-xs text-[#999] mb-4">
+                  Generated {new Date(item.generated_at).toLocaleString()} via LUXAI
                 </p>
                 <div className="text-sm text-[#444] mb-4 leading-relaxed">
                   {typeof item.content === 'string' 
                     ? item.content 
-                    : item.content.content || JSON.stringify(item.content).substring(0, 200)
+                    : item.content.content || JSON.stringify(item.content).substring(0, 300)
                   }
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleApprove(item.id)}
-                    className="bg-[#10B981] text-white text-xs px-4 py-2 rounded hover:bg-[#059669] transition-colors"
+                    className="bg-[#10B981] text-white text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#059669] transition-colors"
                   >
                     Approve & Publish
                   </button>
                   <button
+                    className="bg-white border border-[#e8e8e8] text-[#111] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#f5f5f5] transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
                     onClick={() => handleReject(item.id)}
-                    className="bg-white border border-[#e8e8e8] text-[#EF4444] text-xs px-4 py-2 rounded hover:bg-[#FEE2E2] transition-colors"
+                    className="bg-white border border-[#e8e8e8] text-[#EF4444] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#FEE2E2] transition-colors"
                   >
                     Reject
                   </button>
