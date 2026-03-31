@@ -44,7 +44,9 @@ const NAV_SECTIONS = [
   {
     label: 'LUXAI',
     items: [
-      { label: 'LUXAI', href: '/admin/luxai', icon: Sparkles },
+      { label: 'Approval Queue', href: '/admin/luxai', icon: Sparkles, exact: true },
+      { label: 'Settings', href: '/admin/luxai/settings', icon: Settings },
+      { label: 'Usage & Costs', href: '/admin/luxai/usage', icon: DollarSign },
     ],
   },
   {
@@ -79,7 +81,9 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   '/admin/editorial-review': { title: 'Editorial Review', subtitle: 'Comments & moderation' },
   '/admin/wikilux': { title: 'WikiLux', subtitle: 'Brand encyclopedia' },
   '/admin/escape': { title: 'Escape', subtitle: 'Travel content management' },
-  '/admin/luxai': { title: 'LUXAI', subtitle: 'AI engine management' },
+  '/admin/luxai': { title: 'LUXAI', subtitle: 'Approval queue' },
+  '/admin/luxai/settings': { title: 'LUXAI Settings', subtitle: 'Generation & workflow config' },
+  '/admin/luxai/usage': { title: 'LUXAI Usage', subtitle: 'Volume & cost tracking' },
   '/admin/salary-intelligence': { title: 'Salary Intelligence', subtitle: 'Compensation data' },
   '/admin/media': { title: 'Media Library', subtitle: 'Assets & uploads' },
   '/admin/contact': { title: 'Contact Messages', subtitle: 'Inbound enquiries' },
