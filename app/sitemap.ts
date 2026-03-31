@@ -16,12 +16,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/wikilux`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/wikilux/all`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/bloglux`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/opportunities`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/careers`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/signals`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/events`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/interviews`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/salaries`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/coaching`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/the-brief`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${baseUrl}/travel`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${baseUrl}/escape`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${baseUrl}/connect`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${baseUrl}/join`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/faq`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
@@ -53,17 +55,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  // Dynamic: Opportunities
-  const { data: opportunities } = await supabase
+  // Dynamic: Careers (search assignments)
+  const { data: assignments } = await supabase
     .from('search_assignments')
     .select('slug, updated_at')
-    .eq('status', 'active')
-  const opportunityPages: MetadataRoute.Sitemap = (opportunities || []).map((opp) => ({
-    url: `${baseUrl}/opportunities/${opp.slug}`,
-    lastModified: opp.updated_at ? new Date(opp.updated_at) : new Date(),
+    .eq('status', 'published')
+  const careerPages: MetadataRoute.Sitemap = (assignments || []).map((a) => ({
+    url: `${baseUrl}/careers/${a.slug}`,
+    lastModified: a.updated_at ? new Date(a.updated_at) : new Date(),
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }))
 
-  return [...staticPages, ...brandPages, ...articlePages, ...opportunityPages]
+  return [...staticPages, ...brandPages, ...articlePages, ...careerPages]
 }
