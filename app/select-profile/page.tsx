@@ -47,10 +47,8 @@ export default function SelectProfilePage() {
     if (status === 'authenticated' && session?.user) {
       const regCompleted = (session.user as any).registrationCompleted
       const userStatus = (session.user as any).status
-      const tierSelected = (session.user as any).tierSelected
       if (regCompleted && userStatus === 'approved') router.push('/dashboard')
       else if (regCompleted && userStatus === 'pending') router.push('/members/pending')
-      else if (tierSelected && !regCompleted) router.push('/members/complete-registration')
     }
   }, [status, session, router])
 
