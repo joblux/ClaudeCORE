@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'FAQ & Contact — JOBLUX',
+  title: 'Help & FAQ — JOBLUX',
   description:
-    'Frequently asked questions about JOBLUX — access, opportunities, contributions, privacy, and how to get in touch.',
+    'Everything you need to know about JOBLUX — access, careers intelligence, contributions, privacy, and how to reach us.',
+  alternates: { canonical: 'https://www.joblux.com/faq' },
 }
 
 export default function FaqLayout({ children }: { children: React.ReactNode }) {
