@@ -199,7 +199,8 @@ export default function CareersPage() {
                 const displayMaison = a.is_confidential ? null : a.maison
                 const locationStr = a.location || [a.city, a.country].filter(Boolean).join(', ')
                 return (
-                <div key={a.id} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
+                <Link key={a.id} href={`/opportunities/${a.slug || a.id}`} className="block">
+                <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 hover:border-[#3a3a3a] transition-colors cursor-pointer">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       {seniorityLabel && <span className="text-[10px] font-bold tracking-[1.5px] text-[#a58e28]">{seniorityLabel}</span>}
@@ -239,6 +240,7 @@ export default function CareersPage() {
                     </span>
                   )}
                 </div>
+                </Link>
                 )
               })}
             </div>
