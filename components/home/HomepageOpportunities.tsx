@@ -57,7 +57,7 @@ export function HomepageOpportunities({ assignments }: { assignments: Assignment
           {items.slice(0, 3).map((assignment) => (
             <Link
               key={assignment.id}
-              href={assignment.slug ? `/opportunities/${assignment.slug}` : '/careers'}
+              href={assignment.slug ? `/careers` : '/careers'}
               className="bg-[#222] border border-[#2a2a2a] rounded-[6px] p-5 hover:border-[#333] transition-colors group flex flex-col"
             >
               {assignment.seniority && (

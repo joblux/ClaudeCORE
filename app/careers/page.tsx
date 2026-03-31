@@ -86,7 +86,7 @@ export default function CareersPage() {
   useEffect(() => {
     async function fetchAssignments() {
       const { data } = await supabase
-        .from('job_briefs')
+        .from('search_assignments')
         .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false })
@@ -128,7 +128,7 @@ export default function CareersPage() {
         {/* Tabs */}
         <div className="flex border-b border-[#2a2a2a] mb-6 gap-0">
           {[
-            { id: 'opportunities', label: 'Opportunities', count: '52' },
+            { id: 'opportunities', label: 'Assignments', count: String(assignments.length) },
             { id: 'salary', label: 'Salary intelligence', count: '1,840 data points' },
             { id: 'interview', label: 'Interview prep', count: '38 guides' },
           ].map(tab => (

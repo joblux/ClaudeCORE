@@ -36,7 +36,7 @@ export async function LatestJobs() {
           return (
             <Link
               key={job.id}
-              href={`/opportunities/${job.slug || job.id}`}
+              href={`/careers`}
               className="block py-3 border-b border-[#f5f0e8] last:border-0 hover:bg-[#fafaf5] transition-colors -mx-1 px-1"
             >
               <div className="jl-overline-gold mb-1">{displayMaison}</div>
@@ -49,7 +49,7 @@ export async function LatestJobs() {
           )
         })}
       </div>
-      <Link href="/opportunities" className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors">
+      <Link href="/careers" className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors">
         All assignments →
       </Link>
     </div>
