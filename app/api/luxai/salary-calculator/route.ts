@@ -47,7 +47,7 @@ Guidelines:
 - Keep analysis under 120 words`
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-haiku-3-5-20241022',
       max_tokens: 1000,
       messages: [{ role: 'user', content: prompt }],
     })

@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
 })
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,14 +17,11 @@ export async function POST(req: NextRequest) {
     const { interview_id } = body
 
     // Fetch interview from database
-    const cookieStore = cookies()
-    const supabase = createClient(cookieStore)
-
     const { data: interview } = await supabase
       .from('interview_experiences')
       .select('*')
       .eq('id', interview_id)
-      .single()
+      .maybeSingle()
 
     if (!interview) {
       return NextResponse.json(
@@ -87,7 +88,7 @@ Guidelines:
 - Match format (video/in-person/multi-stage) to reality`
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-haiku-3-5-20241022',
       max_tokens: 2000,
       messages: [{ role: 'user', content: prompt }],
     })
