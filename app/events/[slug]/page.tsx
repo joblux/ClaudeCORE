@@ -17,34 +17,25 @@ const sectorColors: Record<string, { bg: string; color: string; border: string }
   'Hospitality': { bg: 'rgba(76,175,80,0.08)', color: '#4CAF50', border: 'rgba(76,175,80,0.15)' },
   'Jewelry': { bg: 'rgba(255,152,0,0.08)', color: '#FF9800', border: 'rgba(255,152,0,0.15)' },
   'Multi-sector': { bg: 'rgba(96,96,96,0.15)', color: '#888', border: '#2a2a2a' },
-  'Trade fair': { bg: 'rgba(96,96,96,0.15)', color: '#888', border: '#2a2a2a' },
 }
 
 function generateICS(event: any) {
-  const fmtDate = (dateStr: string) => {
-    if (!dateStr) return ''
-    return dateStr.replace(/-/g, '').replace(/:/g, '').split('.')[0].split('T')[0]
-  }
-  const start = fmtDate(event.start_date || event.date)
-  const end = fmtDate(event.end_date || event.start_date || event.date)
+  const fmtDate = (dateStr: string) => dateStr ? dateStr.replace(/-/g, '').split('T')[0] : ''
+  const start = fmtDate(event.start_date)
+  const end = fmtDate(event.end_date || event.start_date)
   const content = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//JOBLUX//Events//EN',
-    'BEGIN:VEVENT',
-    `DTSTART;VALUE=DATE:${start}`,
-    `DTEND;VALUE=DATE:${end}`,
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//JOBLUX//Events//EN', 'BEGIN:VEVENT',
+    `DTSTART;VALUE=DATE:${start}`, `DTEND;VALUE=DATE:${end}`,
     `SUMMARY:${event.title || event.name || ''}`,
-    `LOCATION:${event.location || event.venue || ''}`,
+    `LOCATION:${event.location || ''}`,
     `DESCRIPTION:${(event.description || '').replace(/\n/g, '\\n')}`,
-    'END:VEVENT',
-    'END:VCALENDAR',
+    'END:VEVENT', 'END:VCALENDAR',
   ].join('\r\n')
   const blob = new Blob([content], { type: 'text/calendar' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `${(event.title || event.name || 'event').replace(/\s+/g, '-')}.ics`
+  a.download = `${(event.title || 'event').replace(/\s+/g, '-')}.ics`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -57,13 +48,14 @@ function formatDateRange(start: string, end?: string) {
   if (s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear()) {
     return `${s.getDate()}–${e.toLocaleDateString('en-GB', opts)}`
   }
-  return `${s.toLocaleDateString('en-GB', opts)} – ${e.toLocaleDateString('en-GB', opts)}`
+  return `${s.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })} – ${e.toLocaleDateString('en-GB', opts)}`
 }
 
 export default function EventDetailPage() {
   const params = useParams()
   const slug = params.slug as string
   const [event, setEvent] = useState<any>(null)
+  const [relatedEvents, setRelatedEvents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
 
@@ -85,6 +77,20 @@ export default function EventDetailPage() {
       }
 
       setEvent(data)
+
+      // Fetch related events in same sector
+      if (data?.sector) {
+        const { data: related } = await supabase
+          .from('events')
+          .select('id, slug, title, name, start_date, dates, location, city, sector')
+          .eq('is_published', true)
+          .eq('sector', data.sector)
+          .neq('id', data.id)
+          .order('start_date', { ascending: true })
+          .limit(3)
+        if (related) setRelatedEvents(related)
+      }
+
       setLoading(false)
     }
     fetchEvent()
@@ -132,137 +138,187 @@ export default function EventDetailPage() {
 
   const sectorStyle = sectorColors[event.sector] || sectorColors['Multi-sector']
   const title = event.title || event.name || ''
-  const dateRange = event.start_date
-    ? formatDateRange(event.start_date, event.end_date)
-    : event.dates || ''
+  const dateRange = event.start_date ? formatDateRange(event.start_date, event.end_date) : event.dates || ''
+  const locationStr = event.location || [event.location_city, event.location_country].filter(Boolean).join(', ')
 
   return (
     <div className="min-h-screen bg-[#1a1a1a]">
-      <div className="max-w-[720px] mx-auto px-7 pt-10 pb-16">
+      <div className="max-w-[1200px] mx-auto px-7 pt-10 pb-16">
 
-        {/* Back link */}
-        <Link href="/events" className="text-[13px] text-[#999] hover:text-[#a58e28] transition-colors mb-8 inline-block">
-          ← Back to Events
-        </Link>
+        <div className="lg:grid lg:grid-cols-[1fr_320px] gap-10">
+          {/* ── Main column ── */}
+          <div>
+            {/* Back link */}
+            <Link href="/events" className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] hover:underline mb-6 inline-block">
+              ← Back to Events
+            </Link>
 
-        {/* Badge */}
-        {event.sector && (
-          <div className="flex gap-2 mb-4 flex-wrap">
-            <span
-              className="text-[10px] font-semibold tracking-[1.5px] px-2 py-0.5 rounded"
-              style={{ background: sectorStyle.bg, color: sectorStyle.color, border: `1px solid ${sectorStyle.border}` }}
-            >
-              {event.sector.toUpperCase()}
-            </span>
-            {event.featured && (
-              <span className="text-[10px] font-semibold tracking-[1.5px] px-2 py-0.5 rounded" style={{ background: 'rgba(165,142,40,0.1)', color: '#a58e28', border: '1px solid rgba(165,142,40,0.2)' }}>
-                FEATURED
-              </span>
+            {/* Badges */}
+            {event.sector && (
+              <div className="flex gap-2 mb-4 flex-wrap">
+                <span
+                  className="text-[10px] font-semibold tracking-[1.5px] px-2 py-0.5 rounded"
+                  style={{ background: sectorStyle.bg, color: sectorStyle.color, border: `1px solid ${sectorStyle.border}` }}
+                >
+                  {event.sector.toUpperCase()}
+                </span>
+                {event.featured && (
+                  <span className="text-[10px] font-semibold tracking-[1.5px] px-2 py-0.5 rounded" style={{ background: 'rgba(165,142,40,0.1)', color: '#a58e28', border: '1px solid rgba(165,142,40,0.2)' }}>
+                    FEATURED
+                  </span>
+                )}
+                {event.type && (
+                  <span className="text-[10px] font-semibold tracking-[1.5px] px-2 py-0.5 rounded bg-[#222] text-[#ccc] border border-[#2a2a2a]">
+                    {event.type.toUpperCase()}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Title */}
+            <h1 className="text-[28px] md:text-[34px] text-white leading-snug mb-4" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+              {title}
+            </h1>
+
+            {/* Organiser */}
+            {event.organizer && event.organizer !== 'TBC' && (
+              <p className="text-[13px] text-[#999] mb-4">Organised by <span className="text-[#ccc]">{event.organizer}</span></p>
+            )}
+
+            {/* Meta */}
+            <div className="flex flex-wrap gap-x-5 gap-y-2 mb-4 text-[13px] text-[#999]">
+              {dateRange && <span>{dateRange}</span>}
+              {locationStr && (
+                <>
+                  <span className="text-[#777]">·</span>
+                  <span>{locationStr}</span>
+                </>
+              )}
+            </div>
+
+            {/* Attendance */}
+            {event.attendance && (
+              <p className="text-[12px] text-[#777] mb-6">{event.attendance}</p>
+            )}
+
+            {/* Add to calendar + website */}
+            <div className="flex gap-3 mb-8">
+              <button
+                onClick={() => generateICS(event)}
+                className="text-[12px] text-[#a58e28] border border-[rgba(165,142,40,0.3)] rounded px-4 py-2 hover:bg-[rgba(165,142,40,0.1)] transition-colors"
+              >
+                Add to calendar
+              </button>
+              {event.website_url && (
+                <a
+                  href={event.website_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[12px] text-[#ccc] border border-[#2a2a2a] rounded px-4 py-2 hover:border-[#555] transition-colors"
+                >
+                  Visit website →
+                </a>
+              )}
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-[#222] mb-8" />
+
+            {/* Description */}
+            {event.description && (
+              <div className="text-[15px] text-[#ccc] leading-[1.8] space-y-4 mb-10">
+                {event.description.split('\n').map((p: string, i: number) => (
+                  p.trim() ? <p key={i}>{p}</p> : null
+                ))}
+              </div>
+            )}
+
+            {/* Career context — from DB */}
+            {event.career_context && (
+              <div className="bg-[#141414] border border-[#1e1e1e] rounded p-6 mb-10">
+                <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-3">Career Intelligence</p>
+                <h3 className="text-[15px] text-white mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                  Why this matters for your career
+                </h3>
+                <p className="text-[13px] text-[#ccc] leading-relaxed">
+                  {event.career_context}
+                </p>
+              </div>
+            )}
+
+            {/* Share row */}
+            <div className="border-t border-[#222] pt-6">
+              <div className="flex items-center gap-3 text-[12px] text-[#999]">
+                <button onClick={handleCopyLink} className="hover:text-[#a58e28] transition-colors">
+                  {copied ? 'Copied' : 'Copy link'}
+                </button>
+                <span className="text-[#777]">·</span>
+                <button onClick={handleLinkedIn} className="hover:text-[#a58e28] transition-colors">
+                  Share on LinkedIn
+                </button>
+                <span className="text-[#777]">·</span>
+                <button onClick={handleEmail} className="hover:text-[#a58e28] transition-colors">
+                  Send to a colleague
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Sidebar ── */}
+          <div className="mt-10 lg:mt-0 space-y-6">
+            {/* Event details card */}
+            <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
+              <div className="space-y-3">
+                {event.dates && (
+                  <div className="border-b border-[#2a2a2a] pb-3">
+                    <span className="text-[10px] text-[#999] uppercase tracking-[0.14em] block mb-1">Dates</span>
+                    <span className="text-sm text-[#ccc]">{event.dates}</span>
+                  </div>
+                )}
+                {locationStr && (
+                  <div className="border-b border-[#2a2a2a] pb-3">
+                    <span className="text-[10px] text-[#999] uppercase tracking-[0.14em] block mb-1">Location</span>
+                    <span className="text-sm text-[#ccc]">{locationStr}</span>
+                  </div>
+                )}
+                {event.sector && (
+                  <div className="border-b border-[#2a2a2a] pb-3">
+                    <span className="text-[10px] text-[#999] uppercase tracking-[0.14em] block mb-1">Sector</span>
+                    <span className="text-sm text-[#ccc]">{event.sector}</span>
+                  </div>
+                )}
+                {event.type && (
+                  <div className="border-b border-[#2a2a2a] pb-3">
+                    <span className="text-[10px] text-[#999] uppercase tracking-[0.14em] block mb-1">Type</span>
+                    <span className="text-sm text-[#ccc]">{event.type}</span>
+                  </div>
+                )}
+                {event.attendance && (
+                  <div className="pb-1">
+                    <span className="text-[10px] text-[#999] uppercase tracking-[0.14em] block mb-1">Attendance</span>
+                    <span className="text-sm text-[#ccc]">{event.attendance}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Related events in same sector */}
+            {relatedEvents.length > 0 && (
+              <div>
+                <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-4">RELATED EVENTS</div>
+                <div className="space-y-3">
+                  {relatedEvents.map((e: any) => (
+                    <Link key={e.id} href={`/events/${e.slug || e.id}`} className="block pb-3 border-b border-[#222] last:border-b-0 hover:opacity-80 transition-opacity">
+                      <div className="text-[10px] text-[#999] mb-1">{e.dates}</div>
+                      <div className="text-xs text-[#ccc] hover:text-white transition-colors">{e.title || e.name}</div>
+                      <div className="text-[11px] text-[#999] mt-1">{e.location || e.city}</div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
-        )}
-
-        {/* Title */}
-        <h1 className="text-[28px] text-white leading-snug mb-4" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-          {title}
-        </h1>
-
-        {/* Organiser */}
-        {event.organizer && (
-          <p className="text-[13px] text-[#888] mb-4">Organised by {event.organizer}</p>
-        )}
-
-        {/* Meta */}
-        <div className="flex flex-wrap gap-x-5 gap-y-2 mb-6 text-[13px] text-[#999]">
-          {dateRange && <span>{dateRange}</span>}
-          {event.location && (
-            <>
-              <span className="text-[#777]">·</span>
-              <span>{event.location}</span>
-            </>
-          )}
-          {event.venue && (
-            <>
-              <span className="text-[#777]">·</span>
-              <span>{event.venue}</span>
-            </>
-          )}
-          {event.type && (
-            <>
-              <span className="text-[#777]">·</span>
-              <span>{event.type}</span>
-            </>
-          )}
         </div>
-
-        {/* Attendance */}
-        {event.attendance && (
-          <p className="text-[12px] text-[#999] mb-6">{event.attendance}</p>
-        )}
-
-        {/* Add to calendar */}
-        <button
-          onClick={() => generateICS(event)}
-          className="text-[12px] text-[#a58e28] border border-[rgba(165,142,40,0.3)] rounded px-4 py-2 hover:bg-[rgba(165,142,40,0.1)] transition-colors mb-8"
-        >
-          Add to calendar
-        </button>
-
-        {/* Divider */}
-        <div className="border-t border-[#222] mb-8" />
-
-        {/* Description */}
-        {event.description && (
-          <div className="text-[15px] text-[#ccc] leading-[1.8] space-y-4 mb-10">
-            {event.description.split('\n').map((p: string, i: number) => (
-              p.trim() ? <p key={i}>{p}</p> : null
-            ))}
-          </div>
-        )}
-
-        {/* Editorial note */}
-        <div className="bg-[#141414] border border-[#1e1e1e] rounded p-6 mb-10">
-          <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-3">JOBLUX Editorial</p>
-          <h3 className="text-[15px] text-white mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-            Why this matters for your career
-          </h3>
-          <p className="text-[13px] text-[#999] leading-relaxed">
-            Our editorial team is preparing intelligence on this event. Check back soon for analysis on hiring trends, networking opportunities, and career implications.
-          </p>
-        </div>
-
-        {/* Related content placeholders */}
-        <div className="border-t border-[#222] pt-8 mb-8">
-          <p className="text-[10px] text-[#999] uppercase tracking-[0.14em] mb-4">Related</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-[#141414] border border-[#1e1e1e] rounded p-4">
-              <p className="text-[10px] text-[#999] uppercase tracking-wider mb-2">Brands attending</p>
-              <p className="text-[13px] text-[#999]">Coming soon</p>
-            </div>
-            <div className="bg-[#141414] border border-[#1e1e1e] rounded p-4">
-              <p className="text-[10px] text-[#999] uppercase tracking-wider mb-2">Related signals</p>
-              <p className="text-[13px] text-[#999]">Coming soon</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Share row */}
-        <div className="border-t border-[#222] pt-6">
-          <div className="flex items-center gap-1 text-[12px] text-[#999]">
-            <button onClick={handleCopyLink} className="hover:text-[#a58e28] transition-colors">
-              {copied ? 'Copied' : 'Copy link'}
-            </button>
-            <span className="text-[#777]">·</span>
-            <button onClick={handleLinkedIn} className="hover:text-[#a58e28] transition-colors">
-              Share on LinkedIn
-            </button>
-            <span className="text-[#777]">·</span>
-            <button onClick={handleEmail} className="hover:text-[#a58e28] transition-colors">
-              Send to a colleague
-            </button>
-          </div>
-        </div>
-
       </div>
     </div>
   )
