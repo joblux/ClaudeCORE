@@ -98,10 +98,10 @@ export default function CareersPage() {
   const filtered = assignments.filter(a => {
     if (activeFilter === 'All levels') return true
     const levelMap: Record<string, string> = {
-      Manager: 'MANAGER',
-      Director: 'DIRECTOR',
-      VP: 'VP',
-      'C-suite': 'C-SUITE',
+      Manager: 'senior',
+      Director: 'director',
+      VP: 'vp',
+      'C-suite': 'c-suite',
     }
     const regionMap: Record<string, string> = {
       Europe: 'Europe',
@@ -109,7 +109,7 @@ export default function CareersPage() {
       Asia: 'Asia',
       'Middle East': 'Middle East',
     }
-    if (levelMap[activeFilter]) return a.level === levelMap[activeFilter]
+    if (levelMap[activeFilter]) return a.seniority === levelMap[activeFilter]
     if (regionMap[activeFilter]) return a.region === regionMap[activeFilter]
     return true
   })
@@ -161,10 +161,10 @@ export default function CareersPage() {
             {/* Stats */}
             <div className="grid grid-cols-4 gap-3 mb-6">
               {[
-                { num: '52', label: 'Active assignments' },
-                { num: '8', label: 'New this week' },
-                { num: '14', label: 'Countries' },
-                { num: '23', label: 'Brands represented' },
+                { num: String(assignments.length), label: 'Active assignments' },
+                { num: String(assignments.filter(a => a.activated_at && (Date.now() - new Date(a.activated_at).getTime()) < 7 * 24 * 3600000).length), label: 'New this week' },
+                { num: String(new Set(assignments.map(a => a.country).filter(Boolean)).size), label: 'Countries' },
+                { num: String(new Set(assignments.filter(a => !a.is_confidential).map(a => a.maison).filter(Boolean)).size), label: 'Brands represented' },
               ].map(s => (
                 <div key={s.label} className="bg-[#222] border border-[#2a2a2a] rounded-lg p-4 text-center">
                   <div className="text-2xl font-normal text-[#a58e28] mb-1">{s.num}</div>
@@ -193,36 +193,54 @@ export default function CareersPage() {
 
             {/* Assignment cards */}
             <div className="space-y-3">
-              {filtered.map(a => (
+              {filtered.map(a => {
+                const seniorityLabel = (a.seniority || '').toUpperCase()
+                const isNew = a.activated_at && (Date.now() - new Date(a.activated_at).getTime()) < 7 * 24 * 3600000
+                const displayMaison = a.is_confidential ? null : a.maison
+                const locationStr = a.location || [a.city, a.country].filter(Boolean).join(', ')
+                return (
                 <div key={a.id} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold tracking-[1.5px] text-[#a58e28]">{a.level}</span>
-                      {a.is_new && (
+                      {seniorityLabel && <span className="text-[10px] font-bold tracking-[1.5px] text-[#a58e28]">{seniorityLabel}</span>}
+                      {isNew && (
                         <span className="text-[10px] font-semibold px-2 py-0.5 rounded border border-[#4CAF50] text-[#4CAF50]" style={{ background: 'rgba(76,175,80,0.08)' }}>
                           NEW
                         </span>
                       )}
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm font-medium text-[#a58e28]">{a.salary}</div>
-                      <div className="text-[11px] text-[#999] mt-0.5">{a.salary_note}</div>
-                    </div>
+                    {a.salary_display && (
+                      <div className="text-right">
+                        <div className="text-sm font-medium text-[#a58e28]">{a.salary_display}</div>
+                      </div>
+                    )}
                   </div>
                   <h3 className="text-base font-medium text-white mb-2 leading-snug">{a.title}</h3>
-                  <p className="text-sm text-[#999] leading-relaxed mb-3">{a.body}</p>
+                  {displayMaison && displayMaison !== 'Confidential' && <p className="text-xs text-[#a58e28] mb-1">{displayMaison}</p>}
+                  {a.description && <p className="text-sm text-[#999] leading-relaxed mb-3 line-clamp-2">{a.description}</p>}
                   <div className="flex items-center gap-2 flex-wrap mb-2">
-                    <span className="text-[11px] text-[#999]">{a.location}</span>
-                    <span className="text-[11px] text-[#777]">·</span>
-                    <span className="text-[11px] text-[#999]">{a.sector}</span>
-                    <span className="text-[11px] text-[#777]">·</span>
-                    <span className="text-[11px] text-[#999]">{a.experience}</span>
+                    {locationStr && <span className="text-[11px] text-[#999]">{locationStr}</span>}
+                    {a.contract_type && (
+                      <>
+                        <span className="text-[11px] text-[#777]">·</span>
+                        <span className="text-[11px] text-[#999] capitalize">{a.contract_type}</span>
+                      </>
+                    )}
+                    {a.region && (
+                      <>
+                        <span className="text-[11px] text-[#777]">·</span>
+                        <span className="text-[11px] text-[#999]">{a.region}</span>
+                      </>
+                    )}
                   </div>
-                  <span className="text-[10px] text-[#3a3a3a] border border-[#2a2a2a] rounded px-2 py-1">
-                    Brand disclosed after screening
-                  </span>
+                  {a.is_confidential && (
+                    <span className="text-[10px] text-[#555] border border-[#2a2a2a] rounded px-2 py-1">
+                      Brand disclosed after screening
+                    </span>
+                  )}
                 </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}
