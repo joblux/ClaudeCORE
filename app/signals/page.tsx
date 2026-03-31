@@ -224,8 +224,13 @@ export default function SignalsPage() {
             {filtered.map(signal => {
               const colors = BADGE_COLORS[signal.category] || { bg: 'rgba(136,136,136,0.15)', text: '#888' }
               const label = CATEGORY_LABELS[signal.category] || signal.category?.toUpperCase() || 'SIGNAL'
+              const href = `/signals/${signal.slug || signal.id}`
               return (
-                <div key={signal.id} className="border-b border-[#222] py-5 last:border-b-0">
+                <Link
+                  key={signal.id}
+                  href={href}
+                  className="block border-b border-[#222] py-5 last:border-b-0 group hover:bg-[#222]/30 -mx-3 px-3 rounded transition-colors"
+                >
                   <div className="flex items-center gap-3 mb-2">
                     <span
                       className="text-[10px] font-bold tracking-[0.1em] px-2 py-[2px] rounded"
@@ -238,24 +243,19 @@ export default function SignalsPage() {
                       {signal.published_at ? timeAgo(signal.published_at) : ''}
                     </span>
                   </div>
-                  <Link href={`/signals/${signal.slug || signal.id}`}>
-                    <h3 className="text-[15px] text-white mb-2 leading-snug hover:text-[#ccc] transition-colors cursor-pointer">
-                      {signal.headline}
-                    </h3>
-                  </Link>
+                  <h3 className="text-[15px] text-white mb-2 leading-snug group-hover:text-[#ccc] transition-colors">
+                    {signal.headline}
+                  </h3>
                   <p className="text-[12px] text-[#999] leading-relaxed mb-3">
                     {signal.summary || (signal as any).context_paragraph || ''}
                   </p>
                   <div className="flex items-center justify-between">
                     {signal.region && <span className="text-[11px] text-[#999]">{signal.region}</span>}
-                    <Link
-                      href={`/signals/${signal.slug || signal.id}`}
-                      className="text-[12px] text-[#a58e28] hover:text-[#c4a830] transition-colors ml-auto"
-                    >
+                    <span className="text-[12px] text-[#a58e28] group-hover:text-[#c4a830] transition-colors ml-auto">
                       Read more →
-                    </Link>
+                    </span>
                   </div>
-                </div>
+                </Link>
               )
             })}
           </div>

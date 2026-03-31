@@ -3,27 +3,27 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Terms of Service | JOBLUX',
-  description: 'Terms of service for JOBLUX, the luxury talents society.',
+  description: 'Terms of service for JOBLUX, the luxury careers intelligence gateway.',
 }
 
 export default function TermsOfServicePage() {
   return (
-    <main className="bg-[#f5f4f0] min-h-screen">
+    <main className="bg-[#1a1a1a] min-h-screen">
     <div className="max-w-3xl mx-auto px-6 py-12 lg:py-16">
-    <div className="bg-white rounded-lg shadow-sm p-8 md:p-12">
+    <div className="bg-[#222] rounded-lg p-8 md:p-12 border border-[#333]">
       <p className="jl-overline-gold tracking-widest uppercase text-sm mb-4">Legal</p>
-      <h1 className="jl-serif text-4xl md:text-5xl font-bold mb-4">Terms of Service</h1>
-      <p className="text-muted-foreground mb-12">Last updated: March 2026</p>
+      <h1 className="jl-serif text-4xl md:text-5xl font-bold mb-4 text-white">Terms of Service</h1>
+      <p className="text-[#999] mb-12">Last updated: March 2026</p>
 
-      <div className="jl-prose space-y-12">
+      <div className="space-y-12 text-[#ccc] leading-relaxed text-[15px]">
         {/* ── 1. Introduction & Acceptance ── */}
         <section id="introduction">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">1. Introduction &amp; Acceptance</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">1. Introduction &amp; Acceptance</h2>
           <p>
-            Welcome to JOBLUX, the luxury talents society. JOBLUX is a digital platform operated by
-            Mohammed M'zaour, based in Paris, France. These Terms of Service ("Terms") govern your
+            Welcome to JOBLUX, the luxury careers intelligence gateway. JOBLUX is a digital platform operated by
+            Mohammed M&apos;zaour, based in Paris, France. These Terms of Service (&ldquo;Terms&rdquo;) govern your
             access to and use of the JOBLUX website, applications, and all related services
-            (collectively, the "Platform").
+            (collectively, the &ldquo;Platform&rdquo;).
           </p>
           <p className="mt-3">
             By creating an account, accessing, or using any part of the Platform, you acknowledge that
@@ -31,13 +31,13 @@ export default function TermsOfServicePage() {
             do not agree to these Terms, you must not access or use the Platform.
           </p>
           <p className="mt-3">
-            These Terms constitute a legally binding agreement between you ("Member", "you", or "your")
-            and JOBLUX ("we", "us", or "our"). We reserve the right to update or modify these Terms at
+            These Terms constitute a legally binding agreement between you (&ldquo;User&rdquo;, &ldquo;you&rdquo;, or &ldquo;your&rdquo;)
+            and JOBLUX (&ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;). We reserve the right to update or modify these Terms at
             any time, and your continued use of the Platform following any such changes constitutes
             your acceptance of the revised Terms.
           </p>
           <p className="mt-3">
-            JOBLUX is designed as an invitation-based society connecting exceptional talent with
+            JOBLUX is designed as a confidential intelligence gateway connecting exceptional talent with
             premier opportunities in the luxury sector. By joining, you agree to uphold the standards
             of professionalism and discretion that define our ecosystem.
           </p>
@@ -45,68 +45,61 @@ export default function TermsOfServicePage() {
 
         {/* ── 2. Definitions ── */}
         <section id="definitions">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">2. Definitions</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">2. Definitions</h2>
           <p>
             Throughout these Terms, the following definitions apply:
           </p>
           <p className="mt-3">
-            <strong>"Platform"</strong> refers to the JOBLUX website, web application, mobile
+            <strong className="text-white">&ldquo;Platform&rdquo;</strong> refers to the JOBLUX website, web application, mobile
             applications (if any), APIs, and all associated services, tools, and features made
-            available by JOBLUX. This includes, without limitation, the job board, directory,
-            ecosystem features, and all content hosted therein.
+            available by JOBLUX. This includes, without limitation, the careers intelligence, WikiLux,
+            salary data, and all content hosted therein.
           </p>
           <p className="mt-3">
-            <strong>"Society"</strong> refers to the JOBLUX member ecosystem as a whole. JOBLUX
-            operates as a curated, invitation-based society of luxury professionals, and the term
-            "Society" encompasses all active members and the collective culture, standards, and values
-            they uphold.
-          </p>
-          <p className="mt-3">
-            <strong>"Opportunity"</strong> refers to any job listing, career opportunity, or
+            <strong className="text-white">&ldquo;Opportunity&rdquo;</strong> refers to any career listing or
             professional engagement posted on the Platform, whether by JOBLUX, a verified employer, or
             a recruitment partner. Opportunities may include full-time positions, freelance
             engagements, consulting roles, and other professional arrangements.
           </p>
           <p className="mt-3">
-            <strong>"Search Assignment"</strong> refers to a recruitment mandate entrusted to JOBLUX
+            <strong className="text-white">&ldquo;Search Assignment&rdquo;</strong> refers to a recruitment engagement entrusted to JOBLUX
             by a luxury Maison or employer, in which JOBLUX acts as an intermediary to identify and
-            present qualified candidates from the Society.
+            present qualified candidates.
           </p>
           <p className="mt-3">
-            <strong>"Contribution"</strong> refers to any content, data, text, images, reviews,
-            salary information, interview experiences, or other material submitted by a Member to the
+            <strong className="text-white">&ldquo;Contribution&rdquo;</strong> refers to any content, data, text, images, reviews,
+            salary information, interview experiences, or other material submitted by a user to the
             Platform, including but not limited to WikiLux articles, BlogLux posts, salary reports,
             and interview feedback.
           </p>
           <p className="mt-3">
-            <strong>"WikiLux"</strong> refers to the collaborative knowledge base within JOBLUX where
-            Members contribute and access curated information about luxury Maisons, industry insights,
+            <strong className="text-white">&ldquo;WikiLux&rdquo;</strong> refers to the collaborative knowledge base within JOBLUX where
+            users contribute and access curated information about luxury Maisons, industry insights,
             and career intelligence.
           </p>
           <p className="mt-3">
-            <strong>"BlogLux"</strong> refers to the editorial and ecosystem blog section of the
-            Platform where Members and the JOBLUX team publish articles, thought pieces, and industry
+            <strong className="text-white">&ldquo;BlogLux&rdquo;</strong> refers to the editorial and intelligence blog section of the
+            Platform where users and the JOBLUX team publish articles, thought pieces, and industry
             commentary.
           </p>
           <p className="mt-3">
-            <strong>"The Brief"</strong> refers to the JOBLUX newsletter and curated content digest
-            delivered to Members, containing industry news, new opportunities, and Society updates.
+            <strong className="text-white">&ldquo;The Brief&rdquo;</strong> refers to the JOBLUX newsletter and curated content digest
+            delivered to users, containing industry news, new opportunities, and platform updates.
           </p>
         </section>
 
         {/* ── 3. Registration & Access ── */}
         <section id="registration">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">3. Registration &amp; Access</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">3. Registration &amp; Access</h2>
           <p>
-            JOBLUX operates on an invitation and application basis. Access to the Platform is not
-            automatic; prospective Members must either receive an invitation from an existing Member or
-            submit an application that is reviewed and approved by the JOBLUX team. We maintain strict
-            quality standards to ensure the integrity and exclusivity of the Society.
+            JOBLUX operates on an application basis. Access to the Platform is not
+            automatic; prospective users must submit an application that is reviewed and approved by the JOBLUX team. We maintain strict
+            quality standards to ensure the integrity and exclusivity of the platform.
           </p>
           <p className="mt-3">
             You must be at least eighteen (18) years of age to register for and use the Platform. By
             creating an account, you represent and warrant that you are at least 18 years old and have
-            the legal capacity to enter into these Terms. JOBLUX does not knowingly accept Members
+            the legal capacity to enter into these Terms. JOBLUX does not knowingly accept users
             under the age of 18.
           </p>
           <p className="mt-3">
@@ -116,14 +109,14 @@ export default function TermsOfServicePage() {
             and for all activities that occur under your account.
           </p>
           <p className="mt-3">
-            JOBLUX reserves the absolute right to reject any application or revoke any invitation at
+            JOBLUX reserves the absolute right to reject any application at
             its sole discretion, without obligation to provide a reason. This right extends to
-            applications that are incomplete, fraudulent, or that do not meet our ecosystem standards.
+            applications that are incomplete, fraudulent, or that do not meet our standards.
           </p>
           <p className="mt-3">
-            Members registering under the Business tier or seeking Insider status may be subject to
+            Users registering under the Business tier may be subject to
             additional verification procedures. This may include verification of corporate email
-            addresses, LinkedIn profiles, employment history, or other professional credentials.
+            addresses, professional profiles, employment history, or other professional credentials.
             JOBLUX reserves the right to request supporting documentation at any time to verify the
             accuracy of information provided during registration.
           </p>
@@ -131,24 +124,24 @@ export default function TermsOfServicePage() {
 
         {/* ── 4. The Platform — Free Against Contribution ── */}
         <section id="free-against-contribution">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">4. The Platform — Free Against Contribution</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">4. The Platform — Free Against Contribution</h2>
           <p>
-            JOBLUX is offered free of charge to individual Members. There are no subscription fees,
+            JOBLUX is offered free of charge to individual users. There are no subscription fees,
             recurring fees, or hidden costs for accessing the core features of the Platform. Our
-            model is built on the principle of reciprocity: the Platform thrives because Members
-            contribute their knowledge, experiences, and insights back to the Society.
+            model is built on the principle of reciprocity: the Platform thrives because users
+            contribute their knowledge, experiences, and insights back to the ecosystem.
           </p>
           <p className="mt-3">
-            In exchange for free access, Members are encouraged to actively contribute to the
+            In exchange for free access, users are encouraged to actively contribute to the
             Platform. Contributions may take many forms, including but not limited to: sharing salary
             data, submitting interview experiences, writing WikiLux articles, publishing BlogLux
             posts, participating in discussions, and providing feedback on employers and opportunities.
           </p>
           <p className="mt-3">
-            While contributions are encouraged rather than strictly mandatory, Members who
+            While contributions are encouraged rather than strictly mandatory, users who
             consistently benefit from the Platform without contributing may see their access to certain
             features adjusted. JOBLUX reserves the right to implement contribution thresholds or
-            incentive systems to maintain a healthy balance of give and take within the Society.
+            incentive systems to maintain a healthy balance of give and take within the platform.
           </p>
           <p className="mt-3">
             The free-against-contribution model ensures that JOBLUX remains accessible to all
@@ -160,7 +153,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 5. Content & Contributions ── */}
         <section id="content-contributions">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">5. Content &amp; Contributions</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">5. Content &amp; Contributions</h2>
           <p>
             You retain ownership of all original content you submit to the Platform. By submitting a
             Contribution, you grant JOBLUX a worldwide, non-exclusive, royalty-free, perpetual, and
@@ -170,7 +163,7 @@ export default function TermsOfServicePage() {
           </p>
           <p className="mt-3">
             Certain Contributions, particularly salary data and interview experiences, are
-            automatically anonymised before being made visible to other Members. JOBLUX employs
+            automatically anonymized before being made visible to other users. JOBLUX employs
             technical and editorial measures to strip personally identifying information from such
             Contributions. However, you are responsible for ensuring that your submissions do not
             inadvertently reveal confidential or proprietary information belonging to third parties.
@@ -186,8 +179,8 @@ export default function TermsOfServicePage() {
             Contributions generated with the assistance of artificial intelligence (AI) tools are
             permitted, provided they are clearly identified as AI-assisted and meet the same quality
             and accuracy standards as human-authored content. JOBLUX reserves the right to label,
-            flag, or remove AI-generated content that does not meet ecosystem standards or that may
-            mislead other Members.
+            flag, or remove AI-generated content that does not meet standards or that may
+            mislead other users.
           </p>
           <p className="mt-3">
             You represent and warrant that you have all necessary rights, permissions, and consents to
@@ -199,7 +192,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 6. Recruitment Services ── */}
         <section id="recruitment-services">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">6. Recruitment Services</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">6. Recruitment Services</h2>
           <p>
             JOBLUX acts as a gatekeeper between luxury talent and employers. When you apply to an
             Opportunity or are identified as a potential candidate for a Search Assignment, JOBLUX
@@ -207,9 +200,9 @@ export default function TermsOfServicePage() {
             candidature are presented to employers through JOBLUX, not directly.
           </p>
           <p className="mt-3">
-            Members must not attempt to contact employers directly in connection with Opportunities
-            listed on the Platform, unless explicitly authorised by JOBLUX. Similarly, employers and
-            recruiters accessing the Platform must not contact Members directly outside the channels
+            Users must not attempt to contact employers directly in connection with Opportunities
+            listed on the Platform, unless explicitly authorized by JOBLUX. Similarly, employers and
+            recruiters accessing the Platform must not contact users directly outside the channels
             provided by JOBLUX. This gatekeeper model exists to protect both parties and to ensure a
             curated, professional recruitment experience.
           </p>
@@ -222,7 +215,7 @@ export default function TermsOfServicePage() {
           </p>
           <p className="mt-3">
             Recruitment fees, where applicable, are charged exclusively to the employer or the party
-            commissioning the Search Assignment. Members are never charged for applying to
+            commissioning the Search Assignment. Users are never charged for applying to
             Opportunities, being presented to employers, or participating in the recruitment process.
             If any third party attempts to charge you a fee in connection with a JOBLUX Opportunity,
             please report it to us immediately at hello@joblux.com.
@@ -231,9 +224,9 @@ export default function TermsOfServicePage() {
 
         {/* ── 7. Internship Listings ── */}
         <section id="internship-listings">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">7. Internship Listings</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">7. Internship Listings</h2>
           <p>
-            Internship listings on the Platform are available exclusively to Members registered under
+            Internship listings on the Platform are available exclusively to users registered under
             the Business tier. Employers may post internship opportunities free of charge, subject to
             review and approval by the JOBLUX team. We reserve the right to reject or remove any
             internship listing that does not meet our quality or ethical standards.
@@ -255,18 +248,18 @@ export default function TermsOfServicePage() {
             to French labour law (Code du travail) regarding internship conventions (conventions de
             stage), minimum gratification, maximum duration, and working conditions. JOBLUX does not
             permit unpaid internship listings where local law requires compensation. Employers are
-            solely responsible for ensuring that their internship programmes comply with all applicable
+            solely responsible for ensuring that their internship programs comply with all applicable
             legal and regulatory requirements.
           </p>
         </section>
 
         {/* ── 8. Intellectual Property ── */}
         <section id="intellectual-property">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">8. Intellectual Property</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">8. Intellectual Property</h2>
           <p>
             The JOBLUX name, logo, brand identity, visual design, software, algorithms, databases,
             and all other intellectual property associated with the Platform are the exclusive property
-            of JOBLUX and Mohammed M'zaour. These are protected by applicable intellectual property
+            of JOBLUX and Mohammed M&apos;zaour. These are protected by applicable intellectual property
             laws, including copyright, trademark, and trade secret laws.
           </p>
           <p className="mt-3">
@@ -290,59 +283,58 @@ export default function TermsOfServicePage() {
 
         {/* ── 9. Prohibited Conduct ── */}
         <section id="prohibited-conduct">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">9. Prohibited Conduct</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">9. Prohibited Conduct</h2>
           <p>
-            Members and all users of the Platform agree not to engage in any of the following
+            Users and all visitors of the Platform agree not to engage in any of the following
             prohibited activities. Violation of these rules may result in immediate account
             termination, legal action, or both.
           </p>
           <p className="mt-3">
-            <strong>Scraping and automated access:</strong> You may not use bots, crawlers, scrapers,
+            <strong className="text-white">Scraping and automated access:</strong> You may not use bots, crawlers, scrapers,
             or any automated means to access, collect, or extract data from the Platform. This
-            includes scraping member profiles, salary data, interview experiences, job listings, or
+            includes scraping user profiles, salary data, interview experiences, career listings, or
             any other content. All access must be through the interfaces provided by JOBLUX.
           </p>
           <p className="mt-3">
-            <strong>Sharing credentials:</strong> You may not share your login credentials, access
+            <strong className="text-white">Sharing credentials:</strong> You may not share your login credentials, access
             tokens, or any other authentication information with any third party. Each account is
-            personal and non-transferable. Sharing access to the Platform undermines the integrity of
-            the Society and is grounds for immediate termination.
+            personal and non-transferable. Sharing access to the Platform undermines its integrity and is grounds for immediate termination.
           </p>
           <p className="mt-3">
-            <strong>Harassment and misconduct:</strong> You may not harass, abuse, threaten, stalk,
-            intimidate, or otherwise engage in harmful behaviour towards other Members, JOBLUX staff,
+            <strong className="text-white">Harassment and misconduct:</strong> You may not harass, abuse, threaten, stalk,
+            intimidate, or otherwise engage in harmful behavior towards other users, JOBLUX staff,
             or any third party through the Platform. This includes but is not limited to discriminatory
             language, unwanted solicitation, doxxing, and any form of bullying.
           </p>
           <p className="mt-3">
-            <strong>Circumventing the gatekeeper:</strong> You may not attempt to bypass, circumvent,
+            <strong className="text-white">Circumventing the gatekeeper:</strong> You may not attempt to bypass, circumvent,
             or undermine the JOBLUX gatekeeper model. This includes contacting employers directly
             about Platform-listed Opportunities, sharing employer contact details obtained through the
             Platform with third parties, or facilitating direct connections that bypass JOBLUX
-            intermediation. The gatekeeper model is fundamental to the trust and value of the Society.
+            intermediation. The gatekeeper model is fundamental to the trust and value of the platform.
           </p>
         </section>
 
         {/* ── 10. Account Termination ── */}
         <section id="account-termination">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">10. Account Termination</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">10. Account Termination</h2>
           <p>
             You may terminate your account at any time by contacting us at hello@joblux.com or
             through the account settings on the Platform. Upon termination, your access to the
             Platform will cease, and your personal data will be handled in accordance with our{' '}
-            <Link href="/privacy" className="underline">Privacy Policy</Link>.
+            <Link href="/privacy" className="text-[#a58e28] hover:text-[#c4a830] transition-colors underline">Privacy Policy</Link>.
           </p>
           <p className="mt-3">
             JOBLUX reserves the right to suspend or terminate your account at any time, with or
             without notice, for any reason, including but not limited to: violation of these Terms,
-            fraudulent activity, inactivity, conduct detrimental to the Society, or at the request of
+            fraudulent activity, inactivity, conduct detrimental to the platform, or at the request of
             law enforcement or regulatory authorities.
           </p>
           <p className="mt-3">
             Upon termination, whether initiated by you or by JOBLUX, certain provisions of these
             Terms shall survive, including but not limited to: intellectual property rights, licence
             grants for Contributions, disclaimers, limitations of liability, and governing law
-            provisions. Anonymised Contributions may be retained in accordance with our data retention
+            provisions. Anonymized Contributions may be retained in accordance with our data retention
             policies.
           </p>
           <p className="mt-3">
@@ -354,9 +346,9 @@ export default function TermsOfServicePage() {
 
         {/* ── 11. Disclaimers & Limitation of Liability ── */}
         <section id="disclaimers">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">11. Disclaimers &amp; Limitation of Liability</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">11. Disclaimers &amp; Limitation of Liability</h2>
           <p>
-            The Platform is provided on an "as is" and "as available" basis, without warranties of any
+            The Platform is provided on an &ldquo;as is&rdquo; and &ldquo;as available&rdquo; basis, without warranties of any
             kind, whether express, implied, or statutory. JOBLUX disclaims all warranties, including
             but not limited to implied warranties of merchantability, fitness for a particular purpose,
             non-infringement, and accuracy of information.
@@ -368,7 +360,7 @@ export default function TermsOfServicePage() {
             salary data, interview experiences, and employer information.
           </p>
           <p className="mt-3">
-            To the maximum extent permitted by applicable law, JOBLUX, its operator Mohammed M'zaour,
+            To the maximum extent permitted by applicable law, JOBLUX, its operator Mohammed M&apos;zaour,
             and their respective officers, directors, employees, agents, and affiliates shall not be
             liable for any indirect, incidental, special, consequential, or punitive damages, including
             but not limited to loss of profits, data, use, goodwill, or other intangible losses,
@@ -384,7 +376,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 12. Governing Law ── */}
         <section id="governing-law">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">12. Governing Law</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">12. Governing Law</h2>
           <p>
             These Terms shall be governed by and construed in accordance with the laws of France,
             without regard to its conflict of law provisions. The application of the United Nations
@@ -407,11 +399,11 @@ export default function TermsOfServicePage() {
 
         {/* ── 13. Changes to Terms ── */}
         <section id="changes">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">13. Changes to Terms</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">13. Changes to Terms</h2>
           <p>
             JOBLUX reserves the right to modify, amend, or replace these Terms at any time at its sole
-            discretion. When we make material changes, we will notify Members through the Platform,
-            via email, or through The Brief newsletter. The "Last updated" date at the top of these
+            discretion. When we make material changes, we will notify users through the Platform,
+            via email, or through The Brief newsletter. The &ldquo;Last updated&rdquo; date at the top of these
             Terms will be revised accordingly.
           </p>
           <p className="mt-3">
@@ -422,7 +414,7 @@ export default function TermsOfServicePage() {
           </p>
           <p className="mt-3">
             For significant changes that materially affect your rights or obligations, JOBLUX will
-            endeavour to provide at least thirty (30) days' advance notice before the changes take
+            endeavor to provide at least thirty (30) days&apos; advance notice before the changes take
             effect. During this notice period, you may contact us with questions or concerns about
             the proposed changes.
           </p>
@@ -430,7 +422,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 14. Travel Advisory Services ── */}
         <section id="travel-advisory">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">14. Travel Advisory Services</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">14. Travel Advisory Services</h2>
           <p>
             Travel advisory services featured on JOBLUX Escape are provided by independent advisors
             affiliated with Fora Travel, Inc. Joblux US LLC, registered in Delaware, is a media partner and does not provide, arrange,
@@ -450,29 +442,29 @@ export default function TermsOfServicePage() {
 
         {/* ── 15. Contact ── */}
         <section id="contact">
-          <h2 className="jl-serif text-2xl font-semibold mb-4">15. Contact</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">15. Contact</h2>
           <p>
             If you have any questions, concerns, or feedback regarding these Terms of Service or the
             Platform, please contact us:
           </p>
           <p className="mt-3">
-            <strong>JOBLUX</strong><br />
-            Operated by Mohammed M'zaour<br />
+            <strong className="text-white">JOBLUX</strong><br />
+            Operated by Mohammed M&apos;zaour<br />
             Paris, France<br />
             Email:{' '}
-            <a href="mailto:hello@joblux.com" className="underline">
+            <a href="mailto:hello@joblux.com" className="text-[#a58e28] hover:text-[#c4a830] transition-colors underline">
               hello@joblux.com
             </a>
           </p>
           <p className="mt-3">
             We aim to respond to all enquiries within a reasonable timeframe. For urgent matters
-            related to account security or abuse, please include "URGENT" in your email subject line.
+            related to account security or abuse, please include &ldquo;URGENT&rdquo; in your email subject line.
           </p>
         </section>
       </div>
 
       {/* ── Footer Links ── */}
-      <div className="mt-16 pt-8 border-t border-[#e8e2d8] flex gap-6 text-sm text-[#888]">
+      <div className="mt-16 pt-8 border-t border-[#333] flex gap-6 text-sm text-[#777]">
         <Link href="/privacy" className="underline hover:text-[#a58e28] transition-colors">
           Privacy Policy
         </Link>
