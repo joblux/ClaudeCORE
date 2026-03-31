@@ -200,7 +200,7 @@ export default function CareersPage() {
                 const displayMaison = a.is_confidential ? null : a.maison
                 const locationStr = a.location || [a.city, a.country].filter(Boolean).join(', ')
                 return (
-                <Link key={a.id} href={`/opportunities/${a.slug || a.id}`} className="block">
+                <Link key={a.id} href={`/careers/${a.slug || a.id}`} className="block">
                 <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 hover:border-[#3a3a3a] transition-colors cursor-pointer">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
