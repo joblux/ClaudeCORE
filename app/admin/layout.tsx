@@ -9,7 +9,7 @@ import {
   LayoutDashboard, BarChart3, Briefcase, Kanban, MessageSquare,
   Users, Star, Send, FileText, BookOpen, DollarSign,
   Menu, X, LogOut, Images, PenLine, MessageCircle, Mail,
-  Compass, ClipboardList, Settings
+  Compass, ClipboardList, Settings, Sparkles
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
@@ -39,6 +39,12 @@ const NAV_SECTIONS = [
       { label: 'Salary Intelligence', href: '/admin/salary-intelligence', icon: DollarSign },
       { label: 'Media Library', href: '/admin/media', icon: Images },
       { label: 'Escape', href: '/admin/escape', icon: Compass },
+    ],
+  },
+  {
+    label: 'LUXAI',
+    items: [
+      { label: 'LUXAI', href: '/admin/luxai', icon: Sparkles },
     ],
   },
   {
@@ -73,6 +79,7 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   '/admin/editorial-review': { title: 'Editorial Review', subtitle: 'Comments & moderation' },
   '/admin/wikilux': { title: 'WikiLux', subtitle: 'Brand encyclopedia' },
   '/admin/escape': { title: 'Escape', subtitle: 'Travel content management' },
+  '/admin/luxai': { title: 'LUXAI', subtitle: 'AI engine management' },
   '/admin/salary-intelligence': { title: 'Salary Intelligence', subtitle: 'Compensation data' },
   '/admin/media': { title: 'Media Library', subtitle: 'Assets & uploads' },
   '/admin/contact': { title: 'Contact Messages', subtitle: 'Inbound enquiries' },
