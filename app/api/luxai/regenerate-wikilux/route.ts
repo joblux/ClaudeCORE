@@ -166,7 +166,7 @@ async function generateBrandContent(slug: string, brandName: string) {
   
   await supabase.from('luxai_history').insert({
     type: 'wikilux_regeneration',
-    model: 'claude-3-5-haiku-20241022',
+    model: 'claude-haiku-4-5-20251001',
     prompt: `Generate WikiLux content for ${brandName}`,
     response: { slug, brand_name: brandName },
     tokens_used: totalTokens,
@@ -216,7 +216,7 @@ Tone: encyclopedic, factual, authoritative. Focus on accuracy.`
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model: 'claude-3-5-haiku-20241022',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: isTranslation ? 8000 : 4000,
       messages: [{ role: 'user', content: prompt }]
     })
