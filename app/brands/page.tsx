@@ -1,13 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { BRANDS } from '@/lib/wikilux-brands'
 
 const signalColors: Record<string, string> = {
   growth: '#4CAF50',
@@ -17,22 +12,24 @@ const signalColors: Record<string, string> = {
   merger_acquisition: '#9C27B0',
 }
 
-const placeholderBrands = [
-  { id: '1', name: 'Hermès', slug: 'hermes', parent_group: 'Independent', sectors: ['Leather goods', 'Fashion', 'Watches'], is_hiring: true, revenue_change: '+18%', signal_label: 'Hiring', signal_color: 'growth', extra: '4 new stores' },
-  { id: '2', name: 'Cartier', slug: 'cartier', parent_group: 'Richemont', sectors: ['Jewelry', 'Watches'], is_hiring: true, revenue_change: '+9%', signal_label: 'Hiring', signal_color: 'growth', extra: null },
-  { id: '3', name: 'Gucci', slug: 'gucci', parent_group: 'Kering', sectors: ['Fashion', 'Leather goods'], is_hiring: false, revenue_change: '-6%', signal_label: 'New CD', signal_color: 'leadership', extra: null },
-  { id: '4', name: 'Louis Vuitton', slug: 'louis-vuitton', parent_group: 'LVMH', sectors: ['Fashion', 'Leather goods'], is_hiring: true, revenue_change: '+4%', signal_label: 'Stable', signal_color: 'growth', extra: null },
-  { id: '5', name: 'Chanel', slug: 'chanel', parent_group: 'Independent (private)', sectors: ['Fashion', 'Beauty', 'Jewelry'], is_hiring: false, revenue_change: null, signal_label: 'Expanding', signal_color: 'expansion', extra: null },
-  { id: '6', name: 'Rolex', slug: 'rolex', parent_group: 'Independent (private)', sectors: ['Watches'], is_hiring: false, revenue_change: null, signal_label: 'Stable', signal_color: 'growth', extra: null },
-  { id: '7', name: 'Dior', slug: 'dior', parent_group: 'LVMH', sectors: ['Fashion', 'Beauty'], is_hiring: true, revenue_change: '+11%', signal_label: 'Hiring', signal_color: 'growth', extra: null },
-  { id: '8', name: 'Burberry', slug: 'burberry', parent_group: 'Independent', sectors: ['Fashion'], is_hiring: false, revenue_change: '-14%', signal_label: '-400 roles', signal_color: 'contraction', extra: null },
-  { id: '9', name: 'Prada', slug: 'prada', parent_group: 'Prada Group', sectors: ['Fashion', 'Leather goods'], is_hiring: true, revenue_change: '+8%', signal_label: 'Hiring', signal_color: 'growth', extra: null },
-  { id: '10', name: 'Bottega Veneta', slug: 'bottega-veneta', parent_group: 'Kering', sectors: ['Fashion', 'Leather goods'], is_hiring: false, revenue_change: null, signal_label: 'Stable', signal_color: 'growth', extra: null },
-  { id: '11', name: 'Saint Laurent', slug: 'saint-laurent', parent_group: 'Kering', sectors: ['Fashion'], is_hiring: true, revenue_change: null, signal_label: 'Hiring', signal_color: 'growth', extra: null },
-  { id: '12', name: 'Chloé', slug: 'chloe', parent_group: 'Richemont', sectors: ['Fashion'], is_hiring: false, revenue_change: null, signal_label: 'New CD', signal_color: 'leadership', extra: null },
-]
+// Map BRANDS array to the card shape the listing expects
+const allBrands = BRANDS.map((b, i) => ({
+  id: String(i + 1),
+  name: b.name,
+  slug: b.slug,
+  parent_group: b.group,
+  sectors: b.known_for ? b.known_for.split(',').slice(0, 3).map(s => s.trim()) : [b.sector],
+  is_hiring: false,
+  revenue_change: null as string | null,
+  signal_label: null as string | null,
+  signal_color: 'growth',
+  extra: null as string | null,
+}))
 
-const sectors = ['All', 'Fashion', 'Jewelry', 'Watches', 'Beauty', 'Hospitality', 'Automotive', 'Spirits & Wine']
+// Collect unique sectors from all brands for filter pills
+const sectorSet = new Set<string>()
+BRANDS.forEach(b => sectorSet.add(b.sector))
+const sectors = ['All', ...Array.from(sectorSet).sort()]
 
 function getInitials(name: string) {
   const words = name.split(' ')
@@ -42,24 +39,12 @@ function getInitials(name: string) {
 
 export default function BrandsPage() {
   const router = useRouter()
-  const [brands, setBrands] = useState<any[]>(placeholderBrands)
   const [activeFilter, setActiveFilter] = useState('All')
   const [search, setSearch] = useState('')
 
-  useEffect(() => {
-    async function fetchBrands() {
-      const { data } = await supabase
-        .from('brands')
-        .select('*')
-        .order('name', { ascending: true })
-      if (data && data.length > 0) setBrands(data)
-    }
-    fetchBrands()
-  }, [])
-
-  const filtered = brands.filter(b => {
-    const matchesSector = activeFilter === 'All' || (b.sectors && b.sectors.includes(activeFilter))
-    const matchesSearch = b.name.toLowerCase().includes(search.toLowerCase())
+  const filtered = allBrands.filter(b => {
+    const matchesSector = activeFilter === 'All' || b.sectors.some(s => s.toLowerCase().includes(activeFilter.toLowerCase())) || BRANDS.find(br => br.slug === b.slug)?.sector === activeFilter
+    const matchesSearch = b.name.toLowerCase().includes(search.toLowerCase()) || b.slug.includes(search.toLowerCase())
     return matchesSector && matchesSearch
   })
 
@@ -109,7 +94,7 @@ export default function BrandsPage() {
 
         {/* Stats */}
         <div className="flex gap-6 mb-6">
-          {[['154', 'brands'], ['12', 'sectors'], ['9', 'languages'], ['47', 'hiring now'], ['8', 'new signals today']].map(([n, l]) => (
+          {[[String(BRANDS.length), 'brands'], [String(sectorSet.size), 'sectors'], ['9', 'languages']].map(([n, l]) => (
             <span key={l} className="text-xs">
               <span className="text-[#999]">{n}</span>
               <span className="text-[#999]"> {l}</span>
@@ -120,7 +105,8 @@ export default function BrandsPage() {
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {filtered.map(brand => {
-            const color = signalColors[brand.signal_color] || '#4CAF50'
+            const staticBrand = BRANDS.find(b => b.slug === brand.slug)
+            const color = brand.signal_label ? (signalColors[brand.signal_color] || '#4CAF50') : '#555'
             return (
               <div
                 key={brand.id}
@@ -140,20 +126,22 @@ export default function BrandsPage() {
 
                 {/* Sectors */}
                 <div className="text-[11px] text-[#4a4a4a] mb-3">
-                  {(brand.sectors || []).join(' · ')}
+                  {brand.sectors.join(' · ')}
                 </div>
 
-                {/* Indicators */}
+                {/* Sector pill */}
                 <div className="flex items-center gap-3 flex-wrap">
-                  <span className="flex items-center gap-1.5 text-[11px]">
-                    <span className="w-[5px] h-[5px] rounded-full flex-shrink-0" style={{ background: color }} />
-                    <span style={{ color }}>{brand.signal_label}</span>
-                  </span>
+                  {staticBrand && (
+                    <span className="text-[11px] text-[#555]">{staticBrand.sector}</span>
+                  )}
+                  {brand.signal_label && (
+                    <span className="flex items-center gap-1.5 text-[11px]">
+                      <span className="w-[5px] h-[5px] rounded-full flex-shrink-0" style={{ background: color }} />
+                      <span style={{ color }}>{brand.signal_label}</span>
+                    </span>
+                  )}
                   {brand.revenue_change && (
                     <span className="text-[11px]" style={{ color }}>{brand.revenue_change}</span>
-                  )}
-                  {brand.extra && (
-                    <span className="text-[11px]" style={{ color }}>{brand.extra}</span>
                   )}
                 </div>
               </div>
