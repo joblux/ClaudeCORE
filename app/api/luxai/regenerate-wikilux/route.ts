@@ -11,11 +11,19 @@ interface RegenerateRequest {
   brand_slug?: string
 }
 
+interface BrandResult {
+  slug: string
+  brand_name: string
+  status: 'success' | 'error'
+  tokens_used?: number
+  cost_usd?: number
+  error?: string
+}
+
 export async function POST(request: Request) {
   try {
     const body: RegenerateRequest = await request.json()
     
-    // Validate API key
     if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json({
         success: false,
@@ -23,7 +31,6 @@ export async function POST(request: Request) {
       }, { status: 500 })
     }
 
-    // Get brands to process
     let brandsToProcess: any[] = []
     
     if (body.mode === 'single') {
@@ -58,8 +65,7 @@ export async function POST(request: Request) {
       brandsToProcess = data || []
     }
 
-    // Process brands in batches
-    const results = []
+    const results: BrandResult[] = []
     let totalCost = 0
     let totalTokens = 0
     const startTime = Date.now()
@@ -70,7 +76,7 @@ export async function POST(request: Request) {
     for (let i = 0; i < brandsToProcess.length; i += BATCH_SIZE) {
       const batch = brandsToProcess.slice(i, i + BATCH_SIZE)
       
-      const batchPromises = batch.map(brand => generateBrandContent(brand.slug, brand.brand_name))
+      const batchPromises = batch.map((brand: any) => generateBrandContent(brand.slug, brand.brand_name))
       const batchResults = await Promise.allSettled(batchPromises)
       
       batchResults.forEach((result, idx) => {
@@ -95,7 +101,6 @@ export async function POST(request: Request) {
         }
       })
       
-      // Delay between batches (except after last batch)
       if (i + BATCH_SIZE < brandsToProcess.length) {
         await new Promise(resolve => setTimeout(resolve, DELAY_MS))
       }
@@ -128,15 +133,11 @@ export async function POST(request: Request) {
 }
 
 async function generateBrandContent(slug: string, brandName: string) {
-  const startTime = Date.now()
-  
-  // Generate English content
   const englishContent = await callClaude({
     brand_name: brandName,
     language: 'English'
   })
   
-  // Generate translations
   const translations = await Promise.all([
     callClaude({ brand_name: brandName, language: 'Chinese (Simplified)', source_content: englishContent.content }),
     callClaude({ brand_name: brandName, language: 'Arabic', source_content: englishContent.content }),
@@ -146,7 +147,6 @@ async function generateBrandContent(slug: string, brandName: string) {
   const totalTokens = englishContent.tokens + translations.reduce((sum, t) => sum + t.tokens, 0)
   const totalCost = englishContent.cost + translations.reduce((sum, t) => sum + t.cost, 0)
   
-  // Save to database
   const { error } = await supabase
     .from('wikilux_content')
     .update({
@@ -158,15 +158,12 @@ async function generateBrandContent(slug: string, brandName: string) {
       },
       status: 'pending',
       last_regenerated_at: new Date().toISOString(),
-      regeneration_count: supabase.raw('COALESCE(regeneration_count, 0) + 1'),
-      content_version: supabase.raw('COALESCE(content_version, 0) + 1'),
       updated_at: new Date().toISOString()
     })
     .eq('slug', slug)
   
   if (error) throw error
   
-  // Log to luxai_history
   await supabase.from('luxai_history').insert({
     type: 'wikilux_regeneration',
     model: 'claude-haiku-3-5-20241022',
@@ -177,10 +174,7 @@ async function generateBrandContent(slug: string, brandName: string) {
     status: 'success'
   })
   
-  return {
-    tokens: totalTokens,
-    cost: totalCost
-  }
+  return { tokens: totalTokens, cost: totalCost }
 }
 
 async function callClaude(params: { brand_name: string, language: string, source_content?: any }) {
@@ -197,22 +191,22 @@ Output only the translated JSON with no additional text.`
 Return ONLY a JSON object (no markdown, no explanation) with this exact structure:
 
 {
-  "history": "300-word brand history from founding to present, covering key milestones, evolution, ownership changes, and current position",
-  "founder": "250-word founder biography including birth, background, philosophy, innovations, and lasting impact on the brand and industry",
-  "brand_dna": "200-word brand identity analysis covering core values, aesthetic codes, positioning, what distinguishes the brand, and target clientele",
-  "careers": "150-word overview of working at this brand, covering culture, career paths, typical roles, and what the company values in candidates",
-  "creative_directors": "200-word evolution of creative leadership, covering historical directors, current director, their vision, and impact on brand direction",
-  "signature_products": "200-word description of 2-3 iconic products with their history, significance, price positioning, and what makes them special",
-  "current_strategy": "150-word overview of recent initiatives, digital transformation, sustainability efforts, market expansion, and strategic priorities",
-  "market_position": "180-word analysis of brand positioning in luxury market, target segments, key competitors, and differentiating factors",
+  "history": "300-word brand history from founding to present",
+  "founder": "250-word founder biography",
+  "brand_dna": "200-word brand identity analysis",
+  "careers": "150-word overview of working at this brand",
+  "creative_directors": "200-word evolution of creative leadership",
+  "signature_products": "200-word description of 2-3 iconic products",
+  "current_strategy": "150-word overview of recent initiatives",
+  "market_position": "180-word analysis of brand positioning",
   "hiring_intelligence": {
-    "culture": "150-word description of company culture, working environment, values, and what it's like to work there",
-    "process": "100-word overview of typical interview and hiring process",
-    "profiles": "100-word description of ideal candidate profiles and what the brand looks for"
+    "culture": "150-word description of company culture",
+    "process": "100-word overview of hiring process",
+    "profiles": "100-word description of ideal candidates"
   }
 }
 
-Important: Tone should be encyclopedic, factual, and authoritative. Focus on accuracy of dates, names, and facts.`
+Tone: encyclopedic, factual, authoritative. Focus on accuracy.`
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -224,10 +218,7 @@ Important: Tone should be encyclopedic, factual, and authoritative. Focus on acc
     body: JSON.stringify({
       model: 'claude-haiku-3-5-20241022',
       max_tokens: isTranslation ? 8000 : 4000,
-      messages: [{
-        role: 'user',
-        content: prompt
-      }]
+      messages: [{ role: 'user', content: prompt }]
     })
   })
 
@@ -239,24 +230,17 @@ Important: Tone should be encyclopedic, factual, and authoritative. Focus on acc
   const data = await response.json()
   const text = data.content[0].text
   
-  // Parse JSON from response
   let content
   try {
-    // Remove any markdown code fences if present
     const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
     content = JSON.parse(cleaned)
   } catch (e) {
-    throw new Error(`Failed to parse JSON response: ${text.substring(0, 200)}...`)
+    throw new Error(`Failed to parse JSON: ${text.substring(0, 200)}`)
   }
   
-  // Calculate cost (Haiku pricing: $0.80/1M input, $4.00/1M output)
   const inputTokens = data.usage.input_tokens
   const outputTokens = data.usage.output_tokens
   const cost = (inputTokens * 0.80 / 1000000) + (outputTokens * 4.00 / 1000000)
   
-  return {
-    content,
-    tokens: inputTokens + outputTokens,
-    cost
-  }
+  return { content, tokens: inputTokens + outputTokens, cost }
 }
