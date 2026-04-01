@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Sparkles, CheckCircle, Settings as SettingsIcon, DollarSign, FileText, TrendingUp, Briefcase } from 'lucide-react'
 
 export default function LUXAIAdminPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('generation')
   
   // Approval Queue state
@@ -132,12 +134,12 @@ export default function LUXAIAdminPage() {
     setSavingSettings(false)
   }
 
-  async function handleApprove(id: string) {
+  async function handleApprove(id: string, type?: string, source?: string) {
     try {
       await fetch('/api/admin/luxai/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ id, type, source }),
       })
       setQueue(queue.filter(q => q.id !== id))
       alert('✓ Approved and published')
@@ -146,13 +148,13 @@ export default function LUXAIAdminPage() {
     }
   }
 
-  async function handleReject(id: string) {
+  async function handleReject(id: string, source?: string) {
     if (!confirm('Reject this item?')) return
     try {
       await fetch('/api/admin/luxai/reject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ id, source }),
       })
       setQueue(queue.filter(q => q.id !== id))
       alert('✓ Rejected')
@@ -169,6 +171,7 @@ export default function LUXAIAdminPage() {
       case 'FINANCE': return 'bg-[#8B5CF6] text-white'
       case 'SALARY': return 'bg-[#EC4899] text-white'
       case 'INTERVIEW': return 'bg-[#06B6D4] text-white'
+      case 'WIKILUX': return 'bg-[#111] text-white'
       default: return 'bg-[#3B82F6] text-white'
     }
   }
@@ -176,10 +179,13 @@ export default function LUXAIAdminPage() {
   const filteredQueue = queue.filter(item => {
     if (queueTab === 'all') return true
     if (queueTab === 'signals') return item.type === 'signal'
-    if (queueTab === 'salary') return item.type.includes('salary')
+    if (queueTab === 'salary') return item.type?.includes('salary')
     if (queueTab === 'interview') return item.type === 'interview_detail'
+    if (queueTab === 'wikilux') return item.type === 'wikilux' || item.source === 'wikilux'
     return true
   })
+
+  const wikiluxCount = queue.filter(q => q.type === 'wikilux' || q.source === 'wikilux').length
 
   const tabs = [
     { id: 'generation', label: 'Generation', icon: Sparkles },
@@ -213,6 +219,9 @@ export default function LUXAIAdminPage() {
               >
                 <Icon className="w-4 h-4" />
                 {tab.label}
+                {tab.id === 'approval' && queue.length > 0 && (
+                  <span className="ml-1 bg-[#EF4444] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{queue.length}</span>
+                )}
               </button>
             )
           })}
@@ -492,10 +501,11 @@ export default function LUXAIAdminPage() {
                 <p className="text-sm text-[#666]">Review AI-generated content before publishing</p>
               </div>
 
-              {/* Tabs */}
+              {/* Sub-tabs with WikiLux added */}
               <div className="flex gap-0 border-b border-[#e8e8e8] mb-6">
                 {[
                   { id: 'all', label: 'All' },
+                  { id: 'wikilux', label: 'WikiLux' },
                   { id: 'signals', label: 'Signals' },
                   { id: 'salary', label: 'Salary' },
                   { id: 'interview', label: 'Interview' },
@@ -510,8 +520,9 @@ export default function LUXAIAdminPage() {
                     {tab.label}
                     <span className="text-xs text-[#999] ml-1.5">
                       {tab.id === 'all' ? queue.length
+                        : tab.id === 'wikilux' ? wikiluxCount
                         : tab.id === 'signals' ? queue.filter(q => q.type === 'signal').length
-                        : tab.id === 'salary' ? queue.filter(q => q.type.includes('salary')).length
+                        : tab.id === 'salary' ? queue.filter(q => q.type?.includes('salary')).length
                         : queue.filter(q => q.type === 'interview_detail').length}
                     </span>
                     {queueTab === tab.id && (
@@ -528,16 +539,16 @@ export default function LUXAIAdminPage() {
                   <div className="text-[32px] font-semibold text-[#111]">{queue.length}</div>
                 </div>
                 <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
-                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Approved (7d)</div>
-                  <div className="text-[32px] font-semibold text-[#111]">0</div>
+                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">WikiLux Pending</div>
+                  <div className="text-[32px] font-semibold text-[#111]">{wikiluxCount}</div>
                 </div>
                 <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
-                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Rejected (7d)</div>
-                  <div className="text-[32px] font-semibold text-[#111]">0</div>
+                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Signals Pending</div>
+                  <div className="text-[32px] font-semibold text-[#111]">{queue.filter(q => q.type === 'signal').length}</div>
                 </div>
                 <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
-                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Avg Review Time</div>
-                  <div className="text-[32px] font-semibold text-[#111]">2.4m</div>
+                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Other Pending</div>
+                  <div className="text-[32px] font-semibold text-[#111]">{queue.filter(q => q.type !== 'signal' && q.type !== 'wikilux').length}</div>
                 </div>
               </div>
 
@@ -549,39 +560,86 @@ export default function LUXAIAdminPage() {
               ) : filteredQueue.length === 0 ? (
                 <div className="bg-white border border-[#e8e8e8] rounded-lg p-12 text-center">
                   <p className="text-[#999] text-sm mb-4">No pending items in queue</p>
-                  <p className="text-xs text-[#666] mb-2">Generate content using the Generation tab</p>
+                  <p className="text-xs text-[#666] mb-2">Generate content using the Generation tab, or edit a WikiLux brand to submit for review</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {filteredQueue.map(item => (
                     <div key={item.id} className="bg-white border border-[#e8e8e8] rounded-lg p-5 hover:border-[#ccc] transition-colors">
-                      <div className="mb-3">
+                      <div className="mb-3 flex items-center gap-3">
                         <span className={`inline-block text-[10px] font-semibold px-2 py-1 rounded uppercase tracking-wide ${getBadgeStyle(item.content_type)}`}>
                           {item.content_type || 'SIGNAL'}
                         </span>
+                        {item.source === 'wikilux' && item.content?.slug && (
+                          <span className="text-xs text-[#999]">/{item.content.slug}</span>
+                        )}
                       </div>
                       <h3 className="text-base font-medium text-[#111] mb-1">{item.title}</h3>
                       <p className="text-xs text-[#999] mb-4">
-                        Generated {new Date(item.generated_at).toLocaleString()} via LUXAI
+                        {item.source === 'wikilux' ? 'Edited' : 'Generated'} {new Date(item.generated_at || item.created_at).toLocaleString()}
+                        {item.source === 'wikilux' ? ' via WikiLux Editor' : ' via LUXAI'}
                       </p>
-                      <div className="text-sm text-[#444] mb-4 leading-relaxed">
-                        {typeof item.content === 'string' 
-                          ? item.content 
-                          : item.content.content || JSON.stringify(item.content).substring(0, 300)
-                        }
-                      </div>
+
+                      {/* WikiLux-specific: show editorial notes and section count */}
+                      {item.source === 'wikilux' && (
+                        <div className="mb-4">
+                          {item.content?.editorial_notes && (
+                            <div className="text-sm text-[#666] bg-[#FFFBEB] border border-[#FDE68A] rounded-md p-3 mb-3">
+                              <span className="text-xs font-semibold text-[#92400E] uppercase tracking-wide">Editorial Notes: </span>
+                              {item.content.editorial_notes}
+                            </div>
+                          )}
+                          <div className="text-sm text-[#444] leading-relaxed">
+                            {item.content?.content ? (
+                              <span className="text-xs text-[#666]">
+                                {Object.keys(item.content.content).length} content sections • 
+                                {item.content.content.tagline ? ` "${item.content.content.tagline}"` : ' No tagline'}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-[#999]">No content preview available</span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Non-WikiLux: show content preview */}
+                      {item.source !== 'wikilux' && (
+                        <div className="text-sm text-[#444] mb-4 leading-relaxed">
+                          {typeof item.content === 'string' 
+                            ? item.content 
+                            : item.content?.content || JSON.stringify(item.content).substring(0, 300)
+                          }
+                        </div>
+                      )}
+
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleApprove(item.id)}
+                          onClick={() => handleApprove(item.id, item.type, item.source)}
                           className="bg-[#10B981] text-white text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#059669] transition-colors"
                         >
                           Approve & Publish
                         </button>
-                        <button className="bg-white border border-[#e8e8e8] text-[#111] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#f5f5f5] transition-colors">
-                          Edit
+                        {item.source === 'wikilux' && item.content?.slug && (
+                          <button
+                            onClick={() => router.push(`/admin/wikilux/edit/${item.content.slug}`)}
+                            className="bg-white border border-[#e8e8e8] text-[#111] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#f5f5f5] transition-colors"
+                          >
+                            Edit in WikiLux
+                          </button>
+                        )}
+                        {item.source !== 'wikilux' && (
+                          <button className="bg-white border border-[#e8e8e8] text-[#111] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#f5f5f5] transition-colors">
+                            Edit
+                          </button>
+                        )}
+                        <button
+                          onClick={() => window.open(`/wikilux/${item.content?.slug}`, '_blank')}
+                          className={`bg-white border border-[#e8e8e8] text-[#3B82F6] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#f5f5f5] transition-colors ${item.source !== 'wikilux' ? 'hidden' : ''}`}
+                        >
+                          Preview
                         </button>
                         <button
-                          onClick={() => handleReject(item.id)}
+                          onClick={() => handleReject(item.id, item.source)}
                           className="bg-white border border-[#e8e8e8] text-[#EF4444] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#FEE2E2] transition-colors"
                         >
                           Reject
