@@ -108,14 +108,13 @@ export async function POST(request: Request) {
     
     const processingTime = Math.round((Date.now() - startTime) / 1000)
     const successCount = results.filter(r => r.status === 'success').length
-    const failedCount = results.filter(r => r.status === 'error').length
     
     return NextResponse.json({
       success: true,
       message: `Processed ${successCount}/${brandsToProcess.length} brands`,
       data: {
         brands_processed: successCount,
-        brands_failed: failedCount,
+        brands_failed: results.filter(r => r.status === 'error').length,
         total_cost_usd: totalCost,
         total_tokens: totalTokens,
         processing_time_seconds: processingTime,
@@ -181,32 +180,45 @@ async function callClaude(params: { brand_name: string, language: string, source
   const isTranslation = !!params.source_content
   
   const prompt = isTranslation
-    ? `Translate this WikiLux brand content to ${params.language}. Maintain the exact same JSON structure:
+    ? `Translate this WikiLux brand content to ${params.language}. Maintain the exact same JSON structure and all keys. Translate all string values.
 
 ${JSON.stringify(params.source_content, null, 2)}
 
 Output only the translated JSON with no additional text.`
     : `Generate WikiLux encyclopedia content for ${params.brand_name} in ${params.language}.
 
-Return ONLY a JSON object (no markdown, no explanation) with this exact structure:
+Return ONLY a JSON object (no markdown, no explanation) with this exact structure. Fill ALL fields:
 
 {
-  "history": "300-word brand history from founding to present",
-  "founder": "250-word founder biography",
-  "brand_dna": "200-word brand identity analysis",
-  "careers": "150-word overview of working at this brand",
-  "creative_directors": "200-word evolution of creative leadership",
-  "signature_products": "200-word description of 2-3 iconic products",
-  "current_strategy": "150-word overview of recent initiatives",
-  "market_position": "180-word analysis of brand positioning",
+  "tagline": "One compelling sentence capturing the brand essence (max 15 words)",
+  "brand_dna": "200-word brand identity analysis — what makes this house unique, its codes, its aesthetic philosophy",
+  "history": "300-word brand history from founding to present day, key milestones and turning points",
+  "founder": "250-word founder biography — origins, vision, key achievements, legacy",
+  "founder_facts": "5 fascinating lesser-known facts about the founder, as a JSON array of strings",
+  "key_facts": "8-10 key facts about the brand (founding year, HQ, employees, revenue, stores, etc.), as a JSON array of objects with 'label' and 'value' keys",
+  "key_executives": "Current leadership team, as a JSON array of objects with 'name', 'role', and 'since' keys (3-5 executives)",
+  "creative_directors": "200-word evolution of creative leadership from founding to present, key creative figures and their contributions",
+  "signature_products": "200-word description of 3-5 most iconic products, their origin stories and cultural significance",
+  "careers": "150-word overview of what it is like to work at this brand — culture, expectations, growth",
   "hiring_intelligence": {
-    "culture": "150-word description of company culture",
-    "process": "100-word overview of hiring process",
-    "profiles": "100-word description of ideal candidates"
+    "culture": "150-word description of company culture and work environment",
+    "process": "100-word overview of typical hiring process and what to expect",
+    "profiles": "100-word description of ideal candidate profiles they look for"
+  },
+  "market_position": "180-word analysis of competitive positioning, market share, strengths vs peers",
+  "current_strategy": "150-word overview of current strategic initiatives, recent moves, future direction",
+  "presence": "Global presence summary, as a JSON array of objects with 'region' and 'detail' keys (e.g. Europe: 45 stores, Asia: 30 stores)",
+  "facts": "6-8 interesting brand facts or milestones, as a JSON array of strings",
+  "stock": {
+    "is_public": true or false,
+    "exchange": "Stock exchange name or null if private",
+    "ticker": "Stock ticker or null if private",
+    "parent_group": "Parent company name or 'Independent'",
+    "market_cap": "Approximate market cap or null"
   }
 }
 
-Tone: encyclopedic, factual, authoritative. Focus on accuracy.`
+Tone: encyclopedic, factual, authoritative. Focus on accuracy. For private companies, set stock.is_public to false and null for exchange/ticker/market_cap.`
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -217,7 +229,7 @@ Tone: encyclopedic, factual, authoritative. Focus on accuracy.`
     },
     body: JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: isTranslation ? 8000 : 4000,
+      max_tokens: isTranslation ? 8000 : 6000,
       messages: [{ role: 'user', content: prompt }]
     })
   })
@@ -240,7 +252,7 @@ Tone: encyclopedic, factual, authoritative. Focus on accuracy.`
   
   const inputTokens = data.usage.input_tokens
   const outputTokens = data.usage.output_tokens
-  const cost = (inputTokens * 0.80 / 1000000) + (outputTokens * 4.00 / 1000000)
+  const cost = (inputTokens * 1.00 / 1000000) + (outputTokens * 5.00 / 1000000)
   
   return { content, tokens: inputTokens + outputTokens, cost }
 }
