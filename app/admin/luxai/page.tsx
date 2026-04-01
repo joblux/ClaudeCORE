@@ -24,6 +24,18 @@ export default function LUXAIAdminPage() {
   
   // Generation state
   const [generating, setGenerating] = useState<string | null>(null)
+  
+  // Single brand regeneration
+  const [selectedBrand, setSelectedBrand] = useState('')
+  const [brandsList, setBrandsList] = useState<any[]>([])
+
+  // Load brands list on mount for the dropdown
+  useEffect(() => {
+    fetch('/api/admin/wikilux/brands-list')
+      .then(r => r.json())
+      .then(d => setBrandsList(d.brands || []))
+      .catch(() => {})
+  }, [])
 
   // Load data when switching tabs
   useEffect(() => {
@@ -98,19 +110,52 @@ export default function LUXAIAdminPage() {
         return
       }
 
+      const body = type === 'wikilux-all'
+        ? { mode: 'all' }
+        : { count: count || 5 }
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ count: count || 5 }),
+        body: JSON.stringify(body),
       })
 
       const data = await response.json()
       
       if (data.success) {
-        alert(`✓ Generated successfully! ${data.count || 1} items added to queue.`)
+        alert(`✓ Generated successfully! ${data.data?.brands_processed || data.count || 1} items processed.`)
         if (activeTab === 'approval') loadQueue()
       } else {
-        alert(`✗ Generation failed: ${data.error || 'Unknown error'}`)
+        alert(`✗ Generation failed: ${data.message || data.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      alert(`✗ Generation failed: Network error. Make sure ANTHROPIC_API_KEY is set in Coolify.`)
+    } finally {
+      setGenerating(null)
+    }
+  }
+
+  async function handleGenerateSingleBrand() {
+    if (!selectedBrand) return
+    const brandName = brandsList.find(b => b.slug === selectedBrand)?.brand_name || selectedBrand
+    if (!confirm(`Generate content for ${brandName}? This will use Claude Haiku 3.5 API (~$0.044).`)) return
+    
+    setGenerating('wikilux-single')
+    try {
+      const response = await fetch('/api/luxai/regenerate-wikilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'single', brand_slug: selectedBrand }),
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        alert(`✓ Content generated for ${brandName}! Check the Approval Queue to review and publish.`)
+        setSelectedBrand('')
+        if (activeTab === 'approval') loadQueue()
+      } else {
+        alert(`✗ Generation failed: ${data.message || 'Unknown error'}`)
       }
     } catch (error) {
       alert(`✗ Generation failed: Network error. Make sure ANTHROPIC_API_KEY is set in Coolify.`)
@@ -202,8 +247,6 @@ export default function LUXAIAdminPage() {
           <h1 className="text-[32px] font-semibold text-[#111] mb-2">LUXAI</h1>
           <p className="text-sm text-[#666]">AI engine management - Generation, approval, and cost tracking</p>
         </div>
-
-        {/* Tabs */}
         <div className="px-8 flex gap-8 border-t border-[#e8e8e8]">
           {tabs.map(tab => {
             const Icon = tab.icon
@@ -212,9 +255,7 @@ export default function LUXAIAdminPage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-1 py-4 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-[#111] text-[#111]'
-                    : 'border-transparent text-[#666] hover:text-[#111]'
+                  activeTab === tab.id ? 'border-[#111] text-[#111]' : 'border-transparent text-[#666] hover:text-[#111]'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -228,7 +269,6 @@ export default function LUXAIAdminPage() {
         </div>
       </div>
 
-      {/* Tab Content */}
       <div>
         {/* GENERATION TAB */}
         {activeTab === 'generation' && (
@@ -257,7 +297,7 @@ export default function LUXAIAdminPage() {
                   <div className="grid grid-cols-2 gap-4 text-xs">
                     <div>
                       <div className="text-[#999] uppercase tracking-wide mb-1">Cost</div>
-                      <div className="text-[#111] font-medium">~$0.15 for all 150 brands</div>
+                      <div className="text-[#111] font-medium">~$0.044 per brand · ~$7.90 for all {brandsList.length} brands</div>
                     </div>
                     <div>
                       <div className="text-[#999] uppercase tracking-wide mb-1">When to Use</div>
@@ -265,30 +305,49 @@ export default function LUXAIAdminPage() {
                     </div>
                     <div>
                       <div className="text-[#999] uppercase tracking-wide mb-1">How It Works</div>
-                      <div className="text-[#111] font-medium">AI reads brand data → generates content → saves to wikilux_content</div>
+                      <div className="text-[#111] font-medium">AI reads brand data → generates content → saves as pending → you approve</div>
                     </div>
                     <div>
                       <div className="text-[#999] uppercase tracking-wide mb-1">Result</div>
-                      <div className="text-[#111] font-medium">Content visible on /wikilux/[brand] pages</div>
+                      <div className="text-[#111] font-medium">Content visible on /brands/[brand] pages after approval</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex gap-3">
+                {/* Regenerate All */}
+                <div className="flex gap-3 mb-4">
                   <button
                     onClick={() => handleGenerate('wikilux-all')}
                     disabled={generating !== null}
                     className="px-4 py-2.5 bg-[#111] text-white rounded-md text-sm font-medium hover:bg-[#333] disabled:opacity-50 transition-colors"
                   >
-                    {generating === 'wikilux-all' ? 'Regenerating...' : 'REGENERATE ALL BRANDS (150)'}
-                  </button>
-                  <button
-                    disabled={generating !== null}
-                    className="px-4 py-2.5 bg-white border border-[#e8e8e8] text-[#111] rounded-md text-sm font-medium hover:bg-[#f5f5f5] disabled:opacity-50 transition-colors"
-                  >
-                    REGENERATE SINGLE BRAND ▼
+                    {generating === 'wikilux-all' ? 'Regenerating...' : `REGENERATE ALL BRANDS (${brandsList.length})`}
                   </button>
                 </div>
+
+                {/* Regenerate Single Brand */}
+                <div className="flex gap-3 items-center">
+                  <select
+                    value={selectedBrand}
+                    onChange={e => setSelectedBrand(e.target.value)}
+                    className="px-3 py-2.5 bg-white border border-[#e8e8e8] rounded-md text-sm min-w-[280px]"
+                  >
+                    <option value="">Select brand to regenerate...</option>
+                    {brandsList.map(b => (
+                      <option key={b.slug} value={b.slug}>
+                        {b.brand_name} {b.status === 'approved' ? '✓' : b.status === 'draft' ? '○' : '●'}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={handleGenerateSingleBrand}
+                    disabled={!selectedBrand || generating !== null}
+                    className="px-4 py-2.5 bg-white border border-[#e8e8e8] text-[#111] rounded-md text-sm font-medium hover:bg-[#f5f5f5] disabled:opacity-50 transition-colors"
+                  >
+                    {generating === 'wikilux-single' ? 'Generating...' : 'REGENERATE'}
+                  </button>
+                </div>
+                <p className="text-[10px] text-[#999] mt-2">✓ = published · ○ = draft (no content) · ● = pending review</p>
               </div>
 
               {/* BlogLux Articles */}
@@ -304,41 +363,20 @@ export default function LUXAIAdminPage() {
                     </p>
                   </div>
                 </div>
-
                 <div className="bg-[#f5f5f5] rounded-lg p-4 mb-4">
                   <div className="grid grid-cols-2 gap-4 text-xs">
-                    <div>
-                      <div className="text-[#999] uppercase tracking-wide mb-1">Cost</div>
-                      <div className="text-[#111] font-medium">~$0.01 per article</div>
-                    </div>
-                    <div>
-                      <div className="text-[#999] uppercase tracking-wide mb-1">Topics</div>
-                      <div className="text-[#111] font-medium">Industry trends, career advice, brand analysis</div>
-                    </div>
-                    <div>
-                      <div className="text-[#999] uppercase tracking-wide mb-1">How It Works</div>
-                      <div className="text-[#111] font-medium">AI generates → saves as draft → you review/edit → publish</div>
-                    </div>
-                    <div>
-                      <div className="text-[#999] uppercase tracking-wide mb-1">Result</div>
-                      <div className="text-[#111] font-medium">Article appears in Intelligence section</div>
-                    </div>
+                    <div><div className="text-[#999] uppercase tracking-wide mb-1">Cost</div><div className="text-[#111] font-medium">~$0.01 per article</div></div>
+                    <div><div className="text-[#999] uppercase tracking-wide mb-1">Topics</div><div className="text-[#111] font-medium">Industry trends, career advice, brand analysis</div></div>
+                    <div><div className="text-[#999] uppercase tracking-wide mb-1">How It Works</div><div className="text-[#111] font-medium">AI generates → saves as draft → you review/edit → publish</div></div>
+                    <div><div className="text-[#999] uppercase tracking-wide mb-1">Result</div><div className="text-[#111] font-medium">Article appears in Intelligence section</div></div>
                   </div>
                 </div>
-
                 <div className="flex gap-3">
-                  <button
-                    onClick={() => handleGenerate('article')}
-                    disabled={generating !== null}
-                    className="px-4 py-2.5 bg-[#111] text-white rounded-md text-sm font-medium hover:bg-[#333] disabled:opacity-50 transition-colors"
-                  >
+                  <button onClick={() => handleGenerate('article')} disabled={generating !== null} className="px-4 py-2.5 bg-[#111] text-white rounded-md text-sm font-medium hover:bg-[#333] disabled:opacity-50 transition-colors">
                     {generating === 'article' ? 'Generating...' : 'GENERATE ARTICLE'}
                   </button>
                   <select className="px-4 py-2.5 bg-white border border-[#e8e8e8] rounded-md text-sm font-medium">
-                    <option>Career Trends</option>
-                    <option>Brand Analysis</option>
-                    <option>Market Insights</option>
-                    <option>Hiring Strategy</option>
+                    <option>Career Trends</option><option>Brand Analysis</option><option>Market Insights</option><option>Hiring Strategy</option>
                   </select>
                 </div>
               </div>
@@ -351,52 +389,20 @@ export default function LUXAIAdminPage() {
                   </div>
                   <div className="flex-1">
                     <h3 className="text-base font-semibold text-[#111] mb-1">Signals</h3>
-                    <p className="text-sm text-[#666] leading-relaxed">
-                      Generates luxury industry news signals from monitoring WWD, BOF, Vogue Business, FT, Bloomberg, Reuters
-                    </p>
+                    <p className="text-sm text-[#666] leading-relaxed">Generates luxury industry news signals</p>
                   </div>
                 </div>
-
                 <div className="bg-[#f5f5f5] rounded-lg p-4 mb-4">
                   <div className="grid grid-cols-2 gap-4 text-xs">
-                    <div>
-                      <div className="text-[#999] uppercase tracking-wide mb-1">Cost</div>
-                      <div className="text-[#111] font-medium">~$0.02 for 5 signals</div>
-                    </div>
-                    <div>
-                      <div className="text-[#999] uppercase tracking-wide mb-1">Categories</div>
-                      <div className="text-[#111] font-medium">TALENT, MARKET, BRAND, FINANCE</div>
-                    </div>
-                    <div>
-                      <div className="text-[#999] uppercase tracking-wide mb-1">How It Works</div>
-                      <div className="text-[#111] font-medium">AI monitors news → generates signals → you approve → publishes</div>
-                    </div>
-                    <div>
-                      <div className="text-[#999] uppercase tracking-wide mb-1">Result</div>
-                      <div className="text-[#111] font-medium">Signals appear on /signals page with color badges</div>
-                    </div>
+                    <div><div className="text-[#999] uppercase tracking-wide mb-1">Cost</div><div className="text-[#111] font-medium">~$0.02 for 5 signals</div></div>
+                    <div><div className="text-[#999] uppercase tracking-wide mb-1">Categories</div><div className="text-[#111] font-medium">TALENT, MARKET, BRAND, FINANCE</div></div>
+                    <div><div className="text-[#999] uppercase tracking-wide mb-1">How It Works</div><div className="text-[#111] font-medium">AI generates → you approve → publishes</div></div>
+                    <div><div className="text-[#999] uppercase tracking-wide mb-1">Result</div><div className="text-[#111] font-medium">Signals appear on /signals page</div></div>
                   </div>
                 </div>
-
-                <div className="bg-[#FEF3C7] border border-[#FDE68A] rounded-lg p-3 mb-4">
-                  <p className="text-xs text-[#92400E] leading-relaxed">
-                    <strong>Hybrid Approach:</strong> These buttons are optional. For cost savings (~$0), manually create 1-2 signals/day instead of auto-generating. Manual creation coming soon.
-                  </p>
-                </div>
-
                 <div className="flex gap-3">
-                  <button
-                    onClick={() => handleGenerate('signals', 5)}
-                    disabled={generating !== null}
-                    className="px-4 py-2.5 bg-[#111] text-white rounded-md text-sm font-medium hover:bg-[#333] disabled:opacity-50 transition-colors"
-                  >
+                  <button onClick={() => handleGenerate('signals', 5)} disabled={generating !== null} className="px-4 py-2.5 bg-[#111] text-white rounded-md text-sm font-medium hover:bg-[#333] disabled:opacity-50 transition-colors">
                     {generating === 'signals' ? 'Generating...' : 'GENERATE SIGNALS (5)'}
-                  </button>
-                  <button
-                    disabled={generating !== null}
-                    className="px-4 py-2.5 bg-white border border-[#e8e8e8] text-[#111] rounded-md text-sm font-medium hover:bg-[#f5f5f5] disabled:opacity-50 transition-colors"
-                  >
-                    GENERATE SINGLE SIGNAL
                   </button>
                 </div>
               </div>
@@ -404,88 +410,30 @@ export default function LUXAIAdminPage() {
               {/* Salary Intelligence */}
               <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-5">
                 <div className="flex items-start gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-[#666]" />
-                  </div>
+                  <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] flex items-center justify-center"><DollarSign className="w-5 h-5 text-[#666]" /></div>
                   <div className="flex-1">
                     <h3 className="text-base font-semibold text-[#111] mb-1">Salary Intelligence</h3>
-                    <p className="text-sm text-[#666] leading-relaxed">
-                      Generates salary benchmarks, comparisons, and personalized estimates when users request them on /careers
-                    </p>
+                    <p className="text-sm text-[#666] leading-relaxed">On-demand salary benchmarks when users contribute data</p>
                   </div>
                 </div>
-
-                <div className="bg-[#f5f5f5] rounded-lg p-4 mb-4">
-                  <div className="grid grid-cols-2 gap-4 text-xs">
-                    <div>
-                      <div className="text-[#999] uppercase tracking-wide mb-1">Cost</div>
-                      <div className="text-[#111] font-medium">~$0.30-0.50/month total</div>
-                    </div>
-                    <div>
-                      <div className="text-[#999] uppercase tracking-wide mb-1">Trigger</div>
-                      <div className="text-[#111] font-medium">User clicks Benchmark/Compare/Calculator on /careers</div>
-                    </div>
-                    <div>
-                      <div className="text-[#999] uppercase tracking-wide mb-1">How It Works</div>
-                      <div className="text-[#111] font-medium">User request → API calls Claude → generates data → (optional approval)</div>
-                    </div>
-                    <div>
-                      <div className="text-[#999] uppercase tracking-wide mb-1">Result</div>
-                      <div className="text-[#111] font-medium">User sees salary intelligence (or after approval if enabled)</div>
-                    </div>
-                  </div>
-                </div>
-
                 <div className="flex items-center justify-between py-3 px-4 bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-[#10B981]"></div>
-                    <span className="text-sm font-medium text-[#065F46]">ON-DEMAND ONLY</span>
-                  </div>
-                  <span className="text-xs text-[#065F46]">Triggered by user requests, not auto-generated</span>
+                  <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-[#10B981]"></div><span className="text-sm font-medium text-[#065F46]">ON-DEMAND ONLY</span></div>
+                  <span className="text-xs text-[#065F46]">Triggered by user requests</span>
                 </div>
               </div>
 
               {/* Interview Intelligence */}
               <div className="bg-white border border-[#e8e8e8] rounded-lg p-6">
                 <div className="flex items-start gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] flex items-center justify-center">
-                    <Briefcase className="w-5 h-5 text-[#666]" />
-                  </div>
+                  <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] flex items-center justify-center"><Briefcase className="w-5 h-5 text-[#666]" /></div>
                   <div className="flex-1">
                     <h3 className="text-base font-semibold text-[#111] mb-1">Interview Intelligence</h3>
-                    <p className="text-sm text-[#666] leading-relaxed">
-                      Expands basic interview data into full experiences when users contribute their interview stories
-                    </p>
+                    <p className="text-sm text-[#666] leading-relaxed">Expands interview data when users contribute</p>
                   </div>
                 </div>
-
-                <div className="bg-[#f5f5f5] rounded-lg p-4 mb-4">
-                  <div className="grid grid-cols-2 gap-4 text-xs">
-                    <div>
-                      <div className="text-[#999] uppercase tracking-wide mb-1">Cost</div>
-                      <div className="text-[#111] font-medium">Included in ~$0.30-0.50/month budget</div>
-                    </div>
-                    <div>
-                      <div className="text-[#999] uppercase tracking-wide mb-1">Trigger</div>
-                      <div className="text-[#111] font-medium">User submits basic interview info</div>
-                    </div>
-                    <div>
-                      <div className="text-[#999] uppercase tracking-wide mb-1">How It Works</div>
-                      <div className="text-[#111] font-medium">User contribution → AI expands → (optional approval) → publishes</div>
-                    </div>
-                    <div>
-                      <div className="text-[#999] uppercase tracking-wide mb-1">Result</div>
-                      <div className="text-[#111] font-medium">Rich interview experiences on /careers</div>
-                    </div>
-                  </div>
-                </div>
-
                 <div className="flex items-center justify-between py-3 px-4 bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-[#10B981]"></div>
-                    <span className="text-sm font-medium text-[#065F46]">ON-DEMAND ONLY</span>
-                  </div>
-                  <span className="text-xs text-[#065F46]">Triggered by user contributions, not auto-generated</span>
+                  <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-[#10B981]"></div><span className="text-sm font-medium text-[#065F46]">ON-DEMAND ONLY</span></div>
+                  <span className="text-xs text-[#065F46]">Triggered by user contributions</span>
                 </div>
               </div>
             </div>
@@ -500,8 +448,6 @@ export default function LUXAIAdminPage() {
                 <h2 className="text-[28px] font-semibold text-[#111] mb-2">Approval Queue</h2>
                 <p className="text-sm text-[#666]">Review AI-generated content before publishing</p>
               </div>
-
-              {/* Sub-tabs with WikiLux added */}
               <div className="flex gap-0 border-b border-[#e8e8e8] mb-6">
                 {[
                   { id: 'all', label: 'All' },
@@ -510,57 +456,28 @@ export default function LUXAIAdminPage() {
                   { id: 'salary', label: 'Salary' },
                   { id: 'interview', label: 'Interview' },
                 ].map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setQueueTab(tab.id)}
-                    className={`pb-3 mr-8 text-sm relative transition-colors ${
-                      queueTab === tab.id ? 'text-[#111] font-medium' : 'text-[#666]'
-                    }`}
-                  >
+                  <button key={tab.id} onClick={() => setQueueTab(tab.id)}
+                    className={`pb-3 mr-8 text-sm relative transition-colors ${queueTab === tab.id ? 'text-[#111] font-medium' : 'text-[#666]'}`}>
                     {tab.label}
                     <span className="text-xs text-[#999] ml-1.5">
-                      {tab.id === 'all' ? queue.length
-                        : tab.id === 'wikilux' ? wikiluxCount
-                        : tab.id === 'signals' ? queue.filter(q => q.type === 'signal').length
-                        : tab.id === 'salary' ? queue.filter(q => q.type?.includes('salary')).length
-                        : queue.filter(q => q.type === 'interview_detail').length}
+                      {tab.id === 'all' ? queue.length : tab.id === 'wikilux' ? wikiluxCount : tab.id === 'signals' ? queue.filter(q => q.type === 'signal').length : tab.id === 'salary' ? queue.filter(q => q.type?.includes('salary')).length : queue.filter(q => q.type === 'interview_detail').length}
                     </span>
-                    {queueTab === tab.id && (
-                      <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#111]" />
-                    )}
+                    {queueTab === tab.id && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#111]" />}
                   </button>
                 ))}
               </div>
-
-              {/* Stats Grid */}
               <div className="grid grid-cols-4 gap-4 mb-8">
-                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
-                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Pending Review</div>
-                  <div className="text-[32px] font-semibold text-[#111]">{queue.length}</div>
-                </div>
-                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
-                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">WikiLux Pending</div>
-                  <div className="text-[32px] font-semibold text-[#111]">{wikiluxCount}</div>
-                </div>
-                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
-                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Signals Pending</div>
-                  <div className="text-[32px] font-semibold text-[#111]">{queue.filter(q => q.type === 'signal').length}</div>
-                </div>
-                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
-                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Other Pending</div>
-                  <div className="text-[32px] font-semibold text-[#111]">{queue.filter(q => q.type !== 'signal' && q.type !== 'wikilux').length}</div>
-                </div>
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5"><div className="text-xs text-[#666] uppercase tracking-wide mb-2">Pending Review</div><div className="text-[32px] font-semibold text-[#111]">{queue.length}</div></div>
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5"><div className="text-xs text-[#666] uppercase tracking-wide mb-2">WikiLux Pending</div><div className="text-[32px] font-semibold text-[#111]">{wikiluxCount}</div></div>
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5"><div className="text-xs text-[#666] uppercase tracking-wide mb-2">Signals Pending</div><div className="text-[32px] font-semibold text-[#111]">{queue.filter(q => q.type === 'signal').length}</div></div>
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5"><div className="text-xs text-[#666] uppercase tracking-wide mb-2">Other Pending</div><div className="text-[32px] font-semibold text-[#111]">{queue.filter(q => q.type !== 'signal' && q.type !== 'wikilux').length}</div></div>
               </div>
-
-              {/* Queue Items */}
               {loadingQueue ? (
-                <div className="flex items-center justify-center p-12">
-                  <div className="w-5 h-5 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin" />
-                </div>
+                <div className="flex items-center justify-center p-12"><div className="w-5 h-5 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin" /></div>
               ) : filteredQueue.length === 0 ? (
                 <div className="bg-white border border-[#e8e8e8] rounded-lg p-12 text-center">
                   <p className="text-[#999] text-sm mb-4">No pending items in queue</p>
-                  <p className="text-xs text-[#666] mb-2">Generate content using the Generation tab, or edit a WikiLux brand to submit for review</p>
+                  <p className="text-xs text-[#666]">Generate content using the Generation tab</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -579,71 +496,20 @@ export default function LUXAIAdminPage() {
                         {item.source === 'wikilux' ? 'Edited' : 'Generated'} {new Date(item.generated_at || item.created_at).toLocaleString()}
                         {item.source === 'wikilux' ? ' via WikiLux Editor' : ' via LUXAI'}
                       </p>
-
-                      {/* WikiLux-specific: show editorial notes and section count */}
-                      {item.source === 'wikilux' && (
-                        <div className="mb-4">
-                          {item.content?.editorial_notes && (
-                            <div className="text-sm text-[#666] bg-[#FFFBEB] border border-[#FDE68A] rounded-md p-3 mb-3">
-                              <span className="text-xs font-semibold text-[#92400E] uppercase tracking-wide">Editorial Notes: </span>
-                              {item.content.editorial_notes}
-                            </div>
-                          )}
-                          <div className="text-sm text-[#444] leading-relaxed">
-                            {item.content?.content ? (
-                              <span className="text-xs text-[#666]">
-                                {Object.keys(item.content.content).length} content sections • 
-                                {item.content.content.tagline ? ` "${item.content.content.tagline}"` : ' No tagline'}
-                              </span>
-                            ) : (
-                              <span className="text-xs text-[#999]">No content preview available</span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Non-WikiLux: show content preview */}
-                      {item.source !== 'wikilux' && (
-                        <div className="text-sm text-[#444] mb-4 leading-relaxed">
-                          {typeof item.content === 'string' 
-                            ? item.content 
-                            : item.content?.content || JSON.stringify(item.content).substring(0, 300)
-                          }
-                        </div>
-                      )}
-
+                      <div className="text-sm text-[#444] mb-4 leading-relaxed">
+                        {typeof item.content === 'string'
+                          ? item.content
+                          : item.content?.content
+                            ? (typeof item.content.content === 'string' ? item.content.content.substring(0, 300) : `${Object.keys(item.content.content).length} content sections`)
+                            : JSON.stringify(item.content).substring(0, 300)
+                        }
+                      </div>
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => handleApprove(item.id, item.type, item.source)}
-                          className="bg-[#10B981] text-white text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#059669] transition-colors"
-                        >
-                          Approve & Publish
-                        </button>
+                        <button onClick={() => handleApprove(item.id, item.type, item.source)} className="bg-[#10B981] text-white text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#059669] transition-colors">Approve & Publish</button>
                         {item.source === 'wikilux' && item.content?.slug && (
-                          <button
-                            onClick={() => router.push(`/admin/wikilux/edit/${item.content.slug}`)}
-                            className="bg-white border border-[#e8e8e8] text-[#111] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#f5f5f5] transition-colors"
-                          >
-                            Edit in WikiLux
-                          </button>
+                          <button onClick={() => router.push(`/admin/wikilux/edit/${item.content.slug}`)} className="bg-white border border-[#e8e8e8] text-[#111] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#f5f5f5] transition-colors">Edit in WikiLux</button>
                         )}
-                        {item.source !== 'wikilux' && (
-                          <button className="bg-white border border-[#e8e8e8] text-[#111] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#f5f5f5] transition-colors">
-                            Edit
-                          </button>
-                        )}
-                        <button
-                          onClick={() => window.open(`/wikilux/${item.content?.slug}`, '_blank')}
-                          className={`bg-white border border-[#e8e8e8] text-[#3B82F6] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#f5f5f5] transition-colors ${item.source !== 'wikilux' ? 'hidden' : ''}`}
-                        >
-                          Preview
-                        </button>
-                        <button
-                          onClick={() => handleReject(item.id, item.source)}
-                          className="bg-white border border-[#e8e8e8] text-[#EF4444] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#FEE2E2] transition-colors"
-                        >
-                          Reject
-                        </button>
+                        <button onClick={() => handleReject(item.id, item.source)} className="bg-white border border-[#e8e8e8] text-[#EF4444] text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#FEE2E2] transition-colors">Reject</button>
                       </div>
                     </div>
                   ))}
@@ -662,206 +528,55 @@ export default function LUXAIAdminPage() {
                 <p className="text-sm text-[#666]">Configure AI generation parameters and automation rules</p>
               </div>
 
-              {/* Signal Generation */}
-              <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-5">
-                <h3 className="text-base font-semibold text-[#111] mb-4">Signal Generation</h3>
-                
-                <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
-                  <div>
-                    <div className="text-sm font-medium text-[#111] mb-1">Auto-generate daily signals</div>
-                    <div className="text-xs text-[#666]">LUXAI will generate 5-8 signals per day based on news sources</div>
-                  </div>
-                  <button
-                    onClick={() => setSettings({...settings, signal_generation_enabled: !settings.signal_generation_enabled})}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.signal_generation_enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
-                    }`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      settings.signal_generation_enabled ? 'translate-x-6' : 'translate-x-1'
-                    }`} />
-                  </button>
+              {[
+                { title: 'Signal Generation', items: [
+                  { label: 'Auto-generate daily signals', desc: 'LUXAI will generate 5-8 signals per day', key: 'signal_generation_enabled' },
+                ]},
+                { title: 'Salary Intelligence', items: [
+                  { label: 'Enable benchmark tool', desc: 'Allow LUXAI to generate salary benchmarks', key: 'salary_benchmark_enabled' },
+                  { label: 'Require approval', desc: 'All salary outputs go through approval queue', key: 'salary_require_approval' },
+                ]},
+                { title: 'Interview Intelligence', items: [
+                  { label: 'Generate interview details', desc: 'LUXAI expands basic interview data', key: 'interview_generation_enabled' },
+                  { label: 'Require approval', desc: 'All interview details go through queue', key: 'interview_require_approval' },
+                ]},
+              ].map(section => (
+                <div key={section.title} className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-5">
+                  <h3 className="text-base font-semibold text-[#111] mb-4">{section.title}</h3>
+                  {section.items.map((item, i) => (
+                    <div key={item.key} className={`flex items-center justify-between py-3 ${i < section.items.length - 1 ? 'border-b border-[#f5f5f5]' : ''}`}>
+                      <div>
+                        <div className="text-sm font-medium text-[#111] mb-1">{item.label}</div>
+                        <div className="text-xs text-[#666]">{item.desc}</div>
+                      </div>
+                      <button
+                        onClick={() => setSettings({...settings, [item.key]: !settings[item.key]})}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings[item.key] ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'}`}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings[item.key] ? 'translate-x-6' : 'translate-x-1'}`} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
+              ))}
 
-                <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
-                  <div>
-                    <div className="text-sm font-medium text-[#111] mb-1">Target signals per day</div>
-                    <div className="text-xs text-[#666]">Number of signals to generate daily</div>
-                  </div>
-                  <input
-                    type="number"
-                    value={settings.signal_daily_target}
-                    onChange={(e) => setSettings({...settings, signal_daily_target: parseInt(e.target.value)})}
-                    className="w-20 px-2.5 py-1.5 border border-[#e8e8e8] rounded text-sm"
-                    min="1"
-                    max="20"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between py-3">
-                  <div>
-                    <div className="text-sm font-medium text-[#111] mb-1">News sources</div>
-                    <div className="text-xs text-[#666]">WWD, BOF, Vogue Business, FT, Bloomberg, Reuters</div>
-                  </div>
-                  <button className="px-4 py-2 bg-white border border-[#e8e8e8] rounded-md text-sm font-medium text-[#111] hover:bg-[#f5f5f5] transition-colors">
-                    Configure
-                  </button>
-                </div>
-              </div>
-
-              {/* Salary Intelligence */}
-              <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-5">
-                <h3 className="text-base font-semibold text-[#111] mb-4">Salary Intelligence</h3>
-                
-                <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
-                  <div>
-                    <div className="text-sm font-medium text-[#111] mb-1">Enable benchmark tool</div>
-                    <div className="text-xs text-[#666]">Allow LUXAI to generate salary benchmarks</div>
-                  </div>
-                  <button
-                    onClick={() => setSettings({...settings, salary_benchmark_enabled: !settings.salary_benchmark_enabled})}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.salary_benchmark_enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
-                    }`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      settings.salary_benchmark_enabled ? 'translate-x-6' : 'translate-x-1'
-                    }`} />
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
-                  <div>
-                    <div className="text-sm font-medium text-[#111] mb-1">Enable compare tool</div>
-                    <div className="text-xs text-[#666]">Allow LUXAI to generate salary comparisons</div>
-                  </div>
-                  <button
-                    onClick={() => setSettings({...settings, salary_compare_enabled: !settings.salary_compare_enabled})}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.salary_compare_enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
-                    }`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      settings.salary_compare_enabled ? 'translate-x-6' : 'translate-x-1'
-                    }`} />
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
-                  <div>
-                    <div className="text-sm font-medium text-[#111] mb-1">Enable calculator tool</div>
-                    <div className="text-xs text-[#666]">Allow LUXAI to generate personalized estimates</div>
-                  </div>
-                  <button
-                    onClick={() => setSettings({...settings, salary_calculator_enabled: !settings.salary_calculator_enabled})}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.salary_calculator_enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
-                    }`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      settings.salary_calculator_enabled ? 'translate-x-6' : 'translate-x-1'
-                    }`} />
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between py-3">
-                  <div>
-                    <div className="text-sm font-medium text-[#111] mb-1">Require approval for salary tools</div>
-                    <div className="text-xs text-[#666]">All salary outputs go through approval queue</div>
-                  </div>
-                  <button
-                    onClick={() => setSettings({...settings, salary_require_approval: !settings.salary_require_approval})}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.salary_require_approval ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
-                    }`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      settings.salary_require_approval ? 'translate-x-6' : 'translate-x-1'
-                    }`} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Interview Intelligence */}
-              <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-5">
-                <h3 className="text-base font-semibold text-[#111] mb-4">Interview Intelligence</h3>
-                
-                <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
-                  <div>
-                    <div className="text-sm font-medium text-[#111] mb-1">Generate interview details</div>
-                    <div className="text-xs text-[#666]">LUXAI expands basic interview data into full experiences</div>
-                  </div>
-                  <button
-                    onClick={() => setSettings({...settings, interview_generation_enabled: !settings.interview_generation_enabled})}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.interview_generation_enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
-                    }`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      settings.interview_generation_enabled ? 'translate-x-6' : 'translate-x-1'
-                    }`} />
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between py-3">
-                  <div>
-                    <div className="text-sm font-medium text-[#111] mb-1">Require approval for interview content</div>
-                    <div className="text-xs text-[#666]">All interview details go through approval queue</div>
-                  </div>
-                  <button
-                    onClick={() => setSettings({...settings, interview_require_approval: !settings.interview_require_approval})}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.interview_require_approval ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'
-                    }`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      settings.interview_require_approval ? 'translate-x-6' : 'translate-x-1'
-                    }`} />
-                  </button>
-                </div>
-              </div>
-
-              {/* AI Model */}
               <div className="bg-white border border-[#e8e8e8] rounded-lg p-6 mb-8">
                 <h3 className="text-base font-semibold text-[#111] mb-4">AI Model</h3>
-                
                 <div className="flex items-center justify-between py-3 border-b border-[#f5f5f5]">
-                  <div>
-                    <div className="text-sm font-medium text-[#111] mb-1">Primary model</div>
-                    <div className="text-xs text-[#666]">Claude Haiku 3.5 (recommended for cost)</div>
-                  </div>
-                  <select
-                    value={settings.model}
-                    onChange={(e) => setSettings({...settings, model: e.target.value})}
-                    className="px-2.5 py-1.5 border border-[#e8e8e8] rounded text-sm"
-                  >
+                  <div><div className="text-sm font-medium text-[#111] mb-1">Primary model</div><div className="text-xs text-[#666]">Claude Haiku 3.5 (recommended for cost)</div></div>
+                  <select value={settings.model} onChange={(e) => setSettings({...settings, model: e.target.value})} className="px-2.5 py-1.5 border border-[#e8e8e8] rounded text-sm">
                     <option value="claude-haiku-3-5-20241022">Claude Haiku 3.5</option>
                     <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
                   </select>
                 </div>
-
                 <div className="flex items-center justify-between py-3">
-                  <div>
-                    <div className="text-sm font-medium text-[#111] mb-1">Max tokens per request</div>
-                    <div className="text-xs text-[#666]">Cost control limit</div>
-                  </div>
-                  <input
-                    type="number"
-                    value={settings.max_tokens}
-                    onChange={(e) => setSettings({...settings, max_tokens: parseInt(e.target.value)})}
-                    className="w-24 px-2.5 py-1.5 border border-[#e8e8e8] rounded text-sm"
-                    min="100"
-                    max="10000"
-                  />
+                  <div><div className="text-sm font-medium text-[#111] mb-1">Max tokens per request</div><div className="text-xs text-[#666]">Cost control limit</div></div>
+                  <input type="number" value={settings.max_tokens} onChange={(e) => setSettings({...settings, max_tokens: parseInt(e.target.value)})} className="w-24 px-2.5 py-1.5 border border-[#e8e8e8] rounded text-sm" min="100" max="10000" />
                 </div>
               </div>
 
               <div className="flex justify-end">
-                <button
-                  onClick={handleSaveSettings}
-                  disabled={savingSettings}
-                  className="px-6 py-2.5 bg-[#111] text-white rounded-md text-sm font-medium hover:bg-[#333] disabled:opacity-50 transition-colors"
-                >
+                <button onClick={handleSaveSettings} disabled={savingSettings} className="px-6 py-2.5 bg-[#111] text-white rounded-md text-sm font-medium hover:bg-[#333] disabled:opacity-50 transition-colors">
                   {savingSettings ? 'Saving...' : 'Save Settings'}
                 </button>
               </div>
@@ -877,75 +592,37 @@ export default function LUXAIAdminPage() {
                 <h2 className="text-[28px] font-semibold text-[#111] mb-2">Usage & Costs</h2>
                 <p className="text-sm text-[#666]">LUXAI API usage and spending overview</p>
               </div>
-
-              {/* Stats Grid */}
               <div className="grid grid-cols-4 gap-4 mb-8">
-                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
-                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">This Month</div>
-                  <div className="text-[32px] font-semibold text-[#111] mb-1">${usage.stats.this_month.toFixed(2)}</div>
-                  <div className="text-[13px] font-medium text-[#10B981]">{usage.stats.this_month_requests} requests</div>
-                </div>
-                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
-                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Last Month</div>
-                  <div className="text-[32px] font-semibold text-[#111] mb-1">${usage.stats.last_month.toFixed(2)}</div>
-                  <div className="text-[13px] font-medium text-[#10B981]">{usage.stats.last_month_requests} requests</div>
-                </div>
-                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
-                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Avg Cost/Request</div>
-                  <div className="text-[32px] font-semibold text-[#111] mb-1">${usage.stats.avg_cost.toFixed(4)}</div>
-                  <div className="text-[13px] font-medium text-[#10B981]">Claude Haiku</div>
-                </div>
-                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5">
-                  <div className="text-xs text-[#666] uppercase tracking-wide mb-2">Projected (Month)</div>
-                  <div className="text-[32px] font-semibold text-[#111] mb-1">${(usage.stats.this_month * 1.06).toFixed(2)}</div>
-                  <div className="text-[13px] font-medium text-[#10B981]">+5.7%</div>
-                </div>
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5"><div className="text-xs text-[#666] uppercase tracking-wide mb-2">This Month</div><div className="text-[32px] font-semibold text-[#111] mb-1">${usage.stats.this_month.toFixed(2)}</div><div className="text-[13px] font-medium text-[#10B981]">{usage.stats.this_month_requests} requests</div></div>
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5"><div className="text-xs text-[#666] uppercase tracking-wide mb-2">Last Month</div><div className="text-[32px] font-semibold text-[#111] mb-1">${usage.stats.last_month.toFixed(2)}</div><div className="text-[13px] font-medium text-[#10B981]">{usage.stats.last_month_requests} requests</div></div>
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5"><div className="text-xs text-[#666] uppercase tracking-wide mb-2">Avg Cost/Request</div><div className="text-[32px] font-semibold text-[#111] mb-1">${usage.stats.avg_cost.toFixed(4)}</div><div className="text-[13px] font-medium text-[#10B981]">Claude Haiku</div></div>
+                <div className="bg-white border border-[#e8e8e8] rounded-lg p-5"><div className="text-xs text-[#666] uppercase tracking-wide mb-2">Projected (Month)</div><div className="text-[32px] font-semibold text-[#111] mb-1">${(usage.stats.this_month * 1.06).toFixed(2)}</div><div className="text-[13px] font-medium text-[#10B981]">+5.7%</div></div>
               </div>
-
-              {/* Request Log Table */}
               <div className="bg-white border border-[#e8e8e8] rounded-lg overflow-hidden">
                 <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-[#e8e8e8]">
-                      <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Timestamp</th>
-                      <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Type</th>
-                      <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Model</th>
-                      <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Tokens</th>
-                      <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Cost</th>
-                      <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Status</th>
-                    </tr>
-                  </thead>
+                  <thead><tr className="border-b border-[#e8e8e8]">
+                    <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Timestamp</th>
+                    <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Type</th>
+                    <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Model</th>
+                    <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Tokens</th>
+                    <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Cost</th>
+                    <th className="text-left px-6 py-4 text-xs font-semibold text-[#666] uppercase tracking-wide">Status</th>
+                  </tr></thead>
                   <tbody>
                     {usage.history.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="px-6 py-12 text-center text-sm text-[#999]">No requests yet</td>
+                      <tr><td colSpan={6} className="px-6 py-12 text-center text-sm text-[#999]">No requests yet</td></tr>
+                    ) : usage.history.map((item: any) => (
+                      <tr key={item.id} className="border-b border-[#e8e8e8] hover:bg-[#fafafa] transition-colors">
+                        <td className="px-6 py-4 text-sm text-[#666]">{new Date(item.created_at).toLocaleString('en-US', { year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false })}</td>
+                        <td className="px-6 py-4 text-sm text-[#111]">{item.type}</td>
+                        <td className="px-6 py-4 text-sm text-[#666]">Haiku 3.5</td>
+                        <td className="px-6 py-4 text-sm text-[#666]">{item.tokens_used?.toLocaleString() || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-[#111] font-medium">${item.cost_usd?.toFixed(4) || '0.0000'}</td>
+                        <td className="px-6 py-4 text-sm">
+                          {item.status === 'success' ? <span className="inline-block bg-[#D1FAE5] text-[#065F46] text-xs font-semibold px-2 py-1 rounded">Success</span> : <span className="inline-block bg-[#FEE2E2] text-[#991B1B] text-xs font-semibold px-2 py-1 rounded">Error</span>}
+                        </td>
                       </tr>
-                    ) : (
-                      usage.history.map((item: any) => (
-                        <tr key={item.id} className="border-b border-[#e8e8e8] hover:bg-[#fafafa] transition-colors">
-                          <td className="px-6 py-4 text-sm text-[#666]">{new Date(item.created_at).toLocaleString('en-US', { 
-                            year: 'numeric', 
-                            month: '2-digit', 
-                            day: '2-digit', 
-                            hour: '2-digit', 
-                            minute: '2-digit', 
-                            second: '2-digit',
-                            hour12: false 
-                          })}</td>
-                          <td className="px-6 py-4 text-sm text-[#111]">{item.type}</td>
-                          <td className="px-6 py-4 text-sm text-[#666]">Haiku 3.5</td>
-                          <td className="px-6 py-4 text-sm text-[#666]">{item.tokens_used?.toLocaleString() || '-'}</td>
-                          <td className="px-6 py-4 text-sm text-[#111] font-medium">${item.cost_usd?.toFixed(4) || '0.0000'}</td>
-                          <td className="px-6 py-4 text-sm">
-                            {item.status === 'success' ? (
-                              <span className="inline-block bg-[#D1FAE5] text-[#065F46] text-xs font-semibold px-2 py-1 rounded">Success</span>
-                            ) : (
-                              <span className="inline-block bg-[#FEE2E2] text-[#991B1B] text-xs font-semibold px-2 py-1 rounded">Error</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    )}
+                    ))}
                   </tbody>
                 </table>
               </div>
