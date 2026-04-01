@@ -268,7 +268,19 @@ RULES:
   
   let content
   try {
-    const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    // Strip markdown code fences aggressively
+    let cleaned = text.trim()
+    // Remove opening fence: ```json or ``` at start
+    cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, '')
+    // Remove closing fence: ``` at end
+    cleaned = cleaned.replace(/\n?```\s*$/, '')
+    cleaned = cleaned.trim()
+    // Find the first { and last } to extract JSON
+    const firstBrace = cleaned.indexOf('{')
+    const lastBrace = cleaned.lastIndexOf('}')
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      cleaned = cleaned.substring(firstBrace, lastBrace + 1)
+    }
     content = JSON.parse(cleaned)
   } catch (e) {
     throw new Error(`Failed to parse JSON: ${text.substring(0, 200)}`)
