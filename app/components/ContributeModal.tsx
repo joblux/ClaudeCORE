@@ -23,7 +23,6 @@ export default function ContributeModal({ brandSlug, brandName, isOpen, onClose 
     source: ''
   })
 
-  // Pre-fill name and email for logged-in users
   useEffect(() => {
     if (session?.user) {
       setFormData(prev => ({
@@ -34,7 +33,6 @@ export default function ContributeModal({ brandSlug, brandName, isOpen, onClose 
     }
   }, [session])
 
-  // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
       setSubmitted(false)
@@ -67,7 +65,7 @@ export default function ContributeModal({ brandSlug, brandName, isOpen, onClose 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           brand_slug: brandSlug,
-          user_id: session?.user?.id || null,
+          user_id: (session?.user as any)?.memberId || null,
           contributor_name: formData.name,
           contributor_email: formData.email,
           issue_description: formData.issue,
@@ -121,7 +119,6 @@ export default function ContributeModal({ brandSlug, brandName, isOpen, onClose 
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div style={{
           padding: '24px 28px',
           borderBottom: '0.5px solid #e8e8e8',
@@ -157,11 +154,9 @@ export default function ContributeModal({ brandSlug, brandName, isOpen, onClose 
           </button>
         </div>
 
-        {/* Content */}
         <div style={{ padding: '28px' }}>
           {!submitted ? (
             <form onSubmit={handleSubmit}>
-              {/* Name */}
               <div style={{ marginBottom: '20px' }}>
                 <label style={{
                   display: 'block',
@@ -191,7 +186,6 @@ export default function ContributeModal({ brandSlug, brandName, isOpen, onClose 
                 />
               </div>
 
-              {/* Email */}
               <div style={{ marginBottom: '20px' }}>
                 <label style={{
                   display: 'block',
@@ -221,7 +215,6 @@ export default function ContributeModal({ brandSlug, brandName, isOpen, onClose 
                 />
               </div>
 
-              {/* Issue Description */}
               <div style={{ marginBottom: '20px' }}>
                 <label style={{
                   display: 'block',
@@ -250,7 +243,6 @@ export default function ContributeModal({ brandSlug, brandName, isOpen, onClose 
                 />
               </div>
 
-              {/* Suggested Correction */}
               <div style={{ marginBottom: '20px' }}>
                 <label style={{
                   display: 'block',
@@ -279,7 +271,6 @@ export default function ContributeModal({ brandSlug, brandName, isOpen, onClose 
                 />
               </div>
 
-              {/* Source URL */}
               <div style={{ marginBottom: '24px' }}>
                 <label style={{
                   display: 'block',
@@ -308,7 +299,6 @@ export default function ContributeModal({ brandSlug, brandName, isOpen, onClose 
                 </div>
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={submitting}
@@ -327,7 +317,6 @@ export default function ContributeModal({ brandSlug, brandName, isOpen, onClose 
                 {submitting ? 'Submitting...' : 'Submit Contribution'}
               </button>
 
-              {/* Info */}
               <div style={{
                 marginTop: '20px',
                 padding: '16px',
@@ -345,7 +334,6 @@ export default function ContributeModal({ brandSlug, brandName, isOpen, onClose 
               </div>
             </form>
           ) : (
-            // Success State
             <div style={{ textAlign: 'center', padding: '40px 20px' }}>
               <div style={{
                 width: '64px',
