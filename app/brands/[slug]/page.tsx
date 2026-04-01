@@ -123,10 +123,25 @@ function buildBrandData(staticBrand: any, content: any) {
   // Heritage timeline
   const timeline = Array.isArray(content?.history) ? content.history : []
 
-  // Founder
+  // Extract founder name from first sentence of founder prose
+  let founderName = 'Founder'
+  if (typeof content?.founder === 'string') {
+    const first = content.founder.split(/[.!,]/)[0] || ''
+    const words = first.trim().split(' ')
+    if (words.length >= 2) {
+      const stopWords = ['was', 'born', 'founded', 'established', 'began', 'started', 'created', 'is', 'has', 'grew', 'came', 'entered', 'learned', 'apprenticed']
+      const nameWords: string[] = []
+      for (const w of words) {
+        if (stopWords.includes(w.toLowerCase())) break
+        nameWords.push(w)
+      }
+      if (nameWords.length >= 2 && nameWords.length <= 4) founderName = nameWords.join(' ')
+    }
+  }
+
   const founder = content?.founder
     ? {
-        name: (content.founder_facts && Array.isArray(content.founder_facts)) ? 'Founder' : 'Founder',
+        name: founderName,
         dates: '',
         bio: typeof content.founder === 'string' ? content.founder : '',
       }
@@ -474,7 +489,7 @@ export default function BrandDetailPage() {
                   </div>
                   <div>
                     <h3 className="text-lg font-normal text-white mb-0.5" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-                      {brand.founder.name !== 'Founder' ? brand.founder.name : `Founder of ${brand.name}`}
+                      {brand.founder.name}
                     </h3>
                     <p className="text-xs text-[#999] mb-2">
                       Founder{brand.founder.dates ? ` · ${brand.founder.dates}` : ''} · Est. {brand.founded_year}, {brand.founded_city}
@@ -623,26 +638,6 @@ export default function BrandDetailPage() {
                 {typeof brand.careers_prose === 'string' && brand.careers_prose.split('\n\n').map((p: string, i: number) => (
                   <p key={i} className="text-sm text-[#888] leading-relaxed mb-3">{p}</p>
                 ))}
-              </div>
-            )}
-
-            {/* Work culture accordions */}
-            {brand.workCulture && brand.workCulture.length > 0 && (
-              <div>
-                <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">WHAT IT&apos;S LIKE TO WORK THERE</p>
-                <div className="space-y-2">
-                  {brand.workCulture.map((w: any) => (
-                    <div key={w.label} className="bg-[#222] rounded-lg border border-[#2a2a2a] overflow-hidden">
-                      <button onClick={() => setOpenAccordion(openAccordion === w.label ? null : w.label)} className="w-full flex items-center justify-between px-4 py-3">
-                        <span className="text-xs font-medium text-[#a58e28] tracking-wider">{w.label}</span>
-                        <span className="text-[#999] text-lg leading-none">{openAccordion === w.label ? '−' : '+'}</span>
-                      </button>
-                      {openAccordion === w.label && (
-                        <div className="px-4 pb-4"><p className="text-sm text-[#777] leading-relaxed">{w.text}</p></div>
-                      )}
-                    </div>
-                  ))}
-                </div>
               </div>
             )}
 
