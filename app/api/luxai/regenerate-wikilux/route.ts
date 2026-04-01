@@ -139,7 +139,6 @@ async function generateBrandContent(slug: string, brandName: string) {
     .from('wikilux_content')
     .update({
       content: content.content,
-      status: 'pending',
       last_regenerated_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     })
@@ -203,9 +202,10 @@ Return ONLY a JSON object (no markdown, no explanation, no backticks) with this 
       {"title": "Creativity", "desc": "One sentence."},
       {"title": "Discretion", "desc": "One sentence."}
     ],
-    "culture": "150-word description of internal work culture — atmosphere, pace, what employees say, turnover, promotion culture.",
-    "process": "100-word overview of typical hiring process — number of rounds, timeline, what they look for, how to get noticed.",
-    "profiles": "100-word description of ideal candidate profiles — background, skills, languages, personality traits they recruit for."
+    "culture": "100-word description of internal work culture — atmosphere, employee sentiment, turnover, promotion from within, family vs corporate feel.",
+    "growth": "100-word description of career growth opportunities — expansion plans, new roles being created, internal mobility, training programs.",
+    "pace": "100-word description of work pace and decision-making — fast or slow, bureaucratic or agile, startup energy or institutional, work-life balance.",
+    "access": "100-word description of how to get in — how competitive roles are, whether they advertise publicly, importance of networking and referrals, interview process."
   },
   "quote": {
     "text": "A famous or defining quote from the founder, CEO, or creative director (real, verified quote only).",
