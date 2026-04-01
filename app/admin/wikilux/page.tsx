@@ -1,280 +1,509 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRequireAdmin } from '@/lib/auth-hooks'
-import { BRANDS } from '@/lib/wikilux-brands'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
-interface WikiStats {
-  total_brands: number
-  generated: number
-  with_insights: number
-  with_editorial: number
-  avg_insights: number
-  top_brands: { brand_name: string; slug: string; count: number }[]
-  stale_brands: { slug: string; brand_name: string; updated_at: string }[]
-  last_regen: string | null
+interface Brand {
+  slug: string
+  brand_name: string
+  status: string
+  is_published: boolean
+  last_regenerated_at: string | null
+  regeneration_count: number | null
+  content_version: number | null
 }
 
-export default function AdminWikiLuxPage() {
-  useRequireAdmin()
-
-  const [stats, setStats] = useState<WikiStats | null>(null)
+export default function WikiLuxAdminPage() {
+  const router = useRouter()
+  const [brands, setBrands] = useState<Brand[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeView, setActiveView] = useState<'list' | 'add'>('list')
   const [regenerating, setRegenerating] = useState(false)
-  const [regenResult, setRegenResult] = useState<string | null>(null)
-  const [singleRegen, setSingleRegen] = useState('')
-  const [singleRegening, setSingleRegening] = useState(false)
+  const [selectedBrand, setSelectedBrand] = useState('')
 
-  // Editorial note state
-  const [editSlug, setEditSlug] = useState('')
-  const [editNote, setEditNote] = useState('')
-  const [editSaving, setEditSaving] = useState(false)
-  const [editSuccess, setEditSuccess] = useState(false)
-
-  // Search state
-  const [brandSearch, setBrandSearch] = useState('')
-
-  // Seed state
-  const [seeding, setSeeding] = useState(false)
-  const [seedResult, setSeedResult] = useState<string | null>(null)
+  // Add new brand form state
+  const [newBrand, setNewBrand] = useState({
+    name: '',
+    slug: '',
+    category: '',
+    founded_year: '',
+    country: ''
+  })
 
   useEffect(() => {
-    fetchStats()
+    loadBrands()
   }, [])
 
-  const fetchStats = async () => {
-    setLoading(true)
+  async function loadBrands() {
     try {
-      const res = await fetch('/api/admin/wikilux-stats')
-      if (res.ok) {
-        setStats(await res.json())
-      }
-    } catch {}
-    setLoading(false)
+      const res = await fetch('/api/admin/wikilux/brands')
+      const data = await res.json()
+      setBrands(data.brands || [])
+    } catch (error) {
+      console.error('Failed to load brands:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleRegenAll = async () => {
-    if (!confirm('This will regenerate ALL brand pages using the Claude API. This may take several minutes and incur API costs. Continue?')) return
+  async function handleRegenerateAll() {
+    if (!confirm('Regenerate all brands? This will cost ~$6.60 and take 15-20 minutes.')) return
+    
     setRegenerating(true)
-    setRegenResult(null)
     try {
-      const res = await fetch('/api/wikilux/regenerate', {
+      const res = await fetch('/api/luxai/regenerate-wikilux', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ all: true }),
+        body: JSON.stringify({ mode: 'all' })
       })
       const data = await res.json()
-      setRegenResult(`Regenerated ${data.regenerated} brands. ${data.errors?.length || 0} errors.`)
-      fetchStats()
-    } catch {
-      setRegenResult('Failed to regenerate.')
+      
+      if (data.success) {
+        alert(`Success! Generated ${data.data.brands_processed} brands. Cost: $${data.data.total_cost_usd.toFixed(2)}`)
+        loadBrands()
+      } else {
+        alert('Error: ' + data.message)
+      }
+    } catch (error) {
+      alert('Failed to regenerate brands')
+    } finally {
+      setRegenerating(false)
     }
-    setRegenerating(false)
   }
 
-  const handleRegenSingle = async () => {
-    if (!singleRegen) return
-    setSingleRegening(true)
+  async function handleRegenerateSingle() {
+    if (!selectedBrand) {
+      alert('Please select a brand')
+      return
+    }
+    
+    setRegenerating(true)
     try {
-      const res = await fetch('/api/wikilux/regenerate', {
+      const res = await fetch('/api/luxai/regenerate-wikilux', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug: singleRegen }),
+        body: JSON.stringify({ mode: 'single', brand_slug: selectedBrand })
       })
       const data = await res.json()
-      setRegenResult(`Regenerated: ${singleRegen}. ${data.errors?.length ? data.errors.join(', ') : 'Success.'}`)
-      fetchStats()
-    } catch {
-      setRegenResult('Failed.')
+      
+      if (data.success) {
+        alert(`Success! Generated ${selectedBrand}. Cost: $${data.data.total_cost_usd.toFixed(2)}`)
+        loadBrands()
+      } else {
+        alert('Error: ' + data.message)
+      }
+    } catch (error) {
+      alert('Failed to regenerate brand')
+    } finally {
+      setRegenerating(false)
     }
-    setSingleRegening(false)
   }
 
-  const handleSeed = async () => {
-    if (!confirm('This will generate rich content for all brands that don\'t have it yet. This may take a while and incur API costs. Continue?')) return
-    setSeeding(true)
-    setSeedResult(null)
+  async function handleAddBrand(e: React.FormEvent) {
+    e.preventDefault()
+    
     try {
-      const res = await fetch('/api/wikilux/seed', {
+      const res = await fetch('/api/admin/wikilux/brands', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
+        body: JSON.stringify(newBrand)
       })
       const data = await res.json()
-      setSeedResult(`Total: ${data.total_brands} | Already seeded: ${data.already_seeded} | Newly generated: ${data.newly_generated} | Remaining: ${data.remaining} | Errors: ${data.errors?.length || 0}`)
-      fetchStats()
-    } catch {
-      setSeedResult('Seed request failed.')
+      
+      if (data.success) {
+        alert('Brand added! Now generate content for it.')
+        setNewBrand({ name: '', slug: '', category: '', founded_year: '', country: '' })
+        setActiveView('list')
+        loadBrands()
+      } else {
+        alert('Error: ' + data.message)
+      }
+    } catch (error) {
+      alert('Failed to add brand')
     }
-    setSeeding(false)
   }
 
-  const handleSaveEditorial = async () => {
-    if (!editSlug) return
-    setEditSaving(true)
-    setEditSuccess(false)
+  async function handleDeleteBrand(slug: string) {
+    if (!confirm(`Delete ${slug}? This cannot be undone.`)) return
+    
     try {
-      await fetch('/api/admin/wikilux-editorial', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug: editSlug, editorial_notes: editNote }),
+      const res = await fetch(`/api/admin/wikilux/brands?slug=${slug}`, {
+        method: 'DELETE'
       })
-      setEditSuccess(true)
-    } catch {}
-    setEditSaving(false)
+      const data = await res.json()
+      
+      if (data.success) {
+        alert('Brand deleted')
+        loadBrands()
+      } else {
+        alert('Error: ' + data.message)
+      }
+    } catch (error) {
+      alert('Failed to delete brand')
+    }
+  }
+
+  const statusColor = (status: string) => {
+    switch(status) {
+      case 'draft': return '#999'
+      case 'pending': return '#F59E0B'
+      case 'approved': return '#10B981'
+      case 'rejected': return '#EF4444'
+      default: return '#666'
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center">
+        <div className="w-5 h-5 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin" />
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
-      <div className="px-6 py-5 lg:px-8 max-w-5xl">
-      <div className="mb-6">
-        <h1 className="text-xl font-medium text-[#1a1a1a]">WikiLux Management</h1>
-        <p className="text-sm text-[#999] mt-0.5">Brand content generation and editorial tools</p>
-      </div>
+    <div style={{ background: '#f5f5f5', minHeight: '100vh', padding: '32px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        
+        {/* Header */}
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{ margin: '0 0 8px 0', fontSize: '24px', fontWeight: 500, color: '#111' }}>WikiLux Management</h1>
+          <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>Manage luxury brand encyclopedia content</p>
+        </div>
 
-      {/* Brand search */}
-      <div className="relative mb-6">
-        <input
-          type="text"
-          placeholder="Search brands..."
-          value={brandSearch}
-          onChange={(e) => setBrandSearch(e.target.value)}
-          className="w-full border border-[#e8e8e8] rounded-sm pl-3 pr-3 py-2 text-sm bg-[#f5f5f5] focus:outline-none focus:border-[#e8e8e8] transition-colors"
-        />
-      </div>
+        {/* View Toggle */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '0.5px solid #e8e8e8' }}>
+          <button
+            onClick={() => setActiveView('list')}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: '12px 16px',
+              fontSize: '14px',
+              fontWeight: activeView === 'list' ? 500 : 400,
+              color: activeView === 'list' ? '#111' : '#666',
+              borderBottom: activeView === 'list' ? '2px solid #111' : 'none',
+              cursor: 'pointer',
+              marginBottom: '-1px'
+            }}
+          >
+            Brand List ({brands.length})
+          </button>
+          <button
+            onClick={() => setActiveView('add')}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: '12px 16px',
+              fontSize: '14px',
+              fontWeight: activeView === 'add' ? 500 : 400,
+              color: activeView === 'add' ? '#111' : '#666',
+              borderBottom: activeView === 'add' ? '2px solid #111' : 'none',
+              cursor: 'pointer',
+              marginBottom: '-1px'
+            }}
+          >
+            Add New Brand
+          </button>
+        </div>
 
-      {loading ? (
-        <div className="text-center py-16"><div className="inline-block w-8 h-8 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin" /></div>
-      ) : (
-        <>
-          {/* STATS GRID */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="jl-card text-center">
-              <div className="jl-serif text-2xl text-[#444444]">{BRANDS.length}</div>
-              <div className="jl-overline mt-1">Total Brands</div>
-            </div>
-            <div className="jl-card text-center">
-              <div className="jl-serif text-2xl text-[#1a1a1a]">{stats?.generated || 0}</div>
-              <div className="jl-overline mt-1">Generated</div>
-            </div>
-            <div className="jl-card text-center">
-              <div className="jl-serif text-2xl text-[#1a1a1a]">{stats?.with_insights || 0}</div>
-              <div className="jl-overline mt-1">With Insights</div>
-            </div>
-            <div className="jl-card text-center">
-              <div className="jl-serif text-2xl text-[#1a1a1a]">{stats?.with_editorial || 0}</div>
-              <div className="jl-overline mt-1">With Editorial</div>
-            </div>
-          </div>
-
-          {/* REGENERATION */}
-          <div className="mb-8">
-            <div className="jl-section-label"><span>Regeneration</span></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="jl-card">
-                <h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Regenerate All Brands</h3>
-                <p className="text-xs text-[#666666] mb-3">Re-generate all {BRANDS.length} brand pages with fresh AI content. This takes several minutes.</p>
-                {stats?.last_regen && <p className="text-[0.65rem] text-[#aaa] mb-3">Last full regeneration: {new Date(stats.last_regen).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>}
-                <button onClick={handleRegenAll} disabled={regenerating} className="jl-btn jl-btn-primary text-xs">
-                  {regenerating ? 'Regenerating...' : 'Regenerate All'}
+        {/* List View */}
+        {activeView === 'list' && (
+          <>
+            {/* Regeneration Controls */}
+            <div style={{ background: '#fff', border: '0.5px solid #e8e8e8', borderRadius: '8px', padding: '20px', marginBottom: '24px' }}>
+              <div style={{ fontSize: '15px', fontWeight: 500, color: '#111', marginBottom: '16px' }}>Regeneration Controls</div>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <button
+                  onClick={handleRegenerateAll}
+                  disabled={regenerating}
+                  style={{
+                    background: '#111',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '10px 20px',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    cursor: regenerating ? 'not-allowed' : 'pointer',
+                    opacity: regenerating ? 0.5 : 1
+                  }}
+                >
+                  {regenerating ? 'REGENERATING...' : `REGENERATE ALL BRANDS (${brands.length})`}
+                </button>
+                
+                <select
+                  value={selectedBrand}
+                  onChange={(e) => setSelectedBrand(e.target.value)}
+                  style={{
+                    padding: '10px',
+                    border: '0.5px solid #e8e8e8',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    flex: 1
+                  }}
+                >
+                  <option value="">Select brand to regenerate...</option>
+                  {brands.map(brand => (
+                    <option key={brand.slug} value={brand.slug}>{brand.brand_name}</option>
+                  ))}
+                </select>
+                
+                <button
+                  onClick={handleRegenerateSingle}
+                  disabled={!selectedBrand || regenerating}
+                  style={{
+                    background: '#fff',
+                    color: '#111',
+                    border: '0.5px solid #e8e8e8',
+                    padding: '10px 20px',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    cursor: (!selectedBrand || regenerating) ? 'not-allowed' : 'pointer',
+                    opacity: (!selectedBrand || regenerating) ? 0.5 : 1
+                  }}
+                >
+                  REGENERATE
                 </button>
               </div>
-              <div className="jl-card">
-                <h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Regenerate Single Brand</h3>
-                <div className="flex gap-2">
-                  <select value={singleRegen} onChange={(e) => setSingleRegen(e.target.value)} className="jl-select flex-1 text-xs">
-                    <option value="">Select brand</option>
-                    {BRANDS.filter(b => !brandSearch.trim() || b.name.toLowerCase().includes(brandSearch.toLowerCase())).map((b) => <option key={b.slug} value={b.slug}>{b.name}</option>)}
-                  </select>
-                  <button onClick={handleRegenSingle} disabled={singleRegening || !singleRegen} className="jl-btn jl-btn-outline text-xs">
-                    {singleRegening ? '...' : 'Regenerate'}
-                  </button>
-                </div>
+              <div style={{ marginTop: '12px', fontSize: '12px', color: '#666' }}>
+                Cost: ~$0.044 per brand • All regenerations go to Approval Queue
               </div>
             </div>
-            {regenResult && <p className="text-xs text-[#444444] mt-3">{regenResult}</p>}
-          </div>
 
-          {/* SEED BRANDS */}
-          <div className="mb-8">
-            <div className="jl-section-label"><span>Seed WikiLux Brands</span></div>
-            <div className="jl-card">
-              <h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Fill Missing Content</h3>
-              <p className="text-xs text-[#666666] mb-3">
-                Generate rich editorial content (History, Founder, Signature Products, Creative Directors, Brand DNA, Careers) for all {BRANDS.length} brands that don&rsquo;t have it yet. Safe to run multiple times — only fills gaps.
-              </p>
-              <button onClick={handleSeed} disabled={seeding} className="jl-btn jl-btn-gold text-xs">
-                {seeding ? 'Seeding in progress...' : `Seed WikiLux Brands (${BRANDS.length})`}
-              </button>
-              {seedResult && <p className="text-xs text-[#444444] mt-3 whitespace-pre-line">{seedResult}</p>}
-            </div>
-          </div>
-
-          {/* EDITORIAL NOTES */}
-          <div className="mb-8">
-            <div className="jl-section-label"><span>Editorial Notes</span></div>
-            <div className="jl-card">
-              <p className="text-xs text-[#666666] mb-3">Add editorial notes to any brand page. These appear as a highlighted &ldquo;Editor&rsquo;s Note&rdquo; section on the public page.</p>
-              <div className="space-y-3">
-                <div>
-                  <label className="jl-label">Brand</label>
-                  <select value={editSlug} onChange={(e) => { setEditSlug(e.target.value); setEditSuccess(false); setEditNote('') }} className="jl-select w-full text-xs">
-                    <option value="">Select brand</option>
-                    {BRANDS.filter(b => !brandSearch.trim() || b.name.toLowerCase().includes(brandSearch.toLowerCase())).map((b) => <option key={b.slug} value={b.slug}>{b.name}</option>)}
-                  </select>
-                </div>
-                {editSlug && (
-                  <>
-                    <div>
-                      <label className="jl-label">Editorial Note</label>
-                      <textarea value={editNote} onChange={(e) => setEditNote(e.target.value)} className="jl-input w-full min-h-[120px] resize-y" placeholder="Add editorial commentary, corrections, or insider knowledge..." />
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <button onClick={handleSaveEditorial} disabled={editSaving} className="jl-btn jl-btn-primary text-xs">
-                        {editSaving ? 'Saving...' : 'Save Note'}
-                      </button>
-                      {editSuccess && <span className="text-xs text-[#444444]">Saved</span>}
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* TOP CONTRIBUTED BRANDS */}
-          {stats?.top_brands && stats.top_brands.length > 0 && (
-            <div className="mb-8">
-              <div className="jl-section-label"><span>Most Contributed Brands</span></div>
-              <div className="jl-card overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead><tr className="border-b border-[#e8e8e8]">
-                    <th className="text-left py-2 font-semibold text-[#666666] uppercase tracking-wider">Brand</th>
-                    <th className="text-right py-2 font-semibold text-[#666666] uppercase tracking-wider">Insights</th>
-                  </tr></thead>
-                  <tbody>{stats.top_brands.map((b) => (
-                    <tr key={b.slug} className="border-b border-[#f0ece4]">
-                      <td className="py-2 text-[#1a1a1a]">{b.brand_name}</td>
-                      <td className="py-2 text-right text-[#444444] font-medium">{b.count}</td>
+            {/* Brand Table */}
+            <div style={{ background: '#fff', border: '0.5px solid #e8e8e8', borderRadius: '8px', overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: '#f9f9f9', borderBottom: '0.5px solid #e8e8e8' }}>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 500, color: '#666' }}>BRAND</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 500, color: '#666' }}>STATUS</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 500, color: '#666' }}>PUBLISHED</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 500, color: '#666' }}>REGENERATIONS</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 500, color: '#666' }}>LAST UPDATED</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '12px', fontWeight: 500, color: '#666' }}>ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {brands.map((brand, idx) => (
+                    <tr key={brand.slug} style={{ borderBottom: idx < brands.length - 1 ? '0.5px solid #e8e8e8' : 'none' }}>
+                      <td style={{ padding: '12px 16px' }}>
+                        <div style={{ fontSize: '14px', fontWeight: 500, color: '#111' }}>{brand.brand_name}</div>
+                        <div style={{ fontSize: '12px', color: '#999' }}>{brand.slug}</div>
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 500,
+                          color: statusColor(brand.status),
+                          background: `${statusColor(brand.status)}20`
+                        }}>
+                          {brand.status.toUpperCase()}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px 16px', fontSize: '13px', color: '#666' }}>
+                        {brand.is_published ? '✓ Live' : '—'}
+                      </td>
+                      <td style={{ padding: '12px 16px', fontSize: '13px', color: '#666' }}>
+                        {brand.regeneration_count || 0}× (v{brand.content_version || 1})
+                      </td>
+                      <td style={{ padding: '12px 16px', fontSize: '13px', color: '#666' }}>
+                        {brand.last_regenerated_at ? new Date(brand.last_regenerated_at).toLocaleDateString() : '—'}
+                      </td>
+                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                        <button
+                          onClick={() => router.push(`/wikilux/${brand.slug}`)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            fontSize: '13px',
+                            color: '#3B82F6',
+                            cursor: 'pointer',
+                            marginRight: '12px'
+                          }}
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleDeleteBrand(brand.slug)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            fontSize: '13px',
+                            color: '#EF4444',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </td>
                     </tr>
-                  ))}</tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
+              
+              {brands.length === 0 && (
+                <div style={{ padding: '48px', textAlign: 'center', color: '#999', fontSize: '14px' }}>
+                  No brands yet. Add your first brand to get started.
+                </div>
+              )}
             </div>
-          )}
+          </>
+        )}
 
-          {/* STALE CONTENT */}
-          {stats?.stale_brands && stats.stale_brands.length > 0 && (
-            <div>
-              <div className="jl-section-label"><span>Needs Attention (60+ days old)</span></div>
-              <div className="flex flex-wrap gap-2">
-                {stats.stale_brands.map((b) => (
-                  <span key={b.slug} className="jl-badge-outline text-[0.6rem]">{b.brand_name}</span>
-                ))}
+        {/* Add New Brand View */}
+        {activeView === 'add' && (
+          <div style={{ background: '#fff', border: '0.5px solid #e8e8e8', borderRadius: '8px', padding: '32px', maxWidth: '600px' }}>
+            <h2 style={{ margin: '0 0 24px 0', fontSize: '18px', fontWeight: 500, color: '#111' }}>Add New Brand</h2>
+            
+            <form onSubmit={handleAddBrand}>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: 500, color: '#111' }}>
+                  Brand Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newBrand.name}
+                  onChange={(e) => setNewBrand({...newBrand, name: e.target.value})}
+                  placeholder="e.g. Hermès"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '0.5px solid #e8e8e8',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}
+                />
               </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: 500, color: '#111' }}>
+                  Slug * (URL-friendly, lowercase, hyphens only)
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newBrand.slug}
+                  onChange={(e) => setNewBrand({...newBrand, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-')})}
+                  placeholder="e.g. hermes"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '0.5px solid #e8e8e8',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: 500, color: '#111' }}>
+                  Category *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newBrand.category}
+                  onChange={(e) => setNewBrand({...newBrand, category: e.target.value})}
+                  placeholder="e.g. Fashion, Watches & Jewelry, Automotive"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '0.5px solid #e8e8e8',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: 500, color: '#111' }}>
+                  Founded Year *
+                </label>
+                <input
+                  type="number"
+                  required
+                  value={newBrand.founded_year}
+                  onChange={(e) => setNewBrand({...newBrand, founded_year: e.target.value})}
+                  placeholder="e.g. 1837"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '0.5px solid #e8e8e8',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: 500, color: '#111' }}>
+                  Country *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newBrand.country}
+                  onChange={(e) => setNewBrand({...newBrand, country: e.target.value})}
+                  placeholder="e.g. France"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '0.5px solid #e8e8e8',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  type="submit"
+                  style={{
+                    flex: 1,
+                    background: '#111',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '12px',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Add Brand
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveView('list')}
+                  style={{
+                    flex: 1,
+                    background: '#fff',
+                    color: '#111',
+                    border: '0.5px solid #e8e8e8',
+                    padding: '12px',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+
+            <div style={{ marginTop: '24px', padding: '16px', background: '#F7F3E8', borderRadius: '6px', fontSize: '13px', color: '#78350F' }}>
+              <strong>Note:</strong> After adding a brand, you'll need to generate its content using the regeneration controls. The brand page will remain empty until content is generated and approved.
             </div>
-          )}
-        </>
-      )}
+          </div>
+        )}
+
       </div>
     </div>
   )
