@@ -253,7 +253,7 @@ RULES:
     },
     body: JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 4000,
+      max_tokens: 8000,
       messages: [{ role: 'user', content: prompt }]
     })
   })
@@ -265,25 +265,32 @@ RULES:
 
   const data = await response.json()
   const text = data.content[0].text
+  const stopReason = data.stop_reason
+  
+  // If the model hit the token limit, the JSON is truncated and unparseable
+  if (stopReason === 'max_tokens') {
+    throw new Error(`Output truncated (hit max_tokens). stop_reason=${stopReason}, output_tokens=${data.usage.output_tokens}`)
+  }
   
   let content
   try {
-    // Strip markdown code fences aggressively
     let cleaned = text.trim()
-    // Remove opening fence: ```json or ``` at start
-    cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, '')
-    // Remove closing fence: ``` at end
+    // Strip markdown code fences — handle all variations
+    cleaned = cleaned.replace(/^```(?:json|JSON)?\s*\n?/, '')
     cleaned = cleaned.replace(/\n?```\s*$/, '')
     cleaned = cleaned.trim()
-    // Find the first { and last } to extract JSON
+    // Extract from first { to last } as safety net
     const firstBrace = cleaned.indexOf('{')
     const lastBrace = cleaned.lastIndexOf('}')
     if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
       cleaned = cleaned.substring(firstBrace, lastBrace + 1)
     }
     content = JSON.parse(cleaned)
-  } catch (e) {
-    throw new Error(`Failed to parse JSON: ${text.substring(0, 200)}`)
+  } catch (e: any) {
+    // Log what we actually tried to parse so we can debug
+    const preview = text.substring(0, 100)
+    const ending = text.substring(Math.max(0, text.length - 100))
+    throw new Error(`JSON parse failed. stop_reason=${stopReason}, len=${text.length}, start="${preview}", end="${ending}", parseError=${e.message}`)
   }
   
   const inputTokens = data.usage.input_tokens
