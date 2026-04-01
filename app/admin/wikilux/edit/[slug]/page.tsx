@@ -1,39 +1,49 @@
 'use client'
 
+// eslint-disable-next-line react-hooks/exhaustive-deps
 import { useEffect, useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
-interface ContentSection {
-  overview?: string
-  culture?: {
-    founder?: { name?: string; bio?: string; years?: string }
-    core_values?: Array<{ title: string; description: string }>
-    what_its_like?: Array<{ category: string; description: string }>
-    heritage_timeline?: Array<{ year: string; event: string }>
-  }
-  career_paths?: Array<{ category: string; description: string }>
-  salaries?: Array<{ role: string; location: string; range: string }>
-  leadership?: Array<{ name: string; title: string; since: string }>
-  financial_health?: string
-  key_markets?: Array<{ region: string; presence: string }>
-  corporate?: string
-  known_for?: Array<string>
-}
+const CONTENT_SECTIONS = [
+  { key: 'tagline', label: 'Tagline', type: 'text' },
+  { key: 'brand_dna', label: 'Brand DNA', type: 'json' },
+  { key: 'history', label: 'History', type: 'text' },
+  { key: 'founder', label: 'Founder', type: 'text' },
+  { key: 'founder_facts', label: 'Founder Facts', type: 'json' },
+  { key: 'key_facts', label: 'Key Facts', type: 'json' },
+  { key: 'key_executives', label: 'Key Executives', type: 'json' },
+  { key: 'creative_directors', label: 'Creative Directors', type: 'json' },
+  { key: 'signature_products', label: 'Signature Products', type: 'json' },
+  { key: 'careers', label: 'Careers', type: 'text' },
+  { key: 'hiring_intelligence', label: 'Hiring Intelligence', type: 'json' },
+  { key: 'market_position', label: 'Market Position', type: 'text' },
+  { key: 'current_strategy', label: 'Current Strategy', type: 'text' },
+  { key: 'presence', label: 'Presence', type: 'json' },
+  { key: 'facts', label: 'Facts', type: 'json' },
+  { key: 'stock', label: 'Stock / Financial', type: 'json' },
+]
 
 export default function WikiLuxEditorPage() {
-  const router = useRouter()
   const params = useParams()
-  const slug = params.slug as string
+  const router = useRouter()
+  const slug = params?.slug as string
 
+  const [content, setContent] = useState<Record<string, any>>({})
+  const [editorialNotes, setEditorialNotes] = useState('')
+  const [activeTab, setActiveTab] = useState('tagline')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [brandName, setBrandName] = useState('')
-  const [content, setContent] = useState<ContentSection>({})
-  const [editorialNotes, setEditorialNotes] = useState('')
-  const [activeTab, setActiveTab] = useState('overview')
+  const [status, setStatus] = useState('')
+
+  // Section edit buffers - store stringified versions for editing
+  const [editBuffers, setEditBuffers] = useState<Record<string, string>>({})
+  const [parseErrors, setParseErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
-    loadContent()
+    if (slug) loadContent()
   }, [slug])
 
   async function loadContent() {
@@ -41,169 +51,321 @@ export default function WikiLuxEditorPage() {
       const res = await fetch(`/api/admin/wikilux/content?slug=${slug}`)
       const data = await res.json()
 
-      if (data.success) {
-        setBrandName(data.data.brand_name)
-        setContent(data.data.content || {})
-        setEditorialNotes(data.data.editorial_notes || '')
-      } else {
-        alert('Error loading content: ' + data.error)
+      if (!res.ok || !data.success) {
+        setError(data.error || 'Failed to load content')
+        setLoading(false)
+        return
       }
-    } catch (error) {
-      alert('Failed to load content')
+
+      const row = data.data
+      const c = row.content || {}
+      setContent(c)
+      setBrandName(row.brand_name || slug)
+      setStatus(row.status || 'draft')
+      setEditorialNotes(row.editorial_notes || '')
+
+      // Initialize edit buffers
+      const buffers: Record<string, string> = {}
+      for (const section of CONTENT_SECTIONS) {
+        const val = c[section.key]
+        if (section.type === 'text') {
+          buffers[section.key] = typeof val === 'string' ? val : (val ? JSON.stringify(val, null, 2) : '')
+        } else {
+          buffers[section.key] = val ? JSON.stringify(val, null, 2) : ''
+        }
+      }
+      setEditBuffers(buffers)
+    } catch (err: any) {
+      setError(err.message || 'Failed to load')
     } finally {
       setLoading(false)
     }
   }
 
-  async function handleSave() {
-    if (!confirm('Save changes? Content will be marked as pending for approval.')) return
+  function updateBuffer(key: string, value: string) {
+    setEditBuffers(prev => ({ ...prev, [key]: value }))
+    // Clear parse error on edit
+    if (parseErrors[key]) {
+      setParseErrors(prev => {
+        const next = { ...prev }
+        delete next[key]
+        return next
+      })
+    }
+  }
 
+  async function handleSave() {
     setSaving(true)
+    setError('')
+    setSuccess('')
+
+    // Build content object from buffers
+    const newContent: Record<string, any> = { ...content }
+    const errors: Record<string, string> = {}
+
+    for (const section of CONTENT_SECTIONS) {
+      const raw = editBuffers[section.key]
+      if (!raw || raw.trim() === '') {
+        // Keep existing or set null
+        if (section.key in newContent && !raw) {
+          // Leave as-is if buffer is empty and content existed
+        }
+        continue
+      }
+
+      if (section.type === 'text') {
+        newContent[section.key] = raw
+      } else {
+        try {
+          newContent[section.key] = JSON.parse(raw)
+        } catch (e) {
+          errors[section.key] = 'Invalid JSON'
+        }
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setParseErrors(errors)
+      const badTabs = Object.keys(errors).map(k => CONTENT_SECTIONS.find(s => s.key === k)?.label).join(', ')
+      setError(`Invalid JSON in: ${badTabs}. Fix before saving.`)
+      setSaving(false)
+      return
+    }
+
     try {
       const res = await fetch('/api/admin/wikilux/content', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug, content, editorial_notes: editorialNotes })
+        body: JSON.stringify({
+          slug,
+          content: newContent,
+          editorial_notes: editorialNotes
+        })
       })
       const data = await res.json()
 
       if (data.success) {
-        alert('Content saved! Now pending approval in LUXAI queue.')
-        router.push('/admin/wikilux')
+        setSuccess('Saved! Content marked as pending for approval.')
+        setStatus('pending')
+        setContent(newContent)
       } else {
-        alert('Error: ' + data.error)
+        setError(data.error || 'Save failed')
       }
-    } catch (error) {
-      alert('Failed to save content')
+    } catch (err: any) {
+      setError(err.message || 'Save failed')
     } finally {
       setSaving(false)
     }
   }
 
-  const tabs = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'culture', label: 'Culture' },
-    { id: 'career_paths', label: 'Career Paths' },
-    { id: 'salaries', label: 'Salaries' },
-    { id: 'leadership', label: 'Leadership' },
-    { id: 'financial', label: 'Financial Health' },
-    { id: 'markets', label: 'Key Markets' },
-    { id: 'corporate', label: 'Corporate' },
-    { id: 'known_for', label: 'Known For' }
-  ]
+  const statusColor = (s: string) => {
+    switch (s) {
+      case 'draft': return '#999'
+      case 'pending': return '#F59E0B'
+      case 'approved': return '#10B981'
+      case 'rejected': return '#EF4444'
+      default: return '#666'
+    }
+  }
 
   if (loading) {
     return (
-      <div style={{ padding: '32px', display: 'flex', justifyContent: 'center' }}>
-        <div style={{ width: '20px', height: '20px', border: '2px solid #e8e8e8', borderTopColor: '#111', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
-        <style jsx>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div style={{ background: '#f5f5f5', minHeight: '100vh', padding: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '20px', height: '20px', border: '2px solid #e8e8e8', borderTopColor: '#111', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
       </div>
     )
   }
 
+  const activeSection = CONTENT_SECTIONS.find(s => s.key === activeTab)
+
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh', padding: '32px' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        
-        <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <button onClick={() => router.push('/admin/wikilux')} style={{ background: 'none', border: 'none', color: '#666', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline', marginBottom: '12px' }}>
-              ← Back to WikiLux
+
+        {/* Top Bar */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button
+              onClick={() => router.push('/admin/wikilux')}
+              style={{ background: 'none', border: 'none', fontSize: '14px', color: '#3B82F6', cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              ← Dashboard
             </button>
-            <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', fontWeight: 500, color: '#111' }}>
-              Edit: {brandName}
-            </h1>
-            <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
-              Edit brand encyclopedia content · Changes require approval
-            </p>
+            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: '17px', color: '#111' }}>WikiLux Editor</span>
           </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button onClick={() => window.open(`/wikilux/${slug}`, '_blank')} style={{ background: '#fff', border: '0.5px solid #e8e8e8', padding: '10px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: 500, color: '#111', cursor: 'pointer' }}>
-              Preview Live Page
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{
+              display: 'inline-block',
+              padding: '4px 10px',
+              borderRadius: '4px',
+              fontSize: '11px',
+              fontWeight: 500,
+              color: statusColor(status),
+              background: `${statusColor(status)}20`
+            }}>
+              {status.toUpperCase()}
+            </span>
+            <button
+              onClick={() => window.open(`/wikilux/${slug}`, '_blank')}
+              style={{
+                background: '#fff',
+                border: '0.5px solid #e8e8e8',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '13px',
+                color: '#111',
+                cursor: 'pointer'
+              }}
+            >
+              Preview
             </button>
-            <button onClick={handleSave} disabled={saving} style={{ background: '#111', border: 'none', padding: '10px 20px', borderRadius: '6px', fontSize: '13px', fontWeight: 500, color: '#fff', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.5 : 1 }}>
-              {saving ? 'Saving...' : 'Save Changes'}
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              style={{
+                background: '#111',
+                color: '#fff',
+                border: 'none',
+                padding: '8px 20px',
+                borderRadius: '6px',
+                fontSize: '13px',
+                fontWeight: 500,
+                cursor: saving ? 'not-allowed' : 'pointer',
+                opacity: saving ? 0.5 : 1
+              }}
+            >
+              {saving ? 'Saving...' : 'Save & Submit'}
             </button>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '4px', borderBottom: '0.5px solid #e8e8e8', marginBottom: '24px', overflowX: 'auto' }}>
-          {tabs.map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ background: 'none', border: 'none', padding: '12px 16px', fontSize: '13px', fontWeight: activeTab === tab.id ? 500 : 400, color: activeTab === tab.id ? '#111' : '#666', borderBottom: activeTab === tab.id ? '2px solid #111' : 'none', cursor: 'pointer', marginBottom: '-1px', whiteSpace: 'nowrap' }}>
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        {/* Brand Name */}
+        <h1 style={{ margin: '0 0 24px 0', fontSize: '22px', fontWeight: 500, color: '#111' }}>
+          Editing: {brandName}
+        </h1>
 
-        <div style={{ background: '#fff', border: '0.5px solid #e8e8e8', borderRadius: '8px', padding: '32px' }}>
-          
-          {activeTab === 'overview' && (
-            <div>
-              <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 500, color: '#111' }}>Company Overview</h2>
-              <textarea value={content.overview || ''} onChange={(e) => setContent({...content, overview: e.target.value})} placeholder="Company profile, history, business model..." style={{ width: '100%', minHeight: '400px', padding: '16px', border: '0.5px solid #e8e8e8', borderRadius: '6px', fontSize: '14px', lineHeight: '1.7', fontFamily: 'inherit', resize: 'vertical' }} />
+        {/* Messages */}
+        {error && (
+          <div style={{ padding: '12px 16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '6px', marginBottom: '16px', fontSize: '13px', color: '#DC2626' }}>
+            {error}
+          </div>
+        )}
+        {success && (
+          <div style={{ padding: '12px 16px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '6px', marginBottom: '16px', fontSize: '13px', color: '#16A34A' }}>
+            {success}
+          </div>
+        )}
+
+        {/* Main Layout: Tabs + Editor */}
+        <div style={{ display: 'flex', gap: '24px' }}>
+
+          {/* Sidebar Tabs */}
+          <div style={{ width: '200px', flexShrink: 0 }}>
+            <div style={{ background: '#fff', border: '0.5px solid #e8e8e8', borderRadius: '8px', overflow: 'hidden' }}>
+              {CONTENT_SECTIONS.map(section => (
+                <button
+                  key={section.key}
+                  onClick={() => setActiveTab(section.key)}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '10px 16px',
+                    border: 'none',
+                    borderBottom: '0.5px solid #e8e8e8',
+                    background: activeTab === section.key ? '#f0f0f0' : '#fff',
+                    fontSize: '13px',
+                    fontWeight: activeTab === section.key ? 500 : 400,
+                    color: parseErrors[section.key] ? '#EF4444' : (activeTab === section.key ? '#111' : '#666'),
+                    cursor: 'pointer'
+                  }}
+                >
+                  {section.label}
+                  {parseErrors[section.key] && ' ⚠'}
+                  {editBuffers[section.key] && editBuffers[section.key].trim() !== '' && (
+                    <span style={{ float: 'right', color: '#10B981', fontSize: '11px' }}>●</span>
+                  )}
+                </button>
+              ))}
             </div>
-          )}
 
-          {activeTab === 'culture' && (
-            <div>
-              <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 500, color: '#111' }}>Culture & Heritage</h2>
-              <textarea value={JSON.stringify(content.culture || {}, null, 2)} onChange={(e) => { try { setContent({...content, culture: JSON.parse(e.target.value)}) } catch {} }} placeholder="Culture data (JSON format)..." style={{ width: '100%', minHeight: '400px', padding: '16px', border: '0.5px solid #e8e8e8', borderRadius: '6px', fontSize: '13px', lineHeight: '1.6', fontFamily: 'monospace', resize: 'vertical' }} />
+            {/* Editorial Notes */}
+            <div style={{ marginTop: '16px', background: '#fff', border: '0.5px solid #e8e8e8', borderRadius: '8px', padding: '16px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#666', marginBottom: '8px' }}>
+                EDITORIAL NOTES
+              </label>
+              <textarea
+                value={editorialNotes}
+                onChange={(e) => setEditorialNotes(e.target.value)}
+                placeholder="Notes about this edit..."
+                rows={4}
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  border: '0.5px solid #e8e8e8',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  resize: 'vertical',
+                  fontFamily: 'Inter, sans-serif'
+                }}
+              />
             </div>
-          )}
+          </div>
 
-          {activeTab === 'career_paths' && (
-            <div>
-              <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 500, color: '#111' }}>Career Paths</h2>
-              <textarea value={JSON.stringify(content.career_paths || [], null, 2)} onChange={(e) => { try { setContent({...content, career_paths: JSON.parse(e.target.value)}) } catch {} }} placeholder="Career paths data (JSON format)..." style={{ width: '100%', minHeight: '400px', padding: '16px', border: '0.5px solid #e8e8e8', borderRadius: '6px', fontSize: '13px', lineHeight: '1.6', fontFamily: 'monospace', resize: 'vertical' }} />
+          {/* Editor Area */}
+          <div style={{ flex: 1 }}>
+            <div style={{ background: '#fff', border: '0.5px solid #e8e8e8', borderRadius: '8px', padding: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 500, color: '#111' }}>
+                  {activeSection?.label}
+                </h2>
+                <span style={{
+                  fontSize: '11px',
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  background: activeSection?.type === 'text' ? '#EFF6FF' : '#FFF7ED',
+                  color: activeSection?.type === 'text' ? '#2563EB' : '#C2410C'
+                }}>
+                  {activeSection?.type === 'text' ? 'Plain Text' : 'JSON'}
+                </span>
+              </div>
+
+              {parseErrors[activeTab] && (
+                <div style={{ padding: '8px 12px', background: '#FEF2F2', borderRadius: '4px', marginBottom: '12px', fontSize: '12px', color: '#DC2626' }}>
+                  {parseErrors[activeTab]}
+                </div>
+              )}
+
+              <textarea
+                value={editBuffers[activeTab] || ''}
+                onChange={(e) => updateBuffer(activeTab, e.target.value)}
+                placeholder={activeSection?.type === 'text'
+                  ? 'Enter content text...'
+                  : '{\n  "key": "value"\n}'
+                }
+                style={{
+                  width: '100%',
+                  minHeight: '500px',
+                  padding: '16px',
+                  border: parseErrors[activeTab] ? '1px solid #FECACA' : '0.5px solid #e8e8e8',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontFamily: activeSection?.type === 'text' ? 'Inter, sans-serif' : "'SF Mono', 'Fira Code', monospace",
+                  lineHeight: '1.6',
+                  resize: 'vertical',
+                  color: '#111',
+                  background: '#fafafa'
+                }}
+              />
+
+              {activeSection?.type === 'json' && (
+                <div style={{ marginTop: '8px', fontSize: '11px', color: '#999' }}>
+                  Edit the JSON directly. Must be valid JSON to save.
+                </div>
+              )}
             </div>
-          )}
-
-          {activeTab === 'salaries' && (
-            <div>
-              <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 500, color: '#111' }}>Salary Ranges</h2>
-              <textarea value={JSON.stringify(content.salaries || [], null, 2)} onChange={(e) => { try { setContent({...content, salaries: JSON.parse(e.target.value)}) } catch {} }} placeholder="Salary data (JSON format)..." style={{ width: '100%', minHeight: '400px', padding: '16px', border: '0.5px solid #e8e8e8', borderRadius: '6px', fontSize: '13px', lineHeight: '1.6', fontFamily: 'monospace', resize: 'vertical' }} />
-            </div>
-          )}
-
-          {activeTab === 'leadership' && (
-            <div>
-              <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 500, color: '#111' }}>Leadership Team</h2>
-              <textarea value={JSON.stringify(content.leadership || [], null, 2)} onChange={(e) => { try { setContent({...content, leadership: JSON.parse(e.target.value)}) } catch {} }} placeholder="Leadership data (JSON format)..." style={{ width: '100%', minHeight: '400px', padding: '16px', border: '0.5px solid #e8e8e8', borderRadius: '6px', fontSize: '13px', lineHeight: '1.6', fontFamily: 'monospace', resize: 'vertical' }} />
-            </div>
-          )}
-
-          {activeTab === 'financial' && (
-            <div>
-              <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 500, color: '#111' }}>Financial Health</h2>
-              <textarea value={content.financial_health || ''} onChange={(e) => setContent({...content, financial_health: e.target.value})} placeholder="Financial information, revenue, growth metrics..." style={{ width: '100%', minHeight: '400px', padding: '16px', border: '0.5px solid #e8e8e8', borderRadius: '6px', fontSize: '14px', lineHeight: '1.7', fontFamily: 'inherit', resize: 'vertical' }} />
-            </div>
-          )}
-
-          {activeTab === 'markets' && (
-            <div>
-              <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 500, color: '#111' }}>Key Markets</h2>
-              <textarea value={JSON.stringify(content.key_markets || [], null, 2)} onChange={(e) => { try { setContent({...content, key_markets: JSON.parse(e.target.value)}) } catch {} }} placeholder="Market data (JSON format)..." style={{ width: '100%', minHeight: '400px', padding: '16px', border: '0.5px solid #e8e8e8', borderRadius: '6px', fontSize: '13px', lineHeight: '1.6', fontFamily: 'monospace', resize: 'vertical' }} />
-            </div>
-          )}
-
-          {activeTab === 'corporate' && (
-            <div>
-              <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 500, color: '#111' }}>Corporate Structure</h2>
-              <textarea value={content.corporate || ''} onChange={(e) => setContent({...content, corporate: e.target.value})} placeholder="Ownership, parent group, corporate structure..." style={{ width: '100%', minHeight: '400px', padding: '16px', border: '0.5px solid #e8e8e8', borderRadius: '6px', fontSize: '14px', lineHeight: '1.7', fontFamily: 'inherit', resize: 'vertical' }} />
-            </div>
-          )}
-
-          {activeTab === 'known_for' && (
-            <div>
-              <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 500, color: '#111' }}>Known For</h2>
-              <textarea value={JSON.stringify(content.known_for || [], null, 2)} onChange={(e) => { try { setContent({...content, known_for: JSON.parse(e.target.value)}) } catch {} }} placeholder='["Birkin bag", "Silk scarves", "Craftsmanship"]' style={{ width: '100%', minHeight: '400px', padding: '16px', border: '0.5px solid #e8e8e8', borderRadius: '6px', fontSize: '13px', lineHeight: '1.6', fontFamily: 'monospace', resize: 'vertical' }} />
-            </div>
-          )}
-        </div>
-
-        <div style={{ marginTop: '24px', background: '#fff', border: '0.5px solid #e8e8e8', borderRadius: '8px', padding: '24px' }}>
-          <h3 style={{ margin: '0 0 12px 0', fontSize: '15px', fontWeight: 500, color: '#111' }}>Editorial Notes</h3>
-          <textarea value={editorialNotes} onChange={(e) => setEditorialNotes(e.target.value)} placeholder="Internal notes about these changes (optional)..." style={{ width: '100%', minHeight: '100px', padding: '12px', border: '0.5px solid #e8e8e8', borderRadius: '6px', fontSize: '13px', lineHeight: '1.6', fontFamily: 'inherit', resize: 'vertical' }} />
+          </div>
         </div>
 
       </div>

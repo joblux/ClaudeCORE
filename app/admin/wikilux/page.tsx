@@ -329,6 +329,19 @@ export default function WikiLuxAdminPage() {
                           View
                         </button>
                         <button
+                          onClick={() => router.push(`/admin/wikilux/edit/${brand.slug}`)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            fontSize: '13px',
+                            color: '#10B981',
+                            cursor: 'pointer',
+                            marginRight: '12px'
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
                           onClick={() => handleDeleteBrand(brand.slug)}
                           style={{
                             background: 'none',
