@@ -155,7 +155,7 @@ Tone: encyclopedic, factual, authoritative.`
     tokens_used: inputTokens + outputTokens,
     cost_usd: cost,
     status: 'success'
-  }).catch(() => {})
+  })
   
   return { tokens: inputTokens + outputTokens, cost }
 }
