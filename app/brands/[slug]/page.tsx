@@ -141,7 +141,7 @@ function buildBrandData(staticBrand: any, content: any) {
 
   const founder = content?.founder
     ? {
-        name: founderName,
+        name: content?.founder_name || founderName,
         dates: '',
         bio: typeof content.founder === 'string' ? content.founder : '',
       }
@@ -225,6 +225,7 @@ export default function BrandDetailPage() {
           .from('wikilux_content')
           .select('content')
           .eq('slug', slug)
+          .eq('status', 'approved')
           .maybeSingle()
         setBrand(buildBrandData(staticBrand, data?.content || null))
       } catch {

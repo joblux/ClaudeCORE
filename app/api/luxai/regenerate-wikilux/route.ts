@@ -139,6 +139,7 @@ async function generateBrandContent(slug: string, brandName: string) {
     .from('wikilux_content')
     .update({
       content: content.content,
+      status: 'pending',
       last_regenerated_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     })
@@ -162,19 +163,20 @@ async function generateBrandContent(slug: string, brandName: string) {
 async function callClaude(brandName: string) {
   const prompt = `You are a luxury industry analyst writing for JOBLUX, a luxury careers intelligence platform. Generate encyclopedic content for ${brandName}.
 
-Return ONLY a JSON object (no markdown, no explanation, no backticks) with this EXACT structure:
+Return ONLY a JSON object (no markdown, no explanation, no backticks) with this EXACT structure. Every field is MANDATORY — do not skip any:
 
 {
-  "tagline": "One compelling sentence capturing the brand's essence (max 15 words)",
-  "brand_dna": "200-word brand identity analysis. What makes this house unique, its codes, its position in the luxury universe.",
+  "tagline": "One sentence capturing the brand's essence (max 15 words)",
+  "brand_dna": "120-word brand identity analysis. Codes, position in luxury universe, what makes it unique.",
   "history": [
-    {"year": "1837", "event": "Short description of milestone (1 sentence)"},
+    {"year": "1837", "event": "One-sentence milestone"},
     {"year": "1922", "event": "Another milestone"}
   ],
-  "founder": "250-word founder biography. Birth, origins, how they started, key life events, legacy. Write as narrative prose.",
+  "founder_name": "Full name of the founder (e.g. Louis-François Cartier)",
+  "founder": "150-word founder biography. Birth, origins, how they started, legacy. Narrative prose.",
   "founder_facts": [
-    "Interesting fact about the founder (1 sentence)",
-    "Another surprising fact",
+    "Interesting fact (1 sentence)",
+    "Second fact",
     "Third fact",
     "Fourth fact",
     "Fifth fact"
@@ -184,42 +186,42 @@ Return ONLY a JSON object (no markdown, no explanation, no backticks) with this 
     {"label": "Headquarters", "value": "Paris"},
     {"label": "Employees", "value": "~20,000"},
     {"label": "Revenue", "value": "$14.6B (2024)"},
-    {"label": "Ownership", "value": "Family-controlled / Public / Conglomerate"}
+    {"label": "Ownership", "value": "Family / Public / Conglomerate"}
   ],
   "key_executives": [
     {"name": "Full Name", "role": "CEO", "since": "2013"},
     {"name": "Full Name", "role": "Creative Director", "since": "2020"}
   ],
-  "creative_directors": "200-word history of creative leadership at the house. Past and present creative directors, their impact, transitions.",
+  "creative_directors": "120-word history of creative leadership. Past and present creative directors, their impact.",
   "careers": {
-    "prose": "150-word overview of what it's like to work at this brand. Culture, pace, opportunities, reputation as employer.",
+    "prose": "80-word overview of working at this brand. Culture, pace, reputation as employer.",
     "paths": ["Retail & boutique management", "Artisan & métiers", "Marketing & communications", "Digital & e-commerce", "Finance & strategy", "Supply chain", "HR & talent"]
   },
   "hiring_intelligence": {
     "values": [
-      {"title": "Craftsmanship", "desc": "One sentence describing this core value and how it manifests internally."},
+      {"title": "Craftsmanship", "desc": "One sentence about this core value internally."},
       {"title": "Independence", "desc": "One sentence."},
       {"title": "Creativity", "desc": "One sentence."},
       {"title": "Discretion", "desc": "One sentence."}
     ],
-    "culture": "100-word description of internal work culture — atmosphere, employee sentiment, turnover, promotion from within, family vs corporate feel.",
-    "growth": "100-word description of career growth opportunities — expansion plans, new roles being created, internal mobility, training programs.",
-    "pace": "100-word description of work pace and decision-making — fast or slow, bureaucratic or agile, startup energy or institutional, work-life balance.",
-    "access": "100-word description of how to get in — how competitive roles are, whether they advertise publicly, importance of networking and referrals, interview process."
+    "culture": "60-word internal work culture description.",
+    "growth": "60-word career growth and mobility description.",
+    "pace": "60-word work pace and decision-making description.",
+    "access": "60-word description of how to get hired — competitiveness, networking, referrals, interview process."
   },
   "quote": {
-    "text": "A famous or defining quote from the founder, CEO, or creative director (real, verified quote only).",
+    "text": "A real, verifiable quote from the founder, CEO, or creative director.",
     "author": "Full Name, Title"
   },
-  "market_position": "180-word competitive positioning analysis. Where the brand sits vs peers, strengths, vulnerabilities, market segment.",
+  "market_position": "120-word competitive positioning. Where it sits vs peers, strengths, market segment.",
   "presence": [
     {"region": "Europe", "detail": "Headquarters + 120 boutiques"},
     {"region": "Asia Pacific", "detail": "85 boutiques, strongest in Japan and China"},
     {"region": "North America", "detail": "45 boutiques"}
   ],
   "facts": [
-    "Interesting brand fact or trivia (1 sentence)",
-    "Another fact",
+    "Brand trivia (1 sentence)",
+    "Second fact",
     "Third fact",
     "Fourth fact",
     "Fifth fact",
@@ -235,14 +237,16 @@ Return ONLY a JSON object (no markdown, no explanation, no backticks) with this 
 }
 
 RULES:
-- history: Include 7-10 milestones from founding to present day. Use real years and real events only.
-- key_executives: Include 3-5 current executives. Use real names and real appointment years.
-- careers.paths: Include 6-8 department/function names relevant to this specific brand.
-- hiring_intelligence.values: Exactly 4 values that define the brand's internal culture. Short title + one sentence each.
-- quote: Must be a real, verifiable quote. If unsure, use a well-known quote from the founder.
-- stock.is_public: Set false for private companies. If false, set exchange/ticker/market_cap to null.
-- All prose sections: encyclopedic, factual, authoritative tone. No marketing language.
-- Output valid JSON only. No markdown. No explanation. No backticks.`
+- ALL 16 fields are MANDATORY. Do not omit any field, especially hiring_intelligence.access.
+- history: 7-10 milestones, real years, real events.
+- key_executives: 3-5 current executives with real names and real years.
+- careers.paths: 6-8 departments relevant to this brand.
+- hiring_intelligence.values: Exactly 4. Short title + one sentence each.
+- hiring_intelligence: ALL four sub-fields (culture, growth, pace, access) are REQUIRED.
+- quote: Real, verifiable quote only.
+- stock.is_public: false for private companies — then set exchange/ticker/market_cap to null.
+- Encyclopedic, factual tone. No marketing language. Respect word limits strictly.
+- Output valid JSON only. No markdown. No backticks. No explanation.`
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
