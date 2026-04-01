@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
-import { BRANDS } from '@/lib/wikilux-brands'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -87,12 +86,24 @@ function IllustrationSellerie() {
   )
 }
 
-// Build display data from static BRANDS array + DB wikilux_content
-function buildBrandData(staticBrand: any, content: any) {
+// Helper: extract a value from key_facts array
+function getKeyFact(keyFacts: any[], label: string): string | null {
+  if (!Array.isArray(keyFacts)) return null
+  const found = keyFacts.find((f: any) => f.label?.toLowerCase() === label.toLowerCase())
+  return found?.value || null
+}
+
+// Build display data entirely from DB content
+function buildBrandData(brandName: string, slug: string, content: any) {
   const hi = content?.hiring_intelligence || {}
   const stock = content?.stock || {}
   const execs = content?.key_executives || []
+  const keyFacts = content?.key_facts || []
   const isPublic = stock?.is_public === true
+
+  // Extract founded/headquarters from key_facts
+  const foundedRaw = getKeyFact(keyFacts, 'Founded') || ''
+  const headquarters = getKeyFact(keyFacts, 'Headquarters') || ''
 
   // Leadership cards
   const leadership = execs.map((e: any) => ({
@@ -102,15 +113,10 @@ function buildBrandData(staticBrand: any, content: any) {
     since: e.since || '',
   }))
 
-  // Sectors from known_for
-  const sectors = staticBrand.known_for
-    ? staticBrand.known_for.split(',').map((s: string) => s.trim())
-    : [staticBrand.sector]
-
   // Career paths pills
   const careerPaths = content?.careers?.paths || []
 
-  // Work culture accordions — must be Culture, Growth, Pace, Access
+  // Work culture accordions — Culture, Growth, Pace, Access
   const workCulture = []
   if (hi.culture) workCulture.push({ label: 'Culture', text: hi.culture })
   if (hi.growth) workCulture.push({ label: 'Growth', text: hi.growth })
@@ -123,9 +129,11 @@ function buildBrandData(staticBrand: any, content: any) {
   // Heritage timeline
   const timeline = Array.isArray(content?.history) ? content.history : []
 
-  // Extract founder name from first sentence of founder prose
+  // Extract founder name
   let founderName = 'Founder'
-  if (typeof content?.founder === 'string') {
+  if (content?.founder_name) {
+    founderName = content.founder_name
+  } else if (typeof content?.founder === 'string') {
     const first = content.founder.split(/[.!,]/)[0] || ''
     const words = first.trim().split(' ')
     if (words.length >= 2) {
@@ -141,7 +149,7 @@ function buildBrandData(staticBrand: any, content: any) {
 
   const founder = content?.founder
     ? {
-        name: content?.founder_name || founderName,
+        name: founderName,
         dates: '',
         bio: typeof content.founder === 'string' ? content.founder : '',
       }
@@ -149,6 +157,9 @@ function buildBrandData(staticBrand: any, content: any) {
 
   // Quote
   const quote = content?.quote || null
+
+  // Parent group from stock or key_facts
+  const parentGroup = stock?.parent_group || getKeyFact(keyFacts, 'Ownership') || ''
 
   // Financial
   const financial = isPublic
@@ -160,46 +171,33 @@ function buildBrandData(staticBrand: any, content: any) {
     : null
 
   return {
-    name: staticBrand.name,
-    slug: staticBrand.slug,
-    parent_group: staticBrand.group,
+    name: brandName,
+    slug,
+    parent_group: parentGroup,
     is_public: isPublic,
     stock_ticker: stock.ticker || null,
     stock_exchange: stock.exchange || null,
     stock_price: isPublic ? `${stock.exchange}.${stock.ticker}` : null,
     revenue_change: null,
     hiring_status: null,
-    founded_year: staticBrand.founded,
-    founded_city: staticBrand.headquarters,
-    employee_count: null,
-    sectors,
-    // Overview: Company Profile
-    description1: content?.brand_dna || staticBrand.description,
-    description2: !content?.brand_dna ? staticBrand.hiring_profile : null,
-    // Overview: Career paths pills
+    founded_year: foundedRaw,
+    founded_city: headquarters,
+    employee_count: getKeyFact(keyFacts, 'Employees'),
+    sectors: [],
+    description1: content?.brand_dna || '',
+    description2: null,
     career_paths: careerPaths,
-    // Overview: Recent Signals
     signals: [],
-    // Sidebar: Leadership
     leadership,
-    // Sidebar: Salary Ranges
     salaries: [],
-    // Sidebar: Financial Health
     financial,
-    // Culture: Founder
     founder,
     founder_facts: content?.founder_facts || [],
-    // Culture: Quote
     quote,
-    // Culture: Heritage Timeline
     timeline,
-    // Culture: Core Values
     values,
-    // Culture: Work Culture accordions
     workCulture,
-    // Career paths tab
     careers_prose: content?.careers?.prose || (typeof content?.careers === 'string' ? content.careers : null),
-    // Tagline
     tagline: content?.tagline || null,
   }
 }
@@ -211,25 +209,30 @@ export default function BrandDetailPage() {
   const [openAccordion, setOpenAccordion] = useState<string | null>(null)
   const [brand, setBrand] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-
-  const staticBrand = BRANDS.find(b => b.slug === slug)
+  const [notFound, setNotFound] = useState(false)
 
   useEffect(() => {
-    if (!slug || !staticBrand) {
+    if (!slug) {
       setLoading(false)
+      setNotFound(true)
       return
     }
     async function fetchContent() {
       try {
         const { data } = await supabase
           .from('wikilux_content')
-          .select('content')
+          .select('brand_name, content')
           .eq('slug', slug)
           .eq('status', 'approved')
           .maybeSingle()
-        setBrand(buildBrandData(staticBrand, data?.content || null))
+
+        if (!data || !data.content || JSON.stringify(data.content) === '{}') {
+          setNotFound(true)
+        } else {
+          setBrand(buildBrandData(data.brand_name, slug, data.content))
+        }
       } catch {
-        setBrand(buildBrandData(staticBrand, null))
+        setNotFound(true)
       } finally {
         setLoading(false)
       }
@@ -237,7 +240,7 @@ export default function BrandDetailPage() {
     fetchContent()
   }, [slug])
 
-  if (!loading && !staticBrand) {
+  if (!loading && notFound) {
     return (
       <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
         <div className="text-center">
@@ -309,38 +312,11 @@ export default function BrandDetailPage() {
                 {brand.name}
               </h1>
               <p className="text-sm text-[#999]">
-                {brand.is_public ? `${brand.parent_group} (public: ${brand.stock_exchange}.${brand.stock_ticker})` : brand.parent_group}
+                {brand.parent_group}
                 {brand.founded_year && ` · Founded ${brand.founded_year}, ${brand.founded_city}`}
-                {brand.employee_count && ` · ${brand.employee_count} employees`}
+                {brand.employee_count && ` · ${brand.employee_count}`}
               </p>
-              <div className="flex gap-2 mt-2 flex-wrap">
-                {(brand.sectors || []).map((s: string) => (
-                  <span key={s} className="text-xs px-2 py-0.5 border border-[#2a2a2a] rounded text-[#999]">{s}</span>
-                ))}
-              </div>
             </div>
-          </div>
-
-          {/* Metrics */}
-          <div className="flex gap-3">
-            {brand.revenue_change && (
-              <div className="text-center">
-                <div className="text-lg font-medium text-[#4CAF50]">{brand.revenue_change}</div>
-                <div className="text-[10px] text-[#999] uppercase tracking-wider">Revenue</div>
-              </div>
-            )}
-            {brand.stock_price && (
-              <div className="text-center">
-                <div className="text-lg font-medium text-[#4CAF50]">{brand.stock_price}</div>
-                <div className="text-[10px] text-[#999] uppercase tracking-wider">Stock</div>
-              </div>
-            )}
-            {brand.hiring_status && (
-              <div className="text-center">
-                <div className="text-lg font-medium text-[#4CAF50]">{brand.hiring_status}</div>
-                <div className="text-[10px] text-[#999] uppercase tracking-wider">Status</div>
-              </div>
-            )}
           </div>
         </div>
 
@@ -376,7 +352,6 @@ export default function BrandDetailPage() {
               <div>
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">COMPANY PROFILE</p>
                 <p className="text-sm text-[#888] leading-relaxed mb-3">{brand.description1}</p>
-                {brand.description2 && <p className="text-sm text-[#888] leading-relaxed">{brand.description2}</p>}
               </div>
 
               {/* Career Paths pills */}
@@ -392,25 +367,10 @@ export default function BrandDetailPage() {
               )}
 
               {/* Recent Signals */}
-              {brand.signals && brand.signals.length > 0 ? (
-                <div>
-                  <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">RECENT SIGNALS</p>
-                  <div className="space-y-3">
-                    {brand.signals.map((s: any, i: number) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <span className="w-[6px] h-[6px] rounded-full mt-1.5 flex-shrink-0" style={{ background: s.color }} />
-                        <span className="text-sm text-[#888] flex-1">{s.text}</span>
-                        <span className="text-xs text-[#999] flex-shrink-0">{s.time}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">RECENT SIGNALS</p>
-                  <p className="text-sm text-[#777]">No signals yet for {brand.name}.</p>
-                </div>
-              )}
+              <div>
+                <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">RECENT SIGNALS</p>
+                <p className="text-sm text-[#777]">No signals yet for {brand.name}.</p>
+              </div>
             </div>
 
             {/* Sidebar */}
@@ -439,18 +399,7 @@ export default function BrandDetailPage() {
               {/* Salary Ranges */}
               <div className="bg-[#222] rounded-xl p-4">
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">SALARY RANGES AT {brand.name.toUpperCase()}</p>
-                {brand.salaries && brand.salaries.length > 0 ? (
-                  <div className="space-y-2">
-                    {brand.salaries.map((s: any) => (
-                      <div key={s.role} className="flex justify-between items-center">
-                        <span className="text-xs text-[#888]">{s.role}</span>
-                        <span className="text-xs font-medium" style={{ color: s.blurred ? 'transparent' : '#a58e28', textShadow: s.blurred ? '0 0 8px #a58e28' : 'none', filter: s.blurred ? 'blur(4px)' : 'none', userSelect: s.blurred ? 'none' : 'auto' }}>{s.range}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs text-[#777]">Salary data is contribution-gated. Share your compensation to unlock ranges at {brand.name}.</p>
-                )}
+                <p className="text-xs text-[#777]">Salary data is contribution-gated. Share your compensation to unlock ranges at {brand.name}.</p>
                 <a href="/careers" className="block mt-3 text-xs text-[#a58e28] hover:underline">Contribute your salary to see all →</a>
               </div>
 
@@ -493,7 +442,7 @@ export default function BrandDetailPage() {
                       {brand.founder.name}
                     </h3>
                     <p className="text-xs text-[#999] mb-2">
-                      Founder{brand.founder.dates ? ` · ${brand.founder.dates}` : ''} · Est. {brand.founded_year}, {brand.founded_city}
+                      Founder · Est. {brand.founded_year}, {brand.founded_city}
                     </p>
                     {brand.founder.bio.split('\n\n').slice(0, 3).map((p: string, i: number) => (
                       <p key={i} className="text-sm text-[#777] leading-relaxed mb-2">{p}</p>
@@ -525,7 +474,7 @@ export default function BrandDetailPage() {
               )}
 
               {/* Heritage Timeline */}
-              {brand.timeline && brand.timeline.length > 0 ? (
+              {brand.timeline && brand.timeline.length > 0 && (
                 <div>
                   <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-4">HERITAGE TIMELINE</p>
                   <div className="space-y-4">
@@ -542,11 +491,6 @@ export default function BrandDetailPage() {
                       </div>
                     ))}
                   </div>
-                </div>
-              ) : (
-                <div>
-                  <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">HERITAGE</p>
-                  <p className="text-sm text-[#777] leading-relaxed">{staticBrand?.description || ''}</p>
                 </div>
               )}
             </div>
@@ -620,7 +564,6 @@ export default function BrandDetailPage() {
         {/* ═══════════════ CAREER PATHS TAB ═══════════════ */}
         {activeTab === 'Career paths' && (
           <div className="max-w-3xl space-y-8">
-            {/* Career paths pills */}
             {brand.career_paths && brand.career_paths.length > 0 && (
               <div>
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">CAREER PATHS AT {brand.name.toUpperCase()}</p>
@@ -632,7 +575,6 @@ export default function BrandDetailPage() {
               </div>
             )}
 
-            {/* Careers prose */}
             {brand.careers_prose && (
               <div>
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">WORKING AT {brand.name.toUpperCase()}</p>
@@ -642,7 +584,6 @@ export default function BrandDetailPage() {
               </div>
             )}
 
-            {/* Empty state */}
             {!brand.careers_prose && (!brand.career_paths || brand.career_paths.length === 0) && (
               <div className="flex flex-col items-center justify-center py-24">
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">CAREER PATHS</p>
