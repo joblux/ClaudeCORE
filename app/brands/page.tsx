@@ -1,35 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { BRANDS } from '@/lib/wikilux-brands'
+import { createClient } from '@supabase/supabase-js'
 
-const signalColors: Record<string, string> = {
-  growth: '#4CAF50',
-  leadership: '#FF9800',
-  contraction: '#f44336',
-  expansion: '#2196F3',
-  merger_acquisition: '#9C27B0',
-}
-
-// Map BRANDS array to the card shape the listing expects
-const allBrands = BRANDS.map((b, i) => ({
-  id: String(i + 1),
-  name: b.name,
-  slug: b.slug,
-  parent_group: b.group,
-  sectors: b.known_for ? b.known_for.split(',').slice(0, 3).map(s => s.trim()) : [b.sector],
-  is_hiring: false,
-  revenue_change: null as string | null,
-  signal_label: null as string | null,
-  signal_color: 'growth',
-  extra: null as string | null,
-}))
-
-// Collect unique sectors from all brands for filter pills
-const sectorSet = new Set<string>()
-BRANDS.forEach(b => sectorSet.add(b.sector))
-const sectors = ['All', ...Array.from(sectorSet).sort()]
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 function getInitials(name: string) {
   const words = name.split(' ')
@@ -37,15 +15,66 @@ function getInitials(name: string) {
   return words.slice(0, 2).map((w: string) => w[0]).join('')
 }
 
+// Helper: extract a value from key_facts array
+function getKeyFact(keyFacts: any[], label: string): string | null {
+  if (!Array.isArray(keyFacts)) return null
+  const found = keyFacts.find((f: any) => f.label?.toLowerCase() === label.toLowerCase())
+  return found?.value || null
+}
+
 export default function BrandsPage() {
   const router = useRouter()
   const [activeFilter, setActiveFilter] = useState('All')
   const [search, setSearch] = useState('')
+  const [brands, setBrands] = useState<any[]>([])
+  const [sectors, setSectors] = useState<string[]>(['All'])
+  const [loading, setLoading] = useState(true)
 
-  const filtered = allBrands.filter(b => {
-    const matchesSector = activeFilter === 'All' || b.sectors.some(s => s.toLowerCase().includes(activeFilter.toLowerCase())) || BRANDS.find(br => br.slug === b.slug)?.sector === activeFilter
+  useEffect(() => {
+    async function fetchBrands() {
+      try {
+        const { data } = await supabase
+          .from('wikilux_content')
+          .select('slug, brand_name, content, status')
+          .order('brand_name')
+
+        if (!data) {
+          setLoading(false)
+          return
+        }
+
+        const mapped = data.map((b: any) => {
+          const content = b.content || {}
+          const keyFacts = content.key_facts || []
+          const stock = content.stock || {}
+          const ownership = getKeyFact(keyFacts, 'Ownership') || stock.parent_group || ''
+
+          return {
+            slug: b.slug,
+            name: b.brand_name,
+            parent_group: ownership,
+            status: b.status,
+            has_content: content && JSON.stringify(content) !== '{}',
+            tagline: content.tagline || null,
+          }
+        })
+
+        setBrands(mapped)
+
+        // We don't have sector data in the DB content yet, so no sector filters for now
+        // Once we add a sector field to the prompt, this will populate automatically
+        setSectors(['All'])
+        setLoading(false)
+      } catch {
+        setLoading(false)
+      }
+    }
+    fetchBrands()
+  }, [])
+
+  const filtered = brands.filter(b => {
     const matchesSearch = b.name.toLowerCase().includes(search.toLowerCase()) || b.slug.includes(search.toLowerCase())
-    return matchesSector && matchesSearch
+    return matchesSearch
   })
 
   return (
@@ -64,10 +93,10 @@ export default function BrandsPage() {
           Brand intelligence
         </h1>
         <p className="text-sm text-[#999] mb-7">
-          Career intelligence across 150+ luxury brands. Salaries, culture, leadership, financial health — in 9 languages.
+          Career intelligence across {brands.length}+ luxury brands. Salaries, culture, leadership, financial health — in 9 languages.
         </p>
 
-        {/* Search + Filters */}
+        {/* Search */}
         <div className="flex items-center gap-2 mb-4 flex-wrap">
           <input
             type="text"
@@ -76,40 +105,37 @@ export default function BrandsPage() {
             onChange={e => setSearch(e.target.value)}
             className="bg-white text-[#1a1a1a] text-sm rounded-lg px-3 h-[42px] w-[220px] outline-none flex-shrink-0"
           />
-          {sectors.map(s => (
-            <button
-              key={s}
-              onClick={() => setActiveFilter(s)}
-              className="h-[42px] px-5 rounded-full text-sm transition-colors whitespace-nowrap"
-              style={{
-                border: activeFilter === s ? '1px solid #a58e28' : '1px solid #333',
-                color: activeFilter === s ? '#a58e28' : '#777',
-                background: 'transparent',
-              }}
-            >
-              {s}
-            </button>
-          ))}
         </div>
 
         {/* Stats */}
         <div className="flex gap-6 mb-6">
-          {[[String(BRANDS.length), 'brands'], [String(sectorSet.size), 'sectors'], ['9', 'languages']].map(([n, l]) => (
-            <span key={l} className="text-xs">
-              <span className="text-[#999]">{n}</span>
-              <span className="text-[#999]"> {l}</span>
-            </span>
-          ))}
+          <span className="text-xs">
+            <span className="text-[#999]">{brands.length}</span>
+            <span className="text-[#999]"> brands</span>
+          </span>
+          <span className="text-xs">
+            <span className="text-[#999]">{brands.filter(b => b.status === 'approved' && b.has_content).length}</span>
+            <span className="text-[#999]"> published</span>
+          </span>
+          <span className="text-xs">
+            <span className="text-[#999]">9</span>
+            <span className="text-[#999]"> languages</span>
+          </span>
         </div>
 
+        {/* Loading */}
+        {loading && (
+          <div className="flex justify-center py-24">
+            <div className="w-5 h-5 border-2 border-[#2a2a2a] border-t-[#a58e28] rounded-full animate-spin" />
+          </div>
+        )}
+
         {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {filtered.map(brand => {
-            const staticBrand = BRANDS.find(b => b.slug === brand.slug)
-            const color = brand.signal_label ? (signalColors[brand.signal_color] || '#4CAF50') : '#555'
-            return (
+        {!loading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {filtered.map(brand => (
               <div
-                key={brand.id}
+                key={brand.slug}
                 onClick={() => router.push(`/brands/${brand.slug}`)}
                 className="bg-[#212121] border border-[#2a2a2a] rounded-xl p-4 cursor-pointer transition-colors hover:border-[#3a3a3a]"
               >
@@ -120,34 +146,20 @@ export default function BrandsPage() {
                   </div>
                   <div>
                     <div className="text-sm font-medium text-[#e0e0e0]">{brand.name}</div>
-                    <div className="text-[11px] text-[#999] mt-0.5">{brand.parent_group}</div>
+                    {brand.parent_group && (
+                      <div className="text-[11px] text-[#999] mt-0.5">{brand.parent_group}</div>
+                    )}
                   </div>
                 </div>
 
-                {/* Sectors */}
-                <div className="text-[11px] text-[#4a4a4a] mb-3">
-                  {brand.sectors.join(' · ')}
-                </div>
-
-                {/* Sector pill */}
-                <div className="flex items-center gap-3 flex-wrap">
-                  {staticBrand && (
-                    <span className="text-[11px] text-[#555]">{staticBrand.sector}</span>
-                  )}
-                  {brand.signal_label && (
-                    <span className="flex items-center gap-1.5 text-[11px]">
-                      <span className="w-[5px] h-[5px] rounded-full flex-shrink-0" style={{ background: color }} />
-                      <span style={{ color }}>{brand.signal_label}</span>
-                    </span>
-                  )}
-                  {brand.revenue_change && (
-                    <span className="text-[11px]" style={{ color }}>{brand.revenue_change}</span>
-                  )}
-                </div>
+                {/* Tagline */}
+                {brand.tagline && (
+                  <p className="text-[11px] text-[#555] leading-relaxed line-clamp-2">{brand.tagline}</p>
+                )}
               </div>
-            )
-          })}
-        </div>
+            ))}
+          </div>
+        )}
 
       </div>
     </div>
