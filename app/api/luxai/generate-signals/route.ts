@@ -66,15 +66,30 @@ RULES:
 
     let signals
     try {
+      // Strip markdown backticks if present
       let cleaned = text.trim().replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '').trim()
+
+      // Try array first (signals return [...])
       const firstBracket = cleaned.indexOf('[')
       const lastBracket = cleaned.lastIndexOf(']')
+      const firstBrace = cleaned.indexOf('{')
+      const lastBrace = cleaned.lastIndexOf('}')
+
       if (firstBracket !== -1 && lastBracket > firstBracket) {
         cleaned = cleaned.substring(firstBracket, lastBracket + 1)
+      } else if (firstBrace !== -1 && lastBrace > firstBrace) {
+        cleaned = cleaned.substring(firstBrace, lastBrace + 1)
       }
+
       signals = JSON.parse(cleaned)
+
+      // Wrap single object in array
+      if (!Array.isArray(signals)) {
+        signals = [signals]
+      }
     } catch (e: any) {
-      throw new Error(`JSON parse failed: ${e.message}`)
+      console.error('LUXAI raw response text:', text)
+      throw new Error(`JSON parse failed: ${e.message} — raw starts with: ${text.substring(0, 200)}`)
     }
 
     // Insert each signal as pending (unpublished)
