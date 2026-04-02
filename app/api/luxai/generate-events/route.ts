@@ -28,11 +28,40 @@ Return ONLY a JSON array (no markdown, no backticks):
     "start_date": "2026-06-15",
     "end_date": "2026-06-18",
     "description": "What this event is, who attends, why it matters [max 300 chars]",
+    "long_description": "A 200-400 word editorial overview of the event. Cover its history, significance in the luxury calendar, what to expect this edition, who the key attendees are, and what makes it unmissable for luxury professionals. Write in an authoritative editorial tone.",
+    "highlights": [
+      "Key highlight or feature #1",
+      "Key highlight or feature #2",
+      "Key highlight or feature #3",
+      "Key highlight or feature #4",
+      "Key highlight or feature #5"
+    ],
+    "brands_present": ["Brand 1", "Brand 2", "Brand 3", "Brand 4", "Brand 5", "Brand 6", "Brand 7", "Brand 8"],
+    "career_opportunities": [
+      "Specific career opportunity this event creates #1",
+      "Specific career opportunity #2",
+      "Specific career opportunity #3",
+      "Specific career opportunity #4"
+    ],
+    "networking_tips": [
+      "Actionable networking tip #1 for this specific event",
+      "Networking tip #2",
+      "Networking tip #3"
+    ],
+    "practical_info": {
+      "venue": "Name and address of the venue",
+      "access": "How to get access or register (trade only, public, invitation, etc.)",
+      "transport": "Nearest metro/airport, transport advice",
+      "dress_code": "Expected dress code for the event",
+      "language": "Primary language(s) spoken"
+    },
     "career_context": "Why luxury professionals should care [max 200 chars]",
     "organizer": "Organizer name",
     "attendance": "~5,000",
     "type": "trade_show" | "fashion_week" | "conference" | "exhibition" | "awards" | "summit",
-    "website_url": "https://example.com"
+    "website_url": "https://example.com",
+    "meta_title": "Event Name | City | JOBLUX Events",
+    "meta_description": "150-char SEO description of the event, its dates, and why luxury professionals attend"
   }
 ]
 
@@ -42,6 +71,11 @@ RULES:
 - Dates between April 2026 and March 2027
 - Mix of cities: Paris, Milan, London, Geneva, New York, Hong Kong, Dubai, Shanghai
 - Include major fashion weeks, watch fairs, art fairs, hospitality summits
+- highlights: 4-6 items per event
+- brands_present: 6-10 realistic brands per event
+- career_opportunities: 3-5 items per event
+- networking_tips: 3-4 items per event
+- practical_info: all 5 fields filled for each event
 - Output valid JSON array only`
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -53,7 +87,7 @@ RULES:
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 4000,
+        max_tokens: 8000,
         messages: [{ role: 'user', content: prompt }]
       })
     })
@@ -93,11 +127,19 @@ RULES:
         end_date: ev.end_date,
         event_date: ev.start_date,
         description: ev.description,
+        long_description: ev.long_description,
+        highlights: ev.highlights,
+        brands_present: ev.brands_present,
+        career_opportunities: ev.career_opportunities,
+        networking_tips: ev.networking_tips,
+        practical_info: ev.practical_info,
         career_context: ev.career_context,
         organizer: ev.organizer,
         attendance: ev.attendance,
         type: ev.type,
         website_url: ev.website_url,
+        meta_title: ev.meta_title,
+        meta_description: ev.meta_description,
         is_published: false,
         content_origin: 'ai',
         is_featured: false,
