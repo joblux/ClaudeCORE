@@ -178,7 +178,7 @@ export default function InterviewsClient({
       <section className="bg-[#222222] py-6 md:py-8">
         <div className="jl-container text-center">
           <div className="jl-overline-gold mb-2 tracking-[0.2em]">Interview Intelligence</div>
-          <h1 className="jl-serif text-2xl md:text-3xl font-light text-white mb-2">
+          <h1 className="text-4xl font-normal text-white mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
             Inside the interview rooms of luxury
           </h1>
           <p className="font-sans text-xs md:text-sm text-[#bbb] max-w-2xl mx-auto leading-relaxed mb-3">

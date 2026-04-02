@@ -141,7 +141,7 @@ export default function ContributePage() {
       {/* Header */}
       <section className="border-b border-[#444]">
         <div className="max-w-[1200px] mx-auto px-7 py-10">
-          <h1 className="text-[28px] font-normal text-white mb-3" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+          <h1 className="text-4xl font-normal text-white mb-3" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
             Intelligence is built on contribution
           </h1>
           <p className="text-[14px] text-[#999] max-w-xl leading-relaxed">

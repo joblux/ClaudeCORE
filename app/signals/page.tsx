@@ -148,8 +148,8 @@ export default function SignalsPage() {
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
-            <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] mb-2">Intelligence</p>
-            <h1 className="text-[32px] text-white mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+            <p className="text-[10px] font-semibold tracking-[2px] uppercase text-[#a58e28] mb-2">Intelligence</p>
+            <h1 className="text-4xl font-normal text-white mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
               Signals
             </h1>
             <p className="text-[13px] text-[#999] max-w-[500px] leading-relaxed">
@@ -249,11 +249,11 @@ export default function SignalsPage() {
                 {TICKERS.map(t => (
                   <div key={t.name} className="flex items-center justify-between">
                     <span className="text-[13px] text-[#ccc]">{t.name}</span>
-                    <span className="text-[11px] text-[#555]">{t.ticker}</span>
+                    <span className="text-[11px] text-[#777]">{t.ticker}</span>
                   </div>
                 ))}
               </div>
-              <p className="text-[10px] text-[#555] mt-4">Live prices | coming soon</p>
+              <p className="text-[10px] text-[#777] mt-4">Live prices | coming soon</p>
             </div>
 
             {/* Talent radar | real signals from DB */}

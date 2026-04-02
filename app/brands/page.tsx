@@ -154,7 +154,7 @@ export default function BrandsPage() {
 
                 {/* Tagline */}
                 {brand.tagline && (
-                  <p className="text-[11px] text-[#555] leading-relaxed line-clamp-2">{brand.tagline}</p>
+                  <p className="text-[11px] text-[#777] leading-relaxed line-clamp-2">{brand.tagline}</p>
                 )}
               </div>
             ))}

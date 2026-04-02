@@ -105,7 +105,7 @@ function JoinContent() {
 
 
       <div className="bg-[#1e1e1e] border border-[#2e2e2e] rounded-lg px-8 py-9">
-        <h2 className="text-white font-light text-center mb-1.5" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '20px' }}>
+        <h2 className="text-4xl text-white font-normal text-center mb-1.5" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           Sign in to JOBLUX
         </h2>
         <p className="text-[#888] text-center mb-7" style={{ fontSize: '12px' }}>

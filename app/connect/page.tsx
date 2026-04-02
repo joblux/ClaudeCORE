@@ -7,8 +7,8 @@ export default function ConnectPage() {
 
         <Link href="/join/employer" className="group flex flex-col border-b md:border-b-0 md:border-r border-[#1e1e1e] bg-[#0f0f0f] hover:bg-[#121208] transition-colors duration-300">
           <div className="max-w-[600px] ml-auto w-full px-8 md:px-16 pt-16 pb-8">
-            <p className="text-[0.6rem] tracking-[2.5px] uppercase font-medium text-[#a58e28] mb-8">Employers & Luxury Brands</p>
-            <h2 className="text-3xl md:text-4xl font-light text-white leading-snug mb-6" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+            <p className="text-[10px] font-semibold tracking-[2px] uppercase text-[#a58e28] mb-8">Employers & Luxury Brands</p>
+            <h2 className="text-3xl md:text-4xl font-normal text-white leading-snug mb-6" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
               I represent a brand,<br />group, or organisation
             </h2>
             <p className="text-sm text-[#777] leading-relaxed mb-8 max-w-sm">
@@ -44,8 +44,8 @@ export default function ConnectPage() {
 
         <Link href="/select-profile" className="group flex flex-col bg-[#0a0f0c] hover:bg-[#0c130f] transition-colors duration-300">
           <div className="max-w-[600px] mr-auto w-full px-8 md:px-16 pt-16 pb-8">
-            <p className="text-[0.6rem] tracking-[2.5px] uppercase font-medium text-[#1D9E75] mb-8">Professionals, Students & Contributors</p>
-            <h2 className="text-3xl md:text-4xl font-light text-white leading-snug mb-6" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+            <p className="text-[10px] font-semibold tracking-[2px] uppercase text-[#1D9E75] mb-8">Professionals, Students & Contributors</p>
+            <h2 className="text-3xl md:text-4xl font-normal text-white leading-snug mb-6" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
               I work in or advise<br />the luxury industry
             </h2>
             <p className="text-sm text-[#777] leading-relaxed mb-8 max-w-sm">

@@ -12,13 +12,13 @@ export default function PrivacyPolicyPage() {
     <div className="max-w-3xl mx-auto px-6 py-12 lg:py-16">
     <div className="bg-[#222] rounded-lg p-8 md:p-12 border border-[#333]">
       <p className="jl-overline-gold tracking-widest uppercase text-sm mb-4">Legal</p>
-      <h1 className="jl-serif text-4xl md:text-5xl font-bold mb-4 text-white">Privacy Policy</h1>
+      <h1 className="text-4xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>Privacy Policy</h1>
       <p className="text-[#999] mb-12">Last updated: March 2026 | GDPR compliant</p>
 
       <div className="space-y-12 text-[#ccc] leading-relaxed text-[15px]">
         {/* ── 1. Introduction ── */}
         <section id="introduction">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">1. Introduction</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>1. Introduction</h2>
           <p>
             This Privacy Policy explains how JOBLUX collects, uses, stores, and protects your
             personal data when you use our Platform. JOBLUX is committed to safeguarding the privacy
@@ -47,7 +47,7 @@ export default function PrivacyPolicyPage() {
 
         {/* ── 2. What We Collect ── */}
         <section id="what-we-collect">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">2. What We Collect</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>2. What We Collect</h2>
           <p>
             We collect and process the following categories of personal data in connection with your
             use of the Platform:
@@ -94,7 +94,7 @@ export default function PrivacyPolicyPage() {
 
         {/* ── 3. How We Use Your Data ── */}
         <section id="how-we-use">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">3. How We Use Your Data</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>3. How We Use Your Data</h2>
           <p>
             We process your personal data for the following purposes:
           </p>
@@ -129,7 +129,7 @@ export default function PrivacyPolicyPage() {
 
         {/* ── 4. Legal Basis ── */}
         <section id="legal-basis">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">4. Legal Basis</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>4. Legal Basis</h2>
           <p>
             Under GDPR Article 6, we process your personal data on the following legal bases:
           </p>
@@ -164,7 +164,7 @@ export default function PrivacyPolicyPage() {
 
         {/* ── 5. Data Sharing ── */}
         <section id="data-sharing">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">5. Data Sharing</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>5. Data Sharing</h2>
           <p>
             JOBLUX will never sell your personal data to third parties. The privacy and trust of our
             users is fundamental to the platform, and we treat your data with the utmost
@@ -202,7 +202,7 @@ export default function PrivacyPolicyPage() {
 
         {/* ── 6. Data Retention ── */}
         <section id="data-retention">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">6. Data Retention</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>6. Data Retention</h2>
           <p>
             Your personal data is retained for as long as your account remains active on the Platform.
             We retain your data to provide you with our services, to comply with our legal
@@ -233,7 +233,7 @@ export default function PrivacyPolicyPage() {
 
         {/* ── 7. Your Rights (GDPR) ── */}
         <section id="your-rights">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">7. Your Rights (GDPR)</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>7. Your Rights (GDPR)</h2>
           <p>
             Under the General Data Protection Regulation, you have the following rights regarding
             your personal data:
@@ -286,7 +286,7 @@ export default function PrivacyPolicyPage() {
 
         {/* ── 8. Data Security ── */}
         <section id="data-security">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">8. Data Security</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>8. Data Security</h2>
           <p>
             JOBLUX implements appropriate technical and organizational measures to protect your
             personal data against unauthorized access, alteration, disclosure, or destruction. We take
@@ -318,7 +318,7 @@ export default function PrivacyPolicyPage() {
 
         {/* ── 9. Cookies & Tracking ── */}
         <section id="cookies">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">9. Cookies &amp; Tracking</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>9. Cookies &amp; Tracking</h2>
           <p>
             JOBLUX uses only essential cookies that are strictly necessary for the operation of the
             Platform. These cookies enable core functionality such as authentication, session
@@ -346,7 +346,7 @@ export default function PrivacyPolicyPage() {
 
         {/* ── 10. International Transfers ── */}
         <section id="international-transfers">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">10. International Transfers</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>10. International Transfers</h2>
           <p>
             As JOBLUX uses service providers based in various jurisdictions, your personal data may
             be transferred to and processed in countries outside the European Economic Area (EEA).
@@ -372,7 +372,7 @@ export default function PrivacyPolicyPage() {
 
         {/* ── 11. Children ── */}
         <section id="children">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">11. Children</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>11. Children</h2>
           <p>
             The Platform is intended exclusively for individuals who are at least eighteen (18) years
             of age. JOBLUX does not knowingly collect, process, or store personal data from children
@@ -393,7 +393,7 @@ export default function PrivacyPolicyPage() {
 
         {/* ── 12. Changes to This Policy ── */}
         <section id="changes">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">12. Changes to This Policy</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>12. Changes to This Policy</h2>
           <p>
             JOBLUX reserves the right to update or modify this Privacy Policy at any time. When we
             make material changes, we will notify users through the Platform, via email, or through
@@ -416,7 +416,7 @@ export default function PrivacyPolicyPage() {
 
         {/* ── 13. Contact & Complaints ── */}
         <section id="contact">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">13. Contact &amp; Complaints</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>13. Contact &amp; Complaints</h2>
           <p>
             If you have any questions, concerns, or requests regarding this Privacy Policy or the
             processing of your personal data, please contact our data controller:

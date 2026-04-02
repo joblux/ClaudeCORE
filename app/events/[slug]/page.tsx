@@ -195,7 +195,7 @@ export default function EventDetailPage() {
             )}
 
             {/* Title */}
-            <h1 className="text-[28px] md:text-[34px] text-white leading-snug mb-4" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+            <h1 className="text-4xl font-normal text-white leading-snug mb-4" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
               {title}
             </h1>
 

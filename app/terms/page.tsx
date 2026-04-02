@@ -12,13 +12,13 @@ export default function TermsOfServicePage() {
     <div className="max-w-3xl mx-auto px-6 py-12 lg:py-16">
     <div className="bg-[#222] rounded-lg p-8 md:p-12 border border-[#333]">
       <p className="jl-overline-gold tracking-widest uppercase text-sm mb-4">Legal</p>
-      <h1 className="jl-serif text-4xl md:text-5xl font-bold mb-4 text-white">Terms of Service</h1>
+      <h1 className="text-4xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>Terms of Service</h1>
       <p className="text-[#999] mb-12">Last updated: March 2026</p>
 
       <div className="space-y-12 text-[#ccc] leading-relaxed text-[15px]">
         {/* ── 1. Introduction & Acceptance ── */}
         <section id="introduction">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">1. Introduction &amp; Acceptance</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>1. Introduction &amp; Acceptance</h2>
           <p>
             Welcome to JOBLUX, the luxury careers intelligence gateway. JOBLUX is a digital platform operated by
             Mohammed M&apos;zaour, based in Paris, France. These Terms of Service (&ldquo;Terms&rdquo;) govern your
@@ -45,7 +45,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 2. Definitions ── */}
         <section id="definitions">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">2. Definitions</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>2. Definitions</h2>
           <p>
             Throughout these Terms, the following definitions apply:
           </p>
@@ -90,7 +90,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 3. Registration & Access ── */}
         <section id="registration">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">3. Registration &amp; Access</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>3. Registration &amp; Access</h2>
           <p>
             JOBLUX operates on an application basis. Access to the Platform is not
             automatic; prospective users must submit an application that is reviewed and approved by the JOBLUX team. We maintain strict
@@ -124,7 +124,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 4. The Platform | Free Against Contribution ── */}
         <section id="free-against-contribution">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">4. The Platform | Free Against Contribution</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>4. The Platform | Free Against Contribution</h2>
           <p>
             JOBLUX is offered free of charge to individual users. There are no subscription fees,
             recurring fees, or hidden costs for accessing the core features of the Platform. Our
@@ -153,7 +153,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 5. Content & Contributions ── */}
         <section id="content-contributions">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">5. Content &amp; Contributions</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>5. Content &amp; Contributions</h2>
           <p>
             You retain ownership of all original content you submit to the Platform. By submitting a
             Contribution, you grant JOBLUX a worldwide, non-exclusive, royalty-free, perpetual, and
@@ -192,7 +192,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 6. Recruitment Services ── */}
         <section id="recruitment-services">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">6. Recruitment Services</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>6. Recruitment Services</h2>
           <p>
             JOBLUX acts as a gatekeeper between luxury talent and employers. When you apply to an
             Opportunity or are identified as a potential candidate for a Search Assignment, JOBLUX
@@ -224,7 +224,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 7. Internship Listings ── */}
         <section id="internship-listings">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">7. Internship Listings</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>7. Internship Listings</h2>
           <p>
             Internship listings on the Platform are available exclusively to users registered under
             the Business tier. Employers may post internship opportunities free of charge, subject to
@@ -255,7 +255,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 8. Intellectual Property ── */}
         <section id="intellectual-property">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">8. Intellectual Property</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>8. Intellectual Property</h2>
           <p>
             The JOBLUX name, logo, brand identity, visual design, software, algorithms, databases,
             and all other intellectual property associated with the Platform are the exclusive property
@@ -283,7 +283,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 9. Prohibited Conduct ── */}
         <section id="prohibited-conduct">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">9. Prohibited Conduct</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>9. Prohibited Conduct</h2>
           <p>
             Users and all visitors of the Platform agree not to engage in any of the following
             prohibited activities. Violation of these rules may result in immediate account
@@ -317,7 +317,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 10. Account Termination ── */}
         <section id="account-termination">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">10. Account Termination</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>10. Account Termination</h2>
           <p>
             You may terminate your account at any time by contacting us at hello@joblux.com or
             through the account settings on the Platform. Upon termination, your access to the
@@ -346,7 +346,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 11. Disclaimers & Limitation of Liability ── */}
         <section id="disclaimers">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">11. Disclaimers &amp; Limitation of Liability</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>11. Disclaimers &amp; Limitation of Liability</h2>
           <p>
             The Platform is provided on an &ldquo;as is&rdquo; and &ldquo;as available&rdquo; basis, without warranties of any
             kind, whether express, implied, or statutory. JOBLUX disclaims all warranties, including
@@ -376,7 +376,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 12. Governing Law ── */}
         <section id="governing-law">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">12. Governing Law</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>12. Governing Law</h2>
           <p>
             These Terms shall be governed by and construed in accordance with the laws of France,
             without regard to its conflict of law provisions. The application of the United Nations
@@ -399,7 +399,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 13. Changes to Terms ── */}
         <section id="changes">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">13. Changes to Terms</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>13. Changes to Terms</h2>
           <p>
             JOBLUX reserves the right to modify, amend, or replace these Terms at any time at its sole
             discretion. When we make material changes, we will notify users through the Platform,
@@ -422,7 +422,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 14. Travel Advisory Services ── */}
         <section id="travel-advisory">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">14. Travel Advisory Services</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>14. Travel Advisory Services</h2>
           <p>
             Travel advisory services featured on JOBLUX Escape are provided by independent advisors
             affiliated with Fora Travel, Inc. Joblux US LLC, registered in Delaware, is a media partner and does not provide, arrange,
@@ -442,7 +442,7 @@ export default function TermsOfServicePage() {
 
         {/* ── 15. Contact ── */}
         <section id="contact">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">15. Contact</h2>
+          <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>15. Contact</h2>
           <p>
             If you have any questions, concerns, or feedback regarding these Terms of Service or the
             Platform, please contact us:

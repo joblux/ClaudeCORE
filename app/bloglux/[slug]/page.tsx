@@ -161,7 +161,7 @@ export default async function ArticlePage({ params }: Props) {
               {article.read_time && <span className="font-sans text-[0.6rem] text-[#888]">{article.read_time} min read</span>}
               {article.views_count > 0 && <span className="font-sans text-[0.6rem] text-[#999]">{article.views_count} views</span>}
             </div>
-            <h1 className="jl-serif text-3xl md:text-[3rem] font-light text-white mb-5 leading-tight">
+            <h1 className="text-4xl font-normal text-white mb-5 leading-tight" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
               {article.title}
             </h1>
             {article.excerpt && (

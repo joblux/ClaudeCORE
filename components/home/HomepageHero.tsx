@@ -2,7 +2,7 @@ export function HomepageHero() {
   return (
     <section className="pt-16 pb-14 px-7">
       <div className="max-w-[1200px] mx-auto text-center">
-        <h1 className="text-[34px] font-light text-white mb-5 leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h1 className="text-4xl font-normal text-white mb-5 leading-tight" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           Luxury career{' '}
           <span className="italic text-[#a58e28]">intelligence</span>
         </h1>

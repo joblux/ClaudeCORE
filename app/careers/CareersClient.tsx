@@ -386,7 +386,7 @@ export default function CareersClient({
                     </svg>
                   )}
                   {tab.label}
-                  {tab.locked && <span className="text-[10px] text-[#444]">{tab.points}pts</span>}
+                  {tab.locked && <span className="text-[10px] text-[#777]">{tab.points}pts</span>}
                   {salarySubTab === tab.id && !tab.locked && (
                     <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#1D9E75]" />
                   )}
@@ -398,11 +398,11 @@ export default function CareersClient({
             {salarySubTab === 'browse' && (
               <>
                 {/* Stats */}
-                <div className="flex gap-6 items-center text-xs text-[#666] uppercase tracking-wide mb-5">
+                <div className="flex gap-6 items-center text-xs text-[#777] uppercase tracking-wide mb-5">
                   <span>{salaries.length} data points</span>
-                  <span className="text-[#555]">·</span>
+                  <span className="text-[#777]">·</span>
                   <span>{uniqueBrands.length} maisons</span>
-                  <span className="text-[#555]">·</span>
+                  <span className="text-[#777]">·</span>
                   <span>{uniqueCities.length} cities</span>
                 </div>
 
@@ -463,7 +463,7 @@ export default function CareersClient({
                           </div>
                           <div className="text-[11px] text-[#777] mb-4">{s.city}, {s.country} · {s.department}</div>
                           <div className="flex justify-between items-center pt-3 border-t border-[#2a2a2a]">
-                            <span className="text-xs text-[#666]">Range</span>
+                            <span className="text-xs text-[#777]">Range</span>
                             <span className="text-sm font-medium text-white">{s.currency}{s.salary_min / 1000}K–{s.salary_max / 1000}K</span>
                           </div>
                         </div>
@@ -489,7 +489,7 @@ export default function CareersClient({
                           </div>
                           <div className="text-[11px] text-[#777] mb-4">{s.city}, {s.country} · {s.department}</div>
                           <div className="flex justify-between items-center pt-3 border-t border-[#2a2a2a]">
-                            <span className="text-xs text-[#666]">Range</span>
+                            <span className="text-xs text-[#777]">Range</span>
                             <span className="text-sm font-medium text-white">{s.currency}{s.salary_min / 1000}K–{s.salary_max / 1000}K</span>
                           </div>
                         </div>
@@ -517,7 +517,7 @@ export default function CareersClient({
                           'Curated by the JOBLUX editorial team',
                         ].map((text, i) => (
                           <li key={i} className="flex gap-2.5 text-xs text-[#999] leading-relaxed">
-                            <span className="text-[#666] font-semibold flex-shrink-0">{String(i + 1).padStart(2, '0')}</span>
+                            <span className="text-[#777] font-semibold flex-shrink-0">{String(i + 1).padStart(2, '0')}</span>
                             <span>{text}</span>
                           </li>
                         ))}
@@ -624,15 +624,15 @@ export default function CareersClient({
                       <h3 className="text-base font-medium mb-4">Your Benchmark Results</h3>
                       <div className="grid grid-cols-3 gap-4 mb-4">
                         <div className="bg-[#222] border border-[#2a2a2a] rounded-lg p-4 text-center">
-                          <div className="text-[11px] text-[#666] uppercase tracking-wide mb-1.5">Market Median</div>
+                          <div className="text-[11px] text-[#777] uppercase tracking-wide mb-1.5">Market Median</div>
                           <div className="text-xl font-semibold text-white">{benchmarkResults.median}</div>
                         </div>
                         <div className="bg-[#222] border border-[#2a2a2a] rounded-lg p-4 text-center">
-                          <div className="text-[11px] text-[#666] uppercase tracking-wide mb-1.5">Market Range</div>
+                          <div className="text-[11px] text-[#777] uppercase tracking-wide mb-1.5">Market Range</div>
                           <div className="text-xl font-semibold text-white">{benchmarkResults.range}</div>
                         </div>
                         <div className="bg-[#222] border border-[#2a2a2a] rounded-lg p-4 text-center">
-                          <div className="text-[11px] text-[#666] uppercase tracking-wide mb-1.5">Your Position</div>
+                          <div className="text-[11px] text-[#777] uppercase tracking-wide mb-1.5">Your Position</div>
                           <div className="text-xl font-semibold text-white">{benchmarkResults.percentile}</div>
                         </div>
                       </div>
@@ -851,15 +851,15 @@ export default function CareersClient({
                       <h3 className="text-base font-medium mb-4">Your Estimated Salary Range</h3>
                       <div className="grid grid-cols-3 gap-4 mb-4">
                         <div className="bg-[#222] border border-[#2a2a2a] rounded-lg p-4 text-center">
-                          <div className="text-[11px] text-[#666] uppercase tracking-wide mb-1.5">Low End</div>
+                          <div className="text-[11px] text-[#777] uppercase tracking-wide mb-1.5">Low End</div>
                           <div className="text-xl font-semibold text-white">{calculatorResults.low}</div>
                         </div>
                         <div className="bg-[#222] border border-[#2a2a2a] rounded-lg p-4 text-center">
-                          <div className="text-[11px] text-[#666] uppercase tracking-wide mb-1.5">Target</div>
+                          <div className="text-[11px] text-[#777] uppercase tracking-wide mb-1.5">Target</div>
                           <div className="text-xl font-semibold text-white">{calculatorResults.target}</div>
                         </div>
                         <div className="bg-[#222] border border-[#2a2a2a] rounded-lg p-4 text-center">
-                          <div className="text-[11px] text-[#666] uppercase tracking-wide mb-1.5">High End</div>
+                          <div className="text-[11px] text-[#777] uppercase tracking-wide mb-1.5">High End</div>
                           <div className="text-xl font-semibold text-white">{calculatorResults.high}</div>
                         </div>
                       </div>
@@ -876,11 +876,11 @@ export default function CareersClient({
         {activeTab === 'interview' && (
           <div>
             {/* Stats */}
-            <div className="flex gap-6 items-center text-xs text-[#666] uppercase tracking-wide mb-5">
+            <div className="flex gap-6 items-center text-xs text-[#777] uppercase tracking-wide mb-5">
               <span>{interviews.length} experiences</span>
-              <span className="text-[#555]">·</span>
+              <span className="text-[#777]">·</span>
               <span>{uniqueInterviewBrands.length} maisons</span>
-              <span className="text-[#555]">·</span>
+              <span className="text-[#777]">·</span>
               <span>Last updated March 2026</span>
             </div>
 
@@ -958,7 +958,7 @@ export default function CareersClient({
                             View Details →
                           </button>
                         ) : (
-                          <div className="flex items-center gap-2 text-[#666] text-xs">
+                          <div className="flex items-center gap-2 text-[#777] text-xs">
                             <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <rect x="3" y="11" width="18" height="11" rx="2"/>
                               <path d="M7 11V7a5 5 0 0110 0v4"/>
@@ -986,7 +986,7 @@ export default function CareersClient({
                   <h3 className="text-xs font-semibold uppercase tracking-wide text-[#999] mb-4">Top Interviewed Maisons</h3>
                   <div className="space-y-2 text-xs text-[#999]">
                     {uniqueInterviewBrands.slice(0, 5).map((b, i) => (
-                      <div key={b}><span className="text-[#666] mr-2">{String(i + 1).padStart(2, '0')}</span>{b}</div>
+                      <div key={b}><span className="text-[#777] mr-2">{String(i + 1).padStart(2, '0')}</span>{b}</div>
                     ))}
                   </div>
                 </div>
@@ -1000,7 +1000,7 @@ export default function CareersClient({
                       'Unlock detailed interview intelligence',
                     ].map((text, i) => (
                       <li key={i} className="flex gap-2.5 text-xs text-[#999] leading-relaxed">
-                        <span className="text-[#666] font-semibold flex-shrink-0">{String(i + 1).padStart(2, '0')}</span>
+                        <span className="text-[#777] font-semibold flex-shrink-0">{String(i + 1).padStart(2, '0')}</span>
                         <span>{text}</span>
                       </li>
                     ))}

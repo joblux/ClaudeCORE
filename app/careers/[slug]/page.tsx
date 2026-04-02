@@ -147,7 +147,7 @@ export default async function CareerDetailPage({ params }: { params: { slug: str
               <div className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] mb-3">{assignment.department}</div>
             )}
 
-            <h1 className="text-3xl md:text-4xl font-light text-white mb-3" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+            <h1 className="text-4xl font-normal text-white mb-3" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
               {assignment.title}
             </h1>
 
@@ -185,10 +185,10 @@ export default async function CareerDetailPage({ params }: { params: { slug: str
 
             <div className="flex flex-wrap gap-4 mt-3">
               {assignment.reference_number && (
-                <span className="text-[11px] text-[#666]">Ref: {assignment.reference_number}</span>
+                <span className="text-[11px] text-[#777]">Ref: {assignment.reference_number}</span>
               )}
               {assignment.activated_at && (
-                <span className="text-[11px] text-[#666]">Posted {formatDate(assignment.activated_at)}</span>
+                <span className="text-[11px] text-[#777]">Posted {formatDate(assignment.activated_at)}</span>
               )}
             </div>
           </div>

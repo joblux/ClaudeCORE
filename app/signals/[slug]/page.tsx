@@ -114,7 +114,7 @@ export default function SignalDetailPage() {
       <div className="max-w-[720px] mx-auto px-7 pt-10 pb-16">
 
         {/* Back link */}
-        <Link href="/signals" className="text-[13px] text-[#999] hover:text-[#a58e28] transition-colors mb-8 inline-block">
+        <Link href="/signals" className="text-[10px] text-[#a58e28] uppercase tracking-[2px] hover:underline transition-colors mb-8 inline-block">
           ← Back to Signals
         </Link>
 
@@ -130,7 +130,7 @@ export default function SignalDetailPage() {
         </div>
 
         {/* Headline */}
-        <h1 className="text-[28px] text-white leading-snug mb-4" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+        <h1 className="text-4xl font-normal text-white leading-snug mb-4" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           {signal.headline}
         </h1>
 

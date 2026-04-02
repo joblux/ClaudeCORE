@@ -220,8 +220,8 @@ export default function HelpPage() {
         {/* Header */}
         <div className="mb-6">
           <h1
-            className="text-[28px] font-normal text-white mb-2"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="text-4xl font-normal text-white mb-2"
+            style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}
           >
             Help & FAQ
           </h1>

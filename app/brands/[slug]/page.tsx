@@ -673,11 +673,11 @@ export default function BrandDetailPage() {
                 <div className="border border-[#2a2a2a] rounded-xl overflow-hidden mb-7">
                   <div className="grid gap-0 px-4 py-3 bg-[#222] border-b border-[#2a2a2a]"
                     style={{ gridTemplateColumns: '2fr 1fr 90px 1fr 70px' }}>
-                    <span className="text-[10px] font-semibold tracking-[1.5px] text-[#555]">ROLE</span>
-                    <span className="text-[10px] font-semibold tracking-[1.5px] text-[#555]">DEPARTMENT</span>
-                    <span className="text-[10px] font-semibold tracking-[1.5px] text-[#555]">LEVEL</span>
-                    <span className="text-[10px] font-semibold tracking-[1.5px] text-[#555] text-right">RANGE</span>
-                    <span className="text-[10px] font-semibold tracking-[1.5px] text-[#555] text-right">SOURCE</span>
+                    <span className="text-[10px] font-semibold tracking-[1.5px] text-[#777]">ROLE</span>
+                    <span className="text-[10px] font-semibold tracking-[1.5px] text-[#777]">DEPARTMENT</span>
+                    <span className="text-[10px] font-semibold tracking-[1.5px] text-[#777]">LEVEL</span>
+                    <span className="text-[10px] font-semibold tracking-[1.5px] text-[#777] text-right">RANGE</span>
+                    <span className="text-[10px] font-semibold tracking-[1.5px] text-[#777] text-right">SOURCE</span>
                   </div>
 
                   {brand.salary_data.roles
@@ -720,7 +720,7 @@ export default function BrandDetailPage() {
                             {role.level}
                           </span>
                           <span className="text-[13px] font-medium text-[#a58e28] text-right">{rangeStr}</span>
-                          <span className="text-[12px] text-[#555] text-right">AI est.</span>
+                          <span className="text-[12px] text-[#777] text-right">AI est.</span>
                         </div>
                       );
                     })}
@@ -823,7 +823,7 @@ export default function BrandDetailPage() {
 
                     {brand.salary_data.common_benefits && (
                       <div className="mt-4 pt-3.5 border-t border-[#2a2a2a]">
-                        <p className="text-[10px] font-semibold tracking-[1.5px] text-[#555] mb-2">COMMON BENEFITS</p>
+                        <p className="text-[10px] font-semibold tracking-[1.5px] text-[#777] mb-2">COMMON BENEFITS</p>
                         <div className="flex flex-wrap gap-1.5">
                           {brand.salary_data.common_benefits.map((b: string) => (
                             <span key={b} className="text-[11px] px-2.5 py-1 border border-[#2a2a2a] rounded-full text-[#999]">{b}</span>
@@ -847,7 +847,7 @@ export default function BrandDetailPage() {
               <div className="flex flex-col items-center justify-center py-24">
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">SALARY INTELLIGENCE</p>
                 <p className="text-sm text-[#999] mb-1">Salary data for {brand.name} is being prepared.</p>
-                <p className="text-xs text-[#555]">Check back soon | our AI is mapping compensation across roles and markets.</p>
+                <p className="text-xs text-[#777]">Check back soon | our AI is mapping compensation across roles and markets.</p>
               </div>
             )}
           </div>

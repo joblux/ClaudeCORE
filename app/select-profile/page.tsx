@@ -88,8 +88,8 @@ export default function SelectProfilePage() {
     <div className="min-h-screen">
       <div className="bg-[#1a1a1a] py-8 md:py-10">
         <div className="max-w-[1200px] mx-auto px-7 text-center">
-          <div className="text-[0.65rem] font-semibold tracking-[0.2em] uppercase text-[#a58e28] mb-4">Step 2 of 5 | Select your profile</div>
-          <h1 className="text-2xl md:text-4xl font-light text-white mb-5 leading-tight max-w-3xl mx-auto" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+          <div className="text-[10px] font-semibold tracking-[2px] uppercase text-[#a58e28] mb-4">Step 2 of 5 | Select your profile</div>
+          <h1 className="text-4xl font-normal text-white mb-5 leading-tight max-w-3xl mx-auto" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
             Access begins with the right profile.
           </h1>
           <p className="text-sm text-[#ccc] max-w-2xl mx-auto leading-relaxed">Your profile shapes how you move through JOBLUX. Access is free. Depth grows through contribution.</p>

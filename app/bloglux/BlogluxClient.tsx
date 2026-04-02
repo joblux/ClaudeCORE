@@ -58,7 +58,7 @@ export default function BlogluxClient({ initialArticles }: { initialArticles: Ar
       <div className="border-b-2 border-[#1a1a1a] py-10">
         <div className="jl-container">
           <div className="jl-overline-gold mb-3">Insights</div>
-          <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a] mb-3">
+          <h1 className="text-4xl font-normal text-[#1a1a1a] mb-3" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
             Luxury industry insights and analysis
           </h1>
           <p className="font-sans text-sm text-[#888] max-w-xl">

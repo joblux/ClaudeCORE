@@ -14,10 +14,10 @@ export default function AboutPage() {
 
       {/* ── Hero ── */}
       <section className="max-w-[880px] mx-auto px-7 pt-24 pb-16">
-        <p className="text-[10px] tracking-[0.2em] uppercase text-[#a58e28] mb-4 font-medium">
+        <p className="text-[10px] font-semibold tracking-[2px] uppercase text-[#a58e28] mb-4">
           About JOBLUX
         </p>
-        <h1 className="font-playfair text-4xl md:text-[42px] font-normal leading-tight mb-6 text-white">
+        <h1 className="text-4xl font-normal leading-tight mb-6 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           Twenty years in luxury.<br className="hidden md:block" /> One platform.
         </h1>
         <p className="text-[15px] leading-relaxed text-white/70 border-l-2 border-[#a58e28] pl-6 max-w-2xl">
@@ -34,10 +34,10 @@ export default function AboutPage() {
 
       {/* ── Timeline ── */}
       <section className="max-w-[880px] mx-auto px-7 py-16">
-        <p className="text-[10px] tracking-[0.2em] uppercase text-[#a58e28] mb-4 font-medium">
+        <p className="text-[10px] font-semibold tracking-[2px] uppercase text-[#a58e28] mb-4">
           Our story
         </p>
-        <h2 className="font-playfair text-3xl font-normal mb-10 text-white">
+        <h2 className="text-3xl font-normal mb-10 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           From a Paris store floor to a global platform
         </h2>
 
@@ -51,7 +51,7 @@ export default function AboutPage() {
             <p className="text-[11px] tracking-[0.15em] text-[#a58e28] font-medium mb-1.5">
               2006
             </p>
-            <p className="font-playfair text-lg mb-2 text-white">
+            <p className="text-lg font-normal mb-2 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
               Two worlds meet in London
             </p>
             <p className="text-sm leading-relaxed text-white/70 max-w-2xl">
@@ -69,7 +69,7 @@ export default function AboutPage() {
             <p className="text-[11px] tracking-[0.15em] text-[#a58e28] font-medium mb-1.5">
               2012
             </p>
-            <p className="font-playfair text-lg mb-2 text-white">
+            <p className="text-lg font-normal mb-2 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
               The first platform
             </p>
             <p className="text-sm leading-relaxed text-white/70 max-w-2xl">
@@ -86,7 +86,7 @@ export default function AboutPage() {
             <p className="text-[11px] tracking-[0.15em] text-[#a58e28] font-medium mb-1.5">
               2018
             </p>
-            <p className="font-playfair text-lg mb-2 text-white">
+            <p className="text-lg font-normal mb-2 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
               Going global
             </p>
             <p className="text-sm leading-relaxed text-white/70 max-w-2xl">
@@ -102,7 +102,7 @@ export default function AboutPage() {
             <p className="text-[11px] tracking-[0.15em] text-[#a58e28] font-medium mb-1.5">
               2019
             </p>
-            <p className="font-playfair text-lg mb-2 text-white">
+            <p className="text-lg font-normal mb-2 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
               Quality over volume
             </p>
             <p className="text-sm leading-relaxed text-white/70 max-w-2xl">
@@ -118,7 +118,7 @@ export default function AboutPage() {
             <p className="text-[11px] tracking-[0.15em] text-[#a58e28] font-medium mb-1.5">
               2026
             </p>
-            <p className="font-playfair text-lg mb-2 text-white">
+            <p className="text-lg font-normal mb-2 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
               Intelligence, not noise
             </p>
             <p className="text-sm leading-relaxed text-white/70 max-w-2xl">
@@ -139,10 +139,10 @@ export default function AboutPage() {
 
       {/* ── What JOBLUX is today ── */}
       <section className="max-w-[880px] mx-auto px-7 py-16">
-        <p className="text-[10px] tracking-[0.2em] uppercase text-[#a58e28] mb-4 font-medium">
+        <p className="text-[10px] font-semibold tracking-[2px] uppercase text-[#a58e28] mb-4">
           What JOBLUX is today
         </p>
-        <h2 className="font-playfair text-3xl font-normal mb-5 text-white">
+        <h2 className="text-3xl font-normal mb-5 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           Luxury talent intelligence
         </h2>
         <p className="text-sm leading-relaxed text-white/70 max-w-2xl mb-8">
@@ -181,10 +181,10 @@ export default function AboutPage() {
 
       {/* ── How we work ── */}
       <section className="max-w-[880px] mx-auto px-7 py-16">
-        <p className="text-[10px] tracking-[0.2em] uppercase text-[#a58e28] mb-4 font-medium">
+        <p className="text-[10px] font-semibold tracking-[2px] uppercase text-[#a58e28] mb-4">
           How we work
         </p>
-        <h2 className="font-playfair text-3xl font-normal mb-5 text-white">
+        <h2 className="text-3xl font-normal mb-5 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           No ads. No noise. No compromise.
         </h2>
         <p className="text-sm leading-relaxed text-white/70 max-w-2xl mb-7">
@@ -239,7 +239,7 @@ export default function AboutPage() {
 
       {/* ── Quote ── */}
       <section className="max-w-[880px] mx-auto px-7 pt-14 pb-16">
-        <p className="font-playfair text-xl italic text-[#a58e28] max-w-md leading-relaxed">
+        <p className="text-xl italic text-[#a58e28] max-w-md leading-relaxed" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           &ldquo;Depth before scale. Intelligence before noise.&rdquo;
         </p>
       </section>
@@ -247,7 +247,7 @@ export default function AboutPage() {
       {/* ── CTA ── */}
       <section className="max-w-[880px] mx-auto px-7 pb-20">
         <div className="border border-white/[0.08] rounded-xl p-10 bg-white/[0.02] text-center">
-          <h2 className="font-playfair text-2xl font-normal mb-3 text-white">
+          <h2 className="text-2xl font-normal mb-3 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
             Connect with JOBLUX
           </h2>
           <p className="text-sm text-white/70 mb-7 max-w-sm mx-auto">

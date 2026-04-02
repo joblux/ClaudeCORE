@@ -43,7 +43,7 @@ export default function TheBriefPage() {
       <div className="bg-[#222222] py-16">
         <div className="jl-container-xs text-center">
           <div className="jl-overline-gold mb-4">Biweekly Newsletter</div>
-          <h1 className="jl-serif text-4xl md:text-5xl font-light text-white mb-4">
+          <h1 className="text-4xl font-normal text-white mb-4" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
             The Brief
           </h1>
           <p className="font-sans text-sm text-[#888] mb-10 max-w-md mx-auto leading-relaxed">

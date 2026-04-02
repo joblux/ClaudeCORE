@@ -213,12 +213,13 @@ export default async function ResumePage({
     <div className="min-h-screen bg-[#faf9f6]">
       {/* ── Header ─────────────────────────────────────────────── */}
       <header className="bg-[#3a3a3a] px-6 py-4 flex items-center justify-between">
-        <span
-          className="text-[#a58e28] text-lg tracking-[0.25em] uppercase"
-          style={{ fontFamily: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" }}
-        >
-          JOBLUX
-        </span>
+        <Image
+          src="/logos/joblux-header.png"
+          alt="JOBLUX"
+          width={120}
+          height={30}
+          className="h-[28px] w-auto"
+        />
         <span className="text-[#888] text-xs tracking-wide">Luxury Industry Careers Intelligence</span>
       </header>
 
@@ -461,7 +462,7 @@ export default async function ResumePage({
         <span className="text-xs text-[#888]">
           R&eacute;sum&eacute; shared by {fullName}
         </span>
-        <span className="text-xs text-[#a58e28]">luxuryrecruiter.com</span>
+        <span className="text-xs text-[#a58e28]">joblux.com</span>
       </footer>
     </div>
   )
