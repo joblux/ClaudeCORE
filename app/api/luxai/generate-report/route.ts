@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     }
     const reportDesc = typeMap[report_type] || typeMap['salary']
 
-    const prompt = `You are a senior luxury industry analyst writing for JOBLUX. Write a substantial research report: ${reportDesc}
+    const prompt = `You are a senior luxury industry analyst writing for JOBLUX. The current year is 2026. Write a substantial research report dated 2026: ${reportDesc}
 
 Return ONLY a JSON object (no markdown, no backticks):
 {
@@ -40,6 +40,7 @@ RULES:
 - Reference 10+ real luxury brands with specific plausible data
 - Include city-level comparisons (Paris, Milan, London, New York, Dubai, Hong Kong)
 - Key findings must be specific and data-backed (percentages, figures)
+- All reports must reference 2026 as the current year — never 2024 or 2025
 - Professional tone — this is a premium intelligence product
 - Output valid JSON only`
 
