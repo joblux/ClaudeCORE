@@ -10,7 +10,7 @@ const wikiBrands = [
   { initial: 'C', name: 'Cartier',       slug: 'cartier'       },
   { initial: 'F', name: 'Ferrari',       slug: 'ferrari'       },
   { initial: 'P', name: 'Prada',         slug: 'prada'         },
-  { initial: 'A', name: 'Aman',          slug: 'aman-resorts'  },
+  { initial: 'A', name: 'Aman',          slug: 'aman'          },
 ]
 
 export function WikiLuxPreview() {
@@ -21,7 +21,7 @@ export function WikiLuxPreview() {
         {wikiBrands.map((brand) => (
           <Link
             key={brand.slug}
-            href={`/wikilux/${brand.slug}`}
+            href={`/brands/${brand.slug}`}
             className="inline-flex items-center gap-1 border border-[#e8e2d8] px-2 py-1 hover:border-[#a58e28] transition-colors group"
           >
             <span className="w-5 h-5 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0 group-hover:bg-[#a58e28] transition-colors">
@@ -31,8 +31,8 @@ export function WikiLuxPreview() {
           </Link>
         ))}
       </div>
-      <Link href="/wikilux" className="font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors">
-        All 500+ maisons →
+      <Link href="/brands" className="font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors">
+        All 179 brands →
       </Link>
     </div>
   )

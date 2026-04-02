@@ -8,14 +8,14 @@ interface Brand {
 }
 
 const placeholderBrands = [
-  { id: '1', slug: 'hermes', brand_name: 'Hermès', parent: 'Hermès International', sector: 'Fashion & Leather', indicator: { label: 'Hiring', color: '#4CAF50' } },
-  { id: '2', slug: 'louis-vuitton', brand_name: 'Louis Vuitton', parent: 'LVMH', sector: 'Fashion & Leather', indicator: { label: '+18%', color: '#4CAF50' } },
-  { id: '3', slug: 'cartier', brand_name: 'Cartier', parent: 'Richemont', sector: 'Jewelry & Watches', indicator: { label: 'Hiring', color: '#4CAF50' } },
-  { id: '4', slug: 'chanel', brand_name: 'Chanel', parent: 'Chanel Limited', sector: 'Fashion & Beauty', indicator: { label: 'Expanding', color: '#2196F3' } },
-  { id: '5', slug: 'gucci', brand_name: 'Gucci', parent: 'Kering', sector: 'Fashion & Leather', indicator: { label: '-6%', color: '#f44336' } },
-  { id: '6', slug: 'dior', brand_name: 'Dior', parent: 'LVMH', sector: 'Fashion & Beauty', indicator: { label: '+12%', color: '#4CAF50' } },
-  { id: '7', slug: 'burberry', brand_name: 'Burberry', parent: 'Burberry Group', sector: 'Fashion', indicator: { label: 'Restructuring', color: '#f44336' } },
-  { id: '8', slug: 'tiffany', brand_name: 'Tiffany & Co.', parent: 'LVMH', sector: 'Jewelry', indicator: { label: 'Hiring', color: '#4CAF50' } },
+  { id: '1', slug: 'hermes', brand_name: 'Hermès', parent: 'Hermès International', sector: 'Fashion & Leather', indicator: null },
+  { id: '2', slug: 'louis-vuitton', brand_name: 'Louis Vuitton', parent: 'LVMH', sector: 'Fashion & Leather', indicator: null },
+  { id: '3', slug: 'cartier', brand_name: 'Cartier', parent: 'Richemont', sector: 'Jewelry & Watches', indicator: null },
+  { id: '4', slug: 'chanel', brand_name: 'Chanel', parent: 'Chanel Limited', sector: 'Fashion & Beauty', indicator: null },
+  { id: '5', slug: 'gucci', brand_name: 'Gucci', parent: 'Kering', sector: 'Fashion & Leather', indicator: null },
+  { id: '6', slug: 'dior', brand_name: 'Dior', parent: 'LVMH', sector: 'Fashion & Beauty', indicator: null },
+  { id: '7', slug: 'burberry', brand_name: 'Burberry', parent: 'Burberry Group', sector: 'Fashion', indicator: null },
+  { id: '8', slug: 'tiffany-co', brand_name: 'Tiffany & Co.', parent: 'LVMH', sector: 'Jewelry', indicator: null },
 ]
 
 export function HomepageBrands({ brands }: { brands: Brand[] }) {
@@ -41,7 +41,7 @@ export function HomepageBrands({ brands }: { brands: Brand[] }) {
             Brand intelligence
           </h2>
           <Link href="/brands" className="text-[12px] text-[#a58e28] hover:text-[#e4b042] transition-colors">
-            Explore 150+ brands →
+            Explore 179 brands →
           </Link>
         </div>
 
