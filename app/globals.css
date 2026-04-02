@@ -510,6 +510,90 @@ a {
 
   .jl-prose strong { font-weight: 600; color: #1a1a1a; }
 
+  /* ── PROSE DARK (article pages) ────────────────────── */
+
+  .jl-prose-dark h1 {
+    font-family: var(--font-playfair), Georgia, serif;
+    font-size: 2rem;
+    font-weight: 400;
+    color: #fff;
+    margin: 2.5rem 0 1rem;
+  }
+
+  .jl-prose-dark h2 {
+    font-family: var(--font-playfair), Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #fff;
+    margin: 2rem 0 0.75rem;
+  }
+
+  .jl-prose-dark h3 {
+    font-family: var(--font-playfair), Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: #fff;
+    margin: 1.5rem 0 0.5rem;
+  }
+
+  .jl-prose-dark p {
+    font-size: 1.0625rem;
+    line-height: 1.8;
+    color: #ccc;
+    margin-bottom: 1.25rem;
+  }
+
+  .jl-prose-dark blockquote {
+    border-left: 2px solid #a58e28;
+    padding: 0.75rem 1.25rem;
+    margin: 1.5rem 0;
+    background: transparent;
+    font-family: var(--font-playfair), Georgia, serif;
+    font-style: italic;
+    font-size: 1.125rem;
+    color: #999;
+  }
+
+  .jl-prose-dark a {
+    color: #a58e28;
+    text-decoration: underline;
+    text-decoration-color: rgba(165, 142, 40, 0.35);
+    text-underline-offset: 3px;
+  }
+
+  .jl-prose-dark a:hover {
+    text-decoration-color: #a58e28;
+  }
+
+  .jl-prose-dark p:empty { display: none; }
+
+  .jl-prose-dark ul, .jl-prose-dark ol {
+    margin-bottom: 1em;
+    padding-left: 1.5em;
+    color: #ccc;
+  }
+
+  .jl-prose-dark li {
+    margin-bottom: 0.4em;
+    color: #ccc;
+  }
+
+  .jl-prose-dark img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1.5em 0;
+    display: block;
+  }
+
+  .jl-prose-dark strong { font-weight: 600; color: #fff; }
+
+  .jl-prose-dark hr {
+    border: none;
+    border-top: 1px solid #2a2a2a;
+    margin: 2rem 0;
+  }
+
   /* ── TICKER ───────────────────────────────────────── */
 
   .jl-ticker {

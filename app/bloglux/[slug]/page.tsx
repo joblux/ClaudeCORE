@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
+import { marked } from 'marked'
 import { getCategoryLabel } from '@/lib/bloglux-options'
 
 const supabaseAdmin = createClient(
@@ -111,11 +112,35 @@ function formatDate(d: string | null) {
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
+function renderBody(content: string, heroImageUrl?: string): string {
+  if (!content) return ''
+
+  // If the body looks like HTML (has tags), use it directly but strip duplicate hero image
+  const isHtml = /<[a-z][\s\S]*>/i.test(content)
+  let html = isHtml ? content : marked.parse(content, { async: false }) as string
+
+  // Strip empty paragraphs
+  html = html.replace(/<p>\s*<\/p>/g, '')
+
+  // Remove duplicate hero image from body
+  if (heroImageUrl) {
+    const heroBase = heroImageUrl.split('?')[0]
+    html = html.replace(/<img[^>]*src="[^"]*"[^>]*>/i, (match: string) => {
+      const m = match.match(/src="([^"]*)"/)
+      if (m && m[1].split('?')[0] === heroBase) return ''
+      return match
+    })
+  }
+
+  return html
+}
+
 export default async function ArticlePage({ params }: Props) {
   const article = await getArticle(params.slug)
   if (!article) notFound()
 
   const related = await getRelatedArticles(article)
+  const bodyHtml = renderBody(article.content, article.hero_image_url || article.cover_image_url)
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -135,45 +160,45 @@ export default async function ArticlePage({ params }: Props) {
   }
 
   return (
-    <div className="bg-[#f5f4f0] min-h-screen">
+    <div className="bg-[#1a1a1a] min-h-screen">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* ── HERO ──────────────────────────────────────────── */}
-      <div className="relative bg-[#222222] overflow-hidden">
+      <div className="relative bg-[#141414] overflow-hidden">
         {article.hero_image_url && (
           <div className="absolute inset-0">
             <Image
               src={article.hero_image_url}
               alt={article.hero_image_alt || article.title}
               fill
-              className="object-cover opacity-30"
+              className="object-cover opacity-25"
               priority
               sizes="100vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#222222] via-[#222222]/70 to-[#222222]/40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-[#141414]/70 to-[#141414]/40" />
           </div>
         )}
-        <div className="jl-container relative z-10 py-14 md:py-20">
-          <Link href="/bloglux" className="jl-overline text-[#888] hover:text-[#a58e28] transition-colors mb-6 inline-block">&larr; BlogLux</Link>
+        <div className="max-w-[1200px] mx-auto px-7 relative z-10 py-14 md:py-20">
+          <Link href="/insights" className="text-[10px] font-semibold tracking-[2px] uppercase text-[#a58e28] hover:underline transition-colors mb-6 inline-block">&larr; Insights</Link>
           <div className="max-w-3xl">
             <div className="flex items-center gap-3 mb-4">
-              <span className="jl-badge-gold text-[0.55rem]">{getCategoryLabel(article.category)}</span>
-              {article.read_time && <span className="font-sans text-[0.6rem] text-[#888]">{article.read_time} min read</span>}
-              {article.views_count > 0 && <span className="font-sans text-[0.6rem] text-[#999]">{article.views_count} views</span>}
+              <span className="text-[10px] font-semibold tracking-[2px] uppercase text-[#a58e28] bg-[rgba(165,142,40,0.1)] border border-[rgba(165,142,40,0.2)] px-2 py-0.5 rounded">{getCategoryLabel(article.category)}</span>
+              {article.read_time && <span className="text-[11px] text-[#777]">{article.read_time} min read</span>}
+              {article.views_count > 0 && <span className="text-[11px] text-[#777]">{article.views_count} views</span>}
             </div>
             <h1 className="text-4xl font-normal text-white mb-5 leading-tight" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
               {article.title}
             </h1>
             {article.excerpt && (
-              <p className="font-sans text-sm text-[#aaa] leading-relaxed mb-6 max-w-2xl">{article.excerpt}</p>
+              <p className="text-sm text-[#999] leading-relaxed mb-6 max-w-2xl">{article.excerpt}</p>
             )}
             <div className="flex items-center gap-3">
               {article.author_avatar_url && (
                 <Image src={article.author_avatar_url} alt={article.author_name} width={32} height={32} className="rounded-full" />
               )}
               <div>
-                <div className="font-sans text-xs text-white font-medium">{article.author_name}</div>
-                <div className="font-sans text-[0.6rem] text-[#888]">
+                <div className="text-xs text-white font-medium">{article.author_name}</div>
+                <div className="text-[11px] text-[#777]">
                   {article.author_title || ''} &middot; {formatDate(article.published_at)}
                 </div>
               </div>
@@ -182,53 +207,41 @@ export default async function ArticlePage({ params }: Props) {
         </div>
         {article.hero_image_caption && (
           <div className="absolute bottom-2 right-4 z-10">
-            <span className="text-[0.55rem] text-[#999]">{article.hero_image_caption}</span>
+            <span className="text-[11px] text-[#777]">{article.hero_image_caption}</span>
           </div>
         )}
       </div>
 
       {/* ── CONTENT ───────────────────────────────────────── */}
-      <div className="jl-container py-10">
+      <div className="max-w-[1200px] mx-auto px-7 py-10">
         <div className="max-w-[720px] mx-auto">
-          <div className="jl-prose" dangerouslySetInnerHTML={{ __html: (() => {
-            let body = (article.content || '').replace(/<p>\s*<\/p>/g, '')
-            const heroUrl = article.hero_image_url || article.cover_image_url
-            if (heroUrl) {
-              const heroBase = heroUrl.split('?')[0]
-              body = body.replace(/<img[^>]*src="[^"]*"[^>]*>/i, (match: string) => {
-                const m = match.match(/src="([^"]*)"/)
-                if (m && m[1].split('?')[0] === heroBase) return ''
-                return match
-              })
-            }
-            return body
-          })() }} />
+          <div className="jl-prose-dark" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
 
           {/* Tags */}
           {article.tags && article.tags.length > 0 && (
-            <div className="mt-10 pt-6 border-t border-[#e8e2d8]">
+            <div className="mt-10 pt-6 border-t border-[#2a2a2a]">
               <div className="flex flex-wrap gap-2">
                 {article.tags.map((tag: string) => (
-                  <span key={tag} className="font-sans text-[0.6rem] text-[#a58e28] border border-[#e8e2d8] px-2.5 py-1 tracking-wider uppercase">{tag}</span>
+                  <span key={tag} className="text-[11px] text-[#a58e28] border border-[#2a2a2a] px-2.5 py-1 tracking-wider uppercase">{tag}</span>
                 ))}
               </div>
             </div>
           )}
 
           {/* Author Bio Box */}
-          <div className="mt-10 pt-6 border-t border-[#e8e2d8]">
-            <div className="flex items-start gap-4 p-5 bg-[#fafaf5] border border-[#e8e2d8]">
+          <div className="mt-10 pt-6 border-t border-[#2a2a2a]">
+            <div className="flex items-start gap-4 p-5 bg-[#222] border border-[#2a2a2a] rounded">
               {article.author_avatar_url ? (
                 <Image src={article.author_avatar_url} alt={article.author_name} width={48} height={48} className="rounded-full flex-shrink-0" />
               ) : (
-                <div className="w-12 h-12 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
-                  <span className="jl-serif text-base text-[#a58e28]">{article.author_name?.[0]}</span>
+                <div className="w-12 h-12 bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center flex-shrink-0 rounded">
+                  <span className="text-base text-[#a58e28]" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>{article.author_name?.[0]}</span>
                 </div>
               )}
               <div>
-                <div className="font-sans text-sm font-semibold text-[#1a1a1a]">{article.author_name}</div>
-                {article.author_title && <div className="font-sans text-[0.65rem] text-[#888] mb-2">{article.author_title}</div>}
-                <p className="font-sans text-xs text-[#888] leading-relaxed">Founder of JOBLUX | Luxury Industry Careers Intelligence. Connecting exceptional talent with the world&rsquo;s most prestigious maisons.</p>
+                <div className="text-sm font-semibold text-white">{article.author_name}</div>
+                {article.author_title && <div className="text-[11px] text-[#777] mb-2">{article.author_title}</div>}
+                <p className="text-xs text-[#999] leading-relaxed">Founder of JOBLUX | Luxury Industry Careers Intelligence. Connecting exceptional talent with the world&rsquo;s most prestigious maisons.</p>
               </div>
             </div>
           </div>
@@ -237,22 +250,24 @@ export default async function ArticlePage({ params }: Props) {
 
       {/* ── RELATED ARTICLES ──────────────────────────────── */}
       {related.length > 0 && (
-        <div className="border-t border-[#e8e2d8]">
-          <div className="jl-container py-10">
-            <div className="jl-section-label"><span>More from BlogLux</span></div>
+        <div className="border-t border-[#2a2a2a]">
+          <div className="max-w-[1200px] mx-auto px-7 py-10">
+            <p className="text-[10px] font-semibold tracking-[2px] uppercase text-[#a58e28] mb-6">More from Insights</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {related.map((a: any) => (
-                <Link key={a.id} href={`/bloglux/${a.slug}`} className="jl-card group">
+                <Link key={a.id} href={`/bloglux/${a.slug}`} className="bg-[#222] border border-[#2a2a2a] rounded overflow-hidden group hover:border-[#333] transition-colors">
                   {a.hero_image_url && (
-                    <div className="aspect-[16/9] relative -mx-[1rem] -mt-[1rem] mb-3 overflow-hidden">
+                    <div className="aspect-[16/9] relative overflow-hidden">
                       <Image src={a.hero_image_url} alt={a.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" loading="lazy" />
                     </div>
                   )}
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="jl-overline-gold">{getCategoryLabel(a.category)}</span>
-                    {a.read_time && <span className="font-sans text-[0.6rem] text-[#bbb]">{a.read_time} min</span>}
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[10px] font-semibold tracking-[2px] uppercase text-[#a58e28]">{getCategoryLabel(a.category)}</span>
+                      {a.read_time && <span className="text-[11px] text-[#777]">{a.read_time} min</span>}
+                    </div>
+                    <h3 className="text-sm font-normal text-[#ccc] group-hover:text-[#a58e28] transition-colors leading-snug" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>{a.title}</h3>
                   </div>
-                  <h3 className="jl-serif text-base font-light text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors leading-snug">{a.title}</h3>
                 </Link>
               ))}
             </div>
