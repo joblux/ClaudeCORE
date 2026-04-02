@@ -23,7 +23,7 @@ interface QueueItem {
   type: string
   content_type: string
   title: string
-  content: any
+  content: Record<string, unknown>
   status: string
   source: string
   created_at: string
@@ -56,7 +56,7 @@ export default function ApprovalQueuePage() {
       if (res.ok) {
         setItems(prev => prev.filter(i => i.id !== item.id))
       }
-    } catch { /* silently fail */ }
+    } catch (_e) { /* silently fail */ }
     setActionLoading(null)
   }
 
@@ -71,7 +71,7 @@ export default function ApprovalQueuePage() {
       if (res.ok) {
         setItems(prev => prev.filter(i => i.id !== item.id))
       }
-    } catch { /* silently fail */ }
+    } catch (_e) { /* silently fail */ }
     setActionLoading(null)
   }
 
@@ -135,19 +135,22 @@ function QueueCard({
   isLoading: boolean
 }) {
   const isSignal = item.type === 'signal'
-  const signal = isSignal ? item.content : null
+  const c = item.content as Record<string, unknown>
 
-  const category = signal?.category || 'wikilux'
+  const category = isSignal ? (c?.category as string || 'growth') : 'wikilux'
   const dotColor = categoryColors[category] || '#888'
   const categoryLabel = isSignal
     ? (categoryLabels[category] || category)
     : 'WikiLux'
 
-  const headline = isSignal ? (signal?.headline || item.title) : (item.content?.brand_name || item.title)
+  const headline = isSignal
+    ? ((c?.headline as string) || item.title)
+    : ((c?.brand_name as string) || item.title)
+  const wikiluxContent = c?.content as Record<string, unknown> | undefined
   const subtitle = isSignal
-    ? (signal?.context_paragraph || '')
-    : (item.content?.content?.tagline || item.content?.editorial_notes || '')
-  const tags: string[] = isSignal ? (signal?.brand_tags || []) : []
+    ? ((c?.context_paragraph as string) || '')
+    : ((wikiluxContent?.tagline as string) || (c?.editorial_notes as string) || '')
+  const tags: string[] = isSignal ? (c?.brand_tags as string[] || []) : []
 
   const dateStr = new Date(item.created_at).toLocaleDateString('en-GB', {
     day: 'numeric', month: 'short', year: 'numeric',
