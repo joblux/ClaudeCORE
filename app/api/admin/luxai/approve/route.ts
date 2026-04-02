@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const { id, type, source } = await req.json()
 
-    // WikiLux approval - update wikilux_content directly
+    // WikiLux approval
     if (source === 'wikilux' || type === 'wikilux') {
       const { data, error } = await supabase
         .from('wikilux_content')
@@ -40,6 +40,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         message: `${data?.brand_name || 'Brand'} approved and published`,
+      })
+    }
+
+    // Research Report or Insider Voice approval — publish from bloglux_articles
+    if (source === 'bloglux_articles' || type === 'report' || type === 'insider_voice') {
+      const { data, error } = await supabase
+        .from('bloglux_articles')
+        .update({
+          status: 'published',
+          published_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select('title, category')
+        .maybeSingle()
+
+      if (error) {
+        console.error('Article approve error:', error)
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `"${data?.title}" published`,
       })
     }
 
