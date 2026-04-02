@@ -161,7 +161,7 @@ RULES:
       tokens_used: totalTokens,
       cost_usd: cost,
       status: 'success',
-    }).then(() => {}).catch(() => {}) // fire and forget
+    }).then(() => {}) // fire and forget
 
     console.log(`[LUXAI Salary] ✓ ${displayName}: ${salaryData.roles.length} roles, cost: $${cost.toFixed(4)}`)
 
