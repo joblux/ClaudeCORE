@@ -28,7 +28,7 @@ export async function GET(
 
     // Must be admin
     if (session.user.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden — admin access required' }, { status: 403 })
+      return NextResponse.json({ error: 'Forbidden | admin access required' }, { status: 403 })
     }
 
     // Fetch member by ID

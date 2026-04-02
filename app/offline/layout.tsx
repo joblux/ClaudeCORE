@@ -3,6 +3,6 @@ export default function OfflineLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Standalone layout — no Header/Footer so it works even if app is broken
+  // Standalone layout | no Header/Footer so it works even if app is broken
   return children
 }

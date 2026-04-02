@@ -79,7 +79,7 @@ export async function POST(
       .single()
 
     if (error) {
-      // Foreign key violation — application doesn't exist
+      // Foreign key violation | application doesn't exist
       if (error.code === '23503') {
         return NextResponse.json({ error: 'Application not found' }, { status: 404 })
       }

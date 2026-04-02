@@ -27,11 +27,11 @@ Return ONLY a JSON array (no markdown, no backticks):
 
 RULES:
 - ${count} quotes exactly
-- Use plausible but fictional names — not real people
+- Use plausible but fictional names | not real people
 - Titles: SVP, VP, Director, Chief People Officer, Head of Retail, Creative Director, Managing Director
 - Companies: use real luxury groups (LVMH, Kering, Richemont, Hermès) or "Independent Maison"
 - Topics: hiring, talent, digital transformation, retail, craftsmanship, leadership, culture
-- Quotes must feel genuine — specific, opinionated, insider-knowledge tone
+- Quotes must feel genuine | specific, opinionated, insider-knowledge tone
 - Output valid JSON array only`
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {

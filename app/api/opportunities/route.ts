@@ -7,7 +7,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-// Public-safe fields — never expose internal/private columns
+// Public-safe fields | never expose internal/private columns
 const PUBLIC_FIELDS = [
   'id',
   'title',
@@ -51,7 +51,7 @@ const PUBLIC_FIELDS = [
 ].join(', ')
 
 // ---------------------------------------------------------------------------
-// GET /api/opportunities — list active search assignments (public, no auth)
+// GET /api/opportunities | list active search assignments (public, no auth)
 //   Query params: search, department, seniority, city, contract_type,
 //                 remote_policy, page (default 1), limit (default 20)
 //   Returns only public-safe fields for active assignments with open closing dates.

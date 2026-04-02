@@ -272,7 +272,7 @@ export default function AdminDashboardPage() {
           <span className="text-xs text-[#999] hidden sm:block">{getFormattedDate()}</span>
         </div>
 
-        {/* ── KPI row — 6 metrics ── */}
+        {/* ── KPI row | 6 metrics ── */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-4">
           {kpiCards.map((kpi) => (
             <div key={kpi.label} className="bg-gray-50 rounded-lg p-3">
@@ -283,7 +283,7 @@ export default function AdminDashboardPage() {
           ))}
         </div>
 
-        {/* ── Middle row — Pipeline / Quick Actions / System Status ── */}
+        {/* ── Middle row | Pipeline / Quick Actions / System Status ── */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_0.8fr_0.8fr] gap-3 mb-4">
 
           {/* Column 1: ATS Pipeline overview */}
@@ -372,7 +372,7 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* ── Bottom row — Activity + Launch Checklist ── */}
+        {/* ── Bottom row | Activity + Launch Checklist ── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
 
           {/* Column 1: Recent Activity */}

@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     const db = supabaseAdmin()
 
-    // Build query for listing — direct query on interview_experiences
+    // Build query for listing | direct query on interview_experiences
     let query = db
       .from('interview_experiences' as any)
       .select('*', { count: 'exact' })

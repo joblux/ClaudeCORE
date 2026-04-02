@@ -157,7 +157,7 @@ export default function ContributePage() {
           <div>
             {restoredDraft && (
               <div className="mb-5 p-4 bg-[rgba(165,142,40,0.08)] border border-[rgba(165,142,40,0.2)] text-[13px] text-[#ccc] rounded-lg">
-                Your contribution is ready — confirm and submit.
+                Your contribution is ready | confirm and submit.
               </div>
             )}
             {success && (
@@ -234,7 +234,7 @@ export default function ContributePage() {
                 <div className="grid grid-cols-3 gap-3">
                   <div><span className={lc}>Rounds <span className="text-[#E24B4A]">*</span></span><input type="number" className={ic} placeholder="4" value={interview.number_of_rounds} onChange={e => setInterview({ ...interview, number_of_rounds: e.target.value })} /></div>
                   <div><span className={lc}>Format</span><select className={sc} value={interview.interview_format} onChange={e => setInterview({ ...interview, interview_format: e.target.value })}><option value="">Select</option><option value="phone">Phone</option><option value="video">Video</option><option value="in-person">In-person</option><option value="case_study">Case study</option><option value="panel">Panel</option><option value="mixed">Mixed</option></select></div>
-                  <div><span className={lc}>Difficulty (1–5)</span><select className={sc} value={interview.difficulty} onChange={e => setInterview({ ...interview, difficulty: e.target.value })}><option value="">Select</option><option value="1">1 — Easy</option><option value="2">2 — Fairly easy</option><option value="3">3 — Moderate</option><option value="4">4 — Challenging</option><option value="5">5 — Very challenging</option></select></div>
+                  <div><span className={lc}>Difficulty (1–5)</span><select className={sc} value={interview.difficulty} onChange={e => setInterview({ ...interview, difficulty: e.target.value })}><option value="">Select</option><option value="1">1 | Easy</option><option value="2">2 | Fairly easy</option><option value="3">3 | Moderate</option><option value="4">4 | Challenging</option><option value="5">5 | Very challenging</option></select></div>
                 </div>
                 <div><span className={lc}>Questions asked</span><textarea className={`${ic} min-h-[80px]`} placeholder="Notable or challenging questions you were asked..." value={interview.questions_asked} onChange={e => setInterview({ ...interview, questions_asked: e.target.value })} /></div>
                 <div><span className={lc}>Tips / Advice</span><textarea className={`${ic} min-h-[80px]`} placeholder="What would you tell someone interviewing at this maison?" value={interview.tips} onChange={e => setInterview({ ...interview, tips: e.target.value })} /></div>
@@ -256,7 +256,7 @@ export default function ContributePage() {
                   <div><span className={lc}>Brand / Maison</span><input className={ic} placeholder="e.g. Gucci, LVMH Group" value={signal.brand_name} onChange={e => setSignal({ ...signal, brand_name: e.target.value })} /></div>
                   <div><span className={lc}>Signal type</span><select className={sc} value={signal.signal_type} onChange={e => setSignal({ ...signal, signal_type: e.target.value })}>{SIGNAL_TYPES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}</select></div>
                 </div>
-                <div><span className={lc}>Description <span className="text-[#E24B4A]">*</span></span><textarea className={`${ic} min-h-[110px]`} placeholder="Describe the market signal — what you know, when, and why it matters..." value={signal.description} onChange={e => setSignal({ ...signal, description: e.target.value })} /></div>
+                <div><span className={lc}>Description <span className="text-[#E24B4A]">*</span></span><textarea className={`${ic} min-h-[110px]`} placeholder="Describe the market signal | what you know, when, and why it matters..." value={signal.description} onChange={e => setSignal({ ...signal, description: e.target.value })} /></div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><span className={lc}>Source</span><select className={sc} value={signal.source} onChange={e => setSignal({ ...signal, source: e.target.value })}>{SOURCE_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}</select></div>
                   <div><span className={lc}>City / Region</span><input className={ic} placeholder="e.g. Paris, EMEA" value={signal.city} onChange={e => setSignal({ ...signal, city: e.target.value })} /></div>

@@ -8,8 +8,8 @@ const faqData = [
     label: 'About JOBLUX',
     items: [
       { q: 'What is JOBLUX?', a: 'A confidential careers intelligence gateway for the luxury industry. We bring together salary benchmarks, interview insights, brand intelligence, and private executive search across the premium-to-ultra-luxury segment. Free to use, no ads, no data reselling.' },
-      { q: 'Who is JOBLUX for?', a: 'Anyone connected to the luxury industry — professionals at all levels, from emerging talent to C-suite executives, across fashion, hospitality, watches & jewelry, beauty, wine & spirits, and travel. All applications are reviewed to maintain relevance and quality.' },
-      { q: 'Is JOBLUX free?', a: 'Yes. Free with no subscriptions and no paywalls. JOBLUX operates on a contribution model — share knowledge (salary data, interview experiences, market insights) to unlock deeper intelligence.' },
+      { q: 'Who is JOBLUX for?', a: 'Anyone connected to the luxury industry | professionals at all levels, from emerging talent to C-suite executives, across fashion, hospitality, watches & jewelry, beauty, wine & spirits, and travel. All applications are reviewed to maintain relevance and quality.' },
+      { q: 'Is JOBLUX free?', a: 'Yes. Free with no subscriptions and no paywalls. JOBLUX operates on a contribution model | share knowledge (salary data, interview experiences, market insights) to unlock deeper intelligence.' },
       { q: 'How is JOBLUX different from other professional networks?', a: 'JOBLUX is exclusively dedicated to the luxury industry. Every feature, every piece of content, and every person on the platform serves the premium-to-ultra-luxury segment. It is a curated intelligence gateway, not a general-purpose social network.' },
     ],
   },
@@ -27,7 +27,7 @@ const faqData = [
     items: [
       { q: 'What are search assignments?', a: 'Confidential executive search mandates managed by JOBLUX. Every listed role is verified, active, and at manager level or above. Brand names are disclosed after initial screening to protect all parties.' },
       { q: 'How do I apply for a role?', a: 'Click on any assignment and hit Apply. Your Profilux profile will be shared with the JOBLUX team. The hiring maison will not see your details until you approve the introduction.' },
-      { q: 'Why are some roles marked confidential?', a: 'Many luxury maisons prefer discretion when recruiting senior talent. JOBLUX acts as the intermediary — the brand name is revealed only after an initial conversation and mutual interest.' },
+      { q: 'Why are some roles marked confidential?', a: 'Many luxury maisons prefer discretion when recruiting senior talent. JOBLUX acts as the intermediary | the brand name is revealed only after an initial conversation and mutual interest.' },
       { q: 'Do candidates pay any fees?', a: 'Never. Candidates are never charged. All recruitment fees are paid by the hiring employer.' },
       { q: 'How are roles sourced?', a: 'Through direct relationships with luxury maisons, HR teams, and C-suite executives. JOBLUX does not scrape job boards. Every assignment comes from a direct client relationship.' },
     ],
@@ -37,22 +37,22 @@ const faqData = [
     items: [
       { q: 'How does salary intelligence work?', a: 'JOBLUX collects anonymous salary data contributed by luxury professionals. This data is aggregated into benchmarks by role, brand, city, and seniority level. No individual salary is ever exposed.' },
       { q: 'Is my salary contribution anonymous?', a: 'Yes. All salary contributions are fully anonymized. Your name is never attached to salary figures. Only aggregated data appears on the platform.' },
-      { q: 'How do I contribute salary data?', a: 'Go to the Contribute page and fill in the salary form — job title, brand, city, base salary, bonus, and benefits. It takes under 2 minutes. Your contribution earns points that unlock deeper salary benchmarks.' },
-      { q: 'What are interview experience guides?', a: 'Real interview accounts shared anonymously by professionals who have interviewed at luxury maisons. They cover process, questions asked, timeline, difficulty, and tips — organized by brand and role.' },
+      { q: 'How do I contribute salary data?', a: 'Go to the Contribute page and fill in the salary form | job title, brand, city, base salary, bonus, and benefits. It takes under 2 minutes. Your contribution earns points that unlock deeper salary benchmarks.' },
+      { q: 'What are interview experience guides?', a: 'Real interview accounts shared anonymously by professionals who have interviewed at luxury maisons. They cover process, questions asked, timeline, difficulty, and tips | organized by brand and role.' },
     ],
   },
   {
     label: 'Signals & WikiLux',
     items: [
-      { q: 'What are signals?', a: "Daily intelligence updates on the luxury industry — leadership changes, brand expansions, restructurings, M&A activity, and growth indicators. Each signal includes career implications so you understand what it means for your next move." },
-      { q: 'What is WikiLux?', a: 'The luxury industry encyclopedia — brand pages covering history, leadership, culture, careers, salary intelligence, and hiring patterns. Independently compiled by JOBLUX and continuously updated.' },
+      { q: 'What are signals?', a: "Daily intelligence updates on the luxury industry | leadership changes, brand expansions, restructurings, M&A activity, and growth indicators. Each signal includes career implications so you understand what it means for your next move." },
+      { q: 'What is WikiLux?', a: 'The luxury industry encyclopedia | brand pages covering history, leadership, culture, careers, salary intelligence, and hiring patterns. Independently compiled by JOBLUX and continuously updated.' },
       { q: 'How is WikiLux content created?', a: 'WikiLux content is compiled from public sources, industry data, and professional contributions. All content goes through editorial review before publication. Professionals can suggest corrections or additions.' },
     ],
   },
   {
     label: 'Contributions & points',
     items: [
-      { q: 'How does the contribution system work?', a: 'Share knowledge — salary data, interview experiences, or market insights — and earn points. Points unlock deeper intelligence across the platform, including detailed salary benchmarks and full interview guides.' },
+      { q: 'How does the contribution system work?', a: 'Share knowledge | salary data, interview experiences, or market insights | and earn points. Points unlock deeper intelligence across the platform, including detailed salary benchmarks and full interview guides.' },
       { q: 'What counts as a contribution?', a: 'Salary submissions, interview experience write-ups, market signal tips, WikiLux corrections, and colleague referrals. Each type earns a different number of points.' },
       { q: 'What does contributing unlock?', a: 'Full salary benchmark data (unblurred), complete interview guides, priority visibility in search assignments, and Trusted Contributor status after sustained participation.' },
     ],
@@ -76,8 +76,8 @@ const faqData = [
   {
     label: 'Profilux',
     items: [
-      { q: 'What is Profilux?', a: 'Your professional profile on JOBLUX — a structured overview of your career, skills, sectors, and availability. It replaces a traditional CV for luxury industry roles and is what the JOBLUX team shares (with your approval) when matching you to assignments.' },
-      { q: 'How do I complete my Profilux?', a: 'After approval, go to your Dashboard and click Profilux. Complete each section step by step — personal details, work experience, education, languages, sectors, and availability. Your completion percentage is shown in the top bar.' },
+      { q: 'What is Profilux?', a: 'Your professional profile on JOBLUX | a structured overview of your career, skills, sectors, and availability. It replaces a traditional CV for luxury industry roles and is what the JOBLUX team shares (with your approval) when matching you to assignments.' },
+      { q: 'How do I complete my Profilux?', a: 'After approval, go to your Dashboard and click Profilux. Complete each section step by step | personal details, work experience, education, languages, sectors, and availability. Your completion percentage is shown in the top bar.' },
       { q: 'What is the Portfolio section?', a: 'Creative professionals (designers, art directors, visual merchandisers) get an additional Portfolio block to upload images, lookbooks, press features, and list software tools and creative disciplines.' },
     ],
   },
@@ -85,7 +85,7 @@ const faqData = [
     label: 'For employers',
     items: [
       { q: 'How do I engage JOBLUX for an executive search?', a: "Use the contact form below and select 'I represent a brand or employer.' A member of the team will respond within 24 hours to schedule a confidential consultation." },
-      { q: 'What is the search process?', a: "It starts with a conversation — not a form. We discuss the role, the team, the culture, and the unspoken requirements. From there, we identify and discreetly approach candidates from our network. The strongest candidates are found, not applied." },
+      { q: 'What is the search process?', a: "It starts with a conversation | not a form. We discuss the role, the team, the culture, and the unspoken requirements. From there, we identify and discreetly approach candidates from our network. The strongest candidates are found, not applied." },
       { q: 'What are the fees?', a: 'JOBLUX operates on a retained or success-based fee structure depending on the mandate. Fees are always paid by the employer, never the candidate. Details are discussed during the initial consultation.' },
     ],
   },
@@ -369,7 +369,7 @@ export default function HelpPage() {
                 className="w-full bg-[#3d3d3d] border border-[#4a4a4a] rounded-md px-3.5 py-3 text-[13px] text-[#ccc] placeholder-[#666] outline-none focus:border-[#999] min-h-[110px] resize-y"
               />
 
-              {/* Honeypot — hidden from humans */}
+              {/* Honeypot | hidden from humans */}
               <input
                 type="text"
                 name="website_url"

@@ -12,10 +12,10 @@ export async function POST(request: Request) {
     if (!process.env.ANTHROPIC_API_KEY) return NextResponse.json({ success: false, message: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })
 
     const typeMap: Record<string, string> = {
-      'salary': 'Luxury Compensation Report — salary ranges, bonus structures, and compensation trends across luxury brands and cities',
-      'hiring': 'State of Luxury Hiring — which brands are growing, cutting, restructuring, and what roles are in demand',
-      'market': 'Luxury Market Expansion Index — retail expansion, new markets, and talent demand by region',
-      'career': 'Luxury Career Ladder — how professionals progress across maisons, average tenure, and career path analysis'
+      'salary': 'Luxury Compensation Report | salary ranges, bonus structures, and compensation trends across luxury brands and cities',
+      'hiring': 'State of Luxury Hiring | which brands are growing, cutting, restructuring, and what roles are in demand',
+      'market': 'Luxury Market Expansion Index | retail expansion, new markets, and talent demand by region',
+      'career': 'Luxury Career Ladder | how professionals progress across maisons, average tenure, and career path analysis'
     }
     const reportDesc = typeMap[report_type] || typeMap['salary']
 
@@ -40,8 +40,8 @@ RULES:
 - Reference 10+ real luxury brands with specific plausible data
 - Include city-level comparisons (Paris, Milan, London, New York, Dubai, Hong Kong)
 - Key findings must be specific and data-backed (percentages, figures)
-- All reports must reference 2026 as the current year — never 2024 or 2025
-- Professional tone — this is a premium intelligence product
+- All reports must reference 2026 as the current year | never 2024 or 2025
+- Professional tone | this is a premium intelligence product
 - Output valid JSON only`
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {

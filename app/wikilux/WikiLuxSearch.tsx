@@ -44,7 +44,7 @@ export default function WikiLuxSearch({ brands, categories }: Props) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search brands — Chanel, Rolex, Aman..."
+            placeholder="Search brands | Chanel, Rolex, Aman..."
           />
           <button type="submit">Search</button>
         </form>

@@ -39,7 +39,7 @@ function toBool(val: unknown): boolean | null {
 }
 
 // ---------------------------------------------------------------------------
-// GET /api/briefs — list briefs
+// GET /api/briefs | list briefs
 //   Query params: status, search, page (default 1), limit (default 20)
 //   Admin  → all briefs, optionally filtered by status, ordered by created_at DESC
 //   Public → published briefs with open closing date, ordered by published_at DESC
@@ -100,7 +100,7 @@ export async function GET(req: NextRequest) {
 }
 
 // ---------------------------------------------------------------------------
-// POST /api/briefs — create a new brief (admin only)
+// POST /api/briefs | create a new brief (admin only)
 //   Accepts ALL fields from the job brief form.
 //   Auto-generates slug, seo_title, seo_description when not provided.
 //   Handles numeric, array, boolean, and text coercion.
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
     // ---- Auto-generated SEO fields ----
     const seo_title =
       body.seo_title?.trim() ||
-      `${body.title || ''}${body.maison ? ' at ' + body.maison : ''}${body.city ? ' — ' + body.city : ''}`
+      `${body.title || ''}${body.maison ? ' at ' + body.maison : ''}${body.city ? ' | ' + body.city : ''}`
 
     const seo_description =
       body.seo_description?.trim() ||
@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
         ? parseInt(String(body.salary_max), 10)
         : null
 
-    // ---- salary_display (text in DB — store string or null) ----
+    // ---- salary_display (text in DB | store string or null) ----
     const salary_display =
       body.salary_display != null && body.salary_display !== ''
         ? String(body.salary_display)

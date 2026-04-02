@@ -17,7 +17,7 @@ const POINTS_MAP: Record<string, number> = {
   interview_experience: 10,
 }
 
-// GET /api/contributions — list contributions
+// GET /api/contributions | list contributions
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
   const isAdmin = (session?.user as any)?.role === 'admin'
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ contributions: data, total: count, page, limit })
 }
 
-// POST /api/contributions — submit a new contribution
+// POST /api/contributions | submit a new contribution
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   const memberId = (session?.user as any)?.memberId

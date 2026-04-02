@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   if (!cityGuide) return {}
 
   return {
-    title: `${cityGuide.city_name} — City Guide`,
+    title: `${cityGuide.city_name} | City Guide`,
     description: cityGuide.intro,
   }
 }

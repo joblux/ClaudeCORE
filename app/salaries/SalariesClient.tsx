@@ -156,7 +156,7 @@ function BrowseTab({ accessLevel, initialEntries, initialTotal, initialStats, in
 
     setLoading(true)
     try {
-      // Direct Supabase query — bypasses API route for reliability
+      // Direct Supabase query | bypasses API route for reliability
       let query = supabase
         .from('salary_benchmarks')
         .select('*', { count: 'exact' })
@@ -341,7 +341,7 @@ function BrowseTab({ accessLevel, initialEntries, initialTotal, initialStats, in
       <aside className="hidden lg:block space-y-6">
         <div className="jl-card border-[#a58e28]">
           <h3 className="jl-serif text-lg text-[#1a1a1a] mb-2">Contribute Your Salary</h3>
-          <p className="text-xs text-[#888] leading-relaxed mb-4">Contribute your salary data — it takes one minute and strengthens the intelligence for everyone.</p>
+          <p className="text-xs text-[#888] leading-relaxed mb-4">Contribute your salary data | it takes one minute and strengthens the intelligence for everyone.</p>
           <Link href="/contribute" className="jl-btn-gold w-full text-center">Contribute</Link>
         </div>
         <div className="jl-card">
@@ -388,7 +388,7 @@ function SalaryCard({ entry }: { entry: SalaryRangeData }) {
       <SalaryRangeBar min={e.salary_min} max={e.salary_max} median={e.salary_median} currency={e.currency} />
       {(e.bonus_min != null || e.bonus_max != null) && (
         <div className="mt-2 text-[0.6rem] text-[#999]">
-          Bonus: {e.bonus_min != null ? formatSalaryFull(e.bonus_min, e.currency) : '—'} — {e.bonus_max != null ? formatSalaryFull(e.bonus_max, e.currency) : '—'}
+          Bonus: {e.bonus_min != null ? formatSalaryFull(e.bonus_min, e.currency) : '—'} | {e.bonus_max != null ? formatSalaryFull(e.bonus_max, e.currency) : '—'}
         </div>
       )}
     </div>
@@ -531,7 +531,7 @@ function CompareTab() {
       {result && result.items && (
         <div className="space-y-6">
           <div className="jl-card">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#1a1a1a] mb-4">{result.role} — {result.compare_type === 'city' ? 'City' : 'Brand'} Comparison</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#1a1a1a] mb-4">{result.role} | {result.compare_type === 'city' ? 'City' : 'Brand'} Comparison</h3>
             <SalaryComparisonChart items={result.items.filter(i => i.data_points > 0).map(i => ({ label: i.label, min: i.salary_min, max: i.salary_max, median: i.salary_median, currency: i.currency, costIndex: i.cost_index }))} showCostIndex={result.compare_type === 'city'} />
           </div>
           <div className="jl-card overflow-x-auto">
@@ -613,15 +613,15 @@ function CalculatorTab() {
           <div className="jl-card bg-[#222222] text-white border-[#a58e28]">
             <div className="text-center py-4">
               <div className="jl-overline-gold mb-2">Your Estimated Salary Range</div>
-              <div className="jl-serif text-3xl md:text-4xl font-light mb-2">{formatSalaryFull(result.estimated_low, result.currency)} — {formatSalaryFull(result.estimated_high, result.currency)}</div>
+              <div className="jl-serif text-3xl md:text-4xl font-light mb-2">{formatSalaryFull(result.estimated_low, result.currency)} | {formatSalaryFull(result.estimated_high, result.currency)}</div>
               <div className="text-sm text-[#a58e28]">Mid-point: {formatSalaryFull(result.estimated_mid, result.currency)}</div>
               <div className="text-xs text-[#888] mt-2">{result.data_points} data points &middot; {result.confidence}</div>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="jl-card text-center"><div className="jl-label mb-1">Base Salary</div><div className="text-sm font-semibold text-[#1a1a1a]">{formatSalaryFull(result.estimated_low, result.currency)} — {formatSalaryFull(result.estimated_high, result.currency)}</div></div>
-            <div className="jl-card text-center"><div className="jl-label mb-1">Bonus Range</div><div className="text-sm font-semibold text-[#1a1a1a]">{formatSalaryFull(result.bonus_low, result.currency)} — {formatSalaryFull(result.bonus_high, result.currency)}</div></div>
-            <div className="jl-card text-center"><div className="jl-label mb-1">Total Compensation</div><div className="text-sm font-semibold text-[#a58e28]">{formatSalaryFull(result.total_comp_low, result.currency)} — {formatSalaryFull(result.total_comp_high, result.currency)}</div></div>
+            <div className="jl-card text-center"><div className="jl-label mb-1">Base Salary</div><div className="text-sm font-semibold text-[#1a1a1a]">{formatSalaryFull(result.estimated_low, result.currency)} | {formatSalaryFull(result.estimated_high, result.currency)}</div></div>
+            <div className="jl-card text-center"><div className="jl-label mb-1">Bonus Range</div><div className="text-sm font-semibold text-[#1a1a1a]">{formatSalaryFull(result.bonus_low, result.currency)} | {formatSalaryFull(result.bonus_high, result.currency)}</div></div>
+            <div className="jl-card text-center"><div className="jl-label mb-1">Total Compensation</div><div className="text-sm font-semibold text-[#a58e28]">{formatSalaryFull(result.total_comp_low, result.currency)} | {formatSalaryFull(result.total_comp_high, result.currency)}</div></div>
           </div>
           {result.factors.length > 0 && (
             <div className="jl-card">

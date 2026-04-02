@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import EscapeNav from '@/components/escape/EscapeNav'
 
 export const metadata: Metadata = {
-  title: { default: 'JOBLUX Escape — Travel Intelligence', template: '%s | JOBLUX Escape' },
+  title: { default: 'JOBLUX Escape | Travel Intelligence', template: '%s | JOBLUX Escape' },
   description: 'Curated travel intelligence from your private advisor. Destinations, hotels, itineraries, and city guides.',
 }
 

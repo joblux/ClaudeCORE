@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'About JOBLUX — Twenty Years in Luxury',
+  title: 'About JOBLUX | Twenty Years in Luxury',
   description:
     'JOBLUX is a luxury talent intelligence platform co-founded by Mohammed Alex Mazour and Alex Mason. Two decades of executive search and technology for the luxury industry.',
   alternates: { canonical: 'https://www.joblux.com/about' },
@@ -21,7 +21,7 @@ export default function AboutPage() {
           Twenty years in luxury.<br className="hidden md:block" /> One platform.
         </h1>
         <p className="text-[15px] leading-relaxed text-white/70 border-l-2 border-[#a58e28] pl-6 max-w-2xl">
-          JOBLUX was co-founded by Mohammed Alex Mazour and Alex Mason — a manager-to-executive level search consultant and a web specialist
+          JOBLUX was co-founded by Mohammed Alex Mazour and Alex Mason | a manager-to-executive level search consultant and a web specialist
           who have spent two decades building dedicated tools and services for the
           luxury industry.
         </p>
@@ -91,7 +91,7 @@ export default function AboutPage() {
             </p>
             <p className="text-sm leading-relaxed text-white/70 max-w-2xl">
               The job board evolves into a multilingual professional network for the
-              luxury industry — profiles, connections, and industry discussions
+              luxury industry | profiles, connections, and industry discussions
               across fashion, hospitality, watches, beauty, and beyond.
             </p>
           </div>
@@ -146,7 +146,7 @@ export default function AboutPage() {
           Luxury talent intelligence
         </h2>
         <p className="text-sm leading-relaxed text-white/70 max-w-2xl mb-8">
-          A career intelligence platform for the luxury industry — delivering brand
+          A career intelligence platform for the luxury industry | delivering brand
           intelligence, salary data, daily market signals, and confidential
           executive search to professionals worldwide.
         </p>
@@ -190,7 +190,7 @@ export default function AboutPage() {
         <p className="text-sm leading-relaxed text-white/70 max-w-2xl mb-7">
           JOBLUX is an independent, privately held business. The intelligence
           platform generates trust and inbound demand. That trust supports our core
-          service: confidential executive search for luxury maisons — manager to
+          service: confidential executive search for luxury maisons | manager to
           C-suite, worldwide.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">

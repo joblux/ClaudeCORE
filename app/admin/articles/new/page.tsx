@@ -135,7 +135,7 @@ export default function NewArticlePage() {
       setPasteContent(doc.body.textContent?.trim() || '')
       setPasteMode('preview')
     } else {
-      // Plain text — let normal paste happen, just update state
+      // Plain text | let normal paste happen, just update state
       setPasteContent(plain)
       setPasteMode('preview')
     }
@@ -601,7 +601,7 @@ export default function NewArticlePage() {
                   </div>
                 )}
 
-                <label style={LABEL}>Content — edit before importing</label>
+                <label style={LABEL}>Content | edit before importing</label>
                 <div style={{ marginBottom: 16 }}>
                   <RichTextEditor
                     content={pasteHtml || pasteContent.replace(/\n/g, '<br>')}

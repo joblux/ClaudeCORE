@@ -10,19 +10,19 @@ const supabase = createClient(
 )
 
 const placeholderArticles = [
-  { id: '1', category: 'LEADERSHIP', title: "Kering's creative director cycle — what it means for talent inside the group", excerpt: 'Three CD changes in 18 months. The downstream effects on teams, briefs, and hiring priorities across Gucci, Bottega, and Saint Laurent.', date: 'March 20, 2026', read_time: '6 min', slug: 'kering-creative-director-cycle' },
+  { id: '1', category: 'LEADERSHIP', title: "Kering's creative director cycle | what it means for talent inside the group", excerpt: 'Three CD changes in 18 months. The downstream effects on teams, briefs, and hiring priorities across Gucci, Bottega, and Saint Laurent.', date: 'March 20, 2026', read_time: '6 min', slug: 'kering-creative-director-cycle' },
   { id: '2', category: 'MARKET INTELLIGENCE', title: "Hard luxury's moment: why watches and jewelry are the growth story of 2026", excerpt: "Cartier, Van Cleef, and Tiffany are all expanding headcount while fashion and leather goods hold steady.", date: 'March 18, 2026', read_time: '5 min', slug: 'hard-luxury-growth-2026' },
-  { id: '3', category: 'CAREER INTELLIGENCE', title: "Dubai is becoming luxury's second headquarters — what that means for careers", excerpt: "Regional HQs, flagship openings, and a growing pool of international talent.", date: 'March 15, 2026', read_time: '7 min', slug: 'dubai-luxury-careers' },
-  { id: '4', category: 'SALARY', title: 'What Hermès really pays — from artisan to director', excerpt: "Based on 847 verified contributions, we map out the full compensation ladder.", date: 'March 12, 2026', read_time: '9 min', slug: 'hermes-salary-guide' },
+  { id: '3', category: 'CAREER INTELLIGENCE', title: "Dubai is becoming luxury's second headquarters | what that means for careers", excerpt: "Regional HQs, flagship openings, and a growing pool of international talent.", date: 'March 15, 2026', read_time: '7 min', slug: 'dubai-luxury-careers' },
+  { id: '4', category: 'SALARY', title: 'What Hermès really pays | from artisan to director', excerpt: "Based on 847 verified contributions, we map out the full compensation ladder.", date: 'March 12, 2026', read_time: '9 min', slug: 'hermes-salary-guide' },
   { id: '5', category: 'CAREERS', title: 'How to get hired at Chanel without applying online', excerpt: "Chanel fills over 70% of senior roles through internal referrals and executive search.", date: 'March 10, 2026', read_time: '5 min', slug: 'hired-at-chanel' },
   { id: '6', category: 'MARKET', title: 'LVMH vs Kering: which group offers better career progression?', excerpt: "We analysed 500+ career paths across both groups.", date: 'March 8, 2026', read_time: '8 min', slug: 'lvmh-vs-kering-careers' },
 ]
 
 const placeholderReports = [
-  { icon: '📊', label: 'SALARY REPORT', title: 'Luxury Compensation Report 2026 — Europe Edition', meta: '1,840 data points · Published March 2026', slug: '' },
-  { icon: '🏢', label: 'HIRING REPORT', title: "State of Luxury Hiring Q1 2026 — Who's Growing, Who's Cutting", meta: '52 brands analysed · Published February 2026', slug: '' },
-  { icon: '🌍', label: 'MARKET REPORT', title: 'Asia Pacific Luxury Expansion Index — Retail & Talent Outlook', meta: '12 markets · Published January 2026', slug: '' },
-  { icon: '👔', label: 'CAREER REPORT', title: 'The Luxury Career Ladder — How Professionals Progress Across Maisons', meta: '500+ career paths · Published December 2025', slug: '' },
+  { icon: '📊', label: 'SALARY REPORT', title: 'Luxury Compensation Report 2026 | Europe Edition', meta: '1,840 data points · Published March 2026', slug: '' },
+  { icon: '🏢', label: 'HIRING REPORT', title: "State of Luxury Hiring Q1 2026 | Who's Growing, Who's Cutting", meta: '52 brands analysed · Published February 2026', slug: '' },
+  { icon: '🌍', label: 'MARKET REPORT', title: 'Asia Pacific Luxury Expansion Index | Retail & Talent Outlook', meta: '12 markets · Published January 2026', slug: '' },
+  { icon: '👔', label: 'CAREER REPORT', title: 'The Luxury Career Ladder | How Professionals Progress Across Maisons', meta: '500+ career paths · Published December 2025', slug: '' },
 ]
 
 // Placeholder voices shown when DB has no approved Insider Voices yet
@@ -56,7 +56,7 @@ function getInitials(name: string) {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
-// Voice card — used in both Editorial tab preview and dedicated Insider voices tab
+// Voice card | used in both Editorial tab preview and dedicated Insider voices tab
 function VoiceCard({ v }: { v: any }) {
   const card = (
     <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 hover:border-[#3a3a3a] transition-colors h-full">
@@ -135,7 +135,7 @@ export default function InsightsPage() {
         })))
       }
 
-      // Insider voices — fetch author_name properly
+      // Insider voices | fetch author_name properly
       const { data: voiceData } = await supabase
         .from('bloglux_articles')
         .select('id, slug, title, excerpt, author_name, author_role, published_at')
@@ -179,10 +179,10 @@ export default function InsightsPage() {
   const rest = articles.slice(1, 4)
 
   const displayMostRead = mostRead.length > 0 ? mostRead : [
-    { cat: 'SALARY', title: 'What Hermès really pays — from artisan to director', date: 'March 22, 2026', slug: 'hermes-salary-guide' },
+    { cat: 'SALARY', title: 'What Hermès really pays | from artisan to director', date: 'March 22, 2026', slug: 'hermes-salary-guide' },
     { cat: 'CAREERS', title: 'How to get hired at Chanel without applying online', date: 'March 19, 2026', slug: 'hired-at-chanel' },
     { cat: 'MARKET', title: 'LVMH vs Kering: which group offers better career progression?', date: 'March 14, 2026', slug: 'lvmh-vs-kering-careers' },
-    { cat: 'LEADERSHIP', title: 'The Richemont school of management — and why alumni are in demand', date: 'March 10, 2026', slug: 'richemont-management' },
+    { cat: 'LEADERSHIP', title: 'The Richemont school of management | and why alumni are in demand', date: 'March 10, 2026', slug: 'richemont-management' },
   ]
 
   return (
@@ -321,7 +321,7 @@ export default function InsightsPage() {
               <div>
                 <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">THE BRIEF</div>
                 <p className="text-xs text-[#999] leading-relaxed mb-3">
-                  Biweekly intelligence for luxury professionals. Signals, salary moves, and assignments — direct to your inbox.
+                  Biweekly intelligence for luxury professionals. Signals, salary moves, and assignments | direct to your inbox.
                 </p>
                 <input
                   type="email"
@@ -370,7 +370,7 @@ export default function InsightsPage() {
         {activeTab === 'Luxury map' && (
           <div className="flex flex-col items-center justify-center py-24">
             <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">LUXURY MAP</p>
-            <p className="text-sm text-[#999]">Interactive global luxury industry map — coming soon</p>
+            <p className="text-sm text-[#999]">Interactive global luxury industry map | coming soon</p>
           </div>
         )}
 

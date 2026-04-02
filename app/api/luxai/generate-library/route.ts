@@ -91,7 +91,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: `${inserted.length} images curated for ${brandName} — pending approval`,
+      message: `${inserted.length} images curated for ${brandName} | pending approval`,
       data: { count: inserted.length }
     })
   } catch (error: any) {

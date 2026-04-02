@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Deals — Exclusive Travel Offers',
-  description: 'Exclusive rates and seasonal travel offers curated by JOBLUX Escape — time-sensitive opportunities for those who plan ahead.',
+  title: 'Deals | Exclusive Travel Offers',
+  description: 'Exclusive rates and seasonal travel offers curated by JOBLUX Escape | time-sensitive opportunities for those who plan ahead.',
 }
 
 export default function EscapeDealsPage() {
@@ -29,7 +29,7 @@ export default function EscapeDealsPage() {
           Coming soon
         </p>
         <p style={{ fontSize: 14, color: '#777', marginTop: 12, maxWidth: 512, margin: '12px auto 0' }}>
-          We're curating exclusive rates and seasonal offers with our hotel partners. This section will feature time-sensitive opportunities — the kind that reward those who plan ahead.
+          We're curating exclusive rates and seasonal offers with our hotel partners. This section will feature time-sensitive opportunities | the kind that reward those who plan ahead.
         </p>
         <Link
           href="/escape/plan"

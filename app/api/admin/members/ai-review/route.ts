@@ -49,15 +49,15 @@ export async function POST(req: NextRequest) {
 Your task: assess whether this applicant has a genuine connection to the luxury industry.
 
 IMPORTANT CONTEXT ABOUT LUXURY:
-- Luxury is deeply transversal — it spans fashion & leather goods, haute couture, watches & jewellery, automotive (Rolls-Royce, Bentley, Ferrari, Bugatti), hospitality (Palace hotels, Aman, Four Seasons), beauty & fragrance, spirits & fine dining (Dom Pérignon, Hennessy, Michelin-starred), aviation & yachts, art & auction houses (Christie's, Sotheby's), real estate, design, media, and technology for luxury
+- Luxury is deeply transversal | it spans fashion & leather goods, haute couture, watches & jewellery, automotive (Rolls-Royce, Bentley, Ferrari, Bugatti), hospitality (Palace hotels, Aman, Four Seasons), beauty & fragrance, spirits & fine dining (Dom Pérignon, Hennessy, Michelin-starred), aviation & yachts, art & auction houses (Christie's, Sotheby's), real estate, design, media, and technology for luxury
 - Career paths are non-linear. Someone may have worked at mass-market brands (Zara, H&M, Gap, Uniqlo) before moving into luxury (Chanel, LVMH, Kering, Richemont). A CV that shows Zara THEN Chanel is a legitimate luxury career progression. Judge the FULL trajectory, not one line
 - Students at luxury-focused schools are legitimate: Polimoda, ESSEC Luxury Chair, Bocconi, IFM (Institut Français de la Mode), Glion, EHL, Parsons, Central Saint Martins, LCF, Marangoni, ISML, Sup de Luxe, etc.
 - Consultants and freelancers may not have a maison name but can be deeply embedded in luxury
-- Geographic context matters — Paris, Milan, London, New York, Dubai, Tokyo, Hong Kong, Seoul, Shanghai, Monaco, Geneva, Florence, Munich are luxury hubs
+- Geographic context matters | Paris, Milan, London, New York, Dubai, Tokyo, Hong Kong, Seoul, Shanghai, Monaco, Geneva, Florence, Munich are luxury hubs
 - Job titles vary widely across cultures and companies
 - Many luxury brands are niche but legitimate: Berluti, Moynat, Goyard, Richard Mille, Graff, Van Cleef & Arpels, Brunello Cucinelli, Loro Piana, Brioni, Audemars Piguet, Vacheron Constantin, Patek Philippe, A. Lange & Söhne, Buccellati, etc.
 - Luxury groups: LVMH, Kering, Richemont, Hermès, Chanel, Prada Group, Tapestry, Capri Holdings, Puig, Swatch Group, Rolex
-- Sectors and domains ranked by preference — #1 is most important signal
+- Sectors and domains ranked by preference | #1 is most important signal
 
 MEMBER APPLICATION:
 Tier: ${member.role}
@@ -87,7 +87,7 @@ Rules:
 - HIGH + approve: clearly a luxury professional
 - MEDIUM + review: some indicators but ambiguous
 - LOW + review: no clear luxury connection
-- Never recommend approve for Business or Insider tier — max MEDIUM + review
+- Never recommend approve for Business or Insider tier | max MEDIUM + review
 - Be generous but not naive`
 
     // Call Claude API

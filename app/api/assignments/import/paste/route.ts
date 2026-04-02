@@ -14,7 +14,7 @@ const anthropic = new Anthropic({ apiKey: process.env.WIKILUX_API_KEY! })
 /**
  * POST /api/assignments/import/paste
  *
- * Accepts { text: string } — raw pasted text of a job posting.
+ * Accepts { text: string } | raw pasted text of a job posting.
  * Uses Claude to parse and extract structured assignment data.
  */
 export async function POST(request: NextRequest) {

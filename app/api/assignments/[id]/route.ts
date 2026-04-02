@@ -33,7 +33,7 @@ function applyAccessControl(assignment: any, isAdmin: boolean, user: any) {
 }
 
 // ---------------------------------------------------------------------------
-// GET /api/assignments/[id] — fetch a single search assignment by id or slug
+// GET /api/assignments/[id] | fetch a single search assignment by id or slug
 //   - Tries UUID lookup first; falls back to slug lookup
 //   - Non-admin can only see active assignments
 //   - Non-approved members cannot see confidential assignments
@@ -88,7 +88,7 @@ export async function GET(
 }
 
 // ---------------------------------------------------------------------------
-// PUT /api/assignments/[id] — update a search assignment (admin only)
+// PUT /api/assignments/[id] | update a search assignment (admin only)
 //   - Accepts partial updates (any subset of fields)
 //   - Auto-sets activated_at when status transitions to "active"
 //   - Auto-sets closed_at when status transitions to "closed" or "filled"
@@ -163,7 +163,7 @@ export async function PUT(
 }
 
 // ---------------------------------------------------------------------------
-// DELETE /api/assignments/[id] — delete a search assignment (admin only)
+// DELETE /api/assignments/[id] | delete a search assignment (admin only)
 // ---------------------------------------------------------------------------
 export async function DELETE(
   req: NextRequest,

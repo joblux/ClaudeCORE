@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
       format = 'generic-array'
       rows = data.map(autoMapObject)
     }
-    // Single generic object — wrap in array
+    // Single generic object | wrap in array
     else if (typeof data === 'object' && data !== null) {
       format = 'generic-object'
       rows = [autoMapObject(data)]

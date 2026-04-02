@@ -196,7 +196,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             className={`relative w-8 h-[18px] rounded-full transition-colors ${
               maintenanceMode ? 'bg-red-400' : 'bg-green-400'
             } ${maintenanceLoading ? 'opacity-50' : ''}`}
-            title={maintenanceMode ? 'Site is offline — click to go live' : 'Site is live — click to go offline'}
+            title={maintenanceMode ? 'Site is offline | click to go live' : 'Site is live | click to go offline'}
           >
             <span
               className={`absolute top-[2px] left-[2px] w-[14px] h-[14px] rounded-full bg-white transition-transform shadow-sm ${

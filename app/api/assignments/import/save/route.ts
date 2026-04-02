@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
 
         // Auto-generate SEO title if not provided
         const seoTitle = assignment.seo_title ||
-          `${assignment.title}${assignment.maison ? ' at ' + assignment.maison : ''}${assignment.city ? ' — ' + assignment.city : ''}`
+          `${assignment.title}${assignment.maison ? ' at ' + assignment.maison : ''}${assignment.city ? ' | ' + assignment.city : ''}`
 
         // Auto-generate SEO description if not provided (first 160 chars of description)
         const seoDescription = assignment.seo_description ||

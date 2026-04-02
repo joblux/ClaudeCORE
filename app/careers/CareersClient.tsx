@@ -501,7 +501,7 @@ export default function CareersClient({
                   <div>
                     <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 mb-5">
                       <h3 className="text-lg font-normal mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>Contribute Your Salary</h3>
-                      <p className="text-xs text-[#999] leading-relaxed mb-4">Contribute your salary data — it takes one minute and strengthens the intelligence for everyone.</p>
+                      <p className="text-xs text-[#999] leading-relaxed mb-4">Contribute your salary data | it takes one minute and strengthens the intelligence for everyone.</p>
                       <Link href="/contribute" className="block w-full bg-[#1D9E75] text-white text-[13px] font-semibold py-2.5 rounded-md text-center hover:bg-[#17855f] transition-colors">
                         Contribute
                       </Link>
@@ -976,7 +976,7 @@ export default function CareersClient({
               <div>
                 <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 mb-5">
                   <h3 className="text-lg font-normal mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>Contribute Your Experience</h3>
-                  <p className="text-xs text-[#999] leading-relaxed mb-4">Contribute your interview experience — it takes one minute and strengthens the intelligence for everyone.</p>
+                  <p className="text-xs text-[#999] leading-relaxed mb-4">Contribute your interview experience | it takes one minute and strengthens the intelligence for everyone.</p>
                   <Link href="/contribute" className="block w-full bg-[#1D9E75] text-white text-[13px] font-semibold py-2.5 rounded-md text-center hover:bg-[#17855f] transition-colors">
                     Contribute
                   </Link>

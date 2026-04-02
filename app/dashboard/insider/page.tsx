@@ -155,7 +155,7 @@ function WriteVoiceSection({ session }: { session: any }) {
       <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 8, padding: '20px 24px', marginBottom: 20 }}>
         <div style={{ fontSize: 11, fontWeight: 600, color: '#a58e28', letterSpacing: '1.5px', marginBottom: 6 }}>INSIDER VOICES</div>
         <p style={{ fontSize: 13, color: '#999', lineHeight: 1.6, margin: 0 }}>
-          Share your perspective on luxury careers, talent, and the industry. Your piece will appear on the Insights page — attributed to your role and maison — after editorial review.
+          Share your perspective on luxury careers, talent, and the industry. Your piece will appear on the Insights page | attributed to your role and maison | after editorial review.
         </p>
       </div>
 
@@ -195,7 +195,7 @@ function WriteVoiceSection({ session }: { session: any }) {
             Your full perspective * <span style={{ fontSize: 10, color: '#666', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>— 300–800 words recommended</span>
           </label>
           <textarea
-            placeholder="Write your perspective here. Be specific. Use examples from your experience. Avoid generalities — JOBLUX readers are senior professionals who value precision."
+            placeholder="Write your perspective here. Be specific. Use examples from your experience. Avoid generalities | JOBLUX readers are senior professionals who value precision."
             value={form.bodyText}
             onChange={e => setForm({ ...form, bodyText: e.target.value })}
             rows={12}

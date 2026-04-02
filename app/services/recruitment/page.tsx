@@ -25,7 +25,7 @@ export default function RecruitmentPage() {
               Private executive search<br />for the luxury market
             </h1>
             <p className="text-sm text-[#999] leading-relaxed max-w-xl">
-              We find, approach, and present the right candidates — with full discretion at every stage. No job boards. No noise. One placement at a time.
+              We find, approach, and present the right candidates | with full discretion at every stage. No job boards. No noise. One placement at a time.
             </p>
           </div>
         </div>
@@ -42,10 +42,10 @@ export default function RecruitmentPage() {
                 An international boutique executive search firm. Twenty years. Forty markets. One industry.
               </p>
               <p className="text-sm text-[#777] leading-relaxed mb-3">
-                We start the same way every time — with a conversation. Not a form, not a brief template. A real conversation about the role, the team, the culture, and what it actually takes to succeed in that seat.
+                We start the same way every time | with a conversation. Not a form, not a brief template. A real conversation about the role, the team, the culture, and what it actually takes to succeed in that seat.
               </p>
               <p className="text-sm text-[#777] leading-relaxed mb-4">
-                Twenty years of working exclusively inside the luxury market has taught us one thing: the best hire is rarely the one who applied. They are the one who wasn't looking — until we reached them. We have built the relationships and the intelligence to find that person, in any market, at any level from manager to Chief Executive.
+                Twenty years of working exclusively inside the luxury market has taught us one thing: the best hire is rarely the one who applied. They are the one who wasn't looking | until we reached them. We have built the relationships and the intelligence to find that person, in any market, at any level from manager to Chief Executive.
               </p>
               <Link href="/about" className="text-sm text-[#888] underline underline-offset-4 decoration-[#444] hover:text-[#ccc] transition-colors">
                 Read about us and our DNA →
@@ -56,9 +56,9 @@ export default function RecruitmentPage() {
             <p className="text-[0.6rem] tracking-[3px] uppercase text-[#3a3a3a] border-t border-[#1e1e1e] pt-5 mb-6">How it works</p>
             <div className="space-y-3 mb-12">
               {[
-                { step: '01', title: 'Brief', desc: 'A confidential conversation to understand the role, the culture, and the unspoken requirements that determine whether a placement succeeds. No templated intake forms — a genuine consultation.' },
-                { step: '02', title: 'Identify', desc: 'Using deep luxury market relationships and our proprietary intelligence, we identify and discreetly approach candidates who match the brief. The strongest candidates are not actively looking — they are found, not applied.' },
-                { step: '03', title: 'Present', desc: 'A curated shortlist of qualified candidates, each personally assessed. We manage the entire process — interviews, feedback, negotiation, onboarding support — seamlessly for both sides.' },
+                { step: '01', title: 'Brief', desc: 'A confidential conversation to understand the role, the culture, and the unspoken requirements that determine whether a placement succeeds. No templated intake forms | a genuine consultation.' },
+                { step: '02', title: 'Identify', desc: 'Using deep luxury market relationships and our proprietary intelligence, we identify and discreetly approach candidates who match the brief. The strongest candidates are not actively looking | they are found, not applied.' },
+                { step: '03', title: 'Present', desc: 'A curated shortlist of qualified candidates, each personally assessed. We manage the entire process | interviews, feedback, negotiation, onboarding support | seamlessly for both sides.' },
               ].map((item) => (
                 <div key={item.step} className="border border-[#1e1e1e] rounded-lg p-6 bg-[#111]">
                   <p className="text-[10px] font-semibold tracking-widest text-[#a58e28] mb-2">{item.step}</p>
@@ -72,7 +72,7 @@ export default function RecruitmentPage() {
             <p className="text-[0.6rem] tracking-[3px] uppercase text-[#3a3a3a] border-t border-[#1e1e1e] pt-5 mb-6">What we cover</p>
             <div className="border border-[#1e1e1e] rounded-lg p-6 bg-[#111] mb-12">
               <p className="text-sm text-[#999] leading-relaxed mb-6">
-                Manager to C-suite positions across the full spectrum of luxury. Every search handled by consultants with genuine industry knowledge — not generalist recruiters with a luxury desk.
+                Manager to C-suite positions across the full spectrum of luxury. Every search handled by consultants with genuine industry knowledge | not generalist recruiters with a luxury desk.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-8">
                 {['Fashion & leather goods','Jewellery & watches','Beauty & fragrance','Hospitality & travel','Design & interiors','Wine & spirits','Corporate & group functions','Digital & e-commerce'].map((s) => (
@@ -94,7 +94,7 @@ export default function RecruitmentPage() {
               <div className="border border-[#1e1e1e] rounded-lg p-6 bg-[#111]">
                 <h3 className="text-[14px] font-medium text-white mb-2">Luxury-only focus</h3>
                 <p className="text-sm text-[#999] leading-relaxed mb-5">JOBLUX does not recruit outside the luxury market. This singular focus means deeper relationships, better candidate access, and an understanding of maison culture that generalist firms cannot match.</p>
-                <p className="text-[10px] tracking-widest uppercase text-[#3a3a3a] mb-3 italic">A sample of what is currently active — most assignments are never advertised.</p>
+                <p className="text-[10px] tracking-widest uppercase text-[#3a3a3a] mb-3 italic">A sample of what is currently active | most assignments are never advertised.</p>
                 <div className="space-y-2">
                   {[
                     { level: 'Director', title: 'Director of Retail Operations, Europe', meta: 'Paris · Fashion & leather goods', salary: '€120K–150K' },
@@ -119,7 +119,7 @@ export default function RecruitmentPage() {
 
               <div className="border border-[#1e1e1e] rounded-lg p-6 bg-[#111]">
                 <h3 className="text-[14px] font-medium text-white mb-2">Full discretion, always</h3>
-                <p className="text-sm text-[#999] leading-relaxed">Many positions we fill are never publicly posted. We operate with the same confidentiality expected inside the maisons themselves — protecting both employer and candidate at every stage.</p>
+                <p className="text-sm text-[#999] leading-relaxed">Many positions we fill are never publicly posted. We operate with the same confidentiality expected inside the maisons themselves | protecting both employer and candidate at every stage.</p>
               </div>
             </div>
 

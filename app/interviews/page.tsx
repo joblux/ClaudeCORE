@@ -4,7 +4,7 @@ import InterviewsClient from './InterviewsClient'
 import type { InterviewExperienceListItem, InterviewStats } from '@/types/interview'
 
 export const metadata: Metadata = {
-  title: 'Interview Intelligence — Luxury Industry Interview Experiences | JOBLUX',
+  title: 'Interview Intelligence | Luxury Industry Interview Experiences | JOBLUX',
   description: 'Confidential interview experiences shared by professionals who have been through the process at the industry\'s most selective maisons.',
   alternates: { canonical: 'https://www.joblux.com/interviews' },
   openGraph: {

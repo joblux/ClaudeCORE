@@ -13,7 +13,7 @@ function generateInviteCode(): string {
   return randomBytes(8).toString('hex')
 }
 
-// GET /api/invitations — get member's sent invitations
+// GET /api/invitations | get member's sent invitations
 export async function GET() {
   const session = await getServerSession(authOptions)
   const memberId = (session?.user as any)?.memberId
@@ -43,7 +43,7 @@ export async function GET() {
   })
 }
 
-// POST /api/invitations — send invitations
+// POST /api/invitations | send invitations
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   const memberId = (session?.user as any)?.memberId

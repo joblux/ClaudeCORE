@@ -7,8 +7,8 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env
 export const revalidate = 0
 
 export const metadata: Metadata = {
-  title: 'Hotels Reserve — Preferred Luxury Hotels',
-  description: 'Our curated collection of the world\'s finest hotels with exclusive perks. Suite upgrades, daily breakfast, spa credits — book through JOBLUX.',
+  title: 'Hotels Reserve | Preferred Luxury Hotels',
+  description: 'Our curated collection of the world\'s finest hotels with exclusive perks. Suite upgrades, daily breakfast, spa credits | book through JOBLUX.',
 }
 
 export default async function HotelsPage() {

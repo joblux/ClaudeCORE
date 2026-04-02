@@ -7,10 +7,10 @@ import EscapeArticleGrid from '@/components/escape/EscapeArticleGrid'
 export const revalidate = 0
 
 export const metadata: Metadata = {
-  title: 'April Knows Better — Travel Intelligence',
+  title: 'April Knows Better | Travel Intelligence',
   description: 'Where to travel in April 2026. Cherry blossoms in Japan, spring in Morocco, green season safaris in Kenya. Curated by your private travel advisor.',
   openGraph: {
-    title: 'April Knows Better — JOBLUX Escape',
+    title: 'April Knows Better | JOBLUX Escape',
     description: 'Where to travel in April 2026. Curated travel intelligence from your private advisor.',
     type: 'website',
   },

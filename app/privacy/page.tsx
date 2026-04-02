@@ -13,7 +13,7 @@ export default function PrivacyPolicyPage() {
     <div className="bg-[#222] rounded-lg p-8 md:p-12 border border-[#333]">
       <p className="jl-overline-gold tracking-widest uppercase text-sm mb-4">Legal</p>
       <h1 className="jl-serif text-4xl md:text-5xl font-bold mb-4 text-white">Privacy Policy</h1>
-      <p className="text-[#999] mb-12">Last updated: March 2026 — GDPR compliant</p>
+      <p className="text-[#999] mb-12">Last updated: March 2026 | GDPR compliant</p>
 
       <div className="space-y-12 text-[#ccc] leading-relaxed text-[15px]">
         {/* ── 1. Introduction ── */}
@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
             This Privacy Policy explains how JOBLUX collects, uses, stores, and protects your
             personal data when you use our Platform. JOBLUX is committed to safeguarding the privacy
             of its users and ensuring full compliance with the General Data Protection Regulation
-            (GDPR — Regulation (EU) 2016/679) and all applicable French data protection legislation.
+            (GDPR | Regulation (EU) 2016/679) and all applicable French data protection legislation.
           </p>
           <p className="mt-3">
             The data controller responsible for the processing of your personal data is:
@@ -188,10 +188,10 @@ export default function PrivacyPolicyPage() {
             to appropriate data processing agreements. Our current service providers include:
           </p>
           <p className="mt-3 ml-4">
-            <strong className="text-white">Supabase</strong> — database hosting and authentication services<br />
-            <strong className="text-white">Hetzner</strong> — application hosting and deployment<br />
-            <strong className="text-white">Google</strong> — authentication (OAuth), analytics (when configured)<br />
-            <strong className="text-white">Amazon Web Services</strong> — email delivery (SES)
+            <strong className="text-white">Supabase</strong> | database hosting and authentication services<br />
+            <strong className="text-white">Hetzner</strong> | application hosting and deployment<br />
+            <strong className="text-white">Google</strong> | authentication (OAuth), analytics (when configured)<br />
+            <strong className="text-white">Amazon Web Services</strong> | email delivery (SES)
           </p>
           <p className="mt-3">
             We may also disclose your data where required by law, regulation, legal process, or
@@ -423,7 +423,7 @@ export default function PrivacyPolicyPage() {
           </p>
           <p className="mt-3">
             <strong className="text-white">Mohammed M&apos;zaour</strong><br />
-            JOBLUX — Data Controller<br />
+            JOBLUX | Data Controller<br />
             Paris, France<br />
             Email:{' '}
             <a href="mailto:hello@joblux.com" className="text-[#a58e28] hover:text-[#c4a830] transition-colors underline">

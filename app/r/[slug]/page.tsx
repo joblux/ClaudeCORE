@@ -173,7 +173,7 @@ export async function generateMetadata({
     'Luxury Professional'
 
   return {
-    title: `${name} — ${currentRole} | JOBLUX`,
+    title: `${name} | ${currentRole} | JOBLUX`,
     description:
       resume.resume_headline || 'Luxury professional on JOBLUX | Luxury Industry Careers Intelligence',
     robots: { index: false, follow: false },
@@ -358,7 +358,7 @@ export default async function ResumePage({
                   {resume.work_experiences.map((exp) => {
                     const startStr = formatMonthYear(exp.start_date)
                     const endStr = exp.is_current ? 'Present' : formatMonthYear(exp.end_date)
-                    const dateRange = [startStr, endStr].filter(Boolean).join(' — ')
+                    const dateRange = [startStr, endStr].filter(Boolean).join(' | ')
                     const expLocation = [exp.city, exp.country].filter(Boolean).join(', ')
 
                     return (

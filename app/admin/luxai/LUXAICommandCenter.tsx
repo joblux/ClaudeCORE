@@ -187,7 +187,7 @@ export default function LUXAICommandCenter() {
       {/* Header */}
       <div className="bg-white border-b border-[#e8e8e8] px-8 py-5">
         <h1 className="text-[26px] font-semibold text-[#111]">LUXAI command center</h1>
-        <p className="text-[13px] text-[#666]">AI content engine — generate, schedule, approve, publish</p>
+        <p className="text-[13px] text-[#666]">AI content engine | generate, schedule, approve, publish</p>
       </div>
 
       {/* Flash message */}
@@ -228,7 +228,7 @@ export default function LUXAICommandCenter() {
                 <div className={icon('bg-[#111]')}>W</div>
                 <div className="flex-1">
                   <div className="text-[13px] font-semibold text-[#111]">Brand pages</div>
-                  <div className="text-[10px] text-[#888]">Encyclopedia — overview, culture, career paths, founder, values, leadership</div>
+                  <div className="text-[10px] text-[#888]">Encyclopedia | overview, culture, career paths, founder, values, leadership</div>
                 </div>
                 <span className={badge('bg-[#D1FAE5] text-[#065F46]')}>{health?.brands_live || 0} live</span>
               </div>
@@ -306,7 +306,7 @@ export default function LUXAICommandCenter() {
                 <div className={icon('bg-[#10B981]')}>S</div>
                 <div className="flex-1">
                   <div className="text-[13px] font-semibold text-[#111]">Signals</div>
-                  <div className="text-[10px] text-[#888]">Daily industry news — talent, market, brand, finance</div>
+                  <div className="text-[10px] text-[#888]">Daily industry news | talent, market, brand, finance</div>
                 </div>
                 <span className={badge('bg-[#D1FAE5] text-[#065F46]')}>{health?.signals || 0} live</span>
               </div>
@@ -406,7 +406,7 @@ export default function LUXAICommandCenter() {
                 <div className={icon('bg-[#6366F1]')}>V</div>
                 <div className="flex-1">
                   <div className="text-[13px] font-semibold text-[#111]">Insider voices</div>
-                  <div className="text-[10px] text-[#888]">Executive quotes — insider perspectives on luxury careers</div>
+                  <div className="text-[10px] text-[#888]">Executive quotes | insider perspectives on luxury careers</div>
                 </div>
               </div>
               <div className={body}>
@@ -453,7 +453,7 @@ export default function LUXAICommandCenter() {
                 <div className={icon('bg-[#F59E0B]')}>E</div>
                 <div className="flex-1">
                   <div className="text-[13px] font-semibold text-[#111]">Events</div>
-                  <div className="text-[10px] text-[#888]">Industry calendar — fashion weeks, fairs, conferences</div>
+                  <div className="text-[10px] text-[#888]">Industry calendar | fashion weeks, fairs, conferences</div>
                 </div>
                 <span className={badge('bg-[#FEF3C7] text-[#92400E]')}>{health?.events || 0} total</span>
               </div>
@@ -510,12 +510,12 @@ export default function LUXAICommandCenter() {
                 <div className={icon('bg-[#94A3B8]')}>M</div>
                 <div className="flex-1">
                   <div className="text-[13px] font-semibold text-[#111]">Luxury map</div>
-                  <div className="text-[10px] text-[#888]">Global brand presence — stores, HQs, financials per country</div>
+                  <div className="text-[10px] text-[#888]">Global brand presence | stores, HQs, financials per country</div>
                 </div>
                 <span className={badge('bg-[#F1F5F9] text-[#64748B]')}>Upcoming</span>
               </div>
               <div className={body}>
-                <p className="text-[11px] text-[#999]">Database ready. Feeds from the master Luxury Map on Insights page — will be built as a separate project.</p>
+                <p className="text-[11px] text-[#999]">Database ready. Feeds from the master Luxury Map on Insights page | will be built as a separate project.</p>
               </div>
               <div className={flowBar}><b className="text-[#10B981]">→</b> Brand page: Luxury Map tab <b className="text-[#10B981]">+</b> Insights: Luxury Map tab</div>
             </div>

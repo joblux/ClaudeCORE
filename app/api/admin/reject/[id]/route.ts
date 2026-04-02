@@ -21,7 +21,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const body = await req.json();
     reason = body.reason;
   } catch {
-    // No body — that's fine
+    // No body | that's fine
   }
 
   const { data: member, error: fetchError } = await supabaseAdmin

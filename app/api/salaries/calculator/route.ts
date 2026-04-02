@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       baseHigh = Math.round(baseHigh * expMultiplier)
       factors.push(`${yrsExp} years of experience provides a moderate premium`)
     } else if (yrsExp > 0) {
-      factors.push(`${yrsExp} years of experience — early career range`)
+      factors.push(`${yrsExp} years of experience | early career range`)
     }
 
     // Brand premium
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
       recommendations.push('Developing skills in clienteling, CRM, or multilingual capabilities can increase your earning potential')
     }
     if (yrsExp < 5) {
-      recommendations.push('Focus on building luxury-specific experience — compensation increases significantly after 5+ years in the sector')
+      recommendations.push('Focus on building luxury-specific experience | compensation increases significantly after 5+ years in the sector')
     }
     recommendations.push('Contribute your own salary data to improve estimates for the entire ecosystem')
 

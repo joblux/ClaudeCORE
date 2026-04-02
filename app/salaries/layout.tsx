@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Salary Intelligence — Luxury Industry Compensation Data | JOBLUX',
+  title: 'Salary Intelligence | Luxury Industry Compensation Data | JOBLUX',
   description: 'Confidential salary benchmarks across 15 roles, 8 global markets, and 500+ maisons. Built on real data contributed by industry professionals.',
   alternates: { canonical: 'https://www.joblux.com/salaries' },
   openGraph: {

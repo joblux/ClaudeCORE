@@ -41,7 +41,7 @@ Return ONLY a JSON array (no markdown, no backticks):
 
 RULES:
 - 5 experiences covering different departments and seniority levels
-- Realistic for ${brandName} specifically — reference their culture, values, interview style
+- Realistic for ${brandName} specifically | reference their culture, values, interview style
 - Mix of outcomes: 3 accepted, 1 rejected, 1 withdrew
 - Locations: mix of cities where ${brandName} operates
 - Questions should be specific to luxury industry and ${brandName}

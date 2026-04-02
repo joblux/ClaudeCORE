@@ -68,13 +68,13 @@ async function getRelatedArticles(article: any) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = await getArticle(params.slug)
-  if (!article) return { title: 'Article Not Found — BlogLux' }
+  if (!article) return { title: 'Article Not Found | BlogLux' }
 
   const ogImage = article.og_image_url || article.hero_image_url ||
     `/api/og?title=${encodeURIComponent(article.title)}&subtitle=${encodeURIComponent(getCategoryLabel(article.category))}&type=article`
 
   return {
-    title: `${article.title} | BlogLux — JOBLUX`,
+    title: `${article.title} | BlogLux | JOBLUX`,
     description: article.meta_description || article.excerpt || article.title,
     openGraph: {
       title: article.title,

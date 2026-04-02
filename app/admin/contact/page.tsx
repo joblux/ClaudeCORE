@@ -124,7 +124,7 @@ export default function AdminContactPage() {
               <p className="font-sans text-sm text-[#555] leading-relaxed mb-6 whitespace-pre-line">{selected.message}</p>
               <div className="font-sans text-[0.6rem] text-[#444444] mb-4">{new Date(selected.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
               <div className="flex items-center gap-2 pt-4 border-t border-[#e8e8e8]">
-                <a href={`mailto:${selected.email}?subject=${encodeURIComponent(`Re: JOBLUX — ${selected.category}${selected.subcategory ? ' — ' + selected.subcategory : ''}`)}`} className="jl-btn jl-btn-primary text-[0.6rem]">Reply</a>
+                <a href={`mailto:${selected.email}?subject=${encodeURIComponent(`Re: JOBLUX | ${selected.category}${selected.subcategory ? ' | ' + selected.subcategory : ''}`)}`} className="jl-btn jl-btn-primary text-[0.6rem]">Reply</a>
                 {selected.status !== 'replied' && (
                   <button onClick={() => updateStatus(selected.id, 'replied')} className="jl-btn jl-btn-outline text-[0.6rem]">Mark Replied</button>
                 )}

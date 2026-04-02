@@ -41,7 +41,7 @@ const TICKERS = [
 const placeholderSignals = [
   {
     id: '1', slug: 'kering-appoints-blazy-chanel', category: 'leadership',
-    headline: 'Kering appoints Matthieu Blazy as creative director of Chanel — leaves Bottega Veneta after 3 years',
+    headline: 'Kering appoints Matthieu Blazy as creative director of Chanel | leaves Bottega Veneta after 3 years',
     summary: "The third creative director change at Bottega in five years. Blazy's departure to Chanel marks a rare cross-group move at this level.",
     brand: 'Kering', region: 'Europe', published_at: new Date(Date.now() - 5 * 3600000).toISOString(),
   },
@@ -53,19 +53,19 @@ const placeholderSignals = [
   },
   {
     id: '3', slug: 'hermes-asia-expansion', category: 'expansion',
-    headline: 'Hermès opens 4 stores in Asia Pacific — Seoul flagship is largest in the region',
+    headline: 'Hermès opens 4 stores in Asia Pacific | Seoul flagship is largest in the region',
     summary: 'Hermès now operates 340+ stores globally. New stores mean 200+ retail and support roles across four markets.',
     brand: 'Hermès', region: 'Asia Pacific', published_at: new Date(Date.now() - 24 * 3600000).toISOString(),
   },
   {
     id: '4', slug: 'richemont-ynap-sale', category: 'merger_acquisition',
-    headline: 'Richemont reportedly exploring sale of YNAP online platform — focus returns to hard luxury',
+    headline: 'Richemont reportedly exploring sale of YNAP online platform | focus returns to hard luxury',
     summary: 'After years of losses, Richemont may finally exit e-commerce distribution. Digital roles at YNAP are at risk.',
     brand: 'Richemont', region: 'Global', published_at: new Date(Date.now() - 48 * 3600000).toISOString(),
   },
   {
     id: '5', slug: 'miu-miu-revenue-growth', category: 'growth',
-    headline: 'Miu Miu posts +56% revenue growth — best performing luxury brand of 2025',
+    headline: 'Miu Miu posts +56% revenue growth | best performing luxury brand of 2025',
     summary: 'Unprecedented growth driven by Gen Z appeal and strategic pricing below Prada mainline.',
     brand: 'Prada Group', region: 'Global', published_at: new Date(Date.now() - 72 * 3600000).toISOString(),
   },
@@ -107,7 +107,7 @@ export default function SignalsPage() {
         .limit(30)
       if (signalData && signalData.length > 0) setSignals(signalData)
 
-      // Talent radar — leadership/talent category signals for sidebar
+      // Talent radar | leadership/talent category signals for sidebar
       const { data: talentData } = await supabase
         .from('signals')
         .select('id, slug, headline, context_paragraph, published_at, category')
@@ -117,7 +117,7 @@ export default function SignalsPage() {
         .limit(3)
       if (talentData && talentData.length > 0) setTalentSignals(talentData)
 
-      // Coming this week — real upcoming events
+      // Coming this week | real upcoming events
       const today = new Date().toISOString().split('T')[0]
       const { data: eventData } = await supabase
         .from('events')
@@ -153,7 +153,7 @@ export default function SignalsPage() {
               Signals
             </h1>
             <p className="text-[13px] text-[#999] max-w-[500px] leading-relaxed">
-              Real-time intelligence across 150+ luxury brands. Leadership moves, financial shifts, hiring signals, expansion — verified and contextualized.
+              Real-time intelligence across 150+ luxury brands. Leadership moves, financial shifts, hiring signals, expansion | verified and contextualized.
             </p>
           </div>
           <div className="hidden md:flex items-center gap-2 mt-2">
@@ -192,7 +192,7 @@ export default function SignalsPage() {
         {/* Two-column layout */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
 
-          {/* LEFT — Signal feed */}
+          {/* LEFT | Signal feed */}
           <div className="min-w-0">
             <p className="text-[10px] text-[#999] uppercase tracking-[0.14em] mb-4">Today&apos;s signals</p>
 
@@ -239,10 +239,10 @@ export default function SignalsPage() {
             })}
           </div>
 
-          {/* RIGHT — Sidebar */}
+          {/* RIGHT | Sidebar */}
           <div className="space-y-5">
 
-            {/* Market movers — live prices coming */}
+            {/* Market movers | live prices coming */}
             <div className="bg-[#141414] border border-[#1e1e1e] rounded p-5">
               <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-4">Market movers</p>
               <div className="space-y-3">
@@ -253,10 +253,10 @@ export default function SignalsPage() {
                   </div>
                 ))}
               </div>
-              <p className="text-[10px] text-[#555] mt-4">Live prices — coming soon</p>
+              <p className="text-[10px] text-[#555] mt-4">Live prices | coming soon</p>
             </div>
 
-            {/* Talent radar — real signals from DB */}
+            {/* Talent radar | real signals from DB */}
             <div className="bg-[#141414] border border-[#1e1e1e] rounded p-5">
               <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-4">Talent radar</p>
               <div className="space-y-3">
@@ -271,7 +271,7 @@ export default function SignalsPage() {
               </div>
             </div>
 
-            {/* Coming this week — real events from DB */}
+            {/* Coming this week | real events from DB */}
             <div className="bg-[#141414] border border-[#1e1e1e] rounded p-5">
               <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-4">Coming up</p>
               <div className="space-y-3">

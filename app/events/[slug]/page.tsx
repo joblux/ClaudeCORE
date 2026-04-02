@@ -102,7 +102,7 @@ export default function EventDetailPage() {
     if (event.meta_title) {
       document.title = event.meta_title
     } else if (event.title || event.name) {
-      document.title = `${event.title || event.name} — JOBLUX Events`
+      document.title = `${event.title || event.name} | JOBLUX Events`
     }
     if (event.meta_description) {
       let metaTag = document.querySelector('meta[name="description"]')
@@ -243,7 +243,7 @@ export default function EventDetailPage() {
             {/* Divider */}
             <div className="border-t border-[#222] mb-8" />
 
-            {/* Long description (full editorial body) — falls back to short description */}
+            {/* Long description (full editorial body) | falls back to short description */}
             {(event.long_description || event.description) && (
               <div className="text-[15px] text-[#ccc] leading-[1.8] space-y-4 mb-10">
                 {(event.long_description || event.description).split('\n').map((p: string, i: number) => (
@@ -314,7 +314,7 @@ export default function EventDetailPage() {
               </div>
             )}
 
-            {/* Career context — from DB */}
+            {/* Career context | from DB */}
             {event.career_context && (
               <div className="bg-[#141414] border border-[#1e1e1e] rounded p-6 mb-10">
                 <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-3">Career Intelligence</p>

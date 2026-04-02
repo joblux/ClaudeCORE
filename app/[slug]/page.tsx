@@ -99,7 +99,7 @@ export default async function PublicProfilePage({ params }: Props) {
                   <div key={i} style={{ paddingBottom: '16px', marginBottom: '16px', borderBottom: i < profile.experience.length - 1 ? '0.5px solid #1e1e1e' : 'none' }}>
                     <div style={{ fontSize: '14px', fontWeight: 500, color: '#fff', marginBottom: '4px' }}>{exp.role}</div>
                     <div style={{ fontSize: '13px', color: '#fff', marginBottom: '4px', opacity: 0.7 }}>{exp.brand}{exp.group ? ` · ${exp.group}` : ''}</div>
-                    <div style={{ fontSize: '11px', color: '#fff', opacity: 0.4 }}>{exp.from}{exp.current ? ' — Present' : exp.to ? ` — ${exp.to}` : ''}{exp.location ? ` · ${exp.location}` : ''}</div>
+                    <div style={{ fontSize: '11px', color: '#fff', opacity: 0.4 }}>{exp.from}{exp.current ? ' | Present' : exp.to ? ` | ${exp.to}` : ''}{exp.location ? ` · ${exp.location}` : ''}</div>
                   </div>
                 ))}
               </div>

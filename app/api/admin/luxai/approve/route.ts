@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Research Report or Insider Voice approval — publish from bloglux_articles
+    // Research Report or Insider Voice approval | publish from bloglux_articles
     if (source === 'bloglux_articles' || type === 'report' || type === 'insider_voice') {
       const { data, error } = await supabase
         .from('bloglux_articles')

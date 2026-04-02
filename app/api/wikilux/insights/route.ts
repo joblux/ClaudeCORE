@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
       { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' } }
     )
   } catch {
-    // Return empty array instead of 500 — insights are non-critical
+    // Return empty array instead of 500 | insights are non-critical
     return NextResponse.json({ insights: [], total: 0 })
   }
 }

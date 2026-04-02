@@ -14,7 +14,7 @@ const supabase = createClient(
  * POST /api/opportunities/apply
  * Self-apply to a search assignment as an authenticated member.
  *
- * Body: { jobId: string } — the search_assignment id to apply to
+ * Body: { jobId: string } | the search_assignment id to apply to
  * Returns: { success: true, application_id: string }
  */
 export async function POST(req: NextRequest) {

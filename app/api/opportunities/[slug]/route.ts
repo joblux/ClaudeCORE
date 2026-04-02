@@ -6,7 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// Public-safe fields — never expose internal/private columns
+// Public-safe fields | never expose internal/private columns
 const PUBLIC_FIELDS = [
   'id',
   'title',
@@ -56,7 +56,7 @@ function isUUID(value: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// GET /api/opportunities/[slug] — fetch a single active opportunity by slug or UUID
+// GET /api/opportunities/[slug] | fetch a single active opportunity by slug or UUID
 //   No auth required. Returns only public-safe fields.
 // ---------------------------------------------------------------------------
 export async function GET(

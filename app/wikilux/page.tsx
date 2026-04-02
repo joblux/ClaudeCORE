@@ -5,7 +5,7 @@ import { WIKILUX_CATEGORY_ICONS } from '@/lib/sector-icons'
 import WikiLuxSearch from './WikiLuxSearch'
 
 export const metadata: Metadata = {
-  title: 'Brand Intelligence — 500+ Luxury Maisons | JOBLUX',
+  title: 'Brand Intelligence | 500+ Luxury Maisons | JOBLUX',
   description: 'Explore career intelligence, salary data, and interview insights for over 500 luxury brands including LVMH, Kering, Richemont, Hermès, Chanel and more.',
   alternates: { canonical: 'https://www.joblux.com/wikilux' },
   openGraph: {
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'WikiLux — The Luxury Encyclopedia | JOBLUX',
+    title: 'WikiLux | The Luxury Encyclopedia | JOBLUX',
     description: 'The definitive directory of luxury maisons. Career intelligence for 500+ brands.',
     images: ['/api/og?title=WikiLux&subtitle=500%2B+Luxury+Maisons&type=wikilux'],
   },
@@ -67,7 +67,7 @@ export default function WikiLuxPage() {
             500+ luxury maisons. One intelligence source.
           </h1>
           <p className="font-sans text-sm text-[#888] mb-8 max-w-lg mx-auto">
-            Career intelligence, salary benchmarks, interview insights, and hiring signals for every major luxury house — from LVMH to independent ateliers.
+            Career intelligence, salary benchmarks, interview insights, and hiring signals for every major luxury house | from LVMH to independent ateliers.
           </p>
           <div className="flex items-center justify-center gap-8 flex-wrap">
             {[
@@ -86,7 +86,7 @@ export default function WikiLuxPage() {
 
       <div className="jl-container py-10">
 
-        <p className="font-sans text-sm text-[#999] leading-relaxed mb-8 max-w-2xl">The brand intelligence directory is built on public data, AI research, and — most importantly — confidential contributions from professionals who have worked inside these houses.</p>
+        <p className="font-sans text-sm text-[#999] leading-relaxed mb-8 max-w-2xl">The brand intelligence directory is built on public data, AI research, and | most importantly | confidential contributions from professionals who have worked inside these houses.</p>
 
         <WikiLuxSearch brands={BRANDS} categories={categories} />
 

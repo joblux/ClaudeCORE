@@ -64,7 +64,7 @@ function buildJsonLd(assignment: any): object {
   if (!assignment.is_confidential && assignment.maison) {
     ld.hiringOrganization = { '@type': 'Organization', name: assignment.maison }
   } else {
-    ld.hiringOrganization = { '@type': 'Organization', name: 'Confidential — Leading Luxury Maison' }
+    ld.hiringOrganization = { '@type': 'Organization', name: 'Confidential | Leading Luxury Maison' }
   }
   if (assignment.city || assignment.country) {
     ld.jobLocation = {
@@ -91,7 +91,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   const displayMaison = assignment.is_confidential ? 'Leading Luxury Maison' : assignment.maison || 'JOBLUX'
   const location = [assignment.city, assignment.country].filter(Boolean).join(', ')
-  const title = assignment.seo_title || `${assignment.title} at ${displayMaison} — ${location} | JOBLUX`
+  const title = assignment.seo_title || `${assignment.title} at ${displayMaison} | ${location} | JOBLUX`
   const desc = assignment.seo_description || (assignment.description || '').slice(0, 160)
 
   return {

@@ -16,7 +16,7 @@ export default function PendingPage() {
     if (userStatus === 'approved') router.push('/dashboard')
   }, [userStatus, router])
 
-  // Silent background check — no visible spinner
+  // Silent background check | no visible spinner
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
@@ -71,7 +71,7 @@ export default function PendingPage() {
             {firstName ? `Thank you, ${firstName}.` : 'Thank you.'}
           </h3>
           <p className="text-sm text-[#999] mb-2 leading-relaxed">Your request is under review.</p>
-          <p className="text-xs text-[#999] leading-relaxed mb-8">We personally review every profile. You&apos;ll receive an email once your access is confirmed — typically within 24 hours.</p>
+          <p className="text-xs text-[#999] leading-relaxed mb-8">We personally review every profile. You&apos;ll receive an email once your access is confirmed | typically within 24 hours.</p>
           <div className="border-t border-[#2a2a2a] pt-6">
             <p className="text-xs text-[#ccc] leading-relaxed">
               In the meantime, explore{' '}

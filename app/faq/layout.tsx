@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Help & FAQ — JOBLUX',
+  title: 'Help & FAQ | JOBLUX',
   description:
-    'Everything you need to know about JOBLUX — access, careers intelligence, contributions, privacy, and how to reach us.',
+    'Everything you need to know about JOBLUX | access, careers intelligence, contributions, privacy, and how to reach us.',
   alternates: { canonical: 'https://www.joblux.com/faq' },
 }
 

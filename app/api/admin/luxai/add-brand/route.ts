@@ -57,8 +57,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       message: generated
-        ? `Brand "${name}" created and content generated — check approval queue`
-        : `Brand "${name}" created as empty draft — generate content manually`,
+        ? `Brand "${name}" created and content generated | check approval queue`
+        : `Brand "${name}" created as empty draft | generate content manually`,
       data: { slug, brand_name: name, generated }
     })
   } catch (error: any) {

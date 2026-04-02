@@ -847,7 +847,7 @@ export default function BrandDetailPage() {
               <div className="flex flex-col items-center justify-center py-24">
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">SALARY INTELLIGENCE</p>
                 <p className="text-sm text-[#999] mb-1">Salary data for {brand.name} is being prepared.</p>
-                <p className="text-xs text-[#555]">Check back soon — our AI is mapping compensation across roles and markets.</p>
+                <p className="text-xs text-[#555]">Check back soon | our AI is mapping compensation across roles and markets.</p>
               </div>
             )}
           </div>

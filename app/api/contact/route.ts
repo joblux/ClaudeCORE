@@ -15,12 +15,12 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { name, email, category, subcategory, message, website_url, form_load_timestamp } = body
 
-    // 1. Honeypot — if filled, silently return success (trap bots)
+    // 1. Honeypot | if filled, silently return success (trap bots)
     if (website_url) {
       return NextResponse.json({ success: true, message: 'Message sent successfully' })
     }
 
-    // 2. Timing check — if submitted in under 5 seconds, silently return success
+    // 2. Timing check | if submitted in under 5 seconds, silently return success
     if (form_load_timestamp && Date.now() - form_load_timestamp < 5000) {
       return NextResponse.json({ success: true, message: 'Message sent successfully' })
     }
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid email address' }, { status: 400 })
     }
 
-    // 4. Rate limit by IP — max 3 per hour
+    // 4. Rate limit by IP | max 3 per hour
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
     const { count } = await supabase
@@ -92,12 +92,12 @@ export async function POST(req: NextRequest) {
     const { html: adminHtml, text: adminText } = adminNewContactEmail({
       name: name.trim(),
       email: email.trim(),
-      subject: `${category}${subcategory ? ' — ' + subcategory : ''}`,
+      subject: `${category}${subcategory ? ' | ' + subcategory : ''}`,
       messagePreview: message.trim().slice(0, 300),
     })
     sendEmail({
       to: ADMIN_ALERT_EMAIL,
-      subject: `New contact: ${name.trim()} — ${category}`,
+      subject: `New contact: ${name.trim()} | ${category}`,
       body: adminText,
       bodyHtml: adminHtml,
     }).catch(() => {})

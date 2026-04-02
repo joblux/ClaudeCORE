@@ -65,7 +65,7 @@ function JoinContent() {
         // User already picked a tier but hasn't finished the form
         router.push("/members/complete-registration");
       } else {
-        // Brand new user — needs to pick a tier
+        // Brand new user | needs to pick a tier
         router.push("/select-profile");
       }
     }

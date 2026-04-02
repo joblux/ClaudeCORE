@@ -877,7 +877,7 @@ export default function WikiLuxBrandClient({
                       <textarea
                         value={contributeText}
                         onChange={(e) => setContributeText(e.target.value)}
-                        placeholder={`Share what it's like to work at ${brand.name} — culture, career growth, hiring process, compensation insights...`}
+                        placeholder={`Share what it's like to work at ${brand.name} | culture, career growth, hiring process, compensation insights...`}
                         className="jl-input w-full min-h-[140px] resize-y"
                         maxLength={1000}
                       />
@@ -888,7 +888,7 @@ export default function WikiLuxBrandClient({
                     </div>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" checked={contributeAnon} onChange={(e) => setContributeAnon(e.target.checked)} className="accent-[#a58e28]" />
-                      <span className="font-sans text-xs text-[#888]">Post anonymously — your name won&rsquo;t appear</span>
+                      <span className="font-sans text-xs text-[#888]">Post anonymously | your name won&rsquo;t appear</span>
                     </label>
                   </div>
                   {contributeError && <p className="font-sans text-xs text-red-500 mt-3">{contributeError}</p>}

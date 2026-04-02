@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No contacts provided' }, { status: 400 })
     }
 
-    // Batch insert — handle up to 1000+ contacts
+    // Batch insert | handle up to 1000+ contacts
     const BATCH_SIZE = 500
     let successCount = 0
     let errorCount = 0

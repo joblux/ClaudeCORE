@@ -164,18 +164,18 @@ async function generateBrandContent(slug: string, brandName: string) {
 async function callClaude(brandName: string) {
   const prompt = `You are a luxury industry analyst writing for JOBLUX, a luxury careers intelligence platform. Generate encyclopedic content for ${brandName}.
 
-Return ONLY a JSON object (no markdown, no explanation, no backticks) with this EXACT structure. Every field is MANDATORY — do not skip any.
+Return ONLY a JSON object (no markdown, no explanation, no backticks) with this EXACT structure. Every field is MANDATORY | do not skip any.
 
 CRITICAL: Each prose field has a STRICT CHARACTER LIMIT shown in brackets [max N chars]. Count characters carefully. If a field exceeds its limit, truncate it. This is a hard layout constraint.
 
 {
   "tagline": "One sentence capturing the brand's essence [max 80 chars]",
-  "brand_dna": "Brand identity analysis — codes, position, what makes it unique [max 500 chars]",
+  "brand_dna": "Brand identity analysis | codes, position, what makes it unique [max 500 chars]",
   "history": [
     {"year": "1837", "event": "One-sentence milestone [max 120 chars per event]"}
   ],
   "founder_name": "Full name of the founder",
-  "founder": "Founder biography — birth, origins, how they started, legacy [max 500 chars]",
+  "founder": "Founder biography | birth, origins, how they started, legacy [max 500 chars]",
   "founder_facts": [
     "Short fact [max 80 chars each]",
     "Second fact",
@@ -194,9 +194,9 @@ CRITICAL: Each prose field has a STRICT CHARACTER LIMIT shown in brackets [max N
     {"name": "Full Name", "role": "CEO", "since": "2013"},
     {"name": "Full Name", "role": "Creative Director", "since": "2020"}
   ],
-  "creative_directors": "History of creative leadership — past and present directors, impact [max 400 chars]",
+  "creative_directors": "History of creative leadership | past and present directors, impact [max 400 chars]",
   "careers": {
-    "prose": "What it's like to work here — culture, pace, reputation [max 300 chars]",
+    "prose": "What it's like to work here | culture, pace, reputation [max 300 chars]",
     "paths": ["Retail & boutique management", "Artisan & métiers", "Marketing & communications", "Digital & e-commerce", "Finance & strategy", "Supply chain"]
   },
   "hiring_intelligence": {
@@ -206,16 +206,16 @@ CRITICAL: Each prose field has a STRICT CHARACTER LIMIT shown in brackets [max N
       {"title": "Creativity", "desc": "One sentence [max 80 chars]"},
       {"title": "Discretion", "desc": "One sentence [max 80 chars]"}
     ],
-    "culture": "Internal work culture — atmosphere, sentiment, turnover [max 250 chars]",
-    "growth": "Career growth — expansion, mobility, training [max 250 chars]",
-    "pace": "Work pace — fast/slow, bureaucratic/agile, work-life balance [max 250 chars]",
-    "access": "How to get hired — competitiveness, networking, interview process [max 250 chars]"
+    "culture": "Internal work culture | atmosphere, sentiment, turnover [max 250 chars]",
+    "growth": "Career growth | expansion, mobility, training [max 250 chars]",
+    "pace": "Work pace | fast/slow, bureaucratic/agile, work-life balance [max 250 chars]",
+    "access": "How to get hired | competitiveness, networking, interview process [max 250 chars]"
   },
   "quote": {
     "text": "A real, verifiable quote from the founder or creative director [max 120 chars]",
     "author": "Full Name, Title"
   },
-  "market_position": "Competitive positioning — peers, strengths, market segment [max 400 chars]",
+  "market_position": "Competitive positioning | peers, strengths, market segment [max 400 chars]",
   "presence": [
     {"region": "Europe", "detail": "Headquarters + N boutiques"},
     {"region": "Asia Pacific", "detail": "N boutiques, strongest in..."},
@@ -246,7 +246,7 @@ RULES:
 - careers.paths: 6-8 departments relevant to this brand.
 - hiring_intelligence.values: Exactly 4. Short title + one sentence each.
 - quote: Real, verifiable quote only.
-- stock.is_public: false for private companies — set exchange/ticker/market_cap to null.
+- stock.is_public: false for private companies | set exchange/ticker/market_cap to null.
 - Encyclopedic, factual tone. No marketing language.
 - Output valid JSON only. No markdown. No backticks. No explanation.`
 

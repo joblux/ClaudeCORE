@@ -8,14 +8,14 @@ import Image from 'next/image'
 const PROFILES = [
   {
     key: 'rising', overline: 'EMERGING', title: 'Emerging Professional',
-    description: 'For those at the beginning of their luxury journey — analysts, assistants, coordinators, and recent graduates.',
+    description: 'For those at the beginning of their luxury journey | analysts, assistants, coordinators, and recent graduates.',
     approval: 'Reviewed by JOBLUX', featured: false,
-    features: ['Salary intelligence across markets','Interview experiences at major maisons','Brand intelligence — 500+ houses','The Brief — biweekly intelligence digest','Contribute salary data & experiences'],
+    features: ['Salary intelligence across markets','Interview experiences at major maisons','Brand intelligence | 500+ houses','The Brief | biweekly intelligence digest','Contribute salary data & experiences'],
     cta: 'Select Emerging',
   },
   {
     key: 'pro', overline: 'ESTABLISHED', title: 'Established Professional',
-    description: 'For mid-level professionals building real traction in luxury — managers, specialists, buyers, and boutique leaders.',
+    description: 'For mid-level professionals building real traction in luxury | managers, specialists, buyers, and boutique leaders.',
     approval: 'Reviewed by JOBLUX', featured: false,
     features: ['Everything in Emerging','Deeper benchmarks by market & sector','Track sectors & brands of interest','Save intelligence for later reference','Express interest in search assignments'],
     cta: 'Select Established',
@@ -88,7 +88,7 @@ export default function SelectProfilePage() {
     <div className="min-h-screen">
       <div className="bg-[#1a1a1a] py-8 md:py-10">
         <div className="max-w-[1200px] mx-auto px-7 text-center">
-          <div className="text-[0.65rem] font-semibold tracking-[0.2em] uppercase text-[#a58e28] mb-4">Step 2 of 5 — Select your profile</div>
+          <div className="text-[0.65rem] font-semibold tracking-[0.2em] uppercase text-[#a58e28] mb-4">Step 2 of 5 | Select your profile</div>
           <h1 className="text-2xl md:text-4xl font-light text-white mb-5 leading-tight max-w-3xl mx-auto" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
             Access begins with the right profile.
           </h1>

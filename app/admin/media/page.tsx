@@ -334,7 +334,7 @@ export default function AdminMediaPage() {
           <div className="flex gap-2 mb-6">
             <input
               type="text"
-              placeholder="Search Unsplash — luxury fashion, hotel lobby..."
+              placeholder="Search Unsplash | luxury fashion, hotel lobby..."
               value={unsplashQuery}
               onChange={(e) => setUnsplashQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && searchUnsplash()}

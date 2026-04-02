@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       current_salary && `Current Salary: ${current_salary}`,
     ].filter(Boolean).join('\n')
 
-    const prompt = `You are LUXAI, the salary intelligence engine for JOBLUX — a luxury careers platform.
+    const prompt = `You are LUXAI, the salary intelligence engine for JOBLUX | a luxury careers platform.
 
 Generate a realistic salary benchmark for the following profile:
 

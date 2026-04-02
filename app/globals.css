@@ -10,7 +10,7 @@
   box-sizing: border-box;
 }
 
-/* ── Root — mobile viewport fix (iOS Safari + Android Chrome) ── */
+/* ── Root | mobile viewport fix (iOS Safari + Android Chrome) ── */
 html {
   height: -webkit-fill-available;
   scroll-behavior: smooth;
@@ -41,7 +41,7 @@ body {
   font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
 }
 
-/* ── Responsive type scale — clamp so it works on any screen ── */
+/* ── Responsive type scale | clamp so it works on any screen ── */
 h1 { font-size: clamp(1.8rem, 5vw, 3.5rem); line-height: 1.15; }
 h2 { font-size: clamp(1.4rem, 3.5vw, 2.25rem); line-height: 1.2; }
 h3 { font-size: clamp(1.1rem, 2.5vw, 1.5rem); line-height: 1.3; }
@@ -67,7 +67,7 @@ input, textarea, select, button {
   border-radius: 0;
 }
 
-/* ── Minimum tap target size — mobile accessibility ── */
+/* ── Minimum tap target size | mobile accessibility ── */
 button,
 a,
 [role="button"],
@@ -85,7 +85,7 @@ a, button {
   touch-action: manipulation;
 }
 
-/* ── Focus — visible for keyboard users, clean for mouse ── */
+/* ── Focus | visible for keyboard users, clean for mouse ── */
 :focus { outline: none; }
 :focus-visible {
   outline: 2px solid #a58e28;
@@ -110,7 +110,7 @@ a {
   color: inherit;
 }
 
-/* ── Scrollbar — webkit browsers ── */
+/* ── Scrollbar | webkit browsers ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
@@ -121,7 +121,7 @@ a {
   background: rgba(165, 142, 40, 0.6);
 }
 
-/* ── Safe area insets — iPhone X+ notch ── */
+/* ── Safe area insets | iPhone X+ notch ── */
 .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 .pt-safe { padding-top: env(safe-area-inset-top); }
 .pl-safe { padding-left: env(safe-area-inset-left); }
@@ -133,7 +133,7 @@ a {
 .border-gold { border-color: #a58e28; }
 
 /* ══════════════════════════════════════════════════════
-   JOBLUX DESIGN SYSTEM — Component Classes
+   JOBLUX DESIGN SYSTEM | Component Classes
    ══════════════════════════════════════════════════════ */
 
 @layer components {

@@ -122,9 +122,9 @@ export default function TermsOfServicePage() {
           </p>
         </section>
 
-        {/* ── 4. The Platform — Free Against Contribution ── */}
+        {/* ── 4. The Platform | Free Against Contribution ── */}
         <section id="free-against-contribution">
-          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">4. The Platform — Free Against Contribution</h2>
+          <h2 className="jl-serif text-2xl font-semibold mb-4 text-white">4. The Platform | Free Against Contribution</h2>
           <p>
             JOBLUX is offered free of charge to individual users. There are no subscription fees,
             recurring fees, or hidden costs for accessing the core features of the Platform. Our

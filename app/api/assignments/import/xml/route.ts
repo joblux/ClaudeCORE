@@ -136,7 +136,7 @@ function parseGenericXML(data: any): Record<string, any>[] {
       jobs.push(job)
     }
   } else {
-    // Single item — flatten the whole thing
+    // Single item | flatten the whole thing
     const flattened = flattenObject(data)
     const job: Record<string, any> = {}
     for (const [key, value] of Object.entries(flattened)) {
@@ -248,7 +248,7 @@ export async function POST(request: NextRequest) {
       format = 'linkedin-feed'
       rows = parseLinkedInXML(result)
     } else {
-      // Generic XML — flatten to key-value pairs
+      // Generic XML | flatten to key-value pairs
       format = 'generic'
       rows = parseGenericXML(result)
     }

@@ -13,7 +13,7 @@ const anthropic = new Anthropic({
 })
 
 function buildPrompt(brand: Brand) {
-  return `You are a luxury industry encyclopedia editor writing for JOBLUX — the luxury talents society for industry professionals. Write a comprehensive encyclopedia entry for ${brand.name}.
+  return `You are a luxury industry encyclopedia editor writing for JOBLUX | the luxury talents society for industry professionals. Write a comprehensive encyclopedia entry for ${brand.name}.
 
 Return ONLY a valid JSON object with these exact fields (no markdown, no backticks, just pure JSON):
 
@@ -31,12 +31,12 @@ Return ONLY a valid JSON object with these exact fields (no markdown, no backtic
     { "name": "product name", "year": "launch year", "description": "2-3 sentences" },
     { "name": "product name", "year": "launch year", "description": "2-3 sentences" }
   ],
-  "brand_dna": "2 paragraphs on what makes this brand unique — its codes, values, aesthetic philosophy, what distinguishes it from competitors",
+  "brand_dna": "2 paragraphs on what makes this brand unique | its codes, values, aesthetic philosophy, what distinguishes it from competitors",
   "market_position": "2 paragraphs on where this brand sits in the luxury hierarchy, its pricing strategy, target clientele, competitive landscape",
   "current_strategy": "2 paragraphs on current business strategy, recent moves, digital approach, sustainability initiatives, key markets being developed",
   "hiring_intelligence": {
     "culture": "2 paragraphs on the brand's internal culture, values they hire for, what it's really like to work there based on industry knowledge",
-    "profiles": "2 paragraphs on the typical candidate profiles they seek — backgrounds, qualities, experience, what gives candidates an edge",
+    "profiles": "2 paragraphs on the typical candidate profiles they seek | backgrounds, qualities, experience, what gives candidates an edge",
     "process": "1 paragraph on their typical recruitment process and what to expect",
     "tips": ["tip 1 for candidates", "tip 2", "tip 3", "tip 4"]
   },

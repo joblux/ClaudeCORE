@@ -17,7 +17,7 @@ async function ensureBucket() {
   }
 }
 
-// GET — list photos for a hotel
+// GET | list photos for a hotel
 export async function GET(req: NextRequest) {
   const hotelId = req.nextUrl.searchParams.get('hotel_id')
   if (!hotelId) return NextResponse.json({ error: 'hotel_id required' }, { status: 400 })
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ photos: data })
 }
 
-// POST — upload photos (multipart form)
+// POST | upload photos (multipart form)
 export async function POST(req: NextRequest) {
   await ensureBucket()
 
@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ results })
 }
 
-// PATCH — update a photo (caption, credit, is_cover)
+// PATCH | update a photo (caption, credit, is_cover)
 export async function PATCH(req: NextRequest) {
   const body = await req.json()
   const { id, caption, credit, alt, is_cover } = body
@@ -154,7 +154,7 @@ export async function PATCH(req: NextRequest) {
   return NextResponse.json({ photo: data })
 }
 
-// DELETE — remove a photo
+// DELETE | remove a photo
 export async function DELETE(req: NextRequest) {
   const { id } = await req.json()
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })

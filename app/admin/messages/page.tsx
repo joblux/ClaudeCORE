@@ -301,7 +301,7 @@ export default function AdminMessagesPage() {
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
         {/* =============================================================== */}
-        {/* LEFT PANEL — Conversation List                                  */}
+        {/* LEFT PANEL | Conversation List                                  */}
         {/* =============================================================== */}
         <div
           className="jl-panel-left"
@@ -552,7 +552,7 @@ export default function AdminMessagesPage() {
         </div>
 
         {/* =============================================================== */}
-        {/* RIGHT PANEL — Conversation Detail                               */}
+        {/* RIGHT PANEL | Conversation Detail                               */}
         {/* =============================================================== */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#fff', minWidth: 0 }}>
           {!activeId ? (
@@ -632,7 +632,7 @@ export default function AdminMessagesPage() {
                       style={{ fontSize: 11, color: GOLD, textDecoration: 'none', fontWeight: 500 }}
                     >
                       {activeConvo.search_assignment.maison
-                        ? `${activeConvo.search_assignment.maison} — `
+                        ? `${activeConvo.search_assignment.maison} | `
                         : ''}
                       {activeConvo.search_assignment.title}
                       {activeConvo.search_assignment.reference_number
@@ -1077,7 +1077,7 @@ function TemplateSelector({
                 <span style={{ fontWeight: 500 }}>{t.name}</span>
                 {t.subject && (
                   <span style={{ color: MUTED, marginLeft: 8, fontSize: 11 }}>
-                    — {t.subject}
+                    | {t.subject}
                   </span>
                 )}
               </button>

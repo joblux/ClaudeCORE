@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       languages && `Languages: ${languages}`,
     ].filter(Boolean).join('\n')
 
-    const prompt = `You are LUXAI, the salary intelligence engine for JOBLUX — a luxury careers platform.
+    const prompt = `You are LUXAI, the salary intelligence engine for JOBLUX | a luxury careers platform.
 
 Calculate a personalized salary estimate for this profile:
 

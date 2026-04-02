@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       `Locations: ${locationsList.join(', ')}`,
     ].filter(Boolean).join('\n')
 
-    const prompt = `You are LUXAI, the salary intelligence engine for JOBLUX — a luxury careers platform.
+    const prompt = `You are LUXAI, the salary intelligence engine for JOBLUX | a luxury careers platform.
 
 Generate a realistic salary comparison for the following:
 

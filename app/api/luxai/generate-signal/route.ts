@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate signal
-    const prompt = `You are LUXAI, the luxury industry intelligence engine for JOBLUX — a careers platform.
+    const prompt = `You are LUXAI, the luxury industry intelligence engine for JOBLUX | a careers platform.
 
 Generate ONE realistic luxury industry signal (news/intelligence) for today (${new Date().toLocaleDateString()}).
 

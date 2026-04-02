@@ -56,7 +56,7 @@ export default function CompleteRegistrationPage() {
 
   const [step, setStep] = useState(3)
 
-  // Step 3 — Essentials
+  // Step 3 | Essentials
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [phoneCode, setPhoneCode] = useState(() => detectPhoneCode())
@@ -64,7 +64,7 @@ export default function CompleteRegistrationPage() {
   const [city, setCity] = useState('')
   const [country, setCountry] = useState('')
 
-  // Step 4 — CV Upload
+  // Step 4 | CV Upload
   const [cvFile, setCvFile] = useState<File | null>(null)
   const [cvUploading, setCvUploading] = useState(false)
   const [cvUrl, setCvUrl] = useState('')
@@ -184,7 +184,7 @@ export default function CompleteRegistrationPage() {
     <main className="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-[520px] bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm px-9 pt-8 pb-11">
 
-        {/* Progress bar — inside card */}
+        {/* Progress bar | inside card */}
         <div className="flex items-center justify-center gap-0 mb-8 flex-wrap">
           {STEPS.map((s, i) => (
             <div key={s.num} className="flex items-center">
@@ -209,7 +209,7 @@ export default function CompleteRegistrationPage() {
 
         {error && <div className="mb-5 p-3 border border-red-800 text-red-400 rounded-sm" style={{ fontSize: '12px' }}>{error}</div>}
 
-        {/* ========== STEP 3 — Essentials ========== */}
+        {/* ========== STEP 3 | Essentials ========== */}
         {step === 3 && (
           <div>
             <h2 className="text-white text-center font-normal mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '22px' }}>Your essentials</h2>
@@ -257,7 +257,7 @@ export default function CompleteRegistrationPage() {
           </div>
         )}
 
-        {/* ========== STEP 4 — CV Upload ========== */}
+        {/* ========== STEP 4 | CV Upload ========== */}
         {step === 4 && (
           <div>
             <h2 className="text-white text-center font-normal mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '22px' }}>Upload your CV</h2>

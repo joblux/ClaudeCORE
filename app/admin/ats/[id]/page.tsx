@@ -18,7 +18,7 @@ import {
 } from "@/types/application";
 
 // ---------------------------------------------------------------------------
-// Design tokens — JOBLUX palette
+// Design tokens | JOBLUX palette
 // ---------------------------------------------------------------------------
 const GOLD = "#444";
 const BLACK = "#1a1a1a";

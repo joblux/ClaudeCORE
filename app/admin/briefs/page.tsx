@@ -60,7 +60,7 @@ export default function AdminBriefsPage() {
       .finally(() => setLoading(false))
   }, [isAdmin, statusFilter, search])
 
-  // Debounced search — submit on Enter or after typing stops
+  // Debounced search | submit on Enter or after typing stops
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') setSearch(searchInput)
   }
@@ -160,7 +160,7 @@ export default function AdminBriefsPage() {
                         {brief.reference_number || '—'}
                       </td>
 
-                      {/* Title — links to edit */}
+                      {/* Title | links to edit */}
                       <td style={{ padding: '12px 12px' }}>
                         <Link
                           href={`/admin/briefs/new?id=${brief.id}`}
@@ -170,7 +170,7 @@ export default function AdminBriefsPage() {
                         </Link>
                       </td>
 
-                      {/* Maison — show "Confidential" if is_confidential */}
+                      {/* Maison | show "Confidential" if is_confidential */}
                       <td style={{ padding: '12px 12px', color: '#888', fontSize: 12 }}>
                         {brief.is_confidential ? (
                           <span style={{ fontStyle: 'italic', color: '#444' }}>Confidential</span>

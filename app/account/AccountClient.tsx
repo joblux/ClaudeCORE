@@ -242,7 +242,7 @@ export default function AccountClient({ member }: { member: any }) {
             <>
               {emailStep === 1 && (
                 <div>
-                  <div style={{ fontSize: '11px', color: '#888', letterSpacing: '0.06em', marginBottom: '20px' }}>Step 1 of 3 — Enter email addresses</div>
+                  <div style={{ fontSize: '11px', color: '#888', letterSpacing: '0.06em', marginBottom: '20px' }}>Step 1 of 3 | Enter email addresses</div>
                   <div style={{ background: '#141414', border: '0.5px solid #2a2a2a', borderRadius: '8px', padding: '28px' }}>
                     <h2 style={{ fontFamily: 'Georgia, serif', fontWeight: 400, fontSize: '20px', color: '#fff', margin: '0 0 8px' }}>Invite by email</h2>
                     <p style={{ fontSize: '13px', color: '#fff', opacity: 0.4, margin: '0 0 20px', lineHeight: 1.7 }}>
@@ -267,7 +267,7 @@ export default function AccountClient({ member }: { member: any }) {
 
               {emailStep === 2 && (
                 <div>
-                  <div style={{ fontSize: '11px', color: '#888', letterSpacing: '0.06em', marginBottom: '20px' }}>Step 2 of 3 — Review & confirm</div>
+                  <div style={{ fontSize: '11px', color: '#888', letterSpacing: '0.06em', marginBottom: '20px' }}>Step 2 of 3 | Review & confirm</div>
                   <div style={{ background: '#141414', border: '0.5px solid #2a2a2a', borderRadius: '8px', padding: '28px' }}>
                     <h2 style={{ fontFamily: 'Georgia, serif', fontWeight: 400, fontSize: '20px', color: '#fff', margin: '0 0 6px' }}>Review contacts</h2>
                     <p style={{ fontSize: '13px', color: '#fff', opacity: 0.4, margin: '0 0 20px' }}>3 contacts found. Deselect anyone you don't want to invite.</p>
@@ -321,7 +321,7 @@ export default function AccountClient({ member }: { member: any }) {
             <>
               {gmailStep === 1 && (
                 <div>
-                  <div style={{ fontSize: '11px', color: '#888', letterSpacing: '0.06em', marginBottom: '20px' }}>Step 1 of 3 — Connect Google account</div>
+                  <div style={{ fontSize: '11px', color: '#888', letterSpacing: '0.06em', marginBottom: '20px' }}>Step 1 of 3 | Connect Google account</div>
                   <div style={{ background: '#141414', border: '0.5px solid #2a2a2a', borderRadius: '8px', padding: '36px', textAlign: 'center' }}>
                     <svg width="48" height="48" viewBox="0 0 24 24" style={{ margin: '0 auto 16px', display: 'block' }}>
                       <path fill="#EA4335" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
@@ -330,7 +330,7 @@ export default function AccountClient({ member }: { member: any }) {
                       <path fill="#34A853" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
                     <h2 style={{ fontFamily: 'Georgia, serif', fontWeight: 400, fontSize: '20px', color: '#fff', margin: '0 0 10px' }}>Import from Gmail</h2>
-                    <p style={{ fontSize: '13px', color: '#fff', opacity: 0.4, margin: '0 0 24px', lineHeight: 1.7 }}>Connect your Google account to import contact names and emails. We read nothing else — no emails, no calendar.</p>
+                    <p style={{ fontSize: '13px', color: '#fff', opacity: 0.4, margin: '0 0 24px', lineHeight: 1.7 }}>Connect your Google account to import contact names and emails. We read nothing else | no emails, no calendar.</p>
                     <div style={{ background: '#0f0f0f', border: '0.5px solid #1e1e1e', borderRadius: '6px', padding: '14px', marginBottom: '24px', textAlign: 'left' }}>
                       <div style={{ fontSize: '10px', color: '#fff', opacity: 0.35, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>We only access</div>
                       <div style={{ fontSize: '12px', color: '#ccc', lineHeight: 2 }}>✓ Contact names<br />✓ Email addresses<br />✗ Emails, calendar, or any other data</div>
@@ -345,7 +345,7 @@ export default function AccountClient({ member }: { member: any }) {
 
               {gmailStep === 2 && (
                 <div>
-                  <div style={{ fontSize: '11px', color: '#888', letterSpacing: '0.06em', marginBottom: '20px' }}>Step 2 of 3 — Select contacts to invite</div>
+                  <div style={{ fontSize: '11px', color: '#888', letterSpacing: '0.06em', marginBottom: '20px' }}>Step 2 of 3 | Select contacts to invite</div>
                   <div style={{ background: '#141414', border: '0.5px solid #2a2a2a', borderRadius: '8px', padding: '28px' }}>
                     <h2 style={{ fontFamily: 'Georgia, serif', fontWeight: 400, fontSize: '20px', color: '#fff', margin: '0 0 6px' }}>248 contacts found</h2>
                     <p style={{ fontSize: '13px', color: '#fff', opacity: 0.4, margin: '0 0 16px' }}>Select who you'd like to invite to JOBLUX.</p>
@@ -399,7 +399,7 @@ export default function AccountClient({ member }: { member: any }) {
             <>
               {linkedinStep === 1 && (
                 <div>
-                  <div style={{ fontSize: '11px', color: '#888', letterSpacing: '0.06em', marginBottom: '20px' }}>Step 1 of 3 — Connect LinkedIn account</div>
+                  <div style={{ fontSize: '11px', color: '#888', letterSpacing: '0.06em', marginBottom: '20px' }}>Step 1 of 3 | Connect LinkedIn account</div>
                   <div style={{ background: '#141414', border: '0.5px solid #2a2a2a', borderRadius: '8px', padding: '36px', textAlign: 'center' }}>
                     <div style={{ width: '48px', height: '48px', background: '#0077B5', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', color: '#fff', fontWeight: 700, margin: '0 auto 16px' }}>in</div>
                     <h2 style={{ fontFamily: 'Georgia, serif', fontWeight: 400, fontSize: '20px', color: '#fff', margin: '0 0 10px' }}>Import from LinkedIn</h2>
@@ -418,7 +418,7 @@ export default function AccountClient({ member }: { member: any }) {
 
               {linkedinStep === 2 && (
                 <div>
-                  <div style={{ fontSize: '11px', color: '#888', letterSpacing: '0.06em', marginBottom: '20px' }}>Step 2 of 3 — Select connections to invite</div>
+                  <div style={{ fontSize: '11px', color: '#888', letterSpacing: '0.06em', marginBottom: '20px' }}>Step 2 of 3 | Select connections to invite</div>
                   <div style={{ background: '#141414', border: '0.5px solid #2a2a2a', borderRadius: '8px', padding: '28px' }}>
                     <h2 style={{ fontFamily: 'Georgia, serif', fontWeight: 400, fontSize: '20px', color: '#fff', margin: '0 0 6px' }}>1,247 connections found</h2>
                     <p style={{ fontSize: '13px', color: '#fff', opacity: 0.4, margin: '0 0 16px' }}>Select who you'd like to invite. Luxury industry connections shown first.</p>
@@ -482,11 +482,11 @@ export default function AccountClient({ member }: { member: any }) {
             <button style={btnOutline} onClick={() => signOut({ callbackUrl: '/' })}>Sign out</button>
           </div>
 
-          {/* Export data — GDPR */}
+          {/* Export data | GDPR */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '18px', marginBottom: '18px', borderBottom: '0.5px solid #1e1e1e' }}>
             <div>
               <div style={{ fontSize: '13px', color: '#fff', marginBottom: '3px' }}>Export my data</div>
-              <div style={{ fontSize: '11px', color: '#fff', opacity: 0.35 }}>Download a copy of all data JOBLUX holds about you — GDPR Article 20</div>
+              <div style={{ fontSize: '11px', color: '#fff', opacity: 0.35 }}>Download a copy of all data JOBLUX holds about you | GDPR Article 20</div>
             </div>
             <button style={btnOutline} onClick={() => setExportRequested(true)}>
               {exportRequested ? 'Request sent ✓' : 'Request export'}

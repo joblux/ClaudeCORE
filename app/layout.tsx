@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.joblux.com'),
   alternates: { canonical: './' },
   title: {
-    default: 'JOBLUX — Luxury, decoded.',
+    default: 'JOBLUX | Luxury, decoded.',
     template: '%s',
   },
   description:
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     apple: [{ url: '/apple-touch-icon.png', sizes: '180x180' }],
   },
   openGraph: {
-    title: "JOBLUX — Luxury, decoded.",
+    title: "JOBLUX | Luxury, decoded.",
     description: "JOBLUX brings together luxury intelligence, salary insight, interviews, recruitment, and travel for the global luxury world. Free to access, with deeper value shaped by contribution.",
     url: "https://www.joblux.com",
     siteName: "JOBLUX",
@@ -39,13 +39,13 @@ export const metadata: Metadata = {
         url: "/api/og?title=JOBLUX&subtitle=Luxury%2C+decoded.",
         width: 1200,
         height: 630,
-        alt: "JOBLUX — Luxury, decoded.",
+        alt: "JOBLUX | Luxury, decoded.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "JOBLUX — Luxury, decoded.",
+    title: "JOBLUX | Luxury, decoded.",
     description: "JOBLUX brings together luxury intelligence, salary insight, interviews, recruitment, and travel for the global luxury world. Free to access, with deeper value shaped by contribution.",
     images: ["/api/og?title=JOBLUX&subtitle=Luxury%2C+decoded."],
   },

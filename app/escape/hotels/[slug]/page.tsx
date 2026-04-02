@@ -22,8 +22,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 
   return {
-    title: `${hotel.name}, ${hotel.city} — Preferred Hotel`,
-    description: hotel.advisor_note || `Discover ${hotel.name} in ${hotel.city}, ${hotel.country} — a preferred JOBLUX hotel.`,
+    title: `${hotel.name}, ${hotel.city} | Preferred Hotel`,
+    description: hotel.advisor_note || `Discover ${hotel.name} in ${hotel.city}, ${hotel.country} | a preferred JOBLUX hotel.`,
   }
 }
 

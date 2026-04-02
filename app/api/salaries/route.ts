@@ -6,7 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(req: NextRequest) {
   try {
-    // Session check is optional — RLS handles access control
+    // Session check is optional | RLS handles access control
     // Unauthenticated users can still see salary_benchmarks via public read policy
     let _session: any = null
     try {
@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
       const { data: contributions } = await contribQuery
       contribs = (contributions || []) as any[]
     } catch {
-      // salary_contributions table may not exist yet — continue with benchmarks only
+      // salary_contributions table may not exist yet | continue with benchmarks only
     }
 
     // Aggregate by role+brand+city

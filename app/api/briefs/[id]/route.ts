@@ -33,7 +33,7 @@ function applyAccessControl(brief: any, isAdmin: boolean, user: any) {
 }
 
 // ---------------------------------------------------------------------------
-// GET /api/briefs/[id] — fetch a single brief by id or slug
+// GET /api/briefs/[id] | fetch a single brief by id or slug
 //   - Tries UUID lookup first; falls back to slug lookup
 //   - Non-admin can only see published briefs
 //   - Non-approved members cannot see confidential briefs
@@ -88,7 +88,7 @@ export async function GET(
 }
 
 // ---------------------------------------------------------------------------
-// PUT /api/briefs/[id] — update a brief (admin only)
+// PUT /api/briefs/[id] | update a brief (admin only)
 //   - Accepts partial updates (any subset of fields)
 //   - Auto-sets published_at when status transitions to "published"
 //   - Auto-sets closed_at when status transitions to "closed" or "filled"
@@ -163,7 +163,7 @@ export async function PUT(
 }
 
 // ---------------------------------------------------------------------------
-// DELETE /api/briefs/[id] — delete a brief (admin only)
+// DELETE /api/briefs/[id] | delete a brief (admin only)
 // ---------------------------------------------------------------------------
 export async function DELETE(
   req: NextRequest,

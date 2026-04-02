@@ -8,7 +8,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// GET /api/admin/dashboard — all admin dashboard stats
+// GET /api/admin/dashboard | all admin dashboard stats
 export async function GET() {
   const session = await getServerSession(authOptions)
   const isAdmin = (session?.user as any)?.role === 'admin'

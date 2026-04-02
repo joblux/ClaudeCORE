@@ -68,7 +68,7 @@ function WikiLuxAllContent() {
           <Link href="/wikilux" className="jl-overline text-[#a58e28] hover:underline mb-4 inline-block">&larr; WikiLux</Link>
           <div className="jl-overline-gold mb-3">WikiLux Encyclopedia</div>
           <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a] mb-3">
-            {activeSector === 'All' ? `All ${BRANDS.length} Maisons` : `${activeSector} — ${filtered.length} Maisons`}
+            {activeSector === 'All' ? `All ${BRANDS.length} Maisons` : `${activeSector} | ${filtered.length} Maisons`}
           </h1>
           <p className="font-sans text-sm text-[#888] max-w-xl">
             The complete A&ndash;Z directory of luxury brands across fashion, watches, jewellery, automotive, hospitality, beauty, spirits, aviation and art.

@@ -542,7 +542,7 @@ function NewAssignmentPage() {
         )}
 
         {/* ════════════════════════════════════════════════════════════
-            SECTION 1 — Core Information
+            SECTION 1 | Core Information
         ════════════════════════════════════════════════════════════ */}
         <FormSection title="Core Information">
           <div className="space-y-4">
@@ -655,7 +655,7 @@ function NewAssignmentPage() {
         </FormSection>
 
         {/* ════════════════════════════════════════════════════════════
-            SECTION 2 — Location & Work Model
+            SECTION 2 | Location & Work Model
         ════════════════════════════════════════════════════════════ */}
         <FormSection title="Location & Work Model">
           <div className="space-y-4">
@@ -730,7 +730,7 @@ function NewAssignmentPage() {
         </FormSection>
 
         {/* ════════════════════════════════════════════════════════════
-            SECTION 3 — Role Details
+            SECTION 3 | Role Details
         ════════════════════════════════════════════════════════════ */}
         <FormSection title="Role Details">
           <div className="space-y-4">
@@ -830,7 +830,7 @@ function NewAssignmentPage() {
         </FormSection>
 
         {/* ════════════════════════════════════════════════════════════
-            SECTION 4 — Compensation
+            SECTION 4 | Compensation
         ════════════════════════════════════════════════════════════ */}
         <FormSection title="Compensation">
           <div className="space-y-4">
@@ -919,7 +919,7 @@ function NewAssignmentPage() {
         </FormSection>
 
         {/* ════════════════════════════════════════════════════════════
-            SECTION 5 — Job Description
+            SECTION 5 | Job Description
         ════════════════════════════════════════════════════════════ */}
         <FormSection title="Job Description">
           <div className="space-y-4">
@@ -983,7 +983,7 @@ function NewAssignmentPage() {
         </FormSection>
 
         {/* ════════════════════════════════════════════════════════════
-            SECTION 6 — Luxury Industry Fields
+            SECTION 6 | Luxury Industry Fields
         ════════════════════════════════════════════════════════════ */}
         <FormSection title="Luxury Industry Fields">
           <div className="space-y-4">
@@ -1069,7 +1069,7 @@ function NewAssignmentPage() {
         </FormSection>
 
         {/* ════════════════════════════════════════════════════════════
-            SECTION 7 — SEO & Visibility
+            SECTION 7 | SEO & Visibility
         ════════════════════════════════════════════════════════════ */}
         <FormSection title="SEO & Visibility">
           <div className="space-y-4">
@@ -1084,7 +1084,7 @@ function NewAssignmentPage() {
               <input
                 type="text"
                 className="jl-input w-full"
-                placeholder="e.g. Retail Director at Chanel — Paris"
+                placeholder="e.g. Retail Director at Chanel | Paris"
                 value={form.seo_title}
                 onChange={(e) => updateField('seo_title', e.target.value)}
               />
@@ -1146,7 +1146,7 @@ function NewAssignmentPage() {
         </FormSection>
 
         {/* ════════════════════════════════════════════════════════════
-            SECTION 8 — Internal / Assignment Details (starts CLOSED)
+            SECTION 8 | Internal / Assignment Details (starts CLOSED)
         ════════════════════════════════════════════════════════════ */}
         <FormSection title="Internal / Assignment Details" defaultOpen={false}>
           <div className="space-y-4">
@@ -1218,7 +1218,7 @@ function NewAssignmentPage() {
               <label className="jl-label">Internal Notes</label>
               <textarea
                 className="jl-input w-full min-h-[100px]"
-                placeholder="Private notes for the recruitment team — not visible externally..."
+                placeholder="Private notes for the recruitment team | not visible externally..."
                 value={form.internal_notes}
                 onChange={(e) => updateField('internal_notes', e.target.value)}
               />

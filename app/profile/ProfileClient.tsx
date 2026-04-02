@@ -238,7 +238,7 @@ function CheckboxGrid({
   )
 }
 
-/** Tag input — type and press Enter to add, x to remove */
+/** Tag input | type and press Enter to add, x to remove */
 function TagInput({
   tags,
   onChange,
@@ -1106,7 +1106,7 @@ export default function ProfileClient({ email }: { email: string }) {
             </div>
           </div>
 
-          {/* Mobile: Profile Completeness Bar (hidden on desktop — moves to sidebar) */}
+          {/* Mobile: Profile Completeness Bar (hidden on desktop | moves to sidebar) */}
           <div className="mt-6 lg:hidden">
             <div className="flex items-center justify-between mb-2">
               <span className="font-sans text-xs font-medium text-[#1a1a1a]">
@@ -1126,14 +1126,14 @@ export default function ProfileClient({ email }: { email: string }) {
         </div>
       </div>
 
-      {/* ── Main Content — Two columns on desktop ──────────────── */}
+      {/* ── Main Content | Two columns on desktop ──────────────── */}
       <div className="jl-container py-8 lg:py-10">
         <div className="lg:grid lg:grid-cols-[1fr_340px] gap-8">
-        {/* LEFT — Profile form sections */}
+        {/* LEFT | Profile form sections */}
         <div>
 
           {/* ════════════════════════════════════════════════════ */}
-          {/* Section 1 — Personal Information                    */}
+          {/* Section 1 | Personal Information                    */}
           {/* ════════════════════════════════════════════════════ */}
           <FormSection title="Personal Information" defaultOpen={true}>
             <div className="space-y-5">
@@ -1322,7 +1322,7 @@ export default function ProfileClient({ email }: { email: string }) {
           {!isBusiness && (
           <>
           {/* ════════════════════════════════════════════════════ */}
-          {/* Section 2 — Professional Summary                    */}
+          {/* Section 2 | Professional Summary                    */}
           {/* ════════════════════════════════════════════════════ */}
           <FormSection title="Professional Summary">
             <div className="space-y-5">
@@ -1402,7 +1402,7 @@ export default function ProfileClient({ email }: { email: string }) {
           </FormSection>
 
           {/* ════════════════════════════════════════════════════ */}
-          {/* Section 3 — Work Experience                         */}
+          {/* Section 3 | Work Experience                         */}
           {/* ════════════════════════════════════════════════════ */}
           <FormSection title="Work Experience">
             {/* Existing entries */}
@@ -1597,7 +1597,7 @@ export default function ProfileClient({ email }: { email: string }) {
                   />
                 </div>
 
-                {/* Reason for leaving — only when not current */}
+                {/* Reason for leaving | only when not current */}
                 {!workForm.is_current && (
                   <div>
                     <label className="jl-label">Reason for Leaving</label>
@@ -1645,7 +1645,7 @@ export default function ProfileClient({ email }: { email: string }) {
           </FormSection>
 
           {/* ════════════════════════════════════════════════════ */}
-          {/* Section 4 — Education                               */}
+          {/* Section 4 | Education                               */}
           {/* ════════════════════════════════════════════════════ */}
           <FormSection title="Education">
             {/* Existing entries */}
@@ -1812,7 +1812,7 @@ export default function ProfileClient({ email }: { email: string }) {
           </FormSection>
 
           {/* ════════════════════════════════════════════════════ */}
-          {/* Section 5 — Skills & Languages                      */}
+          {/* Section 5 | Skills & Languages                      */}
           {/* ════════════════════════════════════════════════════ */}
           <FormSection title="Skills & Languages">
             {/* Languages sub-section */}
@@ -1923,7 +1923,7 @@ export default function ProfileClient({ email }: { email: string }) {
           </FormSection>
 
           {/* ════════════════════════════════════════════════════ */}
-          {/* Section 6 — Luxury Profile                          */}
+          {/* Section 6 | Luxury Profile                          */}
           {/* ════════════════════════════════════════════════════ */}
           <FormSection title="Luxury Profile">
             <div className="space-y-6">
@@ -1989,7 +1989,7 @@ export default function ProfileClient({ email }: { email: string }) {
           </FormSection>
 
           {/* ════════════════════════════════════════════════════ */}
-          {/* Section 7 — Availability & Preferences              */}
+          {/* Section 7 | Availability & Preferences              */}
           {/* ════════════════════════════════════════════════════ */}
           <FormSection title="Availability & Preferences">
             <div className="space-y-5">
@@ -2089,7 +2089,7 @@ export default function ProfileClient({ email }: { email: string }) {
           </FormSection>
 
           {/* ════════════════════════════════════════════════════ */}
-          {/* Section 8 — Documents                               */}
+          {/* Section 8 | Documents                               */}
           {/* ════════════════════════════════════════════════════ */}
           <FormSection title="Documents">
             {/* Existing documents */}
@@ -2313,7 +2313,7 @@ export default function ProfileClient({ email }: { email: string }) {
               <div className="flex items-center justify-between">
                 <div>
                   <span className="font-sans text-xs text-[#1a1a1a] font-medium">Notify me about matching opportunities</span>
-                  <p className="font-sans text-[0.6rem] text-[#aaa] italic mt-0.5">Alerts coming soon — we&rsquo;re saving your preferences.</p>
+                  <p className="font-sans text-[0.6rem] text-[#aaa] italic mt-0.5">Alerts coming soon | we&rsquo;re saving your preferences.</p>
                 </div>
                 <button type="button" onClick={() => setPrefAlerts(!prefAlerts)} className={`relative w-8 h-4 rounded-full transition-colors ${prefAlerts ? 'bg-[#a58e28]' : 'bg-[#e8e2d8]'}`}><span className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${prefAlerts ? 'translate-x-4' : ''}`} /></button>
               </div>
@@ -2394,7 +2394,7 @@ export default function ProfileClient({ email }: { email: string }) {
                   </div>
 
                   <p className="font-sans text-[0.65rem] text-[#aaa] leading-relaxed">
-                    Your résumé is yours. Share it wherever you like — LinkedIn, WhatsApp, email. You control what&rsquo;s visible.
+                    Your résumé is yours. Share it wherever you like | LinkedIn, WhatsApp, email. You control what&rsquo;s visible.
                   </p>
 
                   {/* Share buttons */}
@@ -2418,7 +2418,7 @@ export default function ProfileClient({ email }: { email: string }) {
           </>
           )}
 
-          {/* Quick links — mobile only (sidebar has these on desktop) */}
+          {/* Quick links | mobile only (sidebar has these on desktop) */}
           <div className="mt-10 lg:hidden">
             <div className="jl-section-label"><span>Quick Links</span></div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2439,7 +2439,7 @@ export default function ProfileClient({ email }: { email: string }) {
 
         </div>{/* END left column */}
 
-        {/* RIGHT — Sidebar (desktop only) */}
+        {/* RIGHT | Sidebar (desktop only) */}
         <div className="hidden lg:block space-y-4">
 
           {/* Profile Completeness */}

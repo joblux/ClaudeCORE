@@ -12,7 +12,7 @@ export default function ConnectPage() {
               I represent a brand,<br />group, or organisation
             </h2>
             <p className="text-sm text-[#777] leading-relaxed mb-8 max-w-sm">
-              Your confidential intelligence gateway to luxury talent — whether you're hiring, benchmarking, or simply staying ahead.
+              Your confidential intelligence gateway to luxury talent | whether you're hiring, benchmarking, or simply staying ahead.
             </p>
             <ul className="space-y-3 max-w-sm">
               {[
@@ -49,7 +49,7 @@ export default function ConnectPage() {
               I work in or advise<br />the luxury industry
             </h2>
             <p className="text-sm text-[#777] leading-relaxed mb-8 max-w-sm">
-              Where luxury careers are shaped in private. Be seen by the right people — without being on the market.
+              Where luxury careers are shaped in private. Be seen by the right people | without being on the market.
             </p>
             <ul className="space-y-3 max-w-sm">
               {[

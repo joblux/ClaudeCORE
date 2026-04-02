@@ -32,7 +32,7 @@ function calculateAccessLevel(points: number): string {
   return 'basic'
 }
 
-// PUT /api/contributions/[id] — approve or reject a contribution (admin only)
+// PUT /api/contributions/[id] | approve or reject a contribution (admin only)
 export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -203,7 +203,7 @@ export async function PUT(
   }
 }
 
-// GET /api/contributions/[id] — get contribution with full detail
+// GET /api/contributions/[id] | get contribution with full detail
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }

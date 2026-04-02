@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 
     const images = (result.response?.results || []).map(mapUnsplashPhoto)
 
-    // Cache images — non-blocking, never fails the response
+    // Cache images | non-blocking, never fails the response
     try {
       const { error: updateError } = await supabase
         .from('wikilux_brands')

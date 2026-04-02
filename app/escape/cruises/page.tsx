@@ -6,7 +6,7 @@ import EscapeShareBar from '@/components/escape/EscapeShareBar'
 export const revalidate = 0
 
 export const metadata: Metadata = {
-  title: 'Mediterranean Cruise — Barcelona to Rome',
+  title: 'Mediterranean Cruise | Barcelona to Rome',
   description:
     '8-day Mediterranean cruise from Barcelona to Rome via Marseille, Genoa, and Portofino. Curated by your private travel advisor.',
 }

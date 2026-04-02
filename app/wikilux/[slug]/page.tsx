@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     : `${brand.name} careers, salaries, interview insights and intelligence. Explore opportunities at ${brand.name} on JOBLUX.`
 
   return {
-    title: `${brand.name} — Careers, Salaries & Intelligence | JOBLUX`,
+    title: `${brand.name} | Careers, Salaries & Intelligence | JOBLUX`,
     description: desc,
     openGraph: {
       title: `${brand.name} | JOBLUX WikiLux`,

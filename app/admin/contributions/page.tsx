@@ -192,7 +192,7 @@ function VoicesTab() {
               {/* Reject modal inline */}
               {rejectTarget === item.id && (
                 <div style={{ borderTop: '1px solid #fecaca', padding: '14px 16px', background: '#fef2f2' }}>
-                  <div style={{ fontSize: 12, color: '#dc2626', fontWeight: 600, marginBottom: 6 }}>Rejection note (optional — sent to contributor)</div>
+                  <div style={{ fontSize: 12, color: '#dc2626', fontWeight: 600, marginBottom: 6 }}>Rejection note (optional | sent to contributor)</div>
                   <textarea
                     value={rejectNote}
                     onChange={e => setRejectNote(e.target.value)}
@@ -376,7 +376,7 @@ function InterviewsTab() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 500, color: '#111', marginBottom: 2 }}>
-                    {item.brand_name} — {item.interview?.job_title || '—'}
+                    {item.brand_name} | {item.interview?.job_title || '—'}
                   </div>
                   <div style={{ fontSize: 11, color: '#999' }}>
                     {item.interview?.department} · {item.interview?.seniority} · {item.interview?.interview_year} · {timeAgo(item.created_at)}
@@ -485,7 +485,7 @@ function BrandTab() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 500, color: '#111', marginBottom: 2 }}>
-                    {item.brand_slug} — correction by {item.contributor_name || 'Anonymous'}
+                    {item.brand_slug} | correction by {item.contributor_name || 'Anonymous'}
                   </div>
                   <div style={{ fontSize: 11, color: '#999' }}>
                     {timeAgo(item.created_at)}

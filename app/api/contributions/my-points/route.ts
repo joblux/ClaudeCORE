@@ -8,7 +8,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// GET /api/contributions/my-points — get current member's points, access level, and contribution history
+// GET /api/contributions/my-points | get current member's points, access level, and contribution history
 export async function GET() {
   const session = await getServerSession(authOptions)
   const memberId = (session?.user as any)?.memberId

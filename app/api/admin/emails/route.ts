@@ -54,11 +54,11 @@ const SAMPLE_DATA: Record<string, () => { html: string; text: string; subject: s
     return { html, text, subject: 'Update on your contribution' }
   },
   application_confirmation: () => {
-    const { html, text } = applicationConfirmationEmail({ firstName: 'Elena', assignmentTitle: 'VP of Retail Operations — Cartier' })
+    const { html, text } = applicationConfirmationEmail({ firstName: 'Elena', assignmentTitle: 'VP of Retail Operations | Cartier' })
     return { html, text, subject: 'Application received' }
   },
   recruitment_update: () => {
-    const { html, text } = recruitmentUpdateEmail({ firstName: 'Elena', assignmentTitle: 'VP of Retail Operations — Cartier', statusMessage: 'You have been shortlisted for the next stage. Our team will be in touch to schedule an initial conversation.' })
+    const { html, text } = recruitmentUpdateEmail({ firstName: 'Elena', assignmentTitle: 'VP of Retail Operations | Cartier', statusMessage: 'You have been shortlisted for the next stage. Our team will be in touch to schedule an initial conversation.' })
     return { html, text, subject: 'Update on your candidacy' }
   },
   escape_consultation: () => {
@@ -78,16 +78,16 @@ const SAMPLE_DATA: Record<string, () => { html: string; text: string; subject: s
     return { html, text, subject: 'New contribution: Salary Data from Sophie Martin' }
   },
   admin_new_application: () => {
-    const { html, text } = adminNewApplicationEmail({ applicantName: 'Elena Ricci', applicantEmail: 'elena@example.com', tier: 'Professional', assignmentTitle: 'VP of Retail Operations — Cartier' })
-    return { html, text, subject: 'New application: Elena Ricci for VP of Retail Operations — Cartier' }
+    const { html, text } = adminNewApplicationEmail({ applicantName: 'Elena Ricci', applicantEmail: 'elena@example.com', tier: 'Professional', assignmentTitle: 'VP of Retail Operations | Cartier' })
+    return { html, text, subject: 'New application: Elena Ricci for VP of Retail Operations | Cartier' }
   },
   admin_new_escape: () => {
     const { html, text } = adminNewEscapeEmail({ name: 'Isabelle Dupont', email: 'isabelle@example.com', tripType: 'Honeymoon', destination: 'Maldives', budget: '$15,000–$25,000', dates: 'June 2026', tier: 'Professional' })
-    return { html, text, subject: 'New travel request: Isabelle Dupont — Maldives' }
+    return { html, text, subject: 'New travel request: Isabelle Dupont | Maldives' }
   },
   admin_new_contact: () => {
     const { html, text } = adminNewContactEmail({ name: 'Thomas Weber', email: 'thomas@example.com', subject: 'Partnership Inquiry', messagePreview: 'I represent a luxury hospitality brand and would like to explore partnership opportunities with JOBLUX for our talent acquisition needs...' })
-    return { html, text, subject: 'New contact: Thomas Weber — Partnership Inquiry' }
+    return { html, text, subject: 'New contact: Thomas Weber | Partnership Inquiry' }
   },
   the_brief: () => {
     const { html, text } = theBriefEmail({
@@ -99,11 +99,11 @@ const SAMPLE_DATA: Record<string, () => { html: string; text: string; subject: s
         url: 'https://joblux.com/escape',
       },
     })
-    return { html, text, subject: 'THE BRIEF — March 23, 2026' }
+    return { html, text, subject: 'THE BRIEF | March 23, 2026' }
   },
 }
 
-// GET — preview a template (returns HTML)
+// GET | preview a template (returns HTML)
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.role || session.user.role !== 'admin') {
@@ -126,7 +126,7 @@ export async function GET(req: NextRequest) {
   })
 }
 
-// POST — send a test email
+// POST | send a test email
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.role || session.user.role !== 'admin') {

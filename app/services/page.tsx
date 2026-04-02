@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Private Services — Confidential Recruitment & Travel Advisory | JOBLUX',
+  title: 'Private Services | Confidential Recruitment & Travel Advisory | JOBLUX',
   description:
     'JOBLUX operates as a confidential search consultancy and private travel advisory for the luxury industry.',
   alternates: { canonical: 'https://www.joblux.com/services' },
@@ -72,12 +72,12 @@ export default function ServicesPage() {
             <h3 className="font-sans text-sm font-semibold text-white mb-2">What we cover</h3>
             <ul className="font-sans text-sm text-[#999] leading-relaxed space-y-1.5 mb-6 list-none">
               {[
-                'Fashion & leather goods — creative, retail, buying, merchandising',
-                'Jewellery & watches — retail, wholesale, trade marketing',
-                'Beauty & fragrance — brand management, retail, training',
-                'Hospitality & travel — hotel operations, F&B, guest relations',
-                'Design & interiors — project management, studio, client advisory',
-                'Corporate & group — HR, finance, legal, communications, digital',
+                'Fashion & leather goods | creative, retail, buying, merchandising',
+                'Jewellery & watches | retail, wholesale, trade marketing',
+                'Beauty & fragrance | brand management, retail, training',
+                'Hospitality & travel | hotel operations, F&B, guest relations',
+                'Design & interiors | project management, studio, client advisory',
+                'Corporate & group | HR, finance, legal, communications, digital',
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2">
                   <span className="text-[#a58e28] mt-0.5 text-xs">&bull;</span>
@@ -91,7 +91,7 @@ export default function ServicesPage() {
               Most recruitment firms cover luxury as a side category. JOBLUX exists only in
               this space. Two decades of industry relationships, compensation intelligence,
               and cultural understanding give us access to candidates who do not appear on
-              the open market — and a perspective that generalist firms cannot replicate.
+              the open market | and a perspective that generalist firms cannot replicate.
             </p>
 
             <Link
@@ -113,7 +113,7 @@ export default function ServicesPage() {
               Bespoke travel for luxury executives
             </h2>
             <p className="font-sans text-sm text-[#999] leading-relaxed mb-6">
-              A private travel advisory service — not a booking engine. Designed by a luxury
+              A private travel advisory service | not a booking engine. Designed by a luxury
               travel advisor with two decades in the industry. Hotels, private villas,
               jet charters, curated experiences, and complex multi-destination itineraries
               arranged with the same discretion and attention to detail that defines
@@ -122,7 +122,7 @@ export default function ServicesPage() {
 
             <h3 className="font-sans text-sm font-semibold text-white mb-2">Why through JOBLUX</h3>
             <p className="font-sans text-sm text-[#999] leading-relaxed mb-6">
-              JOBLUX is affiliated with Fora Travel — giving our users access to
+              JOBLUX is affiliated with Fora Travel | giving our users access to
               preferred rates, room upgrades, resort credits, and VIP amenities at the
               world&apos;s finest hotels and resorts. This is not a comparison site or a
               booking platform. It is a real person building a real itinerary, with genuine

@@ -40,8 +40,8 @@ const hermesData = {
   career_paths: ['Retail & boutique management', 'Artisan & métiers', 'Merchandising', 'Marketing & communications', 'Supply chain', 'Digital & e-commerce', 'Finance & strategy', 'HR & talent'],
   signals: [
     { color: '#4CAF50', text: '4 new stores opened in Asia Pacific: Seoul, Chengdu, Osaka, Mumbai', time: '2w ago' },
-    { color: '#4CAF50', text: 'Q4 2025 revenue +18% YoY — all divisions growing', time: '2w ago' },
-    { color: '#4CAF50', text: 'New leather workshop opened in Normandy — 250 artisan positions', time: '1mo ago' },
+    { color: '#4CAF50', text: 'Q4 2025 revenue +18% YoY | all divisions growing', time: '2w ago' },
+    { color: '#4CAF50', text: 'New leather workshop opened in Normandy | 250 artisan positions', time: '1mo ago' },
   ],
   leadership: [
     { initials: 'AD', name: 'Axel Dumas', role: 'CEO', since: '2013' },
@@ -71,11 +71,11 @@ const hermesData = {
   timeline: [
     { year: '1837', event: 'Thierry Hermès opens harness workshop in Paris' },
     { year: '1922', event: 'First leather handbag introduced (Haut à Courroies)' },
-    { year: '1937', event: 'First silk scarf — the Carré — launched' },
+    { year: '1937', event: 'First silk scarf | the Carré | launched' },
     { year: '1984', event: 'Birkin bag created for Jane Birkin' },
     { year: '1993', event: 'IPO on Paris Bourse' },
     { year: '2014', event: "Successfully fights off LVMH's acquisition attempt" },
-    { year: '2025', event: 'Revenue crosses €14B — largest independent luxury house by market cap' },
+    { year: '2025', event: 'Revenue crosses €14B | largest independent luxury house by market cap' },
   ],
   values: [
     { title: 'Craftsmanship', desc: 'Every artisan trains 2+ years before touching a product. Quality over volume, always.' },

@@ -96,7 +96,7 @@ export default function BusinessDashboard() {
         }
 
         // Search assignments count (employer's active searches)
-        // For now just get count — employers will be linked to assignments later
+        // For now just get count | employers will be linked to assignments later
         const assignRes = await fetch('/api/assignments?status=active&limit=1')
         if (assignRes.ok) {
           const aData = await assignRes.json()

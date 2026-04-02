@@ -3,10 +3,10 @@
 import { useState } from 'react'
 
 const pastIssues = [
-  { date: 'March 10, 2026', headline: 'LVMH hiring surge in Asia Pacific — 200 new positions',      href: '#' },
-  { date: 'March 3, 2026',  headline: 'Salary benchmarks Q1 2026 — Paris luxury market up 8%',      href: '#' },
-  { date: 'Feb 24, 2026',   headline: 'Richemont restructures Asia leadership — what it means',      href: '#' },
-  { date: 'Feb 17, 2026',   headline: 'Dubai luxury hiring at record high — key roles and salaries', href: '#' },
+  { date: 'March 10, 2026', headline: 'LVMH hiring surge in Asia Pacific | 200 new positions',      href: '#' },
+  { date: 'March 3, 2026',  headline: 'Salary benchmarks Q1 2026 | Paris luxury market up 8%',      href: '#' },
+  { date: 'Feb 24, 2026',   headline: 'Richemont restructures Asia leadership | what it means',      href: '#' },
+  { date: 'Feb 17, 2026',   headline: 'Dubai luxury hiring at record high | key roles and salaries', href: '#' },
 ]
 
 export default function TheBriefPage() {

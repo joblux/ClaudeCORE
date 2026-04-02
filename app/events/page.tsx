@@ -112,7 +112,7 @@ export default function EventsPage() {
           Events
         </h1>
         <p className="text-sm text-[#999] mb-6">
-          Luxury industry events, trade fairs, and professional gatherings — curated for senior professionals.
+          Luxury industry events, trade fairs, and professional gatherings | curated for senior professionals.
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-10">

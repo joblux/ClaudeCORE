@@ -41,7 +41,7 @@ RULES:
 - Article must reference real luxury brands and plausible industry dynamics
 - Tags should include brand names (lowercase with hyphens) and topic tags
 - Content in markdown: use ## for subheadings, **bold** for emphasis
-- Professional, authoritative tone — not promotional
+- Professional, authoritative tone | not promotional
 - Must include career implications for luxury professionals
 - Output valid JSON only`
 

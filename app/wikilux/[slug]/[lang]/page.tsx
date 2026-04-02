@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: { params: { slug: string; lan
 
   return {
     title: `${brand.name} | WikiLux | JOBLUX`,
-    description: `${brand.name} luxury career intelligence in ${langName} — history, careers, salary insights, interview tips.`,
+    description: `${brand.name} luxury career intelligence in ${langName} | history, careers, salary insights, interview tips.`,
     alternates: {
       canonical: `${baseUrl}/wikilux/${params.slug}/${params.lang}`,
       languages: alternates,

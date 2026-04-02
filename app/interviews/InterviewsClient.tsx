@@ -53,7 +53,7 @@ export default function InterviewsClient({
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      // Direct Supabase query — simple query first, then try contributions join
+      // Direct Supabase query | simple query first, then try contributions join
       const offset = (page - 1) * limit
       let query = supabase
         .from('interview_experiences')
@@ -307,7 +307,7 @@ export default function InterviewsClient({
       <div className="jl-container py-10">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
-          {/* Results area — 3 cols */}
+          {/* Results area | 3 cols */}
           <div className="lg:col-span-3">
             {loading ? (
               <LoadingSkeleton />
@@ -357,7 +357,7 @@ export default function InterviewsClient({
             )}
           </div>
 
-          {/* Sidebar — 1 col (desktop only) */}
+          {/* Sidebar | 1 col (desktop only) */}
           <aside className="hidden lg:block space-y-6">
             {/* Top Maisons */}
             {brands.length > 0 && (
@@ -385,7 +385,7 @@ export default function InterviewsClient({
             <div className="jl-card border-[#a58e28]">
               <h3 className="jl-serif text-lg text-[#1a1a1a] mb-2">Contribute Your Experience</h3>
               <p className="text-xs text-[#888] leading-relaxed mb-4">
-                Contribute your interview experience — it takes one minute and strengthens the intelligence for everyone.
+                Contribute your interview experience | it takes one minute and strengthens the intelligence for everyone.
               </p>
               <Link href="/contribute" className="jl-btn-gold w-full text-center">
                 Contribute

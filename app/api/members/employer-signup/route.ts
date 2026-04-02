@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
     })
     sendEmail({
       to: ADMIN_ALERT_EMAIL,
-      subject: `New JOBLUX employer request — ${fullName} (${company})`,
+      subject: `New JOBLUX employer request | ${fullName} (${company})`,
       body: admin.text,
       bodyHtml: admin.html,
     }).catch(() => {})

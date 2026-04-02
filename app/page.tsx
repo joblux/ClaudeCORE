@@ -11,7 +11,7 @@ import type { Metadata } from 'next'
 export const revalidate = 0
 
 export const metadata: Metadata = {
-  title: 'JOBLUX — Luxury career intelligence',
+  title: 'JOBLUX | Luxury career intelligence',
   description: 'Real salary data. Confidential opportunities. Market signals across 150+ luxury brands. The intelligence you need to make your next move.',
 }
 

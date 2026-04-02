@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       `Outcome: ${interview.outcome}`,
     ].join('\n')
 
-    const prompt = `You are LUXAI, the interview intelligence engine for JOBLUX — a luxury careers platform.
+    const prompt = `You are LUXAI, the interview intelligence engine for JOBLUX | a luxury careers platform.
 
 Generate detailed interview intelligence for this experience:
 
@@ -59,7 +59,7 @@ Respond ONLY in JSON format with this exact structure:
     },
     {
       "title": "Interview Rounds",
-      "content": "Round 1: Phone Screening (30 min) — HR conversation about background, motivations, and availability. Basic questions about luxury retail experience and French language proficiency.\\n\\nRound 2: Regional Manager Interview (60 min) — Deep dive into retail operations, team management experience, sales strategies. Scenario-based questions about handling difficult clients and underperforming team members.\\n\\nRound 3: Store Visit & Practical Exercise (2 hours) — Visited the flagship store, observed operations, met team. Presented a 15-minute analysis of store strengths/opportunities with improvement recommendations.\\n\\nRound 4: Final Interview with Country Director (45 min) — Strategic discussion about luxury market trends, brand vision, leadership philosophy. Questions about long-term career goals and alignment with brand values."
+      "content": "Round 1: Phone Screening (30 min) | HR conversation about background, motivations, and availability. Basic questions about luxury retail experience and French language proficiency.\\n\\nRound 2: Regional Manager Interview (60 min) | Deep dive into retail operations, team management experience, sales strategies. Scenario-based questions about handling difficult clients and underperforming team members.\\n\\nRound 3: Store Visit & Practical Exercise (2 hours) | Visited the flagship store, observed operations, met team. Presented a 15-minute analysis of store strengths/opportunities with improvement recommendations.\\n\\nRound 4: Final Interview with Country Director (45 min) | Strategic discussion about luxury market trends, brand vision, leadership philosophy. Questions about long-term career goals and alignment with brand values."
     },
     {
       "title": "Key Questions Asked",
@@ -67,7 +67,7 @@ Respond ONLY in JSON format with this exact structure:
     },
     {
       "title": "Preparation Tips",
-      "content": "• Research brand history thoroughly — they expect deep knowledge of brand heritage\\n• Prepare concrete examples of team leadership and sales achievements with metrics\\n• Visit the store beforehand to understand operations and clientele\\n• Be ready to discuss luxury market trends and competitor positioning\\n• Practice presenting in the local language if applying for non-English speaking role"
+      "content": "• Research brand history thoroughly | they expect deep knowledge of brand heritage\\n• Prepare concrete examples of team leadership and sales achievements with metrics\\n• Visit the store beforehand to understand operations and clientele\\n• Be ready to discuss luxury market trends and competitor positioning\\n• Practice presenting in the local language if applying for non-English speaking role"
     },
     {
       "title": "Outcome",

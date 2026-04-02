@@ -593,7 +593,7 @@ export default function ImportAssignmentsPage() {
         />
 
         {/* ════════════════════════════════════════════════════════
-            STEP 1 — Choose Import Method
+            STEP 1 | Choose Import Method
         ════════════════════════════════════════════════════════ */}
         {step === 1 && !parsing && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -748,7 +748,7 @@ export default function ImportAssignmentsPage() {
         )}
 
         {/* ════════════════════════════════════════════════════════
-            STEP 2 — Preview & Map
+            STEP 2 | Preview & Map
         ════════════════════════════════════════════════════════ */}
         {step === 2 && rawData && (
           <div>
@@ -886,7 +886,7 @@ export default function ImportAssignmentsPage() {
         )}
 
         {/* ════════════════════════════════════════════════════════
-            STEP 3 — Review & Edit
+            STEP 3 | Review & Edit
         ════════════════════════════════════════════════════════ */}
         {step === 3 && (
           <div>
@@ -1390,7 +1390,7 @@ export default function ImportAssignmentsPage() {
         )}
 
         {/* ════════════════════════════════════════════════════════
-            STEP 4 — Results
+            STEP 4 | Results
         ════════════════════════════════════════════════════════ */}
         {step === 4 && (
           <div className="text-center">
