@@ -21,20 +21,36 @@ Each signal must be about a REAL luxury brand or group (LVMH, Kering, Hermès, C
 Return ONLY a JSON array (no markdown, no backticks):
 [
   {
-    "category": "TALENT" | "MARKET" | "BRAND" | "FINANCE",
+    "category": "growth" | "leadership" | "contraction" | "expansion" | "merger_acquisition",
     "headline": "Short punchy headline [max 80 chars]",
     "context_paragraph": "2-3 sentences of context explaining the signal [max 300 chars]",
     "career_implications": "1-2 sentences on what this means for luxury professionals [max 200 chars]",
-    "source_name": "Reuters | BOF | WWD | FT | Bloomberg",
+    "long_context": "A detailed 150-250 word editorial analysis. Cover the background, what triggered this signal, the strategic context, and what industry observers are saying. Write in an authoritative Bloomberg-style editorial tone.",
+    "what_happened": "One clear sentence describing the event or development [max 150 chars]",
+    "why_it_matters": "One clear sentence on the broader industry significance [max 150 chars]",
+    "career_detail": ["Specific career impact #1", "Specific career impact #2", "Specific career impact #3"],
+    "brand_impact": ["Impact on brand/group #1", "Impact on brand/group #2", "Impact on brand/group #3"],
+    "source_name": "Reuters" | "BOF" | "WWD" | "FT" | "Bloomberg",
     "brand_tags": ["BrandName1", "BrandName2"],
-    "confidence": "high" | "medium"
+    "confidence": "high" | "medium",
+    "meta_title": "Headline — Category Signal | JOBLUX Signals",
+    "meta_description": "150-char SEO description summarizing the signal and its career implications"
   }
 ]
 
+CATEGORIES (use exactly these lowercase values):
+- growth: revenue increases, record results, market gains (green dot)
+- leadership: C-suite changes, creative director moves, board reshuffles (amber dot)
+- contraction: layoffs, store closures, declining revenue, cost cuts (red dot)
+- expansion: new stores, new markets, geographic growth, new product lines (blue dot)
+- merger_acquisition: M&A activity, acquisitions, mergers, stake purchases (purple dot)
+
 RULES:
 - ${count} signals exactly
-- Mix of categories: at least 1 TALENT, 1 MARKET, 1 BRAND
+- Mix of categories: use at least 3 different categories
 - brand_tags: use exact brand names (Cartier not cartier)
+- career_detail: 2-4 specific career impacts as string array
+- brand_impact: 2-4 specific brand/group impacts as string array
 - Realistic, plausible signals based on real industry dynamics
 - No duplicate brands across signals
 - Output valid JSON array only`
@@ -48,7 +64,7 @@ RULES:
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 4000,
+        max_tokens: 8000,
         messages: [{ role: 'user', content: prompt }]
       })
     })
@@ -106,10 +122,17 @@ RULES:
         headline: s.headline,
         context_paragraph: s.context_paragraph,
         career_implications: s.career_implications,
+        long_context: s.long_context,
+        what_happened: s.what_happened,
+        why_it_matters: s.why_it_matters,
+        career_detail: s.career_detail,
+        brand_impact: s.brand_impact,
         source_name: s.source_name,
         source_url: null,
         brand_tags: s.brand_tags,
         confidence: s.confidence,
+        meta_title: s.meta_title,
+        meta_description: s.meta_description,
         is_published: false,
         content_origin: 'ai',
         is_pinned: false,
