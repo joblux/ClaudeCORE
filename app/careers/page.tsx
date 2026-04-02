@@ -28,13 +28,13 @@ export default function CareersPage() {
       const { data: salariesData } = await supabase
         .from('salary_benchmarks')
         .select('*')
+        .eq('is_published', true)
         .order('created_at', { ascending: false })
 
       // Fetch interview experiences
       const { data: interviewsData } = await supabase
         .from('interview_experiences')
         .select('*')
-        .eq('status', 'published')
         .order('created_at', { ascending: false })
 
       setAssignments(assignmentsData || [])

@@ -2,13 +2,6 @@
 
 import { useState } from 'react'
 
-const pastIssues = [
-  { date: 'March 10, 2026', headline: 'LVMH hiring surge in Asia Pacific | 200 new positions',      href: '#' },
-  { date: 'March 3, 2026',  headline: 'Salary benchmarks Q1 2026 | Paris luxury market up 8%',      href: '#' },
-  { date: 'Feb 24, 2026',   headline: 'Richemont restructures Asia leadership | what it means',      href: '#' },
-  { date: 'Feb 17, 2026',   headline: 'Dubai luxury hiring at record high | key roles and salaries', href: '#' },
-]
-
 export default function TheBriefPage() {
   const [email,   setEmail]   = useState('')
   const [status,  setStatus]  = useState<'idle'|'loading'|'success'|'error'>('idle')
@@ -38,7 +31,7 @@ export default function TheBriefPage() {
   }
 
   return (
-    <div>
+    <div className="bg-[#1a1a1a]">
       {/* HERO */}
       <div className="bg-[#222222] py-16">
         <div className="jl-container-xs text-center">
@@ -78,7 +71,7 @@ export default function TheBriefPage() {
                 <p className="font-sans text-xs text-red-400 mt-2 text-left">{message}</p>
               )}
               <p className="font-sans text-[0.65rem] text-[#999] mt-3">
-                Free · No spam · Unsubscribe anytime · Join 10,000+ luxury professionals
+                Free · No spam · Unsubscribe anytime · Join luxury professionals worldwide
               </p>
             </form>
           )}
@@ -86,43 +79,37 @@ export default function TheBriefPage() {
       </div>
 
       {/* WHAT'S INSIDE */}
-      <div className="jl-container py-12">
-        <div className="jl-container-sm mx-auto">
-          <div className="jl-section-label"><span>What's Inside Every Issue</span></div>
+      <div className="bg-[#1a1a1a] py-12">
+        <div className="jl-container">
+          <div className="jl-container-sm mx-auto">
+            <div className="jl-section-label"><span>What's Inside Every Issue</span></div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-            {[
-              { n: '01', title: 'Industry Moves',      desc: 'Who moved where. Senior appointments, departures and promotions across the major maisons.' },
-              { n: '02', title: 'Salary Intelligence',  desc: 'One role, one market, detailed compensation breakdown. Real data from JOBLUX placements.' },
-              { n: '03', title: 'New Positions',        desc: 'The week\'s most interesting confidential briefs. Manager to Executive, €100K+.' },
-              { n: '04', title: 'WikiLux Spotlight',    desc: 'One brand in depth. History, culture, what they look for in candidates.' },
-              { n: '05', title: 'Market Intelligence',  desc: 'Hiring trends by market. Where luxury is growing, where it\'s contracting.' },
-              { n: '06', title: 'Travel & Lifestyle',   desc: 'One luxury destination or experience. The world through the JOBLUX lens.' },
-            ].map((item) => (
-              <div key={item.n} className="flex gap-4">
-                <div className="jl-serif text-2xl font-light text-[#e8e2d8] flex-shrink-0 w-8">{item.n}</div>
-                <div>
-                  <h3 className="font-sans text-sm font-semibold text-[#1a1a1a] mb-1">{item.title}</h3>
-                  <p className="font-sans text-xs text-[#888] leading-relaxed">{item.desc}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+              {[
+                { n: '01', title: 'Industry Moves',      desc: 'Who moved where. Senior appointments, departures and promotions across the major maisons.' },
+                { n: '02', title: 'Salary Intelligence',  desc: 'One role, one market, detailed compensation breakdown. Real data from JOBLUX placements.' },
+                { n: '03', title: 'New Positions',        desc: 'The week\'s most interesting confidential briefs. Manager to Executive, \u20ac100K+.' },
+                { n: '04', title: 'WikiLux Spotlight',    desc: 'One brand in depth. History, culture, what they look for in candidates.' },
+                { n: '05', title: 'Market Intelligence',  desc: 'Hiring trends by market. Where luxury is growing, where it\'s contracting.' },
+                { n: '06', title: 'Travel & Lifestyle',   desc: 'One luxury destination or experience. The world through the JOBLUX lens.' },
+              ].map((item) => (
+                <div key={item.n} className="flex gap-4">
+                  <div className="jl-serif text-2xl font-light text-[#a58e28] flex-shrink-0 w-8">{item.n}</div>
+                  <div>
+                    <h3 className="font-sans text-sm font-semibold text-white mb-1">{item.title}</h3>
+                    <p className="font-sans text-xs text-[#888] leading-relaxed">{item.desc}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          {/* PAST ISSUES */}
-          <div className="jl-section-label"><span>Recent Issues</span></div>
-          <div className="space-y-0">
-            {pastIssues.map((issue) => (
-              <div key={issue.date} className="flex items-center justify-between py-4 border-b border-[#f0ece4]">
-                <div>
-                  <div className="jl-overline mb-1">{issue.date}</div>
-                  <p className="font-sans text-sm text-[#1a1a1a]">{issue.headline}</p>
-                </div>
-                <a href={issue.href} className="jl-overline-gold hover:underline whitespace-nowrap ml-4">
-                  Read →
-                </a>
-              </div>
-            ))}
+            {/* LAUNCH NOTE */}
+            <div className="mt-12 border-t border-[#2a2a2a] pt-8 text-center">
+              <p className="font-sans text-sm text-white mb-2">The Brief is launching soon.</p>
+              <p className="font-sans text-xs text-[#888]">
+                Subscribe now to receive the first issues and future archive updates.
+              </p>
+            </div>
           </div>
         </div>
       </div>

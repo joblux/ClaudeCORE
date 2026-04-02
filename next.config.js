@@ -21,9 +21,12 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      { source: '/jobs', destination: '/opportunities', permanent: true },
-      { source: '/jobs/:path*', destination: '/opportunities/:path*', permanent: true },
-    ];
+      { source: '/jobs', destination: '/careers', permanent: true },
+      { source: '/jobs/:path*', destination: '/careers/:path*', permanent: true },
+      { source: '/wikilux', destination: '/brands', permanent: true },
+      { source: '/wikilux/:slug*', destination: '/brands/:slug*', permanent: true },
+      { source: '/salaries', destination: '/careers', permanent: true },
+    ]
   },
   async headers() {
     return [
