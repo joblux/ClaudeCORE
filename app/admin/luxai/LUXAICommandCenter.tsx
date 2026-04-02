@@ -244,6 +244,9 @@ export default function LUXAICommandCenter() {
                   <button className={btnO} disabled={!!generating} onClick={() => callEndpoint('wikilux-all', '/api/luxai/regenerate-wikilux', { mode: 'all' })}>
                     {generating === 'wikilux-all' ? 'Running...' : `Regen all (${brands.length})`}
                   </button>
+                  <button className={btnO} disabled={!!generating || (health?.brands_empty || 0) === 0} onClick={() => callEndpoint('wikilux-drafts', '/api/luxai/bulk-regenerate-wikilux', {})}>
+                    {generating === 'wikilux-drafts' ? 'Regenerating drafts...' : `Regen all drafts (${health?.brands_empty || 0} empty)`}
+                  </button>
                 </div>
                 <div className={row}>
                   <input type="text" placeholder="New brand name..." value={newBrandName} onChange={e => setNewBrandName(e.target.value)} className={`${sel} min-w-[180px]`} />
