@@ -15,7 +15,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.luxuryrecruiter.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.joblux.com'),
   alternates: { canonical: './' },
   title: {
     default: 'JOBLUX — Luxury, decoded.',
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "JOBLUX — Luxury, decoded.",
     description: "JOBLUX brings together luxury intelligence, salary insight, interviews, recruitment, and travel for the global luxury world. Free to access, with deeper value shaped by contribution.",
-    url: "https://www.luxuryrecruiter.com",
+    url: "https://www.joblux.com",
     siteName: "JOBLUX",
     locale: "en_US",
     type: "website",

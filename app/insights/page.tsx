@@ -9,6 +9,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+// Placeholder fallbacks — only shown if DB returns nothing
 const placeholderArticles = [
   {
     id: '1',
@@ -66,50 +67,136 @@ const placeholderArticles = [
   },
 ]
 
-const reports = [
-  { icon: '📊', label: 'SALARY REPORT', title: 'Luxury Compensation Report 2026 — Europe Edition', meta: '1,840 data points · Published March 2026' },
-  { icon: '🏢', label: 'HIRING REPORT', title: "State of Luxury Hiring Q1 2026 — Who's Growing, Who's Cutting", meta: '52 brands analysed · Published February 2026' },
-  { icon: '🌍', label: 'MARKET REPORT', title: 'Asia Pacific Luxury Expansion Index — Retail & Talent Outlook', meta: '12 markets · Published January 2026' },
-  { icon: '👔', label: 'CAREER REPORT', title: 'The Luxury Career Ladder — How Professionals Progress Across Maisons', meta: '500+ career paths · Published December 2025' },
+const placeholderReports = [
+  { icon: '📊', label: 'SALARY REPORT', title: 'Luxury Compensation Report 2026 — Europe Edition', meta: '1,840 data points · Published March 2026', slug: '' },
+  { icon: '🏢', label: 'HIRING REPORT', title: "State of Luxury Hiring Q1 2026 — Who's Growing, Who's Cutting", meta: '52 brands analysed · Published February 2026', slug: '' },
+  { icon: '🌍', label: 'MARKET REPORT', title: 'Asia Pacific Luxury Expansion Index — Retail & Talent Outlook', meta: '12 markets · Published January 2026', slug: '' },
+  { icon: '👔', label: 'CAREER REPORT', title: 'The Luxury Career Ladder — How Professionals Progress Across Maisons', meta: '500+ career paths · Published December 2025', slug: '' },
 ]
 
-const voices = [
+const placeholderVoices = [
   { initials: 'SM', name: 'S. Marchetti', role: 'Former SVP, Kering Group', quote: "The biggest shift I've seen in 20 years is that brands now want operators, not just creatives. The era of the visionary CD with no commercial instinct is over." },
   { initials: 'AL', name: 'A. Laurent', role: 'Retail Director, Independent Maison', quote: "Hermès doesn't post jobs. They cultivate talent for years before offering anything. If you want to work there, start by becoming known in their world." },
   { initials: 'JP', name: 'J. Park', role: 'Chief People Officer, LVMH Asia', quote: "Digital fluency is table stakes now. What separates candidates at director level is whether they can operate at the intersection of data and taste." },
-]
-
-const mostRead = [
-  { cat: 'SALARY', title: 'What Hermès really pays — from artisan to director', date: 'March 22, 2026', slug: 'hermes-salary-guide' },
-  { cat: 'CAREERS', title: 'How to get hired at Chanel without applying online', date: 'March 19, 2026', slug: 'hired-at-chanel' },
-  { cat: 'MARKET', title: 'LVMH vs Kering: which group offers better career progression?', date: 'March 14, 2026', slug: 'lvmh-vs-kering-careers' },
-  { cat: 'LEADERSHIP', title: 'The Richemont school of management — and why alumni are in demand', date: 'March 10, 2026', slug: 'richemont-management' },
 ]
 
 const topics = ['Salary data', 'Leadership moves', 'LVMH', 'Kering', 'Richemont', 'Asia Pacific', 'Middle East', 'Retail', 'Digital', 'Watches', 'Beauty', 'Career advice']
 
 const tabs = ['Editorial', 'Research reports', 'Insider voices', 'Luxury map']
 
+function formatDate(dateStr: string) {
+  if (!dateStr) return ''
+  return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+function getCategoryIcon(category: string) {
+  const c = category?.toLowerCase() || ''
+  if (c.includes('salary')) return '📊'
+  if (c.includes('hiring') || c.includes('talent')) return '🏢'
+  if (c.includes('market')) return '🌍'
+  if (c.includes('career')) return '👔'
+  return '📄'
+}
+
 export default function InsightsPage() {
   const [activeTab, setActiveTab] = useState('Editorial')
   const [articles, setArticles] = useState(placeholderArticles)
+  const [reports, setReports] = useState(placeholderReports)
+  const [voices, setVoices] = useState(placeholderVoices)
+  const [mostRead, setMostRead] = useState<any[]>([])
   const [email, setEmail] = useState('')
 
   useEffect(() => {
-    async function fetchArticles() {
-      const { data } = await supabase
-        .from('blog_posts')
-        .select('id, title, excerpt, category, published_at, slug, read_time')
+    async function fetchAll() {
+      // Editorial articles — fixed table name: bloglux_articles (was blog_posts)
+      const { data: articleData } = await supabase
+        .from('bloglux_articles')
+        .select('id, slug, title, excerpt, category, published_at, read_time_minutes')
         .eq('status', 'published')
+        .not('category', 'in', '("Research Report","Insider Voice")')
         .order('published_at', { ascending: false })
         .limit(6)
-      if (data && data.length > 0) setArticles(data.map((a: any) => ({ ...a, date: a.published_at || "" })))
+
+      if (articleData && articleData.length > 0) {
+        setArticles(articleData.map((a: any) => ({
+          id: a.id,
+          slug: a.slug,
+          title: a.title,
+          excerpt: a.excerpt || '',
+          category: (a.category || '').toUpperCase(),
+          date: formatDate(a.published_at),
+          read_time: a.read_time_minutes ? `${a.read_time_minutes} min` : '',
+        })))
+      }
+
+      // Research reports — from bloglux_articles where category = 'Research Report'
+      const { data: reportData } = await supabase
+        .from('bloglux_articles')
+        .select('id, slug, title, excerpt, category, published_at')
+        .eq('status', 'published')
+        .eq('category', 'Research Report')
+        .order('published_at', { ascending: false })
+        .limit(6)
+
+      if (reportData && reportData.length > 0) {
+        setReports(reportData.map((r: any) => ({
+          icon: getCategoryIcon(r.title),
+          label: 'RESEARCH REPORT',
+          title: r.title,
+          meta: formatDate(r.published_at),
+          slug: r.slug,
+        })))
+      }
+
+      // Insider voices — from bloglux_articles where category = 'Insider Voice'
+      const { data: voiceData } = await supabase
+        .from('bloglux_articles')
+        .select('id, slug, title, excerpt, category, published_at, author_role')
+        .eq('status', 'published')
+        .eq('category', 'Insider Voice')
+        .order('published_at', { ascending: false })
+        .limit(6)
+
+      if (voiceData && voiceData.length > 0) {
+        setVoices(voiceData.map((v: any) => ({
+          initials: (v.title || 'IN').substring(0, 2).toUpperCase(),
+          name: 'Insider Voice',
+          role: v.author_role || 'Luxury Industry Professional',
+          quote: v.excerpt || v.title,
+          slug: v.slug,
+        })))
+      }
+
+      // Most read — most recent published articles for sidebar
+      const { data: recentData } = await supabase
+        .from('bloglux_articles')
+        .select('id, slug, title, category, published_at')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(4)
+
+      if (recentData && recentData.length > 0) {
+        setMostRead(recentData.map((a: any) => ({
+          cat: (a.category || '').toUpperCase(),
+          title: a.title,
+          date: formatDate(a.published_at),
+          slug: a.slug,
+        })))
+      }
     }
-    fetchArticles()
+
+    fetchAll()
   }, [])
 
   const featured = articles[0]
   const rest = articles.slice(1, 4)
+
+  const displayMostRead = mostRead.length > 0 ? mostRead : [
+    { cat: 'SALARY', title: 'What Hermès really pays — from artisan to director', date: 'March 22, 2026', slug: 'hermes-salary-guide' },
+    { cat: 'CAREERS', title: 'How to get hired at Chanel without applying online', date: 'March 19, 2026', slug: 'hired-at-chanel' },
+    { cat: 'MARKET', title: 'LVMH vs Kering: which group offers better career progression?', date: 'March 14, 2026', slug: 'lvmh-vs-kering-careers' },
+    { cat: 'LEADERSHIP', title: 'The Richemont school of management — and why alumni are in demand', date: 'March 10, 2026', slug: 'richemont-management' },
+  ]
 
   return (
     <div className="min-h-screen bg-[#1a1a1a]">
@@ -148,20 +235,18 @@ export default function InsightsPage() {
                       <div className="h-px w-5 bg-[#a58e28]" />
                       <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">FEATURED</span>
                     </div>
-                    <h2 className="text-2xl font-normal text-white mb-3 leading-snug cursor-pointer hover:text-[#ccc]" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-                      The end of the logo era: why quiet luxury is reshaping hiring across Europe's maisons
+                    <h2 className="text-2xl font-normal text-white mb-3 leading-snug" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
+                      {featured.title}
                     </h2>
                     <p className="text-sm text-[#999] leading-relaxed mb-4">
-                      As brands like Bottega Veneta and Loro Piana outperform logo-heavy competitors, a new archetype of luxury professional is emerging — one fluent in craft, restraint, and long-term brand building.
+                      {featured.excerpt}
                     </p>
                     <div className="flex items-center gap-3 text-xs text-[#999] mb-4">
                       <span className="text-[#888]">JOBLUX Editorial</span>
-                      <span>·</span>
-                      <span>March 24, 2026</span>
-                      <span>·</span>
-                      <span>8 min read</span>
+                      {featured.date && <><span>·</span><span>{featured.date}</span></>}
+                      {featured.read_time && <><span>·</span><span>{featured.read_time} read</span></>}
                     </div>
-                    <a href="#" className="text-xs text-[#a58e28] hover:underline">Read article →</a>
+                    <Link href={`/bloglux/${featured.slug}`} className="text-xs text-[#a58e28] hover:underline">Read article →</Link>
                   </div>
                 </div>
               )}
@@ -183,9 +268,9 @@ export default function InsightsPage() {
                     </h3>
                     <p className="text-xs text-[#999] leading-relaxed mb-2">{article.excerpt}</p>
                     <div className="flex gap-2 text-[11px] text-[#999]">
-                      <span>{article.date}</span>
-                      <span>·</span>
-                      <span>{article.read_time}</span>
+                      {article.date && <span>{article.date}</span>}
+                      {article.date && article.read_time && <span>·</span>}
+                      {article.read_time && <span>{article.read_time}</span>}
                     </div>
                   </Link>
                 ))}
@@ -217,10 +302,10 @@ export default function InsightsPage() {
                 <div className="flex-1 h-px bg-[#2a2a2a]" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {voices.map(v => (
-                  <div key={v.name} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
+                {voices.map((v, i) => (
+                  <div key={i} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
                     <p className="text-sm text-[#777] italic leading-relaxed mb-4" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-                      "{v.quote}"
+                      &ldquo;{v.quote}&rdquo;
                     </p>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[10px] font-medium text-[#999] flex-shrink-0">
@@ -242,8 +327,8 @@ export default function InsightsPage() {
               <div>
                 <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-4">MOST READ</div>
                 <div className="space-y-4">
-                  {mostRead.map(a => (
-                    <Link key={a.slug} href={`/bloglux/${a.slug}`} className="flex gap-3 pb-4 border-b border-[#222] last:border-b-0 cursor-pointer group">
+                  {displayMostRead.map((a, i) => (
+                    <Link key={i} href={`/bloglux/${a.slug}`} className="flex gap-3 pb-4 border-b border-[#222] last:border-b-0 cursor-pointer group">
                       <div className="w-14 h-14 bg-[#222] border border-[#2a2a2a] rounded-md flex-shrink-0" />
                       <div>
                         <div className="text-[10px] text-[#a58e28] tracking-wider mb-1">{a.cat}</div>
@@ -291,8 +376,8 @@ export default function InsightsPage() {
         {/* RESEARCH REPORTS TAB */}
         {activeTab === 'Research reports' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {reports.map(r => (
-              <div key={r.title} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 flex gap-4 cursor-pointer hover:border-[#3a3a3a] transition-colors">
+            {reports.map((r, i) => (
+              <div key={i} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 flex gap-4 cursor-pointer hover:border-[#3a3a3a] transition-colors">
                 <div className="w-11 h-11 rounded-lg flex items-center justify-center text-lg flex-shrink-0" style={{ background: 'rgba(165,142,40,0.1)', border: '1px solid rgba(165,142,40,0.2)' }}>
                   {r.icon}
                 </div>
@@ -309,10 +394,10 @@ export default function InsightsPage() {
         {/* INSIDER VOICES TAB */}
         {activeTab === 'Insider voices' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {voices.map(v => (
-              <div key={v.name} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
+            {voices.map((v, i) => (
+              <div key={i} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
                 <p className="text-sm text-[#777] italic leading-relaxed mb-4" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-                  "{v.quote}"
+                  &ldquo;{v.quote}&rdquo;
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[10px] font-medium text-[#999] flex-shrink-0">

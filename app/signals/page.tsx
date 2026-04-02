@@ -1,33 +1,3 @@
-/*
-  Supabase migration — run once to add columns if they don't exist:
-
-  ALTER TABLE signals ADD COLUMN IF NOT EXISTS slug text UNIQUE;
-  ALTER TABLE signals ADD COLUMN IF NOT EXISTS summary text;
-  ALTER TABLE signals ADD COLUMN IF NOT EXISTS body text;
-  ALTER TABLE signals ADD COLUMN IF NOT EXISTS brand text;
-  ALTER TABLE signals ADD COLUMN IF NOT EXISTS region text;
-  ALTER TABLE signals ADD COLUMN IF NOT EXISTS sector text;
-
-  -- If creating from scratch:
-  CREATE TABLE IF NOT EXISTS signals (
-    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-    slug text UNIQUE,
-    headline text NOT NULL,
-    summary text,
-    body text,
-    context_paragraph text,
-    category text DEFAULT 'market',
-    brand text,
-    brand_tags text[],
-    region text,
-    sector text,
-    confidence text,
-    is_published boolean DEFAULT false,
-    published_at timestamptz DEFAULT now(),
-    created_at timestamptz DEFAULT now()
-  );
-*/
-
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -44,10 +14,10 @@ const BADGE_COLORS: Record<string, { bg: string; text: string }> = {
   market:  { bg: 'rgba(63,185,80,0.15)',  text: '#3fb950' },
   brand:   { bg: 'rgba(240,136,62,0.15)', text: '#f0883e' },
   finance: { bg: 'rgba(163,113,247,0.15)', text: '#a371f7' },
-  leadership:       { bg: 'rgba(240,136,62,0.15)', text: '#f0883e' },
-  growth:           { bg: 'rgba(63,185,80,0.15)',  text: '#3fb950' },
-  contraction:      { bg: 'rgba(248,81,73,0.15)',  text: '#f85149' },
-  expansion:        { bg: 'rgba(88,166,255,0.15)', text: '#58a6ff' },
+  leadership:         { bg: 'rgba(240,136,62,0.15)', text: '#f0883e' },
+  growth:             { bg: 'rgba(63,185,80,0.15)',  text: '#3fb950' },
+  contraction:        { bg: 'rgba(248,81,73,0.15)',  text: '#f85149' },
+  expansion:          { bg: 'rgba(88,166,255,0.15)', text: '#58a6ff' },
   merger_acquisition: { bg: 'rgba(163,113,247,0.15)', text: '#a371f7' },
 }
 
@@ -66,27 +36,6 @@ const TICKERS = [
   { name: 'Hermès', ticker: 'RMS.PA' },
   { name: 'Burberry', ticker: 'BRBY.L' },
   { name: 'Tapestry', ticker: 'TPR' },
-]
-
-const MARKET_MOVERS = [
-  { name: 'LVMH', price: '€742.30', change: '+2.3%', positive: true },
-  { name: 'Hermès', price: '€2,184.00', change: '+1.4%', positive: true },
-  { name: 'Kering', price: '€218.55', change: '-1.8%', positive: false },
-  { name: 'Burberry', price: '£10.42', change: '-2.6%', positive: false },
-  { name: 'Richemont', price: 'CHF 138.70', change: '+0.9%', positive: true },
-]
-
-const TALENT_RADAR = [
-  { text: 'Bottega Veneta creative director search underway — shortlist of 4', time: '2h ago' },
-  { text: 'Tiffany & Co. hiring 200+ retail roles across Asia Pacific', time: '5h ago' },
-  { text: 'Chanel CFO transition — new appointment expected Q2', time: '1d ago' },
-]
-
-const COMING_THIS_WEEK = [
-  { day: 'Mon', event: 'LVMH Q1 earnings call' },
-  { day: 'Tue', event: 'Watches & Wonders Geneva opens' },
-  { day: 'Thu', event: 'Kering investor day — strategy update' },
-  { day: 'Fri', event: 'US luxury consumer confidence index' },
 ]
 
 const placeholderSignals = [
@@ -135,21 +84,51 @@ function formatDate(d: Date) {
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
+function formatEventDate(dateStr: string) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+}
+
 export default function SignalsPage() {
   const [activeFilter, setActiveFilter] = useState('All')
   const [signals, setSignals] = useState(placeholderSignals)
+  const [talentSignals, setTalentSignals] = useState<any[]>([])
+  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([])
 
   useEffect(() => {
-    async function fetchSignals() {
-      const { data } = await supabase
+    async function fetchAll() {
+      // Main signal feed
+      const { data: signalData } = await supabase
         .from('signals')
         .select('*')
         .eq('is_published', true)
         .order('published_at', { ascending: false })
         .limit(30)
-      if (data && data.length > 0) setSignals(data)
+      if (signalData && signalData.length > 0) setSignals(signalData)
+
+      // Talent radar — leadership/talent category signals for sidebar
+      const { data: talentData } = await supabase
+        .from('signals')
+        .select('id, slug, headline, context_paragraph, published_at, category')
+        .eq('is_published', true)
+        .in('category', ['leadership', 'talent'])
+        .order('published_at', { ascending: false })
+        .limit(3)
+      if (talentData && talentData.length > 0) setTalentSignals(talentData)
+
+      // Coming this week — real upcoming events
+      const today = new Date().toISOString().split('T')[0]
+      const { data: eventData } = await supabase
+        .from('events')
+        .select('id, slug, name, title, start_date, location_city, sector')
+        .eq('is_published', true)
+        .gte('start_date', today)
+        .order('start_date', { ascending: true })
+        .limit(4)
+      if (eventData && eventData.length > 0) setUpcomingEvents(eventData)
     }
-    fetchSignals()
+    fetchAll()
   }, [])
 
   const filtered = signals.filter(s => {
@@ -263,48 +242,56 @@ export default function SignalsPage() {
           {/* RIGHT — Sidebar */}
           <div className="space-y-5">
 
-            {/* Market movers */}
+            {/* Market movers — live prices coming */}
             <div className="bg-[#141414] border border-[#1e1e1e] rounded p-5">
               <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-4">Market movers</p>
               <div className="space-y-3">
-                {MARKET_MOVERS.map(m => (
-                  <div key={m.name} className="flex items-center justify-between">
-                    <span className="text-[13px] text-[#ccc]">{m.name}</span>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[12px] text-[#999]">{m.price}</span>
-                      <span className={`text-[12px] font-medium ${m.positive ? 'text-[#3fb950]' : 'text-[#f85149]'}`}>
-                        {m.change}
-                      </span>
-                    </div>
+                {TICKERS.map(t => (
+                  <div key={t.name} className="flex items-center justify-between">
+                    <span className="text-[13px] text-[#ccc]">{t.name}</span>
+                    <span className="text-[11px] text-[#555]">{t.ticker}</span>
                   </div>
                 ))}
               </div>
+              <p className="text-[10px] text-[#555] mt-4">Live prices — coming soon</p>
             </div>
 
-            {/* Talent radar */}
+            {/* Talent radar — real signals from DB */}
             <div className="bg-[#141414] border border-[#1e1e1e] rounded p-5">
               <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-4">Talent radar</p>
               <div className="space-y-3">
-                {TALENT_RADAR.map((t, i) => (
+                {(talentSignals.length > 0 ? talentSignals : [
+                  { id: '1', slug: '', headline: 'Leadership intelligence loading...', published_at: new Date().toISOString() },
+                ]).map((t: any, i: number) => (
                   <div key={i} className="border-l-2 border-[#58a6ff] pl-3">
-                    <p className="text-[12px] text-[#ccc] leading-relaxed">{t.text}</p>
-                    <p className="text-[10px] text-[#999] mt-1">{t.time}</p>
+                    <p className="text-[12px] text-[#ccc] leading-relaxed">{t.headline}</p>
+                    <p className="text-[10px] text-[#999] mt-1">{t.published_at ? timeAgo(t.published_at) : ''}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Coming this week */}
+            {/* Coming this week — real events from DB */}
             <div className="bg-[#141414] border border-[#1e1e1e] rounded p-5">
-              <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-4">Coming this week</p>
+              <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-4">Coming up</p>
               <div className="space-y-3">
-                {COMING_THIS_WEEK.map((e, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <span className="text-[11px] text-[#999] font-medium w-8 flex-shrink-0 pt-[1px]">{e.day}</span>
-                    <p className="text-[12px] text-[#ccc] leading-relaxed">{e.event}</p>
-                  </div>
+                {(upcomingEvents.length > 0 ? upcomingEvents : [
+                  { id: '1', name: 'Events loading...', start_date: '', location_city: '' },
+                ]).map((e: any, i: number) => (
+                  <Link key={i} href={`/events/${e.slug || e.id}`} className="flex items-start gap-3 group">
+                    <span className="text-[11px] text-[#999] font-medium w-12 flex-shrink-0 pt-[1px]">
+                      {e.start_date ? formatEventDate(e.start_date) : ''}
+                    </span>
+                    <p className="text-[12px] text-[#ccc] leading-relaxed group-hover:text-white transition-colors">
+                      {e.name || e.title}
+                      {e.location_city && <span className="text-[#777]"> · {e.location_city}</span>}
+                    </p>
+                  </Link>
                 ))}
               </div>
+              <Link href="/events" className="text-[11px] text-[#a58e28] mt-4 block hover:underline">
+                View all events →
+              </Link>
             </div>
 
           </div>
