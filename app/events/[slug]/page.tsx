@@ -128,12 +128,6 @@ export default function EventDetailPage() {
     )
   }
 
-  const handleEmail = () => {
-    if (!event) return
-    const title = event.title || event.name || 'Event'
-    window.location.href = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`${title}\n\n${window.location.href}`)}`
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
@@ -376,15 +370,15 @@ export default function EventDetailPage() {
             <div className="border-t border-[#222] pt-6">
               <div className="flex items-center gap-3 text-[12px] text-[#999]">
                 <button onClick={handleCopyLink} className="hover:text-[#a58e28] transition-colors">
-                  {copied ? 'Copied' : 'Copy link'}
+                  {copied ? 'Copied' : 'Share'}
                 </button>
                 <span className="text-[#777]">·</span>
                 <button onClick={handleLinkedIn} className="hover:text-[#a58e28] transition-colors">
                   Share on LinkedIn
                 </button>
                 <span className="text-[#777]">·</span>
-                <button onClick={handleEmail} className="hover:text-[#a58e28] transition-colors">
-                  Send to a colleague
+                <button onClick={() => generateICS(event)} className="hover:text-[#a58e28] transition-colors">
+                  Download .ics
                 </button>
               </div>
             </div>
