@@ -13,34 +13,36 @@ export async function GET() {
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString()
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString()
 
-    // Content health counts
-    const [brandsRes, signalsRes, articlesRes, salaryRes, interviewsRes, eventsRes, mediaRes] = await Promise.all([
-      supabase.from('wikilux_content').select('status', { count: 'exact', head: false }),
-      supabase.from('signals').select('is_published', { count: 'exact', head: false }).eq('is_published', true),
-      supabase.from('bloglux_articles').select('status', { count: 'exact', head: false }).eq('status', 'published'),
-      supabase.rpc('count_salary_brands'),
+    // Content health counts — precise queries
+    const [
+      brandsLiveRes,
+      brandsTotalRes,
+      brandsEmptyRes,
+      signalsRes,
+      articlesRes,
+      interviewsRes,
+      eventsRes,
+      mediaRes,
+      salaryBrandsRes,
+    ] = await Promise.all([
+      supabase.from('wikilux_content').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
+      supabase.from('wikilux_content').select('id', { count: 'exact', head: true }),
+      supabase.from('wikilux_content').select('id', { count: 'exact', head: true }).eq('status', 'draft').or('content.is.null,content.eq.{}'),
+      supabase.from('signals').select('id', { count: 'exact', head: true }).eq('is_published', true),
+      supabase.from('bloglux_articles').select('id', { count: 'exact', head: true }).eq('status', 'published'),
       supabase.from('interview_experiences').select('id', { count: 'exact', head: true }),
       supabase.from('events').select('id', { count: 'exact', head: true }),
       supabase.from('media_library').select('id', { count: 'exact', head: true }),
+      supabase.from('salary_benchmarks').select('brand_slug').not('brand_slug', 'is', null),
     ])
 
-    // Count brands by status
-    const allBrands = brandsRes.data || []
-    const brandsLive = allBrands.filter((b: any) => b.status === 'approved').length
-    const brandsTotal = allBrands.length
-    const brandsEmpty = brandsTotal - brandsLive
+    const brandsLive = brandsLiveRes.count || 0
+    const brandsTotal = brandsTotalRes.count || 0
+    const brandsEmpty = brandsEmptyRes.count || 0
 
-    // Salary brands count (fallback if RPC doesn't exist)
-    let salaryBrands = 0
-    if (salaryRes.error) {
-      const { data: sbData } = await supabase.from('salary_benchmarks')
-        .select('brand_slug')
-        .neq('brand_name', 'Luxury Sector Average')
-      const uniqueSlugs = new Set((sbData || []).map((r: any) => r.brand_slug).filter(Boolean))
-      salaryBrands = uniqueSlugs.size
-    } else {
-      salaryBrands = (salaryRes.data as any) || 0
-    }
+    // Count distinct brand slugs for salary
+    const uniqueSlugs = new Set((salaryBrandsRes.data || []).map((r: any) => r.brand_slug).filter(Boolean))
+    const salaryBrands = uniqueSlugs.size
 
     // Usage history
     const { data: thisMonthHistory } = await supabase.from('luxai_history')
