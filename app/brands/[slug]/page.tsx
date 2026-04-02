@@ -626,7 +626,7 @@ export default function BrandDetailPage() {
 
                 {/* Department filters */}
                 {(() => {
-                  const departments = ['All', ...Array.from(new Set(brand.salary_data.roles.map((r: any) => r.department)))];
+                  const departments: string[] = ['All', ...Array.from(new Set(brand.salary_data.roles.map((r: any) => r.department) as string[]))];
                   return (
                     <div className="flex gap-2 mb-6 flex-wrap">
                       {departments.map((d: string) => (
