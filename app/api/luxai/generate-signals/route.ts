@@ -64,12 +64,14 @@ RULES:
     const outputTokens = data.usage.output_tokens
     const cost = (inputTokens * 1.00 / 1000000) + (outputTokens * 5.00 / 1000000)
 
+    console.log('[LUXAI signals] Raw Claude response:', text.substring(0, 500))
+
     let signals
     try {
       // Strip markdown backticks if present
       let cleaned = text.trim().replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '').trim()
 
-      // Try array first (signals return [...])
+      // Try array first (signals return [...]), fall back to object
       const firstBracket = cleaned.indexOf('[')
       const lastBracket = cleaned.lastIndexOf(']')
       const firstBrace = cleaned.indexOf('{')
@@ -88,12 +90,15 @@ RULES:
         signals = [signals]
       }
     } catch (e: any) {
-      console.error('LUXAI raw response text:', text)
+      console.error('[LUXAI signals] Raw text that failed parsing:', text)
       throw new Error(`JSON parse failed: ${e.message} — raw starts with: ${text.substring(0, 200)}`)
     }
 
+    console.log(`[LUXAI signals] Parsed ${signals.length} signals from Claude response`)
+
     // Insert each signal as pending (unpublished)
     const inserted = []
+    const insertErrors = []
     for (const s of signals) {
       const slug = s.headline.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 80)
       const { data: row, error } = await supabase.from('signals').insert({
@@ -111,7 +116,16 @@ RULES:
         slug
       }).select().maybeSingle()
 
-      if (!error && row) inserted.push(row)
+      if (error) {
+        console.error(`[LUXAI signals] Insert failed for "${s.headline}":`, error.message, error.details)
+        insertErrors.push({ headline: s.headline, error: error.message })
+      } else if (row) {
+        inserted.push(row)
+      }
+    }
+
+    if (insertErrors.length > 0) {
+      console.error(`[LUXAI signals] ${insertErrors.length}/${signals.length} inserts failed:`, JSON.stringify(insertErrors))
     }
 
     // Log to history
@@ -119,19 +133,32 @@ RULES:
       type: 'signal_generation',
       model: 'claude-haiku-4-5-20251001',
       prompt: `Generate ${count} signals`,
-      response: { count: inserted.length },
+      response: {
+        count: inserted.length,
+        parsed: signals.length,
+        errors: insertErrors.length > 0 ? insertErrors : undefined
+      },
       tokens_used: inputTokens + outputTokens,
       cost_usd: cost,
-      status: 'success'
+      status: inserted.length > 0 ? 'success' : 'error'
     })
 
     return NextResponse.json({
-      success: true,
-      message: `${inserted.length} signals generated and pending approval`,
-      data: { count: inserted.length, cost, tokens: inputTokens + outputTokens }
+      success: inserted.length > 0,
+      message: inserted.length > 0
+        ? `${inserted.length} signals generated and pending approval`
+        : `Parsed ${signals.length} signals but all inserts failed — check logs`,
+      data: {
+        count: inserted.length,
+        parsed: signals.length,
+        failed: insertErrors.length,
+        cost,
+        tokens: inputTokens + outputTokens,
+        errors: insertErrors.length > 0 ? insertErrors : undefined
+      }
     })
   } catch (error: any) {
-    console.error('Signal generation error:', error)
+    console.error('[LUXAI signals] Fatal error:', error)
     await supabase.from('luxai_history').insert({
       type: 'signal_generation',
       model: 'claude-haiku-4-5-20251001',
@@ -140,7 +167,7 @@ RULES:
       tokens_used: 0,
       cost_usd: 0,
       status: 'error'
-    }).then(() => {})
+    }).catch((e) => console.error('[LUXAI signals] Failed to log error to history:', e))
     return NextResponse.json({ success: false, message: error.message }, { status: 500 })
   }
 }

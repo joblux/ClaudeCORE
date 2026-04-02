@@ -100,18 +100,40 @@ RULES:
     const outputTokens = data.usage.output_tokens
     const cost = (inputTokens * 1.00 / 1000000) + (outputTokens * 5.00 / 1000000)
 
+    console.log('[LUXAI events] Raw Claude response:', text.substring(0, 500))
+
     let events
     try {
+      // Strip markdown backticks if present
       let cleaned = text.trim().replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '').trim()
-      const first = cleaned.indexOf('[')
-      const last = cleaned.lastIndexOf(']')
-      if (first !== -1 && last > first) cleaned = cleaned.substring(first, last + 1)
+
+      // Try array first, fall back to object
+      const firstBracket = cleaned.indexOf('[')
+      const lastBracket = cleaned.lastIndexOf(']')
+      const firstBrace = cleaned.indexOf('{')
+      const lastBrace = cleaned.lastIndexOf('}')
+
+      if (firstBracket !== -1 && lastBracket > firstBracket) {
+        cleaned = cleaned.substring(firstBracket, lastBracket + 1)
+      } else if (firstBrace !== -1 && lastBrace > firstBrace) {
+        cleaned = cleaned.substring(firstBrace, lastBrace + 1)
+      }
+
       events = JSON.parse(cleaned)
+
+      // Wrap single object in array
+      if (!Array.isArray(events)) {
+        events = [events]
+      }
     } catch (e: any) {
-      throw new Error(`JSON parse failed: ${e.message}`)
+      console.error('[LUXAI events] Raw text that failed parsing:', text)
+      throw new Error(`JSON parse failed: ${e.message} — raw starts with: ${text.substring(0, 200)}`)
     }
 
+    console.log(`[LUXAI events] Parsed ${events.length} events from Claude response`)
+
     const inserted = []
+    const insertErrors = []
     for (const ev of events) {
       const slug = ev.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 80)
       const { data: row, error } = await supabase.from('events').insert({
@@ -145,26 +167,58 @@ RULES:
         is_featured: false,
         source: 'luxai'
       }).select().maybeSingle()
-      if (!error && row) inserted.push(row)
+
+      if (error) {
+        console.error(`[LUXAI events] Insert failed for "${ev.name}":`, error.message, error.details)
+        insertErrors.push({ name: ev.name, error: error.message })
+      } else if (row) {
+        inserted.push(row)
+      }
+    }
+
+    if (insertErrors.length > 0) {
+      console.error(`[LUXAI events] ${insertErrors.length}/${events.length} inserts failed:`, JSON.stringify(insertErrors))
     }
 
     await supabase.from('luxai_history').insert({
       type: 'event_generation',
       model: 'claude-haiku-4-5-20251001',
       prompt: `Generate ${count} events`,
-      response: { count: inserted.length },
+      response: {
+        count: inserted.length,
+        parsed: events.length,
+        errors: insertErrors.length > 0 ? insertErrors : undefined
+      },
       tokens_used: inputTokens + outputTokens,
       cost_usd: cost,
-      status: 'success'
+      status: inserted.length > 0 ? 'success' : 'error'
     })
 
     return NextResponse.json({
-      success: true,
-      message: `${inserted.length} events generated`,
-      data: { count: inserted.length, cost, tokens: inputTokens + outputTokens }
+      success: inserted.length > 0,
+      message: inserted.length > 0
+        ? `${inserted.length} events generated`
+        : `Parsed ${events.length} events but all inserts failed — check logs`,
+      data: {
+        count: inserted.length,
+        parsed: events.length,
+        failed: insertErrors.length,
+        cost,
+        tokens: inputTokens + outputTokens,
+        errors: insertErrors.length > 0 ? insertErrors : undefined
+      }
     })
   } catch (error: any) {
-    console.error('Event generation error:', error)
+    console.error('[LUXAI events] Fatal error:', error)
+    await supabase.from('luxai_history').insert({
+      type: 'event_generation',
+      model: 'claude-haiku-4-5-20251001',
+      prompt: 'Generate events',
+      response: { error: error.message },
+      tokens_used: 0,
+      cost_usd: 0,
+      status: 'error'
+    }).catch((e) => console.error('[LUXAI events] Failed to log error to history:', e))
     return NextResponse.json({ success: false, message: error.message }, { status: 500 })
   }
 }
