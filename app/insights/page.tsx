@@ -283,7 +283,7 @@ export default function InsightsPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
                 {reports.map(r => (
-                  <div key={r.title} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 flex gap-4 cursor-pointer hover:border-[#3a3a3a] transition-colors">
+                  <Link key={r.title} href={r.slug ? `/bloglux/${r.slug}` : '#'} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 flex gap-4 cursor-pointer hover:border-[#3a3a3a] transition-colors block">
                     <div className="w-11 h-11 rounded-lg flex items-center justify-center text-lg flex-shrink-0" style={{ background: 'rgba(165,142,40,0.1)', border: '1px solid rgba(165,142,40,0.2)' }}>
                       {r.icon}
                     </div>
@@ -292,7 +292,7 @@ export default function InsightsPage() {
                       <div className="text-sm font-medium text-[#e0e0e0] mb-1 leading-snug">{r.title}</div>
                       <div className="text-[11px] text-[#999]">{r.meta}</div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
 
@@ -377,7 +377,7 @@ export default function InsightsPage() {
         {activeTab === 'Research reports' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {reports.map((r, i) => (
-              <div key={i} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 flex gap-4 cursor-pointer hover:border-[#3a3a3a] transition-colors">
+              <Link key={i} href={r.slug ? `/bloglux/${r.slug}` : '#'} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 flex gap-4 cursor-pointer hover:border-[#3a3a3a] transition-colors block">
                 <div className="w-11 h-11 rounded-lg flex items-center justify-center text-lg flex-shrink-0" style={{ background: 'rgba(165,142,40,0.1)', border: '1px solid rgba(165,142,40,0.2)' }}>
                   {r.icon}
                 </div>
@@ -386,7 +386,7 @@ export default function InsightsPage() {
                   <div className="text-sm font-medium text-[#e0e0e0] mb-1 leading-snug">{r.title}</div>
                   <div className="text-[11px] text-[#999]">{r.meta}</div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
