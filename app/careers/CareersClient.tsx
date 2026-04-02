@@ -153,9 +153,9 @@ export default function CareersClient({
   }
 
   const accessLevel = getAccessLevel()
-  const canAccessBenchmark = accessLevel !== 'basic'
-  const canAccessCompare = accessLevel === 'premium' || accessLevel === 'full'
-  const canAccessCalculator = accessLevel === 'full'
+  const canAccessBenchmark = true
+  const canAccessCompare = true
+  const canAccessCalculator = true
 
   // Filter salaries
   const filteredSalaries = salaries.filter(s => {

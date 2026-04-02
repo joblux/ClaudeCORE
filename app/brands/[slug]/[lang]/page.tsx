@@ -51,8 +51,8 @@ const hermesData = {
   salaries: [
     { role: 'Store Manager, Paris', range: '€55K–€75K', blurred: false },
     { role: 'Retail Director, Europe', range: '€95K–€130K', blurred: false },
-    { role: 'Marketing Manager', range: '€65K–€90K', blurred: true },
-    { role: 'Buyer, RTW', range: '€50K–€70K', blurred: true },
+    { role: 'Marketing Manager', range: '€65K–€90K', blurred: false },
+    { role: 'Buyer, RTW', range: '€50K–€70K', blurred: false },
   ],
   financial: {
     stock: '€2,482 (+23% YTD)',

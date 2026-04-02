@@ -565,9 +565,6 @@ function EmptyStateLaunch() {
             { brand: 'Dior', role: 'Visual Merchandiser', dept: 'Visual Merchandising · Mid-level', rounds: 2, diff: 2 },
           ].map((preview, i) => (
             <div key={i} className="jl-card relative overflow-hidden select-none">
-              <div className="absolute inset-0 backdrop-blur-sm bg-white/60 z-10 flex items-center justify-center">
-                <span className="text-xs text-[#a58e28] tracking-wide uppercase font-medium">Preview</span>
-              </div>
               <div className="text-sm font-semibold text-[#1a1a1a] mb-1">{preview.brand}</div>
               <div className="jl-serif text-base text-[#1a1a1a] mb-2">{preview.role}</div>
               <div className="text-[0.65rem] text-[#888] mb-3">{preview.dept}</div>

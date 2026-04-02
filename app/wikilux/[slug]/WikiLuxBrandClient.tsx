@@ -697,7 +697,7 @@ export default function WikiLuxBrandClient({
                 {displayContent.hiring_intelligence.tips && displayContent.hiring_intelligence.tips.length > 0 && (
                   <div className="relative">
                     <h3 className="font-sans text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-3">Insider Tips</h3>
-                    <div className={!isAuthenticated ? 'blur-sm select-none' : ''}>
+                    <div>
                       <ol className="space-y-3">{displayContent.hiring_intelligence.tips.map((tip, i) => (<li key={i} className="flex items-start gap-3"><span className="jl-serif text-lg text-[#a58e28] leading-none mt-0.5 flex-shrink-0 w-6">{i + 1}</span><span className="font-sans text-sm text-[#999] leading-relaxed">{tip}</span></li>))}</ol>
                     </div>
                     {!isAuthenticated && (

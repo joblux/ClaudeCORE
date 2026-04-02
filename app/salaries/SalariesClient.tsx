@@ -646,7 +646,7 @@ function LockedTab({ tool, points, level }: { tool: string; points: number; leve
   return (
     <div className="relative min-h-[400px]">
       <div className="absolute inset-0 overflow-hidden">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 blur-sm opacity-30 pointer-events-none">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="border border-[#e8e2d8] rounded p-5 bg-white">
               <div className="h-5 bg-[#e8e2d8] rounded w-2/3 mb-3" />

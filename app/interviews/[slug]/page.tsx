@@ -244,12 +244,16 @@ export default function BrandInterviewsPage() {
                           {isLoadingDetail ? 'Loading...' : isExpanded ? 'Collapse' : 'View Details \u2192'}
                         </button>
                       ) : (
-                        <span className="flex items-center gap-1.5 text-xs text-[#999]">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                          <Link href="/contribute" className="hover:text-[#a58e28] transition-colors">
-                            Contribute to unlock
-                          </Link>
-                        </span>
+                        <button
+                          onClick={() => {
+                            if (isExpanded) { setExpandedId(null) }
+                            else { fetchDetail(exp.id) }
+                          }}
+                          disabled={isLoadingDetail}
+                          className="text-xs text-[#a58e28] hover:text-[#1a1a1a] transition-colors tracking-wide disabled:opacity-50"
+                        >
+                          {isLoadingDetail ? 'Loading...' : isExpanded ? 'Collapse' : 'View Details \u2192'}
+                        </button>
                       )}
                       <span className="text-[0.6rem] text-[#ccc]">
                         {new Date(exp.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
@@ -297,18 +301,6 @@ export default function BrandInterviewsPage() {
           </div>
         )}
 
-        {/* Access Gate CTA */}
-        {isAuthenticated && summary && summary.total_experiences > 0 && (
-          <div className="mt-10 border border-[#a58e28] rounded p-6 text-center bg-[#fafaf5]">
-            <p className="jl-serif text-lg text-[#1a1a1a] mb-2">Unlock Full Interview Details</p>
-            <p className="text-xs text-[#888] mb-4">
-              Contribute your own experiences to earn points and access detailed process descriptions, questions asked, and insider tips.
-            </p>
-            <Link href="/contribute" className="jl-btn-gold">
-              Contribute &amp; Earn Points
-            </Link>
-          </div>
-        )}
       </div>
     </div>
   )

@@ -683,7 +683,7 @@ export default function BrandDetailPage() {
                   {brand.salary_data.roles
                     .filter((r: any) => salaryDept === 'All' || r.department === salaryDept)
                     .map((role: any, i: number) => {
-                      const isBlurred = i >= 4;
+                      const isBlurred = false;
                       const cityData = role.ranges?.[salaryCurrency] || role.ranges?.paris || {};
                       const currency = cityData.currency || 'EUR';
                       const symbols: Record<string, string> = { EUR: '€', GBP: '£', USD: '$', AED: 'AED ' };
