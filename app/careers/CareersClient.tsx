@@ -181,7 +181,7 @@ export default function CareersClient({
 
   // Show only 2 salaries for basic access
   const visibleSalaries = accessLevel === 'basic' ? filteredSalaries.slice(0, 2) : filteredSalaries
-  const blurredSalaries = accessLevel === 'basic' ? filteredSalaries.slice(2, 6) : []
+  const blurredSalaries = []
 
   // Handle benchmark submission
   const handleBenchmark = async () => {
