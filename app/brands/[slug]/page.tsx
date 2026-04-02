@@ -182,7 +182,28 @@ function buildBrandData(brandName: string, slug: string, content: any) {
     workCulture,
     careers_prose: content?.careers?.prose || (typeof content?.careers === 'string' ? content.careers : null),
     tagline: content?.tagline || null,
-    salary_data: content?.salaries || null,
+    salary_data: (() => {
+      const s = content?.salaries
+      if (!s) return null
+      // Normalize cities[] format → ranges{} format expected by the renderer
+      const normalized = {
+        ...s,
+        roles: (s.roles || []).map((role: any) => {
+          if (role.ranges) return role // already in old format, pass through
+          // Convert cities array to ranges object keyed by city slug
+          const cityKeyMap: Record<string, string> = {
+            'Paris': 'paris', 'London': 'london', 'New York': 'new_york', 'Dubai': 'dubai',
+          }
+          const ranges: Record<string, any> = {}
+          ;(role.cities || []).forEach((c: any) => {
+            const key = cityKeyMap[c.city] || c.city.toLowerCase().replace(/\s+/g, '_')
+            ranges[key] = { min: c.min, max: c.max, median: c.median, currency: c.currency, bonus_min: c.bonus_min, bonus_max: c.bonus_max }
+          })
+          return { ...role, ranges }
+        }),
+      }
+      return normalized
+    })(),
   }
 }
 
