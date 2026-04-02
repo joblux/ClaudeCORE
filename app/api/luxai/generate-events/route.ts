@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export async function POST(request: Request) {
   try {
-    const { count = 10, sector } = await request.json()
+    const { count = 3, sector } = await request.json()
     if (!process.env.ANTHROPIC_API_KEY) return NextResponse.json({ success: false, message: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })
 
     const sectorFilter = sector ? `Focus on the ${sector} sector.` : 'Cover a mix of sectors: Fashion, Watches & Jewellery, Art & Culture, Hospitality, Business, Automotive & Yachts, Beauty, Real Estate.'
@@ -87,7 +87,7 @@ RULES:
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 8000,
+        max_tokens: 12000,
         messages: [{ role: 'user', content: prompt }]
       })
     })
