@@ -98,6 +98,7 @@ RULES:
         tips: iv.tips,
         outcome: iv.outcome,
         difficulty: iv.difficulty,
+        content_origin: 'ai',
         overall_experience: iv.overall_experience
       }).select().maybeSingle()
       if (!error && row) inserted.push(row)

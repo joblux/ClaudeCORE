@@ -78,6 +78,7 @@ RULES:
         category: 'Insider Voice',
         tags: v.topic_tags,
         status: 'draft',
+        content_origin: 'ai',
         author_name: v.author_name,
         author_role: `${v.author_title}, ${v.author_company}`
       }).select().maybeSingle()

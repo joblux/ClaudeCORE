@@ -93,6 +93,7 @@ RULES:
       category: article.category,
       read_time_minutes: article.read_time || 5,
       status: 'draft',
+      content_origin: 'ai',
       author_name: 'JOBLUX Intelligence'
     }).select().maybeSingle()
 

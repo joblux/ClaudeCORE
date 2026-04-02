@@ -88,6 +88,7 @@ RULES:
       category: 'Research Report',
       read_time_minutes: report.read_time || 12,
       status: 'draft',
+      content_origin: 'ai',
       author_name: 'JOBLUX Intelligence'
     })
 

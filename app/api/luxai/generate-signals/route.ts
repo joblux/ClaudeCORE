@@ -91,6 +91,7 @@ RULES:
         brand_tags: s.brand_tags,
         confidence: s.confidence,
         is_published: false,
+        content_origin: 'ai',
         is_pinned: false,
         slug
       }).select().maybeSingle()

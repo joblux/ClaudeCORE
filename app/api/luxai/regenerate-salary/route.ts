@@ -125,6 +125,7 @@ RULES:
           total_comp_min: city.min + (city.bonus_min || 0),
           total_comp_max: city.max + (city.bonus_max || 0),
           source: 'JOBLUX Intelligence',
+          content_origin: 'ai',
           confidence: 'ai_estimated',
           year_of_data: new Date().getFullYear(),
           notes: `AI-generated salary estimate for ${brandName}`

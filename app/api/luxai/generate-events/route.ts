@@ -99,6 +99,7 @@ RULES:
         type: ev.type,
         website_url: ev.website_url,
         is_published: false,
+        content_origin: 'ai',
         is_featured: false,
         source: 'luxai'
       }).select().maybeSingle()
