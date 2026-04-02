@@ -13,36 +13,8 @@ export async function GET() {
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString()
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString()
 
-    // Content health counts — precise queries
-    const [
-      brandsLiveRes,
-      brandsTotalRes,
-      brandsEmptyRes,
-      signalsRes,
-      articlesRes,
-      interviewsRes,
-      eventsRes,
-      mediaRes,
-      salaryBrandsRes,
-    ] = await Promise.all([
-      supabase.from('wikilux_content').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
-      supabase.from('wikilux_content').select('id', { count: 'exact', head: true }),
-      supabase.from('wikilux_content').select('id', { count: 'exact', head: true }).eq('status', 'draft').or('content.is.null,content.eq.{}'),
-      supabase.from('signals').select('id', { count: 'exact', head: true }).eq('is_published', true),
-      supabase.from('bloglux_articles').select('id', { count: 'exact', head: true }).eq('status', 'published'),
-      supabase.from('interview_experiences').select('id', { count: 'exact', head: true }),
-      supabase.from('events').select('id', { count: 'exact', head: true }),
-      supabase.from('media_library').select('id', { count: 'exact', head: true }),
-      supabase.from('salary_benchmarks').select('brand_slug').not('brand_slug', 'is', null),
-    ])
-
-    const brandsLive = brandsLiveRes.count || 0
-    const brandsTotal = brandsTotalRes.count || 0
-    const brandsEmpty = brandsEmptyRes.count || 0
-
-    // Count distinct brand slugs for salary
-    const uniqueSlugs = new Set((salaryBrandsRes.data || []).map((r: any) => r.brand_slug).filter(Boolean))
-    const salaryBrands = uniqueSlugs.size
+    // Content health counts via DB function
+    const { data: stats } = await supabase.rpc('get_luxai_stats')
 
     // Usage history
     const { data: thisMonthHistory } = await supabase.from('luxai_history')
@@ -63,15 +35,15 @@ export async function GET() {
 
     return NextResponse.json({
       stats: {
-        brands_total: brandsTotal,
-        brands_live: brandsLive,
-        brands_empty: brandsEmpty,
-        signals: signalsRes.count || 0,
-        articles: articlesRes.count || 0,
-        salary_brands: salaryBrands,
-        interviews: interviewsRes.count || 0,
-        events: eventsRes.count || 0,
-        media: mediaRes.count || 0,
+        brands_total: stats?.brands_total ?? 0,
+        brands_live: stats?.brands_live ?? 0,
+        brands_empty: stats?.brands_empty ?? 0,
+        signals: stats?.signals ?? 0,
+        articles: stats?.articles ?? 0,
+        salary_brands: stats?.salary_brands ?? 0,
+        interviews: stats?.interviews ?? 0,
+        events: stats?.events ?? 0,
+        media: stats?.media ?? 0,
         this_month: thisMonthCost,
         this_month_requests: thisMonthRequests,
         last_month: lastMonthCost,
