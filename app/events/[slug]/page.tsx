@@ -96,6 +96,25 @@ export default function EventDetailPage() {
     fetchEvent()
   }, [slug])
 
+  // SEO: set document title and meta description from DB fields
+  useEffect(() => {
+    if (!event) return
+    if (event.meta_title) {
+      document.title = event.meta_title
+    } else if (event.title || event.name) {
+      document.title = `${event.title || event.name} — JOBLUX Events`
+    }
+    if (event.meta_description) {
+      let metaTag = document.querySelector('meta[name="description"]')
+      if (!metaTag) {
+        metaTag = document.createElement('meta')
+        metaTag.setAttribute('name', 'description')
+        document.head.appendChild(metaTag)
+      }
+      metaTag.setAttribute('content', event.meta_description)
+    }
+  }, [event])
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href)
     setCopied(true)
@@ -140,6 +159,12 @@ export default function EventDetailPage() {
   const title = event.title || event.name || ''
   const dateRange = event.start_date ? formatDateRange(event.start_date, event.end_date) : event.dates || ''
   const locationStr = event.location || [event.location_city, event.location_country].filter(Boolean).join(', ')
+
+  const practicalInfo = event.practical_info as Record<string, string> | null
+  const highlights = event.highlights as string[] | null
+  const brandsPresent = event.brands_present as string[] | null
+  const careerOpportunities = event.career_opportunities as string[] | null
+  const networkingTips = event.networking_tips as string[] | null
 
   return (
     <div className="min-h-screen bg-[#1a1a1a]">
@@ -224,12 +249,74 @@ export default function EventDetailPage() {
             {/* Divider */}
             <div className="border-t border-[#222] mb-8" />
 
-            {/* Description */}
-            {event.description && (
+            {/* Long description (full editorial body) — falls back to short description */}
+            {(event.long_description || event.description) && (
               <div className="text-[15px] text-[#ccc] leading-[1.8] space-y-4 mb-10">
-                {event.description.split('\n').map((p: string, i: number) => (
+                {(event.long_description || event.description).split('\n').map((p: string, i: number) => (
                   p.trim() ? <p key={i}>{p}</p> : null
                 ))}
+              </div>
+            )}
+
+            {/* Highlights */}
+            {highlights && highlights.length > 0 && (
+              <div className="mb-10">
+                <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-4">Highlights</p>
+                <ul className="space-y-3">
+                  {highlights.map((item, i) => (
+                    <li key={i} className="flex items-start gap-3 text-[14px] text-[#ccc] leading-relaxed">
+                      <span className="mt-[7px] w-[6px] h-[6px] rounded-full bg-[#a58e28] shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Brands present */}
+            {brandsPresent && brandsPresent.length > 0 && (
+              <div className="mb-10">
+                <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-4">Brands Present</p>
+                <div className="flex flex-wrap gap-2">
+                  {brandsPresent.map((brand, i) => (
+                    <span
+                      key={i}
+                      className="text-[12px] text-[#ccc] bg-[#222] border border-[#2a2a2a] rounded-full px-3 py-1"
+                    >
+                      {brand}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Career opportunities */}
+            {careerOpportunities && careerOpportunities.length > 0 && (
+              <div className="bg-[#141414] border border-[#1e1e1e] rounded p-6 mb-10">
+                <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-4">Career Opportunities</p>
+                <ol className="space-y-4">
+                  {careerOpportunities.map((item, i) => (
+                    <li key={i} className="flex gap-3 text-[14px] text-[#ccc] leading-relaxed">
+                      <span className="text-[#a58e28] font-semibold shrink-0">{i + 1}.</span>
+                      {item}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+
+            {/* Networking tips */}
+            {networkingTips && networkingTips.length > 0 && (
+              <div className="bg-[#141414] border border-[#1e1e1e] rounded p-6 mb-10">
+                <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-4">Networking Tips</p>
+                <ol className="space-y-4">
+                  {networkingTips.map((tip, i) => (
+                    <li key={i} className="flex gap-3 text-[14px] text-[#ccc] leading-relaxed">
+                      <span className="text-[#a58e28] font-semibold shrink-0">{i + 1}.</span>
+                      {tip}
+                    </li>
+                  ))}
+                </ol>
               </div>
             )}
 
@@ -243,6 +330,45 @@ export default function EventDetailPage() {
                 <p className="text-[13px] text-[#ccc] leading-relaxed">
                   {event.career_context}
                 </p>
+              </div>
+            )}
+
+            {/* Practical info */}
+            {practicalInfo && Object.keys(practicalInfo).length > 0 && (
+              <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-6 mb-10">
+                <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-4">Practical Information</p>
+                <div className="space-y-3">
+                  {practicalInfo.venue && (
+                    <div className="border-b border-[#2a2a2a] pb-3">
+                      <span className="text-[10px] text-[#999] uppercase tracking-[0.14em] block mb-1">Venue</span>
+                      <span className="text-[14px] text-[#ccc]">{practicalInfo.venue}</span>
+                    </div>
+                  )}
+                  {practicalInfo.access && (
+                    <div className="border-b border-[#2a2a2a] pb-3">
+                      <span className="text-[10px] text-[#999] uppercase tracking-[0.14em] block mb-1">Access</span>
+                      <span className="text-[14px] text-[#ccc]">{practicalInfo.access}</span>
+                    </div>
+                  )}
+                  {practicalInfo.transport && (
+                    <div className="border-b border-[#2a2a2a] pb-3">
+                      <span className="text-[10px] text-[#999] uppercase tracking-[0.14em] block mb-1">Transport</span>
+                      <span className="text-[14px] text-[#ccc]">{practicalInfo.transport}</span>
+                    </div>
+                  )}
+                  {practicalInfo.dress_code && (
+                    <div className="border-b border-[#2a2a2a] pb-3">
+                      <span className="text-[10px] text-[#999] uppercase tracking-[0.14em] block mb-1">Dress Code</span>
+                      <span className="text-[14px] text-[#ccc]">{practicalInfo.dress_code}</span>
+                    </div>
+                  )}
+                  {practicalInfo.language && (
+                    <div className="pb-1">
+                      <span className="text-[10px] text-[#999] uppercase tracking-[0.14em] block mb-1">Language</span>
+                      <span className="text-[14px] text-[#ccc]">{practicalInfo.language}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
