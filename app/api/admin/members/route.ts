@@ -12,6 +12,8 @@ const supabase = createClient(
 
 const PAGE_SIZE = 25
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
   const role = (session?.user as any)?.role

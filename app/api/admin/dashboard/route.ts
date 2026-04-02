@@ -9,6 +9,8 @@ const supabase = createClient(
 )
 
 // GET /api/admin/dashboard | all admin dashboard stats
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   const session = await getServerSession(authOptions)
   const isAdmin = (session?.user as any)?.role === 'admin'

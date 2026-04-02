@@ -7,6 +7,8 @@ const supabase = createClient(
 )
 
 // GET - List all brands
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const { data, error } = await supabase
