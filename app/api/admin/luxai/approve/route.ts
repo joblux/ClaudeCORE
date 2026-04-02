@@ -43,6 +43,24 @@ export async function POST(req: NextRequest) {
       })
     }
 
+    // Signal approval — direct from signals table
+    if (source === 'signals' && type === 'signal') {
+      const { error } = await supabase
+        .from('signals')
+        .update({
+          is_published: true,
+          published_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+
+      if (error) {
+        console.error('Signal approve error:', error)
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+
+      return NextResponse.json({ success: true, message: 'Signal published' })
+    }
+
     // Research Report or Insider Voice approval | publish from bloglux_articles
     if (source === 'bloglux_articles' || type === 'report' || type === 'insider_voice') {
       const { data, error } = await supabase
