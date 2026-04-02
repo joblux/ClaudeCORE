@@ -261,7 +261,7 @@ export default function SignalDetailPage() {
         <div className="border-t border-[#222] pt-6">
           <div className="flex items-center gap-3 text-[12px] text-[#999]">
             <button onClick={handleCopyLink} className="hover:text-[#a58e28] transition-colors">
-              {copied ? 'Copied' : 'Share'}
+              {copied ? 'Copied!' : 'Copy & Share Link'}
             </button>
             <span className="text-[#777]">·</span>
             <button onClick={handleLinkedIn} className="hover:text-[#a58e28] transition-colors">

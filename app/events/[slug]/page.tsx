@@ -226,7 +226,7 @@ export default function EventDetailPage() {
                 onClick={() => generateICS(event)}
                 className="text-[12px] text-[#a58e28] border border-[rgba(165,142,40,0.3)] rounded px-4 py-2 hover:bg-[rgba(165,142,40,0.1)] transition-colors"
               >
-                Add to calendar
+                Add to my Calendar
               </button>
               {event.website_url && (
                 <a
@@ -370,7 +370,7 @@ export default function EventDetailPage() {
             <div className="border-t border-[#222] pt-6">
               <div className="flex items-center gap-3 text-[12px] text-[#999]">
                 <button onClick={handleCopyLink} className="hover:text-[#a58e28] transition-colors">
-                  {copied ? 'Copied' : 'Share'}
+                  {copied ? 'Copied!' : 'Copy & Share Link'}
                 </button>
                 <span className="text-[#777]">·</span>
                 <button onClick={handleLinkedIn} className="hover:text-[#a58e28] transition-colors">
@@ -378,7 +378,7 @@ export default function EventDetailPage() {
                 </button>
                 <span className="text-[#777]">·</span>
                 <button onClick={() => generateICS(event)} className="hover:text-[#a58e28] transition-colors">
-                  Download .ics
+                  Add to my Calendar
                 </button>
               </div>
             </div>
