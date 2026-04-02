@@ -167,7 +167,7 @@ RULES:
       tokens_used: 0,
       cost_usd: 0,
       status: 'error'
-    }).catch((e) => console.error('[LUXAI signals] Failed to log error to history:', e))
+    }).then(() => {})
     return NextResponse.json({ success: false, message: error.message }, { status: 500 })
   }
 }
