@@ -24,7 +24,6 @@ function getInitials(name: string) {
   return words.slice(0, 2).map((w: string) => w[0]).join('')
 }
 
-// SVG illustration: Carré scarf
 function IllustrationCarre() {
   return (
     <svg width="100%" height="100%" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block' }}>
@@ -46,7 +45,6 @@ function IllustrationCarre() {
   )
 }
 
-// SVG illustration: Birkin bag
 function IllustrationBirkin() {
   return (
     <svg width="100%" height="100%" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block' }}>
@@ -65,7 +63,6 @@ function IllustrationBirkin() {
   )
 }
 
-// SVG illustration: Sellerie harness
 function IllustrationSellerie() {
   return (
     <svg width="100%" height="100%" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block' }}>
@@ -86,14 +83,12 @@ function IllustrationSellerie() {
   )
 }
 
-// Helper: extract a value from key_facts array
 function getKeyFact(keyFacts: any[], label: string): string | null {
   if (!Array.isArray(keyFacts)) return null
   const found = keyFacts.find((f: any) => f.label?.toLowerCase() === label.toLowerCase())
   return found?.value || null
 }
 
-// Build display data entirely from DB content
 function buildBrandData(brandName: string, slug: string, content: any) {
   const hi = content?.hiring_intelligence || {}
   const stock = content?.stock || {}
@@ -101,11 +96,9 @@ function buildBrandData(brandName: string, slug: string, content: any) {
   const keyFacts = content?.key_facts || []
   const isPublic = stock?.is_public === true
 
-  // Extract founded/headquarters from key_facts
   const foundedRaw = getKeyFact(keyFacts, 'Founded') || ''
   const headquarters = getKeyFact(keyFacts, 'Headquarters') || ''
 
-  // Leadership cards
   const leadership = execs.map((e: any) => ({
     initials: getInitials(e.name || ''),
     name: e.name || '',
@@ -113,23 +106,17 @@ function buildBrandData(brandName: string, slug: string, content: any) {
     since: e.since || '',
   }))
 
-  // Career paths pills
   const careerPaths = content?.careers?.paths || []
 
-  // Work culture accordions — Culture, Growth, Pace, Access
   const workCulture = []
   if (hi.culture) workCulture.push({ label: 'Culture', text: hi.culture })
   if (hi.growth) workCulture.push({ label: 'Growth', text: hi.growth })
   if (hi.pace) workCulture.push({ label: 'Pace', text: hi.pace })
   if (hi.access) workCulture.push({ label: 'Access', text: hi.access })
 
-  // Core values cards
   const values = hi.values || []
-
-  // Heritage timeline
   const timeline = Array.isArray(content?.history) ? content.history : []
 
-  // Extract founder name
   let founderName = 'Founder'
   if (content?.founder_name) {
     founderName = content.founder_name
@@ -155,13 +142,9 @@ function buildBrandData(brandName: string, slug: string, content: any) {
       }
     : null
 
-  // Quote
   const quote = content?.quote || null
-
-  // Parent group from stock or key_facts
   const parentGroup = stock?.parent_group || getKeyFact(keyFacts, 'Ownership') || ''
 
-  // Financial
   const financial = isPublic
     ? {
         stock: `${stock.exchange || ''}: ${stock.ticker || ''} ${stock.market_cap ? '(' + stock.market_cap + ')' : ''}`.trim(),
@@ -199,6 +182,7 @@ function buildBrandData(brandName: string, slug: string, content: any) {
     workCulture,
     careers_prose: content?.careers?.prose || (typeof content?.careers === 'string' ? content.careers : null),
     tagline: content?.tagline || null,
+    salary_data: content?.salaries || null,
   }
 }
 
@@ -210,6 +194,8 @@ export default function BrandDetailPage() {
   const [brand, setBrand] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
+  const [salaryDept, setSalaryDept] = useState('All')
+  const [salaryCurrency, setSalaryCurrency] = useState('paris')
 
   useEffect(() => {
     if (!slug) {
@@ -348,13 +334,11 @@ export default function BrandDetailPage() {
         {activeTab === 'Overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-8">
-              {/* Company Profile */}
               <div>
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">COMPANY PROFILE</p>
                 <p className="text-sm text-[#888] leading-relaxed mb-3">{brand.description1}</p>
               </div>
 
-              {/* Career Paths pills */}
               {brand.career_paths && brand.career_paths.length > 0 && (
                 <div>
                   <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">CAREER PATHS AT {brand.name.toUpperCase()}</p>
@@ -366,16 +350,13 @@ export default function BrandDetailPage() {
                 </div>
               )}
 
-              {/* Recent Signals */}
               <div>
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">RECENT SIGNALS</p>
                 <p className="text-sm text-[#777]">No signals yet for {brand.name}.</p>
               </div>
             </div>
 
-            {/* Sidebar */}
             <div className="space-y-4">
-              {/* Leadership */}
               <div className="bg-[#222] rounded-xl p-4">
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">LEADERSHIP</p>
                 {brand.leadership && brand.leadership.length > 0 ? (
@@ -396,14 +377,12 @@ export default function BrandDetailPage() {
                 )}
               </div>
 
-              {/* Salary Ranges */}
               <div className="bg-[#222] rounded-xl p-4">
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">SALARY RANGES AT {brand.name.toUpperCase()}</p>
                 <p className="text-xs text-[#777]">Salary data is contribution-gated. Share your compensation to unlock ranges at {brand.name}.</p>
                 <a href="/careers" className="block mt-3 text-xs text-[#a58e28] hover:underline">Contribute your salary to see all →</a>
               </div>
 
-              {/* Financial Health */}
               <div className="bg-[#222] rounded-xl p-4">
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">FINANCIAL HEALTH</p>
                 {brand.financial ? (
@@ -426,9 +405,7 @@ export default function BrandDetailPage() {
         {/* ═══════════════ CULTURE TAB ═══════════════ */}
         {activeTab === 'Culture' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left col */}
             <div className="space-y-6">
-              {/* Founder */}
               {brand.founder && brand.founder.bio && (
                 <div className="flex gap-4">
                   <div className="w-32 h-36 bg-[#222] rounded-lg flex-shrink-0 flex items-center justify-center border border-[#2a2a2a]">
@@ -451,7 +428,6 @@ export default function BrandDetailPage() {
                 </div>
               )}
 
-              {/* Founder facts */}
               {brand.founder_facts && Array.isArray(brand.founder_facts) && brand.founder_facts.length > 0 && (
                 <div className="space-y-1.5 ml-36">
                   {brand.founder_facts.map((fact: string, i: number) => (
@@ -463,7 +439,6 @@ export default function BrandDetailPage() {
                 </div>
               )}
 
-              {/* Quote */}
               {brand.quote && brand.quote.text && (
                 <div className="border-l-2 border-[#a58e28] pl-4 py-2">
                   <p className="text-base italic text-[#ccc] mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
@@ -473,7 +448,6 @@ export default function BrandDetailPage() {
                 </div>
               )}
 
-              {/* Heritage Timeline */}
               {brand.timeline && brand.timeline.length > 0 && (
                 <div>
                   <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-4">HERITAGE TIMELINE</p>
@@ -495,9 +469,7 @@ export default function BrandDetailPage() {
               )}
             </div>
 
-            {/* Right col */}
             <div className="space-y-6">
-              {/* Core Values */}
               {brand.values && brand.values.length > 0 ? (
                 <div>
                   <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">CORE VALUES</p>
@@ -517,7 +489,6 @@ export default function BrandDetailPage() {
                 </div>
               )}
 
-              {/* What it's like to work there — 4 accordions */}
               {brand.workCulture && brand.workCulture.length > 0 ? (
                 <div>
                   <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">WHAT IT&apos;S LIKE TO WORK THERE</p>
@@ -542,7 +513,6 @@ export default function BrandDetailPage() {
                 </div>
               )}
 
-              {/* Maison World — 3 illustrations */}
               <div>
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">MAISON WORLD</p>
                 <div className="grid grid-cols-3 gap-[3px] rounded-lg overflow-hidden border border-[#2a2a2a]">
@@ -595,9 +565,270 @@ export default function BrandDetailPage() {
 
         {/* ═══════════════ SALARIES TAB ═══════════════ */}
         {activeTab === 'Salaries' && (
-          <div className="flex flex-col items-center justify-center py-24">
-            <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">SALARIES</p>
-            <p className="text-sm text-[#999]">Coming in the next phase</p>
+          <div>
+            {brand.salary_data && brand.salary_data.roles ? (
+              <>
+                {/* Header */}
+                <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
+                  <div>
+                    <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-1.5">
+                      SALARY INTELLIGENCE AT {brand.name.toUpperCase()}
+                    </p>
+                    <p className="text-[13px] text-[#777]">
+                      AI-estimated ranges · Updated {brand.salary_data.updated_quarter || 'Q1 2026'} · Based on market data &amp; industry benchmarks
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    {[
+                      { key: 'paris', label: 'EUR €' },
+                      { key: 'london', label: 'GBP £' },
+                      { key: 'new_york', label: 'USD $' },
+                      { key: 'dubai', label: 'AED' },
+                    ].map(c => (
+                      <button
+                        key={c.key}
+                        onClick={() => setSalaryCurrency(c.key)}
+                        className="text-[11px] px-3 py-1 rounded-full border transition-colors"
+                        style={{
+                          background: salaryCurrency === c.key ? '#222' : 'transparent',
+                          borderColor: salaryCurrency === c.key ? '#444' : '#2a2a2a',
+                          color: salaryCurrency === c.key ? '#ccc' : '#555',
+                        }}
+                      >
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Stats bar */}
+                <div className="flex gap-6 mb-7 p-4 bg-[#222] rounded-xl">
+                  <div className="flex-1 text-center">
+                    <p className="text-xl font-medium text-white">{brand.salary_data.roles.length}</p>
+                    <p className="text-[11px] text-[#777] mt-1">Roles mapped</p>
+                  </div>
+                  <div className="w-px bg-[#2a2a2a]" />
+                  <div className="flex-1 text-center">
+                    <p className="text-xl font-medium text-white">4</p>
+                    <p className="text-[11px] text-[#777] mt-1">Markets</p>
+                  </div>
+                  <div className="w-px bg-[#2a2a2a]" />
+                  <div className="flex-1 text-center">
+                    <p className="text-xl font-medium text-white">0</p>
+                    <p className="text-[11px] text-[#777] mt-1">Contributions</p>
+                  </div>
+                  <div className="w-px bg-[#2a2a2a]" />
+                  <div className="flex-1 text-center">
+                    <p className="text-xl font-medium text-[#a58e28]">AI</p>
+                    <p className="text-[11px] text-[#777] mt-1">Data source</p>
+                  </div>
+                </div>
+
+                {/* Department filters */}
+                {(() => {
+                  const departments = ['All', ...Array.from(new Set(brand.salary_data.roles.map((r: any) => r.department)))];
+                  return (
+                    <div className="flex gap-2 mb-6 flex-wrap">
+                      {departments.map((d: string) => (
+                        <button
+                          key={d}
+                          onClick={() => setSalaryDept(d)}
+                          className="text-[11px] px-3.5 py-1.5 rounded-full transition-colors"
+                          style={{
+                            background: salaryDept === d ? '#a58e28' : 'transparent',
+                            border: salaryDept === d ? '1px solid #a58e28' : '1px solid #2a2a2a',
+                            color: salaryDept === d ? '#1a1a1a' : '#999',
+                            fontWeight: salaryDept === d ? '500' : '400',
+                          }}
+                        >
+                          {d === 'All' ? 'All departments' : d}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })()}
+
+                {/* Salary table */}
+                <div className="border border-[#2a2a2a] rounded-xl overflow-hidden mb-7">
+                  <div className="grid gap-0 px-4 py-3 bg-[#222] border-b border-[#2a2a2a]"
+                    style={{ gridTemplateColumns: '2fr 1fr 90px 1fr 70px' }}>
+                    <span className="text-[10px] font-semibold tracking-[1.5px] text-[#555]">ROLE</span>
+                    <span className="text-[10px] font-semibold tracking-[1.5px] text-[#555]">DEPARTMENT</span>
+                    <span className="text-[10px] font-semibold tracking-[1.5px] text-[#555]">LEVEL</span>
+                    <span className="text-[10px] font-semibold tracking-[1.5px] text-[#555] text-right">RANGE</span>
+                    <span className="text-[10px] font-semibold tracking-[1.5px] text-[#555] text-right">SOURCE</span>
+                  </div>
+
+                  {brand.salary_data.roles
+                    .filter((r: any) => salaryDept === 'All' || r.department === salaryDept)
+                    .map((role: any, i: number) => {
+                      const isBlurred = i >= 4;
+                      const cityData = role.ranges?.[salaryCurrency] || role.ranges?.paris || {};
+                      const currency = cityData.currency || 'EUR';
+                      const symbols: Record<string, string> = { EUR: '€', GBP: '£', USD: '$', AED: 'AED ' };
+                      const sym = symbols[currency] || currency + ' ';
+                      const min = cityData.min ? Math.round(cityData.min / 1000) : '?';
+                      const max = cityData.max ? Math.round(cityData.max / 1000) : '?';
+                      const rangeStr = `${sym}${min}K – ${sym}${max}K`;
+
+                      const levelColors: Record<string, string> = {
+                        'Entry': '#1D9E75',
+                        'Mid': '#2196F3',
+                        'Senior': '#a58e28',
+                        'Director': '#9C27B0',
+                        'Executive': '#E24B4A',
+                      };
+                      const levelColor = levelColors[role.level] || '#888';
+
+                      return (
+                        <div
+                          key={i}
+                          className="grid gap-0 px-4 py-3.5 border-b border-[#1e1e1e] items-center last:border-b-0"
+                          style={{
+                            gridTemplateColumns: '2fr 1fr 90px 1fr 70px',
+                            filter: isBlurred ? 'blur(4px)' : 'none',
+                            userSelect: isBlurred ? 'none' : 'auto',
+                          }}
+                        >
+                          <span className="text-[13px] text-[#ccc]">{role.title}</span>
+                          <span className="text-[12px] text-[#888]">{role.department}</span>
+                          <span
+                            className="text-[11px] px-2 py-0.5 rounded-full w-fit"
+                            style={{ color: levelColor, background: `${levelColor}15` }}
+                          >
+                            {role.level}
+                          </span>
+                          <span className="text-[13px] font-medium text-[#a58e28] text-right">{rangeStr}</span>
+                          <span className="text-[12px] text-[#555] text-right">AI est.</span>
+                        </div>
+                      );
+                    })}
+                </div>
+
+                {/* Unlock CTA */}
+                <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 text-center mb-8">
+                  <p className="text-[13px] text-[#999] mb-3">
+                    Contribute your salary to unlock all roles and detailed breakdowns
+                  </p>
+                  <button className="text-[12px] font-medium px-6 py-2 border border-[#a58e28] text-[#a58e28] rounded-md hover:bg-[#a58e28] hover:text-[#1a1a1a] transition-colors">
+                    Contribute your salary →
+                  </button>
+                </div>
+
+                {/* Two-column: Market Comparison + Compensation Breakdown */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-7">
+                  {/* Market Comparison */}
+                  <div className="bg-[#222] rounded-xl p-5">
+                    <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-4">MARKET COMPARISON</p>
+                    <p className="text-[11px] text-[#777] mb-4">
+                      {brand.salary_data.roles[0]?.title || 'Senior Role'} · {brand.salary_data.roles[0]?.level || 'Senior'} level
+                    </p>
+                    <div className="space-y-3">
+                      {[
+                        { key: 'paris', label: 'Paris' },
+                        { key: 'london', label: 'London' },
+                        { key: 'new_york', label: 'New York' },
+                        { key: 'dubai', label: 'Dubai' },
+                      ].map(city => {
+                        const firstRole = brand.salary_data.roles[0];
+                        const cityRange = firstRole?.ranges?.[city.key];
+                        if (!cityRange) return null;
+                        const sym: Record<string, string> = { EUR: '€', GBP: '£', USD: '$', AED: 'AED ' };
+                        const s = sym[cityRange.currency] || '';
+                        const min = Math.round(cityRange.min / 1000);
+                        const max = Math.round(cityRange.max / 1000);
+                        const allMaxes = ['paris','london','new_york','dubai'].map(
+                          c => firstRole?.ranges?.[c]?.max || 0
+                        );
+                        const highestMax = Math.max(...allMaxes);
+                        const barWidth = highestMax > 0 ? (cityRange.max / highestMax) * 100 : 50;
+
+                        return (
+                          <div key={city.key}>
+                            <div className="flex justify-between mb-1">
+                              <span className="text-[12px] text-[#ccc]">{city.label}</span>
+                              <span className="text-[12px] text-[#a58e28] font-medium">{s}{min}K – {s}{max}K</span>
+                            </div>
+                            <div className="bg-[#2a2a2a] rounded h-1.5 overflow-hidden">
+                              <div className="bg-[#a58e28] h-full rounded" style={{ width: `${barWidth}%` }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Compensation Breakdown */}
+                  <div className="bg-[#222] rounded-xl p-5">
+                    <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-4">TYPICAL COMPENSATION</p>
+                    <p className="text-[11px] text-[#777] mb-4">
+                      {brand.salary_data.roles[0]?.title || 'Senior Role'} · Paris · {brand.salary_data.roles[0]?.level || 'Senior'}
+                    </p>
+
+                    {(() => {
+                      const firstRole = brand.salary_data.roles[0];
+                      const parisRange = firstRole?.ranges?.paris;
+                      if (!parisRange) return <p className="text-sm text-[#777]">No data available</p>;
+                      const base = Math.round((parisRange.min + parisRange.max) / 2);
+                      const bonusParts = firstRole.bonus_pct?.match(/(\d+)/g) || ['10', '15'];
+                      const bonusMin = Math.round(base * parseInt(bonusParts[0]) / 100);
+                      const bonusMax = Math.round(base * parseInt(bonusParts[1] || bonusParts[0]) / 100);
+                      const totalMin = parisRange.min + bonusMin;
+                      const totalMax = parisRange.max + bonusMax;
+
+                      return (
+                        <div className="space-y-3.5">
+                          <div className="flex justify-between items-center pb-3 border-b border-[#2a2a2a]">
+                            <span className="text-[12px] text-[#999]">Base salary</span>
+                            <span className="text-[14px] text-white font-medium">
+                              €{Math.round(parisRange.min / 1000)}K – €{Math.round(parisRange.max / 1000)}K
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center pb-3 border-b border-[#2a2a2a]">
+                            <span className="text-[12px] text-[#999]">Annual bonus ({firstRole.bonus_pct || '10-15%'})</span>
+                            <span className="text-[14px] text-white font-medium">
+                              €{Math.round(bonusMin / 1000)}K – €{Math.round(bonusMax / 1000)}K
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-[12px] text-[#a58e28] font-medium">Total compensation</span>
+                            <span className="text-[16px] text-[#a58e28] font-medium">
+                              €{Math.round(totalMin / 1000)}K – €{Math.round(totalMax / 1000)}K
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {brand.salary_data.common_benefits && (
+                      <div className="mt-4 pt-3.5 border-t border-[#2a2a2a]">
+                        <p className="text-[10px] font-semibold tracking-[1.5px] text-[#555] mb-2">COMMON BENEFITS</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {brand.salary_data.common_benefits.map((b: string) => (
+                            <span key={b} className="text-[11px] px-2.5 py-1 border border-[#2a2a2a] rounded-full text-[#999]">{b}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Disclaimer */}
+                {brand.salary_data.compensation_note && (
+                  <div className="p-4 bg-[#222] rounded-lg border-l-[3px] border-[#a58e28]">
+                    <p className="text-[11px] text-[#777] leading-relaxed">
+                      {brand.salary_data.compensation_note} Salary ranges are AI-estimated based on market data, industry benchmarks, and publicly available information. Actual compensation may vary. When real contribution data is available, it will replace AI estimates.
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-24">
+                <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">SALARY INTELLIGENCE</p>
+                <p className="text-sm text-[#999] mb-1">Salary data for {brand.name} is being prepared.</p>
+                <p className="text-xs text-[#555]">Check back soon — our AI is mapping compensation across roles and markets.</p>
+              </div>
+            )}
           </div>
         )}
 
