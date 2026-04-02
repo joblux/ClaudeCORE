@@ -210,6 +210,7 @@ function buildBrandData(brandName: string, slug: string, content: any) {
 export default function BrandDetailPage() {
   const params = useParams()
   const slug = params?.slug as string
+  const isHermes = slug === 'hermes'
   const [activeTab, setActiveTab] = useState('Overview')
   const [openAccordion, setOpenAccordion] = useState<string | null>(null)
   const [brand, setBrand] = useState<any>(null)
@@ -228,17 +229,39 @@ export default function BrandDetailPage() {
       try {
         const { data } = await supabase
           .from('wikilux_content')
-          .select('brand_name, content')
+          .select('brand_name, content, status, is_published')
           .eq('slug', slug)
-          .eq('status', 'approved')
+          .eq('is_published', true)
           .maybeSingle()
 
         if (!data || !data.content || JSON.stringify(data.content) === '{}') {
           setNotFound(true)
         } else {
-          setBrand(buildBrandData(data.brand_name, slug, data.content))
+          // Fetch live salary and signal data for this brand
+          const [{ data: salaryRows }, { data: signalRows }] = await Promise.all([
+            supabase
+              .from('salary_benchmarks')
+              .select('id, brand_slug, brand_name, job_title, department, seniority, city, country, currency, salary_min, salary_max, salary_median, is_published')
+              .eq('is_published', true)
+              .eq('brand_slug', slug)
+              .order('created_at', { ascending: false }),
+            supabase
+              .from('signals')
+              .select('id, headline, category, confidence, published_at, brand_tags, what_happened, why_it_matters, career_implications, is_published')
+              .eq('is_published', true)
+              .contains('brand_tags', [data.brand_name])
+              .order('published_at', { ascending: false })
+          ])
+
+          const builtBrand = buildBrandData(data.brand_name, slug, data.content)
+          setBrand({
+            ...builtBrand,
+            liveSalaryRows: salaryRows || [],
+            liveSignals: signalRows || [],
+          })
         }
-      } catch {
+      } catch (error) {
+        console.error('Error loading brand page:', error)
         setNotFound(true)
       } finally {
         setLoading(false)
@@ -272,9 +295,9 @@ export default function BrandDetailPage() {
 
         {/* Breadcrumb */}
         <div className="text-xs text-[#999] mb-4">
-          <a href="/brands" className="hover:text-[#888]">Brands</a>
+          <a href="/" className="hover:text-[#888]">Home</a>
           <span className="mx-2">/</span>
-          <span>WikiLux</span>
+          <a href="/brands" className="hover:text-[#888]">Brands</a>
           <span className="mx-2">/</span>
           <span className="text-[#888]">{brand.name}</span>
         </div>
@@ -372,9 +395,24 @@ export default function BrandDetailPage() {
               )}
 
               <div>
-                <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">RECENT SIGNALS</p>
-                <p className="text-sm text-[#777]">No signals yet for {brand.name}.</p>
-              </div>
+  <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">RECENT SIGNALS</p>
+  {brand.liveSignals && brand.liveSignals.length > 0 ? (
+    <div className="space-y-3">
+      {brand.liveSignals.slice(0, 2).map((signal: any) => (
+        <div key={signal.id} className="border-l-2 border-[#a58e28] pl-3">
+          <p className="text-sm text-white mb-1">{signal.headline}</p>
+          {signal.career_implications && (
+            <p className="text-xs text-[#777] leading-relaxed">{signal.career_implications}</p>
+          )}
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p className="text-sm text-[#777]">
+      Signals for {brand.name} are being connected here and will appear as they are mapped to this brand.
+    </p>
+  )}
+</div>
             </div>
 
             <div className="space-y-4">
@@ -534,6 +572,7 @@ export default function BrandDetailPage() {
                 </div>
               )}
 
+              {isHermes && (
               <div>
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">MAISON WORLD</p>
                 <div className="grid grid-cols-3 gap-[3px] rounded-lg overflow-hidden border border-[#2a2a2a]">
@@ -548,6 +587,7 @@ export default function BrandDetailPage() {
                   </div>
                 </div>
               </div>
+              )}
             </div>
           </div>
         )}
@@ -843,11 +883,43 @@ export default function BrandDetailPage() {
                   </div>
                 )}
               </>
+            ) : brand.liveSalaryRows && brand.liveSalaryRows.length > 0 ? (
+              <div className="space-y-4">
+                <div className="mb-4">
+                  <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-1.5">
+                    SALARY INTELLIGENCE AT {brand.name.toUpperCase()}
+                  </p>
+                  <p className="text-[13px] text-[#777]">
+                    Based on verified benchmark data · Ranges may expand as more contributions are added
+                  </p>
+                </div>
+                {brand.liveSalaryRows.slice(0, 8).map((row: any) => (
+                  <div key={row.id} className="bg-[#222] rounded-xl p-5 border border-[#2a2a2a]">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-sm text-white font-medium mb-1">{row.job_title}</h3>
+                        <p className="text-xs text-[#999]">
+                          {[row.department, row.seniority, `${row.city}, ${row.country}`].filter(Boolean).join(' · ')}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-[#a58e28] font-medium">
+                          {row.currency || 'EUR'} {row.salary_min?.toLocaleString()} – {row.salary_max?.toLocaleString()}
+                        </div>
+                        {row.salary_median ? (
+                          <div className="text-xs text-[#777] mt-1">
+                            Median: {row.currency || 'EUR'} {row.salary_median.toLocaleString()}
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-24">
                 <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">SALARY INTELLIGENCE</p>
-                <p className="text-sm text-[#999] mb-1">Salary data for {brand.name} is being prepared.</p>
-                <p className="text-xs text-[#777]">Check back soon | our AI is mapping compensation across roles and markets.</p>
+                <p className="text-sm text-[#999] mb-1">Salary ranges for {brand.name} will appear here as benchmark coverage expands.</p>
               </div>
             )}
           </div>
@@ -855,9 +927,38 @@ export default function BrandDetailPage() {
 
         {/* ═══════════════ SIGNALS TAB ═══════════════ */}
         {activeTab === 'Signals' && (
-          <div className="flex flex-col items-center justify-center py-24">
-            <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">SIGNALS</p>
-            <p className="text-sm text-[#999]">Coming in the next phase</p>
+          <div className="max-w-3xl">
+            {brand.liveSignals && brand.liveSignals.length > 0 ? (
+              <div className="space-y-4">
+                {brand.liveSignals.slice(0, 6).map((signal: any) => (
+                  <div key={signal.id} className="bg-[#222] rounded-xl p-5 border border-[#2a2a2a]">
+                    <div className="flex items-center gap-2 mb-2">
+                      {signal.category && (
+                        <span className="text-[10px] uppercase tracking-[0.12em] text-[#a58e28]">{signal.category}</span>
+                      )}
+                      {signal.published_at && (
+                        <span className="text-[10px] uppercase tracking-[0.12em] text-[#777]">
+                          {new Date(signal.published_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-sm text-white font-medium mb-2">{signal.headline}</h3>
+                    {signal.what_happened && (
+                      <p className="text-sm text-[#bdbdbd] leading-relaxed mb-2">{signal.what_happened}</p>
+                    )}
+                    {signal.career_implications && (
+                      <p className="text-sm text-[#999] leading-relaxed">{signal.career_implications}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-[#222] rounded-xl p-6 border border-[#2a2a2a]">
+                <p className="text-sm text-[#999] leading-relaxed">
+                  Signals for this brand are being connected from the live intelligence feed.
+                </p>
+              </div>
+            )}
           </div>
         )}
 

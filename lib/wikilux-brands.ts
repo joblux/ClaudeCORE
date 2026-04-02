@@ -1,3 +1,8 @@
+// NOTE: This file is no longer the source of truth for public brand routing.
+// Public brand pages resolve from wikilux_content in Supabase by slug.
+// This array is kept only for optional metadata or curated homepage usage.
+// Do NOT patch slug mismatches here — fix them in the database instead.
+
 export interface Brand {
   slug: string
   name: string
