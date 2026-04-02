@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -6,166 +6,125 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const { count = 5 } = await req.json()
+    const { count = 5 } = await request.json()
 
-    // Check if ANTHROPIC_API_KEY is set
     if (!process.env.ANTHROPIC_API_KEY) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'ANTHROPIC_API_KEY not configured in environment variables'
-      }, { status: 500 })
+      return NextResponse.json({ success: false, message: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })
     }
 
-    // Check settings
-    const { data: settingsData } = await supabase
-      .from('luxai_settings')
-      .select('*')
-    
-    const settings: Record<string, any> = {}
-    settingsData?.forEach(item => { settings[item.key] = item.value })
+    const prompt = `You are a luxury industry intelligence analyst for JOBLUX. Generate ${count} realistic luxury industry news signals.
 
-    // Check if generation is enabled
-    if (!settings.signal_generation_enabled) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Signal generation is disabled in settings' 
-      }, { status: 400 })
-    }
+Each signal must be about a REAL luxury brand or group (LVMH, Kering, Hermès, Chanel, Richemont, Prada, Burberry, Cartier, Dior, Gucci, Rolex, Tiffany, etc.)
 
-    // Check daily limit
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    
-    const { data: todaySignals } = await supabase
-      .from('luxai_queue')
-      .select('id')
-      .eq('type', 'signal')
-      .gte('generated_at', today.toISOString())
-    
-    const generatedToday = todaySignals?.length || 0
-    const dailyTarget = settings.signal_daily_target || 6
-    
-    if (generatedToday >= dailyTarget) {
-      return NextResponse.json({ 
-        success: false, 
-        error: `Daily limit reached (${generatedToday}/${dailyTarget})` 
-      }, { status: 400 })
-    }
+Return ONLY a JSON array (no markdown, no backticks):
+[
+  {
+    "category": "TALENT" | "MARKET" | "BRAND" | "FINANCE",
+    "headline": "Short punchy headline [max 80 chars]",
+    "context_paragraph": "2-3 sentences of context explaining the signal [max 300 chars]",
+    "career_implications": "1-2 sentences on what this means for luxury professionals [max 200 chars]",
+    "source_name": "Reuters | BOF | WWD | FT | Bloomberg",
+    "brand_tags": ["BrandName1", "BrandName2"],
+    "confidence": "high" | "medium"
+  }
+]
 
-    // Generate signals using Claude Haiku 3.5
-    const signals = []
-    
-    for (let i = 0; i < Math.min(count, dailyTarget - generatedToday); i++) {
-      const prompt = `Generate a luxury industry news signal. Focus on executive moves, brand launches, financial earnings, or market trends from major luxury houses (LVMH, Kering, Richemont, Hermès, Chanel, Prada, Burberry, etc).
+RULES:
+- ${count} signals exactly
+- Mix of categories: at least 1 TALENT, 1 MARKET, 1 BRAND
+- brand_tags: use exact brand names (Cartier not cartier)
+- Realistic, plausible signals based on real industry dynamics
+- No duplicate brands across signals
+- Output valid JSON array only`
 
-Return ONLY a JSON object with this exact structure:
-{
-  "category": "TALENT" | "MARKET" | "BRAND" | "FINANCE",
-  "title": "Headline (80-100 characters)",
-  "content": "Signal content (80-120 words, Bloomberg-style professional tone)"
-}
-
-Make it realistic, timely, and career-relevant for luxury professionals. No JSON formatting, just the raw object.`
-
-      const startTime = Date.now()
-      
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY!,
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: settings.model || 'claude-haiku-3-5-20241022',
-          max_tokens: settings.max_tokens || 2000,
-          messages: [{
-            role: 'user',
-            content: prompt
-          }]
-        })
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY!,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: prompt }]
       })
-
-      if (!response.ok) {
-        throw new Error(`Claude API error: ${response.statusText}`)
-      }
-
-      const data = await response.json()
-      const responseText = data.content[0].text
-      
-      // Parse JSON response
-      let signalData
-      try {
-        signalData = JSON.parse(responseText)
-      } catch (e) {
-        // Try to extract JSON from markdown code blocks
-        const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/) || responseText.match(/```\n([\s\S]*?)\n```/)
-        if (jsonMatch) {
-          signalData = JSON.parse(jsonMatch[1])
-        } else {
-          throw new Error('Failed to parse AI response as JSON')
-        }
-      }
-
-      // Calculate cost (approximate)
-      const tokensUsed = data.usage.input_tokens + data.usage.output_tokens
-      const costPer1kTokens = 0.00025 // Claude Haiku 3.5 pricing
-      const costUsd = (tokensUsed / 1000) * costPer1kTokens
-
-      // Log to luxai_history
-      await supabase.from('luxai_history').insert({
-        type: 'signal',
-        model: settings.model || 'claude-haiku-3-5-20241022',
-        prompt,
-        response: signalData,
-        tokens_used: tokensUsed,
-        cost_usd: costUsd,
-        status: 'success',
-        created_at: new Date().toISOString()
-      })
-
-      // Save to luxai_queue
-      const { data: queueItem } = await supabase
-        .from('luxai_queue')
-        .insert({
-          type: 'signal',
-          content_type: signalData.category,
-          title: signalData.title,
-          content: signalData.content,
-          status: 'pending',
-          generated_at: new Date().toISOString()
-        })
-        .select()
-        .single()
-
-      signals.push(queueItem)
-    }
-
-    return NextResponse.json({ 
-      success: true, 
-      count: signals.length,
-      signals,
-      generated_today: generatedToday + signals.length,
-      daily_target: dailyTarget
     })
 
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Claude API error: ${error}`)
+    }
+
+    const data = await response.json()
+    const text = data.content[0].text
+    const inputTokens = data.usage.input_tokens
+    const outputTokens = data.usage.output_tokens
+    const cost = (inputTokens * 1.00 / 1000000) + (outputTokens * 5.00 / 1000000)
+
+    let signals
+    try {
+      let cleaned = text.trim().replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '').trim()
+      const firstBracket = cleaned.indexOf('[')
+      const lastBracket = cleaned.lastIndexOf(']')
+      if (firstBracket !== -1 && lastBracket > firstBracket) {
+        cleaned = cleaned.substring(firstBracket, lastBracket + 1)
+      }
+      signals = JSON.parse(cleaned)
+    } catch (e: any) {
+      throw new Error(`JSON parse failed: ${e.message}`)
+    }
+
+    // Insert each signal as pending (unpublished)
+    const inserted = []
+    for (const s of signals) {
+      const slug = s.headline.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 80)
+      const { data: row, error } = await supabase.from('signals').insert({
+        category: s.category,
+        headline: s.headline,
+        context_paragraph: s.context_paragraph,
+        career_implications: s.career_implications,
+        source_name: s.source_name,
+        source_url: null,
+        brand_tags: s.brand_tags,
+        confidence: s.confidence,
+        is_published: false,
+        is_pinned: false,
+        slug
+      }).select().maybeSingle()
+
+      if (!error && row) inserted.push(row)
+    }
+
+    // Log to history
+    await supabase.from('luxai_history').insert({
+      type: 'signal_generation',
+      model: 'claude-haiku-4-5-20251001',
+      prompt: `Generate ${count} signals`,
+      response: { count: inserted.length },
+      tokens_used: inputTokens + outputTokens,
+      cost_usd: cost,
+      status: 'success'
+    })
+
+    return NextResponse.json({
+      success: true,
+      message: `${inserted.length} signals generated and pending approval`,
+      data: { count: inserted.length, cost, tokens: inputTokens + outputTokens }
+    })
   } catch (error: any) {
     console.error('Signal generation error:', error)
-    
-    // Log error to history
     await supabase.from('luxai_history').insert({
-      type: 'signal',
-      model: 'claude-haiku-3-5-20241022',
-      status: 'error',
-      error_message: error.message,
-      created_at: new Date().toISOString()
-    })
-
-    return NextResponse.json({ 
-      success: false, 
-      error: error.message || 'Failed to generate signal' 
-    }, { status: 500 })
+      type: 'signal_generation',
+      model: 'claude-haiku-4-5-20251001',
+      prompt: 'Generate signals',
+      response: { error: error.message },
+      tokens_used: 0,
+      cost_usd: 0,
+      status: 'error'
+    }).then(() => {})
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 })
   }
 }
