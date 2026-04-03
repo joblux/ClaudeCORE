@@ -88,7 +88,7 @@ function JoinContent() {
         } catch (err) {
           console.error("[join] Failed to apply pending tier:", err);
           sessionStorage.removeItem("joblux_pending_tier");
-          router.push("/select-profile");
+          router.push("/connect");
           return true;
         }
       }
@@ -107,8 +107,8 @@ function JoinContent() {
       // Brand new user — check for pending tier from select-profile flow
       applyPendingTier().then((handled) => {
         if (!handled) {
-          // No pending tier — send to select-profile
-          router.push("/select-profile");
+          // No pending tier — send to connect
+          router.push("/connect");
         }
       });
     }
