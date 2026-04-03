@@ -45,7 +45,7 @@ const TIER_LABELS: Record<string, string> = {
   pro: 'ESTABLISHED PROFESSIONAL',
   professional: 'ESTABLISHED PROFESSIONAL',
   executive: 'SENIOR & EXECUTIVE',
-  business: 'LUXURY EMPLOYER',
+  business: 'COMPANY',
   insider: 'TRUSTED CONTRIBUTOR',
 }
 

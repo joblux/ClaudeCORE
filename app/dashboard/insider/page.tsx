@@ -37,11 +37,9 @@ const navItems = [
   ]},
   { section: 'CONTRIBUTE', items: [
     { label: 'Write a perspective', id: 'write-voice' },
-    { label: 'Add salary data', id: 'add-salary' },
-    { label: 'Add interview data', id: 'add-interview' },
-    { label: 'Add market signal', id: 'add-signal' },
+    { label: 'Add data', id: 'add-data' },
   ]},
-  { section: 'EXPLORE', items: [
+  { section: 'INTELLIGENCE', items: [
     { label: 'Signals', id: 'signals-link' },
     { label: 'Brands', id: 'brands-link' },
     { label: 'Events', id: 'events-link' },
@@ -349,10 +347,7 @@ export default function InsiderDashboard() {
     if (activeNav === 'signals-link') { window.location.href = '/signals'; return }
     if (activeNav === 'brands-link') { window.location.href = '/brands'; return }
     if (activeNav === 'events-link') { window.location.href = '/events'; return }
-    if (activeNav === 'add-salary' || activeNav === 'add-interview' || activeNav === 'add-signal') {
-      window.location.href = '/contribute'
-      return
-    }
+    if (activeNav === 'add-data') { window.location.href = '/contribute'; return }
   }, [activeNav])
 
   const approvedCount = contributions.filter(c => c.status === 'approved').length
@@ -403,7 +398,7 @@ export default function InsiderDashboard() {
             {loading ? 'Loading...' : activeNav === 'write-voice' ? 'Write a Perspective' : `Welcome back, ${firstName}`}
           </h1>
           <p style={{ fontSize: 13, color: '#999', marginTop: 4 }}>
-            {activeNav === 'write-voice' ? 'Share your expertise with the JOBLUX community' : 'Your contributor dashboard'}
+            {activeNav === 'write-voice' ? 'Share your expertise as a Trusted Contributor' : 'Trusted Contributor — your contributions power JOBLUX intelligence'}
           </p>
         </div>
 
