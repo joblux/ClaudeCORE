@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import UserMenu from '@/components/UserMenu'
 import { useMember } from '@/lib/auth-hooks'
@@ -20,85 +21,65 @@ export function Header() {
   const pathname = usePathname()
 
   return (
-    <header className="sticky top-0 z-50 bg-[#1a1a1a] border-b border-[#2a2a2a]">
-      <div
-        className="max-w-[1200px] mx-auto px-7"
-        style={{ display: 'grid', gridTemplateColumns: '160px 1fr 200px', alignItems: 'center', height: '71px' }}
-      >
+    <header style={{ position: 'sticky', top: 0, zIndex: 50, backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', background: 'rgba(23,23,23,0.9)', borderBottom: '0.5px solid #2b2b2b' }}>
+      <div style={{ maxWidth: 1220, margin: '0 auto', padding: '0 28px' }}>
+        <div style={{ height: 78, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
 
-        {/* Logo */}
-        <Link href="/" className="flex items-center flex-shrink-0">
-          <img
-            src="/logos/joblux-header.png"
-            alt="JOBLUX"
-            className="h-[30px] w-auto block"
-          />
-        </Link>
+          {/* Logo */}
+          <Link href="/" style={{ flexShrink: 0 }}>
+            <Image src="/logos/joblux-header.png" height={22} width={88} alt="JOBLUX" style={{ height: 22, width: 'auto' }} />
+          </Link>
 
-        {/* Center nav — desktop */}
-        <nav className="hidden md:flex items-center justify-center gap-7 h-full">
-          {navItems.map((item) => {
-            const isActive = pathname.startsWith(item.href)
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="flex flex-col items-center justify-center gap-[5px] h-full"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-              >
-                <span className={`text-[15px] font-normal tracking-wide transition-colors ${
-                  isActive ? 'text-white' : 'text-[rgba(255,255,255,0.82)] hover:text-white'
-                }`}>
+          {/* Center nav — desktop */}
+          <nav className="hidden md:flex" style={{ gap: 26, alignItems: 'center' }}>
+            {navItems.map((item) => {
+              const isActive = pathname.startsWith(item.href)
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  style={{ fontSize: 13, color: isActive ? '#fff' : 'rgba(255,255,255,0.8)', textDecoration: 'none', transition: 'color 0.18s ease' }}
+                >
                   {item.label}
-                </span>
-                {isActive && (
-                  <span className="block h-[1.5px] w-full bg-white rounded-sm" />
-                )}
-              </Link>
-            )
-          })}
-        </nav>
+                </Link>
+              )
+            })}
+          </nav>
 
-        {/* Right side */}
-        <div className="hidden md:flex items-center justify-end flex-shrink-0" style={{ height: '71px' }}>
-          {isAuthenticated ? (
-            <UserMenu />
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-              <Link
-                href="/join"
-                style={{ fontFamily: 'Inter, sans-serif', fontSize: '15px', color: 'rgba(255,255,255,0.55)', lineHeight: '1', display: 'flex', alignItems: 'center', height: '100%' }}
-              >
-                Sign in
-              </Link>
-              <div style={{ width: '2px', height: '18px', background: '#a58e28', borderRadius: '2px', margin: '0 18px', flexShrink: 0, alignSelf: 'center' }} />
-              <Link
-                href="/connect"
-                style={{ fontFamily: 'Inter, sans-serif', fontSize: '15px', fontWeight: '500', color: 'rgba(255,255,255,0.9)', lineHeight: '1', display: 'flex', alignItems: 'center', height: '100%' }}
-              >
-                Sign up
-              </Link>
-            </div>
-          )}
+          {/* Right side — desktop */}
+          <div className="hidden md:flex" style={{ alignItems: 'center', gap: 14, flexShrink: 0 }}>
+            {isAuthenticated ? (
+              <UserMenu />
+            ) : (
+              <>
+                <Link href="/join" style={{ fontSize: '12.5px', color: 'rgba(255,255,255,0.48)', textDecoration: 'none', transition: 'color 0.18s ease' }}>
+                  Sign in
+                </Link>
+                <Link href="/connect" style={{ fontSize: '12.5px', color: 'rgba(255,255,255,0.88)', padding: '10px 14px', border: '1px solid #383838', borderRadius: 999, textDecoration: 'none', transition: 'all 0.18s ease' }}>
+                  Request access
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile hamburger */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, fontSize: 24, color: 'rgba(255,255,255,0.82)', background: 'none', border: 'none', cursor: 'pointer' }}
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            >
+              {mobileOpen ? '\u2715' : '\u2630'}
+            </button>
+          </div>
+
         </div>
-
-        {/* Mobile hamburger */}
-        <div className="md:hidden flex items-center justify-end">
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="flex items-center justify-center w-10 h-10 text-[24px] text-[rgba(255,255,255,0.82)] hover:text-white"
-            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-          >
-            {mobileOpen ? '\u2715' : '\u2630'}
-          </button>
-        </div>
-
       </div>
 
       {/* Mobile nav overlay */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 top-[71px] bg-[#1a1a1a] z-50 flex flex-col">
-          <nav className="flex-1 px-7 py-8 space-y-1">
+        <div className="md:hidden" style={{ position: 'fixed', inset: 0, top: 78, background: 'rgba(23,23,23,0.98)', zIndex: 50, display: 'flex', flexDirection: 'column' }}>
+          <nav style={{ flex: 1, padding: '32px 28px' }}>
             {navItems.map((item) => {
               const isActive = pathname.startsWith(item.href)
               return (
@@ -106,23 +87,19 @@ export function Header() {
                   key={item.label}
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
-                  className={`block py-4 text-[15px] border-b border-[#2a2a2a] transition-colors ${
-                    isActive ? 'text-white' : 'text-[rgba(255,255,255,0.82)] hover:text-white'
-                  }`}
+                  style={{ display: 'block', padding: '16px 0', fontSize: 15, borderBottom: '1px solid #2b2b2b', color: isActive ? '#fff' : 'rgba(255,255,255,0.82)', textDecoration: 'none' }}
                 >
                   {item.label}
                 </Link>
               )
             })}
           </nav>
-          <div className="px-7 pb-10 flex gap-6">
-            {!isAuthenticated && (
-              <>
-                <Link href="/join" onClick={() => setMobileOpen(false)} className="text-[15px] text-[rgba(255,255,255,0.82)]">Sign in</Link>
-                <Link href="/connect" onClick={() => setMobileOpen(false)} className="text-[15px] font-medium text-white">Sign up</Link>
-              </>
-            )}
-          </div>
+          {!isAuthenticated && (
+            <div style={{ padding: '0 28px 40px', display: 'flex', gap: 14, alignItems: 'center' }}>
+              <Link href="/join" onClick={() => setMobileOpen(false)} style={{ fontSize: '12.5px', color: 'rgba(255,255,255,0.48)', textDecoration: 'none' }}>Sign in</Link>
+              <Link href="/connect" onClick={() => setMobileOpen(false)} style={{ fontSize: '12.5px', color: 'rgba(255,255,255,0.88)', padding: '10px 14px', border: '1px solid #383838', borderRadius: 999, textDecoration: 'none' }}>Request access</Link>
+            </div>
+          )}
         </div>
       )}
     </header>

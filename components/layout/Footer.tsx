@@ -3,69 +3,68 @@ import Image from 'next/image'
 
 export function Footer() {
   return (
-    <footer className="bg-[#141414] border-t border-[#2a2a2a]">
-      <div className="max-w-[1200px] mx-auto px-7 py-14 grid grid-cols-[240px_1fr_1fr_1fr] gap-12 items-start">
+    <footer style={{ borderTop: '0.5px solid #2b2b2b', paddingTop: 54 }}>
+      <div style={{ maxWidth: 1220, margin: '0 auto', padding: '0 28px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr 1fr 1fr', gap: 40, marginBottom: 42 }}>
 
-        {/* Brand */}
-        <div className="flex flex-col justify-between h-full">
+          {/* Col 1 — Brand */}
           <div>
-            <div className="mb-3"><Image src="/logos/joblux-header.png" alt="JOBLUX" width={86} height={23} className="h-5 w-auto brightness-0 invert" /></div>
-            <p className="text-[13px] text-[#aaa] leading-relaxed mb-6">Luxury Talent Intelligence</p>
-            <div className="flex flex-col gap-1.5 mb-2">
-              <p className="text-[13px] text-[#aaa]">No ads.</p>
-              <p className="text-[13px] text-[#aaa]">No noise.</p>
-              <p className="text-[13px] text-[#aaa]">No data reselling.</p>
-              <p className="text-[13px] text-[#aaa]">Global.</p>
+            <div style={{ marginBottom: 12 }}>
+              <Image src="/logos/joblux-header.png" alt="JOBLUX" width={88} height={22} style={{ height: 22, width: 'auto' }} />
+            </div>
+            <div style={{ fontSize: 13, color: '#989898', marginTop: 12 }}>Luxury Talent Intelligence</div>
+            <div style={{ marginTop: 18, fontSize: '12.5px', lineHeight: 1.8, color: '#6f6f6f' }}>
+              No ads.<br />No noise.<br />No data reselling.<br />Global.
+            </div>
+            <div style={{ marginTop: 18, fontSize: 11, lineHeight: 1.55, color: '#595959' }}>
+              Powered by industry professionals.
             </div>
           </div>
-          <p className="text-[13px] text-[#aaa] leading-relaxed pt-3">Powered by luxury<br/>industry professionals.</p>
+
+          {/* Col 2 — Intelligence */}
+          <div>
+            <h4 style={{ fontSize: 10, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#5f5f5f', marginBottom: 18 }}>Intelligence</h4>
+            <Link href="/brands" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Brands</Link>
+            <Link href="/signals" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Signals</Link>
+            <Link href="/insights" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Industry news &amp; analysis</Link>
+            <Link href="/the-brief" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Biweekly newsletter</Link>
+            <Link href="/interviews" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Interview experiences</Link>
+            <Link href="/careers" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Careers intelligence</Link>
+          </div>
+
+          {/* Col 3 — Services + Escape */}
+          <div>
+            <h4 style={{ fontSize: 10, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#5f5f5f', marginBottom: 18 }}>Services</h4>
+            <Link href="/services" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Executive search</Link>
+            <Link href="/contribute" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Contribute data</Link>
+            <Link href="/connect" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Request access</Link>
+
+            <div style={{ marginTop: 18, paddingTop: 18, borderTop: '0.5px solid #2b2b2b' }}>
+              <Link href="/escape" style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', fontStyle: 'italic', fontSize: 18, color: '#a58e28', display: 'inline-block', marginBottom: 8, textDecoration: 'none' }}>
+                Escape
+              </Link>
+              <div style={{ fontSize: '12.5px', color: '#737373', lineHeight: 1.6, maxWidth: 190 }}>
+                Curated travels.
+              </div>
+            </div>
+          </div>
+
+          {/* Col 4 — Company */}
+          <div>
+            <h4 style={{ fontSize: 10, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#5f5f5f', marginBottom: 18 }}>Company</h4>
+            <Link href="/about" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>About</Link>
+            <Link href="/faq" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Help &amp; FAQ</Link>
+            <Link href="/privacy" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Privacy</Link>
+            <Link href="/terms" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Terms</Link>
+            <Link href="/contact" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Contact</Link>
+          </div>
+
         </div>
 
-        {/* Intelligence */}
-        <div>
-          <p className="text-[10px] text-[#777] tracking-[0.14em] uppercase mb-5">Intelligence</p>
-          <div className="flex flex-col gap-3">
-            <Link href="/brands" className="text-[13px] text-[#aaa] hover:text-white transition-colors">WikiLux</Link>
-            <Link href="/insights" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Industry news & analysis</Link>
-            <Link href="/the-brief" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Biweekly newsletter</Link>
-            <Link href="/salaries" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Salary benchmarks</Link>
-            <Link href="/interviews" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Interview experiences</Link>
-            <Link href="/careers" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Careers intelligence</Link>
-          </div>
-        </div>
-
-        {/* Services + Escape */}
-        <div>
-          <p className="text-[10px] text-[#777] tracking-[0.14em] uppercase mb-5">Services</p>
-          <div className="flex flex-col gap-3 mb-9">
-            <Link href="/services" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Executive search</Link>
-            <Link href="/contribute" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Contribute data</Link>
-            <Link href="/join" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Request access</Link>
-          </div>
-          <div className="border-t border-[#222] pt-6">
-            <Link href="/escape" className="text-[16px] text-[#a58e28] italic font-serif block mb-2">Escape</Link>
-            <p className="text-[12px] text-[#aaa]">Curated travels.</p>
-          </div>
-        </div>
-
-        {/* Company */}
-        <div>
-          <p className="text-[10px] text-[#777] tracking-[0.14em] uppercase mb-5">Company</p>
-          <div className="flex flex-col gap-3">
-            <Link href="/about" className="text-[13px] text-[#aaa] hover:text-white transition-colors">About</Link>
-            <Link href="/faq" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Help & FAQ</Link>
-            <Link href="/privacy" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Privacy</Link>
-            <Link href="/terms" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Terms</Link>
-            <Link href="/faq" className="text-[13px] text-[#aaa] hover:text-white transition-colors">Contact</Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom bar */}
-      <div className="border-t border-[#1e1e1e] px-7 py-4">
-        <div className="max-w-[1200px] mx-auto flex items-center justify-between">
-          <p className="text-[12px] text-[#888]">© 2026 JOBLUX LLC.</p>
-          <p className="text-[12px] text-[#aaa] italic" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Luxury, decoded.</p>
+        {/* Bottom bar */}
+        <div style={{ borderTop: '0.5px solid #2b2b2b', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, padding: '18px 0' }}>
+          <div style={{ fontSize: 11, color: '#595959' }}>&copy; 2026 JOBLUX LLC.</div>
+          <div style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', fontStyle: 'italic', color: '#8f8f8f', fontSize: '12.5px' }}>Luxury, decoded.</div>
         </div>
       </div>
     </footer>

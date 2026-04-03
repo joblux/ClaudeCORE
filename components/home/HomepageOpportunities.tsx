@@ -1,97 +1,60 @@
 import Link from 'next/link'
 
 interface Assignment {
-  id: string
   slug: string
   title: string
   description: string | null
-  seniority: string | null
   location: string | null
-  salary_min: number | null
-  salary_max: number | null
-  salary_currency: string | null
-}
-
-const placeholderAssignments: Assignment[] = [
-  {
-    id: '1', slug: 'retail-director-paris', title: 'Retail Director — Flagship Operations',
-    description: 'Lead the retail strategy for a prestigious Parisian maison across their European flagship network. You will oversee 12 boutiques and report directly to the CEO.',
-    seniority: 'Director', location: 'Paris, France', salary_min: 120000, salary_max: 160000, salary_currency: 'EUR',
-  },
-  {
-    id: '2', slug: 'vp-marketing-london', title: 'VP of Marketing — Global Brand',
-    description: 'Shape the global marketing direction for a top-tier luxury group. This is a board-level hire that will define the brand\'s next chapter in digital and experiential.',
-    seniority: 'VP', location: 'London, UK', salary_min: 150000, salary_max: 200000, salary_currency: 'GBP',
-  },
-  {
-    id: '3', slug: 'merchandising-manager-milan', title: 'Merchandising Manager — Leather Goods',
-    description: 'Join the buying and merchandising team of an iconic Italian house. You will manage a €30M category across wholesale and retail channels.',
-    seniority: 'Manager', location: 'Milan, Italy', salary_min: 65000, salary_max: 90000, salary_currency: 'EUR',
-  },
-]
-
-function formatSalary(min: number | null, max: number | null, currency: string | null): string {
-  if (!min || !max) return ''
-  const symbol = currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$'
-  const fmtMin = Math.round(min / 1000)
-  const fmtMax = Math.round(max / 1000)
-  return `${symbol}${fmtMin}K – ${symbol}${fmtMax}K`
+  seniority: string | null
 }
 
 export function HomepageOpportunities({ assignments }: { assignments: Assignment[] }) {
-  const items = assignments.length > 0 ? assignments : placeholderAssignments
+  if (assignments.length === 0) return null
 
   return (
-    <section className="px-7 py-10">
-      <div className="max-w-[1200px] mx-auto">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-[22px] text-white font-light" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Confidential opportunities
-          </h2>
-          <Link href="/careers" className="text-[12px] text-[#a58e28] hover:text-[#e4b042] transition-colors">
-            View all careers →
+    <section style={{ padding: '44px 0', borderTop: '0.5px solid #2b2b2b' }}>
+      <div style={{ maxWidth: 1220, margin: '0 auto', padding: '0 28px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 18, marginBottom: 20 }}>
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff' }}>Confidential opportunities</h2>
+            <p style={{ marginTop: 6, color: '#989898', fontSize: '12.8px', lineHeight: 1.7, maxWidth: 560 }}>
+              Selected assignments across retail, brand, commercial, and leadership functions.
+            </p>
+          </div>
+          <Link href="/careers" style={{ fontSize: 12, color: '#a58e28', whiteSpace: 'nowrap', textDecoration: 'none' }}>
+            View all careers &rarr;
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {items.slice(0, 3).map((assignment) => (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
+          {assignments.slice(0, 3).map((a) => (
             <Link
-              key={assignment.id}
-              href={assignment.slug ? `/careers` : '/careers'}
-              className="bg-[#222] border border-[#2a2a2a] rounded-[6px] p-5 hover:border-[#333] transition-colors group flex flex-col"
+              key={a.slug}
+              href={`/careers/${a.slug}`}
+              style={{ background: '#202020', border: '1px solid #2b2b2b', borderRadius: 10, padding: 21, transition: 'all 0.2s ease', display: 'flex', flexDirection: 'column', minHeight: 220, textDecoration: 'none' }}
             >
-              {assignment.seniority && (
-                <div className="text-[10px] text-[#a58e28] uppercase tracking-wide font-semibold mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  {assignment.seniority}
+              {a.seniority && (
+                <div style={{ fontSize: 10, letterSpacing: '1px', textTransform: 'uppercase', fontWeight: 700, color: '#a58e28', marginBottom: 10 }}>
+                  {a.seniority}
                 </div>
               )}
 
-              <h3 className="text-[15px] text-white font-medium mb-2 group-hover:text-[#a58e28] transition-colors" style={{ fontFamily: 'Inter, sans-serif' }}>
-                {assignment.title}
-              </h3>
-
-              {assignment.description && (
-                <p className="text-[13px] text-[#888] leading-relaxed mb-4 line-clamp-3 flex-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  {assignment.description}
-                </p>
-              )}
-
-              <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#2a2a2a]">
-                {assignment.location && (
-                  <span className="text-[12px] text-[#666]" style={{ fontFamily: 'Inter, sans-serif' }}>
-                    {assignment.location}
-                  </span>
-                )}
-                {assignment.salary_min && assignment.salary_max && (
-                  <span className="text-[13px] text-[#a58e28] font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
-                    {formatSalary(assignment.salary_min, assignment.salary_max, assignment.salary_currency)}
-                  </span>
-                )}
+              <div style={{ fontSize: 16, lineHeight: 1.35, fontWeight: 600, color: '#fff', marginBottom: 10 }}>
+                {a.title}
               </div>
 
-              <p className="text-[11px] text-[#555] italic mt-3" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Confidential — brand disclosed after screening
-              </p>
+              {a.description && (
+                <div style={{ fontSize: '12.8px', lineHeight: 1.65, color: '#989898', marginBottom: 'auto' }}>
+                  {a.description}
+                </div>
+              )}
+
+              <div style={{ marginTop: 18, paddingTop: 14, borderTop: '0.5px solid #2b2b2b', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {a.location && (
+                  <div style={{ fontSize: '11.5px', color: '#8d8d8d' }}>{a.location}</div>
+                )}
+                <div style={{ fontSize: '10.5px', color: '#777' }}>Brand disclosed after screening</div>
+              </div>
             </Link>
           ))}
         </div>

@@ -1,84 +1,73 @@
 import Link from 'next/link'
 
 interface Event {
-  id: string
   slug: string
-  name: string
-  location_city: string | null
-  location_country: string | null
+  title: string | null
+  event_date: string
+  city: string | null
+  country: string | null
   sector: string | null
-  start_date: string
 }
 
-const placeholderEvents: Event[] = [
-  { id: '1', slug: 'paris-fashion-week-fw26', name: 'Paris Fashion Week — Fall/Winter 2026', location_city: 'Paris', location_country: 'France', sector: 'Fashion', start_date: '2026-06-23' },
-  { id: '2', slug: 'watches-wonders-2026', name: 'Watches & Wonders 2026', location_city: 'Geneva', location_country: 'Switzerland', sector: 'Watches', start_date: '2026-04-05' },
-  { id: '3', slug: 'luxury-hospitality-summit', name: 'Luxury Hospitality Summit', location_city: 'London', location_country: 'UK', sector: 'Hospitality', start_date: '2026-05-14' },
-  { id: '4', slug: 'cosmoprof-asia-2026', name: 'Cosmoprof Asia 2026', location_city: 'Hong Kong', location_country: 'China', sector: 'Beauty', start_date: '2026-11-11' },
-]
-
-const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 export function HomepageEvents({ events }: { events: Event[] }) {
-  const items = events.length > 0 ? events : placeholderEvents
+  if (events.length === 0) return null
 
   return (
-    <section className="px-7 py-10">
-      <div className="max-w-[1200px] mx-auto">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-[22px] text-white font-light" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Upcoming events
-          </h2>
-          <Link href="/events" className="text-[12px] text-[#a58e28] hover:text-[#e4b042] transition-colors">
-            Full calendar →
+    <section style={{ padding: '44px 0', borderTop: '0.5px solid #2b2b2b' }}>
+      <div style={{ maxWidth: 1220, margin: '0 auto', padding: '0 28px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 18, marginBottom: 20 }}>
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff' }}>Upcoming events</h2>
+            <p style={{ marginTop: 6, color: '#989898', fontSize: '12.8px', lineHeight: 1.7, maxWidth: 560 }}>
+              Industry dates worth tracking across fashion, beauty, watches, jewellery, and retail.
+            </p>
+          </div>
+          <Link href="/events" style={{ fontSize: 12, color: '#a58e28', whiteSpace: 'nowrap', textDecoration: 'none' }}>
+            Full calendar &rarr;
           </Link>
         </div>
 
-        <div className="space-y-0">
-          {items.slice(0, 4).map((event) => {
-            const date = new Date(event.start_date + 'T00:00:00')
+        <div style={{ background: '#202020', border: '1px solid #2b2b2b', borderRadius: 16, overflow: 'hidden' }}>
+          {events.map((event, i) => {
+            const date = new Date(event.event_date + 'T00:00:00')
             const month = monthNames[date.getMonth()]
             const day = date.getDate()
-            const location = [event.location_city, event.location_country].filter(Boolean).join(', ')
+            const location = [event.city, event.country].filter(Boolean).join(', ')
 
             return (
               <Link
-                key={event.id}
-                href={`/events`}
-                className="flex items-center gap-6 py-4 border-b border-[#2a2a2a] hover:bg-[#222] px-3 -mx-3 transition-colors group"
+                key={event.slug}
+                href={`/events/${event.slug}`}
+                style={{
+                  display: 'grid', gridTemplateColumns: '66px 1fr auto', gap: 18, alignItems: 'center',
+                  padding: 18, borderBottom: i < events.length - 1 ? '0.5px solid #2b2b2b' : 'none',
+                  textDecoration: 'none', transition: 'background 0.2s ease',
+                }}
               >
-                {/* Date */}
-                <div className="flex-shrink-0 text-center w-12">
-                  <div className="text-[10px] text-[#a58e28] uppercase tracking-wide" style={{ fontFamily: 'Inter, sans-serif' }}>
+                <div>
+                  <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '1px', color: '#a58e28', fontWeight: 700, textAlign: 'center' }}>
                     {month}
                   </div>
-                  <div className="text-[24px] text-white font-light" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  <div style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', fontSize: 27, lineHeight: 1.1, textAlign: 'center', color: '#fff' }}>
                     {day}
                   </div>
                 </div>
 
-                {/* Name + location */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-[14px] text-white group-hover:text-[#a58e28] transition-colors truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                    {event.name}
-                  </div>
+                <div>
+                  <h3 style={{ fontSize: '13.8px', fontWeight: 600, marginBottom: 4, color: '#fff' }}>
+                    {event.title}
+                  </h3>
                   {location && (
-                    <div className="text-[12px] text-[#888]" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      {location}
-                    </div>
+                    <p style={{ fontSize: 12, color: '#6f6f6f', margin: 0 }}>{location}</p>
                   )}
                 </div>
 
-                {/* Sector pill */}
                 {event.sector && (
-                  <div className="flex-shrink-0 hidden sm:block">
-                    <span
-                      className="text-[10px] text-[#888] bg-[#333] rounded-full px-3 py-1"
-                      style={{ fontFamily: 'Inter, sans-serif' }}
-                    >
-                      {event.sector}
-                    </span>
-                  </div>
+                  <span style={{ fontSize: 10, color: '#7f7f7f', border: '1px solid #404040', padding: '5px 10px', borderRadius: 999, whiteSpace: 'nowrap' }}>
+                    {event.sector}
+                  </span>
                 )}
               </Link>
             )

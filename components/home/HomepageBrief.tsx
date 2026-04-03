@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 export function HomepageBrief() {
   const [email, setEmail] = useState('')
@@ -19,7 +20,7 @@ export function HomepageBrief() {
       })
       if (res.ok) {
         setStatus('success')
-        setMessage('You\'re subscribed. Welcome to The Brief.')
+        setMessage("You're subscribed. Welcome to The Brief.")
         setEmail('')
       } else {
         setStatus('error')
@@ -32,51 +33,56 @@ export function HomepageBrief() {
   }
 
   return (
-    <section className="bg-[#222] px-7 py-14">
-      <div className="max-w-[480px] mx-auto text-center">
-        <h2 className="text-[22px] text-white font-light mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-          The{' '}
-          <span className="italic text-[#a58e28]">Brief</span>
-        </h2>
+    <section style={{ padding: '44px 0', borderTop: '0.5px solid #2b2b2b' }}>
+      <div style={{ maxWidth: 1220, margin: '0 auto', padding: '0 28px' }}>
+        <div style={{ background: 'linear-gradient(180deg,rgba(165,142,40,0.06),rgba(165,142,40,0.02))', border: '1px solid rgba(165,142,40,0.18)', borderRadius: 18, padding: 30, textAlign: 'center' }}>
 
-        <p className="text-[13px] text-[#777] leading-relaxed mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
-          Luxury market signals, salary intelligence, and career moves. Biweekly in your inbox.
-        </p>
+          <div style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', fontSize: 28, marginBottom: 10, fontWeight: 400, color: '#fff' }}>
+            The <em style={{ color: '#a58e28' }}>Brief</em>
+          </div>
 
-        {status === 'success' ? (
-          <p className="text-[13px] text-[#a58e28]" style={{ fontFamily: 'Inter, sans-serif' }}>
-            {message}
-          </p>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <div className="flex gap-2">
+          <div style={{ maxWidth: 620, margin: '0 auto 22px', fontSize: '13.8px', lineHeight: 1.75, color: '#989898' }}>
+            Signals, compensation intelligence, and career movement. Biweekly in your inbox.
+          </div>
+
+          {status === 'success' ? (
+            <p style={{ fontSize: '13.8px', color: '#a58e28' }}>{message}</p>
+          ) : (
+            <form onSubmit={handleSubmit} style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 10 }}>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com"
                 required
-                className="flex-1 bg-[#1a1a1a] border border-[#333] rounded-[3px] px-4 py-3 text-[13px] text-white placeholder-[#555] outline-none focus:border-[#a58e28] transition-colors"
-                style={{ fontFamily: 'Inter, sans-serif' }}
+                style={{ width: 292, maxWidth: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid #383838', background: '#212121', color: '#fff', font: 'inherit', outline: 'none' }}
               />
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="bg-[#a58e28] text-[#1a1a1a] px-6 py-3 rounded-[3px] text-[12px] font-semibold tracking-wide hover:bg-[#e4b042] transition-colors disabled:opacity-50 flex-shrink-0"
-                style={{ fontFamily: 'Inter, sans-serif' }}
+                style={{ padding: '12px 20px', border: '1px solid #383838', borderRadius: 10, background: '#2a2a2a', color: 'rgba(255,255,255,0.88)', font: 'inherit', fontWeight: 700, cursor: 'pointer' }}
               >
                 {status === 'loading' ? '...' : 'Subscribe'}
               </button>
-            </div>
-            {status === 'error' && (
-              <p className="text-[12px] text-red-400 mt-2" style={{ fontFamily: 'Inter, sans-serif' }}>{message}</p>
-            )}
-          </form>
-        )}
+            </form>
+          )}
 
-        <p className="text-[11px] text-[#555] mt-4" style={{ fontFamily: 'Inter, sans-serif' }}>
-          250,000+ luxury professionals. No spam. Unsubscribe anytime.
-        </p>
+          {status === 'error' && (
+            <p style={{ fontSize: 12, color: '#f44336', marginBottom: 8 }}>{message}</p>
+          )}
+
+          <div style={{ fontSize: '11.5px', color: '#6d6d6d' }}>
+            Join professionals worldwide. No spam. Unsubscribe anytime.
+          </div>
+
+          <div style={{ marginTop: 10, fontSize: 12, color: '#7a7a7a', lineHeight: 1.6 }}>
+            Travel editorial preview by{' '}
+            <Link href="/escape" style={{ color: '#a58e28', fontFamily: 'var(--font-playfair), Playfair Display, serif', fontStyle: 'italic', textDecoration: 'none' }}>
+              Escape
+            </Link>
+          </div>
+
+        </div>
       </div>
     </section>
   )

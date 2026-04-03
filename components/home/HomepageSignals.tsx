@@ -9,49 +9,20 @@ const categoryColors: Record<string, string> = {
 }
 
 const categoryLabels: Record<string, string> = {
-  growth: 'GROWTH',
-  leadership: 'LEADERSHIP',
-  contraction: 'CONTRACTION',
-  expansion: 'EXPANSION',
+  growth: 'Growth',
+  leadership: 'Leadership',
+  contraction: 'Contraction',
+  expansion: 'Expansion',
   merger_acquisition: 'M&A',
 }
 
 interface Signal {
-  id: string
-  category: string
-  confidence: string
+  slug: string
   headline: string
-  context_paragraph: string | null
-  brand_tags: string[]
+  category: string
+  brand_tags: string[] | null
   published_at: string | null
 }
-
-const placeholderSignals: Signal[] = [
-  {
-    id: '1', category: 'growth', confidence: 'high',
-    headline: 'LVMH reports record Q4 revenue across fashion & leather goods division',
-    context_paragraph: 'Revenue growth driven by strong demand in Asia-Pacific and the Americas, signaling continued hiring momentum across key maisons.',
-    brand_tags: ['LVMH', 'Louis Vuitton', 'Dior'], published_at: new Date(Date.now() - 2 * 3600000).toISOString(),
-  },
-  {
-    id: '2', category: 'leadership', confidence: 'high',
-    headline: 'Kering appoints new CEO for Gucci, signaling strategic pivot',
-    context_paragraph: 'Leadership change expected to reshape creative direction and commercial strategy. Key roles in merchandising and retail likely to open.',
-    brand_tags: ['Kering', 'Gucci'], published_at: new Date(Date.now() - 5 * 3600000).toISOString(),
-  },
-  {
-    id: '3', category: 'expansion', confidence: 'medium',
-    headline: 'Hermès opens three new flagship stores across Asia-Pacific',
-    context_paragraph: 'Expansion into Seoul, Bangkok, and Melbourne reflects bullish outlook on APAC luxury retail. Store management and clienteling roles expected.',
-    brand_tags: ['Hermès'], published_at: new Date(Date.now() - 8 * 3600000).toISOString(),
-  },
-  {
-    id: '4', category: 'contraction', confidence: 'high',
-    headline: 'Burberry announces restructuring, 400 roles affected globally',
-    context_paragraph: 'Cost reduction program targets corporate and retail operations. Severance packages being offered across UK, US, and APAC offices.',
-    brand_tags: ['Burberry'], published_at: new Date(Date.now() - 12 * 3600000).toISOString(),
-  },
-]
 
 function timeAgo(dateStr: string | null): string {
   if (!dateStr) return ''
@@ -64,62 +35,53 @@ function timeAgo(dateStr: string | null): string {
 }
 
 export function HomepageSignals({ signals }: { signals: Signal[] }) {
-  const items = signals.length > 0 ? signals : placeholderSignals
+  if (signals.length === 0) return null
 
   return (
-    <section className="px-7 py-10">
-      <div className="max-w-[1200px] mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-[22px] text-white font-light" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Latest signals
-          </h2>
-          <Link href="/signals" className="text-[12px] text-[#a58e28] hover:text-[#e4b042] transition-colors">
-            View all signals →
+    <section style={{ padding: '44px 0', borderTop: '0.5px solid #2b2b2b' }}>
+      <div style={{ maxWidth: 1220, margin: '0 auto', padding: '0 28px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 18, marginBottom: 20 }}>
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff' }}>Latest signals</h2>
+            <p style={{ marginTop: 6, color: '#989898', fontSize: '12.8px', lineHeight: 1.7, maxWidth: 560 }}>
+              Market movement with direct implications for hiring, leadership, and timing.
+            </p>
+          </div>
+          <Link href="/signals" style={{ fontSize: 12, color: '#a58e28', whiteSpace: 'nowrap', textDecoration: 'none' }}>
+            View all signals &rarr;
           </Link>
         </div>
 
-        {/* 2x2 grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {items.slice(0, 4).map((signal) => {
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          {signals.map((signal) => {
             const color = categoryColors[signal.category] || '#888'
-            const label = categoryLabels[signal.category] || signal.category.toUpperCase()
+            const label = categoryLabels[signal.category] || signal.category
             return (
-              <div
-                key={signal.id}
-                className="bg-[#222] border border-[#2a2a2a] rounded-[6px] p-5"
+              <Link
+                key={signal.slug}
+                href={`/signals/${signal.slug}`}
+                style={{ display: 'block', padding: 19, background: '#202020', border: '1px solid #2b2b2b', borderRadius: 10, textDecoration: 'none', transition: 'all 0.2s ease' }}
               >
-                {/* Category */}
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="inline-block w-[7px] h-[7px] rounded-full" style={{ backgroundColor: color }} />
-                  <span className="text-[11px] font-semibold tracking-wide" style={{ color, fontFamily: 'Inter, sans-serif' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 10, letterSpacing: '0.9px', textTransform: 'uppercase', fontWeight: 700, color }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
                     {label}
-                  </span>
-                </div>
-
-                {/* Headline */}
-                <p className="text-[14px] text-[#ddd] leading-[1.5] mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  {signal.headline}
-                </p>
-
-                {/* Footer: brand pills + timestamp */}
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-wrap gap-2">
-                    {(signal.brand_tags || []).slice(0, 3).map((brand) => (
-                      <span
-                        key={brand}
-                        className="text-[10px] text-[#a58e28] border border-[#a58e28]/40 rounded-full px-2.5 py-0.5"
-                        style={{ fontFamily: 'Inter, sans-serif' }}
-                      >
-                        {brand}
-                      </span>
-                    ))}
                   </div>
-                  <span className="text-[11px] text-[#555] flex-shrink-0 ml-3" style={{ fontFamily: 'Inter, sans-serif' }}>
-                    {timeAgo(signal.published_at)}
-                  </span>
+                  <div style={{ fontSize: 11, color: '#6f6f6f' }}>{timeAgo(signal.published_at)}</div>
                 </div>
-              </div>
+
+                <div style={{ fontSize: 14, lineHeight: 1.52, color: 'rgba(255,255,255,0.92)', marginBottom: 14 }}>
+                  {signal.headline}
+                </div>
+
+                <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+                  {(signal.brand_tags || []).map((tag) => (
+                    <span key={tag} style={{ fontSize: 10, color: '#818181', background: '#242424', borderRadius: 999, padding: '5px 10px' }}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </Link>
             )
           })}
         </div>

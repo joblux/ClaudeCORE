@@ -1,90 +1,79 @@
 import Link from 'next/link'
 
-interface Brand {
-  id: string
-  slug: string
-  brand_name: string
-  content: Record<string, unknown> | null
+const categoryColors: Record<string, string> = {
+  growth: '#4CAF50',
+  leadership: '#FF9800',
+  contraction: '#f44336',
+  expansion: '#2196F3',
+  merger_acquisition: '#9C27B0',
 }
 
-const placeholderBrands = [
-  { id: '1', slug: 'hermes', brand_name: 'Hermès', parent: 'Hermès International', sector: 'Fashion & Leather', indicator: null },
-  { id: '2', slug: 'louis-vuitton', brand_name: 'Louis Vuitton', parent: 'LVMH', sector: 'Fashion & Leather', indicator: null },
-  { id: '3', slug: 'cartier', brand_name: 'Cartier', parent: 'Richemont', sector: 'Jewelry & Watches', indicator: null },
-  { id: '4', slug: 'chanel', brand_name: 'Chanel', parent: 'Chanel Limited', sector: 'Fashion & Beauty', indicator: null },
-  { id: '5', slug: 'gucci', brand_name: 'Gucci', parent: 'Kering', sector: 'Fashion & Leather', indicator: null },
-  { id: '6', slug: 'dior', brand_name: 'Dior', parent: 'LVMH', sector: 'Fashion & Beauty', indicator: null },
-  { id: '7', slug: 'burberry', brand_name: 'Burberry', parent: 'Burberry Group', sector: 'Fashion', indicator: null },
-  { id: '8', slug: 'tiffany-co', brand_name: 'Tiffany & Co.', parent: 'LVMH', sector: 'Jewelry', indicator: null },
-]
+const signalLabels: Record<string, string> = {
+  growth: 'Active signal',
+  expansion: 'Active signal',
+  leadership: 'Leadership shift',
+  contraction: 'Contraction',
+  merger_acquisition: 'Strategic move',
+}
+
+interface Brand {
+  slug: string
+  brand_name: string
+  tagline: string
+  parent_group: string
+  latest_signal: string
+}
 
 export function HomepageBrands({ brands }: { brands: Brand[] }) {
-  const items = brands.length > 0
-    ? brands.map((b) => {
-        const c = (b.content || {}) as Record<string, unknown>
-        return {
-          id: b.id,
-          slug: b.slug,
-          brand_name: b.brand_name,
-          parent: (c.parent_company as string) || '',
-          sector: (c.sector as string) || '',
-          indicator: null as { label: string; color: string } | null,
-        }
-      })
-    : placeholderBrands
+  if (brands.length === 0) return null
 
   return (
-    <section className="px-7 py-10">
-      <div className="max-w-[1200px] mx-auto">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-[22px] text-white font-light" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Brand intelligence
-          </h2>
-          <Link href="/brands" className="text-[12px] text-[#a58e28] hover:text-[#e4b042] transition-colors">
-            Explore 179 brands →
+    <section style={{ padding: '44px 0', borderTop: '0.5px solid #2b2b2b' }}>
+      <div style={{ maxWidth: 1220, margin: '0 auto', padding: '0 28px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 18, marginBottom: 20 }}>
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff' }}>Brand intelligence</h2>
+            <p style={{ marginTop: 6, color: '#989898', fontSize: '12.8px', lineHeight: 1.7, maxWidth: 560 }}>
+              Profiles, market context, and hiring signals across leading houses and groups.
+            </p>
+          </div>
+          <Link href="/brands" style={{ fontSize: 12, color: '#a58e28', whiteSpace: 'nowrap', textDecoration: 'none' }}>
+            Explore 179 brands &rarr;
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {items.slice(0, 8).map((brand) => (
-            <Link
-              key={brand.id}
-              href={`/brands/${brand.slug}`}
-              className="bg-[#222] border border-[#2a2a2a] rounded-[6px] p-5 text-center hover:border-[#333] transition-colors group"
-            >
-              {/* Circle initials */}
-              <div className="w-12 h-12 rounded-full bg-[#333] border border-[#444] flex items-center justify-center mx-auto mb-3">
-                <span className="text-[#888] text-[14px] font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  {brand.brand_name.substring(0, 2).toUpperCase()}
-                </span>
-              </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14 }}>
+          {brands.map((brand) => {
+            const color = categoryColors[brand.latest_signal] || '#888'
+            const label = signalLabels[brand.latest_signal] || 'Active signal'
+            const initials = brand.brand_name.substring(0, 2).toUpperCase()
+            const sector = [brand.tagline, brand.parent_group].filter(Boolean).join(' \u00b7 ')
 
-              <div className="text-[14px] text-white font-medium mb-1 group-hover:text-[#a58e28] transition-colors" style={{ fontFamily: 'Inter, sans-serif' }}>
-                {brand.brand_name}
-              </div>
-
-              {brand.parent && (
-                <div className="text-[12px] text-[#888] mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  {brand.parent}
+            return (
+              <Link
+                key={brand.slug}
+                href={`/brands/${brand.slug}`}
+                style={{ background: '#202020', border: '1px solid #2b2b2b', borderRadius: 10, padding: '20px 15px', textAlign: 'center', transition: 'all 0.2s ease', textDecoration: 'none', display: 'block' }}
+              >
+                <div style={{ width: 50, height: 50, borderRadius: '50%', background: '#2a2a2a', border: '1px solid #353535', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 13px', fontSize: 13, color: '#9b9b9b', fontWeight: 600, letterSpacing: '0.5px' }}>
+                  {initials}
                 </div>
-              )}
 
-              {brand.sector && (
-                <div className="text-[10px] text-[#555] uppercase mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  {brand.sector}
+                <div style={{ fontSize: '13.5px', fontWeight: 600, marginBottom: 5, color: '#fff' }}>
+                  {brand.brand_name}
                 </div>
-              )}
 
-              {brand.indicator && (
-                <div className="flex items-center justify-center gap-1.5">
-                  <span className="w-[5px] h-[5px] rounded-full" style={{ backgroundColor: brand.indicator.color }} />
-                  <span className="text-[11px]" style={{ color: brand.indicator.color, fontFamily: 'Inter, sans-serif' }}>
-                    {brand.indicator.label}
-                  </span>
+                <div style={{ fontSize: 11, color: '#707070', lineHeight: 1.5, minHeight: 32 }}>
+                  {sector}
                 </div>
-              )}
-            </Link>
-          ))}
+
+                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 10, fontSize: 10, color: '#8a8a8a' }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0 }} />
+                  {label}
+                </div>
+              </Link>
+            )
+          })}
         </div>
       </div>
     </section>
