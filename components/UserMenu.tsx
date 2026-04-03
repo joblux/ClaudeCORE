@@ -74,11 +74,11 @@ export default function UserMenu() {
                 Dashboard
               </Link>
               <Link
-                href="/profile"
+                href="/account"
                 onClick={() => setOpen(false)}
                 className="block px-4 py-2 text-[13px] text-[#ccc] hover:bg-[#2a2a2a] hover:text-white transition-colors"
               >
-                Profile
+                Account
               </Link>
               <Link
                 href="/invite"
