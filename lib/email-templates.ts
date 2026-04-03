@@ -24,7 +24,7 @@ const ADMIN_EMAIL = 'luxuryistime@gmail.com'
 // Logo image (hosted PNG, replaces inline SVG)
 // ────────────────────────────────────────────
 
-const LOGO_IMG = `<img src="https://joblux.com/images/joblux-logo-black.png" alt="JOBLUX" width="88" height="22" style="display:block;margin-bottom:8px;" />`
+const LOGO_IMG = `<p style="font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;letter-spacing:2px;color:#1a1a1a;margin:0 0 6px;">JOBLUX.</p>`
 
 // ────────────────────────────────────────────
 // Tier display labels
@@ -251,17 +251,21 @@ export function welcomeApprovalEmail(params: {
 }): EmailContent {
   const greeting = params.firstName ? `${params.firstName},` : ''
   const tierDisplay = TIER_LABELS[params.tier] || params.tier.charAt(0).toUpperCase() + params.tier.slice(1)
+  const isBusiness = params.tier === 'business'
+  const bodyLine = isBusiness
+    ? 'Your company access has been approved. You now have full access to career intelligence, salary data, industry news, brand insights, and employer services.'
+    : `Your ${tierDisplay} access has been approved. You now have full access to career intelligence, salary data, brand insights, and confidential opportunities.`
   const html = layout({
     content: [
       greeting ? p(greeting) : '',
       h1('Your access is active'),
-      p(`Your ${tierDisplay} access has been approved. You now have full access to career intelligence, salary data, brand insights, and confidential opportunities.`),
+      p(bodyLine),
       p('To get started, click below to sign in. You\'ll receive a secure link to verify your email and access your dashboard.'),
       button('Sign in to get started', `${SITE_URL}/join`),
     ].join(''),
     reason: 'You received this because your access request was approved.',
   })
-  return { html, text: `${greeting ? greeting + '\n\n' : ''}Your access is active\n\nYour ${tierDisplay} access has been approved. Sign in to get started.\n\nDashboard: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Your access is active\n\n${bodyLine} Sign in to get started.\n\nDashboard: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
 export function registrationDeclinedEmail(params: {

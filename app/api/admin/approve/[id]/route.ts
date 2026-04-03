@@ -10,14 +10,6 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const TIER_LABELS: Record<string, string> = {
-  rising: 'Emerging Professional',
-  pro: 'Established Professional',
-  executive: 'Senior & Executive',
-  insider: 'Trusted Contributor',
-  business: 'Company',
-};
-
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.role || session.user.role !== "admin") {
@@ -43,7 +35,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Send welcome email
+  // Send welcome email — pass raw role key, welcomeApprovalEmail applies TIER_LABELS internally
   try {
     const tier = member.role || 'rising';
     console.log("Sending approval email to:", member.email, "tier:", tier);
