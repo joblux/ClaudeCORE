@@ -312,6 +312,9 @@ export default function MemberProfilePage() {
               {displayName(member)}
             </h1>
             <div className="text-sm text-[#999] mt-0.5">{member.email}</div>
+            {member.role === 'business' && (member as any).company_name && (
+              <div className="text-[13px] text-[#888] mt-0.5">{(member as any).company_name}</div>
+            )}
             {member.headline && (
               <div className="text-sm text-[#444] mt-1">{member.headline}</div>
             )}
