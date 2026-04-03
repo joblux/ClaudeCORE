@@ -37,13 +37,16 @@ function JoinContent() {
   const router = useRouter();
 
   const tier = searchParams.get("tier");
+  const pendingTierParam = searchParams.get("pending_tier");
 
-  // Store tier in sessionStorage on mount — survives OAuth redirect
+  // Store tier in sessionStorage on mount — from /select-profile redirect (?tier=) or OAuth return (?pending_tier=)
   useEffect(() => {
-    if (tier && typeof window !== "undefined") {
-      sessionStorage.setItem("joblux_pending_tier", tier);
+    const tierValue = tier || pendingTierParam;
+    if (tierValue && typeof window !== "undefined") {
+      console.log("[join] Storing tier in sessionStorage from URL param:", tierValue);
+      sessionStorage.setItem("joblux_pending_tier", tierValue);
     }
-  }, [tier]);
+  }, [tier, pendingTierParam]);
 
   useEffect(() => {
     if (ref && typeof window !== "undefined") {
@@ -51,7 +54,7 @@ function JoinContent() {
     }
   }, [ref]);
 
-  // Post-auth routing — applies pending tier if present in sessionStorage
+  // Post-auth routing — applies pending tier from sessionStorage or URL param
   useEffect(() => {
     if (status !== "authenticated" || !session?.user) return;
 
@@ -61,18 +64,21 @@ function JoinContent() {
     const tierSelected = (session.user as any).tierSelected;
 
     const applyPendingTier = async () => {
-      const pendingTier = typeof window !== "undefined" ? sessionStorage.getItem("joblux_pending_tier") : null;
-      console.log("[join] applyPendingTier called — pendingTier:", pendingTier, "role:", role, "tierSelected:", tierSelected);
+      // Check sessionStorage first, fall back to URL param
+      const fromStorage = typeof window !== "undefined" ? sessionStorage.getItem("joblux_pending_tier") : null;
+      const fromParam = pendingTierParam || tier;
+      const pendingTier = fromStorage || fromParam;
+      console.log("[join] applyPendingTier — fromStorage:", fromStorage, "fromParam:", fromParam, "using:", pendingTier, "role:", role, "tierSelected:", tierSelected);
       if (pendingTier) {
         try {
-          console.log("[join] Calling set-tier with:", pendingTier);
+          console.log("[join] Calling POST /api/members/set-tier with tier:", pendingTier);
           const res = await fetch("/api/members/set-tier", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ tier: pendingTier }),
           });
           if (res.ok) {
-            console.log("[join] set-tier succeeded, routing to complete-registration");
+            console.log("[join] set-tier succeeded for tier:", pendingTier);
             sessionStorage.removeItem("joblux_pending_tier");
             router.push("/members/complete-registration");
             return true;
@@ -105,14 +111,27 @@ function JoinContent() {
         }
       });
     }
-  }, [status, session, router]);
+  }, [status, session, router, tier, pendingTierParam]);
+
+  // Store tier in sessionStorage before OAuth redirect, then call signIn
+  const handleOAuthSignIn = (provider: string) => {
+    const tierValue = tier || (typeof window !== "undefined" ? sessionStorage.getItem("joblux_pending_tier") : null);
+    if (tierValue && typeof window !== "undefined") {
+      console.log("[join] Storing tier before OAuth redirect:", tierValue);
+      sessionStorage.setItem("joblux_pending_tier", tierValue);
+    }
+    const callbackUrl = tierValue ? `/join?pending_tier=${tierValue}` : "/join";
+    signIn(provider, { callbackUrl });
+  };
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
     setIsSubmitting(true);
     try {
-      await signIn("email", { email, redirect: false, callbackUrl: "/join?tier_applied=1" });
+      const tierValue = tier || (typeof window !== "undefined" ? sessionStorage.getItem("joblux_pending_tier") : null);
+      const callbackUrl = tierValue ? `/join?pending_tier=${tierValue}` : "/join";
+      await signIn("email", { email, redirect: false, callbackUrl });
       setEmailSent(true);
       const refCode = typeof window !== "undefined" ? sessionStorage.getItem("joblux_ref") : null;
       if (refCode) {
@@ -199,7 +218,7 @@ function JoinContent() {
 
             <div className="grid grid-cols-2 gap-2">
               <button
-                onClick={() => signIn("google", { callbackUrl: "/join?tier_applied=1" })}
+                onClick={() => handleOAuthSignIn("google")}
                 className="flex items-center justify-start gap-1.5 py-2.5 border border-[#3a3a3a] bg-[#2a2a2a] text-white rounded-md hover:border-[#555] hover:bg-[#333] transition-colors"
                 style={{ fontSize: '11px' }}
               >
@@ -207,7 +226,7 @@ function JoinContent() {
                 Google
               </button>
               <button
-                onClick={() => signIn("linkedin", { callbackUrl: "/join?tier_applied=1" })}
+                onClick={() => handleOAuthSignIn("linkedin")}
                 className="flex items-center justify-start gap-1.5 py-2.5 border border-[#3a3a3a] bg-[#2a2a2a] text-white rounded-md hover:border-[#555] hover:bg-[#333] transition-colors"
                 style={{ fontSize: '11px' }}
               >
