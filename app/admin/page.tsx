@@ -251,10 +251,11 @@ export default function AdminPage() {
             className="border border-[#e8e8e8] rounded-lg px-3 py-2 text-sm bg-white text-[#444] cursor-pointer focus:outline-none focus:border-[#ccc]"
           >
             <option value="all">All tiers</option>
-            <option value="candidate">Candidate</option>
-            <option value="employer">Employer</option>
-            <option value="influencer">Influencer</option>
-            <option value="rising">Rising</option>
+            <option value="rising">Emerging</option>
+            <option value="pro">Established</option>
+            <option value="executive">Senior & Executive</option>
+            <option value="business">Company</option>
+            <option value="insider">Trusted Contributor</option>
             <option value="admin">Admin</option>
           </select>
           <select
