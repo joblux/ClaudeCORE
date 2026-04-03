@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
       rising: 'Emerging Professional',
       pro: 'Established Professional',
       executive: 'Senior & Executive',
-      business: 'Luxury Employer',
+      business: 'Company',
       insider: 'Trusted Contributor',
     }
     const tierDisplay = tierLabels[tier] || tier

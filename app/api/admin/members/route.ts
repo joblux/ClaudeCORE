@@ -116,7 +116,7 @@ export async function PATCH(req: NextRequest) {
             .eq('id', id)
             .single()
           if (member?.email) {
-            const tier = member.role === 'business' ? 'Luxury Employer' : member.role || 'member'
+            const tier = member.role === 'business' ? 'Company' : member.role || 'member'
             const { html, text } = welcomeApprovalEmail({ firstName: member.first_name, tier })
             await sendEmail({ to: member.email, subject: 'Your JOBLUX access is active', body: text, bodyHtml: html })
           }

@@ -8,12 +8,12 @@ const TIER_LABELS: Record<string, string> = {
   emerging_professional: 'Emerging Professional',
   established_professional: 'Established Professional',
   senior_executive: 'Senior & Executive',
-  luxury_employer: 'Luxury Employer',
+  luxury_employer: 'Company',
   trusted_contributor: 'Trusted Contributor',
   rising: 'Emerging Professional',
   pro: 'Established Professional',
   professional: 'Established Professional',
-  business: 'Luxury Employer',
+  business: 'Company',
   insider: 'Trusted Contributor',
 }
 

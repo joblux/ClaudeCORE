@@ -18,7 +18,7 @@ const faqData = [
     items: [
       { q: 'How do I request access?', a: 'Go to the Connect page and sign in with Google or use a magic link. Complete the registration form with your details and upload your CV. Most applications are reviewed within 24–48 hours.' },
       { q: 'What happens after I apply?', a: "Your application goes to a pending state while the JOBLUX team reviews it. You'll receive a confirmation email immediately. Once approved, you'll receive a welcome email and gain full access to your dashboard." },
-      { q: 'What are the access tiers?', a: 'There are five tiers: Emerging Professional (early career), Established Professional (mid-level), Senior & Executive (VP, Director, C-suite), Luxury Employer (brands and maisons), and Trusted Contributor (consultants, advisors, key voices). Your tier determines the types of opportunities you see, not the content you can access.' },
+      { q: 'What are the access tiers?', a: 'There are five tiers: Emerging Professional (early career), Established Professional (mid-level), Senior & Executive (VP, Director, C-suite), Company (brands and maisons), and Trusted Contributor (consultants, advisors, key voices). Your tier determines the types of opportunities you see, not the content you can access.' },
       { q: 'Can I invite colleagues?', a: 'Yes. Approved professionals can invite colleagues through their Account page via email, contact import, or a personal referral link. Successful referrals earn contribution points.' },
     ],
   },
