@@ -59,5 +59,5 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     console.error("Failed to send rejection email:", emailError);
   }
 
-  return NextResponse.redirect(new URL("/admin", req.url));
+  return NextResponse.json({ success: true });
 }

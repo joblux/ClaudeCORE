@@ -19,12 +19,6 @@ const LinkedInIcon = () => (
   </svg>
 );
 
-const AppleIcon = () => (
-  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-  </svg>
-);
-
 const MailIcon = () => (
   <svg className="w-6 h-6 text-[#a58e28]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
@@ -42,6 +36,8 @@ function JoinContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
+  const tier = searchParams.get("tier");
+
   useEffect(() => {
     if (ref && typeof window !== "undefined") {
       sessionStorage.setItem("joblux_ref", ref);
@@ -49,25 +45,60 @@ function JoinContent() {
   }, [ref]);
 
   useEffect(() => {
-    if (status === "authenticated" && session?.user) {
-      const regCompleted = (session.user as any).registrationCompleted;
-      const userStatus = (session.user as any).status;
-      const role = (session.user as any).role;
-      const tierSelected = (session.user as any).tierSelected;
+    if (tier && typeof window !== "undefined") {
+      sessionStorage.setItem("joblux_pending_tier", tier);
+    }
+  }, [tier]);
 
-      if (role === "admin") {
-        router.push("/admin");
-      } else if (regCompleted && userStatus === "approved") {
-        router.push("/dashboard");
-      } else if (regCompleted && userStatus === "pending") {
-        router.push("/members/pending");
-      } else if (tierSelected && !regCompleted) {
-        // User already picked a tier but hasn't finished the form
-        router.push("/members/complete-registration");
-      } else {
-        // Brand new user | needs to pick a tier
-        router.push("/select-profile");
+  useEffect(() => {
+    if (status !== "authenticated" || !session?.user) return;
+
+    const regCompleted = (session.user as any).registrationCompleted;
+    const userStatus = (session.user as any).status;
+    const role = (session.user as any).role;
+    const tierSelected = (session.user as any).tierSelected;
+
+    const applyPendingTier = async () => {
+      const pendingTier = typeof window !== "undefined" ? sessionStorage.getItem("joblux_pending_tier") : null;
+      if (pendingTier) {
+        try {
+          const res = await fetch("/api/members/set-tier", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tier: pendingTier }),
+          });
+          if (res.ok) {
+            sessionStorage.removeItem("joblux_pending_tier");
+            router.push("/members/complete-registration");
+            return;
+          }
+          throw new Error("set-tier failed");
+        } catch (err) {
+          console.error("Failed to apply pending tier:", err);
+          sessionStorage.removeItem("joblux_pending_tier");
+          router.push("/select-profile");
+          return;
+        }
       }
+      return null;
+    };
+
+    if (role === "admin") {
+      router.push("/admin");
+    } else if (regCompleted && userStatus === "approved") {
+      router.push("/dashboard");
+    } else if (regCompleted && userStatus === "pending") {
+      router.push("/members/pending");
+    } else if (tierSelected && !regCompleted) {
+      router.push("/members/complete-registration");
+    } else {
+      // Brand new user — check for pending tier from select-profile flow
+      applyPendingTier().then((handled) => {
+        if (handled === null) {
+          // No pending tier — send to select-profile
+          router.push("/select-profile");
+        }
+      });
     }
   }, [status, session, router]);
 
@@ -161,7 +192,7 @@ function JoinContent() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => signIn("google", { callbackUrl: "/join" })}
                 className="flex items-center justify-start gap-1.5 py-2.5 border border-[#3a3a3a] bg-[#2a2a2a] text-white rounded-md hover:border-[#555] hover:bg-[#333] transition-colors"
@@ -177,15 +208,6 @@ function JoinContent() {
               >
                 <LinkedInIcon />
                 LinkedIn
-              </button>
-              <button
-                disabled
-                className="flex items-center justify-start gap-1 py-2.5 border border-[#2e2e2e] bg-[#222] rounded-md opacity-40 cursor-not-allowed"
-                style={{ fontSize: '11px' }}
-              >
-                <AppleIcon />
-                <span className="text-[#888]">Apple</span>
-                <span className="text-[#999] italic" style={{ fontSize: '9px' }}>soon</span>
               </button>
             </div>
           </>

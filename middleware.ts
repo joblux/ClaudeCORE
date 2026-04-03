@@ -64,14 +64,14 @@ export default withAuth(
       return response;
     }
 
-    // Holding page: production domain without preview cookie
-    if (
-      host.includes("joblux.com") &&
-      req.cookies.get("joblux_preview")?.value !== "true" &&
-      !HOLDING_BYPASS.some((p) => pathname.startsWith(p))
-    ) {
-      return NextResponse.redirect(new URL("/holding", req.url));
-    }
+    // HOLDING PAGE — re-enable before soft launch if needed
+    // if (
+    //   host.includes("joblux.com") &&
+    //   req.cookies.get("joblux_preview")?.value !== "true" &&
+    //   !HOLDING_BYPASS.some((p) => pathname.startsWith(p))
+    // ) {
+    //   return NextResponse.redirect(new URL("/holding", req.url));
+    // }
 
     // Check maintenance bypass paths
     if (!MAINTENANCE_BYPASS.some((p) => pathname.startsWith(p))) {

@@ -21,6 +21,7 @@ export default function DashboardRouter() {
     } else if (role === 'insider' || role === 'insider_contributor' || role === 'insider_key_speaker') {
       router.push('/dashboard/insider')
     } else {
+      // 'professional' included as legacy fallback — new users get 'rising' instead
       router.push('/dashboard/candidate')
     }
   }, [session, status, router])
