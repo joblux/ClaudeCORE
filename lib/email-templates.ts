@@ -24,7 +24,7 @@ const ADMIN_EMAIL = 'luxuryistime@gmail.com'
 // Logo image (hosted PNG, replaces inline SVG)
 // ────────────────────────────────────────────
 
-const LOGO_IMG = `<img src="https://joblux.com/logos/joblux-email.png" alt="JOBLUX" width="200" height="53" style="display:block;margin-bottom:8px;" />`
+const LOGO_IMG = `<img src="https://joblux.com/logos/joblux-email.png" alt="JOBLUX" width="200" height="53" style="display:block;margin-bottom:8px;width:200px;max-width:200px;height:auto;" />`
 
 // ────────────────────────────────────────────
 // Tier display labels
