@@ -202,7 +202,34 @@ export default function CandidateDashboard() {
           </div>
         </div>
 
+        {/* ── Next steps ── */}
+        {!loading && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+            <Link href="/dashboard/candidate/profilux" className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 hover:border-[#3a3a3a] transition-colors block">
+              <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-2">PROFILE</div>
+              <div className="text-sm text-[#ccc] mb-1">{profiluxCompletion === 100 ? 'Complete' : `${profiluxCompletion}% done`}</div>
+              <div className="text-[11px] text-[#999]">{profiluxCompletion === 100 ? 'View your Profilux' : 'Finish to unlock matching'}</div>
+            </Link>
+            <Link href="/careers" className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 hover:border-[#3a3a3a] transition-colors block">
+              <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-2">CAREERS</div>
+              <div className="text-sm text-[#ccc] mb-1">{roles.length > 0 ? `${roles.length} active` : 'Browse'}</div>
+              <div className="text-[11px] text-[#999]">Explore opportunities</div>
+            </Link>
+            <Link href="/signals" className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 hover:border-[#3a3a3a] transition-colors block">
+              <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-2">INTELLIGENCE</div>
+              <div className="text-sm text-[#ccc] mb-1">Signals &amp; brands</div>
+              <div className="text-[11px] text-[#999]">Market intelligence</div>
+            </Link>
+            <Link href="/contribute" className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 hover:border-[#3a3a3a] transition-colors block">
+              <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-2">CONTRIBUTE</div>
+              <div className="text-sm text-[#ccc] mb-1">{contributionStats?.points ? `${contributionStats.points} pts` : 'Get started'}</div>
+              <div className="text-[11px] text-[#999]">Salary, interviews, signals</div>
+            </Link>
+          </div>
+        )}
+
         {/* ── Profilux bar ── */}
+        {profiluxCompletion < 100 && (
         <div className="bg-[#222] border border-[rgba(165,142,40,0.2)] rounded-xl p-4 flex items-center gap-5 mb-8">
           <div className="flex-shrink-0">
             <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-1">PROFILUX</div>
@@ -213,15 +240,14 @@ export default function CandidateDashboard() {
               <div className="h-full bg-[#1D9E75] rounded-full transition-all" style={{ width: `${profiluxCompletion}%` }} />
             </div>
             <div className="text-[11px] text-[#999]">
-              {profiluxCompletion === 100
-                ? 'Profile complete'
-                : `${profiluxCompletion}% complete · Fill in to unlock full matching`}
+              {`${profiluxCompletion}% complete · Fill in to unlock full matching`}
             </div>
           </div>
           <Link href="/dashboard/candidate/profilux" className="bg-white text-[#1a1a1a] text-xs font-semibold px-4 py-2 rounded-lg hover:opacity-85 transition-opacity whitespace-nowrap">
-            {profiluxCompletion === 100 ? 'View profile →' : 'Continue →'}
+            Continue →
           </Link>
         </div>
+        )}
 
         {/* ── Careers (matched roles) ── */}
         <div className="flex items-center gap-3 mb-4">

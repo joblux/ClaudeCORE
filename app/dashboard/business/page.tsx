@@ -172,7 +172,7 @@ export default function BusinessDashboard() {
               <div style={{ fontSize: 11, fontWeight: 600, color: '#a58e28', letterSpacing: '1.5px', marginBottom: 8 }}>HOW IT WORKS</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
                 {[
-                  { step: '1', label: 'Submit a brief', desc: 'Describe the role you need to fill.' },
+                  { step: '1', label: 'Share your brief', desc: 'Tell us about the role you need to fill.' },
                   { step: '2', label: 'We search', desc: 'Your JOBLUX consultant runs a confidential search.' },
                   { step: '3', label: 'Review candidates', desc: 'We present shortlisted candidates for your review.' },
                 ].map(s => (
@@ -185,16 +185,16 @@ export default function BusinessDashboard() {
               </div>
             </div>
 
-            {/* Submit a brief CTA */}
+            {/* Start a search CTA */}
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, fontWeight: 500, color: '#999', letterSpacing: '0.5px', marginBottom: 10, textTransform: 'uppercase' }}>Start a search</div>
               <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '28px 24px', textAlign: 'center' }}>
                 <div style={{ fontSize: 14, color: '#ccc', marginBottom: 6 }}>Need to hire?</div>
                 <p style={{ fontSize: 13, color: '#999', marginBottom: 14, maxWidth: 440, margin: '0 auto 14px' }}>
-                  Submit a confidential search brief and your dedicated JOBLUX consultant will manage the process end to end.
+                  Learn how our confidential executive search process works and get in touch to start a search.
                 </p>
                 <Link href="/services/recruitment" style={{ display: 'inline-block', padding: '10px 24px', fontSize: 12, fontWeight: 600, color: '#000', background: '#a58e28', borderRadius: 4, textDecoration: 'none' }}>
-                  Submit a brief →
+                  Learn about our process →
                 </Link>
               </div>
             </div>
@@ -240,14 +240,21 @@ export default function BusinessDashboard() {
 
           {/* ── SUBMIT A BRIEF ── */}
           {activeNav === 'submit-brief' && (
-            <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '28px 24px', textAlign: 'center' }}>
-              <div style={{ fontSize: 14, color: '#ccc', marginBottom: 6 }}>Start a confidential search</div>
-              <p style={{ fontSize: 13, color: '#999', marginBottom: 14, maxWidth: 440, margin: '0 auto 14px' }}>
-                Describe the role, seniority, location, and any specific requirements. Your JOBLUX consultant will follow up within 48 hours to refine the brief and begin the search.
-              </p>
-              <Link href="/services/recruitment" style={{ display: 'inline-block', padding: '10px 24px', fontSize: 12, fontWeight: 600, color: '#000', background: '#a58e28', borderRadius: 4, textDecoration: 'none' }}>
-                Submit a brief →
-              </Link>
+            <div>
+              <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '28px 24px', textAlign: 'center', marginBottom: 20 }}>
+                <div style={{ fontSize: 14, color: '#ccc', marginBottom: 6 }}>Initiate a confidential search</div>
+                <p style={{ fontSize: 13, color: '#999', marginBottom: 14, maxWidth: 440, margin: '0 auto 14px' }}>
+                  To begin a search, contact JOBLUX with the role, seniority, location, and any specific requirements. Your consultant will follow up within 48 hours.
+                </p>
+                <Link href="/services/recruitment" style={{ display: 'inline-block', padding: '10px 24px', fontSize: 12, fontWeight: 600, color: '#000', background: '#a58e28', borderRadius: 4, textDecoration: 'none' }}>
+                  View our recruitment services →
+                </Link>
+              </div>
+              <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '16px 20px' }}>
+                <div style={{ fontSize: 12, color: '#999', lineHeight: 1.6 }}>
+                  An in-dashboard brief submission form is coming soon. For now, reach out via the recruitment services page or email your consultant directly.
+                </div>
+              </div>
             </div>
           )}
 

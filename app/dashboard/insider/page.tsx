@@ -407,6 +407,13 @@ export default function InsiderDashboard() {
 
         {/* OVERVIEW */}
         {activeNav === 'overview' && (<>
+          {/* Role framing */}
+          <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 8, padding: '16px 20px', marginBottom: 20 }}>
+            <div style={{ fontSize: 12, color: '#999', lineHeight: 1.6 }}>
+              As a <span style={{ color: '#a58e28', fontWeight: 500 }}>Trusted Contributor</span>, your salary data, interview experiences, market signals, and perspectives power JOBLUX intelligence. You have access to all public intelligence plus contributor tools.
+            </div>
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 28 }}>
             {[
               { label: 'Total contributions', value: String(contributions.length), sub: `${approvedCount} verified · ${pendingCount} pending` },
