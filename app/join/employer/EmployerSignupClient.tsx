@@ -4,23 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { PHONE_CODES, detectPhoneCode } from '@/lib/phone-codes'
-
-const ORG_TYPES = [
-  'Luxury group',
-  'Independent maison',
-  'Multi-brand retailer',
-  'Department store',
-  'Hospitality & hotel group',
-  'Travel & lifestyle',
-  'Beauty & fragrance',
-  'Watches & jewellery',
-  'Wine & spirits',
-  'Design & interiors',
-  'Real estate & private club',
-  'Consultancy & advisory',
-  'Press & media',
-  'Other',
-]
+import { ORG_TYPES } from '@/lib/org-types'
 
 const COUNTRIES = [
   "Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia","Austria",
