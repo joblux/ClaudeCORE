@@ -38,18 +38,20 @@ function JoinContent() {
 
   const tier = searchParams.get("tier");
 
-  useEffect(() => {
-    if (ref && typeof window !== "undefined") {
-      sessionStorage.setItem("joblux_ref", ref);
-    }
-  }, [ref]);
-
+  // Store tier in sessionStorage on mount — survives OAuth redirect
   useEffect(() => {
     if (tier && typeof window !== "undefined") {
       sessionStorage.setItem("joblux_pending_tier", tier);
     }
   }, [tier]);
 
+  useEffect(() => {
+    if (ref && typeof window !== "undefined") {
+      sessionStorage.setItem("joblux_ref", ref);
+    }
+  }, [ref]);
+
+  // Post-auth routing — applies pending tier if present in sessionStorage
   useEffect(() => {
     if (status !== "authenticated" || !session?.user) return;
 
@@ -60,27 +62,30 @@ function JoinContent() {
 
     const applyPendingTier = async () => {
       const pendingTier = typeof window !== "undefined" ? sessionStorage.getItem("joblux_pending_tier") : null;
+      console.log("[join] applyPendingTier called — pendingTier:", pendingTier, "role:", role, "tierSelected:", tierSelected);
       if (pendingTier) {
         try {
+          console.log("[join] Calling set-tier with:", pendingTier);
           const res = await fetch("/api/members/set-tier", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ tier: pendingTier }),
           });
           if (res.ok) {
+            console.log("[join] set-tier succeeded, routing to complete-registration");
             sessionStorage.removeItem("joblux_pending_tier");
             router.push("/members/complete-registration");
-            return;
+            return true;
           }
-          throw new Error("set-tier failed");
+          throw new Error("set-tier failed with status " + res.status);
         } catch (err) {
-          console.error("Failed to apply pending tier:", err);
+          console.error("[join] Failed to apply pending tier:", err);
           sessionStorage.removeItem("joblux_pending_tier");
           router.push("/select-profile");
-          return;
+          return true;
         }
       }
-      return null;
+      return false;
     };
 
     if (role === "admin") {
@@ -94,7 +99,7 @@ function JoinContent() {
     } else {
       // Brand new user — check for pending tier from select-profile flow
       applyPendingTier().then((handled) => {
-        if (handled === null) {
+        if (!handled) {
           // No pending tier — send to select-profile
           router.push("/select-profile");
         }
@@ -107,7 +112,7 @@ function JoinContent() {
     if (!email) return;
     setIsSubmitting(true);
     try {
-      await signIn("email", { email, redirect: false, callbackUrl: "/join" });
+      await signIn("email", { email, redirect: false, callbackUrl: "/join?tier_applied=1" });
       setEmailSent(true);
       const refCode = typeof window !== "undefined" ? sessionStorage.getItem("joblux_ref") : null;
       if (refCode) {
@@ -194,7 +199,7 @@ function JoinContent() {
 
             <div className="grid grid-cols-2 gap-2">
               <button
-                onClick={() => signIn("google", { callbackUrl: "/join" })}
+                onClick={() => signIn("google", { callbackUrl: "/join?tier_applied=1" })}
                 className="flex items-center justify-start gap-1.5 py-2.5 border border-[#3a3a3a] bg-[#2a2a2a] text-white rounded-md hover:border-[#555] hover:bg-[#333] transition-colors"
                 style={{ fontSize: '11px' }}
               >
@@ -202,7 +207,7 @@ function JoinContent() {
                 Google
               </button>
               <button
-                onClick={() => signIn("linkedin", { callbackUrl: "/join" })}
+                onClick={() => signIn("linkedin", { callbackUrl: "/join?tier_applied=1" })}
                 className="flex items-center justify-start gap-1.5 py-2.5 border border-[#3a3a3a] bg-[#2a2a2a] text-white rounded-md hover:border-[#555] hover:bg-[#333] transition-colors"
                 style={{ fontSize: '11px' }}
               >
