@@ -31,8 +31,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
-  background-color: #ffffff;
-  color: #1a1a1a;
+  background-color: #171717;
+  color: #ffffff;
 }
 
 /* ── Playfair Display ── */
