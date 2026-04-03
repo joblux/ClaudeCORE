@@ -6,90 +6,93 @@ import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { useRequireAdmin } from '@/lib/auth-hooks'
 import {
-  LayoutDashboard, BarChart3, Briefcase, Kanban, MessageSquare,
-  Users, Star, Send, FileText, BookOpen, DollarSign,
-  Menu, X, LogOut, Images, PenLine, MessageCircle, Mail,
-  Compass, ClipboardList, Settings, Sparkles
+  LayoutDashboard, Briefcase, Kanban, MessageSquare,
+  Users, Building2, Star, FileText, BookOpen,
+  Menu, X, LogOut, Mail, Newspaper,
+  Compass, ClipboardList, Settings, Sparkles, MessageCircle
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
   {
+    label: 'Overview',
+    items: [
+      { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+    ],
+  },
+  {
     label: 'Members',
     items: [
       { label: 'Profiles', href: '/admin', icon: Users, exact: true, countKey: 'pending_members' },
-      { label: 'Access Approvals', href: '/admin/access-approvals', icon: Send, countKey: 'pending_approvals' },
+      { label: 'Businesses', href: '/admin?view=business', icon: Building2, exact: true, countKey: 'pending_businesses' },
       { label: 'Messages', href: '/admin/messages', icon: MessageSquare, countKey: 'unread_messages' },
-      { label: 'Contributions', href: '/admin/contributions', icon: Star, countKey: 'pending_contributions' },
     ],
   },
   {
-    label: 'Analytics',
-    items: [
-      { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-      { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-    ],
-  },
-  {
-    label: 'Content',
+    label: 'Intelligence',
     items: [
       { label: 'WikiLux', href: '/admin/wikilux', icon: BookOpen },
       { label: 'Insights', href: '/admin/articles', icon: FileText },
-      { label: 'Editorial Review', href: '/admin/editorial-review', icon: MessageCircle, countKey: 'pending_comments' },
-      { label: 'Intelligence Queue', href: '/admin/intelligence-queue', icon: PenLine },
-      { label: 'Salary Intelligence', href: '/admin/salary-intelligence', icon: DollarSign },
-      { label: 'Media Library', href: '/admin/media', icon: Images },
-      { label: 'Escape', href: '/admin/escape', icon: Compass },
+      { label: 'Comments', href: '/admin/bloglux/comments', icon: MessageCircle, countKey: 'pending_comments' },
+      { label: 'The Brief', href: '/admin/the-brief', icon: Newspaper },
     ],
   },
   {
-    label: 'LUXAI',
+    label: 'LuxAI',
     items: [
       { label: 'Command Center', href: '/admin/luxai', icon: Sparkles, exact: true },
       { label: 'Approval Queue', href: '/admin/luxai/queue', icon: ClipboardList },
-      { label: 'Usage & Costs', href: '/admin/luxai/usage', icon: DollarSign },
     ],
   },
   {
-    label: 'Recruitment',
+    label: 'Contributions',
+    items: [
+      { label: 'Command Center', href: '/admin/contributions', icon: Star, countKey: 'pending_contributions' },
+    ],
+  },
+  {
+    label: 'Recruiting',
     items: [
       { label: 'Assignments', href: '/admin/assignments', icon: Briefcase },
       { label: 'ATS Pipeline', href: '/admin/ats', icon: Kanban },
-      { label: 'Consultations', href: '/admin/consultations', icon: ClipboardList, countKey: 'pending_consultations' },
+      { label: 'Briefs', href: '/admin/briefs', icon: ClipboardList },
     ],
   },
   {
-    label: 'Support',
+    label: 'Escape',
+    items: [
+      { label: 'Content', href: '/admin/escape', icon: Compass },
+    ],
+  },
+  {
+    label: 'System',
     items: [
       { label: 'Contact Messages', href: '/admin/contact', icon: Mail, countKey: 'new_contact' },
-      { label: 'Platform Settings', href: '/admin/settings', icon: Settings },
+      { label: 'Email Templates', href: '/admin/emails', icon: Mail },
+      { label: 'Settings', href: '/admin/settings', icon: Settings },
     ],
   },
 ]
 
 const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   '/admin/dashboard': { title: 'Dashboard', subtitle: 'Platform overview' },
-  '/admin/analytics': { title: 'Analytics', subtitle: 'Usage & performance' },
-  '/admin': { title: 'Profiles', subtitle: 'Member directory' },
-  '/admin/assignments': { title: 'Search Assignments', subtitle: 'Executive search pipeline' },
+  '/admin': { title: 'Members', subtitle: 'Member directory' },
+  '/admin/assignments': { title: 'Assignments', subtitle: 'Search assignments' },
   '/admin/ats': { title: 'ATS Pipeline', subtitle: 'Applicant tracking' },
+  '/admin/briefs': { title: 'Briefs', subtitle: 'Recruiting requests' },
   '/admin/messages': { title: 'Messages', subtitle: 'Member communications' },
-  '/admin/contributions': { title: 'Contributions', subtitle: 'Member submissions' },
-  '/admin/consultations': { title: 'Consultations', subtitle: 'Travel consultation requests' },
-  '/admin/access-approvals': { title: 'Access Approvals', subtitle: 'Pending member requests' },
-  '/admin/articles': { title: 'Insights', subtitle: 'Published intelligence' },
-  '/admin/intelligence-queue': { title: 'Intelligence Queue', subtitle: 'Draft & schedule' },
-  '/admin/editorial-review': { title: 'Editorial Review', subtitle: 'Comments & moderation' },
+  '/admin/contributions': { title: 'Contributions', subtitle: 'Command center' },
+  '/admin/articles': { title: 'Insights', subtitle: 'BlogLux articles' },
+  '/admin/bloglux/comments': { title: 'Comments', subtitle: 'Moderation queue' },
+  '/admin/the-brief': { title: 'The Brief', subtitle: 'Newsletter management' },
   '/admin/wikilux': { title: 'WikiLux', subtitle: 'Brand encyclopedia' },
-  '/admin/escape': { title: 'Escape', subtitle: 'Travel content management' },
-  '/admin/luxai': { title: 'LUXAI', subtitle: 'Command center' },
-  '/admin/luxai/queue': { title: 'Approval Queue', subtitle: 'Pending AI content review' },
-  '/admin/luxai/usage': { title: 'LUXAI Usage', subtitle: 'Volume & cost tracking' },
-  '/admin/salary-intelligence': { title: 'Salary Intelligence', subtitle: 'Compensation data' },
-  '/admin/media': { title: 'Media Library', subtitle: 'Assets & uploads' },
+  '/admin/escape': { title: 'Escape', subtitle: 'Travel content' },
+  '/admin/luxai': { title: 'LuxAI', subtitle: 'Command center' },
+  '/admin/luxai/queue': { title: 'Approval Queue', subtitle: 'Pending AI content' },
+  '/admin/luxai/usage': { title: 'LuxAI Usage', subtitle: 'Volume & cost tracking' },
   '/admin/contact': { title: 'Contact Messages', subtitle: 'Inbound enquiries' },
   '/admin/emails': { title: 'Email Templates', subtitle: 'Transactional emails' },
   '/admin/messages/templates': { title: 'Message Templates', subtitle: 'Saved responses' },
-  '/admin/settings': { title: 'Platform Settings', subtitle: 'Configuration' },
+  '/admin/settings': { title: 'Settings', subtitle: 'Platform configuration' },
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -132,6 +135,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!isAdmin) return null
 
   const isActive = (href: string, exact?: boolean) => {
+    if (href.includes('?')) {
+      const [path, qs] = href.split('?')
+      return pathname === path && typeof window !== 'undefined' && window.location.search.includes(qs)
+    }
     if (exact) return pathname === href
     return pathname === href || pathname.startsWith(href + '/')
   }
@@ -187,7 +194,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-2">
             <span className={`w-2 h-2 rounded-full ${maintenanceMode ? 'bg-red-500' : 'bg-green-500'}`} />
             <span className="text-[11px] text-[#999]">
-              {maintenanceMode ? 'Offline' : 'Live'} &middot; luxuryrecruiter.com
+              {maintenanceMode ? 'Offline' : 'Live'} &middot; joblux.com
             </span>
           </div>
           <button
@@ -353,7 +360,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span className="text-[12px] text-[#999]">{currentPage.subtitle}</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-[11px] text-[#999]">luxuryrecruiter.com</span>
+            <span className="text-[11px] text-[#999]">joblux.com</span>
             <div className="flex items-center gap-1.5">
               <span className={`w-2 h-2 rounded-full ${maintenanceMode ? 'bg-red-500' : 'bg-green-500'}`} />
               <span className={`text-[10px] font-medium ${maintenanceMode ? 'text-red-500' : 'text-green-600'}`}>

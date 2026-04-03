@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { useRequireAdmin } from "@/lib/auth-hooks";
 import { Search, Download, UserPlus, MoreHorizontal } from "lucide-react";
 
@@ -44,14 +45,25 @@ type Counts = {
 };
 
 export default function AdminPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-sm text-[#999]">Loading...</div>}>
+      <AdminPageContent />
+    </Suspense>
+  );
+}
+
+function AdminPageContent() {
   const { isAdmin, isLoading: authLoading } = useRequireAdmin();
+  const searchParams = useSearchParams();
+  const viewParam = searchParams.get("view");
+  const isBusinessView = viewParam === "business";
 
   const [members, setMembers] = useState<Member[]>([]);
   const [counts, setCounts] = useState<Counts>({ total: 0, pending: 0, approved: 0, rejected: 0, today: 0, thisWeek: 0 });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [roleFilter, setRoleFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState(isBusinessView ? "business" : "all");
   const [page, setPage] = useState(0);
   const [totalRows, setTotalRows] = useState(0);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -113,6 +125,11 @@ export default function AdminPage() {
   }, [isAdmin, fetchData]);
 
   useEffect(() => { setPage(0); setSelected(new Set()); }, [search, statusFilter, roleFilter]);
+
+  useEffect(() => {
+    setRoleFilter(isBusinessView ? "business" : "all");
+    setPage(0);
+  }, [isBusinessView]);
 
   const updateStatus = async (id: string, newStatus: string) => {
     setActing((s) => new Set(s).add(id));
