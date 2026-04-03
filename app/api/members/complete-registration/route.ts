@@ -19,7 +19,16 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const { tier, sectors, domains } = body
+    const { sectors, domains } = body
+
+    // Read tier from DB directly — JWT role can be stale after set-tier
+    const { data: currentMember } = await supabase
+      .from('members')
+      .select('role')
+      .eq('id', memberId)
+      .maybeSingle()
+
+    const tier = currentMember?.role
 
     if (!tier || !VALID_TIERS.includes(tier)) {
       return NextResponse.json({ error: 'Invalid tier' }, { status: 400 })
