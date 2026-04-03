@@ -43,6 +43,11 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  // Add to blocklist so they can't re-register
+  await supabaseAdmin
+    .from("blocked_emails")
+    .upsert({ email: member.email, reason: "rejected_by_admin", blocked_by: "admin" }, { onConflict: "email", ignoreDuplicates: true });
+
   // Send decline email
   try {
     const { html, text } = registrationDeclinedEmail({

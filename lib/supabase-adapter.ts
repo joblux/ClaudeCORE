@@ -16,6 +16,18 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
         return mapMemberToAdapterUser(existing);
       }
 
+      // Check blocked_emails table for exact email or domain match
+      const emailDomain = user.email.split("@")[1];
+      const { data: blocked } = await supabase
+        .from("blocked_emails")
+        .select("id")
+        .or(`email.eq.${user.email},domain.eq.${emailDomain}`)
+        .maybeSingle();
+
+      if (blocked) {
+        throw new Error("Email blocked");
+      }
+
       const fullName = user.name || user.email.split("@")[0];
       const { data, error } = await supabase
         .from("members")
@@ -58,10 +70,22 @@ export function SupabaseAdapter(supabase: SupabaseClient): Adapter {
 
     async getUserByEmail(email: string): Promise<AdapterUser | null> {
       if (!email) return null;
+      const normalizedEmail = email.toLowerCase().trim();
+
+      // Check blocked_emails table — return null so NextAuth treats as blocked
+      const emailDomain = normalizedEmail.split("@")[1];
+      const { data: blocked } = await supabase
+        .from("blocked_emails")
+        .select("id")
+        .or(`email.eq.${normalizedEmail},domain.eq.${emailDomain}`)
+        .maybeSingle();
+
+      if (blocked) return null;
+
       const { data, error } = await supabase
         .from("members")
         .select()
-        .eq("email", email.toLowerCase().trim())
+        .eq("email", normalizedEmail)
         .single();
       if (error || !data) return null;
       return mapMemberToAdapterUser(data);
