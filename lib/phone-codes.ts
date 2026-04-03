@@ -47,7 +47,7 @@ export const PHONE_CODES = [
 /**
  * Detect phone country code from browser timezone.
  * No API call, no permissions, instant.
- * Falls back to +1 if detection fails.
+ * Falls back to +33 (France) if detection fails.
  */
 export function detectPhoneCode(): string {
   try {
@@ -86,5 +86,5 @@ export function detectPhoneCode(): string {
     if (tz.startsWith('Asia/')) return '+971'
     if (tz.startsWith('Africa/')) return '+212'
   } catch {}
-  return '+1'
+  return '+33'
 }
