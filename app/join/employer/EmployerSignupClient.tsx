@@ -28,6 +28,7 @@ export default function EmployerSignupClient() {
   const [email, setEmail] = useState("")
   const [title, setTitle] = useState("")
   const [country, setCountry] = useState("")
+  const [city, setCity] = useState("")
   const [phoneCode, setPhoneCode] = useState(() => detectPhoneCode())
   const [phone, setPhone] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -52,7 +53,7 @@ export default function EmployerSignupClient() {
       const res = await fetch("/api/members/employer-signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ company, orgType, firstName, lastName, email, title, country, phone: phone ? `${phoneCode} ${phone}` : '' }),
+        body: JSON.stringify({ company, orgType, firstName, lastName, email, title, country, city, phone: phone ? `${phoneCode} ${phone}` : '' }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -150,7 +151,7 @@ export default function EmployerSignupClient() {
             <input type="text" value={title} onChange={e => setTitle(e.target.value)} className={inputClass} />
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mb-6">
+          <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
               <label className={labelClass}>Country *</label>
               <select value={country} onChange={e => setCountry(e.target.value)} required className={selectClass}>
@@ -159,13 +160,18 @@ export default function EmployerSignupClient() {
               </select>
             </div>
             <div>
-              <label className={labelClass}>Phone</label>
-              <div className="flex gap-1.5">
-                <select value={phoneCode} onChange={e => setPhoneCode(e.target.value)} className="px-2 py-2.5 text-[13px] bg-[#222] border border-[#333] rounded-md text-white outline-none focus:border-[#a58e28] transition-colors appearance-none w-[130px] flex-shrink-0">
-                  {PHONE_CODES.map(pc => <option key={pc.code} value={pc.code}>{pc.label}</option>)}
-                </select>
-                <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="flex-1 min-w-0 px-3 py-2.5 text-[13px] bg-[#222] border border-[#333] rounded-md text-white outline-none focus:border-[#a58e28] transition-colors" />
-              </div>
+              <label className={labelClass}>City</label>
+              <input type="text" value={city} onChange={e => setCity(e.target.value)} className={inputClass} />
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <label className={labelClass}>Phone</label>
+            <div className="flex gap-1.5">
+              <select value={phoneCode} onChange={e => setPhoneCode(e.target.value)} className="px-2 py-2.5 text-[13px] bg-[#222] border border-[#333] rounded-md text-white outline-none focus:border-[#a58e28] transition-colors appearance-none w-[140px] flex-shrink-0">
+                {PHONE_CODES.map(pc => <option key={pc.code} value={pc.code}>{pc.label}</option>)}
+              </select>
+              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="flex-1 min-w-0 px-3 py-2.5 text-[13px] bg-[#222] border border-[#333] rounded-md text-white outline-none focus:border-[#a58e28] transition-colors" />
             </div>
           </div>
 
