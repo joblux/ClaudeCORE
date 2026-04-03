@@ -51,14 +51,9 @@ export function Header() {
             {isAuthenticated ? (
               <UserMenu />
             ) : (
-              <>
-                <Link href="/join" style={{ fontSize: '12.5px', color: 'rgba(255,255,255,0.48)', textDecoration: 'none', transition: 'color 0.18s ease' }}>
-                  Sign in
-                </Link>
-                <Link href="/connect" style={{ fontSize: '12.5px', color: 'rgba(255,255,255,0.88)', padding: '10px 14px', border: '1px solid #383838', borderRadius: 999, textDecoration: 'none', transition: 'all 0.18s ease' }}>
-                  Request access
-                </Link>
-              </>
+              <Link href="/access" style={{ fontSize: '12.5px', fontWeight: 600, color: '#171717', background: '#a58e28', padding: '10px 18px', borderRadius: 999, textDecoration: 'none', transition: 'background 0.18s ease' }}>
+                Access &rarr;
+              </Link>
             )}
           </div>
 
@@ -95,9 +90,10 @@ export function Header() {
             })}
           </nav>
           {!isAuthenticated && (
-            <div style={{ padding: '0 28px 40px', display: 'flex', gap: 14, alignItems: 'center' }}>
-              <Link href="/join" onClick={() => setMobileOpen(false)} style={{ fontSize: '12.5px', color: 'rgba(255,255,255,0.48)', textDecoration: 'none' }}>Sign in</Link>
-              <Link href="/connect" onClick={() => setMobileOpen(false)} style={{ fontSize: '12.5px', color: 'rgba(255,255,255,0.88)', padding: '10px 14px', border: '1px solid #383838', borderRadius: 999, textDecoration: 'none' }}>Request access</Link>
+            <div style={{ padding: '0 28px 40px' }}>
+              <Link href="/access" onClick={() => setMobileOpen(false)} style={{ fontSize: '12.5px', fontWeight: 600, color: '#171717', background: '#a58e28', padding: '10px 18px', borderRadius: 999, textDecoration: 'none', display: 'inline-block' }}>
+                Access &rarr;
+              </Link>
             </div>
           )}
         </div>
