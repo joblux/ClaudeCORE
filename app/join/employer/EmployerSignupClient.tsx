@@ -177,10 +177,10 @@ export default function EmployerSignupClient() {
             <div>
               <label className={labelClass}>Phone</label>
               <div className="flex gap-1.5">
-                <select value={phoneCode} onChange={e => setPhoneCode(e.target.value)} className="px-2 py-2.5 text-[13px] bg-[#222] border border-[#333] rounded-md text-white outline-none focus:border-[#a58e28] transition-colors appearance-none w-[100px] flex-shrink-0">
+                <select value={phoneCode} onChange={e => setPhoneCode(e.target.value)} className="px-2 py-2.5 text-[13px] bg-[#222] border border-[#333] rounded-md text-white outline-none focus:border-[#a58e28] transition-colors appearance-none w-[130px] flex-shrink-0">
                   {PHONE_CODES.map(pc => <option key={pc.code} value={pc.code}>{pc.label}</option>)}
                 </select>
-                <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className={inputClass} />
+                <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="flex-1 min-w-0 px-3 py-2.5 text-[13px] bg-[#222] border border-[#333] rounded-md text-white outline-none focus:border-[#a58e28] transition-colors" />
               </div>
             </div>
           </div>
