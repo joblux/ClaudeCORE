@@ -9,7 +9,7 @@
  *   Text:          #1a1a1a (heading), #555 (body), #aaa (muted)
  *   Gold accent:   #B8975C (tagline only)
  *   Button:        bg #1a1a1a, color #ffffff, radius 3px
- *   Footer:        Logo image + gold tagline + help link + address
+ *   Footer:        Gold SVG logo + gold tagline + help link + address
  *
  * GLOBAL RULE: "JOBLUX" never appears in subject lines or body text
  * of user-facing emails. The sender name is already "JOBLUX".
@@ -21,10 +21,10 @@ const HELP_URL = `${SITE_URL}/faq`
 const ADMIN_EMAIL = 'luxuryistime@gmail.com'
 
 // ────────────────────────────────────────────
-// Logo image (hosted PNG, replaces inline SVG)
+// Logo SVG (inline gold, footer only)
 // ────────────────────────────────────────────
 
-const LOGO_IMG = `<img src="https://joblux.com/logos/joblux-email.png" alt="JOBLUX" width="200" height="53" style="display:block;margin-bottom:8px;width:200px;max-width:200px;height:auto;" />`
+const LOGO_SVG = `<svg width="100" height="24" viewBox="-2.47 13.94 297.03 66.06" fill="#B8975C" xmlns="http://www.w3.org/2000/svg" style="display:block;margin-bottom:6px;"><path d="M1.38 80L-2.47 71.53Q-0.31 70.22 1.23 68.78Q2.78 67.34 3.78 65.61Q4.78 63.88 5.25 61.73Q5.72 59.59 5.72 56.88V14.59H15.63V55.09Q15.63 58.34 15.34 61.02Q15.06 63.69 14.42 65.92Q13.78 68.16 12.70 70.03Q11.63 71.91 10.05 73.59Q8.47 75.28 6.33 76.84Q4.19 78.41 1.38 80ZM20.41 38.88Q20.41 33.34 22.44 28.75Q24.47 24.16 28.14 20.86Q31.81 17.56 36.95 15.75Q42.09 13.94 48.34 13.94Q54.56 13.94 59.72 15.75Q64.88 17.56 68.55 20.86Q72.22 24.16 74.25 28.75Q76.28 33.34 76.28 38.88Q76.28 44.44 74.25 49.08Q72.22 53.72 68.55 57.06Q64.88 60.41 59.72 62.27Q54.56 64.13 48.34 64.13Q42.09 64.13 36.95 62.27Q31.81 60.41 28.14 57.06Q24.47 53.72 22.44 49.08Q20.41 44.44 20.41 38.88ZM30.31 38.88Q30.31 42.66 31.67 45.69Q33.03 48.72 35.45 50.86Q37.88 53 41.17 54.16Q44.47 55.31 48.34 55.31Q52.22 55.31 55.52 54.16Q58.81 53 61.22 50.86Q63.63 48.72 65 45.69Q66.38 42.66 66.38 38.88Q66.38 35.09 65 32.09Q63.63 29.09 61.22 27.02Q58.81 24.94 55.52 23.84Q52.22 22.75 48.34 22.75Q44.47 22.75 41.17 23.84Q37.88 24.94 35.45 27.02Q33.03 29.09 31.67 32.09Q30.31 35.09 30.31 38.88ZM82.28 63.44V14.59H108.38Q113.16 14.59 116.70 15.61Q120.25 16.63 122.59 18.41Q124.94 20.19 126.08 22.64Q127.22 25.09 127.22 27.94Q127.22 32.59 124.28 36.09Q127.66 38.09 129.31 41.28Q130.97 44.47 130.97 48.53Q130.97 51.94 129.83 54.69Q128.69 57.44 126.36 59.39Q124.03 61.34 120.48 62.39Q116.94 63.44 112.13 63.44H82.28ZM92.19 33.34H112.19Q113.47 33.34 114.69 33.44Q116.78 31.44 116.78 28.88Q116.78 26.22 114.70 24.77Q112.63 23.31 108.63 23.31H92.19V33.34ZM92.19 54.81H112.38Q116.38 54.81 118.45 53.09Q120.53 51.38 120.53 48.25Q120.53 45.13 118.45 43.38Q116.38 41.63 112.38 41.63H92.19V54.81ZM136 63.44V14.59H145.91V54.75H174.31V63.44H136ZM177.06 42.69V14.59H186.97V41.50Q186.97 44.81 187.88 47.39Q188.78 49.97 190.58 51.75Q192.38 53.53 195.03 54.45Q197.69 55.38 201.22 55.38Q204.72 55.38 207.39 54.45Q210.06 53.53 211.86 51.75Q213.66 49.97 214.56 47.39Q215.47 44.81 215.47 41.50V14.59H225.38V42.69Q225.38 47.50 223.75 51.44Q222.13 55.38 219.03 58.19Q215.94 61 211.45 62.53Q206.97 64.06 201.22 64.06Q195.47 64.06 190.98 62.53Q186.50 61 183.41 58.19Q180.31 55.38 178.69 51.44Q177.06 47.50 177.06 42.69ZM226 63.44L246.31 38.63 227.53 14.59H239.66L252.63 31.41 265.66 14.59H277.59L258.47 38.53 278.25 63.44H266.09L252.19 45.88 237.97 63.44H226ZM279.72 58.03Q279.72 56.78 280.23 55.67Q280.75 54.56 281.72 53.73Q282.69 52.91 284.06 52.44Q285.44 51.97 287.16 51.97Q288.88 51.97 290.25 52.44Q291.63 52.91 292.58 53.73Q293.53 54.56 294.05 55.67Q294.56 56.78 294.56 58.03Q294.56 59.28 294.05 60.39Q293.53 61.50 292.58 62.31Q291.63 63.13 290.25 63.61Q288.88 64.09 287.16 64.09Q285.44 64.09 284.06 63.61Q282.69 63.13 281.72 62.31Q280.75 61.50 280.23 60.39Q279.72 59.28 279.72 58.03Z"/></svg>`
 
 // ────────────────────────────────────────────
 // Tier display labels
@@ -73,7 +73,7 @@ ${content}
 <tr><td style="padding:0 36px 32px;">
 <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
 <tr><td style="border-top:1px solid #eee;padding-top:24px;">
-${LOGO_IMG}
+${LOGO_SVG}
 <p style="font-size:11px;color:#B8975C;font-family:Arial,Helvetica,sans-serif;margin:0 0 10px;letter-spacing:0.5px;">Luxury Talent Intelligence</p>
 <p style="font-size:11px;color:#999;font-family:Arial,Helvetica,sans-serif;margin:0 0 8px;">${unsubLinks}<a href="${HELP_URL}" style="color:#999;text-decoration:underline;">Need help?</a></p>
 <p style="font-size:11px;color:#bbb;font-family:Arial,Helvetica,sans-serif;margin:0 0 3px;">JOBLUX LLC &middot; 424 Park Avenue South, New York, NY 10016</p>
