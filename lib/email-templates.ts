@@ -1,6 +1,6 @@
 /**
  * JOBLUX branded email templates — signature style.
- * White background, black logo signature, gold accent line.
+ * White background, logo image header, gold accent line.
  * All templates return { html, text } for SES dual-format sending.
  *
  * Design:
@@ -9,7 +9,11 @@
  *   Text:          #1a1a1a (heading), #555 (body), #aaa (muted)
  *   Gold accent:   #B8975C (tagline only)
  *   Button:        bg #1a1a1a, color #ffffff, radius 3px
- *   Footer:        Black SVG logo + gold tagline + help link + address
+ *   Footer:        Logo image + gold tagline + help link + address
+ *
+ * GLOBAL RULE: "JOBLUX" never appears in subject lines or body text
+ * of user-facing emails. The sender name is already "JOBLUX".
+ * Exception: footer legal line (required) and admin-internal emails.
  */
 
 const SITE_URL = 'https://joblux.com'
@@ -17,10 +21,22 @@ const HELP_URL = `${SITE_URL}/faq`
 const ADMIN_EMAIL = 'luxuryistime@gmail.com'
 
 // ────────────────────────────────────────────
-// SVG logo (black, inline for email clients)
+// Logo image (hosted PNG, replaces inline SVG)
 // ────────────────────────────────────────────
 
-const LOGO_SVG = `<svg width="100" height="24" viewBox="-2.47 13.94 297.03 66.06" fill="#1a1a1a" xmlns="http://www.w3.org/2000/svg" style="display:block;margin-bottom:6px;"><path d="M1.38 80L-2.47 71.53Q-0.31 70.22 1.23 68.78Q2.78 67.34 3.78 65.61Q4.78 63.88 5.25 61.73Q5.72 59.59 5.72 56.88V14.59H15.63V55.09Q15.63 58.34 15.34 61.02Q15.06 63.69 14.42 65.92Q13.78 68.16 12.70 70.03Q11.63 71.91 10.05 73.59Q8.47 75.28 6.33 76.84Q4.19 78.41 1.38 80ZM20.41 38.88Q20.41 33.34 22.44 28.75Q24.47 24.16 28.14 20.86Q31.81 17.56 36.95 15.75Q42.09 13.94 48.34 13.94Q54.56 13.94 59.72 15.75Q64.88 17.56 68.55 20.86Q72.22 24.16 74.25 28.75Q76.28 33.34 76.28 38.88Q76.28 44.44 74.25 49.08Q72.22 53.72 68.55 57.06Q64.88 60.41 59.72 62.27Q54.56 64.13 48.34 64.13Q42.09 64.13 36.95 62.27Q31.81 60.41 28.14 57.06Q24.47 53.72 22.44 49.08Q20.41 44.44 20.41 38.88ZM30.31 38.88Q30.31 42.66 31.67 45.69Q33.03 48.72 35.45 50.86Q37.88 53 41.17 54.16Q44.47 55.31 48.34 55.31Q52.22 55.31 55.52 54.16Q58.81 53 61.22 50.86Q63.63 48.72 65 45.69Q66.38 42.66 66.38 38.88Q66.38 35.09 65 32.09Q63.63 29.09 61.22 27.02Q58.81 24.94 55.52 23.84Q52.22 22.75 48.34 22.75Q44.47 22.75 41.17 23.84Q37.88 24.94 35.45 27.02Q33.03 29.09 31.67 32.09Q30.31 35.09 30.31 38.88ZM82.28 63.44V14.59H108.38Q113.16 14.59 116.70 15.61Q120.25 16.63 122.59 18.41Q124.94 20.19 126.08 22.64Q127.22 25.09 127.22 27.94Q127.22 32.59 124.28 36.09Q127.66 38.09 129.31 41.28Q130.97 44.47 130.97 48.53Q130.97 51.94 129.83 54.69Q128.69 57.44 126.36 59.39Q124.03 61.34 120.48 62.39Q116.94 63.44 112.13 63.44H82.28ZM92.19 33.34H112.19Q113.47 33.34 114.69 33.44Q116.78 31.44 116.78 28.88Q116.78 26.22 114.70 24.77Q112.63 23.31 108.63 23.31H92.19V33.34ZM92.19 54.81H112.38Q116.38 54.81 118.45 53.09Q120.53 51.38 120.53 48.25Q120.53 45.13 118.45 43.38Q116.38 41.63 112.38 41.63H92.19V54.81ZM136 63.44V14.59H145.91V54.75H174.31V63.44H136ZM177.06 42.69V14.59H186.97V41.50Q186.97 44.81 187.88 47.39Q188.78 49.97 190.58 51.75Q192.38 53.53 195.03 54.45Q197.69 55.38 201.22 55.38Q204.72 55.38 207.39 54.45Q210.06 53.53 211.86 51.75Q213.66 49.97 214.56 47.39Q215.47 44.81 215.47 41.50V14.59H225.38V42.69Q225.38 47.50 223.75 51.44Q222.13 55.38 219.03 58.19Q215.94 61 211.45 62.53Q206.97 64.06 201.22 64.06Q195.47 64.06 190.98 62.53Q186.50 61 183.41 58.19Q180.31 55.38 178.69 51.44Q177.06 47.50 177.06 42.69ZM226 63.44L246.31 38.63 227.53 14.59H239.66L252.63 31.41 265.66 14.59H277.59L258.47 38.53 278.25 63.44H266.09L252.19 45.88 237.97 63.44H226ZM279.72 58.03Q279.72 56.78 280.23 55.67Q280.75 54.56 281.72 53.73Q282.69 52.91 284.06 52.44Q285.44 51.97 287.16 51.97Q288.88 51.97 290.25 52.44Q291.63 52.91 292.58 53.73Q293.53 54.56 294.05 55.67Q294.56 56.78 294.56 58.03Q294.56 59.28 294.05 60.39Q293.53 61.50 292.58 62.31Q291.63 63.13 290.25 63.61Q288.88 64.09 287.16 64.09Q285.44 64.09 284.06 63.61Q282.69 63.13 281.72 62.31Q280.75 61.50 280.23 60.39Q279.72 59.28 279.72 58.03Z"/></svg>`
+const LOGO_IMG = `<img src="https://joblux.com/logos/joblux-header.png" alt="JOBLUX" width="88" height="22" style="display:block;margin-bottom:8px;" />`
+
+// ────────────────────────────────────────────
+// Tier display labels
+// ────────────────────────────────────────────
+
+const TIER_LABELS: Record<string, string> = {
+  rising: 'Emerging Professional',
+  pro: 'Established Professional',
+  executive: 'Senior & Executive',
+  insider: 'Trusted Contributor',
+  business: 'Company',
+}
 
 // ────────────────────────────────────────────
 // Master layout — signature style
@@ -50,6 +66,10 @@ function layout({ content, reason, showUnsubscribe }: LayoutOptions): string {
 
 <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;background-color:#ffffff;border-top:2px solid #B8975C;">
 
+<tr><td style="padding:32px 36px 0; text-align:left;">
+<img src="https://joblux.com/logos/joblux-header.png" alt="JOBLUX" width="88" height="22" style="display:block;" />
+</td></tr>
+
 <tr><td style="padding:40px 36px 28px;">
 ${content}
 </td></tr>
@@ -57,7 +77,7 @@ ${content}
 <tr><td style="padding:0 36px 32px;">
 <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
 <tr><td style="border-top:1px solid #eee;padding-top:24px;">
-${LOGO_SVG}
+${LOGO_IMG}
 <p style="font-size:11px;color:#B8975C;font-family:Arial,Helvetica,sans-serif;margin:0 0 10px;letter-spacing:0.5px;">Luxury Talent Intelligence</p>
 <p style="font-size:11px;color:#999;font-family:Arial,Helvetica,sans-serif;margin:0 0 8px;">${unsubLinks}<a href="${HELP_URL}" style="color:#999;text-decoration:underline;">Need help?</a></p>
 <p style="font-size:11px;color:#bbb;font-family:Arial,Helvetica,sans-serif;margin:0 0 3px;">JOBLUX LLC &middot; 424 Park Avenue South, New York, NY 10016</p>
@@ -184,7 +204,7 @@ export interface EmailContent {
 export function magicLinkEmail(url: string): EmailContent {
   const html = layout({
     content: [
-      h1('Sign in to JOBLUX'),
+      h1('Your sign-in link'),
       p('Click the button below to access your account.'),
       button('Sign in', url),
       muted('This link expires in 24 hours.'),
@@ -192,7 +212,7 @@ export function magicLinkEmail(url: string): EmailContent {
     ].join(''),
     reason: 'You received this because a sign-in was requested for your account.',
   })
-  return { html, text: `Sign in to JOBLUX\n\nClick here to sign in: ${url}\n\nThis link expires in 24 hours.\nIf you didn't request this, ignore this email.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+  return { html, text: `Your sign-in link\n\nClick here to sign in: ${url}\n\nThis link expires in 24 hours.\nIf you didn't request this, ignore this email.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
 export function emailVerificationEmail(url: string): EmailContent {
@@ -201,7 +221,7 @@ export function emailVerificationEmail(url: string): EmailContent {
       h1('Verify your email address'),
       p('Please confirm your email address by clicking the button below.'),
       button('Verify email', url),
-      muted('If you didn\'t create an account on JOBLUX, you can safely ignore this email.'),
+      muted('If you didn\'t create an account, you can safely ignore this email.'),
     ].join(''),
     reason: 'You received this because an account was created with this email address.',
   })
@@ -220,13 +240,13 @@ export function registrationPendingEmail(params: {
     content: [
       greeting ? p(greeting) : '',
       h1('We received your request'),
-      p('Thank you for your interest in JOBLUX. Your request is being reviewed and you\'ll hear from us shortly.'),
+      p('Thank you for your interest. Your request is being reviewed and you\'ll hear from us shortly.'),
       p('In the meantime, you can explore our public intelligence — brand insights, market signals, and industry news are available without an account.'),
-      button('Explore JOBLUX', SITE_URL),
+      button('Explore', SITE_URL),
     ].join(''),
-    reason: 'You received this because you submitted an access request to JOBLUX.',
+    reason: 'You received this because you submitted an access request.',
   })
-  return { html, text: `${greeting ? greeting + '\n\n' : ''}We received your request\n\nThank you for your interest in JOBLUX. Your request is being reviewed.\n\nExplore: ${SITE_URL}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}We received your request\n\nThank you for your interest. Your request is being reviewed.\n\nExplore: ${SITE_URL}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
 export function welcomeApprovalEmail(params: {
@@ -234,7 +254,7 @@ export function welcomeApprovalEmail(params: {
   tier: string
 }): EmailContent {
   const greeting = params.firstName ? `${params.firstName},` : ''
-  const tierDisplay = params.tier.charAt(0).toUpperCase() + params.tier.slice(1)
+  const tierDisplay = TIER_LABELS[params.tier] || params.tier.charAt(0).toUpperCase() + params.tier.slice(1)
   const html = layout({
     content: [
       greeting ? p(greeting) : '',
@@ -243,7 +263,7 @@ export function welcomeApprovalEmail(params: {
       p('To get started, click below to sign in. You\'ll receive a secure link to verify your email and access your dashboard.'),
       button('Sign in to get started', `${SITE_URL}/join`),
     ].join(''),
-    reason: 'You received this because your JOBLUX access request was approved.',
+    reason: 'You received this because your access request was approved.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}Your access is active\n\nYour ${tierDisplay} access has been approved. Sign in to get started.\n\nDashboard: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -257,12 +277,12 @@ export function registrationDeclinedEmail(params: {
     content: [
       greeting ? p(greeting) : '',
       h1('Update on your access request'),
-      p('Thank you for your interest in JOBLUX. After review, we are unable to approve your request at this time.'),
+      p('Thank you for your interest. After review, we are unable to approve your request at this time.'),
       params.reason ? p(params.reason) : '',
       p('If you have questions or believe this should be reconsidered, please reach out.'),
       button('Contact us', HELP_URL),
     ].join(''),
-    reason: 'You received this because you submitted an access request to JOBLUX.',
+    reason: 'You received this because you submitted an access request.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}Update on your access request\n\nAfter review, we are unable to approve your request at this time.\n${params.reason ? '\n' + params.reason + '\n' : ''}\nContact: ${HELP_URL}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -281,9 +301,9 @@ export function employerPendingEmail(params: {
       greeting ? p(greeting) : '',
       h1('We received your request'),
       p(`Thank you for connecting${params.companyName ? ` on behalf of ${params.companyName}` : ''}. Your request is being reviewed and we\'ll be in touch shortly.`),
-      button('Explore JOBLUX', SITE_URL),
+      button('Explore', SITE_URL),
     ].join(''),
-    reason: 'You received this because you submitted an employer access request to JOBLUX.',
+    reason: 'You received this because you submitted an employer access request.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}We received your request\n\nThank you for connecting${params.companyName ? ` on behalf of ${params.companyName}` : ''}. We'll be in touch shortly.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -297,12 +317,12 @@ export function employerApprovalEmail(params: {
     content: [
       greeting ? p(greeting) : '',
       h1('Your employer access is active'),
-      p(`Welcome to JOBLUX${params.companyName ? ` — ${params.companyName} is now connected` : ''}. You have access to salary benchmarks, talent intelligence, and our confidential search services.`),
-      button('Sign in to JOBLUX', `${SITE_URL}/join`),
+      p(`Welcome${params.companyName ? ` — ${params.companyName} is now connected` : ''}. You have access to salary benchmarks, talent intelligence, and our confidential search services.`),
+      button('Sign in to get started', `${SITE_URL}/join`),
     ].join(''),
-    reason: 'You received this because your JOBLUX employer access was approved.',
+    reason: 'You received this because your employer access was approved.',
   })
-  return { html, text: `${greeting ? greeting + '\n\n' : ''}Your employer access is active\n\nWelcome to JOBLUX${params.companyName ? ` — ${params.companyName} is now connected` : ''}.\n\nDashboard: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Your employer access is active\n\nWelcome${params.companyName ? ` — ${params.companyName} is now connected` : ''}.\n\nDashboard: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
 // ────────────────────────────────────────────
@@ -321,7 +341,7 @@ export function briefReceivedEmail(params: {
       p(`Thank you for submitting ${params.roleTitle ? `the brief for <strong>${params.roleTitle}</strong>` : 'your search brief'}. A member of our team will be in touch within 48 hours to discuss next steps.`),
       p('Every conversation is fully confidential.'),
     ].join(''),
-    reason: 'You received this because you submitted a search brief on JOBLUX.',
+    reason: 'You received this because you submitted a search brief.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}We received your brief\n\nThank you for submitting your search brief. We'll be in touch within 48 hours.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -337,9 +357,9 @@ export function searchUpdateEmail(params: {
       greeting ? p(greeting) : '',
       h1(`Update: ${params.roleTitle}`),
       p(params.message),
-      button('View on JOBLUX', `${SITE_URL}/dashboard`),
+      button('View on dashboard', `${SITE_URL}/dashboard`),
     ].join(''),
-    reason: 'You received this because you have an active search with JOBLUX.',
+    reason: 'You received this because you have an active search.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}Update: ${params.roleTitle}\n\n${params.message}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -357,7 +377,7 @@ export function candidateSharedEmail(params: {
       p(`We\'ve prepared ${params.candidateCount} candidate${params.candidateCount > 1 ? 's' : ''} for <strong>${params.roleTitle}</strong>. Profiles are ready for your review on the platform.`),
       button('Review candidates', `${SITE_URL}/dashboard`),
     ].join(''),
-    reason: 'You received this because you have an active search with JOBLUX.',
+    reason: 'You received this because you have an active search.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}Candidates ready for review\n\n${params.candidateCount} candidate(s) for ${params.roleTitle}.\n\nReview: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -373,9 +393,9 @@ export function placementConfirmedEmployerEmail(params: {
       greeting ? p(greeting) : '',
       h1('Placement confirmed'),
       p(`We\'re pleased to confirm the placement of <strong>${params.candidateName}</strong> for <strong>${params.roleTitle}</strong>.`),
-      p('Thank you for trusting JOBLUX with this search. We look forward to working together again.'),
+      p('Thank you for trusting us with this search. We look forward to working together again.'),
     ].join(''),
-    reason: 'You received this because a placement was confirmed through JOBLUX.',
+    reason: 'You received this because a placement was confirmed through your account.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}Placement confirmed\n\n${params.candidateName} for ${params.roleTitle}.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -399,7 +419,7 @@ export function candidateMatchedEmail(params: {
       p('This is a discreet enquiry — your details have not been shared. If you\'re interested, we\'ll tell you more.'),
       button('View details', `${SITE_URL}/dashboard`),
     ].join(''),
-    reason: 'You received this because your JOBLUX profile matched an active search.',
+    reason: 'You received this because your profile matched an active search.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}An opportunity for you\n\n${params.roleTitle}${params.location ? ' in ' + params.location : ''}${params.sector ? ' (' + params.sector + ')' : ''}\n\nThis is a discreet enquiry. View details: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -417,9 +437,9 @@ export function interviewScheduledEmail(params: {
       h1('Interview scheduled'),
       p(`An interview has been arranged for <strong>${params.roleTitle}</strong>${params.date ? ` on ${params.date}` : ''}.`),
       params.details ? p(params.details) : '',
-      button('View on JOBLUX', `${SITE_URL}/dashboard`),
+      button('View on dashboard', `${SITE_URL}/dashboard`),
     ].join(''),
-    reason: 'You received this because you have an active application on JOBLUX.',
+    reason: 'You received this because you have an active application.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}Interview scheduled\n\n${params.roleTitle}${params.date ? ' on ' + params.date : ''}${params.details ? '\n' + params.details : ''}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -437,7 +457,7 @@ export function applicationStatusEmail(params: {
       p(params.statusMessage),
       button('View details', `${SITE_URL}/dashboard`),
     ].join(''),
-    reason: 'You received this because you have an active application on JOBLUX.',
+    reason: 'You received this because you have an active application.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}Update: ${params.roleTitle}\n\n${params.statusMessage}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -454,7 +474,7 @@ export function offerExtendedEmail(params: {
       p(`We\'re pleased to inform you that an offer has been extended for <strong>${params.roleTitle}</strong>. Please review the details on your dashboard.`),
       button('View offer', `${SITE_URL}/dashboard`),
     ].join(''),
-    reason: 'You received this because you have an active application on JOBLUX.',
+    reason: 'You received this because you have an active application.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}An offer has been extended for ${params.roleTitle}.\n\nView: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -471,7 +491,7 @@ export function placementConfirmedCandidateEmail(params: {
       p(`Your placement for <strong>${params.roleTitle}</strong> has been confirmed. We\'re delighted to have been part of this next chapter in your career.`),
       p('We wish you every success.'),
     ].join(''),
-    reason: 'You received this because a placement was confirmed through JOBLUX.',
+    reason: 'You received this because a placement was confirmed through your account.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}Congratulations\n\nYour placement for ${params.roleTitle} has been confirmed.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -492,7 +512,7 @@ export function profiluxReminderEmail(params: {
       p(`Your profile is ${params.completionPercent}% complete. A full profile helps us match you with the right opportunities and intelligence.`),
       button('Continue building', `${SITE_URL}/dashboard/candidate/profilux`),
     ].join(''),
-    reason: 'You received this because your JOBLUX profile is incomplete.',
+    reason: 'You received this because your profile is incomplete.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}Complete your Profilux\n\nYour profile is ${params.completionPercent}% complete.\n\nContinue: ${SITE_URL}/dashboard/candidate/profilux\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -508,7 +528,7 @@ export function profiluxCompleteEmail(params: {
       p('Your profile is now fully built. You\'re visible to our search team and eligible for the most relevant opportunities.'),
       button('View your profile', `${SITE_URL}/dashboard/candidate/profilux`),
     ].join(''),
-    reason: 'You received this because your JOBLUX Profilux reached 100%.',
+    reason: 'You received this because your Profilux reached 100%.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}Your Profilux is complete\n\nYou're now visible to our search team.\n\nView: ${SITE_URL}/dashboard/candidate/profilux\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -520,12 +540,12 @@ export function profileSharedEmail(params: {
   const html = layout({
     content: [
       h1('A profile has been shared with you'),
-      p(`<strong>${params.senderName}</strong> shared their JOBLUX profile with you.`),
+      p(`<strong>${params.senderName}</strong> shared their profile with you.`),
       button('View profile', params.profileUrl),
     ].join(''),
-    reason: 'You received this because someone shared their JOBLUX profile with you.',
+    reason: 'You received this because someone shared their profile with you.',
   })
-  return { html, text: `A profile has been shared with you\n\n${params.senderName} shared their JOBLUX profile.\n\nView: ${params.profileUrl}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+  return { html, text: `A profile has been shared with you\n\n${params.senderName} shared their profile.\n\nView: ${params.profileUrl}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
 export function dataExportEmail(params: {
@@ -540,7 +560,7 @@ export function dataExportEmail(params: {
       p('The data you requested is ready to download. This link is valid for 48 hours.'),
       button('Download your data', params.downloadUrl),
     ].join(''),
-    reason: 'You received this because you requested a data export from JOBLUX.',
+    reason: 'You received this because you requested a data export.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}Your data export is ready\n\nDownload: ${params.downloadUrl}\n\nThis link is valid for 48 hours.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -553,10 +573,10 @@ export function accountDeletedEmail(params: {
     content: [
       greeting ? p(greeting) : '',
       h1('Your account has been deleted'),
-      p('Your JOBLUX account and all associated data have been permanently removed.'),
+      p('Your account and all associated data have been permanently removed.'),
       p('If this was a mistake, please contact us within 30 days.'),
     ].join(''),
-    reason: 'You received this because your JOBLUX account was deleted.',
+    reason: 'You received this because your account was deleted.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}Your account has been deleted\n\nAll data has been permanently removed. Contact us within 30 days if this was a mistake.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -583,7 +603,7 @@ export function contributionSubmittedEmail(params: {
       p(`Your ${typeLabel} has been submitted and is under review.`),
       button('View your dashboard', `${SITE_URL}/dashboard`),
     ].join(''),
-    reason: 'You received this because you submitted a contribution on JOBLUX.',
+    reason: 'You received this because you submitted a contribution.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}Thank you for your contribution\n\nYour ${typeLabel} is under review.\n\nDashboard: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -603,7 +623,7 @@ export function contributionApprovedEmail(params: {
     content: [
       greeting ? p(greeting) : '',
       h1('Your contribution is live'),
-      p(`Your ${typeLabel} has been approved and is now part of JOBLUX intelligence. Thank you for contributing.`),
+      p(`Your ${typeLabel} has been approved and is now part of the intelligence platform. Thank you for contributing.`),
     ].join(''),
     reason: 'You received this because a contribution you submitted was reviewed.',
   })
@@ -644,13 +664,13 @@ export function inviteColleagueEmail(params: {
 }): EmailContent {
   const html = layout({
     content: [
-      h1('You\'ve been invited to JOBLUX'),
-      p(`<strong>${params.inviterName}</strong> thinks you\'d benefit from JOBLUX — a confidential career intelligence platform for the luxury industry.`),
+      h1('You\'ve been invited'),
+      p(`<strong>${params.inviterName}</strong> thinks you\'d benefit from a confidential career intelligence platform for the luxury industry.`),
       button('Accept invitation', params.inviteUrl),
     ].join(''),
-    reason: `You received this because ${params.inviterName} invited you to JOBLUX.`,
+    reason: `You received this because ${params.inviterName} invited you.`,
   })
-  return { html, text: `You've been invited to JOBLUX\n\n${params.inviterName} thinks you'd benefit from JOBLUX.\n\nAccept: ${params.inviteUrl}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+  return { html, text: `You've been invited\n\n${params.inviterName} thinks you'd benefit from a confidential career intelligence platform for the luxury industry.\n\nAccept: ${params.inviteUrl}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
 export function inviteAcceptedEmail(params: {
@@ -661,12 +681,12 @@ export function inviteAcceptedEmail(params: {
   const html = layout({
     content: [
       greeting ? p(greeting) : '',
-      h1('Your colleague joined JOBLUX'),
+      h1('Your colleague joined'),
       p(`<strong>${params.newMemberName}</strong> accepted your invitation and is now on the platform.`),
     ].join(''),
-    reason: 'You received this because someone you invited joined JOBLUX.',
+    reason: 'You received this because someone you invited joined the platform.',
   })
-  return { html, text: `${greeting ? greeting + '\n\n' : ''}Your colleague joined JOBLUX\n\n${params.newMemberName} accepted your invitation.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+  return { html, text: `${greeting ? greeting + '\n\n' : ''}Your colleague joined\n\n${params.newMemberName} accepted your invitation.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
 
 export function sendToFriendEmail(params: {
@@ -680,9 +700,9 @@ export function sendToFriendEmail(params: {
       h1(`${params.senderName} shared an article with you`),
       p(`<strong>${params.articleTitle}</strong>`),
       params.personalNote ? p(`<em>"${params.personalNote}"</em>`) : '',
-      button('Read on JOBLUX', params.articleUrl),
+      button('Read article', params.articleUrl),
     ].join(''),
-    reason: `You received this because ${params.senderName} shared a JOBLUX article with you.`,
+    reason: `You received this because ${params.senderName} shared an article with you.`,
   })
   return { html, text: `${params.senderName} shared an article with you\n\n${params.articleTitle}\n${params.personalNote ? '\n"' + params.personalNote + '"\n' : ''}\nRead: ${params.articleUrl}\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -699,11 +719,11 @@ export function escapeConsultationEmail(params: {
     content: [
       greeting ? p(greeting) : '',
       h1('We received your travel request'),
-      p('Thank you for reaching out through JOBLUX Escape. A travel advisor will review your request and be in touch within 48 hours.'),
+      p('Thank you for reaching out through Escape. A travel advisor will review your request and be in touch within 48 hours.'),
       divider(),
       muted('Travel advisory services provided by independent advisors affiliated with Fora Travel, Inc.'),
     ].join(''),
-    reason: 'You received this because you submitted a travel request through JOBLUX Escape.',
+    reason: 'You received this because you submitted a travel request through Escape.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}We received your travel request\n\nA travel advisor will be in touch within 48 hours.\n\nTravel advisory by Fora Travel, Inc.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -740,7 +760,7 @@ export function theBriefEmail(params: {
       `<div style="font-size:14px;color:#555;line-height:1.8;font-family:Arial,Helvetica,sans-serif;">${params.bodyHtml}</div>`,
       escapeSection,
     ].join(''),
-    reason: 'You\'re receiving this because you have JOBLUX access.',
+    reason: 'You\'re receiving this because you have access.',
     showUnsubscribe: true,
   })
   return {
@@ -763,7 +783,7 @@ export function contactConfirmationEmail(params: {
       h1('We received your message'),
       p('Our team will review your message and get back to you shortly.'),
     ].join(''),
-    reason: 'You received this because you sent a message through the JOBLUX help page.',
+    reason: 'You received this because you sent a message through the help page.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}We received your message\n\nOur team will get back to you shortly.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
@@ -957,9 +977,9 @@ export function wrapInEmailTemplate({
   return layout({
     content: [
       `<div style="font-size:14px;color:#555;line-height:1.8;font-family:Arial,Helvetica,sans-serif;">${bodyHtml}</div>`,
-      ctaUrl ? button(ctaLabel || 'View on JOBLUX', ctaUrl) : '',
+      ctaUrl ? button(ctaLabel || 'View on dashboard', ctaUrl) : '',
     ].join(''),
-    reason: 'You received this email from JOBLUX.',
+    reason: 'You received this email.',
   })
 }
 
@@ -987,7 +1007,7 @@ export function applicationConfirmationEmail(params: {
       p(`Your profile has been submitted for <strong>${params.assignmentTitle}</strong>. You can track the status on your dashboard.`),
       button('View dashboard', `${SITE_URL}/dashboard`),
     ].join(''),
-    reason: 'You received this because you applied for a position on JOBLUX.',
+    reason: 'You received this because you applied for a position.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}Application received\n\nSubmitted for ${params.assignmentTitle}.\n\nDashboard: ${SITE_URL}/dashboard\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }

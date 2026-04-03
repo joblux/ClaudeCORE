@@ -56,7 +56,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     });
     await sendEmail({
       to: member.email,
-      subject: "Update on your JOBLUX access request",
+      subject: "Update on your access request",
       body: text,
       bodyHtml: html,
     });

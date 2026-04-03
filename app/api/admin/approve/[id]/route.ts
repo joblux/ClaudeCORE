@@ -10,6 +10,14 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+const TIER_LABELS: Record<string, string> = {
+  rising: 'Emerging Professional',
+  pro: 'Established Professional',
+  executive: 'Senior & Executive',
+  insider: 'Trusted Contributor',
+  business: 'Company',
+};
+
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.role || session.user.role !== "admin") {
@@ -37,7 +45,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
   // Send welcome email
   try {
-    const tier = member.role === 'business' ? 'Luxury Employer' : member.role || 'member';
+    const tier = member.role || 'rising';
     console.log("Sending approval email to:", member.email, "tier:", tier);
     const { html, text } = welcomeApprovalEmail({
       firstName: member.first_name,
@@ -45,7 +53,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     });
     const result = await sendEmail({
       to: member.email,
-      subject: "Welcome to JOBLUX",
+      subject: "Your access is active",
       body: text,
       bodyHtml: html,
     });
