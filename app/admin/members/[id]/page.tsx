@@ -13,13 +13,19 @@ import type {
 
 type Tab = "overview" | "experience" | "skills" | "documents" | "preferences" | "notes" | "ai_review";
 
-const TABS: { key: Tab; label: string }[] = [
+const PROFESSIONAL_TABS: { key: Tab; label: string }[] = [
   { key: "overview", label: "Overview" },
   { key: "ai_review", label: "AI Assessment" },
   { key: "experience", label: "Experience" },
   { key: "skills", label: "Skills" },
   { key: "documents", label: "Documents" },
   { key: "preferences", label: "Preferences" },
+  { key: "notes", label: "Notes" },
+];
+
+const BUSINESS_TABS: { key: Tab; label: string }[] = [
+  { key: "overview", label: "Overview" },
+  { key: "ai_review", label: "AI Assessment" },
   { key: "notes", label: "Notes" },
 ];
 
@@ -250,14 +256,16 @@ export default function MemberProfilePage() {
 
   // ---- Full profile view ----
   const completeness = member.profile_completeness ?? 0;
+  const isBusiness = member.role === 'business';
+  const tabs = isBusiness ? BUSINESS_TABS : PROFESSIONAL_TABS;
 
   return (
     <div className="min-h-screen bg-[#f5f5f5]">
       {/* Topbar */}
       <div className="bg-white border-b border-[#e8e8e8] px-8 py-4">
         <div className="flex items-center justify-between">
-          <a href="/admin" className="text-sm text-[#999] hover:text-[#444] no-underline transition-colors">
-            &larr; Back to Profiles
+          <a href={isBusiness ? "/admin?view=business" : "/admin"} className="text-sm text-[#999] hover:text-[#444] no-underline transition-colors">
+            &larr; Back to {isBusiness ? 'Businesses' : 'Profiles'}
           </a>
           <div className="flex items-center gap-2">
             {member.status !== "approved" && (
@@ -326,23 +334,25 @@ export default function MemberProfilePage() {
               </span>
             </div>
 
-            {/* Profile completeness */}
-            <div className="mt-4 max-w-xs">
-              <div className="flex justify-between mb-1">
-                <span className="text-[10px] uppercase tracking-[0.1em] text-[#999]">Profile Completeness</span>
-                <span className="text-xs font-semibold text-[#111]">{completeness}%</span>
+            {/* Profile completeness — professionals only */}
+            {!isBusiness && (
+              <div className="mt-4 max-w-xs">
+                <div className="flex justify-between mb-1">
+                  <span className="text-[10px] uppercase tracking-[0.1em] text-[#999]">Profile Completeness</span>
+                  <span className="text-xs font-semibold text-[#111]">{completeness}%</span>
+                </div>
+                <div className="h-1.5 bg-[#e8e8e8] rounded-full overflow-hidden">
+                  <div className="h-full bg-[#111] rounded-full transition-all duration-400" style={{ width: `${completeness}%` }} />
+                </div>
               </div>
-              <div className="h-1.5 bg-[#e8e8e8] rounded-full overflow-hidden">
-                <div className="h-full bg-[#111] rounded-full transition-all duration-400" style={{ width: `${completeness}%` }} />
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Tabs */}
       <div className="bg-white border-b border-[#e8e8e8] px-8 flex gap-0 overflow-x-auto">
-        {TABS.map((tab) => (
+        {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
@@ -425,23 +435,38 @@ function OverviewTab({ member }: { member: MemberProfile }) {
         )}
       </div>
 
-      <SectionLabel>Professional Summary</SectionLabel>
-      <div className="bg-white border border-[#e8e8e8] rounded-lg p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-10">
-          <InfoRow label="Job Title" value={member.job_title} />
-          <InfoRow label="Current Employer" value={member.current_employer || member.maison} />
-          <InfoRow label="Seniority" value={member.seniority} />
-          <InfoRow label="Department" value={member.department} />
-          <InfoRow
-            label="Total Experience"
-            value={member.total_years_experience != null ? `${member.total_years_experience} years` : null}
-          />
-          <InfoRow
-            label="Years in Luxury"
-            value={member.years_in_luxury != null ? `${member.years_in_luxury} years` : null}
-          />
-        </div>
-      </div>
+      {member.role === 'business' ? (
+        <>
+          <SectionLabel>Company Information</SectionLabel>
+          <div className="bg-white border border-[#e8e8e8] rounded-lg p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-10">
+              <InfoRow label="Company Name" value={(member as any).company_name} />
+              <InfoRow label="Organisation Type" value={(member as any).org_type} />
+              <InfoRow label="Contact Title" value={member.job_title} />
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <SectionLabel>Professional Summary</SectionLabel>
+          <div className="bg-white border border-[#e8e8e8] rounded-lg p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-10">
+              <InfoRow label="Job Title" value={member.job_title} />
+              <InfoRow label="Current Employer" value={member.current_employer || member.maison} />
+              <InfoRow label="Seniority" value={member.seniority} />
+              <InfoRow label="Department" value={member.department} />
+              <InfoRow
+                label="Total Experience"
+                value={member.total_years_experience != null ? `${member.total_years_experience} years` : null}
+              />
+              <InfoRow
+                label="Years in Luxury"
+                value={member.years_in_luxury != null ? `${member.years_in_luxury} years` : null}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }
