@@ -24,7 +24,7 @@ const ADMIN_EMAIL = 'luxuryistime@gmail.com'
 // Logo image (hosted PNG, replaces inline SVG)
 // ────────────────────────────────────────────
 
-const LOGO_IMG = `<img src="https://joblux.com/logos/joblux-header.png" alt="JOBLUX" width="88" height="22" style="display:block;margin-bottom:8px;" />`
+const LOGO_IMG = `<img src="https://joblux.com/logos/joblux-black.svg" alt="JOBLUX" width="88" height="22" style="display:block;margin-bottom:8px;" />`
 
 // ────────────────────────────────────────────
 // Tier display labels
@@ -65,10 +65,6 @@ function layout({ content, reason, showUnsubscribe }: LayoutOptions): string {
 <tr><td align="center" style="padding:32px 16px;">
 
 <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;background-color:#ffffff;border-top:2px solid #B8975C;">
-
-<tr><td style="padding:32px 36px 0; text-align:left;">
-<img src="https://joblux.com/logos/joblux-header.png" alt="JOBLUX" width="88" height="22" style="display:block;" />
-</td></tr>
 
 <tr><td style="padding:40px 36px 28px;">
 ${content}
