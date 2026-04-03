@@ -33,7 +33,7 @@ function JoinContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const ref = searchParams.get("ref");
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
 
   const tier = searchParams.get("tier");
@@ -80,6 +80,7 @@ function JoinContent() {
           if (res.ok) {
             console.log("[join] set-tier succeeded for tier:", pendingTier);
             sessionStorage.removeItem("joblux_pending_tier");
+            await update();
             router.push("/members/complete-registration");
             return true;
           }
