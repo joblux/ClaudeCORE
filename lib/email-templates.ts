@@ -303,7 +303,7 @@ export function employerPendingEmail(params: {
       p(`Thank you for connecting${params.companyName ? ` on behalf of ${params.companyName}` : ''}. Your request is being reviewed and we\'ll be in touch shortly.`),
       button('Explore', SITE_URL),
     ].join(''),
-    reason: 'You received this because you submitted an employer access request.',
+    reason: 'You received this because you submitted an access request.',
   })
   return { html, text: `${greeting ? greeting + '\n\n' : ''}We received your request\n\nThank you for connecting${params.companyName ? ` on behalf of ${params.companyName}` : ''}. We'll be in touch shortly.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
 }
