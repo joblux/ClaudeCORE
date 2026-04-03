@@ -13,7 +13,7 @@ export default function TermsOfServicePage() {
     <div className="bg-[#222] rounded-lg p-8 md:p-12 border border-[#333]">
       <p className="jl-overline-gold tracking-widest uppercase text-sm mb-4">Legal</p>
       <h1 className="text-4xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>Terms of Service</h1>
-      <p className="text-[#999] mb-12">Last updated: March 2026</p>
+      <p className="text-[#999] mb-12">Last updated: April 2026</p>
 
       <div className="space-y-12 text-[#ccc] leading-relaxed text-[15px]">
         {/* ── 1. Introduction & Acceptance ── */}
@@ -329,6 +329,12 @@ export default function TermsOfServicePage() {
             without notice, for any reason, including but not limited to: violation of these Terms,
             fraudulent activity, inactivity, conduct detrimental to the platform, or at the request of
             law enforcement or regulatory authorities.
+          </p>
+          <p className="mt-3">
+            Where access is declined or revoked due to fraudulent activity, abuse, or repeated
+            violations, JOBLUX reserves the right to permanently block the associated email address
+            and prevent future registration attempts. This measure is applied at JOBLUX&apos;s sole
+            discretion and without obligation to notify the affected party.
           </p>
           <p className="mt-3">
             Upon termination, whether initiated by you or by JOBLUX, certain provisions of these
