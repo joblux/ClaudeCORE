@@ -8,13 +8,13 @@ export const metadata: Metadata = {
     title: "You've been invited to JOBLUX",
     description:
       "Request access to JOBLUX. Free access to salary data, brand insights, and executive positions.",
-    url: "https://www.luxuryrecruiter.com/join",
+    url: "https://joblux.com/join",
     siteName: "JOBLUX",
     locale: "en_US",
     type: "website",
     images: [
       {
-        url: "https://www.luxuryrecruiter.com/og-image.png",
+        url: "https://joblux.com/og-image.png",
         width: 1200,
         height: 630,
         alt: "JOBLUX | Luxury Industry Careers Intelligence",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     title: "You've been invited to JOBLUX",
     description:
       "Request access to JOBLUX.",
-    images: ["https://www.luxuryrecruiter.com/og-image.png"],
+    images: ["https://joblux.com/og-image.png"],
   },
 };
 

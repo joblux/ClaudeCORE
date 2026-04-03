@@ -72,7 +72,7 @@ export default function ArticleInteractions({ articleId, articleTitle, articleSl
     setPosting(false)
   }
 
-  const shareUrl = `https://www.luxuryrecruiter.com/bloglux/${articleSlug}`
+  const shareUrl = `https://joblux.com/bloglux/${articleSlug}`
 
   return (
     <>

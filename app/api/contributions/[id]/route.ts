@@ -120,7 +120,7 @@ export async function PUT(
           const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
           if (!lastRegen || new Date(lastRegen).getTime() < sevenDaysAgo) {
             // Trigger background regeneration (fire-and-forget)
-            fetch(`${process.env.NEXTAUTH_URL || 'https://www.luxuryrecruiter.com'}/api/wikilux/regenerate`, {
+            fetch(`${process.env.NEXTAUTH_URL || 'https://joblux.com'}/api/wikilux/regenerate`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ slug: contribution.brand_slug }),

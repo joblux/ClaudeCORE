@@ -1,7 +1,7 @@
 'use client'
 
 const LANG_CODES = ['fr', 'ar', 'it', 'es', 'de', 'zh', 'ja', 'ru'] as const
-const BASE_URL = 'https://www.luxuryrecruiter.com'
+const BASE_URL = 'https://joblux.com'
 
 export function HreflangTags({ slug }: { slug: string }) {
   return (

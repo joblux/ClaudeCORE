@@ -102,7 +102,7 @@ export async function GET(req: NextRequest) {
             fontFamily: 'sans-serif',
           }}
         >
-          luxuryrecruiter.com
+          joblux.com
         </div>
 
         {/* Type badge */}

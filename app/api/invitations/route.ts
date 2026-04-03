@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
         .eq('id', memberId)
     }
 
-    const baseUrl = process.env.NEXTAUTH_URL || 'https://www.luxuryrecruiter.com'
+    const baseUrl = process.env.NEXTAUTH_URL || 'https://joblux.com'
     const results: any[] = []
 
     for (const contact of contacts) {

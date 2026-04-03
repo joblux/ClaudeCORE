@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { BRANDS } from '@/lib/wikilux-brands'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.luxuryrecruiter.com'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://joblux.com'
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

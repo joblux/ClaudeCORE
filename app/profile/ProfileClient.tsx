@@ -2347,9 +2347,9 @@ export default function ProfileClient({ email }: { email: string }) {
                     <div>
                       <label className="jl-label">Your Résumé URL</label>
                       <div className="flex gap-2">
-                        <input className="jl-input flex-1 text-xs bg-[#fafaf5]" readOnly value={`luxuryrecruiter.com/r/${resumeSlug}`} />
+                        <input className="jl-input flex-1 text-xs bg-[#fafaf5]" readOnly value={`joblux.com/r/${resumeSlug}`} />
                         <button
-                          onClick={() => { navigator.clipboard.writeText(`https://www.luxuryrecruiter.com/r/${resumeSlug}`); setResumeCopied(true); setTimeout(() => setResumeCopied(false), 2000) }}
+                          onClick={() => { navigator.clipboard.writeText(`https://www.joblux.com/r/${resumeSlug}`); setResumeCopied(true); setTimeout(() => setResumeCopied(false), 2000) }}
                           className="jl-btn jl-btn-outline text-xs"
                         >
                           {resumeCopied ? 'Copied!' : 'Copy'}
@@ -2400,9 +2400,9 @@ export default function ProfileClient({ email }: { email: string }) {
                   {/* Share buttons */}
                   {resumeSlug && (
                     <div className="flex items-center gap-3">
-                      <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent('https://www.luxuryrecruiter.com/r/' + resumeSlug)}`} target="_blank" rel="noopener noreferrer" className="text-xs text-[#888] hover:text-[#a58e28]">LinkedIn</a>
-                      <a href={`https://wa.me/?text=${encodeURIComponent('My JOBLUX Résumé: https://www.luxuryrecruiter.com/r/' + resumeSlug)}`} target="_blank" rel="noopener noreferrer" className="text-xs text-[#888] hover:text-[#a58e28]">WhatsApp</a>
-                      <a href={`mailto:?subject=${encodeURIComponent('My JOBLUX Résumé')}&body=${encodeURIComponent('https://www.luxuryrecruiter.com/r/' + resumeSlug)}`} className="text-xs text-[#888] hover:text-[#a58e28]">Email</a>
+                      <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent('https://www.joblux.com/r/' + resumeSlug)}`} target="_blank" rel="noopener noreferrer" className="text-xs text-[#888] hover:text-[#a58e28]">LinkedIn</a>
+                      <a href={`https://wa.me/?text=${encodeURIComponent('My JOBLUX Résumé: https://www.joblux.com/r/' + resumeSlug)}`} target="_blank" rel="noopener noreferrer" className="text-xs text-[#888] hover:text-[#a58e28]">WhatsApp</a>
+                      <a href={`mailto:?subject=${encodeURIComponent('My JOBLUX Résumé')}&body=${encodeURIComponent('https://www.joblux.com/r/' + resumeSlug)}`} className="text-xs text-[#888] hover:text-[#a58e28]">Email</a>
                       <a href={`/r/${resumeSlug}`} target="_blank" rel="noopener noreferrer" className="text-xs text-[#a58e28] hover:underline">Preview &rarr;</a>
                     </div>
                   )}
@@ -2486,13 +2486,13 @@ export default function ProfileClient({ email }: { email: string }) {
                   <div className="flex items-center gap-2">
                     <input
                       className="jl-input text-xs flex-1 bg-gray-50"
-                      value={`luxuryrecruiter.com/r/${resumeSlug}`}
+                      value={`joblux.com/r/${resumeSlug}`}
                       readOnly
                       onClick={(e) => (e.target as HTMLInputElement).select()}
                     />
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(`https://www.luxuryrecruiter.com/r/${resumeSlug}`)
+                        navigator.clipboard.writeText(`https://www.joblux.com/r/${resumeSlug}`)
                         setResumeCopied(true)
                         setTimeout(() => setResumeCopied(false), 2000)
                       }}

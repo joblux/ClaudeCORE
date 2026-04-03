@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: { params: { slug: string; lan
   const brand = BRANDS.find((b) => b.slug === params.slug)
   if (!brand || !VALID_LANGS.includes(params.lang)) return {}
 
-  const baseUrl = 'https://www.luxuryrecruiter.com'
+  const baseUrl = 'https://joblux.com'
   const langName = LANG_NAMES[params.lang] || params.lang
 
   const alternates: Record<string, string> = { en: `${baseUrl}/wikilux/${params.slug}` }

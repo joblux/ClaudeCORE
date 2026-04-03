@@ -179,7 +179,7 @@ export async function generateMetadata({
     robots: { index: false, follow: false },
     openGraph: {
       images: [
-        `https://www.luxuryrecruiter.com/api/og?title=${encodeURIComponent(name)}&subtitle=${encodeURIComponent(currentRole)}&type=page`,
+        `https://joblux.com/api/og?title=${encodeURIComponent(name)}&subtitle=${encodeURIComponent(currentRole)}&type=page`,
       ],
     },
   }

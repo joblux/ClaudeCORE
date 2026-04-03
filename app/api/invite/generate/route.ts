@@ -44,6 +44,6 @@ export async function GET() {
   }
 
   return NextResponse.json({
-    inviteUrl: `https://www.luxuryrecruiter.com/join?ref=${code}`,
+    inviteUrl: `https://joblux.com/join?ref=${code}`,
   });
 }
