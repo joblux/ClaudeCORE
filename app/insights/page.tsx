@@ -10,12 +10,12 @@ const supabase = createClient(
 )
 
 const placeholderArticles = [
-  { id: '1', category: 'LEADERSHIP', title: "Kering's creative director cycle | what it means for talent inside the group", excerpt: 'Three CD changes in 18 months. The downstream effects on teams, briefs, and hiring priorities across Gucci, Bottega, and Saint Laurent.', date: 'March 20, 2026', read_time: '6 min', slug: 'kering-creative-director-cycle' },
-  { id: '2', category: 'MARKET INTELLIGENCE', title: "Hard luxury's moment: why watches and jewelry are the growth story of 2026", excerpt: "Cartier, Van Cleef, and Tiffany are all expanding headcount while fashion and leather goods hold steady.", date: 'March 18, 2026', read_time: '5 min', slug: 'hard-luxury-growth-2026' },
-  { id: '3', category: 'CAREER INTELLIGENCE', title: "Dubai is becoming luxury's second headquarters | what that means for careers", excerpt: "Regional HQs, flagship openings, and a growing pool of international talent.", date: 'March 15, 2026', read_time: '7 min', slug: 'dubai-luxury-careers' },
-  { id: '4', category: 'SALARY', title: 'What Hermès really pays | from artisan to director', excerpt: "Based on 847 verified contributions, we map out the full compensation ladder.", date: 'March 12, 2026', read_time: '9 min', slug: 'hermes-salary-guide' },
-  { id: '5', category: 'CAREERS', title: 'How to get hired at Chanel without applying online', excerpt: "Chanel fills over 70% of senior roles through internal referrals and executive search.", date: 'March 10, 2026', read_time: '5 min', slug: 'hired-at-chanel' },
-  { id: '6', category: 'MARKET', title: 'LVMH vs Kering: which group offers better career progression?', excerpt: "We analysed 500+ career paths across both groups.", date: 'March 8, 2026', read_time: '8 min', slug: 'lvmh-vs-kering-careers' },
+  { id: '1', category: 'LEADERSHIP', title: "Kering's creative director cycle | what it means for talent inside the group", excerpt: 'Three CD changes in 18 months. The downstream effects on teams, briefs, and hiring priorities across Gucci, Bottega, and Saint Laurent.', date: 'March 20, 2026', read_time: '6 min', slug: 'kering-creative-director-cycle', cover_image_url: '' },
+  { id: '2', category: 'MARKET INTELLIGENCE', title: "Hard luxury's moment: why watches and jewelry are the growth story of 2026", excerpt: "Cartier, Van Cleef, and Tiffany are all expanding headcount while fashion and leather goods hold steady.", date: 'March 18, 2026', read_time: '5 min', slug: 'hard-luxury-growth-2026', cover_image_url: '' },
+  { id: '3', category: 'CAREER INTELLIGENCE', title: "Dubai is becoming luxury's second headquarters | what that means for careers", excerpt: "Regional HQs, flagship openings, and a growing pool of international talent.", date: 'March 15, 2026', read_time: '7 min', slug: 'dubai-luxury-careers', cover_image_url: '' },
+  { id: '4', category: 'SALARY', title: 'What Hermès really pays | from artisan to director', excerpt: "Based on 847 verified contributions, we map out the full compensation ladder.", date: 'March 12, 2026', read_time: '9 min', slug: 'hermes-salary-guide', cover_image_url: '' },
+  { id: '5', category: 'CAREERS', title: 'How to get hired at Chanel without applying online', excerpt: "Chanel fills over 70% of senior roles through internal referrals and executive search.", date: 'March 10, 2026', read_time: '5 min', slug: 'hired-at-chanel', cover_image_url: '' },
+  { id: '6', category: 'MARKET', title: 'LVMH vs Kering: which group offers better career progression?', excerpt: "We analysed 500+ career paths across both groups.", date: 'March 8, 2026', read_time: '8 min', slug: 'lvmh-vs-kering-careers', cover_image_url: '' },
 ]
 
 const placeholderReports = [
@@ -101,7 +101,7 @@ export default function InsightsPage() {
       // Editorial articles
       const { data: articleData } = await supabase
         .from('bloglux_articles')
-        .select('id, slug, title, excerpt, category, published_at, read_time_minutes')
+        .select('id, slug, title, excerpt, category, published_at, read_time_minutes, cover_image_url')
         .eq('status', 'published')
         .not('category', 'in', '("Research Report","Insider Voice")')
         .order('published_at', { ascending: false })
@@ -113,6 +113,7 @@ export default function InsightsPage() {
           category: (a.category || '').toUpperCase(),
           date: formatDate(a.published_at),
           read_time: a.read_time_minutes ? `${a.read_time_minutes} min` : '',
+          cover_image_url: a.cover_image_url || '',
         })))
       }
 
@@ -157,7 +158,7 @@ export default function InsightsPage() {
       // Most read sidebar
       const { data: recentData } = await supabase
         .from('bloglux_articles')
-        .select('id, slug, title, category, published_at')
+        .select('id, slug, title, category, published_at, cover_image_url')
         .eq('status', 'published')
         .order('published_at', { ascending: false })
         .limit(4)
@@ -168,6 +169,7 @@ export default function InsightsPage() {
           title: a.title,
           date: formatDate(a.published_at),
           slug: a.slug,
+          cover_image_url: a.cover_image_url || '',
         })))
       }
     }
@@ -216,7 +218,11 @@ export default function InsightsPage() {
               {/* Featured */}
               {featured && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 items-center">
-                  <div className="bg-[#222] border border-[#2a2a2a] rounded-xl h-72" />
+                  <div className="bg-[#222] border border-[#2a2a2a] rounded-xl h-72 overflow-hidden relative">
+                    {featured.cover_image_url ? (
+                      <img src={featured.cover_image_url} alt={featured.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : null}
+                  </div>
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       <div className="h-px w-5 bg-[#a58e28]" />
@@ -244,7 +250,11 @@ export default function InsightsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
                 {rest.map(article => (
                   <Link key={article.id} href={`/bloglux/${article.slug}`} className="group cursor-pointer">
-                    <div className="bg-[#222] border border-[#2a2a2a] rounded-lg h-44 mb-3" />
+                    <div className="bg-[#222] border border-[#2a2a2a] rounded-lg h-44 mb-3 overflow-hidden relative">
+                      {article.cover_image_url ? (
+                        <img src={article.cover_image_url} alt={article.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : null}
+                    </div>
                     <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-1">{article.category}</div>
                     <h3 className="text-sm font-normal text-[#e0e0e0] leading-snug mb-2 group-hover:text-white transition-colors" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
                       {article.title}
@@ -296,7 +306,11 @@ export default function InsightsPage() {
                 <div className="space-y-4">
                   {displayMostRead.map((a, i) => (
                     <Link key={i} href={`/bloglux/${a.slug}`} className="flex gap-3 pb-4 border-b border-[#222] last:border-b-0 cursor-pointer group">
-                      <div className="w-14 h-14 bg-[#222] border border-[#2a2a2a] rounded-md flex-shrink-0" />
+                      <div className="w-14 h-14 bg-[#222] border border-[#2a2a2a] rounded-md flex-shrink-0 overflow-hidden relative">
+                        {a.cover_image_url ? (
+                          <img src={a.cover_image_url} alt={a.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : null}
+                      </div>
                       <div>
                         <div className="text-[10px] text-[#a58e28] tracking-wider mb-1">{a.cat}</div>
                         <div className="text-xs text-[#ccc] leading-snug group-hover:text-white transition-colors">{a.title}</div>
