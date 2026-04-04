@@ -8,8 +8,10 @@ const CACHE_TTL = 30_000; // 30 seconds
 
 const MAINTENANCE_BYPASS = [
   "/holding",
-  "/auth/",
+  "/auth",
+  "/api/auth",
   "/api/",
+  "/admin",
   "/_next/",
   "/favicon.ico",
   "/images/",
@@ -52,7 +54,7 @@ const HOLDING_BYPASS = ["/holding", "/api", "/_next", "/logos", "/favicon"];
 
 export default withAuth(
   async function middleware(req) {
-    const { pathname } = req.nextUrl;
+    const { pathname, searchParams } = req.nextUrl;
     const host = req.headers.get("host") || "";
     const token = req.nextauth.token;
 
@@ -74,6 +76,22 @@ export default withAuth(
     // ) {
     //   return NextResponse.redirect(new URL("/holding", req.url));
     // }
+
+    // Prevent callbackUrl nesting — if the callbackUrl itself contains a callbackUrl, flatten it
+    if (pathname.startsWith("/auth") || pathname.startsWith("/api/auth")) {
+      const cb = searchParams.get("callbackUrl");
+      if (cb && cb.includes("callbackUrl")) {
+        try {
+          const inner = new URL(cb, req.url);
+          const deepCb = inner.searchParams.get("callbackUrl");
+          if (deepCb) {
+            const cleaned = new URL(req.url);
+            cleaned.searchParams.set("callbackUrl", deepCb);
+            return NextResponse.redirect(cleaned);
+          }
+        } catch { /* malformed URL, continue */ }
+      }
+    }
 
     // Check maintenance bypass paths
     if (!MAINTENANCE_BYPASS.some((p) => pathname.startsWith(p))) {
