@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+
+const TAB_SLUG_MAP: Record<string, string> = { 'salary-intelligence': 'salary', 'interview-experiences': 'interview' }
+const TAB_TO_SLUG: Record<string, string> = { 'assignments': '', 'salary': 'salary-intelligence', 'interview': 'interview-experiences' }
 
 interface Assignment {
   id: string
@@ -64,9 +68,14 @@ export default function CareersClient({
   interviews,
 }: CareersClientProps) {
   const { data: session } = useSession()
-  const [activeTab, setActiveTab] = useState('assignments')
+  const searchParams = useSearchParams()
+  const tabParam = searchParams.get('tab') || ''
+  const activeTab = TAB_SLUG_MAP[tabParam] || 'assignments'
   const [salarySubTab, setSalarySubTab] = useState('browse')
-  
+
+  // Reset salary sub-tab when switching to salary tab
+  useEffect(() => { if (activeTab === 'salary') setSalarySubTab('browse') }, [activeTab])
+
   // Contribution points state
   const [contributionPoints, setContributionPoints] = useState(0)
   const [isLoadingPoints, setIsLoadingPoints] = useState(true)
@@ -284,23 +293,25 @@ export default function CareersClient({
             { id: 'assignments', label: 'Assignments', count: String(assignments.length) },
             { id: 'salary', label: 'Salary intelligence', count: `${salaries.length} data points` },
             { id: 'interview', label: 'Interview prep', count: `${interviews.length} experiences` },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id)
-                if (tab.id === 'salary') setSalarySubTab('browse')
-              }}
-              className="pb-3 mr-8 text-sm relative transition-colors whitespace-nowrap"
-              style={{ color: activeTab === tab.id ? '#fff' : '#555' }}
-            >
-              {tab.label}
-              <span className="text-[11px] ml-1" style={{ color: '#444' }}>{tab.count}</span>
-              {activeTab === tab.id && (
-                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#1D9E75]" />
-              )}
-            </button>
-          ))}
+          ].map(tab => {
+            const tabSlug = TAB_TO_SLUG[tab.id]
+            const href = tabSlug ? `/careers?tab=${tabSlug}` : '/careers'
+            return (
+              <Link
+                key={tab.id}
+                href={href}
+                scroll={false}
+                className="pb-3 mr-8 text-sm relative transition-colors whitespace-nowrap"
+                style={{ color: activeTab === tab.id ? '#fff' : '#555' }}
+              >
+                {tab.label}
+                <span className="text-[11px] ml-1" style={{ color: '#444' }}>{tab.count}</span>
+                {activeTab === tab.id && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#1D9E75]" />
+                )}
+              </Link>
+            )
+          })}
         </div>
 
         {/* TAB 1: ASSIGNMENTS */}

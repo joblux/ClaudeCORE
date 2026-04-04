@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import CareersClient from './CareersClient'
 
@@ -9,7 +9,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export default function CareersPage() {
+function CareersPageInner() {
   const [assignments, setAssignments] = useState<any[]>([])
   const [salaries, setSalaries] = useState<any[]>([])
   const [interviews, setInterviews] = useState<any[]>([])
@@ -60,5 +60,13 @@ export default function CareersPage() {
       salaries={salaries}
       interviews={interviews}
     />
+  )
+}
+
+export default function CareersPage() {
+  return (
+    <Suspense>
+      <CareersPageInner />
+    </Suspense>
   )
 }
