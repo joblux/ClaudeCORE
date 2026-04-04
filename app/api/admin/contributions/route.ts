@@ -165,12 +165,12 @@ export async function POST(req: NextRequest) {
       .eq('id', id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    // If approved, promote to salary_benchmarks
+    // If approved, promote to salary_benchmarks (best-effort — do not roll back approval on failure)
     if (action === 'approve') {
       const { data: contrib } = await supabase.from('contributions').select('*').eq('id', id).maybeSingle()
       const { data: sal } = await supabase.from('salary_contributions').select('*').eq('contribution_id', id).maybeSingle()
       if (contrib && sal) {
-        await supabase.from('salary_benchmarks').insert({
+        const { error: benchErr } = await supabase.from('salary_benchmarks').insert({
           brand_name: contrib.brand_name,
           brand_slug: contrib.brand_slug,
           job_title: sal.job_title,
@@ -180,11 +180,19 @@ export async function POST(req: NextRequest) {
           country: sal.country,
           currency: sal.salary_currency || 'EUR',
           salary_min: sal.base_salary,
-          salary_max: sal.total_comp || sal.base_salary,
+          salary_max: sal.base_salary,
           salary_median: sal.base_salary,
+          bonus_min: sal.bonus_amount || null,
+          bonus_max: sal.bonus_amount || null,
+          total_comp_min: sal.total_comp || null,
+          total_comp_max: sal.total_comp || null,
+          year_of_data: sal.year_of_data || null,
           source: 'Member Contribution',
           content_origin: 'contributed',
+          is_published: true,
+          created_at: now,
         })
+        if (benchErr) console.error('salary_benchmarks promotion failed:', benchErr.message)
       }
     }
     return NextResponse.json({ ok: true })
