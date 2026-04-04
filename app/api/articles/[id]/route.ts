@@ -46,7 +46,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     .update(updateData)
     .eq("id", params.id)
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 

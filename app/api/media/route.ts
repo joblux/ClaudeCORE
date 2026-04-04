@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
         mime_type: file.type,
       })
       .select()
-      .single()
+      .maybeSingle()
 
     if (insertError) {
       return NextResponse.json(
@@ -167,7 +167,7 @@ export async function PUT(request: NextRequest) {
       .update(updateData)
       .eq('id', id)
       .select()
-      .single()
+      .maybeSingle()
 
     if (error) {
       return NextResponse.json(
@@ -215,7 +215,7 @@ export async function DELETE(request: NextRequest) {
       .from('media_library')
       .select('file_url')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (fetchError || !media) {
       return NextResponse.json(

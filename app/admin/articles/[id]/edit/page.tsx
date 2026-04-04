@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useRequireAdmin } from '@/lib/auth-hooks'
+import dynamic from 'next/dynamic'
+import MediaLibraryModal from '@/components/admin/MediaLibraryModal'
+
+const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor'), { ssr: false })
 
 const CATEGORIES = [
   { value: 'industry-news', label: 'Industry News' },
@@ -23,6 +27,7 @@ export default function EditArticlePage() {
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [coverModalOpen, setCoverModalOpen] = useState(false)
   const [form, setForm] = useState({
     title: '',
     category: 'bloglux',
@@ -62,7 +67,8 @@ export default function EditArticlePage() {
   }
 
   const handleSave = async (publish: boolean) => {
-    if (!form.title.trim() || !form.content.trim()) return
+    const plainContent = form.content.replace(/<[^>]*>/g, '').trim()
+    if (!form.title.trim() || !plainContent) return
     setSaving(true)
     const tags = form.tags.split(',').map((t) => t.trim()).filter(Boolean)
     const res = await fetch(`/api/articles/${id}`, {
@@ -160,23 +166,39 @@ export default function EditArticlePage() {
 
         <div style={{ marginBottom: 24 }}>
           <label style={{ display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#666', marginBottom: 6 }}>Cover Image URL (optional)</label>
-          <input
-            type="text"
-            value={form.cover_image}
-            onChange={(e) => handleChange('cover_image', e.target.value)}
-            placeholder="https://..."
-            style={{ width: '100%', padding: '10px 12px', fontSize: 14, border: '1px solid #e8e8e8', outline: 'none', color: '#1a1a1a' }}
-          />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input
+              type="text"
+              value={form.cover_image}
+              onChange={(e) => handleChange('cover_image', e.target.value)}
+              placeholder="https://..."
+              style={{ flex: 1, padding: '10px 12px', fontSize: 14, border: '1px solid #e8e8e8', outline: 'none', color: '#1a1a1a' }}
+            />
+            <button
+              onClick={() => setCoverModalOpen(true)}
+              type="button"
+              style={{
+                padding: '10px 16px', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em',
+                textTransform: 'uppercase' as const, border: '1px solid #1a1a1a',
+                background: '#fff', color: '#1a1a1a', cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              Browse Library
+            </button>
+          </div>
+          {form.cover_image && (
+            <div style={{ marginTop: 8 }}>
+              <img src={form.cover_image} alt="Cover preview" style={{ maxHeight: 120, borderRadius: 4, border: '1px solid #e8e8e8' }} />
+            </div>
+          )}
         </div>
 
         <div style={{ marginBottom: 24 }}>
           <label style={{ display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#666', marginBottom: 6 }}>Content</label>
-          <textarea
-            value={form.content}
-            onChange={(e) => handleChange('content', e.target.value)}
-            rows={20}
-            placeholder="Write your article here. Use blank lines between paragraphs."
-            style={{ width: '100%', padding: '16px', fontSize: 15, lineHeight: 1.8, border: '1px solid #e8e8e8', outline: 'none', resize: 'vertical', color: '#333', fontFamily: 'Inter, system-ui, sans-serif' }}
+          <RichTextEditor
+            content={form.content}
+            onChange={(html) => handleChange('content', html)}
+            placeholder="Write your article here..."
           />
         </div>
 
@@ -196,7 +218,7 @@ export default function EditArticlePage() {
           <div style={{ display: 'flex', gap: 12 }}>
             <button
               onClick={() => handleSave(false)}
-              disabled={saving || !form.title.trim() || !form.content.trim()}
+              disabled={saving || !form.title.trim()}
               style={{
                 padding: '10px 24px', fontSize: 11, fontWeight: 600, letterSpacing: '0.1em',
                 textTransform: 'uppercase' as const, border: '1px solid #1a1a1a',
@@ -207,7 +229,7 @@ export default function EditArticlePage() {
             </button>
             <button
               onClick={() => handleSave(true)}
-              disabled={saving || !form.title.trim() || !form.content.trim()}
+              disabled={saving || !form.title.trim()}
               style={{
                 padding: '10px 24px', fontSize: 11, fontWeight: 600, letterSpacing: '0.1em',
                 textTransform: 'uppercase' as const, border: 'none',
@@ -219,6 +241,12 @@ export default function EditArticlePage() {
           </div>
         </div>
       </div>
+
+      <MediaLibraryModal
+        open={coverModalOpen}
+        onClose={() => setCoverModalOpen(false)}
+        onSelect={(url) => handleChange('cover_image', url)}
+      />
     </div>
   )
 }

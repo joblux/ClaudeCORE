@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useRequireAdmin } from '@/lib/auth-hooks'
 import sanitizeHtml from 'sanitize-html'
 import dynamic from 'next/dynamic'
+import MediaLibraryModal from '@/components/admin/MediaLibraryModal'
 
 const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor'), { ssr: false })
 
@@ -69,6 +70,7 @@ export default function NewArticlePage() {
   const [csvRows, setCsvRows] = useState<CsvRow[]>([])
   const [csvImporting, setCsvImporting] = useState(false)
   const [bulkResult, setBulkResult] = useState<{ imported: number; errors: string[] } | null>(null)
+  const [coverModalOpen, setCoverModalOpen] = useState(false)
   const wpFileRef = useRef<HTMLInputElement>(null)
   const csvFileRef = useRef<HTMLInputElement>(null)
   const mdFileRef = useRef<HTMLInputElement>(null)
@@ -697,7 +699,25 @@ export default function NewArticlePage() {
 
         <div style={{ marginBottom: 24 }}>
           <label style={LABEL}>Cover Image URL (optional)</label>
-          <input type="text" value={form.cover_image} onChange={(e) => handleChange('cover_image', e.target.value)} placeholder="https://..." style={INPUT} />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input type="text" value={form.cover_image} onChange={(e) => handleChange('cover_image', e.target.value)} placeholder="https://..." style={{ ...INPUT, flex: 1 }} />
+            <button
+              onClick={() => setCoverModalOpen(true)}
+              type="button"
+              style={{
+                padding: '10px 16px', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em',
+                textTransform: 'uppercase' as const, border: '1px solid #1a1a1a',
+                background: '#fff', color: '#1a1a1a', cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              Browse Library
+            </button>
+          </div>
+          {form.cover_image && (
+            <div style={{ marginTop: 8 }}>
+              <img src={form.cover_image} alt="Cover preview" style={{ maxHeight: 120, borderRadius: 4, border: '1px solid #e8e2d8' }} />
+            </div>
+          )}
         </div>
 
         <div style={{ marginBottom: 24 }}>
@@ -730,6 +750,12 @@ export default function NewArticlePage() {
           </div>
         </div>
       </div>
+
+      <MediaLibraryModal
+        open={coverModalOpen}
+        onClose={() => setCoverModalOpen(false)}
+        onSelect={(url) => { handleChange('cover_image', url); handleChange('hero_image_url', url) }}
+      />
     </div>
   )
 }
