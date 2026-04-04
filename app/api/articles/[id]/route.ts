@@ -51,6 +51,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   revalidatePath('/bloglux');
+  revalidatePath('/insights');
   revalidatePath('/');
 
   return NextResponse.json({ article: data });
@@ -70,6 +71,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   revalidatePath('/bloglux');
+  revalidatePath('/insights');
   revalidatePath('/');
 
   return NextResponse.json({ success: true });
