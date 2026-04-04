@@ -41,7 +41,8 @@ const navItems = [
   ]},
   { section: 'CONTRIBUTE', items: [
     { label: 'Write a perspective', id: 'write-voice' },
-    { label: 'Add data', id: 'add-data' },
+    { label: 'Submit salary data', id: 'submit-salary' },
+    { label: 'Flag correction', id: 'submit-correction' },
   ]},
   { section: 'INTELLIGENCE', items: [
     { label: 'Signals', id: 'signals-link' },
@@ -355,7 +356,8 @@ export default function InsiderDashboard() {
     if (activeNav === 'signals-link') { window.location.href = '/signals'; return }
     if (activeNav === 'brands-link') { window.location.href = '/brands'; return }
     if (activeNav === 'events-link') { window.location.href = '/events'; return }
-    if (activeNav === 'add-data') { window.location.href = '/contribute'; return }
+    if (activeNav === 'submit-salary') { window.location.href = '/dashboard/insider/submit-salary'; return }
+    if (activeNav === 'submit-correction') { window.location.href = '/dashboard/insider/submit-correction'; return }
   }, [activeNav])
 
   const approvedCount = contributions.filter(c => c.status === 'approved').length
@@ -382,18 +384,19 @@ export default function InsiderDashboard() {
           {navItems.map(section => (
             <div key={section.section} style={{ marginBottom: 14 }}>
               <div style={{ fontSize: 10, fontWeight: 600, color: '#555', letterSpacing: '1.5px', padding: '6px 8px 4px' }}>{section.section}</div>
-              {section.items.map(item => (
+              {section.items.map(item => {
+                const isContribute = ['write-voice', 'submit-salary', 'submit-correction'].includes(item.id)
+                const icons: Record<string, string> = { 'write-voice': '✍ ', 'submit-salary': '💰 ', 'submit-correction': '🔍 ' }
+                return (
                 <button key={item.id} onClick={() => setActiveNav(item.id)} style={{
                   display: 'block', width: '100%', textAlign: 'left', padding: '7px 8px', borderRadius: 4, border: 'none', cursor: 'pointer', fontSize: 13,
                   background: activeNav === item.id ? '#1e1e1e' : 'transparent',
-                  color: item.id === 'write-voice'
-                    ? (activeNav === item.id ? '#a58e28' : '#a58e28')
-                    : (activeNav === item.id ? '#fff' : '#999'),
-                  fontWeight: item.id === 'write-voice' ? 500 : 400,
+                  color: isContribute ? '#a58e28' : (activeNav === item.id ? '#fff' : '#999'),
+                  fontWeight: isContribute ? 500 : 400,
                 }}>
-                  {item.id === 'write-voice' ? '✍ ' : ''}{item.label}
-                </button>
-              ))}
+                  {icons[item.id] || ''}{item.label}
+                </button>)
+              })}
             </div>
           ))}
         </nav>

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,33 +9,40 @@ const supabase = createClient(
 )
 
 export async function POST(request: Request) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user) {
+    return NextResponse.json({ success: false, message: 'Not authenticated' }, { status: 401 })
+  }
+
+  const user = session.user as any
+  const memberId = user.memberId
+  const memberStatus = user.status
+
+  if (!memberId || memberStatus !== 'approved') {
+    return NextResponse.json({ success: false, message: 'You must be an approved member to contribute' }, { status: 403 })
+  }
+
+  // Get contributor name and email from member record
+  const { data: member } = await supabase
+    .from('members')
+    .select('email, first_name, last_name, full_name')
+    .eq('id', memberId)
+    .single()
+
+  if (!member?.email) {
+    return NextResponse.json({ success: false, message: 'Member record not found' }, { status: 500 })
+  }
+
+  const contributorName = member.full_name || [member.first_name, member.last_name].filter(Boolean).join(' ') || 'JOBLUX Member'
+  const contributorEmail = member.email
+
   try {
     const body = await request.json()
-    const {
-      brand_slug,
-      user_id,
-      contributor_name,
-      contributor_email,
-      issue_description,
-      suggested_correction,
-      source_url
-    } = body
+    const { brand_slug, issue_description, suggested_correction, source_url } = body
 
     // Validate required fields
-    if (!brand_slug || !contributor_name || !contributor_email || !issue_description || !suggested_correction) {
-      return NextResponse.json({
-        success: false,
-        message: 'Missing required fields'
-      }, { status: 400 })
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(contributor_email)) {
-      return NextResponse.json({
-        success: false,
-        message: 'Invalid email address'
-      }, { status: 400 })
+    if (!brand_slug || !issue_description || !suggested_correction) {
+      return NextResponse.json({ success: false, message: 'Missing required fields' }, { status: 400 })
     }
 
     // Insert contribution
@@ -41,31 +50,20 @@ export async function POST(request: Request) {
       .from('brand_contributions')
       .insert({
         brand_slug,
-        user_id: user_id || null,
-        contributor_name,
-        contributor_email,
+        user_id: memberId,
+        contributor_name: contributorName,
+        contributor_email: contributorEmail,
         issue_description,
         suggested_correction,
         source_url: source_url || null,
-        status: 'pending',
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       })
 
     if (error) throw error
 
-    // Send email notification to admin (optional - implement SES if needed)
-    // await sendAdminNotification(...)
-
-    return NextResponse.json({
-      success: true,
-      message: 'Contribution submitted successfully'
-    })
-
+    return NextResponse.json({ success: true, message: 'Correction submitted successfully' })
   } catch (error: any) {
-    console.error('Contribution submission error:', error)
-    return NextResponse.json({
-      success: false,
-      message: error.message || 'Internal server error'
-    }, { status: 500 })
+    console.error('Brand correction submission error:', error)
+    return NextResponse.json({ success: false, message: error.message || 'Internal server error' }, { status: 500 })
   }
 }
