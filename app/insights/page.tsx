@@ -260,7 +260,11 @@ function InsightsPageInner() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
                 {rest.map(article => (
                   <Link key={article.id} href={`/insights/${article.slug}`} className="group cursor-pointer">
-                    <div className="bg-[#222] border border-[#2a2a2a] rounded-lg h-44 mb-3" />
+                    <div className="bg-[#222] border border-[#2a2a2a] rounded-lg h-44 mb-3 overflow-hidden relative">
+                      {article.cover_image_url && (
+                        <img src={article.cover_image_url} alt={article.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                      )}
+                    </div>
                     <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-1">{article.category}</div>
                     <h3 className="text-sm font-normal text-[#e0e0e0] leading-snug mb-2 group-hover:text-white transition-colors" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
                       {article.title}
