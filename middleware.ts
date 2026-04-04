@@ -8,6 +8,7 @@ const CACHE_TTL = 30_000; // 30 seconds
 
 const MAINTENANCE_BYPASS = [
   "/offline",
+  "/auth/",
   "/api/",
   "/_next/",
   "/favicon.ico",
