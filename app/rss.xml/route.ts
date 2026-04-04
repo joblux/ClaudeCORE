@@ -20,8 +20,8 @@ export async function GET() {
   const items = (articles || []).map((a) => `
     <item>
       <title><![CDATA[${a.title}]]></title>
-      <link>${baseUrl}/bloglux/${a.slug}</link>
-      <guid isPermaLink="true">${baseUrl}/bloglux/${a.slug}</guid>
+      <link>${baseUrl}/insights/${a.slug}</link>
+      <guid isPermaLink="true">${baseUrl}/insights/${a.slug}</guid>
       <description><![CDATA[${a.meta_description || a.excerpt || ''}]]></description>
       <category>${escapeXml(a.category || '')}</category>
       <author>${escapeXml(a.author_name || 'JOBLUX')}</author>
@@ -33,7 +33,7 @@ export async function GET() {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
     <title>JOBLUX Intelligence</title>
-    <link>${baseUrl}/bloglux</link>
+    <link>${baseUrl}/insights</link>
     <description>Intelligence, analysis, and insights for luxury industry professionals. Careers, salaries, brand profiles, and market trends.</description>
     <language>en</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>

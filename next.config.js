@@ -25,6 +25,7 @@ const nextConfig = {
       { source: '/jobs/:path*', destination: '/careers/:path*', permanent: true },
       { source: '/wikilux', destination: '/brands', permanent: true },
       { source: '/wikilux/:slug*', destination: '/brands/:slug*', permanent: true },
+      { source: '/bloglux/:slug*', destination: '/insights/:slug*', permanent: true },
       { source: '/salaries', destination: '/careers', permanent: true },
     ]
   },

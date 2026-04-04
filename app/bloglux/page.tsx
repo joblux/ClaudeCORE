@@ -9,7 +9,7 @@ export const revalidate = 0
 export const metadata: Metadata = {
   title: 'Insights | Luxury Industry Analysis | JOBLUX',
   description: 'Expert analysis, career insights, and industry intelligence from across the luxury sector.',
-  alternates: { canonical: 'https://www.joblux.com/bloglux' },
+  alternates: { canonical: 'https://www.joblux.com/insights' },
   openGraph: {
     title: 'Insights | JOBLUX',
     description: 'Expert analysis, career insights, and industry intelligence from across the luxury sector.',

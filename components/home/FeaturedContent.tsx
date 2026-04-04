@@ -91,7 +91,7 @@ export async function FeaturedArticle() {
       <div className="flex flex-col justify-center">
         <div className="jl-overline-gold mb-2">{lead.category}</div>
         <h2 className="jl-serif text-2xl font-light text-[#1a1a1a] leading-snug mb-2 hover:text-[#a58e28] transition-colors">
-          <Link href={`/bloglux/${lead.slug}`}>{lead.title}</Link>
+          <Link href={`/insights/${lead.slug}`}>{lead.title}</Link>
         </h2>
         {lead.excerpt && (
           <p className="font-sans text-sm text-[#666] leading-relaxed mb-2">
@@ -123,7 +123,7 @@ export async function ArticleList() {
             <div className="flex-1">
               <div className="jl-overline-gold mb-1">{article.category}</div>
               <h3 className="jl-serif text-base font-light text-[#1a1a1a] leading-snug mb-1 hover:text-[#a58e28] transition-colors">
-                <Link href={`/bloglux/${article.slug}`}>{article.title}</Link>
+                <Link href={`/insights/${article.slug}`}>{article.title}</Link>
               </h3>
               <div className="jl-overline">
                 {formatDate(article.published_at)}

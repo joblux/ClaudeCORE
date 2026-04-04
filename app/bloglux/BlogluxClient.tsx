@@ -107,7 +107,7 @@ export default function BlogluxClient({ initialArticles }: { initialArticles: Ar
             {/* Featured hero section */}
             {featuredArticle && (
               <Link
-                href={`/bloglux/${featuredArticle.slug}`}
+                href={`/insights/${featuredArticle.slug}`}
                 className="block mb-10 group"
               >
                 <div className="relative w-full aspect-[4/3] md:aspect-[16/7] overflow-hidden rounded-lg">
@@ -158,7 +158,7 @@ export default function BlogluxClient({ initialArticles }: { initialArticles: Ar
                 {remainingArticles.map((article) => (
                   <Link
                     key={article.id}
-                    href={`/bloglux/${article.slug}`}
+                    href={`/insights/${article.slug}`}
                     className="jl-card group flex flex-col overflow-hidden"
                   >
                     {/* Thumbnail */}
