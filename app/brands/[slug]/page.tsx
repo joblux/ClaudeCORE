@@ -646,7 +646,7 @@ export default function BrandDetailPage() {
                       SALARY INTELLIGENCE AT {brand.name.toUpperCase()}
                     </p>
                     <p className="text-[13px] text-[#777]">
-                      AI-estimated ranges · Updated {brand.salary_data.updated_quarter || 'Q1 2026'} · Based on market data &amp; industry benchmarks
+                      AI estimates + verified contributions · Updated {brand.salary_data.updated_quarter || 'Q1 2026'}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -675,7 +675,7 @@ export default function BrandDetailPage() {
                 {/* Stats bar */}
                 <div className="flex gap-6 mb-7 p-4 bg-[#222] rounded-xl">
                   <div className="flex-1 text-center">
-                    <p className="text-xl font-medium text-white">{brand.salary_data.roles.length}</p>
+                    <p className="text-xl font-medium text-white">{brand.salary_data.roles.length + (brand.liveSalaryRows?.length || 0)}</p>
                     <p className="text-[11px] text-[#777] mt-1">Roles mapped</p>
                   </div>
                   <div className="w-px bg-[#2a2a2a]" />
@@ -686,18 +686,20 @@ export default function BrandDetailPage() {
                   <div className="w-px bg-[#2a2a2a]" />
                   <div className="flex-1 text-center">
                     <p className="text-xl font-medium text-white">{brand.liveSalaryRows?.length || 0}</p>
-                    <p className="text-[11px] text-[#777] mt-1">Contributions</p>
+                    <p className="text-[11px] text-[#777] mt-1">Verified</p>
                   </div>
                   <div className="w-px bg-[#2a2a2a]" />
                   <div className="flex-1 text-center">
-                    <p className="text-xl font-medium text-[#a58e28]">AI</p>
-                    <p className="text-[11px] text-[#777] mt-1">Data source</p>
+                    <p className="text-xl font-medium text-white">{brand.salary_data.roles.length}</p>
+                    <p className="text-[11px] text-[#777] mt-1">AI estimated</p>
                   </div>
                 </div>
 
                 {/* Department filters */}
                 {(() => {
-                  const departments: string[] = ['All', ...Array.from(new Set(brand.salary_data.roles.map((r: any) => r.department) as string[]))];
+                  const aiDepts = brand.salary_data.roles.map((r: any) => r.department) as string[];
+                  const contribDepts = (brand.liveSalaryRows || []).map((r: any) => r.department).filter(Boolean) as string[];
+                  const departments: string[] = ['All', ...Array.from(new Set([...aiDepts, ...contribDepts]))];
                   return (
                     <div className="flex gap-2 mb-6 flex-wrap">
                       {departments.map((d: string) => (
@@ -771,6 +773,32 @@ export default function BrandDetailPage() {
                           </span>
                           <span className="text-[13px] font-medium text-[#a58e28] text-right">{rangeStr}</span>
                           <span className="text-[12px] text-[#777] text-right">AI est.</span>
+                        </div>
+                      );
+                    })}
+
+                  {/* Contributed rows merged into the same table */}
+                  {(brand.liveSalaryRows || [])
+                    .filter((r: any) => salaryDept === 'All' || r.department === salaryDept)
+                    .map((row: any) => {
+                      const sym: Record<string, string> = { EUR: '€', GBP: '£', USD: '$', AED: 'AED ', CHF: 'CHF ', SGD: 'SGD ', HKD: 'HKD ', JPY: '¥', CNY: '¥' };
+                      const c = row.currency || 'EUR';
+                      const s = sym[c] || c + ' ';
+                      const min = row.salary_min ? Math.round(row.salary_min / 1000) : '?';
+                      const max = row.salary_max ? Math.round(row.salary_max / 1000) : '?';
+                      return (
+                        <div
+                          key={`contrib-${row.id}`}
+                          className="grid gap-0 px-4 py-3.5 border-b border-[#1e1e1e] items-center last:border-b-0"
+                          style={{ gridTemplateColumns: '2fr 1fr 90px 1fr 70px' }}
+                        >
+                          <span className="text-[13px] text-[#ccc]">{row.job_title}</span>
+                          <span className="text-[12px] text-[#888]">{row.department || '—'}</span>
+                          <span className="text-[11px] px-2 py-0.5 rounded-full w-fit" style={{ color: '#888', background: '#88815' }}>
+                            {row.seniority || '—'}
+                          </span>
+                          <span className="text-[13px] font-medium text-[#a58e28] text-right">{s}{min}K – {s}{max}K</span>
+                          <span className="text-[11px] text-[#1D9E75] text-right font-medium">Verified</span>
                         </div>
                       );
                     })}
@@ -893,38 +921,6 @@ export default function BrandDetailPage() {
                   </div>
                 )}
 
-                {/* Contributed salary data from salary_benchmarks */}
-                {brand.liveSalaryRows && brand.liveSalaryRows.length > 0 && (
-                  <div className="mt-8">
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">CONTRIBUTED DATA</span>
-                      <div className="flex-1 h-px bg-[#2a2a2a]" />
-                      <span className="text-[11px] text-[#777]">{brand.liveSalaryRows.length} verified {brand.liveSalaryRows.length === 1 ? 'contribution' : 'contributions'}</span>
-                    </div>
-                    {brand.liveSalaryRows.slice(0, 8).map((row: any) => (
-                      <div key={row.id} className="bg-[#222] rounded-xl p-5 border border-[#2a2a2a] mb-3">
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <h3 className="text-sm text-white font-medium mb-1">{row.job_title}</h3>
-                            <p className="text-xs text-[#999]">
-                              {[row.department, row.seniority, `${row.city}, ${row.country}`].filter(Boolean).join(' · ')}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm text-[#a58e28] font-medium">
-                              {row.currency || 'EUR'} {row.salary_min?.toLocaleString()} – {row.salary_max?.toLocaleString()}
-                            </div>
-                            {row.salary_median ? (
-                              <div className="text-xs text-[#777] mt-1">
-                                Median: {row.currency || 'EUR'} {row.salary_median.toLocaleString()}
-                              </div>
-                            ) : null}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </>
             ) : brand.liveSalaryRows && brand.liveSalaryRows.length > 0 ? (
               <div className="space-y-4">
