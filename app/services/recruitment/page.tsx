@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: 'Confidential Executive Search for Luxury | JOBLUX',
   description: 'An international boutique executive search firm. Twenty years. Forty markets. One industry. Private executive search with full discretion.',
   alternates: { canonical: 'https://www.joblux.com/services/recruitment' },
+  robots: 'noindex, nofollow',
   openGraph: {
     title: 'Confidential Executive Search | JOBLUX',
     description: 'Private executive search for the luxury market. Full discretion at every stage.',
@@ -22,7 +23,7 @@ export default function RecruitmentPage() {
           <div className="max-w-[760px]">
             <p className="text-[0.6rem] tracking-[3px] uppercase text-[#a58e28] mb-5">Confidential Recruitment</p>
             <h1 className="text-4xl lg:text-5xl font-light text-white leading-tight mb-6" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-              Private executive search<br />for the luxury market
+              Manager &amp; executives<br />search services
             </h1>
             <p className="text-sm text-[#999] leading-relaxed max-w-xl">
               We find, approach, and present the right candidates | with full discretion at every stage. No job boards. No noise. One placement at a time.

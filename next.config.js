@@ -29,6 +29,7 @@ const nextConfig = {
       { source: '/salaries', destination: '/careers', permanent: true },
       { source: '/bloglux', destination: '/insights', permanent: true },
       { source: '/bloglux/:slug*', destination: '/insights/:slug*', permanent: true },
+      { source: '/services', destination: '/', permanent: true },
     ]
   },
   async headers() {

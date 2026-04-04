@@ -35,7 +35,7 @@ export function Footer() {
           {/* Col 3 — Services + Escape */}
           <div>
             <h4 style={{ fontSize: 10, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#5f5f5f', marginBottom: 18 }}>Services</h4>
-            <Link href="/services" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Executive search</Link>
+            <Link href="/services/recruitment" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Talent Search</Link>
             <Link href="/contribute" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Contribute data</Link>
             <Link href="/connect" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Request access</Link>
 
