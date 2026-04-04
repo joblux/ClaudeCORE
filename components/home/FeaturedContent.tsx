@@ -136,7 +136,7 @@ export async function ArticleList() {
           </div>
         ))}
       </div>
-      <Link href="/bloglux" className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors">
+      <Link href="/insights" className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors">
         More intelligence →
       </Link>
     </div>

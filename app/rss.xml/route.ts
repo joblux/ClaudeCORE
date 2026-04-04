@@ -8,9 +8,9 @@ export async function GET() {
   )
 
   const { data: articles } = await supabase
-    .from('articles')
-    .select('title, slug, meta_description, excerpt, category, author_name, created_at, updated_at, hero_image_url, published_at')
-    .eq('published', true)
+    .from('bloglux_articles')
+    .select('title, slug, meta_description, excerpt, category, author_name, created_at, updated_at, cover_image_url, published_at')
+    .eq('status', 'published')
     .order('published_at', { ascending: false })
     .limit(50)
 
@@ -25,15 +25,15 @@ export async function GET() {
       <description><![CDATA[${a.meta_description || a.excerpt || ''}]]></description>
       <category>${escapeXml(a.category || '')}</category>
       <author>${escapeXml(a.author_name || 'JOBLUX')}</author>
-      <pubDate>${new Date(a.published_at || a.created_at).toUTCString()}</pubDate>${a.hero_image_url ? `
-      <enclosure url="${escapeXml(a.hero_image_url)}" type="image/jpeg"/>` : ''}
+      <pubDate>${new Date(a.published_at || a.created_at).toUTCString()}</pubDate>${a.cover_image_url ? `
+      <enclosure url="${escapeXml(a.cover_image_url)}" type="image/jpeg"/>` : ''}
     </item>`).join('')
 
   const feed = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
     <title>JOBLUX Intelligence</title>
-    <link>${baseUrl}/bloglux</link>
+    <link>${baseUrl}/insights</link>
     <description>Intelligence, analysis, and insights for luxury industry professionals. Careers, salaries, brand profiles, and market trends.</description>
     <language>en</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
