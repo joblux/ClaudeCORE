@@ -46,6 +46,13 @@ export default async function BlogluxPage() {
     views_count: null,
   }))
 
+  if (articles.length > 0) {
+    console.log('FIRST ARTICLE:', JSON.stringify(articles[0]))
+  }
+  if (data && data.length > 0) {
+    console.log('RAW FIRST ROW cover_image_url:', data[0].cover_image_url)
+  }
+
   return (
     <Suspense>
       <BlogluxClient initialArticles={articles} />
