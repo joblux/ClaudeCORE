@@ -2,7 +2,6 @@
 
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { BLOGLUX_CATEGORIES, getCategoryLabel } from '@/lib/bloglux-options'
 
 export interface Article {
@@ -113,12 +112,10 @@ export default function BlogluxClient({ initialArticles }: { initialArticles: Ar
                 <div className="relative w-full aspect-[4/3] md:aspect-[16/7] overflow-hidden rounded-lg">
                   {featuredArticle.hero_image_url ? (
                     <>
-                      <Image
+                      <img
                         src={featuredArticle.hero_image_url}
                         alt={featuredArticle.hero_image_alt || featuredArticle.title}
-                        fill
-                        className="object-cover"
-                        priority
+                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                       <div className="absolute inset-0 bg-black/45" />
                     </>
@@ -168,11 +165,11 @@ export default function BlogluxClient({ initialArticles }: { initialArticles: Ar
                     {/* Thumbnail */}
                     <div className="relative w-full aspect-[16/9] overflow-hidden mb-4">
                       {article.hero_image_url ? (
-                        <Image
+                        <img
                           src={article.hero_image_url}
                           alt={article.hero_image_alt || article.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s' }}
+                          className="group-hover:scale-105"
                         />
                       ) : (
                         <div className="absolute inset-0 bg-[#f5f0e8] flex items-center justify-center">
