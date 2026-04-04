@@ -6,7 +6,8 @@ import { useSession } from 'next-auth/react'
 import { BRANDS } from '@/lib/wikilux-brands'
 
 const CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'AED', 'SGD', 'HKD', 'JPY', 'CNY']
-const SENIORITY_LEVELS = ['Junior', 'Mid-level', 'Senior', 'Manager', 'Director', 'VP', 'C-Suite']
+const SENIORITY_LEVELS = ['Intern', 'Junior', 'Mid-level', 'Senior', 'Director', 'VP', 'C-Suite']
+const SENIORITY_DB: Record<string, string> = { 'Intern': 'intern', 'Junior': 'junior', 'Mid-level': 'mid-level', 'Senior': 'senior', 'Director': 'director', 'VP': 'vp', 'C-Suite': 'c-suite' }
 const EMPLOYMENT_TYPES = ['Permanent', 'Fixed-term', 'Freelance', 'Interim']
 const EMPLOYMENT_TYPE_DB: Record<string, string> = { 'Permanent': 'permanent', 'Fixed-term': 'fixed-term', 'Freelance': 'freelance', 'Interim': 'interim' }
 const DEPARTMENTS = ['Retail', 'Marketing', 'Digital', 'Merchandising', 'Finance', 'HR', 'Operations', 'Design', 'Communications', 'Supply chain', 'E-commerce', 'Legal', 'IT', 'Other']
@@ -61,7 +62,7 @@ export default function SubmitSalaryPage() {
           data: {
             job_title: form.job_title,
             department: form.department || null,
-            seniority: form.seniority || null,
+            seniority: SENIORITY_DB[form.seniority] || null,
             city: form.city,
             country: form.country,
             base_salary: form.base_salary,
