@@ -171,6 +171,7 @@ export async function POST(req: NextRequest) {
       const { data: sal } = await supabase.from('salary_contributions').select('*').eq('contribution_id', id).maybeSingle()
       if (contrib && sal) {
         const { error: benchErr } = await supabase.from('salary_benchmarks').insert({
+          contribution_id: id,
           brand_name: contrib.brand_name,
           brand_slug: contrib.brand_slug,
           job_title: sal.job_title,
@@ -195,6 +196,16 @@ export async function POST(req: NextRequest) {
         if (benchErr) console.error('salary_benchmarks promotion failed:', benchErr.message)
       }
     }
+
+    // If rejecting a previously-approved contribution, remove the promoted benchmark row
+    if (action === 'reject') {
+      const { error: delErr } = await supabase
+        .from('salary_benchmarks')
+        .delete()
+        .eq('contribution_id', id)
+      if (delErr) console.error('salary_benchmarks rollback failed:', delErr.message)
+    }
+
     return NextResponse.json({ ok: true })
   }
 
