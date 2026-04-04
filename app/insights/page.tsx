@@ -316,7 +316,11 @@ function InsightsPageInner() {
                 <div className="space-y-4">
                   {displayMostRead.map((a, i) => (
                     <Link key={i} href={`/insights/${a.slug}`} className="flex gap-3 pb-4 border-b border-[#222] last:border-b-0 cursor-pointer group">
-                      <div className="w-14 h-14 bg-[#222] border border-[#2a2a2a] rounded-md flex-shrink-0" />
+                      <div className="w-14 h-14 bg-[#222] border border-[#2a2a2a] rounded-md flex-shrink-0 overflow-hidden relative">
+                        {a.cover_image_url && (
+                          <img src={a.cover_image_url} alt={a.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                        )}
+                      </div>
                       <div>
                         <div className="text-[10px] text-[#a58e28] tracking-wider mb-1">{a.cat}</div>
                         <div className="text-xs text-[#ccc] leading-snug group-hover:text-white transition-colors">{a.title}</div>
