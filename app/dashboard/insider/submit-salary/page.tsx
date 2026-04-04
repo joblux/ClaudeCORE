@@ -8,6 +8,7 @@ import { BRANDS } from '@/lib/wikilux-brands'
 const CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'AED', 'SGD', 'HKD', 'JPY', 'CNY']
 const SENIORITY_LEVELS = ['Junior', 'Mid-level', 'Senior', 'Manager', 'Director', 'VP', 'C-Suite']
 const EMPLOYMENT_TYPES = ['Full-time', 'Part-time', 'Contract', 'Freelance', 'Internship']
+const EMPLOYMENT_TYPE_DB: Record<string, string> = { 'Full-time': 'full_time', 'Part-time': 'part_time', 'Contract': 'contract', 'Freelance': 'freelance', 'Internship': 'internship' }
 const DEPARTMENTS = ['Retail', 'Marketing', 'Digital', 'Merchandising', 'Finance', 'HR', 'Operations', 'Design', 'Communications', 'Supply chain', 'E-commerce', 'Legal', 'IT', 'Other']
 
 const sortedBrands = [...BRANDS].sort((a, b) => a.name.localeCompare(b.name))
@@ -70,7 +71,7 @@ export default function SubmitSalaryPage() {
             total_comp: form.total_comp || null,
             benefits_notes: form.benefits_notes || null,
             year_of_data: form.year_of_data || null,
-            employment_type: form.employment_type || null,
+            employment_type: EMPLOYMENT_TYPE_DB[form.employment_type] || form.employment_type.toLowerCase().replace(/[^a-z]+/g, '_') || null,
             years_experience: form.years_experience || null,
           },
         }),
