@@ -20,7 +20,7 @@ async function getArticle(slug: string) {
     .select('*')
     .eq('slug', slug)
     .eq('status', 'published')
-    .single()
+    .maybeSingle()
   if (data) {
     // Map columns to expected shape
     return {
@@ -38,7 +38,7 @@ async function getArticle(slug: string) {
     .select('*')
     .eq('slug', slug)
     .eq('published', true)
-    .single()
+    .maybeSingle()
   return legacy
 }
 
