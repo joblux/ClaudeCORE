@@ -287,7 +287,7 @@ function WriteVoiceSection({ session }: { session: any }) {
                   </div>
                   <span style={{ fontSize: 10, fontWeight: 600, color: st.color }}>{st.label}</span>
                   {v.status === 'published' && v.slug && (
-                    <Link href={`/bloglux/${v.slug}`} style={{ fontSize: 11, color: '#a58e28', textDecoration: 'none' }}>View →</Link>
+                    <Link href={`/insights/${v.slug}`} style={{ fontSize: 11, color: '#a58e28', textDecoration: 'none' }}>View →</Link>
                   )}
                 </div>
               )

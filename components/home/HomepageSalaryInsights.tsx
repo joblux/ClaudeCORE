@@ -99,7 +99,7 @@ export function HomepageSalaryInsights({ salaries, articles }: { salaries: Salar
               return (
                 <Link
                   key={article.slug}
-                  href={`/bloglux/${article.slug}`}
+                  href={`/insights/${article.slug}`}
                   style={{ display: 'block', background: '#202020', border: '1px solid #2b2b2b', borderRadius: 10, padding: 17, marginBottom: 12, textDecoration: 'none', transition: 'all 0.2s ease' }}
                 >
                   {article.category && (

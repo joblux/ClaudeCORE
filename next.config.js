@@ -26,6 +26,8 @@ const nextConfig = {
       { source: '/wikilux', destination: '/brands', permanent: true },
       { source: '/wikilux/:slug*', destination: '/brands/:slug*', permanent: true },
       { source: '/salaries', destination: '/careers', permanent: true },
+      { source: '/bloglux', destination: '/insights', permanent: true },
+      { source: '/bloglux/:slug*', destination: '/insights/:slug*', permanent: true },
     ]
   },
   async headers() {

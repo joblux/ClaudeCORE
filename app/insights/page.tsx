@@ -80,7 +80,7 @@ function VoiceCard({ v }: { v: any }) {
 
   if (v.slug) {
     return (
-      <Link href={`/bloglux/${v.slug}`} className="block">
+      <Link href={`/insights/${v.slug}`} className="block">
         {card}
       </Link>
     )
@@ -237,7 +237,7 @@ export default function InsightsPage() {
                       {featured.date && <><span>·</span><span>{featured.date}</span></>}
                       {featured.read_time && <><span>·</span><span>{featured.read_time} read</span></>}
                     </div>
-                    <Link href={`/bloglux/${featured.slug}`} className="text-xs text-[#a58e28] hover:underline">Read article →</Link>
+                    <Link href={`/insights/${featured.slug}`} className="text-xs text-[#a58e28] hover:underline">Read article →</Link>
                   </div>
                 </div>
               )}
@@ -249,7 +249,7 @@ export default function InsightsPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
                 {rest.map(article => (
-                  <Link key={article.id} href={`/bloglux/${article.slug}`} className="group cursor-pointer">
+                  <Link key={article.id} href={`/insights/${article.slug}`} className="group cursor-pointer">
                     <div className="bg-[#222] border border-[#2a2a2a] rounded-lg h-44 mb-3 overflow-hidden relative">
                       {article.cover_image_url ? (
                         <img src={article.cover_image_url} alt={article.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -276,7 +276,7 @@ export default function InsightsPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
                 {reports.slice(0, 4).map(r => (
-                  <Link key={r.title} href={r.slug ? `/bloglux/${r.slug}` : '#'} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 flex gap-4 hover:border-[#3a3a3a] transition-colors block">
+                  <Link key={r.title} href={r.slug ? `/insights/${r.slug}` : '#'} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 flex gap-4 hover:border-[#3a3a3a] transition-colors block">
                     <div className="w-11 h-11 rounded-lg flex items-center justify-center text-lg flex-shrink-0" style={{ background: 'rgba(165,142,40,0.1)', border: '1px solid rgba(165,142,40,0.2)' }}>
                       {r.icon}
                     </div>
@@ -305,7 +305,7 @@ export default function InsightsPage() {
                 <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-4">MOST READ</div>
                 <div className="space-y-4">
                   {displayMostRead.map((a, i) => (
-                    <Link key={i} href={`/bloglux/${a.slug}`} className="flex gap-3 pb-4 border-b border-[#222] last:border-b-0 cursor-pointer group">
+                    <Link key={i} href={`/insights/${a.slug}`} className="flex gap-3 pb-4 border-b border-[#222] last:border-b-0 cursor-pointer group">
                       <div className="w-14 h-14 bg-[#222] border border-[#2a2a2a] rounded-md flex-shrink-0 overflow-hidden relative">
                         {a.cover_image_url ? (
                           <img src={a.cover_image_url} alt={a.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -356,7 +356,7 @@ export default function InsightsPage() {
         {activeTab === 'Research reports' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {reports.map((r, i) => (
-              <Link key={i} href={r.slug ? `/bloglux/${r.slug}` : '#'} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 flex gap-4 hover:border-[#3a3a3a] transition-colors block">
+              <Link key={i} href={r.slug ? `/insights/${r.slug}` : '#'} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 flex gap-4 hover:border-[#3a3a3a] transition-colors block">
                 <div className="w-11 h-11 rounded-lg flex items-center justify-center text-lg flex-shrink-0" style={{ background: 'rgba(165,142,40,0.1)', border: '1px solid rgba(165,142,40,0.2)' }}>
                   {r.icon}
                 </div>

@@ -20,8 +20,8 @@ export async function GET() {
   const items = (articles || []).map((a) => `
     <item>
       <title><![CDATA[${a.title}]]></title>
-      <link>${baseUrl}/bloglux/${a.slug}</link>
-      <guid isPermaLink="true">${baseUrl}/bloglux/${a.slug}</guid>
+      <link>${baseUrl}/insights/${a.slug}</link>
+      <guid isPermaLink="true">${baseUrl}/insights/${a.slug}</guid>
       <description><![CDATA[${a.meta_description || a.excerpt || ''}]]></description>
       <category>${escapeXml(a.category || '')}</category>
       <author>${escapeXml(a.author_name || 'JOBLUX')}</author>

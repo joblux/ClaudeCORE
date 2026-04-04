@@ -108,7 +108,7 @@ export default function EditArticlePage() {
         {slug && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
             <a
-              href={`/bloglux/${slug}`}
+              href={`/insights/${slug}`}
               target="_blank"
               rel="noopener noreferrer"
               style={{ fontSize: 12, color: '#666', textDecoration: 'none' }}
