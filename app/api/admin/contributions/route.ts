@@ -134,6 +134,15 @@ export async function POST(req: NextRequest) {
 
   // ── Insider Voices ────────────────────────────────────────────────────────
   if (type === 'voices') {
+    if (action === 'delete') {
+      const { error } = await supabase
+        .from('bloglux_articles')
+        .delete()
+        .eq('id', id)
+        .eq('content_origin', 'contributed')
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ ok: true, deleted: true })
+    }
     if (action === 'approve') {
       const { error } = await supabase
         .from('bloglux_articles')
@@ -158,6 +167,16 @@ export async function POST(req: NextRequest) {
 
   // ── Salary ────────────────────────────────────────────────────────────────
   if (type === 'salary') {
+    if (action === 'delete') {
+      // Child tables first, then parent
+      const { error: e1 } = await supabase.from('salary_benchmarks').delete().eq('contribution_id', id)
+      if (e1) console.error('delete salary_benchmarks failed:', e1.message)
+      const { error: e2 } = await supabase.from('salary_contributions').delete().eq('contribution_id', id)
+      if (e2) console.error('delete salary_contributions failed:', e2.message)
+      const { error: e3 } = await supabase.from('contributions').delete().eq('id', id)
+      if (e3) return NextResponse.json({ error: e3.message }, { status: 500 })
+      return NextResponse.json({ ok: true, deleted: true })
+    }
     const newStatus = action === 'approve' ? 'approved' : 'rejected'
     const { error } = await supabase
       .from('contributions')
@@ -211,6 +230,13 @@ export async function POST(req: NextRequest) {
 
   // ── Interviews ────────────────────────────────────────────────────────────
   if (type === 'interviews') {
+    if (action === 'delete') {
+      const { error: e1 } = await supabase.from('interview_experiences').delete().eq('contribution_id', id)
+      if (e1) console.error('delete interview_experiences failed:', e1.message)
+      const { error: e2 } = await supabase.from('contributions').delete().eq('id', id)
+      if (e2) return NextResponse.json({ error: e2.message }, { status: 500 })
+      return NextResponse.json({ ok: true, deleted: true })
+    }
     const newStatus = action === 'approve' ? 'approved' : 'rejected'
     const { error } = await supabase
       .from('contributions')
@@ -222,6 +248,11 @@ export async function POST(req: NextRequest) {
 
   // ── Brand corrections ─────────────────────────────────────────────────────
   if (type === 'brand') {
+    if (action === 'delete') {
+      const { error } = await supabase.from('brand_contributions').delete().eq('id', id)
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ ok: true, deleted: true })
+    }
     const newStatus = action === 'approve' ? 'approved' : 'rejected'
     const { error } = await supabase
       .from('brand_contributions')
