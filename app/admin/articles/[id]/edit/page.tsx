@@ -55,7 +55,7 @@ export default function EditArticlePage() {
             excerpt: article.excerpt || '',
             tags: (article.tags || []).join(', '),
             content: article.content || '',
-            cover_image: article.cover_image || '',
+            cover_image: article.cover_image || article.cover_image_url || '',
             published: !!article.published,
           })
         }
@@ -108,7 +108,7 @@ export default function EditArticlePage() {
         {slug && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
             <a
-              href={`/insights/${slug}`}
+              href={`/bloglux/${slug}`}
               target="_blank"
               rel="noopener noreferrer"
               style={{ fontSize: 12, color: '#666', textDecoration: 'none' }}

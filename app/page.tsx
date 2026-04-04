@@ -70,7 +70,7 @@ export default async function HomePage() {
     supabase
       .from('bloglux_articles')
       .select('slug, title, category, read_time_minutes, published_at')
-      .eq('is_published', true)
+      .eq('status', 'published')
       .order('published_at', { ascending: false })
       .limit(3),
     // Upcoming events

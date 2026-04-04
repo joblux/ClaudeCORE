@@ -123,7 +123,11 @@ export default function BlogluxClient({ initialArticles }: { initialArticles: Ar
                       <div className="absolute inset-0 bg-black/45" />
                     </>
                   ) : (
-                    <div className="absolute inset-0 bg-[#1a1a1a]" />
+                    <div className="absolute inset-0 bg-[#1a1a1a] flex items-center justify-center">
+                      <span style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#666' }}>
+                        {getCategoryLabel(featuredArticle.category)}
+                      </span>
+                    </div>
                   )}
                   <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-10">
                     <span className="jl-badge bg-[#a58e28] text-white text-[0.6rem] uppercase tracking-widest px-3 py-1 w-fit mb-3">
@@ -171,7 +175,11 @@ export default function BlogluxClient({ initialArticles }: { initialArticles: Ar
                           className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
-                        <div className="absolute inset-0 bg-[#f5f0e8]" />
+                        <div className="absolute inset-0 bg-[#f5f0e8] flex items-center justify-center">
+                          <span style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#666' }}>
+                            {getCategoryLabel(article.category)}
+                          </span>
+                        </div>
                       )}
                     </div>
 
