@@ -22,9 +22,25 @@ export async function GET(request: NextRequest) {
     const source = searchParams.get('source')
     const tag = searchParams.get('tag')
     const search = searchParams.get('search')
+    const category = searchParams.get('category')
+    const brand = searchParams.get('brand')
+    const fileType = searchParams.get('fileType')
+    const orientation = searchParams.get('orientation')
+    const sort = searchParams.get('sort') || 'newest'
     const page = parseInt(searchParams.get('page') || '1', 10)
     const limit = parseInt(searchParams.get('limit') || '20', 10)
     const offset = (page - 1) * limit
+
+    // Fetch distinct brand names for filter dropdown
+    if (searchParams.get('distinct') === 'brands') {
+      const { data } = await supabase
+        .from('media_library')
+        .select('brand_name')
+        .not('brand_name', 'is', null)
+        .not('brand_name', 'eq', '')
+      const brands = [...new Set((data || []).map((r: any) => r.brand_name).filter(Boolean))]
+      return NextResponse.json({ brands })
+    }
 
     let query = supabase
       .from('media_library')
@@ -38,13 +54,71 @@ export async function GET(request: NextRequest) {
       query = query.contains('tags', [tag])
     }
 
-    if (search) {
-      query = query.or(`filename.ilike.%${search}%,alt_text.ilike.%${search}%`)
+    if (category) {
+      query = query.eq('category', category)
     }
 
-    query = query
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1)
+    if (brand) {
+      query = query.eq('brand_name', brand)
+    }
+
+    if (search) {
+      query = query.or(`filename.ilike.%${search}%,alt_text.ilike.%${search}%,original_filename.ilike.%${search}%,photographer_name.ilike.%${search}%`)
+    }
+
+    // File type filter based on mime_type
+    if (fileType === 'image') {
+      query = query.like('mime_type', 'image/%')
+    } else if (fileType === 'video') {
+      query = query.like('mime_type', 'video/%')
+    } else if (fileType === 'audio') {
+      query = query.like('mime_type', 'audio/%')
+    } else if (fileType === 'document') {
+      query = query.or('mime_type.like.application/pdf,mime_type.like.application/%')
+    }
+
+    // Orientation filter (images only)
+    if (orientation === 'landscape') {
+      query = query.not('width', 'is', null).not('height', 'is', null).gt('width', 0)
+      // Can't do width > height directly in PostgREST, filter client-side below
+    } else if (orientation === 'portrait') {
+      query = query.not('width', 'is', null).not('height', 'is', null).gt('height', 0)
+    } else if (orientation === 'square') {
+      query = query.not('width', 'is', null).not('height', 'is', null)
+    }
+
+    // Sorting
+    if (sort === 'oldest') {
+      query = query.order('created_at', { ascending: true })
+    } else if (sort === 'name') {
+      query = query.order('original_filename', { ascending: true })
+    } else if (sort === 'largest') {
+      query = query.order('file_size', { ascending: false, nullsFirst: false })
+    } else {
+      query = query.order('created_at', { ascending: false })
+    }
+
+    // For orientation filtering, we need to fetch more and filter client-side
+    if (orientation && orientation !== '') {
+      // Fetch all matching, then filter, then paginate
+      const { data: allData, error, count } = await query
+      if (error) {
+        return NextResponse.json({ error: 'Failed to fetch media', details: error.message }, { status: 500 })
+      }
+      let filtered = allData || []
+      if (orientation === 'landscape') {
+        filtered = filtered.filter((m: any) => m.width && m.height && m.width > m.height)
+      } else if (orientation === 'portrait') {
+        filtered = filtered.filter((m: any) => m.width && m.height && m.height > m.width)
+      } else if (orientation === 'square') {
+        filtered = filtered.filter((m: any) => m.width && m.height && Math.abs(m.width - m.height) / Math.max(m.width, m.height) < 0.1)
+      }
+      const total = filtered.length
+      const items = filtered.slice(offset, offset + limit)
+      return NextResponse.json({ items, total, page, limit })
+    }
+
+    query = query.range(offset, offset + limit - 1)
 
     const { data, error, count } = await query
 
@@ -79,6 +153,9 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData()
     const file = formData.get('file') as File | null
+    const altText = formData.get('alt_text') as string | null
+    const tags = formData.get('tags') as string | null
+    const category = formData.get('category') as string | null
 
     if (!file) {
       return NextResponse.json(
@@ -91,7 +168,6 @@ export async function POST(request: NextRequest) {
     const filename = `${Date.now()}-${file.name}`
     const storagePath = `uploads/${filename}`
 
-    // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage
       .from('media')
       .upload(storagePath, buffer, {
@@ -110,18 +186,23 @@ export async function POST(request: NextRequest) {
       .from('media')
       .getPublicUrl(storagePath)
 
-    // Insert record into media_library
+    const insertData: Record<string, any> = {
+      filename: filename,
+      original_filename: file.name,
+      file_url: urlData.publicUrl,
+      file_size: file.size,
+      mime_type: file.type,
+      source: 'upload',
+    }
+    if (altText) insertData.alt_text = altText
+    if (tags) insertData.tags = tags.split(',').map(t => t.trim()).filter(Boolean)
+    if (category) insertData.category = category
+
     const { data, error: insertError } = await supabase
       .from('media_library')
-      .insert({
-        filename: filename,
-        original_filename: file.name,
-        file_url: urlData.publicUrl,
-        file_size: file.size,
-        mime_type: file.type,
-      })
+      .insert(insertData)
       .select()
-      .single()
+      .maybeSingle()
 
     if (insertError) {
       return NextResponse.json(
@@ -148,7 +229,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { id, alt_text, caption, tags } = body
+    const { id, alt_text, caption, tags, category, brand_name, photographer_name } = body
 
     if (!id) {
       return NextResponse.json(
@@ -157,17 +238,20 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const updateData: Record<string, any> = {}
+    const updateData: Record<string, any> = { updated_at: new Date().toISOString() }
     if (alt_text !== undefined) updateData.alt_text = alt_text
     if (caption !== undefined) updateData.caption = caption
     if (tags !== undefined) updateData.tags = tags
+    if (category !== undefined) updateData.category = category
+    if (brand_name !== undefined) updateData.brand_name = brand_name
+    if (photographer_name !== undefined) updateData.photographer_name = photographer_name
 
     const { data, error } = await supabase
       .from('media_library')
       .update(updateData)
       .eq('id', id)
       .select()
-      .single()
+      .maybeSingle()
 
     if (error) {
       return NextResponse.json(
@@ -210,12 +294,11 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Get the record first to find the storage path
     const { data: media, error: fetchError } = await supabase
       .from('media_library')
       .select('file_url')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (fetchError || !media) {
       return NextResponse.json(
@@ -224,7 +307,6 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Extract storage path from the public URL
     const url = new URL(media.file_url)
     const pathParts = url.pathname.split('/storage/v1/object/public/media/')
     const storagePath = pathParts[1]
@@ -239,7 +321,6 @@ export async function DELETE(request: NextRequest) {
       }
     }
 
-    // Delete database record
     const { error: deleteError } = await supabase
       .from('media_library')
       .delete()

@@ -2,7 +2,6 @@
 
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { BLOGLUX_CATEGORIES, getCategoryLabel } from '@/lib/bloglux-options'
 
 export interface Article {
@@ -113,17 +112,19 @@ export default function BlogluxClient({ initialArticles }: { initialArticles: Ar
                 <div className="relative w-full aspect-[4/3] md:aspect-[16/7] overflow-hidden rounded-lg">
                   {featuredArticle.hero_image_url ? (
                     <>
-                      <Image
+                      <img
                         src={featuredArticle.hero_image_url}
                         alt={featuredArticle.hero_image_alt || featuredArticle.title}
-                        fill
-                        className="object-cover"
-                        priority
+                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                       <div className="absolute inset-0 bg-black/45" />
                     </>
                   ) : (
-                    <div className="absolute inset-0 bg-[#1a1a1a]" />
+                    <div className="absolute inset-0 bg-[#1a1a1a] flex items-center justify-center">
+                      <span style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#666' }}>
+                        {getCategoryLabel(featuredArticle.category)}
+                      </span>
+                    </div>
                   )}
                   <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-10">
                     <span className="jl-badge bg-[#a58e28] text-white text-[0.6rem] uppercase tracking-widest px-3 py-1 w-fit mb-3">
@@ -164,14 +165,18 @@ export default function BlogluxClient({ initialArticles }: { initialArticles: Ar
                     {/* Thumbnail */}
                     <div className="relative w-full aspect-[16/9] overflow-hidden mb-4">
                       {article.hero_image_url ? (
-                        <Image
+                        <img
                           src={article.hero_image_url}
                           alt={article.hero_image_alt || article.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s' }}
+                          className="group-hover:scale-105"
                         />
                       ) : (
-                        <div className="absolute inset-0 bg-[#f5f0e8]" />
+                        <div className="absolute inset-0 bg-[#f5f0e8] flex items-center justify-center">
+                          <span style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#666' }}>
+                            {getCategoryLabel(article.category)}
+                          </span>
+                        </div>
                       )}
                     </div>
 

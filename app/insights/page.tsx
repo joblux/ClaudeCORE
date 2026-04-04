@@ -10,12 +10,12 @@ const supabase = createClient(
 )
 
 const placeholderArticles = [
-  { id: '1', category: 'LEADERSHIP', title: "Kering's creative director cycle | what it means for talent inside the group", excerpt: 'Three CD changes in 18 months. The downstream effects on teams, briefs, and hiring priorities across Gucci, Bottega, and Saint Laurent.', date: 'March 20, 2026', read_time: '6 min', slug: 'kering-creative-director-cycle' },
-  { id: '2', category: 'MARKET INTELLIGENCE', title: "Hard luxury's moment: why watches and jewelry are the growth story of 2026", excerpt: "Cartier, Van Cleef, and Tiffany are all expanding headcount while fashion and leather goods hold steady.", date: 'March 18, 2026', read_time: '5 min', slug: 'hard-luxury-growth-2026' },
-  { id: '3', category: 'CAREER INTELLIGENCE', title: "Dubai is becoming luxury's second headquarters | what that means for careers", excerpt: "Regional HQs, flagship openings, and a growing pool of international talent.", date: 'March 15, 2026', read_time: '7 min', slug: 'dubai-luxury-careers' },
-  { id: '4', category: 'SALARY', title: 'What Hermès really pays | from artisan to director', excerpt: "Based on 847 verified contributions, we map out the full compensation ladder.", date: 'March 12, 2026', read_time: '9 min', slug: 'hermes-salary-guide' },
-  { id: '5', category: 'CAREERS', title: 'How to get hired at Chanel without applying online', excerpt: "Chanel fills over 70% of senior roles through internal referrals and executive search.", date: 'March 10, 2026', read_time: '5 min', slug: 'hired-at-chanel' },
-  { id: '6', category: 'MARKET', title: 'LVMH vs Kering: which group offers better career progression?', excerpt: "We analysed 500+ career paths across both groups.", date: 'March 8, 2026', read_time: '8 min', slug: 'lvmh-vs-kering-careers' },
+  { id: '1', category: 'LEADERSHIP', title: "Kering's creative director cycle | what it means for talent inside the group", excerpt: 'Three CD changes in 18 months. The downstream effects on teams, briefs, and hiring priorities across Gucci, Bottega, and Saint Laurent.', date: 'March 20, 2026', read_time: '6 min', slug: 'kering-creative-director-cycle', cover_image_url: '' },
+  { id: '2', category: 'MARKET INTELLIGENCE', title: "Hard luxury's moment: why watches and jewelry are the growth story of 2026", excerpt: "Cartier, Van Cleef, and Tiffany are all expanding headcount while fashion and leather goods hold steady.", date: 'March 18, 2026', read_time: '5 min', slug: 'hard-luxury-growth-2026', cover_image_url: '' },
+  { id: '3', category: 'CAREER INTELLIGENCE', title: "Dubai is becoming luxury's second headquarters | what that means for careers", excerpt: "Regional HQs, flagship openings, and a growing pool of international talent.", date: 'March 15, 2026', read_time: '7 min', slug: 'dubai-luxury-careers', cover_image_url: '' },
+  { id: '4', category: 'SALARY', title: 'What Hermès really pays | from artisan to director', excerpt: "Based on 847 verified contributions, we map out the full compensation ladder.", date: 'March 12, 2026', read_time: '9 min', slug: 'hermes-salary-guide', cover_image_url: '' },
+  { id: '5', category: 'CAREERS', title: 'How to get hired at Chanel without applying online', excerpt: "Chanel fills over 70% of senior roles through internal referrals and executive search.", date: 'March 10, 2026', read_time: '5 min', slug: 'hired-at-chanel', cover_image_url: '' },
+  { id: '6', category: 'MARKET', title: 'LVMH vs Kering: which group offers better career progression?', excerpt: "We analysed 500+ career paths across both groups.", date: 'March 8, 2026', read_time: '8 min', slug: 'lvmh-vs-kering-careers', cover_image_url: '' },
 ]
 
 const placeholderReports = [
@@ -101,7 +101,7 @@ export default function InsightsPage() {
       // Editorial articles
       const { data: articleData } = await supabase
         .from('bloglux_articles')
-        .select('id, slug, title, excerpt, category, published_at, read_time_minutes')
+        .select('id, slug, title, excerpt, category, published_at, read_time_minutes, cover_image_url')
         .eq('status', 'published')
         .not('category', 'in', '("Research Report","Insider Voice")')
         .order('published_at', { ascending: false })
@@ -113,6 +113,7 @@ export default function InsightsPage() {
           category: (a.category || '').toUpperCase(),
           date: formatDate(a.published_at),
           read_time: a.read_time_minutes ? `${a.read_time_minutes} min` : '',
+          cover_image_url: a.cover_image_url || '',
         })))
       }
 
@@ -157,7 +158,7 @@ export default function InsightsPage() {
       // Most read sidebar
       const { data: recentData } = await supabase
         .from('bloglux_articles')
-        .select('id, slug, title, category, published_at')
+        .select('id, slug, title, category, published_at, cover_image_url')
         .eq('status', 'published')
         .order('published_at', { ascending: false })
         .limit(4)
@@ -168,6 +169,7 @@ export default function InsightsPage() {
           title: a.title,
           date: formatDate(a.published_at),
           slug: a.slug,
+          cover_image_url: a.cover_image_url || '',
         })))
       }
     }
@@ -216,7 +218,11 @@ export default function InsightsPage() {
               {/* Featured */}
               {featured && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 items-center">
-                  <div className="bg-[#222] border border-[#2a2a2a] rounded-xl h-72" />
+                  <div className="bg-[#222] border border-[#2a2a2a] rounded-xl h-72 overflow-hidden relative">
+                    {featured.cover_image_url ? (
+                      <img src={featured.cover_image_url} alt={featured.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : null}
+                  </div>
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       <div className="h-px w-5 bg-[#a58e28]" />

@@ -45,9 +45,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Dynamic: BlogLux articles
   const { data: articles } = await supabase
-    .from('articles')
+    .from('bloglux_articles')
     .select('slug, updated_at')
-    .eq('published', true)
+    .eq('status', 'published')
   const articlePages: MetadataRoute.Sitemap = (articles || []).map((article) => ({
     url: `${baseUrl}/insights/${article.slug}`,
     lastModified: article.updated_at ? new Date(article.updated_at) : new Date(),

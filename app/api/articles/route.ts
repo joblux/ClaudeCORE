@@ -83,11 +83,12 @@ export async function POST(req: Request) {
       featured_homepage: !!is_featured,
     })
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   revalidatePath('/bloglux');
+  revalidatePath('/insights');
   revalidatePath('/');
 
   return NextResponse.json({ article: data });

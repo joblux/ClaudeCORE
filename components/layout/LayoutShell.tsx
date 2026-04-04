@@ -1,9 +1,9 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { Header } from './Header'
 import { SignalsTicker } from './SignalsTicker'
+import { StockTicker } from './StockTicker'
 import { Footer } from './Footer'
 
 export function LayoutShell({ children }: { children: React.ReactNode }) {
@@ -11,8 +11,6 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   const isEscape = pathname.startsWith('/escape')
   const isAdmin = pathname.startsWith('/admin')
   const isHolding = pathname.startsWith('/holding')
-  const { status } = useSession()
-  const isAuthenticated = status === 'authenticated'
 
   // Escape, Admin, and Holding have their own layouts
   if (isEscape || isAdmin || isHolding) {
@@ -22,7 +20,8 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Header />
-      {!isAuthenticated && <SignalsTicker />}
+      <SignalsTicker />
+      <StockTicker />
       {children}
       <Footer />
     </>

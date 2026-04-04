@@ -77,7 +77,7 @@ export default function PendingPage() {
               In the meantime, explore{' '}
               <Link href="/wikilux" className="text-[#a58e28] hover:text-white transition-colors">brand intelligence</Link>
               {' '}or read{' '}
-              <Link href="/bloglux" className="text-[#a58e28] hover:text-white transition-colors">the latest insights</Link>.
+              <Link href="/insights" className="text-[#a58e28] hover:text-white transition-colors">the latest insights</Link>.
             </p>
           </div>
         </div>

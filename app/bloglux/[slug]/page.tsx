@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
@@ -20,7 +19,7 @@ async function getArticle(slug: string) {
     .select('*')
     .eq('slug', slug)
     .eq('status', 'published')
-    .single()
+    .maybeSingle()
   if (data) {
     // Map columns to expected shape
     return {
@@ -38,7 +37,7 @@ async function getArticle(slug: string) {
     .select('*')
     .eq('slug', slug)
     .eq('published', true)
-    .single()
+    .maybeSingle()
   return legacy
 }
 
@@ -95,17 +94,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export async function generateStaticParams() {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-  const { data } = await supabase
-    .from('bloglux_articles')
-    .select('slug')
-    .eq('status', 'published')
-  return (data || []).map(a => ({ slug: a.slug }))
-}
+// Fully dynamic — no build-time static generation
+export const dynamic = 'force-dynamic'
 
 function formatDate(d: string | null) {
   if (!d) return ''
@@ -167,13 +157,10 @@ export default async function ArticlePage({ params }: Props) {
       <div className="relative bg-[#141414] overflow-hidden">
         {article.hero_image_url && (
           <div className="absolute inset-0">
-            <Image
+            <img
               src={article.hero_image_url}
               alt={article.hero_image_alt || article.title}
-              fill
-              className="object-cover opacity-25"
-              priority
-              sizes="100vw"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.25 }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-[#141414]/70 to-[#141414]/40" />
           </div>
@@ -194,7 +181,7 @@ export default async function ArticlePage({ params }: Props) {
             )}
             <div className="flex items-center gap-3">
               {article.author_avatar_url && (
-                <Image src={article.author_avatar_url} alt={article.author_name} width={32} height={32} className="rounded-full" />
+                <img src={article.author_avatar_url} alt={article.author_name} width={32} height={32} style={{ borderRadius: '9999px' }} />
               )}
               <div>
                 <div className="text-xs text-white font-medium">{article.author_name}</div>
@@ -232,7 +219,7 @@ export default async function ArticlePage({ params }: Props) {
           <div className="mt-10 pt-6 border-t border-[#2a2a2a]">
             <div className="flex items-start gap-4 p-5 bg-[#222] border border-[#2a2a2a] rounded">
               {article.author_avatar_url ? (
-                <Image src={article.author_avatar_url} alt={article.author_name} width={48} height={48} className="rounded-full flex-shrink-0" />
+                <img src={article.author_avatar_url} alt={article.author_name} width={48} height={48} style={{ borderRadius: '9999px', flexShrink: 0 }} />
               ) : (
                 <div className="w-12 h-12 bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center flex-shrink-0 rounded">
                   <span className="text-base text-[#a58e28]" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>{article.author_name?.[0]}</span>
@@ -258,7 +245,7 @@ export default async function ArticlePage({ params }: Props) {
                 <Link key={a.id} href={`/insights/${a.slug}`} className="bg-[#222] border border-[#2a2a2a] rounded overflow-hidden group hover:border-[#333] transition-colors">
                   {a.hero_image_url && (
                     <div className="aspect-[16/9] relative overflow-hidden">
-                      <Image src={a.hero_image_url} alt={a.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" loading="lazy" />
+                      <img src={a.hero_image_url} alt={a.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
                     </div>
                   )}
                   <div className="p-4">

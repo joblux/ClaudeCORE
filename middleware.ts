@@ -8,8 +8,12 @@ const CACHE_TTL = 30_000; // 30 seconds
 
 const MAINTENANCE_BYPASS = [
   "/holding",
-  "/auth/",
+  "/auth",
+  "/api/auth",
   "/api/",
+  "/admin",
+  "/bloglux",
+  "/insights",
   "/_next/",
   "/favicon.ico",
   "/images/",
@@ -52,7 +56,7 @@ const HOLDING_BYPASS = ["/holding", "/api", "/_next", "/logos", "/favicon"];
 
 export default withAuth(
   async function middleware(req) {
-    const { pathname } = req.nextUrl;
+    const { pathname, searchParams } = req.nextUrl;
     const host = req.headers.get("host") || "";
     const token = req.nextauth.token;
 
@@ -74,6 +78,22 @@ export default withAuth(
     // ) {
     //   return NextResponse.redirect(new URL("/holding", req.url));
     // }
+
+    // Prevent callbackUrl nesting — if the callbackUrl itself contains a callbackUrl, flatten it
+    if (pathname.startsWith("/auth") || pathname.startsWith("/api/auth")) {
+      const cb = searchParams.get("callbackUrl");
+      if (cb && cb.includes("callbackUrl")) {
+        try {
+          const inner = new URL(cb, req.url);
+          const deepCb = inner.searchParams.get("callbackUrl");
+          if (deepCb) {
+            const cleaned = new URL(req.url);
+            cleaned.searchParams.set("callbackUrl", deepCb);
+            return NextResponse.redirect(cleaned);
+          }
+        } catch { /* malformed URL, continue */ }
+      }
+    }
 
     // Check maintenance bypass paths
     if (!MAINTENANCE_BYPASS.some((p) => pathname.startsWith(p))) {
@@ -109,18 +129,9 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token, req }) => {
-        const { pathname } = req.nextUrl;
-        // Allow unauthenticated access to public pages (maintenance redirect handles them)
-        const publicPaths = ["/", "/about", "/holding", "/jobs", "/opportunities", "/wikilux", "/bloglux", "/brands", "/signals", "/careers", "/events", "/insights", "/travel", "/[slug]", "/escape", "/interviews", "/salaries", "/coaching", "/the-brief", "/members", "/join", "/offline", "/search", "/companies", "/interview-prep", "/terms", "/privacy", "/faq", "/contact", "/services", "/contribute", "/select-profile", "/connect", "/access", "/join/employer", "/sitemap.xml", "/robots.txt", "/rss.xml", "/rss", "/feed", "/feed.xml"];
-        if (publicPaths.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
-          return true;
-        }
-        // API routes and static assets always allowed
-        if (pathname.startsWith("/api/") || pathname.startsWith("/_next/")) {
-          return true;
-        }
-        return !!token;
+      // Let all requests through to our middleware — it handles access control
+      authorized() {
+        return true;
       },
     },
   }
