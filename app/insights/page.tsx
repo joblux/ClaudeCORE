@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -34,6 +35,8 @@ const placeholderVoices = [
 
 const topics = ['Salary data', 'Leadership moves', 'LVMH', 'Kering', 'Richemont', 'Asia Pacific', 'Middle East', 'Retail', 'Digital', 'Watches', 'Beauty', 'Career advice']
 const tabs = ['Editorial', 'Research reports', 'Insider voices', 'Luxury map']
+const TAB_SLUG_MAP: Record<string, string> = { 'editorial': 'Editorial', 'research-reports': 'Research reports', 'insider-voices': 'Insider voices', 'luxury-map': 'Luxury map' }
+const TAB_TO_SLUG: Record<string, string> = { 'Editorial': 'editorial', 'Research reports': 'research-reports', 'Insider voices': 'insider-voices', 'Luxury map': 'luxury-map' }
 
 function formatDate(dateStr: string) {
   if (!dateStr) return ''
@@ -88,8 +91,10 @@ function VoiceCard({ v }: { v: any }) {
   return card
 }
 
-export default function InsightsPage() {
-  const [activeTab, setActiveTab] = useState('Editorial')
+function InsightsPageInner() {
+  const searchParams = useSearchParams()
+  const tabParam = searchParams.get('tab') || ''
+  const activeTab = TAB_SLUG_MAP[tabParam] || 'Editorial'
   const [articles, setArticles] = useState(placeholderArticles)
   const [reports, setReports] = useState(placeholderReports)
   const [voices, setVoices] = useState(placeholderVoices)
@@ -198,17 +203,22 @@ export default function InsightsPage() {
 
         {/* Tabs */}
         <div className="flex border-b border-[#2a2a2a] mb-8">
-          {tabs.map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className="pb-3 mr-8 text-sm relative transition-colors whitespace-nowrap"
-              style={{ color: activeTab === tab ? '#fff' : '#555' }}
-            >
-              {tab}
-              {activeTab === tab && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#a58e28]" />}
-            </button>
-          ))}
+          {tabs.map(tab => {
+            const tabSlug = TAB_TO_SLUG[tab]
+            const href = tabSlug === 'editorial' ? '/insights' : `/insights?tab=${tabSlug}`
+            return (
+              <Link
+                key={tab}
+                href={href}
+                scroll={false}
+                className="pb-3 mr-8 text-sm relative transition-colors whitespace-nowrap"
+                style={{ color: activeTab === tab ? '#fff' : '#555' }}
+              >
+                {tab}
+                {activeTab === tab && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#a58e28]" />}
+              </Link>
+            )
+          })}
         </div>
 
         {/* ── EDITORIAL TAB ── */}
@@ -382,5 +392,13 @@ export default function InsightsPage() {
 
       </div>
     </div>
+  )
+}
+
+export default function InsightsPage() {
+  return (
+    <Suspense>
+      <InsightsPageInner />
+    </Suspense>
   )
 }
