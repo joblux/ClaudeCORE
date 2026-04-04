@@ -13,11 +13,15 @@ const TABS = [
 ]
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; label: string }> = {
-  draft:    { bg: '#fff8e6', text: '#a58e28', label: 'Pending' },
-  pending:  { bg: '#fff8e6', text: '#a58e28', label: 'Pending' },
-  published:{ bg: '#e6f7ef', text: '#1D9E75', label: 'Approved' },
-  approved: { bg: '#e6f7ef', text: '#1D9E75', label: 'Approved' },
-  rejected: { bg: '#fef2f2', text: '#dc2626', label: 'Rejected' },
+  draft:              { bg: '#f5f5f5', text: '#666',    label: 'Draft' },
+  submitted:          { bg: '#fff8e6', text: '#a58e28', label: 'Submitted' },
+  review:             { bg: '#fff8e6', text: '#a58e28', label: 'In Review' },
+  pending:            { bg: '#fff8e6', text: '#a58e28', label: 'Pending' },
+  revision_requested: { bg: '#fff3e0', text: '#e68a00', label: 'Revision' },
+  published:          { bg: '#e6f7ef', text: '#1D9E75', label: 'Published' },
+  approved:           { bg: '#e6f7ef', text: '#1D9E75', label: 'Approved' },
+  archived:           { bg: '#f5f5f5', text: '#666',    label: 'Archived' },
+  rejected:           { bg: '#fef2f2', text: '#dc2626', label: 'Rejected' },
 }
 
 function Badge({ status }: { status: string }) {
@@ -75,6 +79,9 @@ function VoicesTab() {
 
   useEffect(() => { fetch_() }, [fetch_])
 
+  const [revisionTarget, setRevisionTarget] = useState<string | null>(null)
+  const [revisionNote, setRevisionNote] = useState('')
+
   const approve = async (id: string) => {
     setActioning(id)
     await fetch('/api/admin/contributions', {
@@ -83,6 +90,19 @@ function VoicesTab() {
       body: JSON.stringify({ action: 'approve', type: 'voices', id }),
     })
     setActioning(null)
+    fetch_()
+  }
+
+  const requestRevision = async (id: string) => {
+    setActioning(id)
+    await fetch('/api/admin/contributions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'revision', type: 'voices', id, note: revisionNote }),
+    })
+    setActioning(null)
+    setRevisionTarget(null)
+    setRevisionNote('')
     fetch_()
   }
 
@@ -99,20 +119,20 @@ function VoicesTab() {
     fetch_()
   }
 
-  const pending = items.filter(i => i.status === 'draft').length
+  const pending = items.filter(i => ['draft', 'submitted', 'review'].includes(i.status)).length
 
   return (
     <div>
       {/* Filter bar */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, alignItems: 'center' }}>
-        {['all', 'draft', 'published', 'rejected'].map(f => (
+        {['all', 'submitted', 'revision_requested', 'published', 'rejected'].map(f => (
           <button key={f} onClick={() => setFilter(f)} style={{
             padding: '5px 12px', borderRadius: 6, border: '1px solid', fontSize: 12, cursor: 'pointer',
             borderColor: filter === f ? '#111' : '#e8e8e8',
             background: filter === f ? '#111' : '#fff',
             color: filter === f ? '#fff' : '#666',
           }}>
-            {f === 'all' ? 'All' : f === 'draft' ? 'Pending' : f.charAt(0).toUpperCase() + f.slice(1)}
+            {f === 'all' ? 'All' : f === 'submitted' ? 'Submitted' : f === 'revision_requested' ? 'Revision' : f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
         ))}
         {pending > 0 && (
@@ -150,10 +170,13 @@ function VoicesTab() {
                   <button onClick={() => setExpanded(expanded === item.id ? null : item.id)} style={{ padding: '5px 10px', fontSize: 11, border: '1px solid #e8e8e8', borderRadius: 5, background: '#fff', cursor: 'pointer', color: '#666' }}>
                     {expanded === item.id ? 'Close' : 'Preview'}
                   </button>
-                  {item.status === 'draft' && (
+                  {['draft', 'submitted', 'review'].includes(item.status) && (
                     <>
                       <button onClick={() => approve(item.id)} disabled={actioning === item.id} style={{ padding: '5px 12px', fontSize: 11, border: 'none', borderRadius: 5, background: '#1D9E75', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
-                        {actioning === item.id ? '...' : 'Approve'}
+                        {actioning === item.id ? '...' : 'Publish'}
+                      </button>
+                      <button onClick={() => setRevisionTarget(item.id)} style={{ padding: '5px 12px', fontSize: 11, border: '1px solid #e8e8e8', borderRadius: 5, background: '#fff', color: '#e68a00', cursor: 'pointer', fontWeight: 600 }}>
+                        Revise
                       </button>
                       <button onClick={() => setRejectTarget(item.id)} style={{ padding: '5px 12px', fontSize: 11, border: '1px solid #fecaca', borderRadius: 5, background: '#fef2f2', color: '#dc2626', cursor: 'pointer', fontWeight: 600 }}>
                         Reject
@@ -186,6 +209,27 @@ function VoicesTab() {
                       External link →
                     </a>
                   )}
+                </div>
+              )}
+
+              {/* Revision request inline */}
+              {revisionTarget === item.id && (
+                <div style={{ borderTop: '1px solid #e8e8e8', padding: '14px 16px', background: '#fffbf0' }}>
+                  <div style={{ fontSize: 12, color: '#e68a00', fontWeight: 600, marginBottom: 6 }}>Revision note (sent to contributor)</div>
+                  <textarea
+                    value={revisionNote}
+                    onChange={e => setRevisionNote(e.target.value)}
+                    placeholder="e.g. Great perspective — could you add a specific example from your experience?"
+                    style={{ width: '100%', padding: '8px 10px', fontSize: 12, border: '1px solid #e8e2d8', borderRadius: 5, background: '#fff', color: '#111', outline: 'none', resize: 'vertical', minHeight: 60, boxSizing: 'border-box' }}
+                  />
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                    <button onClick={() => requestRevision(item.id)} disabled={actioning === item.id} style={{ padding: '6px 14px', fontSize: 12, border: 'none', borderRadius: 5, background: '#e68a00', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
+                      {actioning === item.id ? '...' : 'Request Revision'}
+                    </button>
+                    <button onClick={() => { setRevisionTarget(null); setRevisionNote('') }} style={{ padding: '6px 14px', fontSize: 12, border: '1px solid #e8e8e8', borderRadius: 5, background: '#fff', color: '#666', cursor: 'pointer' }}>
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               )}
 

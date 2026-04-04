@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   // ── Pending counts for tab badges ─────────────────────────────────────────
   if (type === 'counts') {
     const [voices, salary, interviews, brand] = await Promise.all([
-      supabase.from('bloglux_articles').select('id', { count: 'exact', head: true }).eq('category', 'Insider Voice').eq('status', 'draft'),
+      supabase.from('bloglux_articles').select('id', { count: 'exact', head: true }).eq('category', 'Insider Voice').in('status', ['draft', 'submitted', 'review']),
       supabase.from('contributions').select('id', { count: 'exact', head: true }).eq('contribution_type', 'salary_data').eq('status', 'pending'),
       supabase.from('contributions').select('id', { count: 'exact', head: true }).eq('contribution_type', 'interview_experience').eq('status', 'pending'),
       supabase.from('brand_contributions').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
@@ -129,22 +129,29 @@ export async function POST(req: NextRequest) {
   }
 
   const { action, type, id, note } = await req.json()
+  const adminId = (session.user as any)?.memberId
+  const now = new Date().toISOString()
 
   // ── Insider Voices ────────────────────────────────────────────────────────
   if (type === 'voices') {
     if (action === 'approve') {
       const { error } = await supabase
         .from('bloglux_articles')
-        .update({ status: 'published', published_at: new Date().toISOString() })
+        .update({ status: 'published', published_at: now, reviewed_by: adminId, reviewed_at: now })
+        .eq('id', id)
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    } else if (action === 'revision') {
+      const { error } = await supabase
+        .from('bloglux_articles')
+        .update({ status: 'revision_requested', revision_note: note || null, reviewed_by: adminId, reviewed_at: now })
         .eq('id', id)
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     } else {
       const { error } = await supabase
         .from('bloglux_articles')
-        .update({ status: 'rejected' })
+        .update({ status: 'rejected', reviewed_by: adminId, reviewed_at: now, admin_notes: note || null })
         .eq('id', id)
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-      // TODO: send rejection email with note when SES is wired up
     }
     return NextResponse.json({ ok: true })
   }
@@ -154,7 +161,7 @@ export async function POST(req: NextRequest) {
     const newStatus = action === 'approve' ? 'approved' : 'rejected'
     const { error } = await supabase
       .from('contributions')
-      .update({ status: newStatus, reviewed_at: new Date().toISOString() })
+      .update({ status: newStatus, reviewed_by: adminId, reviewed_at: now, rejection_reason: action === 'reject' ? (note || null) : null })
       .eq('id', id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
@@ -188,7 +195,7 @@ export async function POST(req: NextRequest) {
     const newStatus = action === 'approve' ? 'approved' : 'rejected'
     const { error } = await supabase
       .from('contributions')
-      .update({ status: newStatus, reviewed_at: new Date().toISOString() })
+      .update({ status: newStatus, reviewed_by: adminId, reviewed_at: now, rejection_reason: action === 'reject' ? (note || null) : null })
       .eq('id', id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ ok: true })
@@ -199,7 +206,7 @@ export async function POST(req: NextRequest) {
     const newStatus = action === 'approve' ? 'approved' : 'rejected'
     const { error } = await supabase
       .from('brand_contributions')
-      .update({ status: newStatus, reviewed_at: new Date().toISOString(), admin_notes: note || null })
+      .update({ status: newStatus, reviewed_by: adminId, reviewed_at: now, admin_notes: note || null })
       .eq('id', id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ ok: true })
