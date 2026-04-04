@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 
 const TABS = [
@@ -42,6 +42,30 @@ function timeAgo(dateStr: string) {
   return `${Math.floor(d / 30)}mo ago`
 }
 
+function DeleteBtn({ onClick }: { onClick: () => void }) {
+  return (
+    <button onClick={onClick} style={{ padding: '5px 10px', fontSize: 11, border: '1px solid #e8e8e8', borderRadius: 5, background: '#fff', cursor: 'pointer', color: '#999' }} title="Delete">
+      🗑
+    </button>
+  )
+}
+
+function DeleteConfirmInline({ id, actioning, onConfirm, onCancel }: { id: string; actioning: string | null; onConfirm: () => void; onCancel: () => void }) {
+  return (
+    <div style={{ borderTop: '1px solid #fecaca', padding: '14px 16px', background: '#fef2f2' }}>
+      <div style={{ fontSize: 12, color: '#dc2626', fontWeight: 600, marginBottom: 8 }}>Permanently delete this contribution? This cannot be undone.</div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button onClick={onConfirm} disabled={actioning === id} style={{ padding: '6px 14px', fontSize: 12, border: 'none', borderRadius: 5, background: '#dc2626', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
+          {actioning === id ? '...' : 'Delete permanently'}
+        </button>
+        <button onClick={onCancel} style={{ padding: '6px 14px', fontSize: 12, border: '1px solid #e8e8e8', borderRadius: 5, background: '#fff', color: '#666', cursor: 'pointer' }}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function EmptyState({ label }: { label: string }) {
   return (
     <div style={{ textAlign: 'center', padding: '60px 24px', color: '#999', fontSize: 13 }}>
@@ -81,6 +105,19 @@ function VoicesTab() {
 
   const [revisionTarget, setRevisionTarget] = useState<string | null>(null)
   const [revisionNote, setRevisionNote] = useState('')
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+
+  const doDelete = async (id: string) => {
+    setActioning(id)
+    await fetch('/api/admin/contributions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', type: 'voices', id }),
+    })
+    setActioning(null)
+    setDeleteTarget(null)
+    fetch_()
+  }
 
   const approve = async (id: string) => {
     setActioning(id)
@@ -183,6 +220,7 @@ function VoicesTab() {
                       </button>
                     </>
                   )}
+                  <DeleteBtn onClick={() => setDeleteTarget(item.id)} />
                 </div>
               </div>
 
@@ -253,6 +291,11 @@ function VoicesTab() {
                   </div>
                 </div>
               )}
+
+              {/* Delete confirmation inline */}
+              {deleteTarget === item.id && (
+                <DeleteConfirmInline id={item.id} actioning={actioning} onConfirm={() => doDelete(item.id)} onCancel={() => setDeleteTarget(null)} />
+              )}
             </div>
           ))}
         </div>
@@ -278,6 +321,8 @@ function SalaryTab() {
 
   useEffect(() => { fetch_() }, [fetch_])
 
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+
   const act = async (id: string, action: 'approve' | 'reject') => {
     setActioning(id)
     await fetch('/api/admin/contributions', {
@@ -286,6 +331,18 @@ function SalaryTab() {
       body: JSON.stringify({ action, type: 'salary', id }),
     })
     setActioning(null)
+    fetch_()
+  }
+
+  const doDelete = async (id: string) => {
+    setActioning(id)
+    await fetch('/api/admin/contributions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', type: 'salary', id }),
+    })
+    setActioning(null)
+    setDeleteTarget(null)
     fetch_()
   }
 
@@ -327,7 +384,8 @@ function SalaryTab() {
             </thead>
             <tbody>
               {items.map((item, i) => (
-                <tr key={item.id} style={{ borderBottom: i < items.length - 1 ? '1px solid #f5f5f5' : 'none' }}>
+                <React.Fragment key={item.id}>
+                <tr style={{ borderBottom: i < items.length - 1 ? '1px solid #f5f5f5' : 'none' }}>
                   <td style={{ padding: '12px 14px', color: '#111', fontWeight: 500 }}>{item.brand_name || item.brand_slug || '—'}</td>
                   <td style={{ padding: '12px 14px', color: '#444' }}>{item.salary?.job_title || '—'}</td>
                   <td style={{ padding: '12px 14px', color: '#666' }}>{item.salary?.city || '—'}</td>
@@ -337,18 +395,27 @@ function SalaryTab() {
                   <td style={{ padding: '12px 14px', color: '#999', fontSize: 11 }}>{timeAgo(item.created_at)}</td>
                   <td style={{ padding: '12px 14px' }}><Badge status={item.status} /></td>
                   <td style={{ padding: '12px 14px' }}>
-                    {item.status === 'pending' && (
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        <button onClick={() => act(item.id, 'approve')} disabled={actioning === item.id} style={{ padding: '4px 10px', fontSize: 11, border: 'none', borderRadius: 4, background: '#1D9E75', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
-                          {actioning === item.id ? '...' : '✓'}
-                        </button>
-                        <button onClick={() => act(item.id, 'reject')} disabled={actioning === item.id} style={{ padding: '4px 10px', fontSize: 11, border: '1px solid #fecaca', borderRadius: 4, background: '#fef2f2', color: '#dc2626', cursor: 'pointer' }}>
-                          ✕
-                        </button>
-                      </div>
-                    )}
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {item.status === 'pending' && (
+                        <>
+                          <button onClick={() => act(item.id, 'approve')} disabled={actioning === item.id} style={{ padding: '4px 10px', fontSize: 11, border: 'none', borderRadius: 4, background: '#1D9E75', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
+                            {actioning === item.id ? '...' : '✓'}
+                          </button>
+                          <button onClick={() => act(item.id, 'reject')} disabled={actioning === item.id} style={{ padding: '4px 10px', fontSize: 11, border: '1px solid #fecaca', borderRadius: 4, background: '#fef2f2', color: '#dc2626', cursor: 'pointer' }}>
+                            ✕
+                          </button>
+                        </>
+                      )}
+                      <DeleteBtn onClick={() => setDeleteTarget(item.id)} />
+                    </div>
                   </td>
                 </tr>
+                {deleteTarget === item.id && (
+                  <tr><td colSpan={7} style={{ padding: 0 }}>
+                    <DeleteConfirmInline id={item.id} actioning={actioning} onConfirm={() => doDelete(item.id)} onCancel={() => setDeleteTarget(null)} />
+                  </td></tr>
+                )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
@@ -376,6 +443,8 @@ function InterviewsTab() {
 
   useEffect(() => { fetch_() }, [fetch_])
 
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+
   const act = async (id: string, action: 'approve' | 'reject') => {
     setActioning(id)
     await fetch('/api/admin/contributions', {
@@ -384,6 +453,18 @@ function InterviewsTab() {
       body: JSON.stringify({ action, type: 'interviews', id }),
     })
     setActioning(null)
+    fetch_()
+  }
+
+  const doDelete = async (id: string) => {
+    setActioning(id)
+    await fetch('/api/admin/contributions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', type: 'interviews', id }),
+    })
+    setActioning(null)
+    setDeleteTarget(null)
     fetch_()
   }
 
@@ -441,6 +522,7 @@ function InterviewsTab() {
                       </button>
                     </>
                   )}
+                  <DeleteBtn onClick={() => setDeleteTarget(item.id)} />
                 </div>
               </div>
               {expanded === item.id && item.interview && (
@@ -458,6 +540,9 @@ function InterviewsTab() {
                   )}
                   {item.interview.tips && <div><strong style={{ color: '#111' }}>Tips:</strong> {item.interview.tips}</div>}
                 </div>
+              )}
+              {deleteTarget === item.id && (
+                <DeleteConfirmInline id={item.id} actioning={actioning} onConfirm={() => doDelete(item.id)} onCancel={() => setDeleteTarget(null)} />
               )}
             </div>
           ))}
@@ -485,6 +570,8 @@ function BrandTab() {
 
   useEffect(() => { fetch_() }, [fetch_])
 
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+
   const act = async (id: string, action: 'approve' | 'reject') => {
     setActioning(id)
     await fetch('/api/admin/contributions', {
@@ -493,6 +580,18 @@ function BrandTab() {
       body: JSON.stringify({ action, type: 'brand', id }),
     })
     setActioning(null)
+    fetch_()
+  }
+
+  const doDelete = async (id: string) => {
+    setActioning(id)
+    await fetch('/api/admin/contributions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', type: 'brand', id }),
+    })
+    setActioning(null)
+    setDeleteTarget(null)
     fetch_()
   }
 
@@ -551,6 +650,7 @@ function BrandTab() {
                       </button>
                     </>
                   )}
+                  <DeleteBtn onClick={() => setDeleteTarget(item.id)} />
                 </div>
               </div>
               {expanded === item.id && (
@@ -558,6 +658,9 @@ function BrandTab() {
                   <div style={{ marginBottom: 8 }}><strong style={{ color: '#111' }}>Issue reported:</strong> {item.issue_description}</div>
                   {item.suggested_correction && <div><strong style={{ color: '#111' }}>Suggested correction:</strong> {item.suggested_correction}</div>}
                 </div>
+              )}
+              {deleteTarget === item.id && (
+                <DeleteConfirmInline id={item.id} actioning={actioning} onConfirm={() => doDelete(item.id)} onCancel={() => setDeleteTarget(null)} />
               )}
             </div>
           ))}
