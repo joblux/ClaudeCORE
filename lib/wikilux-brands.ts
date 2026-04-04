@@ -357,20 +357,6 @@ export const BRANDS: Brand[] = [
     known_for: "Neapolitan tailoring, Handmade suits, Super 150s fabrics, Sartorial perfection, Master craftsmen",
   },
   {
-    slug: "brioni",
-    name: "Brioni",
-    country: "Italy",
-    founded: 1945,
-    sector: "Fashion",
-    group: "Kering",
-    headquarters: "Rome",
-    description:
-      "Brioni pioneered the concept of the fashion runway for menswear and has dressed heads of state, business titans, and James Bond. The Roman house is celebrated for its impeccable Italian tailoring, combining structured Roman cut with luxurious fabrics. Brioni operates its own tailoring school to ensure the preservation of its artisanal traditions.",
-    hiring_profile:
-      "Brioni seeks dedicated professionals who value sartorial tradition, precision, and the art of dressing powerful men. The house looks for individuals with a refined sensibility and deep respect for Italian tailoring heritage.",
-    known_for: "James Bond suits, Roman tailoring, Menswear runway pioneer, Tailoring school, Power dressing",
-  },
-  {
     slug: "tom-ford",
     name: "Tom Ford",
     country: "United States",
