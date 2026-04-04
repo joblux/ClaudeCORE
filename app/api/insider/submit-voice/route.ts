@@ -24,8 +24,9 @@ export async function POST(req: NextRequest) {
 
   const user = session.user as any
 
-  // Only insider tier can submit
-  if (user.tier !== 'insider') {
+  // Only insider role can submit (role holds tier value: 'insider', 'insider_contributor', etc.)
+  const insiderRoles = ['insider', 'insider_contributor', 'insider_key_speaker']
+  if (!insiderRoles.includes(user.role)) {
     return NextResponse.json({ error: 'Only Trusted Contributors can submit Insider Voices' }, { status: 403 })
   }
 

@@ -24,8 +24,10 @@ const SIGNAL_COLORS: Record<string, string> = {
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
+  draft: { label: 'UNDER REVIEW', color: '#FF9800' },
   pending: { label: 'UNDER REVIEW', color: '#FF9800' },
   approved: { label: 'VERIFIED', color: '#4CAF50' },
+  published: { label: 'PUBLISHED', color: '#4CAF50' },
   rejected: { label: 'REJECTED', color: '#f44336' },
 }
 
@@ -78,17 +80,13 @@ function WriteVoiceSection({ session }: { session: any }) {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
 
-  // Load my previously submitted voices
+  // Load my previously submitted voices via authenticated API
   const [myVoices, setMyVoices] = useState<any[]>([])
   useEffect(() => {
-    supabase
-      .from('bloglux_articles')
-      .select('id, slug, title, status, created_at')
-      .eq('category', 'Insider Voice')
-      .eq('content_origin', 'contributed')
-      .order('created_at', { ascending: false })
-      .limit(5)
-      .then(({ data }) => setMyVoices(data || []))
+    fetch('/api/insider/my-voices')
+      .then(r => r.json())
+      .then(data => setMyVoices(data.voices || []))
+      .catch(() => {})
   }, [submitted])
 
   const handleSubmit = async () => {
@@ -308,6 +306,7 @@ export default function InsiderDashboard() {
   const [contributions, setContributions] = useState<any[]>([])
   const [contributionStats, setContributionStats] = useState<any>(null)
   const [signals, setSignals] = useState<any[]>([])
+  const [overviewVoices, setOverviewVoices] = useState<any[]>([])
   const [activeNav, setActiveNav] = useState('overview')
 
   const firstName = (session?.user?.name || 'there').split(' ')[0]
@@ -334,6 +333,13 @@ export default function InsiderDashboard() {
           .order('published_at', { ascending: false })
           .limit(5)
         if (sigData) setSignals(sigData)
+
+        // Fetch my submitted voices
+        const voicesRes = await fetch('/api/insider/my-voices')
+        if (voicesRes.ok) {
+          const vData = await voicesRes.json()
+          setOverviewVoices(vData.voices || [])
+        }
       } catch (err) {
         console.error('Insider dashboard fetch error:', err)
       }
@@ -438,6 +444,33 @@ export default function InsiderDashboard() {
               Write a perspective →
             </button>
           </div>
+
+          {/* My perspectives */}
+          {overviewVoices.length > 0 && (
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <div style={{ fontSize: 11, fontWeight: 500, color: '#999', letterSpacing: '0.5px', textTransform: 'uppercase' }}>My perspectives</div>
+                <button onClick={() => setActiveNav('write-voice')} style={{ fontSize: 12, color: '#a58e28', background: 'none', border: 'none', cursor: 'pointer' }}>Write new →</button>
+              </div>
+              <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '4px 20px' }}>
+                {overviewVoices.slice(0, 5).map((v: any, i: number) => {
+                  const st = STATUS_LABELS[v.status] || { label: (v.status || '').toUpperCase(), color: '#999' }
+                  return (
+                    <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: i < Math.min(overviewVoices.length, 5) - 1 ? '1px solid #1e1e1e' : 'none' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, color: '#ccc' }}>{v.title}</div>
+                        <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>{timeAgo(v.created_at)}</div>
+                      </div>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: st.color }}>{st.label}</span>
+                      {v.status === 'published' && v.slug && (
+                        <Link href={`/insights/${v.slug}`} style={{ fontSize: 11, color: '#a58e28', textDecoration: 'none' }}>View →</Link>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Recent contributions */}
           <div style={{ marginBottom: 28 }}>
