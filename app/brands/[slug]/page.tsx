@@ -882,6 +882,39 @@ export default function BrandDetailPage() {
                     </p>
                   </div>
                 )}
+
+                {/* Contributed salary data from salary_benchmarks */}
+                {brand.liveSalaryRows && brand.liveSalaryRows.length > 0 && (
+                  <div className="mt-8">
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">CONTRIBUTED DATA</span>
+                      <div className="flex-1 h-px bg-[#2a2a2a]" />
+                      <span className="text-[11px] text-[#777]">{brand.liveSalaryRows.length} verified {brand.liveSalaryRows.length === 1 ? 'contribution' : 'contributions'}</span>
+                    </div>
+                    {brand.liveSalaryRows.slice(0, 8).map((row: any) => (
+                      <div key={row.id} className="bg-[#222] rounded-xl p-5 border border-[#2a2a2a] mb-3">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <h3 className="text-sm text-white font-medium mb-1">{row.job_title}</h3>
+                            <p className="text-xs text-[#999]">
+                              {[row.department, row.seniority, `${row.city}, ${row.country}`].filter(Boolean).join(' · ')}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm text-[#a58e28] font-medium">
+                              {row.currency || 'EUR'} {row.salary_min?.toLocaleString()} – {row.salary_max?.toLocaleString()}
+                            </div>
+                            {row.salary_median ? (
+                              <div className="text-xs text-[#777] mt-1">
+                                Median: {row.currency || 'EUR'} {row.salary_median.toLocaleString()}
+                              </div>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </>
             ) : brand.liveSalaryRows && brand.liveSalaryRows.length > 0 ? (
               <div className="space-y-4">
