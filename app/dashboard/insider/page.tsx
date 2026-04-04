@@ -24,10 +24,12 @@ const SIGNAL_COLORS: Record<string, string> = {
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  draft: { label: 'UNDER REVIEW', color: '#FF9800' },
-  pending: { label: 'UNDER REVIEW', color: '#FF9800' },
-  approved: { label: 'VERIFIED', color: '#4CAF50' },
+  draft: { label: 'DRAFT', color: '#666' },
+  submitted: { label: 'SUBMITTED', color: '#FF9800' },
+  review: { label: 'UNDER REVIEW', color: '#FF9800' },
+  revision_requested: { label: 'REVISION REQUESTED', color: '#e68a00' },
   published: { label: 'PUBLISHED', color: '#4CAF50' },
+  archived: { label: 'ARCHIVED', color: '#666' },
   rejected: { label: 'REJECTED', color: '#f44336' },
 }
 

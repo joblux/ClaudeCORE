@@ -15,21 +15,17 @@ export async function GET() {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
-  const user = session.user as any
-  const memberName = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.name
-
-  if (!memberName) {
+  const memberId = (session.user as any).memberId
+  if (!memberId) {
     return NextResponse.json({ voices: [] })
   }
 
-  // Filter by author_name matching session user's name
-  // This is the best available approach until member_id is added to bloglux_articles
   const { data, error } = await supabase
     .from('bloglux_articles')
     .select('id, slug, title, status, created_at, category')
     .eq('category', 'Insider Voice')
     .eq('content_origin', 'contributed')
-    .eq('author_name', memberName)
+    .eq('author_id', memberId)
     .order('created_at', { ascending: false })
     .limit(20)
 

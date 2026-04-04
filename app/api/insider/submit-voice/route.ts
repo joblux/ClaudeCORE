@@ -41,6 +41,8 @@ export async function POST(req: NextRequest) {
   const baseSlug = slugify(title)
   const slug = `${baseSlug}-${Date.now().toString(36)}`
 
+  const now = new Date().toISOString()
+
   const { data, error } = await supabase
     .from('bloglux_articles')
     .insert({
@@ -49,16 +51,18 @@ export async function POST(req: NextRequest) {
       excerpt,           // the hook quote shown on the card
       body: bodyText,    // full article body
       category: 'Insider Voice',
+      author_id: user.memberId,
       author_name: authorName || user.name || 'Insider Voice',
       author_role: authorRole || '',
       cover_image_url: coverImageUrl || null,
-      status: 'draft',   // goes to approval queue
+      status: 'submitted',
       content_origin: 'contributed',
+      submitted_at: now,
       read_time_minutes: Math.ceil(bodyText.split(' ').length / 200),
       meta_title: title,
       meta_description: excerpt,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      created_at: now,
+      updated_at: now,
     })
     .select('id, slug')
     .single()
