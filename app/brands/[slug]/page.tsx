@@ -244,6 +244,7 @@ export default function BrandDetailPage() {
               .select('id, brand_slug, brand_name, job_title, department, seniority, city, country, currency, salary_min, salary_max, salary_median, is_published')
               .eq('is_published', true)
               .eq('brand_slug', slug)
+              .eq('content_origin', 'contributed')
               .order('created_at', { ascending: false }),
             supabase
               .from('signals')
@@ -675,7 +676,7 @@ export default function BrandDetailPage() {
                   </div>
                   <div className="w-px bg-[#2a2a2a]" />
                   <div className="flex-1 text-center">
-                    <p className="text-xl font-medium text-white">0</p>
+                    <p className="text-xl font-medium text-white">{brand.liveSalaryRows?.length || 0}</p>
                     <p className="text-[11px] text-[#777] mt-1">Contributions</p>
                   </div>
                   <div className="w-px bg-[#2a2a2a]" />
