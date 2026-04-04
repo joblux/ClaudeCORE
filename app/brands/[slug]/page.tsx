@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 
@@ -17,6 +17,8 @@ const languageOptions = [
   { code: 'ja', label: 'JA', display: '日' },
 ]
 const tabs = ['Overview', 'Culture', 'Career paths', 'Salaries', 'Signals']
+const TAB_SLUG_MAP: Record<string, string> = { 'culture': 'Culture', 'career-paths': 'Career paths', 'salaries': 'Salaries', 'signals': 'Signals' }
+const TAB_TO_SLUG: Record<string, string> = { 'Culture': 'culture', 'Career paths': 'career-paths', 'Salaries': 'salaries', 'Signals': 'signals' }
 
 function getInitials(name: string) {
   const words = name.split(' ')
@@ -209,9 +211,11 @@ function buildBrandData(brandName: string, slug: string, content: any) {
 
 export default function BrandDetailPage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const slug = params?.slug as string
   const isHermes = slug === 'hermes'
-  const [activeTab, setActiveTab] = useState('Overview')
+  const tabParam = searchParams.get('tab') || ''
+  const activeTab = TAB_SLUG_MAP[tabParam] || 'Overview'
   const [openAccordion, setOpenAccordion] = useState<string | null>(null)
   const [brand, setBrand] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -360,19 +364,24 @@ export default function BrandDetailPage() {
 
         {/* Tabs */}
         <div className="flex gap-6 border-b border-[#2a2a2a] mb-8">
-          {tabs.map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className="pb-3 text-sm transition-colors relative"
-              style={{ color: activeTab === tab ? '#fff' : '#555' }}
-            >
-              {tab}
-              {activeTab === tab && (
-                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#a58e28]" />
-              )}
-            </button>
-          ))}
+          {tabs.map(tab => {
+            const tabSlug = TAB_TO_SLUG[tab]
+            const href = tabSlug ? `/brands/${slug}?tab=${tabSlug}` : `/brands/${slug}`
+            return (
+              <Link
+                key={tab}
+                href={href}
+                scroll={false}
+                className="pb-3 text-sm transition-colors relative"
+                style={{ color: activeTab === tab ? '#fff' : '#555' }}
+              >
+                {tab}
+                {activeTab === tab && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#a58e28]" />
+                )}
+              </Link>
+            )
+          })}
         </div>
 
         {/* ═══════════════ OVERVIEW TAB ═══════════════ */}

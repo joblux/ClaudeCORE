@@ -43,6 +43,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ])
 
+  // Brand tab pages (152 brands × 4 tabs = 608 URLs)
+  const brandTabSlugs = ['culture', 'career-paths', 'salaries', 'signals']
+  const brandTabPages: MetadataRoute.Sitemap = BRANDS.flatMap((brand) => [
+    { url: `${baseUrl}/brands/${brand.slug}`, lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.8 },
+    ...brandTabSlugs.map((tab) => ({
+      url: `${baseUrl}/brands/${brand.slug}?tab=${tab}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    })),
+  ])
+
   // Dynamic: BlogLux articles
   const { data: articles } = await supabase
     .from('bloglux_articles')
@@ -67,5 +79,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  return [...staticPages, ...brandPages, ...articlePages, ...careerPages]
+  return [...staticPages, ...brandPages, ...brandTabPages, ...articlePages, ...careerPages]
 }
