@@ -7,13 +7,14 @@ let cachedStatus: { value: boolean; ts: number } | null = null;
 const CACHE_TTL = 30_000; // 30 seconds
 
 const MAINTENANCE_BYPASS = [
-  "/offline",
+  "/holding",
   "/auth/",
   "/api/",
   "/_next/",
   "/favicon.ico",
   "/images/",
   "/fonts/",
+  "/logos/",
 ];
 
 async function getMaintenanceMode(): Promise<boolean> {
@@ -78,7 +79,7 @@ export default withAuth(
     if (!MAINTENANCE_BYPASS.some((p) => pathname.startsWith(p))) {
       const isMaintenanceOn = await getMaintenanceMode();
       if (isMaintenanceOn && token?.role !== "admin") {
-        return NextResponse.redirect(new URL("/offline", req.url));
+        return NextResponse.redirect(new URL("/holding", req.url));
       }
     }
 
