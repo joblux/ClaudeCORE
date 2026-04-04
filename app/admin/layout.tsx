@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Briefcase, Kanban, MessageSquare,
   Users, Building2, Star, FileText, BookOpen,
   Menu, X, LogOut, Mail, Newspaper,
-  Compass, ClipboardList, Settings, Sparkles, MessageCircle
+  Compass, ClipboardList, Settings, Sparkles, MessageCircle, Image
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
@@ -66,6 +66,7 @@ const NAV_SECTIONS = [
   {
     label: 'System',
     items: [
+      { label: 'Media Library', href: '/admin/media', icon: Image },
       { label: 'Contact Messages', href: '/admin/contact', icon: Mail, countKey: 'new_contact' },
       { label: 'Email Templates', href: '/admin/emails', icon: Mail },
       { label: 'Settings', href: '/admin/settings', icon: Settings },
@@ -89,6 +90,7 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   '/admin/luxai': { title: 'LuxAI', subtitle: 'Command center' },
   '/admin/luxai/queue': { title: 'Approval Queue', subtitle: 'Pending AI content' },
   '/admin/luxai/usage': { title: 'LuxAI Usage', subtitle: 'Volume & cost tracking' },
+  '/admin/media': { title: 'Media Library', subtitle: 'Files and images' },
   '/admin/contact': { title: 'Contact Messages', subtitle: 'Inbound enquiries' },
   '/admin/emails': { title: 'Email Templates', subtitle: 'Transactional emails' },
   '/admin/messages/templates': { title: 'Message Templates', subtitle: 'Saved responses' },
