@@ -468,6 +468,31 @@ export default function BrandDetailPage() {
                 <p className="text-[10px] text-[#777] mt-3">Source: public filings, last updated March 2026</p>
               </div>
             </div>
+
+            {/* Related Intelligence */}
+            {(brand.liveSalaryRows?.length > 0 || brand.liveSignals?.length > 0) && (
+              <div className="lg:col-span-3 mt-4 pt-6 border-t border-[#2a2a2a]">
+                <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">RELATED INTELLIGENCE</p>
+                <div className="flex flex-wrap gap-x-6 gap-y-2">
+                  {brand.liveSalaryRows?.length > 0 && (
+                    <Link href={`/brands/${slug}?tab=salaries`} className="text-sm text-[#999] hover:text-[#a58e28] transition-colors">
+                      {brand.liveSalaryRows.length} salary {brand.liveSalaryRows.length === 1 ? 'contribution' : 'contributions'} →
+                    </Link>
+                  )}
+                  {brand.liveSignals?.length > 0 && (
+                    <Link href={`/brands/${slug}?tab=signals`} className="text-sm text-[#999] hover:text-[#a58e28] transition-colors">
+                      {brand.liveSignals.length} {brand.liveSignals.length === 1 ? 'signal' : 'signals'} →
+                    </Link>
+                  )}
+                  <Link href="/insights" className="text-sm text-[#999] hover:text-[#a58e28] transition-colors">
+                    Industry insights →
+                  </Link>
+                  <Link href="/careers" className="text-sm text-[#999] hover:text-[#a58e28] transition-colors">
+                    Open assignments →
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
