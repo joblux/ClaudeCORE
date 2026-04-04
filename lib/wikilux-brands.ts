@@ -301,6 +301,20 @@ export const BRANDS: Brand[] = [
     known_for: "Fine fabrics, Vertical integration, Menswear excellence, Oasi Zegna, Sustainable wool",
   },
   {
+    slug: "brioni",
+    name: "Brioni",
+    country: "Italy",
+    founded: 1945,
+    sector: "Fashion",
+    group: "Kering",
+    headquarters: "Rome",
+    description:
+      "Brioni is the definitive name in Italian luxury tailoring, dressing world leaders, Hollywood icons, and discerning gentlemen since 1945. Founded in Rome, the house is renowned for its bespoke suits crafted by master tailors trained through a rigorous four-year apprenticeship. Now part of Kering, Brioni upholds the highest standards of sartorial excellence and handcrafted Italian menswear.",
+    hiring_profile:
+      "Brioni seeks professionals with a deep appreciation for tailoring tradition, Italian craftsmanship, and discreet luxury. The house values precision, patience, and an understanding of the bespoke client relationship.",
+    known_for: "Bespoke tailoring, Italian menswear, Roman elegance, James Bond suits, Master tailors",
+  },
+  {
     slug: "brunello-cucinelli",
     name: "Brunello Cucinelli",
     country: "Italy",
