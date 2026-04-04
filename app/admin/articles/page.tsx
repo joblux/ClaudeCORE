@@ -231,6 +231,16 @@ export default function AdminArticlesPage() {
 
                 {/* Actions */}
                 <div className="flex items-center justify-end gap-2">
+                  {article.slug && (
+                    <a
+                      href={`/insights/${article.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] font-medium text-[#444444] hover:text-[#8a7622] uppercase tracking-wide transition-colors"
+                    >
+                      View
+                    </a>
+                  )}
                   <Link
                     href={`/admin/articles/${article.id}/edit`}
                     className="text-[11px] font-medium text-[#444444] hover:text-[#8a7622] uppercase tracking-wide transition-colors"

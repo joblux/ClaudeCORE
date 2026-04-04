@@ -28,6 +28,7 @@ export default function EditArticlePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [coverModalOpen, setCoverModalOpen] = useState(false)
+  const [slug, setSlug] = useState('')
   const [form, setForm] = useState({
     title: '',
     category: 'bloglux',
@@ -46,6 +47,7 @@ export default function EditArticlePage() {
       .then((data) => {
         const article = data.articles?.find((a: { id: string }) => a.id === id)
         if (article) {
+          setSlug(article.slug || '')
           setForm({
             title: article.title || '',
             category: article.category || 'bloglux',
@@ -102,6 +104,21 @@ export default function EditArticlePage() {
     <div className="min-h-screen bg-[#f5f5f5]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
 
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
+
+        {slug && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+            <a
+              href={`/insights/${slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontSize: 12, color: '#666', textDecoration: 'none' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#111')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#666')}
+            >
+              Preview on site &rarr;
+            </a>
+          </div>
+        )}
 
         <div style={{ marginBottom: 24 }}>
           <input
