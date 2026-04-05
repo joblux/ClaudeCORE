@@ -114,18 +114,6 @@ export default function BrandsPage() {
           />
         </div>
 
-        {/* Stats */}
-        <div className="flex gap-6 mb-6">
-          <span className="text-xs">
-            <span className="text-[#999]">{brandStats.total}</span>
-            <span className="text-[#999]"> brands</span>
-          </span>
-          <span className="text-xs">
-            <span className="text-[#999]">{brandStats.published}</span>
-            <span className="text-[#999]"> published</span>
-          </span>
-        </div>
-
         {/* Loading */}
         {loading && (
           <div className="flex justify-center py-24">
