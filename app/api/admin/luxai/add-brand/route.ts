@@ -32,7 +32,8 @@ export async function POST(request: Request) {
       slug,
       brand_name: name,
       content: {},
-      status: 'draft',
+      status: 'approved',
+      is_published: true,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     })
