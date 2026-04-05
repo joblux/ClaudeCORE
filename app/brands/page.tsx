@@ -98,7 +98,7 @@ export default function BrandsPage() {
           Brand intelligence
         </h1>
         <p className="text-sm text-[#999] mb-7">
-          Career intelligence across {brandStats.total}+ luxury brands. Salaries, culture, leadership, financial health | in {brandStats.languages} languages.
+          Career intelligence across {brandStats.total}+ luxury brands. Salaries, culture, leadership, financial health.
         </p>
 
         {/* Search */}
@@ -121,10 +121,6 @@ export default function BrandsPage() {
           <span className="text-xs">
             <span className="text-[#999]">{brandStats.published}</span>
             <span className="text-[#999]"> published</span>
-          </span>
-          <span className="text-xs">
-            <span className="text-[#999]">{brandStats.languages}</span>
-            <span className="text-[#999]"> languages</span>
           </span>
         </div>
 
