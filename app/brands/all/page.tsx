@@ -128,7 +128,7 @@ function BrandsAllContent() {
         <div className="jl-container">
           <Link href="/brands" className="jl-overline text-[#a58e28] hover:underline mb-4 inline-block">&larr; Brands</Link>
           <div className="jl-overline-gold mb-3">Brand Intelligence</div>
-          <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a] mb-3">
+          <h1 className="jl-serif text-3xl md:text-4xl font-light text-white mb-3">
             {activeSector === 'All' ? `All ${allBrands.length} Maisons` : `${activeSector} | ${filtered.length} Maisons`}
           </h1>
           <p className="font-sans text-sm text-[#888] max-w-xl">

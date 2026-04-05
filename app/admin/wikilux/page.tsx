@@ -19,6 +19,7 @@ export default function WikiLuxAdminPage() {
   const [loading, setLoading] = useState(true)
   const [activeView, setActiveView] = useState<'list' | 'add'>('list')
   const [regenerating, setRegenerating] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [selectedBrand, setSelectedBrand] = useState('')
 
   // Add new brand form state
@@ -36,11 +37,23 @@ export default function WikiLuxAdminPage() {
 
   async function loadBrands() {
     try {
+      setError(null)
       const res = await fetch('/api/admin/wikilux/brands')
+      if (!res.ok) {
+        setError(`API returned ${res.status}`)
+        setLoading(false)
+        return
+      }
       const data = await res.json()
+      if (!data.success) {
+        setError(data.message || 'Unknown error')
+        setLoading(false)
+        return
+      }
       setBrands(data.brands || [])
-    } catch (error) {
-      console.error('Failed to load brands:', error)
+    } catch (err: any) {
+      setError(err.message || 'Failed to load brands')
+      console.error('Failed to load brands:', err)
     } finally {
       setLoading(false)
     }
@@ -206,6 +219,13 @@ export default function WikiLuxAdminPage() {
             Add New Brand
           </button>
         </div>
+
+        {/* Error Banner */}
+        {error && (
+          <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', padding: '16px', marginBottom: '24px', fontSize: '14px', color: '#991B1B' }}>
+            <strong>Error loading brands:</strong> {error}
+          </div>
+        )}
 
         {/* List View */}
         {activeView === 'list' && (
