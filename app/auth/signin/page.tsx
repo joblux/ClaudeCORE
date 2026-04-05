@@ -58,8 +58,8 @@ function SignInContent() {
     <div className="min-h-screen bg-[#171717] flex items-center justify-center px-4">
       <div className="w-full max-w-[400px]">
         <div className="text-center mb-10">
-          <h1 className="font-['Playfair_Display'] text-[28px] text-white mb-2">Sign in to JOBLUX</h1>
-          <p className="text-[#999] text-sm">Access your intelligence dashboard.</p>
+          <h1 className="font-['Playfair_Display'] text-[1.6rem] text-white mb-2">Sign in to JOBLUX</h1>
+          <p className="text-[#999] text-sm">Access your talent intelligence dashboard.</p>
         </div>
 
         {error && (
@@ -70,19 +70,19 @@ function SignInContent() {
           </div>
         )}
 
-        <form onSubmit={handleEmail} className="mb-6">
+        <form onSubmit={handleEmail} className="mb-6 flex flex-col items-center">
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email address"
             required
-            className="w-full h-12 px-4 rounded-md bg-[#1e1e1e] border border-[#2b2b2b] text-white text-sm placeholder-[#666] outline-none focus:border-[#a58e28] transition-colors mb-3"
+            className="w-[70%] h-12 px-4 rounded-md bg-[#1e1e1e] border border-[#2b2b2b] text-white text-sm placeholder-[#666] outline-none focus:border-[#a58e28] transition-colors mb-3"
           />
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-12 rounded-md bg-white text-[#171717] text-sm font-semibold tracking-wider hover:bg-[#f0f0f0] transition-colors disabled:opacity-50"
+            className="w-[70%] h-12 rounded-md bg-white text-[#171717] text-sm font-semibold tracking-wider hover:bg-[#f0f0f0] transition-colors disabled:opacity-50"
           >
             {isSubmitting ? 'SENDING...' : 'CONTINUE WITH EMAIL'}
           </button>
@@ -114,7 +114,12 @@ function SignInContent() {
         <p className="text-center text-[#666] text-sm">
           Don&apos;t have access?{' '}
           <Link href="/connect" className="text-[#a58e28] hover:underline">
-            Connect
+            Request access
+          </Link>
+        </p>
+        <p className="text-center text-[#666] text-sm mt-2">
+          <Link href="/faq" className="text-[#a58e28] hover:underline">
+            Need help?
           </Link>
         </p>
       </div>
