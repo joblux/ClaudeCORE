@@ -8,10 +8,10 @@ import UserMenu from '@/components/UserMenu'
 import { useMember } from '@/lib/auth-hooks'
 
 const navItems = [
+  { label: 'Careers', href: '/careers' },
   { label: 'Brands', href: '/brands' },
   { label: 'Insights', href: '/insights' },
   { label: 'Signals', href: '/signals' },
-  { label: 'Careers', href: '/careers' },
   { label: 'Events', href: '/events' },
 ]
 
