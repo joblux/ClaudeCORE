@@ -1,8 +1,13 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { BRANDS } from '@/lib/wikilux-brands'
+import { createClient } from '@supabase/supabase-js'
 import { WIKILUX_CATEGORY_ICONS } from '@/lib/sector-icons'
 import WikiLuxSearch from './WikiLuxSearch'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export const metadata: Metadata = {
   title: 'Brand Intelligence | 500+ Luxury Maisons | JOBLUX',
@@ -30,6 +35,7 @@ const sectorLabels: Record<string, string> = {
   'Spirits & Dining': 'Spirits & Fine Dining',
   'Aviation & Yachting': 'Aviation & Yachting',
   'Art & Culture': 'Art & Collectibles',
+  'Other': 'Other',
 }
 
 const sectorSlugs: Record<string, string> = {
@@ -41,22 +47,43 @@ const sectorSlugs: Record<string, string> = {
   'Spirits & Dining': 'spirits',
   'Aviation & Yachting': 'aviation',
   'Art & Culture': 'art',
+  'Other': 'other',
 }
 
-const sectorCounts = BRANDS.reduce<Record<string, number>>((acc, b) => {
-  acc[b.sector] = (acc[b.sector] || 0) + 1
-  return acc
-}, {})
+export default async function WikiLuxPage() {
+  const { data } = await supabase
+    .from('wikilux_content')
+    .select('id, slug, brand_name, sector, country, founded, group_name, headquarters, known_for, description')
+    .eq('is_published', true)
+    .is('deleted_at', null)
+    .order('brand_name')
 
-const categories = Object.entries(sectorCounts).map(([sector, count]) => ({
-  sector,
-  label: sectorLabels[sector] || sector,
-  slug: sectorSlugs[sector] || sector.toLowerCase().replace(/\s+/g, '-'),
-  count,
-  icon: WIKILUX_CATEGORY_ICONS[sector],
-}))
+  const brands = (data || []).map((b: any) => ({
+    slug: b.slug,
+    name: b.brand_name,
+    country: b.country || '',
+    founded: b.founded || 0,
+    sector: b.sector || 'Other',
+    group: b.group_name || '',
+    headquarters: b.headquarters || '',
+    description: b.description || '',
+    hiring_profile: '',
+    known_for: b.known_for || '',
+  }))
 
-export default function WikiLuxPage() {
+  const sectorCounts = brands.reduce<Record<string, number>>((acc, b) => {
+    acc[b.sector] = (acc[b.sector] || 0) + 1
+    return acc
+  }, {})
+
+  const categories = Object.entries(sectorCounts).map(([sector, count]) => ({
+    sector,
+    label: sectorLabels[sector] || sector,
+    slug: sectorSlugs[sector] || sector.toLowerCase().replace(/\s+/g, '-'),
+    count,
+    icon: WIKILUX_CATEGORY_ICONS[sector],
+  }))
+
   return (
     <div>
       {/* HERO */}
@@ -64,15 +91,15 @@ export default function WikiLuxPage() {
         <div className="jl-container-sm text-center">
           <div className="jl-overline-gold mb-4">BRAND INTELLIGENCE</div>
           <h1 className="jl-serif text-4xl md:text-5xl font-light text-white mb-4">
-            500+ luxury maisons. One intelligence source.
+            {brands.length}+ luxury maisons. One intelligence source.
           </h1>
           <p className="font-sans text-sm text-[#888] mb-8 max-w-lg mx-auto">
             Career intelligence, salary benchmarks, interview insights, and hiring signals for every major luxury house | from LVMH to independent ateliers.
           </p>
           <div className="flex items-center justify-center gap-8 flex-wrap">
             {[
-              { n: `${BRANDS.length}+`, l: 'Brands' },
-              { n: `${BRANDS.length * 30}+`, l: 'Pages' },
+              { n: `${brands.length}+`, l: 'Brands' },
+              { n: `${brands.length * 30}+`, l: 'Pages' },
               { n: String(categories.length), l: 'Categories' },
             ].map((s) => (
               <div key={s.l} className="text-center">
@@ -88,15 +115,15 @@ export default function WikiLuxPage() {
 
         <p className="font-sans text-sm text-[#999] leading-relaxed mb-8 max-w-2xl">The brand intelligence directory is built on public data, AI research, and | most importantly | confidential contributions from professionals who have worked inside these houses.</p>
 
-        <WikiLuxSearch brands={BRANDS} categories={categories} />
+        <WikiLuxSearch brands={brands} categories={categories} />
 
         {/* A-Z NOTE */}
         <div className="text-center py-8 border-t border-[#e8e2d8]">
           <p className="font-sans text-sm text-[#888]">
-            Full A&ndash;Z directory of {BRANDS.length}+ luxury brands available.
+            Full A&ndash;Z directory of {brands.length}+ luxury brands available.
             <br />
             <Link href="/wikilux/all" className="text-[#a58e28] hover:underline">
-              Browse all {BRANDS.length} maisons &rarr;
+              Browse all {brands.length} maisons &rarr;
             </Link>
           </p>
         </div>
