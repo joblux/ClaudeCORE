@@ -282,7 +282,7 @@ export default function TrashPage() {
                         style={{
                           flex: 1, padding: '6px 10px', border: '1px solid #fecaca',
                           borderRadius: 4, fontSize: 12, outline: 'none',
-                          background: '#fff',
+                          background: '#fff', color: '#111',
                         }}
                       />
                       <button
