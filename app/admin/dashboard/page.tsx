@@ -55,11 +55,9 @@ const PIPELINE_STAGES = [
 // ── Launch checklist ─────────────────────────────────────────────────────────
 
 const LAUNCH_CHECKLIST = [
-  { label: 'Set Vercel spend cap', done: true },
   { label: 'Rotate Anthropic API key', done: true },
   { label: 'Seed all content', done: true },
-  { label: 'Sentry monitoring live', done: true },
-  { label: 'Rotate GitHub PAT', done: false },
+  { label: 'Rotate GitHub PAT', done: true },
   { label: 'Set up Cloudflare', done: false },
   { label: 'Update NEXTAUTH_URL', done: false },
   { label: 'Update OAuth callbacks', done: false },
@@ -67,6 +65,8 @@ const LAUNCH_CHECKLIST = [
   { label: 'Set 301 redirects', done: false },
   { label: 'Update meta/OG/canonical URLs', done: false },
   { label: 'Set up GA4 + Search Console', done: false },
+  { label: 'Seed BlogLux articles', done: false },
+  { label: 'Add /dashboard to maintenance bypass', done: false },
   { label: 'Toggle offline mode off (launch!)', done: false },
 ]
 
