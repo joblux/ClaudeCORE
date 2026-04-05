@@ -161,11 +161,11 @@ function JoinContent() {
 
 
       <div className="bg-[#1e1e1e] border border-[#2e2e2e] rounded-lg px-8 py-9">
-        <h2 className="text-4xl text-white font-normal text-center mb-1.5" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
+        <h2 className="text-[1.6rem] text-white font-normal text-center mb-1.5" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           Sign in to JOBLUX
         </h2>
         <p className="text-[#888] text-center mb-7" style={{ fontSize: '12px' }}>
-          Access your intelligence dashboard.
+          Access your talent intelligence dashboard.
         </p>
 
         {error === "pending" && (
@@ -194,16 +194,16 @@ function JoinContent() {
           </div>
         ) : (
           <>
-            <form onSubmit={handleMagicLink}>
-              <label htmlFor="email" className="block text-[10px] text-white uppercase tracking-widest mb-2 font-medium">
+            <form onSubmit={handleMagicLink} className="flex flex-col items-center">
+              <label htmlFor="email" className="block text-[10px] text-white uppercase tracking-widest mb-2 font-medium self-start">
                 Email address
               </label>
               <input
                 id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com" required
-                className="w-full px-4 py-3 text-[14px] border border-[#3a3a3a] rounded-md bg-[#2a2a2a] text-white placeholder:text-[#999] focus:outline-none focus:border-[#a58e28] transition-colors"
+                className="w-[70%] px-4 py-3 text-[14px] border border-[#3a3a3a] rounded-md bg-[#2a2a2a] text-white placeholder:text-[#999] focus:outline-none focus:border-[#a58e28] transition-colors"
               />
-              <button type="submit" disabled={isSubmitting} className="w-full mt-3 py-3 bg-white text-black text-[11px] uppercase tracking-widest font-semibold rounded-md hover:bg-[#f0f0f0] transition-colors disabled:opacity-50">
+              <button type="submit" disabled={isSubmitting} className="w-[70%] mt-3 py-3 bg-white text-black text-[11px] uppercase tracking-widest font-semibold rounded-md hover:bg-[#f0f0f0] transition-colors disabled:opacity-50">
                 {isSubmitting ? "Sending..." : "Continue with email"}
               </button>
             </form>
@@ -217,22 +217,22 @@ function JoinContent() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-col gap-2.5">
               <button
                 onClick={() => handleOAuthSignIn("google")}
-                className="flex items-center justify-start gap-1.5 py-2.5 border border-[#3a3a3a] bg-[#2a2a2a] text-white rounded-md hover:border-[#555] hover:bg-[#333] transition-colors"
+                className="w-full py-2.5 border border-[#3a3a3a] bg-[#2a2a2a] text-white rounded-md hover:border-[#555] hover:bg-[#333] transition-colors flex items-center justify-center gap-2"
                 style={{ fontSize: '11px' }}
               >
                 <GoogleIcon />
-                Google
+                Continue with Google
               </button>
               <button
                 onClick={() => handleOAuthSignIn("linkedin")}
-                className="flex items-center justify-start gap-1.5 py-2.5 border border-[#3a3a3a] bg-[#2a2a2a] text-white rounded-md hover:border-[#555] hover:bg-[#333] transition-colors"
+                className="w-full py-2.5 border border-[#3a3a3a] bg-[#2a2a2a] text-white rounded-md hover:border-[#555] hover:bg-[#333] transition-colors flex items-center justify-center gap-2"
                 style={{ fontSize: '11px' }}
               >
                 <LinkedInIcon />
-                LinkedIn
+                Continue with LinkedIn
               </button>
             </div>
           </>
@@ -247,7 +247,7 @@ function JoinContent() {
           </a>
         </p>
         <a href="/faq" className="block text-[#777] hover:text-[#aaa] transition-colors" style={{ fontSize: '11px' }}>
-          Need help signing in? &rarr;
+          Need help?
         </a>
       </div>
     </div>
