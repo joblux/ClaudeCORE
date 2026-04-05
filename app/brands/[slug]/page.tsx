@@ -236,6 +236,7 @@ export default function BrandDetailPage() {
           .select('brand_name, content, status, is_published')
           .eq('slug', slug)
           .eq('is_published', true)
+          .is('deleted_at', null)
           .maybeSingle()
 
         if (!data || !data.content || JSON.stringify(data.content) === '{}') {

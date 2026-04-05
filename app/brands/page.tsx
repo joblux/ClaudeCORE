@@ -37,6 +37,7 @@ export default function BrandsPage() {
         const { data } = await supabase
           .from('wikilux_content')
           .select('slug, brand_name, content, status')
+          .is('deleted_at', null)
           .order('brand_name')
 
         if (!data) {

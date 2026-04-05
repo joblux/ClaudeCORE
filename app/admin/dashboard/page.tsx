@@ -119,16 +119,17 @@ export default function AdminDashboardPage() {
       supabase.from('members').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('search_assignments').select('id', { count: 'exact', head: true }),
       supabase.from('search_assignments').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-      supabase.from('bloglux_articles').select('id', { count: 'exact', head: true }),
+      supabase.from('bloglux_articles').select('id', { count: 'exact', head: true }).is('deleted_at', null),
       fetch('/api/brands/stats', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ total: 0, published: 0 })),
       supabase.from('salary_benchmarks').select('id', { count: 'exact', head: true }),
-      supabase.from('interview_experiences').select('id', { count: 'exact', head: true }),
+      supabase.from('interview_experiences').select('id', { count: 'exact', head: true }).is('deleted_at', null),
     ])
 
     // Count unique houses from interviews
     const { data: houseData } = await supabase
       .from('interview_experiences')
       .select('company')
+      .is('deleted_at', null)
 
     const uniqueHouses = new Set((houseData || []).map(h => h.company).filter(Boolean)).size
 
@@ -171,6 +172,7 @@ export default function AdminDashboardPage() {
       supabase
         .from('contributions')
         .select('id, contribution_type, brand_name, status, created_at')
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
         .limit(6),
     ])

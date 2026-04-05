@@ -63,6 +63,7 @@ export default async function TranslatedBrandPageRoute({
     .from('wikilux_content')
     .select('content, translations')
     .eq('slug', slug)
+    .is('deleted_at', null)
     .maybeSingle()
 
   if (!row?.content) {
@@ -95,6 +96,7 @@ export default async function TranslatedBrandPageRoute({
         .from('wikilux_content')
         .update({ translations })
         .eq('slug', slug)
+        .is('deleted_at', null)
     } catch {
       // Fall back to English if translation fails
       redirect(`/wikilux/${slug}`)

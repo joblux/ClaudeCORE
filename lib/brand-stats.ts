@@ -20,16 +20,19 @@ export async function getBrandStats(): Promise<BrandStats> {
   const [totalRes, publishedRes, emptyRes] = await Promise.all([
     supabase
       .from('wikilux_content')
-      .select('id', { count: 'exact', head: true }),
+      .select('id', { count: 'exact', head: true })
+      .is('deleted_at', null),
     supabase
       .from('wikilux_content')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'approved')
-      .eq('is_published', true),
+      .eq('is_published', true)
+      .is('deleted_at', null),
     supabase
       .from('wikilux_content')
       .select('id', { count: 'exact', head: true })
-      .or('status.neq.approved,is_published.neq.true'),
+      .or('status.neq.approved,is_published.neq.true')
+      .is('deleted_at', null),
   ])
 
   return {

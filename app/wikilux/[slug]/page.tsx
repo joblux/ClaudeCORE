@@ -16,6 +16,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     .from('wikilux_content')
     .select('content')
     .eq('slug', params.slug)
+    .is('deleted_at', null)
     .maybeSingle()
 
   const tagline = cached?.content?.tagline
@@ -58,6 +59,7 @@ export default async function WikiLuxBrandPage({ params }: { params: { slug: str
     .from('wikilux_content')
     .select('content, updated_at, editorial_notes')
     .eq('slug', params.slug)
+    .is('deleted_at', null)
     .maybeSingle()
 
   // Compute related brands on the server (avoids shipping the full BRANDS array to client)

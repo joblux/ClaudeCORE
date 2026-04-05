@@ -109,6 +109,7 @@ function InsightsPageInner() {
         .select('id, slug, title, excerpt, category, published_at, read_time_minutes, cover_image_url')
         .eq('status', 'published')
         .not('category', 'in', '("Research Report","Insider Voice")')
+        .is('deleted_at', null)
         .order('published_at', { ascending: false })
         .limit(6)
 
@@ -128,6 +129,7 @@ function InsightsPageInner() {
         .select('id, slug, title, excerpt, category, published_at')
         .eq('status', 'published')
         .eq('category', 'Research Report')
+        .is('deleted_at', null)
         .order('published_at', { ascending: false })
         .limit(8)
 
@@ -147,6 +149,7 @@ function InsightsPageInner() {
         .select('id, slug, title, excerpt, author_name, author_role, published_at')
         .eq('status', 'published')
         .eq('category', 'Insider Voice')
+        .is('deleted_at', null)
         .order('published_at', { ascending: false })
         .limit(9)
 
@@ -165,6 +168,7 @@ function InsightsPageInner() {
         .from('bloglux_articles')
         .select('id, slug, title, category, published_at, cover_image_url')
         .eq('status', 'published')
+        .is('deleted_at', null)
         .order('published_at', { ascending: false })
         .limit(4)
 

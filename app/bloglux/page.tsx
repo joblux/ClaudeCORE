@@ -24,6 +24,7 @@ export default async function BlogluxPage() {
     .from('bloglux_articles')
     .select('id, title, slug, excerpt, category, author_name, published_at, read_time_minutes, tags, cover_image_url, status')
     .eq('status', 'published')
+    .is('deleted_at', null)
     .order('published_at', { ascending: false })
 
   if (error) {

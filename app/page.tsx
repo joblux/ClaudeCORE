@@ -71,6 +71,7 @@ export default async function HomePage() {
       .from('bloglux_articles')
       .select('slug, title, category, read_time_minutes, published_at')
       .eq('status', 'published')
+      .is('deleted_at', null)
       .order('published_at', { ascending: false })
       .limit(3),
     // Upcoming events
@@ -92,7 +93,8 @@ export default async function HomePage() {
     supabase
       .from('wikilux_content')
       .select('slug, brand_name, content, is_published')
-      .eq('is_published', true),
+      .eq('is_published', true)
+      .is('deleted_at', null),
   ])
 
   // Build brand intelligence: brands sorted by most recent signal

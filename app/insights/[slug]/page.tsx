@@ -20,6 +20,7 @@ async function getArticle(slug: string) {
     .select('*')
     .eq('slug', slug)
     .eq('status', 'published')
+    .is('deleted_at', null)
     .single()
   if (data) {
     // Map columns to expected shape
@@ -48,6 +49,7 @@ async function getRelatedArticles(article: any) {
     .from('bloglux_articles')
     .select('id, title, slug, excerpt, category, author_name, published_at, read_time_minutes, cover_image_url')
     .eq('status', 'published')
+    .is('deleted_at', null)
     .neq('slug', article.slug)
     .eq('category', article.category)
     .order('published_at', { ascending: false })
@@ -104,6 +106,7 @@ export async function generateStaticParams() {
     .from('bloglux_articles')
     .select('slug')
     .eq('status', 'published')
+    .is('deleted_at', null)
   return (data || []).map(a => ({ slug: a.slug }))
 }
 

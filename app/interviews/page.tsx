@@ -20,6 +20,7 @@ export default async function InterviewsPage() {
   const { data: rawData, count } = await supabase
     .from('interview_experiences')
     .select('*', { count: 'exact' })
+    .is('deleted_at', null)
     .order('created_at', { ascending: false })
     .range(0, 11)
 
@@ -47,6 +48,7 @@ export default async function InterviewsPage() {
   const { data: allData } = await supabase
     .from('interview_experiences')
     .select('difficulty, brand_name, brand_slug, department, seniority')
+    .is('deleted_at', null)
 
   const brandSlugs = new Set<string>()
   const brandMap = new Map<string, string>()

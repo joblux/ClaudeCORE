@@ -58,6 +58,7 @@ export default function InterviewsClient({
       let query = supabase
         .from('interview_experiences')
         .select('*', { count: 'exact' })
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
 
       if (filterDepartment) query = query.eq('department', filterDepartment)
@@ -108,6 +109,7 @@ export default function InterviewsClient({
       const { data: allData } = await supabase
         .from('interview_experiences')
         .select('difficulty, brand_name, brand_slug, department, seniority')
+        .is('deleted_at', null)
 
       const brandSlugs = new Set<string>()
       const brandMap = new Map<string, string>()

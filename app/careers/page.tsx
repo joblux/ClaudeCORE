@@ -35,6 +35,7 @@ function CareersPageInner() {
       const { data: interviewsData } = await supabase
         .from('interview_experiences')
         .select('*')
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
 
       setAssignments(assignmentsData || [])
