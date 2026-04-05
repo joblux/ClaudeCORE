@@ -377,7 +377,7 @@ export default function CareersClient({
         {/* TAB 2: SALARY INTELLIGENCE */}
         {activeTab === 'salary' && (
           <div>
-            <p className="text-[11px] text-[#777] mb-4">Modeled estimates refined with vetted market inputs.</p>
+            <p className="text-[11px] text-[#777] mb-4">Modeled compensation refined with vetted market inputs.</p>
             {/* Sub-tabs */}
             <div className="flex gap-0 border-b border-[#2a2a2a] mb-5">
               {[
