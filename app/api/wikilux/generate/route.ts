@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import Anthropic from "@anthropic-ai/sdk";
-import { BRANDS } from "@/lib/wikilux-brands";
 import { buildRichPrompt } from "@/lib/wikilux-prompt";
 
 export const maxDuration = 60;
@@ -26,7 +25,7 @@ export async function POST(req: Request) {
     // Check cache
     const { data: cached } = await supabaseAdmin
       .from("wikilux_content")
-      .select("content, translations, updated_at, editorial_notes")
+      .select("content, translations, updated_at, editorial_notes, brand_name, sector, country, founded, group_name, headquarters, known_for, description")
       .eq("slug", slug)
       .is("deleted_at", null)
       .maybeSingle();
@@ -38,11 +37,30 @@ export async function POST(req: Request) {
       );
     }
 
-    const brand = BRANDS.find((b) => b.slug === slug) || {
-      slug, name: brandName, sector: sector || "Luxury", founded: founded || 0,
-      country: country || "", group: group || "Independent",
-      headquarters: country || "", description: "", hiring_profile: "", known_for: "",
-    };
+    // Build brand object from DB row if available, otherwise from request body
+    const brand = cached
+      ? {
+          slug,
+          name: cached.brand_name || brandName,
+          sector: cached.sector || sector || "Luxury",
+          founded: cached.founded || founded || 0,
+          country: cached.country || country || "",
+          group_name: cached.group_name || group || "Independent",
+          headquarters: cached.headquarters || country || "",
+          description: cached.description || "",
+          known_for: cached.known_for || "",
+        }
+      : {
+          slug,
+          name: brandName,
+          sector: sector || "Luxury",
+          founded: founded || 0,
+          country: country || "",
+          group_name: group || "Independent",
+          headquarters: country || "",
+          description: "",
+          known_for: "",
+        };
 
     const message = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",

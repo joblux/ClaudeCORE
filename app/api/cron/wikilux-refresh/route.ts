@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import Anthropic from "@anthropic-ai/sdk"
-import { BRANDS, Brand } from "@/lib/wikilux-brands"
+import type { BrandInput } from "@/lib/wikilux-prompt"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,7 +12,7 @@ const anthropic = new Anthropic({
   apiKey: process.env.WIKILUX_API_KEY!,
 })
 
-function buildPrompt(brand: Brand) {
+function buildPrompt(brand: BrandInput) {
   return `You are a luxury industry encyclopedia editor writing for JOBLUX | the luxury talents society for industry professionals. Write a comprehensive encyclopedia entry for ${brand.name}.
 
 Return ONLY a valid JSON object with these exact fields (no markdown, no backticks, just pure JSON):
@@ -44,7 +44,7 @@ Return ONLY a valid JSON object with these exact fields (no markdown, no backtic
     { "role": "CEO/President", "note": "brief note on leadership style or recent moves" }
   ],
   "presence": {
-    "headquarters": "${brand.country}",
+    "headquarters": "${brand.country || ''}",
     "key_markets": ["market 1", "market 2", "market 3", "market 4"],
     "boutiques": "approximate number or description of retail presence"
   },
@@ -52,16 +52,16 @@ Return ONLY a valid JSON object with these exact fields (no markdown, no backtic
     "listed": true or false,
     "exchange": "stock exchange name or null",
     "ticker": "ticker symbol or null",
-    "parent_group": "${brand.group}"
+    "parent_group": "${brand.group_name || ''}"
   },
   "facts": ["interesting fact 1", "interesting fact 2", "interesting fact 3", "interesting fact 4", "interesting fact 5"]
 }
 
-Brand details: ${brand.name}, ${brand.sector} sector, founded ${brand.founded}, ${brand.country}, part of ${brand.group}.
+Brand details: ${brand.name}, ${brand.sector || 'Luxury'} sector, founded ${brand.founded || 'unknown'}, ${brand.country || 'unknown'}, part of ${brand.group_name || 'Independent'}.
 Write with genuine expertise. This will be read by luxury industry executives and senior professionals. Be accurate, insightful and authoritative. Include the latest developments and news if relevant.`
 }
 
-async function regenerateBrand(brand: Brand): Promise<{ success: boolean; error?: string }> {
+async function regenerateBrand(brand: BrandInput): Promise<{ success: boolean; error?: string }> {
   try {
     // Delete existing cache
     await supabase.from("wikilux_content").delete().eq("slug", brand.slug)
@@ -104,7 +104,25 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const allBrands = BRANDS
+  // Fetch all active brands from DB
+  const { data: allBrandRows } = await supabase
+    .from("wikilux_content")
+    .select("slug, brand_name, sector, country, founded, group_name, headquarters, known_for, description")
+    .is("deleted_at", null)
+    .order("brand_name")
+
+  const allBrands: BrandInput[] = (allBrandRows || []).map((row: any) => ({
+    slug: row.slug,
+    name: row.brand_name,
+    sector: row.sector || null,
+    country: row.country || null,
+    founded: row.founded || null,
+    group_name: row.group_name || null,
+    headquarters: row.headquarters || null,
+    known_for: row.known_for || null,
+    description: row.description || null,
+  }))
+
   let regenerated = 0
   const errors: string[] = []
 

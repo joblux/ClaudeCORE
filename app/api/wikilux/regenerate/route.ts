@@ -3,8 +3,7 @@ import { createClient } from "@supabase/supabase-js"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import Anthropic from "@anthropic-ai/sdk"
-import { BRANDS, Brand } from "@/lib/wikilux-brands"
-import { buildRichPrompt } from "@/lib/wikilux-prompt"
+import { buildRichPrompt, type BrandInput } from "@/lib/wikilux-prompt"
 
 export const maxDuration = 60
 
@@ -17,7 +16,7 @@ const anthropic = new Anthropic({
   apiKey: process.env.WIKILUX_API_KEY!,
 })
 
-async function regenerateBrand(brand: Brand): Promise<{ success: boolean; error?: string }> {
+async function regenerateBrand(brand: BrandInput): Promise<{ success: boolean; error?: string }> {
   try {
     await supabase.from("wikilux_content").delete().eq("slug", brand.slug)
 
@@ -57,6 +56,20 @@ async function regenerateBrand(brand: Brand): Promise<{ success: boolean; error?
   }
 }
 
+function dbRowToBrandInput(row: any): BrandInput {
+  return {
+    slug: row.slug,
+    name: row.brand_name,
+    sector: row.sector || null,
+    country: row.country || null,
+    founded: row.founded || null,
+    group_name: row.group_name || null,
+    headquarters: row.headquarters || null,
+    known_for: row.known_for || null,
+    description: row.description || null,
+  }
+}
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
   if ((session?.user as any)?.role !== "admin") {
@@ -77,9 +90,17 @@ export async function POST(req: Request) {
   const errors: string[] = []
 
   if (all) {
+    const { data: allBrands } = await supabase
+      .from("wikilux_content")
+      .select("slug, brand_name, sector, country, founded, group_name, headquarters, known_for, description")
+      .is("deleted_at", null)
+      .order("brand_name")
+
+    const brands = (allBrands || []).map(dbRowToBrandInput)
+
     const batchSize = 5
-    for (let i = 0; i < BRANDS.length; i += batchSize) {
-      const batch = BRANDS.slice(i, i + batchSize)
+    for (let i = 0; i < brands.length; i += batchSize) {
+      const batch = brands.slice(i, i + batchSize)
       const results = await Promise.all(batch.map((brand) => regenerateBrand(brand)))
 
       for (const result of results) {
@@ -90,17 +111,23 @@ export async function POST(req: Request) {
         }
       }
 
-      if (i + batchSize < BRANDS.length) {
+      if (i + batchSize < brands.length) {
         await new Promise((resolve) => setTimeout(resolve, 2000))
       }
     }
   } else {
-    const brand = BRANDS.find((b) => b.slug === slug)
-    if (!brand) {
+    const { data: row } = await supabase
+      .from("wikilux_content")
+      .select("slug, brand_name, sector, country, founded, group_name, headquarters, known_for, description")
+      .eq("slug", slug)
+      .is("deleted_at", null)
+      .maybeSingle()
+
+    if (!row) {
       return NextResponse.json({ error: `Brand not found: ${slug}` }, { status: 404 })
     }
 
-    const result = await regenerateBrand(brand)
+    const result = await regenerateBrand(dbRowToBrandInput(row))
     if (result.success) {
       regenerated++
     } else if (result.error) {
