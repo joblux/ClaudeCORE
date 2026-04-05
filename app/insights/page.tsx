@@ -199,7 +199,8 @@ function InsightsPageInner() {
         <h1 className="text-4xl font-normal text-white mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           Insights
         </h1>
-        <p className="text-sm text-[#999] mb-6">Analysis, research, and intelligence from inside the luxury industry.</p>
+        <p className="text-sm text-[#999] mb-1.5">Analysis, research, and intelligence from inside the luxury industry.</p>
+        <p className="text-[11px] text-[#777] mb-6">Editorial reporting blended with insider contributions.</p>
 
         {/* Tabs */}
         <div className="flex border-b border-[#2a2a2a] mb-8">

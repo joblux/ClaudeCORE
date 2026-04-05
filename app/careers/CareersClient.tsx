@@ -283,9 +283,10 @@ export default function CareersClient({
         <h1 className="text-4xl font-normal text-white mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           Careers
         </h1>
-        <p className="text-sm text-[#999] mb-6">
+        <p className="text-sm text-[#999] mb-1.5">
           Confidential opportunities, salary intelligence, and interview preparation
         </p>
+        <p className="text-[11px] text-[#777] mb-6">Real career experiences combined with structured intelligence.</p>
 
         {/* Main Tabs */}
         <div className="flex border-b border-[#2a2a2a] mb-8 gap-0">
@@ -376,6 +377,7 @@ export default function CareersClient({
         {/* TAB 2: SALARY INTELLIGENCE */}
         {activeTab === 'salary' && (
           <div>
+            <p className="text-[11px] text-[#777] mb-4">Modeled estimates refined with vetted market inputs.</p>
             {/* Sub-tabs */}
             <div className="flex gap-0 border-b border-[#2a2a2a] mb-5">
               {[
