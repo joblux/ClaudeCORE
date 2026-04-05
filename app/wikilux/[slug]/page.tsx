@@ -2,40 +2,38 @@ export const dynamic = 'force-dynamic'
 
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
-import { BRANDS } from '@/lib/wikilux-brands'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import WikiLuxBrandClient from './WikiLuxBrandClient'
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const brand = BRANDS.find(b => b.slug === params.slug)
-  if (!brand) return { title: 'Brand Not Found | JOBLUX' }
-
-  // Try to get content for better description
   const supabase = createServerSupabaseClient()
-  const { data: cached } = await supabase
+  const { data: brand } = await supabase
     .from('wikilux_content')
-    .select('content')
+    .select('brand_name, sector, content')
     .eq('slug', params.slug)
     .is('deleted_at', null)
     .maybeSingle()
 
-  const tagline = cached?.content?.tagline
+  if (!brand) return { title: 'Brand Not Found | JOBLUX' }
+
+  const tagline = brand.content?.tagline
+  const name = brand.brand_name
   const desc = tagline
-    ? `${brand.name}: ${tagline}. Careers, salaries, interview insights and intelligence on JOBLUX.`
-    : `${brand.name} careers, salaries, interview insights and intelligence. Explore opportunities at ${brand.name} on JOBLUX.`
+    ? `${name}: ${tagline}. Careers, salaries, interview insights and intelligence on JOBLUX.`
+    : `${name} careers, salaries, interview insights and intelligence. Explore opportunities at ${name} on JOBLUX.`
 
   return {
-    title: `${brand.name} | Careers, Salaries & Intelligence | JOBLUX`,
+    title: `${name} | Careers, Salaries & Intelligence | JOBLUX`,
     description: desc,
     openGraph: {
-      title: `${brand.name} | JOBLUX WikiLux`,
+      title: `${name} | JOBLUX WikiLux`,
       description: desc,
       url: `https://www.joblux.com/wikilux/${params.slug}`,
-      images: [`/api/og?title=${encodeURIComponent(brand.name)}&subtitle=${encodeURIComponent(brand.sector || 'Luxury')}&type=wikilux`],
+      images: [`/api/og?title=${encodeURIComponent(name)}&subtitle=${encodeURIComponent(brand.sector || 'Luxury')}&type=wikilux`],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${brand.name} | JOBLUX WikiLux`,
+      title: `${name} | JOBLUX WikiLux`,
       description: desc,
     },
     alternates: {
@@ -45,41 +43,72 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export async function generateStaticParams() {
-  return BRANDS.map(b => ({ slug: b.slug }))
+  const supabase = createServerSupabaseClient()
+  const { data } = await supabase
+    .from('wikilux_content')
+    .select('slug')
+    .eq('is_published', true)
+    .is('deleted_at', null)
+  return (data || []).map(b => ({ slug: b.slug }))
 }
 
 export default async function WikiLuxBrandPage({ params }: { params: { slug: string } }) {
-  const brand = BRANDS.find(b => b.slug === params.slug)
-  if (!brand) notFound()
-
   const supabase = createServerSupabaseClient()
 
-  // Fetch wiki content
-  const { data: cached } = await supabase
+  // Fetch brand metadata + content in one query
+  const { data: row } = await supabase
     .from('wikilux_content')
-    .select('content, updated_at, editorial_notes')
+    .select('slug, brand_name, sector, country, founded, group_name, headquarters, known_for, description, content, updated_at, editorial_notes')
     .eq('slug', params.slug)
     .is('deleted_at', null)
     .maybeSingle()
 
-  // Compute related brands on the server (avoids shipping the full BRANDS array to client)
-  const related = BRANDS
-    .filter(b => b.sector === brand.sector && b.slug !== brand.slug)
+  if (!row) notFound()
+
+  // Map DB row to shape expected by WikiLuxBrandClient (uses brand.group, not brand.group_name)
+  const brand = {
+    slug: row.slug,
+    name: row.brand_name,
+    sector: row.sector || '',
+    country: row.country || '',
+    founded: row.founded || 0,
+    group: row.group_name || '',
+    headquarters: row.headquarters || '',
+    known_for: row.known_for || '',
+    description: row.description || '',
+    hiring_profile: '',
+  }
+
+  // Related brands: same sector, different slug, randomized
+  const { data: relatedRows } = await supabase
+    .from('wikilux_content')
+    .select('slug, brand_name, sector, country, founded')
+    .eq('sector', row.sector)
+    .neq('slug', params.slug)
+    .eq('is_published', true)
+    .is('deleted_at', null)
+    .limit(10)
+
+  const related = (relatedRows || [])
+    .map(r => ({
+      slug: r.slug,
+      name: r.brand_name,
+      sector: r.sector || '',
+      country: r.country || '',
+      founded: r.founded || 0,
+    }))
     .sort(() => 0.5 - Math.random())
     .slice(0, 3)
-
-  // Insights and images are fetched client-side via API routes
-  // (insights need service role key join; images come from Unsplash API)
 
   return (
     <WikiLuxBrandClient
       brand={brand}
-      initialContent={cached?.content || null}
+      initialContent={row.content || null}
       initialImages={[]}
       initialInsights={[]}
       insightsTotal={0}
-      contentUpdatedAt={cached?.updated_at || null}
-      editorialNotes={cached?.editorial_notes || null}
+      contentUpdatedAt={row.updated_at || null}
+      editorialNotes={row.editorial_notes || null}
       related={related}
     />
   )

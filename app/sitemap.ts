@@ -1,6 +1,5 @@
 import { MetadataRoute } from 'next'
 import { createClient } from '@supabase/supabase-js'
-import { BRANDS } from '@/lib/wikilux-brands'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://joblux.com'
@@ -35,24 +34,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
   ]
 
-  // WikiLux brand pages | all languages (150 brands × 9 languages = 1,350 URLs)
+  // Fetch published brands from DB (source of truth)
+  const { data: brands } = await supabase
+    .from('wikilux_content')
+    .select('slug')
+    .eq('is_published', true)
+    .is('deleted_at', null)
+
+  const brandSlugs = (brands || []).map(b => b.slug)
+
+  // WikiLux brand pages | all languages
   const wikiLuxLangs = ['fr', 'ar', 'it', 'es', 'de', 'zh', 'ja', 'ru']
-  const brandPages: MetadataRoute.Sitemap = BRANDS.flatMap((brand) => [
-    { url: `${baseUrl}/wikilux/${brand.slug}`, lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.8 },
+  const brandPages: MetadataRoute.Sitemap = brandSlugs.flatMap((slug) => [
+    { url: `${baseUrl}/wikilux/${slug}`, lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.8 },
     ...wikiLuxLangs.map((lang) => ({
-      url: `${baseUrl}/wikilux/${brand.slug}/${lang}`,
+      url: `${baseUrl}/wikilux/${slug}/${lang}`,
       lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     })),
   ])
 
-  // Brand tab pages (152 brands × 4 tabs = 608 URLs)
+  // Brand tab pages (published brands × 4 tabs)
   const brandTabSlugs = ['culture', 'career-paths', 'salaries', 'signals']
-  const brandTabPages: MetadataRoute.Sitemap = BRANDS.flatMap((brand) => [
-    { url: `${baseUrl}/brands/${brand.slug}`, lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.8 },
+  const brandTabPages: MetadataRoute.Sitemap = brandSlugs.flatMap((slug) => [
+    { url: `${baseUrl}/brands/${slug}`, lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.8 },
     ...brandTabSlugs.map((tab) => ({
-      url: `${baseUrl}/brands/${brand.slug}?tab=${tab}`,
+      url: `${baseUrl}/brands/${slug}?tab=${tab}`,
       lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
@@ -64,6 +72,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .from('bloglux_articles')
     .select('slug, updated_at')
     .eq('status', 'published')
+    .is('deleted_at', null)
   const articlePages: MetadataRoute.Sitemap = (articles || []).map((article) => ({
     url: `${baseUrl}/insights/${article.slug}`,
     lastModified: article.updated_at ? new Date(article.updated_at) : new Date(),

@@ -3,7 +3,6 @@
 import { useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { BRANDS, Brand } from '@/lib/wikilux-brands'
 import { SUPPORTED_LANGUAGES } from '@/lib/wikilux-prompt'
 import { HreflangTags } from '@/components/wikilux/HreflangTags'
 
@@ -50,21 +49,35 @@ function getFounderInitials(name: string | undefined): string {
   return '?'
 }
 
+interface TranslatedBrand {
+  slug: string
+  name: string
+  sector: string
+  country: string
+  founded: number
+  group_name: string
+  known_for: string
+}
+
+interface RelatedBrand {
+  slug: string
+  name: string
+  sector: string
+  country: string
+  founded: number
+}
+
 interface TranslatedBrandPageProps {
-  brand: Brand
+  brand: TranslatedBrand
   content: Record<string, unknown>
   lang: string
   slug: string
+  related?: RelatedBrand[]
 }
 
-export function TranslatedBrandPage({ brand, content, lang, slug }: TranslatedBrandPageProps) {
+export function TranslatedBrandPage({ brand, content, lang, slug, related = [] }: TranslatedBrandPageProps) {
   const isRtl = lang === 'ar'
-  const knownForTags = brand.known_for.split(',').map((t) => t.trim())
-
-  const related = useMemo(() => {
-    return BRANDS.filter((b) => b.sector === brand.sector && b.slug !== brand.slug)
-      .sort(() => 0.5 - Math.random()).slice(0, 3)
-  }, [brand])
+  const knownForTags = brand.known_for ? brand.known_for.split(',').map((t) => t.trim()).filter(Boolean) : []
 
   const c = content as Record<string, any>
 
@@ -93,12 +106,12 @@ export function TranslatedBrandPage({ brand, content, lang, slug }: TranslatedBr
           <h1 className="jl-serif text-[2.5rem] md:text-[4rem] font-light text-white mb-3 leading-tight">{brand.name}</h1>
           {c.tagline && <p className="jl-editorial text-[#a58e28] mb-6 max-w-2xl">{c.tagline}</p>}
           <div className="flex items-center gap-3 flex-wrap">
-            <span className="font-sans text-[0.65rem] text-[#999] border border-[#444] px-3 py-1.5 tracking-wider uppercase">Est. {brand.founded}</span>
-            <span className="font-sans text-[0.65rem] text-[#999] border border-[#444] px-3 py-1.5 tracking-wider uppercase">{brand.country}</span>
-            <span className="font-sans text-[0.65rem] text-[#999] border border-[#444] px-3 py-1.5 tracking-wider uppercase">{brand.sector}</span>
-            <span className="font-sans text-[0.65rem] text-[#a58e28] border border-[#a58e28] px-3 py-1.5 tracking-wider uppercase">{brand.group}</span>
+            {brand.founded > 0 && <span className="font-sans text-[0.65rem] text-[#999] border border-[#444] px-3 py-1.5 tracking-wider uppercase">Est. {brand.founded}</span>}
+            {brand.country && <span className="font-sans text-[0.65rem] text-[#999] border border-[#444] px-3 py-1.5 tracking-wider uppercase">{brand.country}</span>}
+            {brand.sector && <span className="font-sans text-[0.65rem] text-[#999] border border-[#444] px-3 py-1.5 tracking-wider uppercase">{brand.sector}</span>}
+            {brand.group_name && <span className="font-sans text-[0.65rem] text-[#a58e28] border border-[#a58e28] px-3 py-1.5 tracking-wider uppercase">{brand.group_name}</span>}
             {(() => {
-              const stockInfo = getStockInfo(brand.group, brand.name)
+              const stockInfo = getStockInfo(brand.group_name, brand.name)
               if (stockInfo === 'private') return <span className="font-sans text-[0.65rem] text-[#777] border border-[#444] px-3 py-1.5 tracking-wider uppercase">Privately Held</span>
               if (stockInfo) return <span className="font-sans text-[0.65rem] text-[#a58e28] border border-[#a58e28] px-3 py-1.5 tracking-wider">{stockInfo.exchange}: {stockInfo.ticker}</span>
               return null
@@ -152,10 +165,12 @@ export function TranslatedBrandPage({ brand, content, lang, slug }: TranslatedBr
                     </div>
                   </div>
                 )}
-                <div className="border border-[#e8e2d8] p-5">
-                  <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-3">Known For</span>
-                  <div className="flex flex-wrap gap-2">{knownForTags.map((tag) => (<span key={tag} className="font-sans text-[0.6rem] text-[#a58e28] border border-[#e8e2d8] px-2.5 py-1">{tag}</span>))}</div>
-                </div>
+                {knownForTags.length > 0 && (
+                  <div className="border border-[#e8e2d8] p-5">
+                    <span className="font-sans text-[0.65rem] text-[#888] uppercase tracking-wider block mb-3">Known For</span>
+                    <div className="flex flex-wrap gap-2">{knownForTags.map((tag) => (<span key={tag} className="font-sans text-[0.6rem] text-[#a58e28] border border-[#e8e2d8] px-2.5 py-1">{tag}</span>))}</div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -234,7 +249,7 @@ export function TranslatedBrandPage({ brand, content, lang, slug }: TranslatedBr
       {/* CROSS-LINKS */}
       <div className="border-t border-[#e8e2d8]">
         <div className="jl-container py-8">
-          <Link href={`/interviews/${brand.slug}`} className="jl-card group flex items-center justify-between border-[#a58e28] bg-[#fafaf5]">
+          <Link href={`/interviews/${slug}`} className="jl-card group flex items-center justify-between border-[#a58e28] bg-[#fafaf5]">
             <div><div className="jl-overline-gold mb-1">Interview Intelligence</div><div className="font-sans text-sm font-semibold text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors">Interview experiences at {brand.name} &rarr;</div></div>
             <span className="jl-badge-gold text-[0.6rem] hidden sm:inline-block">View</span>
           </Link>

@@ -1,6 +1,18 @@
-import type { Brand } from './wikilux-brands'
+export interface BrandInput {
+  slug: string
+  name: string
+  sector?: string | null
+  country?: string | null
+  founded?: number | null
+  group_name?: string | null
+  /** @deprecated Use group_name. Kept for backward compatibility during migration. */
+  group?: string | null
+  headquarters?: string | null
+  known_for?: string | null
+  description?: string | null
+}
 
-export function buildRichPrompt(brand: Brand): string {
+export function buildRichPrompt(brand: BrandInput): string {
   return `You are writing a comprehensive brand intelligence profile for WikiLux by JOBLUX, the luxury talents society. Write authoritative, editorial-quality content in the style of Business of Fashion or the Financial Times luxury coverage.
 
 You MUST generate ALL of the following sections. Each section should be a substantial paragraph of 150-300 words. Write in authoritative editorial prose — informative, precise, never promotional. Include specific dates, names, and facts.
@@ -32,19 +44,19 @@ Return ONLY a valid JSON object (no markdown, no backticks, just pure JSON) with
     { "role": "CEO/President", "note": "brief note on leadership style or recent moves" }
   ],
   "key_facts": {
-    "headquarters_city": "${brand.headquarters}",
-    "headquarters_country": "${brand.country}",
-    "founded_year": ${brand.founded},
+    "headquarters_city": "${brand.headquarters || ''}",
+    "headquarters_country": "${brand.country || ''}",
+    "founded_year": ${brand.founded || 0},
     "founder_name": "founder full name",
-    "parent_group": "${brand.group}",
-    "sector": "${brand.sector}",
+    "parent_group": "${brand.group_name || brand.group || ''}",
+    "sector": "${brand.sector || ''}",
     "subsectors": ["subsector 1", "subsector 2"],
     "estimated_employees": "approximate number or range",
     "key_markets": ["market 1", "market 2", "market 3", "market 4"],
     "website_url": "official website URL"
   },
   "presence": {
-    "headquarters": "${brand.country}",
+    "headquarters": "${brand.country || ''}",
     "key_markets": ["market 1", "market 2", "market 3", "market 4"],
     "boutiques": "approximate number or description of retail presence"
   },
@@ -52,12 +64,12 @@ Return ONLY a valid JSON object (no markdown, no backticks, just pure JSON) with
     "listed": true,
     "exchange": "stock exchange name or null",
     "ticker": "ticker symbol or null",
-    "parent_group": "${brand.group}"
+    "parent_group": "${brand.group_name || brand.group || ''}"
   },
   "facts": ["interesting fact 1", "interesting fact 2", "interesting fact 3", "interesting fact 4", "interesting fact 5"]
 }
 
-Brand details: ${brand.name}, ${brand.sector} sector, founded ${brand.founded}, ${brand.country}, part of ${brand.group}.
+Brand details: ${brand.name}, ${brand.sector || 'Luxury'} sector, founded ${brand.founded || 'unknown'}, ${brand.country || 'unknown'}, part of ${brand.group_name || brand.group || 'Independent'}.
 Write with genuine expertise. This will be read by luxury industry executives and senior professionals. Be accurate, insightful and authoritative. Every sentence should add real information. Do NOT use markdown formatting inside the JSON values — plain text only with no headers or bullets.`
 }
 

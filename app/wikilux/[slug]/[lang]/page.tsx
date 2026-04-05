@@ -1,6 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
-import { BRANDS } from '@/lib/wikilux-brands'
 import { SUPPORTED_LANGUAGES, buildTranslationPrompt } from '@/lib/wikilux-prompt'
 import Anthropic from '@anthropic-ai/sdk'
 import { TranslatedBrandPage } from './TranslatedBrandPage'
@@ -20,8 +19,17 @@ function getSupabase() {
 }
 
 export async function generateMetadata({ params }: { params: { slug: string; lang: string } }) {
-  const brand = BRANDS.find((b) => b.slug === params.slug)
-  if (!brand || !VALID_LANGS.includes(params.lang)) return {}
+  if (!VALID_LANGS.includes(params.lang)) return {}
+
+  const supabase = getSupabase()
+  const { data: brand } = await supabase
+    .from('wikilux_content')
+    .select('brand_name')
+    .eq('slug', params.slug)
+    .is('deleted_at', null)
+    .maybeSingle()
+
+  if (!brand) return {}
 
   const baseUrl = 'https://joblux.com'
   const langName = LANG_NAMES[params.lang] || params.lang
@@ -32,8 +40,8 @@ export async function generateMetadata({ params }: { params: { slug: string; lan
   }
 
   return {
-    title: `${brand.name} | WikiLux | JOBLUX`,
-    description: `${brand.name} luxury career intelligence in ${langName} | history, careers, salary insights, interview tips.`,
+    title: `${brand.brand_name} | WikiLux | JOBLUX`,
+    description: `${brand.brand_name} luxury career intelligence in ${langName} | history, careers, salary insights, interview tips.`,
     alternates: {
       canonical: `${baseUrl}/wikilux/${params.slug}/${params.lang}`,
       languages: alternates,
@@ -53,21 +61,29 @@ export default async function TranslatedBrandPageRoute({
     redirect(`/wikilux/${slug}`)
   }
 
-  // Find brand
-  const brand = BRANDS.find((b) => b.slug === slug)
-  if (!brand) notFound()
-
-  // Fetch content + translations from Supabase
   const supabase = getSupabase()
+
+  // Fetch brand metadata + content + translations
   const { data: row } = await supabase
     .from('wikilux_content')
-    .select('content, translations')
+    .select('brand_name, sector, country, founded, group_name, headquarters, known_for, content, translations')
     .eq('slug', slug)
     .is('deleted_at', null)
     .maybeSingle()
 
-  if (!row?.content) {
+  if (!row || !row.content) {
     redirect(`/wikilux/${slug}`)
+  }
+
+  // Map DB row to shape expected by TranslatedBrandPage
+  const brand = {
+    slug,
+    name: row.brand_name,
+    sector: row.sector || '',
+    country: row.country || '',
+    founded: row.founded || 0,
+    group_name: row.group_name || '',
+    known_for: row.known_for || '',
   }
 
   const englishContent = row.content as Record<string, unknown>
@@ -106,12 +122,34 @@ export default async function TranslatedBrandPageRoute({
   // Merge: translated text sections over English base (keeps key_facts, stock, etc.)
   const mergedContent = { ...englishContent, ...translatedContent }
 
+  // Related brands: same sector, different slug, published only
+  const { data: relatedRows } = await supabase
+    .from('wikilux_content')
+    .select('slug, brand_name, sector, country, founded')
+    .eq('sector', row.sector)
+    .neq('slug', slug)
+    .eq('is_published', true)
+    .is('deleted_at', null)
+    .limit(10)
+
+  const related = (relatedRows || [])
+    .map(r => ({
+      slug: r.slug,
+      name: r.brand_name,
+      sector: r.sector || '',
+      country: r.country || '',
+      founded: r.founded || 0,
+    }))
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 3)
+
   return (
     <TranslatedBrandPage
       brand={brand}
       content={mergedContent}
       lang={lang}
       slug={slug}
+      related={related}
     />
   )
 }
