@@ -2,8 +2,6 @@
 
 import { usePathname } from 'next/navigation'
 import { Header } from './Header'
-import { SignalsTicker } from './SignalsTicker'
-import { StockTicker } from './StockTicker'
 import { Footer } from './Footer'
 
 export function LayoutShell({ children }: { children: React.ReactNode }) {
@@ -20,8 +18,6 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Header />
-      <SignalsTicker />
-      <StockTicker />
       {children}
       <Footer />
     </>
