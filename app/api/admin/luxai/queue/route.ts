@@ -33,6 +33,7 @@ export async function GET() {
       .select('id, slug, brand_name, content, editorial_notes, editorial_updated_at, status, updated_at, created_at')
       .eq('status', 'draft')
       .neq('content', '{}')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
 
     if (wikiluxError) console.error('WikiLux fetch error:', wikiluxError)

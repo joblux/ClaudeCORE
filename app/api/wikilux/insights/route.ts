@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
       .eq("status", "approved")
       .eq("contribution_type", "wikilux_insight")
       .eq("brand_slug", slug)
+      .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(limit)
 

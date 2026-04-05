@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
       .from('wikilux_content')
       .select('*')
       .eq('slug', slug)
+      .is('deleted_at', null)
       .maybeSingle()
 
     if (error) {
@@ -66,6 +67,7 @@ export async function PUT(request: NextRequest) {
         updated_at: new Date().toISOString()
       })
       .eq('slug', slug)
+      .is('deleted_at', null)
       .select()
       .maybeSingle()
 

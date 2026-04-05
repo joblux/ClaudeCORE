@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
   let query = supabase
     .from('contributions')
     .select('*, members!contributions_member_id_fkey(full_name, first_name, last_name, avatar_url)', { count: 'exact' })
+    .is('deleted_at', null)
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
 

@@ -18,7 +18,7 @@ export async function GET() {
   try {
     const [unreadRes, contribRes, commentsRes, internshipsRes, contactRes, consultRes, pendingMembersRes, pendingBusinessRes] = await Promise.all([
       supabase.from('conversations').select('id', { count: 'exact', head: true }).gt('unread_count', 0),
-      supabase.from('contributions').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('contributions').select('id', { count: 'exact', head: true }).eq('status', 'pending').is('deleted_at', null),
       supabase.from('bloglux_comments').select('id', { count: 'exact', head: true }).eq('is_approved', false),
       supabase.from('internship_listings').select('id', { count: 'exact', head: true }).eq('status', 'pending_review'),
       supabase.from('contact_messages').select('id', { count: 'exact', head: true }).eq('status', 'new'),

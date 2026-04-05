@@ -21,6 +21,7 @@ export async function GET() {
     const { count: generated } = await supabase
       .from('wikilux_content')
       .select('*', { count: 'exact', head: true })
+      .is('deleted_at', null)
 
     // Brands with insights
     const { data: insightBrands } = await supabase
@@ -28,6 +29,7 @@ export async function GET() {
       .select('brand_slug')
       .eq('contribution_type', 'wikilux_insight')
       .eq('status', 'approved')
+      .is('deleted_at', null)
 
     const uniqueInsightBrands = new Set((insightBrands || []).map(c => c.brand_slug))
 
@@ -36,6 +38,7 @@ export async function GET() {
       .from('wikilux_content')
       .select('*', { count: 'exact', head: true })
       .not('editorial_notes', 'is', null)
+      .is('deleted_at', null)
 
     // Top contributed brands
     const { data: topRaw } = await supabase
@@ -43,6 +46,7 @@ export async function GET() {
       .select('brand_slug, brand_name')
       .eq('contribution_type', 'wikilux_insight')
       .eq('status', 'approved')
+      .is('deleted_at', null)
 
     const brandCounts: Record<string, { brand_name: string; count: number }> = {}
     for (const c of topRaw || []) {
@@ -60,6 +64,7 @@ export async function GET() {
       .from('wikilux_content')
       .select('slug, brand_name, updated_at')
       .lt('updated_at', sixtyDaysAgo)
+      .is('deleted_at', null)
       .order('updated_at', { ascending: true })
       .limit(20)
 
@@ -68,6 +73,7 @@ export async function GET() {
       .from('wikilux_content')
       .select('last_regenerated_at')
       .not('last_regenerated_at', 'is', null)
+      .is('deleted_at', null)
       .order('last_regenerated_at', { ascending: false })
       .limit(1)
 

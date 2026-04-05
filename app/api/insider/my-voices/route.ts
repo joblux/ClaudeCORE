@@ -26,6 +26,7 @@ export async function GET() {
     .eq('category', 'Insider Voice')
     .eq('content_origin', 'contributed')
     .eq('author_id', memberId)
+    .is('deleted_at', null)
     .order('created_at', { ascending: false })
     .limit(20)
 

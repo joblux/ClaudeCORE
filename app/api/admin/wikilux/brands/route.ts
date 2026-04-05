@@ -14,6 +14,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('wikilux_content')
       .select('slug, brand_name, status, is_published, last_regenerated_at, regeneration_count, content_version')
+      .is('deleted_at', null)
       .order('brand_name')
     
     if (error) throw error
@@ -101,14 +102,15 @@ export async function DELETE(request: Request) {
     
     const { error } = await supabase
       .from('wikilux_content')
-      .delete()
+      .update({ deleted_at: new Date().toISOString(), deleted_by: null })
       .eq('slug', slug)
-    
+      .is('deleted_at', null)
+
     if (error) throw error
-    
+
     return NextResponse.json({
       success: true,
-      message: 'Brand deleted successfully'
+      message: 'Brand moved to trash'
     })
   } catch (error: any) {
     return NextResponse.json({

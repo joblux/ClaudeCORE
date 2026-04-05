@@ -59,6 +59,7 @@ export async function PUT(
       .from('contributions')
       .select('*')
       .eq('id', id)
+      .is('deleted_at', null)
       .single()
 
     if (fetchError || !contribution) {
@@ -217,6 +218,7 @@ export async function GET(
     .from('contributions')
     .select('*, members!contributions_member_id_fkey(full_name, first_name, last_name, email, avatar_url)')
     .eq('id', id)
+    .is('deleted_at', null)
     .single()
 
   if (error || !contribution) {
@@ -249,6 +251,7 @@ export async function GET(
       .from('interview_experiences')
       .select('*')
       .eq('contribution_id', id)
+      .is('deleted_at', null)
       .single()
     detail = data
   }

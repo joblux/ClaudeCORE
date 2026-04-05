@@ -22,9 +22,9 @@ export async function GET(req: NextRequest) {
   // ── Pending counts for tab badges ─────────────────────────────────────────
   if (type === 'counts') {
     const [voices, salary, interviews, brand] = await Promise.all([
-      supabase.from('bloglux_articles').select('id', { count: 'exact', head: true }).eq('category', 'Insider Voice').in('status', ['draft', 'submitted', 'review']),
-      supabase.from('contributions').select('id', { count: 'exact', head: true }).eq('contribution_type', 'salary_data').eq('status', 'pending'),
-      supabase.from('contributions').select('id', { count: 'exact', head: true }).eq('contribution_type', 'interview_experience').eq('status', 'pending'),
+      supabase.from('bloglux_articles').select('id', { count: 'exact', head: true }).eq('category', 'Insider Voice').in('status', ['draft', 'submitted', 'review']).is('deleted_at', null),
+      supabase.from('contributions').select('id', { count: 'exact', head: true }).eq('contribution_type', 'salary_data').eq('status', 'pending').is('deleted_at', null),
+      supabase.from('contributions').select('id', { count: 'exact', head: true }).eq('contribution_type', 'interview_experience').eq('status', 'pending').is('deleted_at', null),
       supabase.from('brand_contributions').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     ])
     return NextResponse.json({
@@ -43,6 +43,7 @@ export async function GET(req: NextRequest) {
       .from('bloglux_articles')
       .select('id, slug, title, excerpt, body, author_name, author_role, cover_image_url, status, created_at, content_origin')
       .eq('category', 'Insider Voice')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
 
     if (status !== 'all') query = query.eq('status', status)
@@ -58,6 +59,7 @@ export async function GET(req: NextRequest) {
       .from('contributions')
       .select('id, member_id, brand_name, brand_slug, status, created_at, points_awarded')
       .eq('contribution_type', 'salary_data')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
 
     if (status !== 'all') query = query.eq('status', status)
@@ -84,6 +86,7 @@ export async function GET(req: NextRequest) {
       .from('contributions')
       .select('id, member_id, brand_name, brand_slug, status, created_at, points_awarded')
       .eq('contribution_type', 'interview_experience')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
 
     if (status !== 'all') query = query.eq('status', status)
@@ -97,6 +100,7 @@ export async function GET(req: NextRequest) {
         .from('interview_experiences')
         .select('*')
         .eq('contribution_id', c.id)
+        .is('deleted_at', null)
         .maybeSingle()
       return { ...c, interview: iv }
     }))
@@ -137,9 +141,10 @@ export async function POST(req: NextRequest) {
     if (action === 'delete') {
       const { error } = await supabase
         .from('bloglux_articles')
-        .delete()
+        .update({ deleted_at: now, deleted_by: adminId || null })
         .eq('id', id)
         .eq('content_origin', 'contributed')
+        .is('deleted_at', null)
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       return NextResponse.json({ ok: true, deleted: true })
     }
@@ -168,13 +173,13 @@ export async function POST(req: NextRequest) {
   // ── Salary ────────────────────────────────────────────────────────────────
   if (type === 'salary') {
     if (action === 'delete') {
-      // Child tables first, then parent
-      const { error: e1 } = await supabase.from('salary_benchmarks').delete().eq('contribution_id', id)
-      if (e1) console.error('delete salary_benchmarks failed:', e1.message)
-      const { error: e2 } = await supabase.from('salary_contributions').delete().eq('contribution_id', id)
-      if (e2) console.error('delete salary_contributions failed:', e2.message)
-      const { error: e3 } = await supabase.from('contributions').delete().eq('id', id)
-      if (e3) return NextResponse.json({ error: e3.message }, { status: 500 })
+      // Soft-delete parent contribution only (salary_benchmarks/salary_contributions are promoted copies)
+      const { error } = await supabase
+        .from('contributions')
+        .update({ deleted_at: now, deleted_by: adminId || null })
+        .eq('id', id)
+        .is('deleted_at', null)
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       return NextResponse.json({ ok: true, deleted: true })
     }
     const newStatus = action === 'approve' ? 'approved' : 'rejected'
@@ -231,9 +236,18 @@ export async function POST(req: NextRequest) {
   // ── Interviews ────────────────────────────────────────────────────────────
   if (type === 'interviews') {
     if (action === 'delete') {
-      const { error: e1 } = await supabase.from('interview_experiences').delete().eq('contribution_id', id)
-      if (e1) console.error('delete interview_experiences failed:', e1.message)
-      const { error: e2 } = await supabase.from('contributions').delete().eq('id', id)
+      // Soft-delete both parent contribution and child interview_experiences together
+      const { error: e1 } = await supabase
+        .from('interview_experiences')
+        .update({ deleted_at: now, deleted_by: adminId || null })
+        .eq('contribution_id', id)
+        .is('deleted_at', null)
+      if (e1) console.error('soft-delete interview_experiences failed:', e1.message)
+      const { error: e2 } = await supabase
+        .from('contributions')
+        .update({ deleted_at: now, deleted_by: adminId || null })
+        .eq('id', id)
+        .is('deleted_at', null)
       if (e2) return NextResponse.json({ error: e2.message }, { status: 500 })
       return NextResponse.json({ ok: true, deleted: true })
     }

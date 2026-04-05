@@ -45,6 +45,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     .from("bloglux_articles")
     .update(updateData)
     .eq("id", params.id)
+    .is("deleted_at", null)
     .select()
     .maybeSingle();
 
@@ -65,8 +66,9 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
 
   const { error } = await supabaseAdmin
     .from("bloglux_articles")
-    .delete()
-    .eq("id", params.id);
+    .update({ deleted_at: new Date().toISOString(), deleted_by: null })
+    .eq("id", params.id)
+    .is("deleted_at", null);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 

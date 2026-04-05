@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Briefcase, Kanban, MessageSquare,
   Users, Building2, Star, FileText, BookOpen,
   Menu, X, LogOut, Mail, Newspaper,
-  Compass, ClipboardList, Settings, Sparkles, MessageCircle, Image
+  Compass, ClipboardList, Settings, Sparkles, MessageCircle, Image, Trash2
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
@@ -70,6 +70,7 @@ const NAV_SECTIONS = [
       { label: 'Contact Messages', href: '/admin/contact', icon: Mail, countKey: 'new_contact' },
       { label: 'Email Templates', href: '/admin/emails', icon: Mail },
       { label: 'Settings', href: '/admin/settings', icon: Settings },
+      { label: 'Trash', href: '/admin/trash', icon: Trash2 },
     ],
   },
 ]
@@ -95,6 +96,7 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   '/admin/emails': { title: 'Email Templates', subtitle: 'Transactional emails' },
   '/admin/messages/templates': { title: 'Message Templates', subtitle: 'Saved responses' },
   '/admin/settings': { title: 'Settings', subtitle: 'Platform configuration' },
+  '/admin/trash': { title: 'Trash', subtitle: 'Deleted content' },
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

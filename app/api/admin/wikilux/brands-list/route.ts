@@ -11,6 +11,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('wikilux_content')
       .select('slug, brand_name, status, is_published')
+      .is('deleted_at', null)
       .order('brand_name')
 
     if (error) throw error

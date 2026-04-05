@@ -28,6 +28,7 @@ export async function POST(req: Request) {
       .from("wikilux_content")
       .select("content, translations, updated_at, editorial_notes")
       .eq("slug", slug)
+      .is("deleted_at", null)
       .maybeSingle();
 
     if (cached?.content) {

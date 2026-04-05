@@ -24,6 +24,7 @@ export async function POST(
         .from('bloglux_articles')
         .select('views_count')
         .eq('id', id)
+        .is('deleted_at', null)
         .single()
 
       if (fetchError) {
