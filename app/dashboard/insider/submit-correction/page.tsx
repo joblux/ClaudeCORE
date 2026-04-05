@@ -1,17 +1,33 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
-import { BRANDS } from '@/lib/wikilux-brands'
+import { createClient } from '@supabase/supabase-js'
 
-const sortedBrands = [...BRANDS].sort((a, b) => a.name.localeCompare(b.name))
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export default function SubmitCorrectionPage() {
   const { data: session } = useSession()
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
+  const [brandOptions, setBrandOptions] = useState<{ slug: string; name: string }[]>([])
+
+  useEffect(() => {
+    async function fetchBrands() {
+      const { data } = await supabase
+        .from('wikilux_content')
+        .select('slug, brand_name')
+        .is('deleted_at', null)
+        .order('brand_name')
+      setBrandOptions((data || []).map((b: any) => ({ slug: b.slug, name: b.brand_name })))
+    }
+    fetchBrands()
+  }, [])
 
   const [form, setForm] = useState({
     brand_slug: '',
@@ -90,7 +106,7 @@ export default function SubmitCorrectionPage() {
             <label style={labelStyle}>Brand *</label>
             <select value={form.brand_slug} onChange={e => set('brand_slug', e.target.value)} style={{ ...inputStyle, appearance: 'auto' as const }}>
               <option value="">Select a brand</option>
-              {sortedBrands.map(b => <option key={b.slug} value={b.slug}>{b.name}</option>)}
+              {brandOptions.map(b => <option key={b.slug} value={b.slug}>{b.name}</option>)}
             </select>
           </div>
 

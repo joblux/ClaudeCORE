@@ -1,9 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
-import { BRANDS } from '@/lib/wikilux-brands'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 const CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'AED', 'SGD', 'HKD', 'JPY', 'CNY']
 const SENIORITY_LEVELS = ['Intern', 'Junior', 'Mid-level', 'Senior', 'Director', 'VP', 'C-Suite']
@@ -12,13 +17,24 @@ const EMPLOYMENT_TYPES = ['Permanent', 'Fixed-term', 'Freelance', 'Interim']
 const EMPLOYMENT_TYPE_DB: Record<string, string> = { 'Permanent': 'permanent', 'Fixed-term': 'fixed-term', 'Freelance': 'freelance', 'Interim': 'interim' }
 const DEPARTMENTS = ['Retail', 'Marketing', 'Digital', 'Merchandising', 'Finance', 'HR', 'Operations', 'Design', 'Communications', 'Supply chain', 'E-commerce', 'Legal', 'IT', 'Other']
 
-const sortedBrands = [...BRANDS].sort((a, b) => a.name.localeCompare(b.name))
-
 export default function SubmitSalaryPage() {
   const { data: session } = useSession()
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
+  const [brandOptions, setBrandOptions] = useState<{ slug: string; name: string }[]>([])
+
+  useEffect(() => {
+    async function fetchBrands() {
+      const { data } = await supabase
+        .from('wikilux_content')
+        .select('slug, brand_name')
+        .is('deleted_at', null)
+        .order('brand_name')
+      setBrandOptions((data || []).map((b: any) => ({ slug: b.slug, name: b.brand_name })))
+    }
+    fetchBrands()
+  }, [])
 
   const [form, setForm] = useState({
     brand_slug: '',
@@ -41,7 +57,7 @@ export default function SubmitSalaryPage() {
 
   const set = (field: string, value: string | boolean) => setForm(f => ({ ...f, [field]: value }))
 
-  const selectedBrand = sortedBrands.find(b => b.slug === form.brand_slug)
+  const selectedBrand = brandOptions.find(b => b.slug === form.brand_slug)
 
   const handleSubmit = async () => {
     if (!form.job_title || !form.city || !form.country || !form.base_salary) {
@@ -128,7 +144,7 @@ export default function SubmitSalaryPage() {
             <label style={labelStyle}>Brand / Maison {optionalSpan}</label>
             <select value={form.brand_slug} onChange={e => set('brand_slug', e.target.value)} style={{ ...inputStyle, appearance: 'auto' as const }}>
               <option value="">Select a brand (or leave blank)</option>
-              {sortedBrands.map(b => <option key={b.slug} value={b.slug}>{b.name}</option>)}
+              {brandOptions.map(b => <option key={b.slug} value={b.slug}>{b.name}</option>)}
             </select>
           </div>
 
