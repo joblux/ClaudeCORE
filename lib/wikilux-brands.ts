@@ -2148,4 +2148,18 @@ export const BRANDS: Brand[] = [
       "Artcurial seeks cultured, French-market-savvy professionals with expertise in the auction house's signature categories and Parisian art world. Candidates should bring specialist knowledge, French cultural fluency, and commercial skills suited to France's leading independent auction house.",
     known_for: "Rétromobile motor car sales, Hergé/Tintin auctions, Champs-Élysées location, French art market leader, Bandes dessinées",
   },
+  {
+    slug: "santoni",
+    name: "Santoni",
+    country: "Italy",
+    founded: 1975,
+    sector: "Fashion",
+    group: "Independent",
+    headquarters: "Corridonia",
+    description:
+      "Santoni is an Italian luxury footwear house founded by Andrea Santoni in the Marche region, known for handcrafted shoes that combine artisanal tradition with contemporary design. The maison's patina finishing technique, requiring up to nine coats of hand-applied color, has become its signature. Santoni represents the pinnacle of Italian shoemaking craft, bridging classic menswear heritage with modern luxury lifestyle.",
+    hiring_profile:
+      "Santoni seeks detail-oriented professionals with a passion for Italian craftsmanship and leather goods excellence. Candidates should bring an appreciation for artisanal production, retail sophistication, and the ability to communicate the value of handmade luxury footwear to discerning clients.",
+    known_for: "Hand-painted patina, Italian shoemaking craft, Marche artisanal heritage, Men's luxury footwear, Nine-coat finishing",
+  },
 ]
