@@ -56,7 +56,7 @@ export function Footer() {
             <Link href="/faq" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Help &amp; FAQ</Link>
             <Link href="/privacy" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Privacy</Link>
             <Link href="/terms" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Terms</Link>
-            <Link href="/contact" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Contact</Link>
+            <Link href="/faq" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Contact</Link>
           </div>
 
         </div>
