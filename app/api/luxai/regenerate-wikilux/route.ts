@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       
       const { data, error } = await supabase
         .from('wikilux_content')
-        .select('slug, brand_name')
+        .select('slug, brand_name, status')
         .eq('slug', body.brand_slug)
         .maybeSingle()
       
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     } else {
       const { data, error } = await supabase
         .from('wikilux_content')
-        .select('slug, brand_name')
+        .select('slug, brand_name, status')
         .order('slug')
       
       if (error) throw error
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
     for (let i = 0; i < brandsToProcess.length; i += BATCH_SIZE) {
       const batch = brandsToProcess.slice(i, i + BATCH_SIZE)
       
-      const batchPromises = batch.map((brand: any) => generateBrandContent(brand.slug, brand.brand_name))
+      const batchPromises = batch.map((brand: any) => generateBrandContent(brand.slug, brand.brand_name, brand.status))
       const batchResults = await Promise.allSettled(batchPromises)
       
       batchResults.forEach((result, idx) => {
@@ -132,14 +132,14 @@ export async function POST(request: Request) {
   }
 }
 
-async function generateBrandContent(slug: string, brandName: string) {
+async function generateBrandContent(slug: string, brandName: string, previousStatus: string) {
   const content = await callClaude(brandName)
-  
+
   const { error } = await supabase
     .from('wikilux_content')
     .update({
       content: content.content,
-      status: 'pending',
+      status: previousStatus === 'approved' ? 'approved' : 'pending',
       last_regenerated_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     })
