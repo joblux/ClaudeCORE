@@ -73,15 +73,9 @@ const LAUNCH_CHECKLIST = [
 const CHECKLIST_DONE = LAUNCH_CHECKLIST.filter(c => c.done).length
 const CHECKLIST_VISIBLE = 8
 
-// ── System status (TODO: pull from Vercel/Sentry/Supabase APIs in future) ──
+// ── System status (TODO: pull from Coolify/Supabase/Anthropic APIs in future) ──
 
-const SYSTEM_STATUS = [
-  { service: 'Vercel', detail: 'Live · Last deploy 2h ago', status: 'green' as const },
-  { service: 'Supabase', detail: 'Healthy · Free tier', status: 'green' as const },
-  { service: 'Sentry', detail: '0 errors today', status: 'green' as const },
-  { service: 'Anthropic credit', detail: '~$10 remaining', status: 'amber' as const },
-  { service: 'WikiLux', detail: 'Celine gen failed', status: 'amber' as const },
-]
+const SYSTEM_STATUS: { service: string; detail: string; status: 'green' | 'amber' | 'red' }[] = []
 
 // ── Main component ───────────────────────────────────────────────────────────
 
@@ -364,7 +358,7 @@ export default function AdminDashboardPage() {
                 </div>
               ))}
             </div>
-            {/* TODO: Pull real data from Vercel, Sentry, Supabase, Anthropic APIs */}
+            {/* TODO: Pull real data from Coolify, Supabase, Anthropic APIs when available */}
           </div>
         </div>
 
