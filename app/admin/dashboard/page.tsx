@@ -126,7 +126,7 @@ export default function AdminDashboardPage() {
       supabase.from('search_assignments').select('id', { count: 'exact', head: true }),
       supabase.from('search_assignments').select('id', { count: 'exact', head: true }).eq('status', 'active'),
       supabase.from('articles').select('id', { count: 'exact', head: true }),
-      supabase.from('wikilux_brands').select('id', { count: 'exact', head: true }),
+      fetch('/api/brands/stats', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ total: 0, published: 0 })),
       supabase.from('salary_benchmarks').select('id', { count: 'exact', head: true }),
       supabase.from('interview_experiences').select('id', { count: 'exact', head: true }),
     ])
@@ -138,18 +138,14 @@ export default function AdminDashboardPage() {
 
     const uniqueHouses = new Set((houseData || []).map(h => h.company).filter(Boolean)).size
 
-    // Count failed WikiLux brands (if any have error status)
-    // TODO: Add error tracking column to wikilux_brands table
-    const failedBrands = 0
-
     setKpis({
       members: totalMembers.count ?? 0,
       pendingMembers: pendingMembers.count ?? 0,
       assignments: totalAssignments.count ?? 0,
       activeAssignments: activeAssignments.count ?? 0,
       articles: totalArticles.count ?? 0,
-      brands: totalBrands.count ?? 0,
-      failedBrands,
+      brands: totalBrands.total ?? 0,
+      failedBrands: 0,
       salaries: totalSalaries.count ?? 0,
       interviews: totalInterviews.count ?? 0,
       houses: uniqueHouses,

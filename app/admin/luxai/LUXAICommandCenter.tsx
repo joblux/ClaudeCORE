@@ -41,12 +41,16 @@ export default function LUXAICommandCenter() {
 
   const loadHealth = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/luxai/usage')
-      const d = await res.json()
+      const [usageRes, statsRes] = await Promise.all([
+        fetch('/api/admin/luxai/usage'),
+        fetch('/api/brands/stats', { cache: 'no-store' }),
+      ])
+      const d = await usageRes.json()
+      const brandStats = await statsRes.json().catch(() => ({ total: 0, published: 0, empty: 0 }))
       setHealth({
-        brands_total: d.stats?.brands_total || 0,
-        brands_live: d.stats?.brands_live || 0,
-        brands_empty: d.stats?.brands_empty || 0,
+        brands_total: brandStats.total || 0,
+        brands_live: brandStats.published || 0,
+        brands_empty: brandStats.empty || 0,
         signals: d.stats?.signals || 0,
         articles: d.stats?.articles || 0,
         salary_brands: d.stats?.salary_brands || 0,

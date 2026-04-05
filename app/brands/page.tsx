@@ -29,6 +29,7 @@ export default function BrandsPage() {
   const [brands, setBrands] = useState<any[]>([])
   const [sectors, setSectors] = useState<string[]>(['All'])
   const [loading, setLoading] = useState(true)
+  const [brandStats, setBrandStats] = useState<{ total: number; published: number; languages: number }>({ total: 0, published: 0, languages: 9 })
 
   useEffect(() => {
     async function fetchBrands() {
@@ -70,6 +71,10 @@ export default function BrandsPage() {
       }
     }
     fetchBrands()
+    fetch('/api/brands/stats', { cache: 'no-store' })
+      .then(r => r.json())
+      .then(d => setBrandStats({ total: d.total || 0, published: d.published || 0, languages: d.languages || 9 }))
+      .catch(() => {})
   }, [])
 
   const filtered = brands.filter(b => {
@@ -93,7 +98,7 @@ export default function BrandsPage() {
           Brand intelligence
         </h1>
         <p className="text-sm text-[#999] mb-7">
-          Career intelligence across {brands.length}+ luxury brands. Salaries, culture, leadership, financial health | in 9 languages.
+          Career intelligence across {brandStats.total}+ luxury brands. Salaries, culture, leadership, financial health | in {brandStats.languages} languages.
         </p>
 
         {/* Search */}
@@ -110,15 +115,15 @@ export default function BrandsPage() {
         {/* Stats */}
         <div className="flex gap-6 mb-6">
           <span className="text-xs">
-            <span className="text-[#999]">{brands.length}</span>
+            <span className="text-[#999]">{brandStats.total}</span>
             <span className="text-[#999]"> brands</span>
           </span>
           <span className="text-xs">
-            <span className="text-[#999]">{brands.filter(b => b.status === 'approved' && b.has_content).length}</span>
+            <span className="text-[#999]">{brandStats.published}</span>
             <span className="text-[#999]"> published</span>
           </span>
           <span className="text-xs">
-            <span className="text-[#999]">9</span>
+            <span className="text-[#999]">{brandStats.languages}</span>
             <span className="text-[#999]"> languages</span>
           </span>
         </div>
