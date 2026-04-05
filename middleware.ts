@@ -12,6 +12,7 @@ const MAINTENANCE_BYPASS = [
   "/api/auth",
   "/api/",
   "/admin",
+  "/dashboard",
   "/bloglux",
   "/insights",
   "/_next/",
