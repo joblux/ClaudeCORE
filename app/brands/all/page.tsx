@@ -35,7 +35,7 @@ function groupByLetter(brands: Brand[]) {
 
 export default function BrandsAllPage() {
   return (
-    <Suspense fallback={<div className="jl-container py-20 text-center"><div className="inline-block w-8 h-8 border-2 border-[#e8e2d8] border-t-[#a58e28] rounded-full animate-spin" /></div>}>
+    <Suspense fallback={<div className="jl-container py-20 text-center"><div className="inline-block w-8 h-8 border-2 border-[#2a2a2a] border-t-[#a58e28] rounded-full animate-spin" /></div>}>
       <BrandsAllContent />
     </Suspense>
   )
@@ -116,7 +116,7 @@ function BrandsAllContent() {
   if (loading) {
     return (
       <div className="jl-container py-20 text-center">
-        <div className="inline-block w-8 h-8 border-2 border-[#e8e2d8] border-t-[#a58e28] rounded-full animate-spin" />
+        <div className="inline-block w-8 h-8 border-2 border-[#2a2a2a] border-t-[#a58e28] rounded-full animate-spin" />
       </div>
     )
   }
@@ -124,14 +124,14 @@ function BrandsAllContent() {
   return (
     <div>
       {/* HERO */}
-      <div className="border-b-2 border-[#1a1a1a] py-10">
+      <div className="border-b-2 border-[#2a2a2a] py-10">
         <div className="jl-container">
           <Link href="/brands" className="jl-overline text-[#a58e28] hover:underline mb-4 inline-block">&larr; Brands</Link>
           <div className="jl-overline-gold mb-3">Brand Intelligence</div>
           <h1 className="jl-serif text-3xl md:text-4xl font-light text-white mb-3">
             {activeSector === 'All' ? `All ${allBrands.length} Maisons` : `${activeSector} | ${filtered.length} Maisons`}
           </h1>
-          <p className="font-sans text-sm text-[#888] max-w-xl">
+          <p className="font-sans text-sm text-[#999] max-w-xl">
             The complete A&ndash;Z directory of luxury brands across fashion, watches, jewellery, automotive, hospitality, beauty, spirits, aviation and art.
           </p>
         </div>
@@ -159,7 +159,7 @@ function BrandsAllContent() {
               className={`font-sans text-[0.65rem] font-medium tracking-wider uppercase px-3 py-1.5 border transition-colors ${
                 activeSector === sector
                   ? 'border-[#a58e28] text-[#a58e28] bg-[#a58e28]/5'
-                  : 'border-[#e8e2d8] text-[#888] hover:border-[#aaa] hover:text-[#999]'
+                  : 'border-[#2a2a2a] text-[#999] hover:border-[#3a3a3a] hover:text-[#ccc]'
               }`}
             >
               {sector === 'All' ? `All (${allBrands.length})` : `${sector} (${allBrands.filter((b) => b.sector === sector).length})`}
@@ -168,12 +168,12 @@ function BrandsAllContent() {
         </div>
 
         {/* Letter jump nav */}
-        <div className="flex flex-wrap gap-1 mb-10 border-b border-[#e8e2d8] pb-4">
+        <div className="flex flex-wrap gap-1 mb-10 border-b border-[#2a2a2a] pb-4">
           {grouped.map(([letter]) => (
             <a
               key={letter}
               href={`#letter-${letter}`}
-              className="w-8 h-8 flex items-center justify-center font-sans text-xs font-semibold text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-[#a58e28] transition-colors"
+              className="w-8 h-8 flex items-center justify-center font-sans text-xs font-semibold text-[#e0e0e0] hover:bg-[#2a2a2a] hover:text-[#a58e28] transition-colors"
             >
               {letter}
             </a>
@@ -182,14 +182,14 @@ function BrandsAllContent() {
 
         {/* A–Z Groups */}
         {grouped.length === 0 ? (
-          <p className="font-sans text-sm text-[#888] py-8 text-center">No brands found in this category.</p>
+          <p className="font-sans text-sm text-[#999] py-8 text-center">No brands found in this category.</p>
         ) : (
           grouped.map(([letter, brands]) => (
             <div key={letter} id={`letter-${letter}`} className="mb-10">
               <div className="flex items-center gap-3 mb-4">
                 <span className="jl-serif text-3xl font-light text-[#a58e28]">{letter}</span>
-                <div className="flex-1 h-px bg-[#e8e2d8]" />
-                <span className="font-sans text-[0.6rem] text-[#aaa]">{brands.length} brand{brands.length !== 1 ? 's' : ''}</span>
+                <div className="flex-1 h-px bg-[#2a2a2a]" />
+                <span className="font-sans text-[0.6rem] text-[#777]">{brands.length} brand{brands.length !== 1 ? 's' : ''}</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -197,18 +197,18 @@ function BrandsAllContent() {
                   <Link
                     key={brand.slug}
                     href={`/brands/${brand.slug}`}
-                    className="flex items-center gap-3 p-3 border border-[#f0ece4] hover:border-[#a58e28] transition-colors group"
+                    className="flex items-center gap-3 p-3 border border-[#2a2a2a] hover:border-[#a58e28] transition-colors group"
                   >
-                    <div className="w-9 h-9 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0 group-hover:bg-[#a58e28] transition-colors">
+                    <div className="w-9 h-9 bg-[#2a2a2a] flex items-center justify-center flex-shrink-0 group-hover:bg-[#a58e28] transition-colors">
                       <span className="jl-serif text-sm text-[#a58e28] group-hover:text-[#1a1a1a]">
                         {brand.name[0]}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-sans text-sm font-medium text-[#1a1a1a] group-hover:text-[#a58e28] transition-colors">
+                      <div className="font-sans text-sm font-medium text-[#e0e0e0] group-hover:text-[#a58e28] transition-colors">
                         {brand.name}
                       </div>
-                      <div className="font-sans text-[0.6rem] text-[#aaa] truncate">
+                      <div className="font-sans text-[0.6rem] text-[#999] truncate">
                         {brand.sector} &middot; {brand.country} &middot; Est. {brand.founded}
                       </div>
                     </div>
@@ -220,7 +220,7 @@ function BrandsAllContent() {
         )}
 
         {/* Back to top */}
-        <div className="text-center pt-6 border-t border-[#e8e2d8]">
+        <div className="text-center pt-6 border-t border-[#2a2a2a]">
           <a href="#" className="jl-overline text-[#a58e28] hover:underline">&uarr; Back to top</a>
         </div>
 
