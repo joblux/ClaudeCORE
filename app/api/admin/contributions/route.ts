@@ -143,7 +143,6 @@ export async function POST(req: NextRequest) {
         .from('bloglux_articles')
         .update({ deleted_at: now, deleted_by: adminId || null })
         .eq('id', id)
-        .eq('content_origin', 'contributed')
         .is('deleted_at', null)
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       return NextResponse.json({ ok: true, deleted: true })
