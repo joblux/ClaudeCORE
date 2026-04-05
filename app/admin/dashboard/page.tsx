@@ -66,7 +66,7 @@ const LAUNCH_CHECKLIST = [
   { label: 'Update meta/OG/canonical URLs', done: false },
   { label: 'Set up GA4 + Search Console', done: false },
   { label: 'Seed BlogLux articles', done: false },
-  { label: 'Add /dashboard to maintenance bypass', done: false },
+  { label: 'Add /dashboard to maintenance bypass', done: true },
   { label: 'Toggle offline mode off (launch!)', done: false },
 ]
 
