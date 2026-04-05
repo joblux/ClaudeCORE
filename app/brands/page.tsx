@@ -37,6 +37,7 @@ export default function BrandsPage() {
         const { data } = await supabase
           .from('wikilux_content')
           .select('slug, brand_name, content, status')
+          .eq('is_published', true)
           .is('deleted_at', null)
           .order('brand_name')
 
@@ -99,7 +100,7 @@ export default function BrandsPage() {
           Brand intelligence
         </h1>
         <p className="text-sm text-[#999] mb-7">
-          Career intelligence across {brandStats.total}+ luxury brands. Salaries, culture, leadership, financial health.
+          Career intelligence across {brandStats.published}+ luxury brands. Salaries, culture, leadership, financial health.
         </p>
 
         {/* Search */}
