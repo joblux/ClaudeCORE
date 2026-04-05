@@ -1,11 +1,27 @@
 'use client'
 
-import { useState, useMemo, Suspense } from 'react'
+import { useState, useEffect, useMemo, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { BRANDS, type Brand } from '@/lib/wikilux-brands'
+import { createClient } from '@supabase/supabase-js'
 
-const sectors = ['All', ...Array.from(new Set(BRANDS.map((b) => b.sector))).sort()]
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+interface Brand {
+  slug: string
+  name: string
+  country: string
+  founded: number
+  sector: string
+  group: string
+  headquarters: string
+  description: string
+  hiring_profile: string
+  known_for: string
+}
 
 function groupByLetter(brands: Brand[]) {
   const groups: Record<string, Brand[]> = {}
@@ -30,18 +46,55 @@ function WikiLuxAllContent() {
   const initialSearch = searchParams.get('search') || ''
   const initialSector = searchParams.get('sector') || 'All'
 
-  const [activeSector, setActiveSector] = useState(() => {
-    if (initialSector === 'All') return 'All'
-    // Match sector slug to sector name
-    const match = BRANDS.find(b => b.sector.toLowerCase().replace(/\s+/g, '-').replace(/&/g, '') === initialSector.replace(/&/g, ''))
-    return match ? match.sector : 'All'
-  })
+  const [allBrands, setAllBrands] = useState<Brand[]>([])
+  const [loading, setLoading] = useState(true)
+  const [activeSector, setActiveSector] = useState('All')
   const [search, setSearch] = useState(initialSearch)
+  const [sectorResolved, setSectorResolved] = useState(false)
+
+  useEffect(() => {
+    async function fetchBrands() {
+      const { data } = await supabase
+        .from('wikilux_content')
+        .select('id, slug, brand_name, sector, country, founded, group_name, headquarters, known_for, description')
+        .eq('is_published', true)
+        .is('deleted_at', null)
+        .order('brand_name')
+
+      const mapped = (data || []).map((b: any) => ({
+        slug: b.slug,
+        name: b.brand_name,
+        country: b.country || '',
+        founded: b.founded || 0,
+        sector: b.sector || 'Other',
+        group: b.group_name || '',
+        headquarters: b.headquarters || '',
+        description: b.description || '',
+        hiring_profile: '',
+        known_for: b.known_for || '',
+      }))
+
+      setAllBrands(mapped)
+
+      // Resolve initial sector from URL slug after data is loaded
+      if (initialSector !== 'All') {
+        const match = mapped.find((b: Brand) => b.sector.toLowerCase().replace(/\s+/g, '-').replace(/&/g, '') === initialSector.replace(/&/g, ''))
+        setActiveSector(match ? match.sector : 'All')
+      }
+      setSectorResolved(true)
+      setLoading(false)
+    }
+    fetchBrands()
+  }, [initialSector])
+
+  const sectors = useMemo(() => {
+    return ['All', ...Array.from(new Set(allBrands.map((b) => b.sector))).sort()]
+  }, [allBrands])
 
   const filtered = useMemo(() => {
     let list = activeSector === 'All'
-      ? BRANDS
-      : BRANDS.filter((b) => b.sector === activeSector)
+      ? allBrands
+      : allBrands.filter((b) => b.sector === activeSector)
 
     if (search.trim()) {
       const q = search.toLowerCase().trim()
@@ -51,14 +104,22 @@ function WikiLuxAllContent() {
           b.sector.toLowerCase().includes(q) ||
           b.country.toLowerCase().includes(q) ||
           b.group.toLowerCase().includes(q) ||
-          b.known_for.toLowerCase().includes(q)
+          (b.known_for || '').toLowerCase().includes(q)
       )
     }
 
     return [...list].sort((a, b) => a.name.localeCompare(b.name))
-  }, [activeSector, search])
+  }, [allBrands, activeSector, search])
 
   const grouped = useMemo(() => groupByLetter(filtered), [filtered])
+
+  if (loading) {
+    return (
+      <div className="jl-container py-20 text-center">
+        <div className="inline-block w-8 h-8 border-2 border-[#e8e2d8] border-t-[#a58e28] rounded-full animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -68,7 +129,7 @@ function WikiLuxAllContent() {
           <Link href="/wikilux" className="jl-overline text-[#a58e28] hover:underline mb-4 inline-block">&larr; WikiLux</Link>
           <div className="jl-overline-gold mb-3">WikiLux Encyclopedia</div>
           <h1 className="jl-serif text-3xl md:text-4xl font-light text-[#1a1a1a] mb-3">
-            {activeSector === 'All' ? `All ${BRANDS.length} Maisons` : `${activeSector} | ${filtered.length} Maisons`}
+            {activeSector === 'All' ? `All ${allBrands.length} Maisons` : `${activeSector} | ${filtered.length} Maisons`}
           </h1>
           <p className="font-sans text-sm text-[#888] max-w-xl">
             The complete A&ndash;Z directory of luxury brands across fashion, watches, jewellery, automotive, hospitality, beauty, spirits, aviation and art.
@@ -101,7 +162,7 @@ function WikiLuxAllContent() {
                   : 'border-[#e8e2d8] text-[#888] hover:border-[#aaa] hover:text-[#999]'
               }`}
             >
-              {sector === 'All' ? `All (${BRANDS.length})` : `${sector} (${BRANDS.filter((b) => b.sector === sector).length})`}
+              {sector === 'All' ? `All (${allBrands.length})` : `${sector} (${allBrands.filter((b) => b.sector === sector).length})`}
             </button>
           ))}
         </div>
