@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { BRANDS } from '@/lib/wikilux-brands'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function GET(
   req: NextRequest,
@@ -8,7 +13,15 @@ export async function GET(
 ) {
   try {
     const { slug } = params
-    const brand = BRANDS.find(b => b.slug === slug)
+
+    // Look up brand from DB instead of static array
+    const { data: brand } = await supabase
+      .from('wikilux_content')
+      .select('slug, brand_name, sector')
+      .eq('slug', slug)
+      .is('deleted_at', null)
+      .maybeSingle()
+
     if (!brand) {
       return NextResponse.json({ error: 'Brand not found' }, { status: 404 })
     }
@@ -59,7 +72,7 @@ export async function GET(
       const contrib = Array.isArray(exp.contributions) ? exp.contributions[0] : exp.contributions
       return {
         id: exp.id,
-        brand_name: contrib?.brand_name || brand.name,
+        brand_name: contrib?.brand_name || brand.brand_name,
         brand_slug: contrib?.brand_slug || slug,
         job_title: exp.job_title,
         department: exp.department,
@@ -77,7 +90,6 @@ export async function GET(
     })
 
     // Compute summary stats
-    const allExps = experiences // Already filtered by brand
     const difficultyBreakdown: Record<string, number> = {}
     const formatCount: Record<string, number> = {}
     const deptSet = new Set<string>()
@@ -119,12 +131,12 @@ export async function GET(
 
     return NextResponse.json({
       brand: {
-        name: brand.name,
+        name: brand.brand_name,
         slug: brand.slug,
         sector: brand.sector || null,
       },
       summary: {
-        brand_name: brand.name,
+        brand_name: brand.brand_name,
         brand_slug: brand.slug,
         brand_sector: brand.sector || null,
         total_experiences: totalAll,
