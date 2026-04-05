@@ -47,6 +47,7 @@ export default function TrashPage() {
   const [actioning, setActioning] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [deleteInput, setDeleteInput] = useState('')
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   const fetchItems = () => {
     setLoading(true)
@@ -63,6 +64,7 @@ export default function TrashPage() {
 
   const handleRestore = async (item: TrashItem) => {
     setActioning(item.id)
+    setErrorMsg(null)
     try {
       const res = await fetch('/api/admin/trash', {
         method: 'POST',
@@ -71,8 +73,11 @@ export default function TrashPage() {
       })
       if (res.ok) {
         setItems(prev => prev.filter(i => i.id !== item.id))
+      } else {
+        const data = await res.json()
+        setErrorMsg(data.error || 'Restore failed')
       }
-    } catch { /* silently fail */ }
+    } catch { setErrorMsg('Restore failed — network error') }
     setActioning(null)
   }
 
@@ -143,6 +148,23 @@ export default function TrashPage() {
           </button>
         ))}
       </div>
+
+      {/* Error banner */}
+      {errorMsg && (
+        <div style={{
+          marginBottom: 16, padding: '10px 14px', background: '#fef2f2',
+          border: '1px solid #fecaca', borderRadius: 6, display: 'flex',
+          alignItems: 'center', justifyContent: 'space-between', gap: 10,
+        }}>
+          <span style={{ fontSize: 12, color: '#dc2626' }}>{errorMsg}</span>
+          <button
+            onClick={() => setErrorMsg(null)}
+            style={{ fontSize: 11, color: '#999', background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Content */}
       {loading ? (

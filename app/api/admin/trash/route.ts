@@ -137,6 +137,25 @@ export async function POST(req: NextRequest) {
   // ── Restore ─────────────────────────────────────────────────────────────
   if (action === 'restore') {
     if (content_type === 'wikilux') {
+      // Check slug conflict before restoring
+      const { data: deleted } = await supabase
+        .from('wikilux_content')
+        .select('slug')
+        .eq('id', id)
+        .maybeSingle()
+      if (deleted?.slug) {
+        const { data: conflict } = await supabase
+          .from('wikilux_content')
+          .select('id')
+          .eq('slug', deleted.slug)
+          .is('deleted_at', null)
+          .maybeSingle()
+        if (conflict) {
+          return NextResponse.json({
+            error: `Cannot restore: an active brand already uses the slug "${deleted.slug}". Delete or trash the active brand first.`,
+          }, { status: 409 })
+        }
+      }
       const { error } = await supabase
         .from('wikilux_content')
         .update({ deleted_at: null, deleted_by: null })
@@ -146,6 +165,25 @@ export async function POST(req: NextRequest) {
     }
 
     if (content_type === 'article') {
+      // Check slug conflict before restoring
+      const { data: deleted } = await supabase
+        .from('bloglux_articles')
+        .select('slug')
+        .eq('id', id)
+        .maybeSingle()
+      if (deleted?.slug) {
+        const { data: conflict } = await supabase
+          .from('bloglux_articles')
+          .select('id')
+          .eq('slug', deleted.slug)
+          .is('deleted_at', null)
+          .maybeSingle()
+        if (conflict) {
+          return NextResponse.json({
+            error: `Cannot restore: an active article already uses the slug "${deleted.slug}". Delete or trash the active article first.`,
+          }, { status: 409 })
+        }
+      }
       const { error } = await supabase
         .from('bloglux_articles')
         .update({ deleted_at: null, deleted_by: null })
