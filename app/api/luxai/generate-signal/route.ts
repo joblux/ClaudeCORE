@@ -133,7 +133,7 @@ Guidelines:
     // Write to content_queue (canonical editorial gate)
     await supabase.from('content_queue').insert({
       content_type: 'signal',
-      source_type: 'ai',
+      source_type: 'joblux_generation',
       source_name: 'luxai',
       title: result.title,
       category: result.category,

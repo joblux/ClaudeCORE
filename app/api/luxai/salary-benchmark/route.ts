@@ -126,7 +126,7 @@ Guidelines:
       // Write to content_queue (canonical editorial gate)
       await supabase.from('content_queue').insert({
         content_type: 'salary_benchmark',
-        source_type: 'ai',
+        source_type: 'joblux_generation',
         source_name: 'luxai',
         title: `Salary Benchmark: ${job_title}, ${city}`,
         raw_content: { query: body, result },

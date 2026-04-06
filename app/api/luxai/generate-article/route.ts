@@ -87,7 +87,7 @@ RULES:
     const slug = article.slug || article.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 80)
     const { error } = await supabase.from('content_queue').insert({
       content_type: 'article',
-      source_type: 'ai',
+      source_type: 'joblux_generation',
       source_name: 'luxai',
       title: article.title,
       category: article.category,
