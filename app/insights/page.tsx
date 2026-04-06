@@ -28,9 +28,9 @@ const placeholderReports = [
 
 // Placeholder voices shown when DB has no approved Insider Voices yet
 const placeholderVoices = [
-  { initials: 'SM', name: 'S. Marchetti', role: 'Former SVP, Kering Group', quote: "The biggest shift I've seen in 20 years is that brands now want operators, not just creatives. The era of the visionary CD with no commercial instinct is over.", slug: '' },
-  { initials: 'AL', name: 'A. Laurent', role: 'Retail Director, Independent Maison', quote: "Hermès doesn't post jobs. They cultivate talent for years before offering anything. If you want to work there, start by becoming known in their world.", slug: '' },
-  { initials: 'JP', name: 'J. Park', role: 'Chief People Officer, LVMH Asia', quote: "Digital fluency is table stakes now. What separates candidates at director level is whether they can operate at the intersection of data and taste.", slug: '' },
+  { initials: 'AB', name: 'Ana Brandt', role: 'Director of Global Guest Experience Innovation, Dorchester Collection', quote: 'The guest experience can never become what the employee experience is already not.', slug: 'in-conversation-with-ana-brandt' },
+  { initials: 'AB', name: 'Ana Brandt', role: 'Director of Global Guest Experience Innovation, Dorchester Collection', quote: 'The real distinction is between what we feel is important and what the customer thinks is important. To become a customer-centric organisation, companies have to let go of their ego.', slug: 'in-conversation-with-ana-brandt' },
+  { initials: 'AB', name: 'Ana Brandt', role: 'Director of Global Guest Experience Innovation, Dorchester Collection', quote: 'It is no longer important how deep you go in a certain discipline — it matters how widely you can connect the dots.', slug: 'in-conversation-with-ana-brandt' },
 ]
 
 const topics = ['Salary data', 'Leadership moves', 'LVMH', 'Kering', 'Richemont', 'Asia Pacific', 'Middle East', 'Retail', 'Digital', 'Watches', 'Beauty', 'Career advice']
