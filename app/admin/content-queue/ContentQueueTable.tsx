@@ -171,9 +171,13 @@ function PreviewPanel({ content }: { content: Record<string, any> | null }) {
 
   const fields: { label: string; value: any }[] = [
     { label: 'Category', value: content.category },
+    { label: 'Subtitle', value: content.subtitle },
+    { label: 'Excerpt', value: content.excerpt },
     { label: 'Context', value: content.context_paragraph },
     { label: 'Career implications', value: content.career_implications },
     { label: 'Brand tags', value: Array.isArray(content.brand_tags) ? content.brand_tags.join(', ') : content.brand_tags },
+    { label: 'Tags', value: Array.isArray(content.tags) ? content.tags.join(', ') : content.tags },
+    { label: 'Read time', value: content.read_time_minutes ? `${content.read_time_minutes} min` : null },
     { label: 'Confidence', value: content.confidence },
   ]
 

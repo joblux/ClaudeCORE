@@ -83,19 +83,28 @@ RULES:
       throw new Error(`JSON parse failed: ${e.message}`)
     }
 
-    const { data: row, error } = await supabase.from('bloglux_articles').insert({
+    // Write to content_queue (canonical editorial gate) — not directly to bloglux_articles
+    const slug = article.slug || article.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 80)
+    const { error } = await supabase.from('content_queue').insert({
+      content_type: 'article',
+      source_type: 'ai',
+      source_name: 'luxai',
       title: article.title,
-      subtitle: article.subtitle,
-      slug: article.slug || article.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 80),
-      body: article.content,
-      excerpt: article.excerpt,
-      tags: article.tags,
       category: article.category,
-      read_time_minutes: article.read_time || 5,
+      destination_table: 'bloglux_articles',
       status: 'draft',
-      content_origin: 'ai',
-      author_name: 'JOBLUX Intelligence'
-    }).select().maybeSingle()
+      processed_content: {
+        title: article.title,
+        subtitle: article.subtitle,
+        slug,
+        body: article.content,
+        excerpt: article.excerpt,
+        tags: article.tags,
+        category: article.category,
+        read_time_minutes: article.read_time || 5,
+        brand_mentions: article.brand_mentions || [],
+      },
+    })
 
     if (error) throw error
 
@@ -111,7 +120,7 @@ RULES:
 
     return NextResponse.json({
       success: true,
-      message: `Article "${article.title}" generated as draft`,
+      message: `Article "${article.title}" queued for review`,
       data: { title: article.title, cost, tokens: inputTokens + outputTokens }
     })
   } catch (error: any) {

@@ -20,6 +20,47 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ success: false, error: fetchError?.message || 'Record not found' }, { status: 500 })
   }
 
+  // Article: approve and publish to bloglux_articles
+  if (record.content_type === 'article') {
+    const pc = (record.processed_content || {}) as Record<string, any>
+    const slug = pc.slug || (record.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 80)
+
+    const { data: newArticle, error: insertError } = await supabaseAdmin
+      .from('bloglux_articles')
+      .insert({
+        title: pc.title || record.title,
+        subtitle: pc.subtitle || null,
+        slug,
+        body: pc.body || null,
+        excerpt: pc.excerpt || null,
+        tags: pc.tags || null,
+        category: pc.category || null,
+        read_time_minutes: pc.read_time_minutes || 5,
+        author_name: 'JOBLUX Intelligence',
+        content_origin: 'ai',
+        status: 'published',
+        published_at: now,
+      })
+      .select('id')
+      .maybeSingle()
+
+    if (insertError) {
+      return NextResponse.json({ success: false, error: insertError.message }, { status: 500 })
+    }
+
+    await supabaseAdmin
+      .from('content_queue')
+      .update({
+        status: 'published',
+        reviewed_at: now,
+        destination_table: 'bloglux_articles',
+        destination_id: newArticle?.id || null,
+      })
+      .eq('id', params.id)
+
+    return NextResponse.json({ success: true, published: true, destination_id: newArticle?.id || null })
+  }
+
   // Unhandled content types: approve only, no publish
   if (record.content_type !== 'signal' && record.content_type !== 'event') {
     const { error } = await supabaseAdmin
