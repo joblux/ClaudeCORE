@@ -64,6 +64,9 @@ export async function GET() {
         } else if (taskType === 'articles') {
           endpoint = '/api/luxai/generate-article'
           body = { topic: 'career-trends' }
+        } else if (taskType === 'rss_ingestion') {
+          endpoint = '/api/luxai/ingest-rss'
+          body = {}
         } else if (taskType === 'brand_refresh') {
           endpoint = '/api/luxai/regenerate-wikilux'
           body = { mode: 'all' }
