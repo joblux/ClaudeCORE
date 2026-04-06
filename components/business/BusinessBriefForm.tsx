@@ -303,7 +303,7 @@ export default function BusinessBriefForm() {
         onClick={handleSubmit}
         disabled={submitting}
         style={{
-          display: 'inline-block', padding: '12px 32px', fontSize: 14, fontWeight: 600,
+          display: 'inline-block', alignSelf: 'flex-start', padding: '12px 32px', fontSize: 14, fontWeight: 600,
           fontFamily: 'Inter, sans-serif',
           background: submitting ? '#7a6a1e' : '#a58e28', color: '#111',
           border: 'none', borderRadius: 4, cursor: submitting ? 'not-allowed' : 'pointer',
