@@ -12,7 +12,7 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
   // Fetch the queue record
   const { data: record, error: fetchError } = await supabaseAdmin
     .from('content_queue')
-    .select('id, content_type, title, processed_content')
+    .select('id, content_type, title, processed_content, source_type, source_name')
     .eq('id', params.id)
     .maybeSingle()
 
@@ -84,6 +84,15 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
   // Event: approve and publish to events table
   if (record.content_type === 'event') {
     const eventTitle = pc.title || pc.name || record.title
+    const eventStartDate = pc.start_date || pc.date || null
+
+    if (!eventTitle || !slug || !eventStartDate) {
+      return NextResponse.json(
+        { success: false, error: 'Cannot publish event: missing required fields (name, slug, or start_date). Edit the queue item first.' },
+        { status: 400 }
+      )
+    }
+
     const { data: newEvent, error: insertError } = await supabaseAdmin
       .from('events')
       .insert({
@@ -113,9 +122,9 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
         meta_title: pc.meta_title || null,
         meta_description: pc.meta_description || null,
         is_published: true,
-        content_origin: 'ai',
+        content_origin: record.source_type === 'external_feed' ? 'rss' : 'ai',
         is_featured: false,
-        source: 'joblux_generation',
+        source: record.source_name || 'joblux_generation',
       })
       .select('id')
       .maybeSingle()

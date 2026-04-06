@@ -480,8 +480,29 @@ export default function LUXAICommandCenter() {
                   <button className={btnB} disabled={!!generating} onClick={() => callEndpoint('events', '/api/luxai/generate-events', { count: 10, sector: selEventSector || undefined })}>
                     {generating === 'events' ? 'Generating...' : 'Generate 10 events'}
                   </button>
+                  <button className={btnO} disabled={!!generating} onClick={async () => {
+                    if (generating) return
+                    setGenerating('events-rss')
+                    try {
+                      const res = await fetch('/api/luxai/ingest-events-rss', { method: 'POST' })
+                      const d = await res.json()
+                      if (d.success) {
+                        flash('success', d.inserted > 0 ? `${d.inserted} events added to queue` : 'No new events found')
+                        loadQueue()
+                        loadHealth()
+                      } else {
+                        flash('error', d.message || 'Event ingestion failed')
+                      }
+                    } catch {
+                      flash('error', 'Event ingestion failed')
+                    } finally {
+                      setGenerating(null)
+                    }
+                  }}>
+                    {generating === 'events-rss' ? 'Ingesting...' : 'Ingest from RSS'}
+                  </button>
                 </div>
-                <p className={info}>AI-generated + manual add · ~94 events/year target</p>
+                <p className={info}>AI-generated + RSS ingestion · ~94 events/year target</p>
               </div>
               <div className={flowBar}><b className="text-[#10B981]">→</b> Events page <b className="text-[#10B981]">+</b> Brand page (by sector match)</div>
             </div>
