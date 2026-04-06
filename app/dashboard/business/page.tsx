@@ -209,11 +209,12 @@ export default function BusinessDashboard() {
             {/* 3. How it works */}
             <div style={{ background: 'rgba(165,142,40,0.06)', border: '1px solid rgba(165,142,40,0.2)', borderRadius: 8, padding: '20px 24px', marginBottom: 28 }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: '#a58e28', letterSpacing: '1.5px', marginBottom: 8 }}>HOW IT WORKS</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
                 {[
-                  { step: '1', label: 'Share your brief', desc: 'Tell us about the role you need to fill.' },
-                  { step: '2', label: 'We search', desc: 'Your JOBLUX consultant runs a confidential search.' },
-                  { step: '3', label: 'Review candidates', desc: 'We present shortlisted candidates for your review.' },
+                  { step: '1', label: 'Share your brief', desc: 'Tell us about the role and context.' },
+                  { step: '2', label: 'We reach out', desc: 'If the brief is a fit, we discuss the mandate and align on scope.' },
+                  { step: '3', label: 'We search', desc: 'Your JOBLUX consultant runs a discreet search.' },
+                  { step: '4', label: 'Review candidates', desc: 'We present shortlisted candidates for review.' },
                 ].map(s => (
                   <div key={s.step}>
                     <div style={{ fontSize: 20, fontWeight: 300, color: '#a58e28', marginBottom: 4 }}>{s.step}</div>
