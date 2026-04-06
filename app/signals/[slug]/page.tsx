@@ -197,7 +197,15 @@ export default function SignalDetailPage() {
           </div>
         )}
 
-        {/* Career implications */}
+        {/* Career implications (text) */}
+        {signal.career_implications && (
+          <div className="mb-8">
+            <p className="text-[10px] font-semibold tracking-[2px] uppercase text-[#999] mb-3">Career implications</p>
+            <p className="text-[14px] text-[#ccc] leading-[1.8]">{signal.career_implications}</p>
+          </div>
+        )}
+
+        {/* Career implications (detail list) */}
         {careerDetail && careerDetail.length > 0 && (
           <div className="bg-[#141414] border border-[#1e1e1e] rounded p-6 mb-8">
             <p className="text-[10px] font-semibold tracking-[2px] uppercase text-[#a58e28] mb-4">Career implications</p>
