@@ -40,7 +40,6 @@ export async function POST(req: Request) {
       confidentiality_level: body.confidentiality_level,
       mandate_title: body.mandate_title?.trim() || null,
       brief_summary: body.brief_summary.trim(),
-      support_scope: Array.isArray(body.support_scope) ? body.support_scope : null,
       seniority_level: body.seniority_level || null,
       function: body.function || null,
       location: body.location?.trim() || null,

@@ -22,12 +22,6 @@ const BRIEF_TYPES = [
 const URGENCY_OPTIONS = ['Immediate', 'Within 30 days', 'Within this quarter', 'Exploratory']
 const CONFIDENTIALITY_OPTIONS = ['Standard', 'Sensitive', 'Highly confidential']
 
-const SUPPORT_SCOPE_OPTIONS = [
-  'Candidate identification', 'Market mapping', 'Salary benchmarking',
-  'Competitor intelligence', 'Profile calibration',
-  'Geographic expansion support', 'Discreet advisory input',
-]
-
 const SENIORITY_OPTIONS = ['Manager', 'Senior Manager', 'Director', 'VP', 'C-level', 'Flexible']
 
 const FUNCTION_OPTIONS = [
@@ -50,7 +44,6 @@ const initialForm = {
   confidentiality_level: '',
   mandate_title: '',
   brief_summary: '',
-  support_scope: [] as string[],
   seniority_level: '',
   function: '',
   location: '',
@@ -65,21 +58,11 @@ const initialForm = {
 
 export default function BusinessBriefForm() {
   const [form, setForm] = useState(initialForm)
-  const [acknowledged, setAcknowledged] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
 
   const set = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }))
-
-  const toggleScope = (val: string) => {
-    setForm(prev => ({
-      ...prev,
-      support_scope: prev.support_scope.includes(val)
-        ? prev.support_scope.filter(s => s !== val)
-        : [...prev.support_scope, val],
-    }))
-  }
 
   const handleSubmit = async () => {
     setError('')
@@ -88,26 +71,17 @@ export default function BusinessBriefForm() {
       setError('Please complete all required fields.')
       return
     }
-    if (!acknowledged) {
-      setError('Please acknowledge the confidentiality notice before submitting.')
-      return
-    }
-
     setSubmitting(true)
     try {
       const res = await fetch('/api/business-briefs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...form,
-          support_scope: form.support_scope.length > 0 ? form.support_scope : null,
-        }),
+        body: JSON.stringify(form),
       })
       const data = await res.json()
       if (data.success) {
         setSubmitted(true)
         setForm(initialForm)
-        setAcknowledged(false)
       } else {
         setError(data.error || 'Something went wrong. Please try again.')
       }
@@ -183,14 +157,28 @@ export default function BusinessBriefForm() {
       {/* Section 2 — Brief Type */}
       <div style={{ background: '#222', border: '1px solid #2a2a2a', borderRadius: 8, padding: '28px 24px' }}>
         <h3 style={sectionHeadingStyle}>Brief Type</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '18px 20px' }}>
-          <div style={fieldGroupStyle}>
-            <label style={labelStyle}>Brief type{requiredStar}</label>
-            <select style={selectStyle} value={form.brief_type} onChange={e => set('brief_type', e.target.value)}>
-              <option value="">Select...</option>
-              {BRIEF_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+        <div style={{ marginBottom: 18 }}>
+          <label style={labelStyle}>Brief type{requiredStar}</label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
+            {BRIEF_TYPES.map(bt => (
+              <button
+                key={bt}
+                type="button"
+                onClick={() => set('brief_type', bt)}
+                style={{
+                  padding: '8px 16px', fontSize: 12, fontFamily: 'Inter, sans-serif',
+                  borderRadius: 4, cursor: 'pointer', transition: 'all 0.15s',
+                  background: form.brief_type === bt ? '#fff' : 'transparent',
+                  color: form.brief_type === bt ? '#111' : '#999',
+                  border: form.brief_type === bt ? '1px solid #fff' : '1px solid #444',
+                }}
+              >
+                {bt}
+              </button>
+            ))}
           </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px 20px' }}>
           <div style={fieldGroupStyle}>
             <label style={labelStyle}>Urgency{requiredStar}</label>
             <select style={selectStyle} value={form.urgency} onChange={e => set('urgency', e.target.value)}>
@@ -219,22 +207,6 @@ export default function BusinessBriefForm() {
           <div style={{ ...fieldGroupStyle, gridColumn: '1 / -1' }}>
             <label style={labelStyle}>Brief summary{requiredStar}</label>
             <textarea style={{ ...inputStyle, minHeight: 100, resize: 'vertical' }} placeholder="Describe the requirement, context, and what a successful outcome looks like." value={form.brief_summary} onChange={e => set('brief_summary', e.target.value)} />
-          </div>
-          <div style={{ ...fieldGroupStyle, gridColumn: '1 / -1' }}>
-            <label style={labelStyle}>Scope of support</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 4 }}>
-              {SUPPORT_SCOPE_OPTIONS.map(opt => (
-                <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#ccc', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={form.support_scope.includes(opt)}
-                    onChange={() => toggleScope(opt)}
-                    style={{ accentColor: '#a58e28' }}
-                  />
-                  {opt}
-                </label>
-              ))}
-            </div>
           </div>
           <div style={fieldGroupStyle}>
             <label style={labelStyle}>Seniority level</label>
@@ -293,17 +265,6 @@ export default function BusinessBriefForm() {
             <input style={inputStyle} value={form.best_timing} onChange={e => set('best_timing', e.target.value)} />
             <div style={helperStyle}>Timezone, availability window, or response preference</div>
           </div>
-          <div style={{ ...fieldGroupStyle, gridColumn: '1 / -1' }}>
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12, color: '#ccc', cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={acknowledged}
-                onChange={e => setAcknowledged(e.target.checked)}
-                style={{ accentColor: '#a58e28', marginTop: 2 }}
-              />
-              I understand this brief will be reviewed privately by the JOBLUX team before any follow-up.
-            </label>
-          </div>
         </div>
       </div>
 
@@ -311,6 +272,13 @@ export default function BusinessBriefForm() {
       {error && (
         <div style={{ fontSize: 13, color: '#e57373', padding: '0 4px' }}>{error}</div>
       )}
+
+      {/* Terms link */}
+      <div style={{ textAlign: 'right', padding: '0 4px' }}>
+        <a href="/terms/business" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: '#999', fontFamily: 'Inter, sans-serif', textDecoration: 'none' }}>
+          View Terms of Business &rarr;
+        </a>
+      </div>
 
       {/* Submit */}
       <button

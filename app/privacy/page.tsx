@@ -29,9 +29,10 @@ export default function PrivacyPolicyPage() {
             The data controller responsible for the processing of your personal data is:
           </p>
           <p className="mt-3">
-            <strong className="text-white">Mohammed M&apos;zaour</strong><br />
-            JOBLUX<br />
-            Paris, France<br />
+            <strong className="text-white">JOBLUX LLC</strong><br />
+            954 Lexington Ave.<br />
+            New York, NY 10021<br />
+            United States<br />
             Email:{' '}
             <a href="mailto:hello@joblux.com" className="text-[#a58e28] hover:text-[#c4a830] transition-colors underline">
               hello@joblux.com

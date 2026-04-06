@@ -318,7 +318,13 @@ export default function HelpPage() {
             >
               Get in touch
             </h2>
-            <p className="text-[12px] text-[#999] mb-5">We respond within 24–48 hours.</p>
+            <p className="text-[12px] text-[#999] mb-2">We respond within 24–48 hours.</p>
+            <p className="text-[12px] text-[#777] mb-5 leading-relaxed">
+              JOBLUX LLC<br />
+              954 Lexington Ave.<br />
+              New York, NY 10021<br />
+              United States
+            </p>
 
             <form onSubmit={handleSubmit} className="space-y-3">
               <select

@@ -21,7 +21,7 @@ export default function TermsOfServicePage() {
           <h2 className="text-2xl font-normal mb-4 text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>1. Introduction &amp; Acceptance</h2>
           <p>
             Welcome to JOBLUX, the luxury careers intelligence gateway. JOBLUX is a digital platform operated by
-            Mohammed M&apos;zaour, based in Paris, France. These Terms of Service (&ldquo;Terms&rdquo;) govern your
+            JOBLUX LLC, 954 Lexington Ave., New York, NY 10021, United States. These Terms of Service (&ldquo;Terms&rdquo;) govern your
             access to and use of the JOBLUX website, applications, and all related services
             (collectively, the &ldquo;Platform&rdquo;).
           </p>
@@ -454,9 +454,10 @@ export default function TermsOfServicePage() {
             Platform, please contact us:
           </p>
           <p className="mt-3">
-            <strong className="text-white">JOBLUX</strong><br />
-            Operated by Mohammed M&apos;zaour<br />
-            Paris, France<br />
+            <strong className="text-white">JOBLUX LLC</strong><br />
+            954 Lexington Ave.<br />
+            New York, NY 10021<br />
+            United States<br />
             Email:{' '}
             <a href="mailto:hello@joblux.com" className="text-[#a58e28] hover:text-[#c4a830] transition-colors underline">
               hello@joblux.com

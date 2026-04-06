@@ -244,7 +244,8 @@ export default function BusinessDashboard() {
             <div>
               <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 20, fontWeight: 400, color: '#fff', margin: '0 0 8px' }}>Business Brief</h2>
               <p style={{ fontSize: 13, color: '#999', lineHeight: 1.5, marginBottom: 28, fontFamily: 'Inter, sans-serif' }}>
-                Share your hiring or intelligence requirement. Each brief is reviewed privately and routed according to scope, urgency, and confidentiality.
+                Share your hiring or intelligence requirement. Each brief is handled discreetly and in accordance with our{' '}
+                <a href="/terms/business" target="_blank" rel="noopener noreferrer" style={{ color: '#999', textDecoration: 'underline' }}>Terms of Business</a>.
               </p>
               <BusinessBriefForm />
             </div>
