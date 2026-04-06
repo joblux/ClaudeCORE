@@ -27,8 +27,45 @@ function formatDate(dateStr: string | null): string {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-export default function ContentQueueTable({ rows }: { rows: QueueItem[] }) {
+export default function ContentQueueTable({ rows: initialRows }: { rows: QueueItem[] }) {
+  const [rows, setRows] = useState(initialRows)
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const handleDelete = (id: string) => {
+    setRows(prev => prev.filter(r => r.id !== id))
+    if (expandedId === id) setExpandedId(null)
+  }
+
+  const startEdit = (item: QueueItem) => {
+    setEditingId(item.id)
+    setEditTitle(item.title || '')
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setEditTitle('')
+  }
+
+  const saveEdit = async (id: string) => {
+    const trimmed = editTitle.trim()
+    if (!trimmed) return
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/admin/content-queue/${id}/edit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: trimmed }),
+      })
+      if (res.ok) {
+        setRows(prev => prev.map(r => r.id === id ? { ...r, title: trimmed } : r))
+        setEditingId(null)
+      }
+    } catch {}
+    setSaving(false)
+  }
 
   return (
     <div style={{ overflowX: 'auto' }}>
@@ -46,11 +83,12 @@ export default function ContentQueueTable({ rows }: { rows: QueueItem[] }) {
           {rows.map(item => {
             const badge = statusBadge[item.status] || statusBadge.draft
             const isExpanded = expandedId === item.id
+            const isEditing = editingId === item.id
             return (
               <>
                 <tr
                   key={item.id}
-                  onClick={() => setExpandedId(isExpanded ? null : item.id)}
+                  onClick={() => { if (!isEditing) setExpandedId(isExpanded ? null : item.id) }}
                   style={{ borderBottom: isExpanded ? 'none' : '1px solid #e8e8e8', cursor: 'pointer' }}
                 >
                   <td style={{ padding: '12px' }}>
@@ -58,8 +96,35 @@ export default function ContentQueueTable({ rows }: { rows: QueueItem[] }) {
                       {item.content_type}
                     </span>
                   </td>
-                  <td style={{ padding: '12px', color: '#111', fontWeight: 500, maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {item.title || '\u2014'}
+                  <td style={{ padding: '12px', color: '#111', fontWeight: 500, maxWidth: 300 }} onClick={e => { if (isEditing) e.stopPropagation() }}>
+                    {isEditing ? (
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <input
+                          value={editTitle}
+                          onChange={e => setEditTitle(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') saveEdit(item.id); if (e.key === 'Escape') cancelEdit() }}
+                          style={{ flex: 1, padding: '4px 8px', fontSize: 13, border: '1px solid #e8e8e8', borderRadius: 3, color: '#111', outline: 'none' }}
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => saveEdit(item.id)}
+                          disabled={saving || !editTitle.trim()}
+                          style={{ fontSize: 11, padding: '4px 10px', background: '#e8f5e9', color: '#2e7d32', border: '1px solid #c8e6c9', borderRadius: 3, cursor: 'pointer' }}
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={cancelEdit}
+                          style={{ fontSize: 11, padding: '4px 10px', background: '#fff', color: '#555', border: '1px solid #e8e8e8', borderRadius: 3, cursor: 'pointer' }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+                        {item.title || '\u2014'}
+                      </span>
+                    )}
                   </td>
                   <td style={{ padding: '12px', color: '#888', fontSize: 12 }}>{item.source_type || '\u2014'}</td>
                   <td style={{ padding: '12px', color: '#888', fontSize: 12 }}>{item.source_name || '\u2014'}</td>
@@ -75,7 +140,12 @@ export default function ContentQueueTable({ rows }: { rows: QueueItem[] }) {
                   </td>
                   <td style={{ padding: '12px', color: '#888', fontSize: 12 }}>{formatDate(item.created_at)}</td>
                   <td style={{ padding: '12px' }} onClick={e => e.stopPropagation()}>
-                    <ContentQueueActions id={item.id} status={item.status} />
+                    <ContentQueueActions
+                      id={item.id}
+                      status={item.status}
+                      onDelete={() => handleDelete(item.id)}
+                      onEdit={() => startEdit(item)}
+                    />
                   </td>
                 </tr>
                 {isExpanded && (
