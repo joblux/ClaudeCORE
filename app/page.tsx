@@ -50,12 +50,12 @@ export default async function HomePage() {
     supabase
       .from('search_assignments')
       .select('id', { count: 'exact', head: true })
-      .eq('status', 'active'),
+      .eq('status', 'published'),
     // Assignments for opportunities section
     supabase
       .from('search_assignments')
       .select('slug, title, description, location, seniority')
-      .eq('status', 'active')
+      .eq('status', 'published')
       .order('created_at', { ascending: false })
       .limit(3),
     // Salary benchmarks
