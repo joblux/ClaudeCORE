@@ -179,19 +179,30 @@ export default function SignalDetailPage() {
           </div>
         )}
 
-        {/* Long context (main editorial body) */}
-        {signal.long_context && (
-          <div className="text-[15px] text-[#ccc] leading-[1.8] space-y-4 mb-10">
-            {signal.long_context.split('\n').map((p: string, i: number) => (
-              p.trim() ? <p key={i}>{p}</p> : null
-            ))}
+        {/* Context */}
+        {signal.context_paragraph && (
+          <div className="mb-8">
+            <p className="text-[10px] font-semibold tracking-[2px] uppercase text-[#999] mb-3">Context</p>
+            <p className="text-[15px] text-[#ccc] leading-[1.8]">{signal.context_paragraph}</p>
           </div>
         )}
 
-        {/* Fallback: original body/summary if no long_context */}
-        {!signal.long_context && (signal.body || signal.context_paragraph || signal.summary) && (
+        {/* Strategic read (long_context) */}
+        {signal.long_context && (
+          <div className="mb-10">
+            <p className="text-[10px] font-semibold tracking-[2px] uppercase text-[#999] mb-3">Strategic read</p>
+            <div className="text-[15px] text-[#ccc] leading-[1.8] space-y-4">
+              {signal.long_context.split('\n').map((p: string, i: number) => (
+                p.trim() ? <p key={i}>{p}</p> : null
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Fallback: original body/summary if no long_context and no context_paragraph */}
+        {!signal.long_context && !signal.context_paragraph && (signal.body || signal.summary) && (
           <div className="text-[15px] text-[#ccc] leading-[1.8] space-y-4 mb-10">
-            {(signal.body || signal.context_paragraph || signal.summary || '').split('\n').map((p: string, i: number) => (
+            {(signal.body || signal.summary || '').split('\n').map((p: string, i: number) => (
               p.trim() ? <p key={i}>{p}</p> : null
             ))}
           </div>

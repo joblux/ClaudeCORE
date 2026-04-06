@@ -253,7 +253,7 @@ export default function BrandDetailPage() {
               .order('created_at', { ascending: false }),
             supabase
               .from('signals')
-              .select('id, headline, category, confidence, published_at, brand_tags, what_happened, why_it_matters, career_implications, is_published')
+              .select('id, slug, headline, category, confidence, published_at, brand_tags, long_context, context_paragraph, is_published')
               .eq('is_published', true)
               .contains('brand_tags', [data.brand_name])
               .order('published_at', { ascending: false })
@@ -995,27 +995,29 @@ export default function BrandDetailPage() {
           <div className="max-w-3xl">
             {brand.liveSignals && brand.liveSignals.length > 0 ? (
               <div className="space-y-4">
-                {brand.liveSignals.slice(0, 6).map((signal: any) => (
-                  <div key={signal.id} className="bg-[#222] rounded-xl p-5 border border-[#2a2a2a]">
-                    <div className="flex items-center gap-2 mb-2">
-                      {signal.category && (
-                        <span className="text-[10px] uppercase tracking-[0.12em] text-[#a58e28]">{signal.category}</span>
+                {brand.liveSignals.slice(0, 6).map((signal: any) => {
+                  const excerpt = (signal.long_context || signal.context_paragraph || '').substring(0, 160) + ((signal.long_context || signal.context_paragraph || '').length > 160 ? '...' : '')
+                  const signalHref = signal.slug ? `/signals/${signal.slug}` : `/signals/${signal.id}`
+                  return (
+                    <div key={signal.id} className="bg-[#222] rounded-xl p-5 border border-[#2a2a2a]">
+                      <div className="flex items-center gap-2 mb-2">
+                        {signal.category && (
+                          <span className="text-[10px] uppercase tracking-[0.12em] text-[#a58e28]">{signal.category}</span>
+                        )}
+                        {signal.published_at && (
+                          <span className="text-[10px] uppercase tracking-[0.12em] text-[#777]">
+                            {new Date(signal.published_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="text-sm text-white font-medium mb-2">{signal.headline}</h3>
+                      {excerpt && (
+                        <p className="text-sm text-[#999] leading-relaxed mb-3">{excerpt}</p>
                       )}
-                      {signal.published_at && (
-                        <span className="text-[10px] uppercase tracking-[0.12em] text-[#777]">
-                          {new Date(signal.published_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-                        </span>
-                      )}
+                      <a href={signalHref} className="text-[12px] text-[#a58e28] hover:underline">View signal &rarr;</a>
                     </div>
-                    <h3 className="text-sm text-white font-medium mb-2">{signal.headline}</h3>
-                    {signal.what_happened && (
-                      <p className="text-sm text-[#bdbdbd] leading-relaxed mb-2">{signal.what_happened}</p>
-                    )}
-                    {signal.career_implications && (
-                      <p className="text-sm text-[#999] leading-relaxed">{signal.career_implications}</p>
-                    )}
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <div className="bg-[#222] rounded-xl p-6 border border-[#2a2a2a]">
