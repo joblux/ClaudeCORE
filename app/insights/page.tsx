@@ -99,10 +99,31 @@ function InsightsPageInner() {
   const [reports, setReports] = useState(placeholderReports)
   const [voices, setVoices] = useState(placeholderVoices)
   const [mostRead, setMostRead] = useState<any[]>([])
+  const [pinnedFeatured, setPinnedFeatured] = useState<any>(null)
   const [email, setEmail] = useState('')
 
   useEffect(() => {
     async function fetchAll() {
+      // Pinned featured article
+      const { data: featuredArticle } = await supabase
+        .from('bloglux_articles')
+        .select('id, slug, title, excerpt, category, published_at, read_time_minutes, cover_image_url')
+        .eq('status', 'published')
+        .eq('featured_homepage', true)
+        .is('deleted_at', null)
+        .maybeSingle()
+
+      if (featuredArticle) {
+        setPinnedFeatured({
+          id: featuredArticle.id, slug: featuredArticle.slug, title: featuredArticle.title,
+          excerpt: featuredArticle.excerpt || '',
+          category: (featuredArticle.category || '').toUpperCase(),
+          date: formatDate(featuredArticle.published_at),
+          read_time: featuredArticle.read_time_minutes ? `${featuredArticle.read_time_minutes} min` : '',
+          cover_image_url: featuredArticle.cover_image_url || '',
+        })
+      }
+
       // Editorial articles
       const { data: articleData } = await supabase
         .from('bloglux_articles')
@@ -186,8 +207,10 @@ function InsightsPageInner() {
     fetchAll()
   }, [])
 
-  const featured = articles[0]
-  const rest = articles.slice(1, 4)
+  const featured = pinnedFeatured || articles[0]
+  const rest = pinnedFeatured
+    ? articles.filter(a => a.id !== pinnedFeatured.id).slice(0, 3)
+    : articles.slice(1, 4)
 
   const displayMostRead = mostRead.length > 0 ? mostRead : [
     { cat: 'SALARY', title: 'What Hermès really pays | from artisan to director', date: 'March 22, 2026', slug: 'hermes-salary-guide' },
