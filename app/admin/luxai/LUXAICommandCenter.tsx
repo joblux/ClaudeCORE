@@ -325,6 +325,27 @@ export default function LUXAICommandCenter() {
                   <button className={btnO} disabled={!!generating} onClick={() => callEndpoint('signals-10', '/api/luxai/generate-signals', { count: 10 })}>
                     {generating === 'signals-10' ? 'Generating...' : 'Generate 10'}
                   </button>
+                  <button className={btnO} disabled={!!generating} onClick={async () => {
+                    if (generating) return
+                    setGenerating('rss-ingest')
+                    try {
+                      const res = await fetch('/api/luxai/ingest-rss', { method: 'POST' })
+                      const d = await res.json()
+                      if (d.success) {
+                        flash('success', d.inserted > 0 ? `${d.inserted} items added to queue` : 'No new items found')
+                        loadQueue()
+                        loadHealth()
+                      } else {
+                        flash('error', d.message || 'Ingestion failed')
+                      }
+                    } catch {
+                      flash('error', 'Ingestion failed')
+                    } finally {
+                      setGenerating(null)
+                    }
+                  }}>
+                    {generating === 'rss-ingest' ? 'Ingesting...' : 'Ingest from RSS'}
+                  </button>
                 </div>
                 <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#f5f5f5] text-[10px] text-[#666]">
                   <button onClick={() => saveAutopilot('signals', { enabled: !autopilot.signals?.enabled })} className={`w-6 h-3.5 rounded-full relative cursor-pointer transition-colors ${autopilot.signals?.enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'}`}>
