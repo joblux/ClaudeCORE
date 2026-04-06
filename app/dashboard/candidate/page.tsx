@@ -116,7 +116,8 @@ export default function CandidateDashboard() {
         // 4. Latest signals (direct Supabase, same pattern as signals page)
         const { data: sigData } = await supabase
           .from('signals')
-          .select('id, slug, title, category, brand, published_at')
+          .select('id, slug, headline, category, brand, published_at')
+          .eq('is_published', true)
           .order('published_at', { ascending: false })
           .limit(4)
         if (sigData) setSignals(sigData)
@@ -314,7 +315,7 @@ export default function CandidateDashboard() {
                 {signals.map(s => (
                   <Link key={s.id} href={`/signals/${s.slug || s.id}`} className="flex gap-3 py-3 hover:bg-[#2a2a2a] -mx-2 px-2 rounded transition-colors block">
                     <span className="w-[6px] h-[6px] rounded-full flex-shrink-0 mt-1.5" style={{ background: SIGNAL_COLORS[s.category] || '#888' }} />
-                    <span className="text-xs text-[#ccc] flex-1 leading-relaxed">{s.title}</span>
+                    <span className="text-xs text-[#ccc] flex-1 leading-relaxed">{s.headline}</span>
                     <span className="text-[10px] text-[#999] whitespace-nowrap">{timeAgo(s.published_at)}</span>
                   </Link>
                 ))}

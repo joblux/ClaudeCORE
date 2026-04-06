@@ -80,7 +80,8 @@ export default function BusinessDashboard() {
         // Latest signals
         const { data: sigData } = await supabase
           .from('signals')
-          .select('id, slug, title, category, brand, published_at')
+          .select('id, slug, headline, category, brand, published_at')
+          .eq('is_published', true)
           .order('published_at', { ascending: false })
           .limit(5)
         if (sigData) setSignals(sigData)
@@ -236,7 +237,7 @@ export default function BusinessDashboard() {
                   {signals.slice(0, 3).map((s, i) => (
                     <Link key={s.id} href={`/signals/${s.slug || s.id}`} style={{ display: 'flex', gap: 10, padding: '12px 0', borderBottom: i < Math.min(signals.length, 3) - 1 ? '1px solid #1e1e1e' : 'none', textDecoration: 'none', alignItems: 'flex-start' }}>
                       <span style={{ width: 6, height: 6, borderRadius: '50%', background: SIGNAL_COLORS[s.category] || '#888', flexShrink: 0, marginTop: 5 }} />
-                      <span style={{ fontSize: 13, color: '#ccc', flex: 1, lineHeight: 1.4 }}>{s.title}</span>
+                      <span style={{ fontSize: 13, color: '#ccc', flex: 1, lineHeight: 1.4 }}>{s.headline}</span>
                       <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap' }}>{timeAgo(s.published_at)}</span>
                     </Link>
                   ))}
@@ -306,7 +307,7 @@ export default function BusinessDashboard() {
                 {signals.map((s, i) => (
                   <Link key={s.id} href={`/signals/${s.slug || s.id}`} style={{ display: 'flex', gap: 10, padding: '12px 0', borderBottom: i < signals.length - 1 ? '1px solid #1e1e1e' : 'none', textDecoration: 'none', alignItems: 'flex-start' }}>
                     <span style={{ width: 6, height: 6, borderRadius: '50%', background: SIGNAL_COLORS[s.category] || '#888', flexShrink: 0, marginTop: 5 }} />
-                    <span style={{ fontSize: 13, color: '#ccc', flex: 1, lineHeight: 1.4 }}>{s.title}</span>
+                    <span style={{ fontSize: 13, color: '#ccc', flex: 1, lineHeight: 1.4 }}>{s.headline}</span>
                     <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap' }}>{timeAgo(s.published_at)}</span>
                   </Link>
                 ))}

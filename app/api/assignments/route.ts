@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
       query = query.order('created_at', { ascending: false })
     } else {
       // Non-admin: only active assignments whose closing date is null or in the future
-      query = query.eq('status', 'active')
+      query = query.eq('status', 'published')
       query = query.or('closing_date.is.null,closing_date.gt.now()')
       query = query.order('activated_at', { ascending: false })
     }
@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
 
     // ---- activated_at: set to now when status is "active" ----
     const activated_at =
-      body.status === 'active' ? new Date().toISOString() : body.activated_at || null
+      body.status === 'published' ? new Date().toISOString() : body.activated_at || null
 
     // ---- Build the insert payload ----
     // Spread the original body first so every form field is captured,

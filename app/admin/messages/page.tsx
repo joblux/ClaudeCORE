@@ -1135,7 +1135,7 @@ function NewMessageModal({
 
   // Fetch assignments on mount
   useEffect(() => {
-    fetch('/api/assignments?status=active')
+    fetch('/api/assignments?status=published')
       .then((r) => r.json())
       .then((data) => setAssignments(data.assignments || []))
       .catch(() => {})

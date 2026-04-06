@@ -411,7 +411,7 @@ export default function ImportAssignmentsPage() {
       .filter((_, i) => selectedRows.has(i))
       .map((a) => ({
         ...a,
-        status: activate ? 'active' : 'draft',
+        status: activate ? 'published' : 'draft',
       }))
 
     if (selectedAssignments.length === 0) return

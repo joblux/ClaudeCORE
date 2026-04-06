@@ -118,7 +118,7 @@ export default function AdminDashboardPage() {
       supabase.from('members').select('id', { count: 'exact', head: true }),
       supabase.from('members').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('search_assignments').select('id', { count: 'exact', head: true }),
-      supabase.from('search_assignments').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+      supabase.from('search_assignments').select('id', { count: 'exact', head: true }).eq('status', 'published'),
       supabase.from('bloglux_articles').select('id', { count: 'exact', head: true }).is('deleted_at', null),
       fetch('/api/brands/stats', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ total: 0, published: 0 })),
       supabase.from('salary_benchmarks').select('id', { count: 'exact', head: true }),

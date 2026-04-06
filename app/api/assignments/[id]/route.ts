@@ -20,7 +20,7 @@ function isUUID(value: string): boolean {
 // ---------------------------------------------------------------------------
 function applyAccessControl(assignment: any, isAdmin: boolean, user: any) {
   // Non-admin can only view active assignments
-  if (!isAdmin && assignment.status !== 'active') {
+  if (!isAdmin && assignment.status !== 'published') {
     return NextResponse.json({ error: 'Assignment not found' }, { status: 404 })
   }
 
@@ -126,7 +126,7 @@ export async function PUT(
 
     // ---- Status-transition timestamps ----
     // Set activated_at when moving to "active" and it has not been set yet
-    if (body.status === 'active' && !existing.activated_at && !body.activated_at) {
+    if (body.status === 'published' && !existing.activated_at && !body.activated_at) {
       body.activated_at = now
     }
 
