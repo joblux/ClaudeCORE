@@ -26,13 +26,6 @@ const placeholderReports = [
   { icon: '👔', label: 'CAREER REPORT', title: 'The Luxury Career Ladder | How Professionals Progress Across Maisons', meta: '500+ career paths · Published December 2025', slug: '' },
 ]
 
-// Placeholder voices shown when DB has no approved Insider Voices yet
-const placeholderVoices = [
-  { initials: 'AB', name: 'Ana Brandt', role: 'Director of Global Guest Experience Innovation, Dorchester Collection', quote: 'The guest experience can never become what the employee experience is already not.', slug: 'in-conversation-with-ana-brandt' },
-  { initials: 'AB', name: 'Ana Brandt', role: 'Director of Global Guest Experience Innovation, Dorchester Collection', quote: 'The real distinction is between what we feel is important and what the customer thinks is important. To become a customer-centric organisation, companies have to let go of their ego.', slug: 'in-conversation-with-ana-brandt' },
-  { initials: 'AB', name: 'Ana Brandt', role: 'Director of Global Guest Experience Innovation, Dorchester Collection', quote: 'It is no longer important how deep you go in a certain discipline — it matters how widely you can connect the dots.', slug: 'in-conversation-with-ana-brandt' },
-]
-
 const topics = ['Salary data', 'Leadership moves', 'LVMH', 'Kering', 'Richemont', 'Asia Pacific', 'Middle East', 'Retail', 'Digital', 'Watches', 'Beauty', 'Career advice']
 const tabs = ['Editorial', 'Research reports', 'Insider voices', 'Luxury map']
 const TAB_SLUG_MAP: Record<string, string> = { 'editorial': 'Editorial', 'research-reports': 'Research reports', 'insider-voices': 'Insider voices', 'luxury-map': 'Luxury map' }
@@ -97,7 +90,7 @@ function InsightsPageInner() {
   const activeTab = TAB_SLUG_MAP[tabParam] || 'Editorial'
   const [articles, setArticles] = useState(placeholderArticles)
   const [reports, setReports] = useState(placeholderReports)
-  const [voices, setVoices] = useState(placeholderVoices)
+  const [voices, setVoices] = useState<any[]>([])
   const [mostRead, setMostRead] = useState<any[]>([])
   const [pinnedFeatured, setPinnedFeatured] = useState<any>(null)
   const [email, setEmail] = useState('')
@@ -164,23 +157,22 @@ function InsightsPageInner() {
         })))
       }
 
-      // Insider voices | fetch author_name properly
-      const { data: voiceData } = await supabase
-        .from('bloglux_articles')
-        .select('id, slug, title, excerpt, author_name, author_role, published_at')
+      // Insider voice cards
+      const { data: voiceCards } = await supabase
+        .from('insider_voice_cards')
+        .select('id, quote_text, display_name, display_title, display_company, initials, link_slug, is_featured')
         .eq('status', 'published')
-        .eq('category', 'Insider Voice')
-        .is('deleted_at', null)
-        .order('published_at', { ascending: false })
-        .limit(9)
+        .order('is_featured', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(6)
 
-      if (voiceData && voiceData.length > 0) {
-        setVoices(voiceData.map((v: any) => ({
-          initials: getInitials(v.author_name),
-          name: v.author_name || 'Insider Voice',
-          role: v.author_role || 'Luxury Industry Professional',
-          quote: v.excerpt || v.title,
-          slug: v.slug,
+      if (voiceCards && voiceCards.length > 0) {
+        setVoices(voiceCards.map((v: any) => ({
+          initials: v.initials,
+          name: v.display_name,
+          role: [v.display_title, v.display_company].filter(Boolean).join(', '),
+          quote: v.quote_text,
+          slug: v.link_slug || '',
         })))
       }
 
