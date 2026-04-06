@@ -6,7 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const BASE = 'https://joblux.com'
+const BASE = 'https://www.joblux.com'
 
 export async function GET() {
   const [articles, itineraries, hotels, cities, cruises] = await Promise.all([
