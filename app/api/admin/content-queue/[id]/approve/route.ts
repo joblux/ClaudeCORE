@@ -20,8 +20,8 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ success: false, error: fetchError?.message || 'Record not found' }, { status: 500 })
   }
 
-  // Non-signal types: approve only, no publish
-  if (record.content_type !== 'signal') {
+  // Unhandled content types: approve only, no publish
+  if (record.content_type !== 'signal' && record.content_type !== 'event') {
     const { error } = await supabaseAdmin
       .from('content_queue')
       .update({ status: 'approved', reviewed_at: now })
@@ -33,7 +33,6 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ success: true })
   }
 
-  // Signal: approve and publish to signals table
   const pc = (record.processed_content || {}) as Record<string, any>
   const slug = (record.title || '')
     .toLowerCase()
@@ -41,6 +40,65 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     .replace(/^-|-$/g, '')
     .substring(0, 80)
 
+  // Event: approve and publish to events table
+  if (record.content_type === 'event') {
+    const eventTitle = pc.title || pc.name || record.title
+    const { data: newEvent, error: insertError } = await supabaseAdmin
+      .from('events')
+      .insert({
+        title: eventTitle,
+        name: eventTitle,
+        slug,
+        location_city: pc.city || pc.location_city || null,
+        location_country: pc.country || pc.location_country || null,
+        city: pc.city || pc.location_city || null,
+        location: [pc.city || pc.location_city, pc.country || pc.location_country].filter(Boolean).join(', ') || null,
+        sector: pc.sector || null,
+        start_date: pc.start_date || pc.date || null,
+        end_date: pc.end_date || null,
+        event_date: pc.start_date || pc.date || null,
+        description: pc.description || null,
+        long_description: pc.long_description || null,
+        highlights: pc.highlights || null,
+        brands_present: pc.brands_present || null,
+        career_opportunities: pc.career_opportunities || null,
+        networking_tips: pc.networking_tips || null,
+        practical_info: pc.practical_info || null,
+        career_context: pc.career_context || null,
+        organizer: pc.organizer || null,
+        attendance: pc.attendance || null,
+        type: pc.type || null,
+        website_url: pc.website_url || null,
+        meta_title: pc.meta_title || null,
+        meta_description: pc.meta_description || null,
+        is_published: true,
+        content_origin: 'ai',
+        is_featured: false,
+        source: 'joblux_generation',
+      })
+      .select('id')
+      .maybeSingle()
+
+    if (insertError) {
+      return NextResponse.json({ success: false, error: insertError.message }, { status: 500 })
+    }
+
+    const destinationId = newEvent?.id || null
+
+    await supabaseAdmin
+      .from('content_queue')
+      .update({
+        status: 'published',
+        reviewed_at: now,
+        destination_table: 'events',
+        destination_id: destinationId,
+      })
+      .eq('id', params.id)
+
+    return NextResponse.json({ success: true, published: true, destination_id: destinationId })
+  }
+
+  // Signal: approve and publish to signals table
   const { data: newSignal, error: insertError } = await supabaseAdmin
     .from('signals')
     .insert({
