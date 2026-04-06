@@ -48,7 +48,7 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
       category: pc.category,
       context_paragraph: pc.context_paragraph || null,
       career_implications: pc.career_implications || null,
-      long_context: pc.long_context || null,
+      long_context: pc.strategic_read || pc.long_context || null,
       what_happened: pc.what_happened || null,
       why_it_matters: pc.why_it_matters || null,
       career_detail: pc.career_detail || null,

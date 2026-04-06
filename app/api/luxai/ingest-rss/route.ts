@@ -54,8 +54,9 @@ Return ONLY valid JSON (no markdown):
 {
   "headline": "Clean punchy headline max 80 chars",
   "category": "growth|leadership|contraction|expansion|merger_acquisition",
-  "context_paragraph": "2-3 sentences of context max 300 chars",
-  "career_implications": "1-2 sentences on career impact max 200 chars",
+  "context_paragraph": "2-3 sentences: what happened and the immediate facts. Max 300 chars.",
+  "strategic_read": "1 tight paragraph: what this move signals strategically — market dynamics, competitive positioning, or brand strategy implications. Max 400 chars.",
+  "career_implications": "2-3 sharp sentences: which roles increase in demand, what profiles win, what skills matter. Be specific not generic. Max 250 chars.",
   "brand_tags": ["BrandName1"],
   "confidence": "high|medium"
 }`
