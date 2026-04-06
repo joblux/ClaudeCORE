@@ -40,8 +40,7 @@ const NAV_SECTIONS = [
     label: 'LuxAI',
     items: [
       { label: 'Command Center', href: '/admin/luxai', icon: Sparkles, exact: true },
-      { label: 'Approval Queue', href: '/admin/luxai/queue', icon: ClipboardList },
-      { label: 'Content Queue', href: '/admin/content-queue', icon: FileText },
+      { label: 'Content Queue', href: '/admin/content-queue', icon: ClipboardList },
     ],
   },
   {
@@ -91,7 +90,6 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   '/admin/wikilux': { title: 'WikiLux', subtitle: 'Brand encyclopedia' },
   '/admin/escape': { title: 'Escape', subtitle: 'Travel content' },
   '/admin/luxai': { title: 'LuxAI', subtitle: 'Command center' },
-  '/admin/luxai/queue': { title: 'Approval Queue', subtitle: 'Pending AI content' },
   '/admin/luxai/usage': { title: 'LuxAI Usage', subtitle: 'Volume & cost tracking' },
   '/admin/media': { title: 'Media Library', subtitle: 'Files and images' },
   '/admin/contact': { title: 'Contact Messages', subtitle: 'Inbound enquiries' },
