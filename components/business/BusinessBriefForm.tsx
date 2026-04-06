@@ -14,9 +14,7 @@ const COMPANY_TYPES = [
 ]
 
 const BRIEF_TYPES = [
-  'Executive search', 'Mid-senior hiring', 'Talent mapping',
-  'Compensation benchmarking', 'Market intelligence',
-  'Discreet exploratory brief', 'Other',
+  'Executive search', 'Senior and mid-level search', 'Exploratory brief',
 ]
 
 const URGENCY_OPTIONS = ['Immediate', 'Within 30 days', 'Within this quarter', 'Exploratory']

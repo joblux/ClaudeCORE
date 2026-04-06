@@ -12,7 +12,7 @@ const sections = [
   },
   {
     title: '2. Scope of Engagement',
-    body: 'Executive and senior-level search, targeted talent identification, market mapping, and advisory on role positioning and candidate calibration.',
+    body: 'Executive and senior-level direct hiring search, targeted talent identification, market mapping, and advisory on role positioning and candidate calibration. JOBLUX does not provide temporary staffing, temp-to-hire, or interim placement services.',
   },
   {
     title: '3. Candidate Introduction',
