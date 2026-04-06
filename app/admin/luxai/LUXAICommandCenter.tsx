@@ -429,28 +429,6 @@ export default function LUXAICommandCenter() {
               <div className={flowBar}><b className="text-[#10B981]">→</b> Insights page: Research reports tab</div>
             </div>
 
-            {/* 6. Insider voices */}
-            <div className={card}>
-              <div className={cardH}>
-                <div className={icon('bg-[#6366F1]')}>V</div>
-                <div className="flex-1">
-                  <div className="text-[13px] font-semibold text-[#111]">Insider voices</div>
-                  <div className="text-[10px] text-[#888]">Executive quotes | insider perspectives on luxury careers</div>
-                </div>
-              </div>
-              <div className={body}>
-                <div className={row}>
-                  <button className={btnB} disabled={!!generating} onClick={() => callEndpoint('insider-3', '/api/luxai/generate-insider-voice', { count: 3 })}>
-                    {generating === 'insider-3' ? 'Generating...' : 'Generate 3 voices'}
-                  </button>
-                  <button className={btnO} disabled={!!generating} onClick={() => callEndpoint('insider-6', '/api/luxai/generate-insider-voice', { count: 6 })}>
-                    {generating === 'insider-6' ? 'Generating...' : 'Generate 6'}
-                  </button>
-                </div>
-              </div>
-              <div className={flowBar}><b className="text-[#10B981]">→</b> Insights page: Insider voices tab</div>
-            </div>
-
             {/* 7. Interview intelligence */}
             <div className={card}>
               <div className={cardH}>
