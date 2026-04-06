@@ -84,9 +84,10 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
   // Event: approve and publish to events table
   if (record.content_type === 'event') {
     const eventTitle = pc.title || pc.name || record.title
+    const eventSlug = slug || (eventTitle || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 80)
     const eventStartDate = pc.start_date || pc.date || null
 
-    if (!eventTitle || !slug || !eventStartDate) {
+    if (!eventTitle || !eventSlug || !eventStartDate) {
       return NextResponse.json(
         { success: false, error: 'Cannot publish event: missing required fields (name, slug, or start_date). Edit the queue item first.' },
         { status: 400 }
@@ -98,7 +99,7 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
       .insert({
         title: eventTitle,
         name: eventTitle,
-        slug,
+        slug: eventSlug,
         location_city: pc.city || pc.location_city || null,
         location_country: pc.country || pc.location_country || null,
         city: pc.city || pc.location_city || null,

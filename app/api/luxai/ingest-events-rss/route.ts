@@ -83,7 +83,8 @@ Return ONLY valid JSON (no markdown):
   "sector": "Fashion|Watches & Jewellery|Art & Culture|Hospitality|Business|Automotive & Yachts|Beauty|Real Estate",
   "city": "City name",
   "country": "Country name",
-  "start_date": "YYYY-MM-DD or null if unclear",
+  "slug": "url-friendly-slug-from-event-name",
+  "start_date": "YYYY-MM-DD (REQUIRED — see rules below)",
   "end_date": "YYYY-MM-DD or null",
   "description": "What this event is and why it matters for luxury professionals [max 300 chars]",
   "long_description": "200-400 word editorial overview: history, significance, what to expect, key attendees",
@@ -98,7 +99,11 @@ Return ONLY valid JSON (no markdown):
   "website_url": "${link}",
   "meta_title": "Event Name | City | JOBLUX Events",
   "meta_description": "150-char SEO description"
-}`
+}
+
+RULES:
+- You MUST extract or infer start_date. If the article mentions a month and year but no exact day, use the 1st of that month (e.g. "June 2026" → "2026-06-01"). If only a year is mentioned, use January 1st. Only return null if absolutely no date reference exists.
+- Always generate a URL-friendly slug from the event name (lowercase, hyphens, no special chars, max 80 chars).`
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
