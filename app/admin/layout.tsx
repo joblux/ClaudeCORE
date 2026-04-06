@@ -55,6 +55,7 @@ const NAV_SECTIONS = [
       { label: 'Assignments', href: '/admin/assignments', icon: Briefcase },
       { label: 'ATS Pipeline', href: '/admin/ats', icon: Kanban },
       { label: 'Briefs', href: '/admin/briefs', icon: ClipboardList },
+      { label: 'Business Briefs', href: '/admin/business-briefs', icon: FileText },
     ],
   },
   {

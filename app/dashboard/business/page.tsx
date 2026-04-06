@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { useSession, signOut } from 'next-auth/react'
+import BusinessBriefForm from '@/components/business/BusinessBriefForm'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -241,20 +242,11 @@ export default function BusinessDashboard() {
           {/* ── SUBMIT A BRIEF ── */}
           {activeNav === 'submit-brief' && (
             <div>
-              <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '28px 24px', textAlign: 'center', marginBottom: 20 }}>
-                <div style={{ fontSize: 14, color: '#ccc', marginBottom: 6 }}>Initiate a confidential search</div>
-                <p style={{ fontSize: 13, color: '#999', marginBottom: 14, maxWidth: 440, margin: '0 auto 14px' }}>
-                  To begin a search, contact JOBLUX with the role, seniority, location, and any specific requirements. Your consultant will follow up within 48 hours.
-                </p>
-                <Link href="/services/recruitment" style={{ display: 'inline-block', padding: '10px 24px', fontSize: 12, fontWeight: 600, color: '#000', background: '#a58e28', borderRadius: 4, textDecoration: 'none' }}>
-                  View our recruitment services →
-                </Link>
-              </div>
-              <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '16px 20px' }}>
-                <div style={{ fontSize: 12, color: '#999', lineHeight: 1.6 }}>
-                  An in-dashboard brief submission form is coming soon. For now, reach out via the recruitment services page or email your consultant directly.
-                </div>
-              </div>
+              <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 20, fontWeight: 400, color: '#fff', margin: '0 0 8px' }}>Business Brief</h2>
+              <p style={{ fontSize: 13, color: '#999', lineHeight: 1.5, marginBottom: 28, fontFamily: 'Inter, sans-serif' }}>
+                Share your hiring or intelligence requirement. Each brief is reviewed privately and routed according to scope, urgency, and confidentiality.
+              </p>
+              <BusinessBriefForm />
             </div>
           )}
 
