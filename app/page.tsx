@@ -37,7 +37,6 @@ export default async function HomePage() {
     salariesRes,
     articlesRes,
     eventsRes,
-    brandSignalsRes,
     brandsWikiRes,
   ] = await Promise.all([
     // Signals for ticker + signals section (limit 6 covers both)
@@ -77,52 +76,32 @@ export default async function HomePage() {
     // Upcoming events
     supabase
       .from('events')
-      .select('slug, title, event_date, city, country, sector')
+      .select('slug, title, event_date, location_city, location_country, sector')
       .eq('is_published', true)
       .gte('event_date', new Date().toISOString().split('T')[0])
       .order('event_date', { ascending: true })
       .limit(4),
-    // Signals for brand intelligence mapping
-    supabase
-      .from('signals')
-      .select('brand_tags, category, published_at')
-      .eq('is_published', true)
-      .order('published_at', { ascending: false })
-      .limit(50),
     // WikiLux content for brand cards
     supabase
       .from('wikilux_content')
-      .select('slug, brand_name, content, is_published')
+      .select('slug, brand_name, content, is_published, updated_at')
       .eq('is_published', true)
-      .is('deleted_at', null),
+      .is('deleted_at', null)
+      .order('updated_at', { ascending: false })
+      .limit(8),
   ])
 
-  // Build brand intelligence: brands sorted by most recent signal
-  const brandSignalMap = new Map<string, string>()
-  const brandSignals = (brandSignalsRes.data || []) as { brand_tags: string[] | null; category: string; published_at: string }[]
-  for (const signal of brandSignals) {
-    for (const tag of (signal.brand_tags || []) as string[]) {
-      const key = tag.toLowerCase()
-      if (!brandSignalMap.has(key)) {
-        brandSignalMap.set(key, signal.category)
-      }
-    }
-  }
-
   const wikiData = (brandsWikiRes.data || []) as { slug: string; brand_name: string; content: Record<string, any> | null; is_published: boolean }[]
-  const brands = wikiData
-    .filter(b => brandSignalMap.has(b.brand_name.toLowerCase()))
-    .map(b => {
-      const c = (b.content || {}) as Record<string, any>
-      return {
-        slug: b.slug,
-        brand_name: b.brand_name,
-        tagline: (c.tagline as string) || '',
-        parent_group: (c.stock?.parent_group as string) || '',
-        latest_signal: brandSignalMap.get(b.brand_name.toLowerCase())!,
-      }
-    })
-    .slice(0, 8)
+  const brands = wikiData.map(b => {
+    const c = (b.content || {}) as Record<string, any>
+    return {
+      slug: b.slug,
+      brand_name: b.brand_name,
+      tagline: (c.tagline as string) || '',
+      parent_group: (c.stock?.parent_group as string) || '',
+      latest_signal: '',
+    }
+  })
 
   const activeSearchCount = activeCountRes.count || 0
 
@@ -137,7 +116,7 @@ export default async function HomePage() {
         salaries={salariesRes.data || []}
         articles={articlesRes.data || []}
       />
-      <HomepageEvents events={eventsRes.data || []} />
+      <HomepageEvents events={(eventsRes.data || []).map((e: any) => ({ ...e, city: e.location_city, country: e.location_country }))} />
       <HomepageBrief />
     </div>
   )
