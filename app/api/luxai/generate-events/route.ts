@@ -135,37 +135,18 @@ RULES:
     const inserted = []
     const insertErrors = []
     for (const ev of events) {
-      const slug = ev.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 80)
-      const { data: row, error } = await supabase.from('events').insert({
-        name: ev.name,
+      const { data: row, error } = await supabase.from('content_queue').insert({
+        content_type: 'event',
+        source_type: 'joblux_generation',
         title: ev.title || ev.name,
-        slug,
-        sector: ev.sector,
-        location_city: ev.location_city,
-        location_country: ev.location_country,
-        city: ev.location_city,
-        location: `${ev.location_city}, ${ev.location_country}`,
-        start_date: ev.start_date,
-        end_date: ev.end_date,
-        event_date: ev.start_date,
-        description: ev.description,
-        long_description: ev.long_description,
-        highlights: ev.highlights,
-        brands_present: ev.brands_present,
-        career_opportunities: ev.career_opportunities,
-        networking_tips: ev.networking_tips,
-        practical_info: ev.practical_info,
-        career_context: ev.career_context,
-        organizer: ev.organizer,
-        attendance: ev.attendance,
-        type: ev.type,
-        website_url: ev.website_url,
-        meta_title: ev.meta_title,
-        meta_description: ev.meta_description,
-        is_published: false,
-        content_origin: 'ai',
-        is_featured: false,
-        source: 'luxai'
+        raw_content: ev,
+        processed_content: ev,
+        source_name: 'JOBLUX Intelligence',
+        source_url: null,
+        byline: 'JOBLUX Intelligence',
+        category: ev.sector,
+        target_surfaces: ['events', 'homepage'],
+        status: 'draft',
       }).select().maybeSingle()
 
       if (error) {
