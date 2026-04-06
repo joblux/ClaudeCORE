@@ -111,31 +111,23 @@ RULES:
 
     console.log(`[LUXAI signals] Parsed ${signals.length} signals from Claude response`)
 
-    // Insert each signal as pending (unpublished)
+    // Insert each signal into content_queue as draft
     const inserted = []
     const insertErrors = []
     for (const s of signals) {
-      const slug = s.headline.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 80)
-      const { data: row, error } = await supabase.from('signals').insert({
-        category: s.category,
-        headline: s.headline,
-        context_paragraph: s.context_paragraph,
-        career_implications: s.career_implications,
-        long_context: s.long_context,
-        what_happened: s.what_happened,
-        why_it_matters: s.why_it_matters,
-        career_detail: s.career_detail,
-        brand_impact: s.brand_impact,
+      const { data: row, error } = await supabase.from('content_queue').insert({
+        content_type: 'signal',
+        source_type: 'joblux_generation',
+        title: s.headline,
+        raw_content: s,
+        processed_content: s,
         source_name: 'JOBLUX Intelligence',
         source_url: null,
+        byline: 'JOBLUX Intelligence',
+        category: s.category,
         brand_tags: s.brand_tags,
-        confidence: s.confidence,
-        meta_title: s.meta_title,
-        meta_description: s.meta_description,
-        is_published: false,
-        content_origin: 'ai',
-        is_pinned: false,
-        slug
+        target_surfaces: ['signals', 'homepage'],
+        status: 'draft',
       }).select().maybeSingle()
 
       if (error) {

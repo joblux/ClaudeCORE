@@ -41,6 +41,7 @@ const NAV_SECTIONS = [
     items: [
       { label: 'Command Center', href: '/admin/luxai', icon: Sparkles, exact: true },
       { label: 'Approval Queue', href: '/admin/luxai/queue', icon: ClipboardList },
+      { label: 'Content Queue', href: '/admin/content-queue', icon: FileText },
     ],
   },
   {
