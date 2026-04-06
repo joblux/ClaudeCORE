@@ -51,11 +51,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true })
     }
 
-    // Standard luxai_queue rejection
+    // content_queue rejection (canonical editorial gate)
     const { error } = await supabase
-      .from('luxai_queue')
+      .from('content_queue')
       .update({
         status: 'rejected',
+        rejection_reason: reason || null,
+        reviewed_by: (session.user as any).id || null,
         reviewed_at: new Date().toISOString(),
       })
       .eq('id', id)

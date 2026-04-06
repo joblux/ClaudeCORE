@@ -123,12 +123,15 @@ Guidelines:
     const requireApproval = settings?.value === true
 
     if (requireApproval) {
-      // Save to queue
-      await supabase.from('luxai_queue').insert({
-        type: 'salary_benchmark',
+      // Write to content_queue (canonical editorial gate)
+      await supabase.from('content_queue').insert({
+        content_type: 'salary_benchmark',
+        source_type: 'ai',
+        source_name: 'luxai',
         title: `Salary Benchmark: ${job_title}, ${city}`,
-        content: { query: body, result },
-        status: 'pending',
+        raw_content: { query: body, result },
+        destination_table: 'salary_benchmarks',
+        status: 'draft',
       })
       return NextResponse.json({ 
         queued: true,

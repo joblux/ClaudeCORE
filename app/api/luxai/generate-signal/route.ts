@@ -38,10 +38,11 @@ export async function POST(req: NextRequest) {
     today.setHours(0, 0, 0, 0)
 
     const { count } = await supabase
-      .from('luxai_queue')
+      .from('content_queue')
       .select('*', { count: 'exact', head: true })
-      .eq('type', 'signal')
-      .gte('generated_at', today.toISOString())
+      .eq('content_type', 'signal')
+      .eq('source_name', 'luxai')
+      .gte('created_at', today.toISOString())
 
     if (count && count >= dailyTarget) {
       return NextResponse.json({
@@ -129,12 +130,14 @@ Guidelines:
       status: 'success',
     })
 
-    // Add to queue with full rich content
-    await supabase.from('luxai_queue').insert({
-      type: 'signal',
-      content_type: result.category,
+    // Write to content_queue (canonical editorial gate)
+    await supabase.from('content_queue').insert({
+      content_type: 'signal',
+      source_type: 'ai',
+      source_name: 'luxai',
       title: result.title,
-      content: {
+      category: result.category,
+      raw_content: {
         content: result.content,
         what_happened: result.what_happened,
         why_it_matters: result.why_it_matters,
@@ -144,7 +147,8 @@ Guidelines:
         meta_title: result.meta_title,
         meta_description: result.meta_description,
       },
-      status: 'pending',
+      destination_table: 'signals',
+      status: 'draft',
     })
 
     return NextResponse.json({

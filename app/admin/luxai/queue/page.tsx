@@ -20,12 +20,14 @@ const categoryLabels: Record<string, string> = {
 
 interface QueueItem {
   id: string
-  type: string
   content_type: string
+  source_type: string
+  source_name: string
   title: string
-  content: Record<string, unknown>
+  raw_content: Record<string, unknown>
+  category: string
+  brand_tags: string[]
   status: string
-  source: string
   created_at: string
 }
 
@@ -51,7 +53,7 @@ export default function ApprovalQueuePage() {
       const res = await fetch('/api/admin/luxai/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: item.id, type: item.type, source: item.source }),
+        body: JSON.stringify({ id: item.id, type: item.content_type, source: item.source_name }),
       })
       if (res.ok) {
         setItems(prev => prev.filter(i => i.id !== item.id))
@@ -66,7 +68,7 @@ export default function ApprovalQueuePage() {
       const res = await fetch('/api/admin/luxai/reject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: item.id, type: item.type, source: item.source }),
+        body: JSON.stringify({ id: item.id, type: item.content_type, source: item.source_name }),
       })
       if (res.ok) {
         setItems(prev => prev.filter(i => i.id !== item.id))
@@ -134,10 +136,10 @@ function QueueCard({
   onReject: (item: QueueItem) => void
   isLoading: boolean
 }) {
-  const isSignal = item.type === 'signal'
-  const c = item.content as Record<string, unknown>
+  const isSignal = item.content_type === 'signal'
+  const c = item.raw_content as Record<string, unknown>
 
-  const category = isSignal ? (c?.category as string || 'growth') : 'wikilux'
+  const category = isSignal ? (item.category?.toLowerCase() || 'growth') : 'wikilux'
   const dotColor = categoryColors[category] || '#888'
   const categoryLabel = isSignal
     ? (categoryLabels[category] || category)
@@ -150,7 +152,7 @@ function QueueCard({
   const subtitle = isSignal
     ? ((c?.context_paragraph as string) || '')
     : ((wikiluxContent?.tagline as string) || (c?.editorial_notes as string) || '')
-  const tags: string[] = isSignal ? (c?.brand_tags as string[] || []) : []
+  const tags: string[] = item.brand_tags || []
 
   const dateStr = new Date(item.created_at).toLocaleDateString('en-GB', {
     day: 'numeric', month: 'short', year: 'numeric',

@@ -10,8 +10,9 @@ interface HealthStats {
 }
 
 interface QueueItem {
-  id: string; title: string; type: string; content_type: string
-  content: any; source: string; created_at: string; generated_at?: string
+  id: string; title: string; content_type: string
+  raw_content: any; source_type: string; source_name: string
+  category: string; brand_tags: string[]; status: string; created_at: string
 }
 
 interface BrandOption {
@@ -130,7 +131,7 @@ export default function LUXAICommandCenter() {
       await fetch('/api/admin/luxai/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: item.id, type: item.type, source: item.source })
+        body: JSON.stringify({ id: item.id, type: item.content_type, source: item.source_name })
       })
       setQueue(q => q.filter(x => x.id !== item.id))
       flash('success', 'Approved and published')
@@ -143,7 +144,7 @@ export default function LUXAICommandCenter() {
       await fetch('/api/admin/luxai/reject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: item.id, source: item.source })
+        body: JSON.stringify({ id: item.id, type: item.content_type, source: item.source_name })
       })
       setQueue(q => q.filter(x => x.id !== item.id))
       flash('success', 'Rejected')
@@ -578,14 +579,14 @@ export default function LUXAICommandCenter() {
                   {queue.slice(0, 10).map(item => (
                     <div key={item.id} className="px-3 py-2.5 border-b border-[#f0f0f0] last:border-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded text-white uppercase" style={{ background: queueBadge(item.type || item.content_type?.toLowerCase() || 'wikilux') }}>
-                          {item.content_type || item.type || 'Content'}
+                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded text-white uppercase" style={{ background: queueBadge(item.content_type?.toLowerCase() || 'wikilux') }}>
+                          {item.content_type || 'Content'}
                         </span>
                         <span className="text-[11px] font-medium text-[#111] flex-1 truncate">{item.title}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-[9px] text-[#999]">
-                          {item.source === 'wikilux' ? 'WikiLux editor' : 'LUXAI'} · {new Date(item.generated_at || item.created_at).toLocaleDateString()}
+                          {item.source_name === 'wikilux' ? 'WikiLux editor' : 'LUXAI'} · {new Date(item.created_at).toLocaleDateString()}
                         </span>
                         <div className="flex gap-1">
                           <button onClick={() => handleApprove(item)} className="px-2 py-1 bg-[#111] text-white text-[9px] font-semibold rounded hover:bg-[#333]">Approve</button>

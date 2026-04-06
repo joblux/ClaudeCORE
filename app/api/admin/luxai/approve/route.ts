@@ -84,32 +84,35 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Standard luxai_queue approval
+    // content_queue approval (canonical editorial gate)
+    const { data: item } = await supabase
+      .from('content_queue')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (!item) {
+      return NextResponse.json({ error: 'Queue item not found' }, { status: 404 })
+    }
+
     await supabase
-      .from('luxai_queue')
+      .from('content_queue')
       .update({
         status: 'approved',
+        reviewed_by: (session.user as any).id || null,
         reviewed_at: new Date().toISOString(),
       })
       .eq('id', id)
 
-    // Publish content based on type
-    if (type === 'signal') {
-      const { data: item } = await supabase
-        .from('luxai_queue')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle()
-
-      if (item) {
-        await supabase.from('signals').insert({
-          title: item.title,
-          content: item.content.content,
-          type: item.content_type?.toLowerCase() || 'talent',
-          status: 'published',
-          published_at: new Date().toISOString(),
-        })
-      }
+    // Publish content to destination table
+    if (item.content_type === 'signal' && item.raw_content) {
+      await supabase.from('signals').insert({
+        title: item.title,
+        content: item.raw_content.content,
+        type: item.category?.toLowerCase() || 'talent',
+        status: 'published',
+        published_at: new Date().toISOString(),
+      })
     }
 
     return NextResponse.json({ success: true })
