@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })
     }
 
-    const prompt = `You are a luxury industry intelligence analyst for JOBLUX. Generate ${count} realistic luxury industry news signals.
+    const prompt = `You are a luxury industry intelligence analyst for JOBLUX. Generate ${count} luxury industry intelligence signals. These are JOBLUX Intelligence draft items, not press clippings. Do not attribute to any external publication.
 
 Each signal must be about a REAL luxury brand or group (LVMH, Kering, Hermès, Chanel, Richemont, Prada, Burberry, Cartier, Dior, Gucci, Rolex, Tiffany, etc.)
 
@@ -25,12 +25,11 @@ Return ONLY a JSON array (no markdown, no backticks):
     "headline": "Short punchy headline [max 80 chars]",
     "context_paragraph": "2-3 sentences of context explaining the signal [max 300 chars]",
     "career_implications": "1-2 sentences on what this means for luxury professionals [max 200 chars]",
-    "long_context": "A detailed 150-250 word editorial analysis. Cover the background, what triggered this signal, the strategic context, and what industry observers are saying. Write in an authoritative Bloomberg-style editorial tone.",
+    "long_context": "A detailed 150-250 word editorial analysis. Cover the background, what triggered this signal, the strategic context, and what industry observers are noting. Write in an authoritative, precise editorial tone.",
     "what_happened": "One clear sentence describing the event or development [max 150 chars]",
     "why_it_matters": "One clear sentence on the broader industry significance [max 150 chars]",
     "career_detail": ["Specific career impact #1", "Specific career impact #2", "Specific career impact #3"],
     "brand_impact": ["Impact on brand/group #1", "Impact on brand/group #2", "Impact on brand/group #3"],
-    "source_name": "Reuters" | "BOF" | "WWD" | "FT" | "Bloomberg",
     "brand_tags": ["BrandName1", "BrandName2"],
     "confidence": "high" | "medium",
     "meta_title": "Headline — Category Signal | JOBLUX Signals",
@@ -51,7 +50,7 @@ RULES:
 - brand_tags: use exact brand names (Cartier not cartier)
 - career_detail: 2-4 specific career impacts as string array
 - brand_impact: 2-4 specific brand/group impacts as string array
-- Realistic, plausible signals based on real industry dynamics
+- Plausible signals based on real industry dynamics
 - No duplicate brands across signals
 - Output valid JSON array only`
 
@@ -127,7 +126,7 @@ RULES:
         why_it_matters: s.why_it_matters,
         career_detail: s.career_detail,
         brand_impact: s.brand_impact,
-        source_name: s.source_name,
+        source_name: 'JOBLUX Intelligence',
         source_url: null,
         brand_tags: s.brand_tags,
         confidence: s.confidence,
