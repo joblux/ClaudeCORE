@@ -12,7 +12,7 @@ export const revalidate = 0
 
 export const metadata: Metadata = {
   title: 'JOBLUX | Luxury career intelligence',
-  description: 'Real salary data. Confidential opportunities. Market signals across 179 luxury brands. The intelligence you need to make your next move.',
+  description: 'Real salary data. Confidential opportunities. Market signals across 180+ luxury brands. The intelligence you need to make your next move.',
 }
 
 const organizationJsonLd = {
@@ -21,7 +21,7 @@ const organizationJsonLd = {
   name: 'JOBLUX',
   url: 'https://www.joblux.com',
   logo: 'https://www.joblux.com/favicon.svg',
-  description: 'Luxury career intelligence. Real salary data, confidential opportunities, and market signals across 179 luxury brands.',
+  description: 'Luxury career intelligence. Real salary data, confidential opportunities, and market signals across 180+ luxury brands.',
   foundingDate: '2006',
   founder: { '@type': 'Person', name: "Mohammed M'zaour" },
   address: { '@type': 'PostalAddress', addressLocality: 'Paris', addressCountry: 'FR' },
