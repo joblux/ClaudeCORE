@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 const SECTORS = [
   'Fashion', 'Watches & Jewellery', 'Beauty', 'Hospitality', 'Travel',
@@ -59,14 +59,33 @@ export default function BusinessBriefForm() {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
+  const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set())
+  const formRef = useRef<HTMLDivElement>(null)
 
   const set = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }))
 
   const handleSubmit = async () => {
     setError('')
+    setInvalidFields(new Set())
 
-    if (!form.company_name.trim() || !form.sector || !form.company_type || !form.brief_type || !form.urgency || !form.confidentiality_level || !form.brief_summary.trim() || !form.contact_name.trim() || !form.contact_email.trim() || !form.preferred_follow_up) {
-      setError('Please complete all required fields.')
+    const required: { key: string; check: boolean }[] = [
+      { key: 'company_name', check: !form.company_name.trim() },
+      { key: 'sector', check: !form.sector },
+      { key: 'company_type', check: !form.company_type },
+      { key: 'brief_type', check: !form.brief_type },
+      { key: 'urgency', check: !form.urgency },
+      { key: 'confidentiality_level', check: !form.confidentiality_level },
+      { key: 'brief_summary', check: !form.brief_summary.trim() },
+      { key: 'contact_name', check: !form.contact_name.trim() },
+      { key: 'contact_email', check: !form.contact_email.trim() },
+      { key: 'preferred_follow_up', check: !form.preferred_follow_up },
+    ]
+    const missing = required.filter(r => r.check).map(r => r.key)
+    if (missing.length > 0) {
+      setInvalidFields(new Set(missing))
+      setError(`Please complete all required fields (${missing.length} missing).`)
+      const first = formRef.current?.querySelector(`[data-field="${missing[0]}"]`) as HTMLElement | null
+      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' })
       return
     }
     setSubmitting(true)
@@ -114,9 +133,10 @@ export default function BusinessBriefForm() {
     margin: '0 0 20px', paddingBottom: 12, borderBottom: '1px solid #2a2a2a',
   }
   const fieldGroupStyle: React.CSSProperties = { marginBottom: 18 }
+  const borderFor = (field: string): string => invalidFields.has(field) ? '1px solid #e57373' : '1px solid #333'
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+    <div ref={formRef} style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
 
       {/* Section 1 — Company Context */}
       <div style={{ background: '#222', border: '1px solid #2a2a2a', borderRadius: 8, padding: '28px 24px' }}>
@@ -124,7 +144,7 @@ export default function BusinessBriefForm() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px 20px' }}>
           <div style={fieldGroupStyle}>
             <label style={labelStyle}>Company name{requiredStar}</label>
-            <input style={inputStyle} value={form.company_name} onChange={e => set('company_name', e.target.value)} />
+            <input data-field="company_name" style={{ ...inputStyle, border: borderFor('company_name') }} value={form.company_name} onChange={e => set('company_name', e.target.value)} />
           </div>
           <div style={fieldGroupStyle}>
             <label style={labelStyle}>Company website</label>
@@ -132,14 +152,14 @@ export default function BusinessBriefForm() {
           </div>
           <div style={fieldGroupStyle}>
             <label style={labelStyle}>Sector{requiredStar}</label>
-            <select style={selectStyle} value={form.sector} onChange={e => set('sector', e.target.value)}>
+            <select data-field="sector" style={{ ...selectStyle, border: borderFor('sector') }} value={form.sector} onChange={e => set('sector', e.target.value)}>
               <option value="">Select...</option>
               {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div style={fieldGroupStyle}>
             <label style={labelStyle}>Company type{requiredStar}</label>
-            <select style={selectStyle} value={form.company_type} onChange={e => set('company_type', e.target.value)}>
+            <select data-field="company_type" style={{ ...selectStyle, border: borderFor('company_type') }} value={form.company_type} onChange={e => set('company_type', e.target.value)}>
               <option value="">Select...</option>
               {COMPANY_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
@@ -157,7 +177,7 @@ export default function BusinessBriefForm() {
         <h3 style={sectionHeadingStyle}>Brief Type</h3>
         <div style={{ marginBottom: 18 }}>
           <label style={labelStyle}>Brief type{requiredStar}</label>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
+          <div data-field="brief_type" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4, padding: invalidFields.has('brief_type') ? 6 : 0, border: invalidFields.has('brief_type') ? '1px solid #e57373' : 'none', borderRadius: 4 }}>
             {BRIEF_TYPES.map(bt => (
               <button
                 key={bt}
@@ -179,14 +199,14 @@ export default function BusinessBriefForm() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px 20px' }}>
           <div style={fieldGroupStyle}>
             <label style={labelStyle}>Urgency{requiredStar}</label>
-            <select style={selectStyle} value={form.urgency} onChange={e => set('urgency', e.target.value)}>
+            <select data-field="urgency" style={{ ...selectStyle, border: borderFor('urgency') }} value={form.urgency} onChange={e => set('urgency', e.target.value)}>
               <option value="">Select...</option>
               {URGENCY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div style={fieldGroupStyle}>
             <label style={labelStyle}>Confidentiality level{requiredStar}</label>
-            <select style={selectStyle} value={form.confidentiality_level} onChange={e => set('confidentiality_level', e.target.value)}>
+            <select data-field="confidentiality_level" style={{ ...selectStyle, border: borderFor('confidentiality_level') }} value={form.confidentiality_level} onChange={e => set('confidentiality_level', e.target.value)}>
               <option value="">Select...</option>
               {CONFIDENTIALITY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
@@ -204,7 +224,7 @@ export default function BusinessBriefForm() {
           </div>
           <div style={{ ...fieldGroupStyle, gridColumn: '1 / -1' }}>
             <label style={labelStyle}>Brief summary{requiredStar}</label>
-            <textarea style={{ ...inputStyle, minHeight: 100, resize: 'vertical' }} placeholder="Describe the requirement, context, and what a successful outcome looks like." value={form.brief_summary} onChange={e => set('brief_summary', e.target.value)} />
+            <textarea data-field="brief_summary" style={{ ...inputStyle, minHeight: 100, resize: 'vertical', border: borderFor('brief_summary') }} placeholder="Describe the requirement, context, and what a successful outcome looks like." value={form.brief_summary} onChange={e => set('brief_summary', e.target.value)} />
           </div>
           <div style={fieldGroupStyle}>
             <label style={labelStyle}>Seniority level</label>
@@ -241,11 +261,11 @@ export default function BusinessBriefForm() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px 20px' }}>
           <div style={fieldGroupStyle}>
             <label style={labelStyle}>Contact name{requiredStar}</label>
-            <input style={inputStyle} value={form.contact_name} onChange={e => set('contact_name', e.target.value)} />
+            <input data-field="contact_name" style={{ ...inputStyle, border: borderFor('contact_name') }} value={form.contact_name} onChange={e => set('contact_name', e.target.value)} />
           </div>
           <div style={fieldGroupStyle}>
             <label style={labelStyle}>Work email{requiredStar}</label>
-            <input style={inputStyle} type="email" value={form.contact_email} onChange={e => set('contact_email', e.target.value)} />
+            <input data-field="contact_email" style={{ ...inputStyle, border: borderFor('contact_email') }} type="email" value={form.contact_email} onChange={e => set('contact_email', e.target.value)} />
           </div>
           <div style={fieldGroupStyle}>
             <label style={labelStyle}>Role / title</label>
@@ -253,7 +273,7 @@ export default function BusinessBriefForm() {
           </div>
           <div style={fieldGroupStyle}>
             <label style={labelStyle}>Preferred follow-up{requiredStar}</label>
-            <select style={selectStyle} value={form.preferred_follow_up} onChange={e => set('preferred_follow_up', e.target.value)}>
+            <select data-field="preferred_follow_up" style={{ ...selectStyle, border: borderFor('preferred_follow_up') }} value={form.preferred_follow_up} onChange={e => set('preferred_follow_up', e.target.value)}>
               <option value="">Select...</option>
               {FOLLOW_UP_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
@@ -283,9 +303,9 @@ export default function BusinessBriefForm() {
         onClick={handleSubmit}
         disabled={submitting}
         style={{
-          width: '100%', padding: '14px 0', fontSize: 13, fontWeight: 600,
+          padding: '12px 32px', fontSize: 13, fontWeight: 600,
           fontFamily: 'Inter, sans-serif', letterSpacing: '0.05em',
-          background: submitting ? '#7a6a1e' : '#a58e28', color: '#000',
+          background: submitting ? '#7a6a1e' : '#a58e28', color: '#111',
           border: 'none', borderRadius: 4, cursor: submitting ? 'not-allowed' : 'pointer',
         }}
       >
