@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/ses'
 
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
     // Get session for created_by (nullable)
     let createdBy: string | null = null
     try {
-      const session = await getServerSession()
+      const session = await getServerSession(authOptions)
       if (session?.user && (session.user as any).memberId) {
         createdBy = (session.user as any).memberId
       }

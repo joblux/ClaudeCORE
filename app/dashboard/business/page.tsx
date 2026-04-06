@@ -65,6 +65,8 @@ export default function BusinessDashboard() {
   const [contributions, setContributions] = useState<any[]>([])
   const [contributionStats, setContributionStats] = useState<any>(null)
   const [searchCount, setSearchCount] = useState(0)
+  const [myBriefs, setMyBriefs] = useState<any[]>([])
+  const [briefsLoading, setBriefsLoading] = useState(false)
 
   useEffect(() => {
     if (!session) return
@@ -97,16 +99,23 @@ export default function BusinessDashboard() {
         }
 
         // Search assignments count (employer's active searches)
-        // For now just get count | employers will be linked to assignments later
         const assignRes = await fetch('/api/assignments?status=active&limit=1')
         if (assignRes.ok) {
           const aData = await assignRes.json()
           setSearchCount(aData.total || 0)
         }
 
-      } catch (err) {
-        console.error('Business dashboard fetch error:', err)
-      }
+        // My business briefs
+        if (memberId) {
+          const { data: briefData } = await supabase
+            .from('business_briefs')
+            .select('id, company_name, brief_type, status, created_at')
+            .eq('created_by', memberId)
+            .order('created_at', { ascending: false })
+          if (briefData) setMyBriefs(briefData)
+        }
+
+      } catch {}
       setLoading(false)
     }
 
@@ -168,7 +177,36 @@ export default function BusinessDashboard() {
 
           {/* ── OVERVIEW ── */}
           {activeNav === 'overview' && (<>
-            {/* How it works */}
+            {/* 1. Start a search CTA */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, fontWeight: 500, color: '#999', letterSpacing: '0.5px', marginBottom: 10, textTransform: 'uppercase' }}>Start a search</div>
+              <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '28px 24px', textAlign: 'center' }}>
+                <div style={{ fontSize: 14, color: '#ccc', marginBottom: 6 }}>Need to hire?</div>
+                <p style={{ fontSize: 13, color: '#999', marginBottom: 14, maxWidth: 440, margin: '0 auto 14px' }}>
+                  Share your hiring requirement. Each brief is reviewed discreetly and handled according to scope and urgency.
+                </p>
+                <button onClick={() => setActiveNav('submit-brief')} style={{ display: 'inline-block', padding: '10px 24px', fontSize: 12, fontWeight: 600, color: '#000', background: '#a58e28', borderRadius: 4, border: 'none', cursor: 'pointer' }}>
+                  Submit a brief &rarr;
+                </button>
+              </div>
+            </div>
+
+            {/* 2. Request status */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, fontWeight: 500, color: '#999', letterSpacing: '0.5px', marginBottom: 10, textTransform: 'uppercase' }}>Request status</div>
+              <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '24px', textAlign: 'center' }}>
+                {myBriefs.length > 0 ? (
+                  <>
+                    <div style={{ fontSize: 14, color: '#ccc', marginBottom: 6 }}>{myBriefs.length} brief{myBriefs.length > 1 ? 's' : ''} submitted</div>
+                    <p style={{ fontSize: 13, color: '#999' }}>View the Request status tab for details.</p>
+                  </>
+                ) : (
+                  <p style={{ fontSize: 13, color: '#999' }}>No active requests yet. Submit a brief to begin.</p>
+                )}
+              </div>
+            </div>
+
+            {/* 3. How it works */}
             <div style={{ background: 'rgba(165,142,40,0.06)', border: '1px solid rgba(165,142,40,0.2)', borderRadius: 8, padding: '20px 24px', marginBottom: 28 }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: '#a58e28', letterSpacing: '1.5px', marginBottom: 8 }}>HOW IT WORKS</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
@@ -186,40 +224,11 @@ export default function BusinessDashboard() {
               </div>
             </div>
 
-            {/* Start a search CTA */}
-            <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, fontWeight: 500, color: '#999', letterSpacing: '0.5px', marginBottom: 10, textTransform: 'uppercase' }}>Start a search</div>
-              <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '28px 24px', textAlign: 'center' }}>
-                <div style={{ fontSize: 14, color: '#ccc', marginBottom: 6 }}>Need to hire?</div>
-                <p style={{ fontSize: 13, color: '#999', marginBottom: 14, maxWidth: 440, margin: '0 auto 14px' }}>
-                  Learn how our confidential executive search process works and get in touch to start a search.
-                </p>
-                <Link href="/services/recruitment" style={{ display: 'inline-block', padding: '10px 24px', fontSize: 12, fontWeight: 600, color: '#000', background: '#a58e28', borderRadius: 4, textDecoration: 'none' }}>
-                  Learn about our process →
-                </Link>
-              </div>
-            </div>
-
-            {/* Request status */}
-            <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, fontWeight: 500, color: '#999', letterSpacing: '0.5px', marginBottom: 10, textTransform: 'uppercase' }}>Request status</div>
-              <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '24px', textAlign: 'center' }}>
-                {searchCount > 0 ? (
-                  <>
-                    <div style={{ fontSize: 14, color: '#ccc', marginBottom: 6 }}>{searchCount} active assignment{searchCount > 1 ? 's' : ''}</div>
-                    <p style={{ fontSize: 13, color: '#999' }}>Your JOBLUX consultant is managing your search{searchCount > 1 ? 'es' : ''}. You'll be contacted directly with updates.</p>
-                  </>
-                ) : (
-                  <p style={{ fontSize: 13, color: '#999' }}>No active requests. When you submit a brief, its status will appear here.</p>
-                )}
-              </div>
-            </div>
-
-            {/* Market signals */}
+            {/* 4. Market signals */}
             <div style={{ marginBottom: 28 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                 <div style={{ fontSize: 11, fontWeight: 500, color: '#999', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Market signals</div>
-                <Link href="/signals" style={{ fontSize: 12, color: '#999', textDecoration: 'none' }}>View all →</Link>
+                <Link href="/signals" style={{ fontSize: 12, color: '#999', textDecoration: 'none' }}>View all &rarr;</Link>
               </div>
               {signals.length > 0 ? (
                 <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '4px 20px' }}>
@@ -233,7 +242,7 @@ export default function BusinessDashboard() {
                 </div>
               ) : (
                 <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '20px', textAlign: 'center' }}>
-                  <p style={{ fontSize: 13, color: '#999' }}>Market intelligence relevant to your sector will appear here.</p>
+                  <p style={{ fontSize: 13, color: '#999' }}>Relevant market intelligence will appear here based on your company profile and activity.</p>
                 </div>
               )}
             </div>
@@ -253,20 +262,38 @@ export default function BusinessDashboard() {
 
           {/* ── REQUEST STATUS ── */}
           {activeNav === 'request-status' && (
-            <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '28px 24px', textAlign: 'center' }}>
-              {searchCount > 0 ? (
-                <>
-                  <div style={{ fontSize: 14, color: '#ccc', marginBottom: 6 }}>{searchCount} active assignment{searchCount > 1 ? 's' : ''}</div>
-                  <p style={{ fontSize: 13, color: '#999' }}>Your JOBLUX consultant is managing your search{searchCount > 1 ? 'es' : ''} and will contact you directly with updates and candidate shortlists.</p>
-                </>
+            <div>
+              {myBriefs.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {myBriefs.map(b => {
+                    const badgeColors: Record<string, { bg: string; text: string }> = {
+                      new: { bg: '#e3f2fd', text: '#1565c0' },
+                      under_review: { bg: '#fff8e1', text: '#f57f17' },
+                      closed: { bg: '#f5f5f5', text: '#757575' },
+                    }
+                    const badge = badgeColors[b.status] || badgeColors.new
+                    const date = b.created_at ? new Date(b.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''
+                    return (
+                      <div key={b.id} style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '20px 24px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                          <div style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>{b.company_name}</div>
+                          <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, padding: '3px 10px', borderRadius: 3, background: badge.bg, color: badge.text, flexShrink: 0 }}>
+                            {b.status.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 13, color: '#999' }}>{b.brief_type}</div>
+                        <div style={{ fontSize: 12, color: '#777', marginTop: 4 }}>{date}</div>
+                      </div>
+                    )
+                  })}
+                </div>
               ) : (
-                <>
-                  <div style={{ fontSize: 14, color: '#ccc', marginBottom: 6 }}>No active requests</div>
-                  <p style={{ fontSize: 13, color: '#999', marginBottom: 14 }}>When you submit a brief, you can track its status here.</p>
+                <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '28px 24px', textAlign: 'center' }}>
+                  <p style={{ fontSize: 13, color: '#999', marginBottom: 14 }}>No active requests yet. Submit a brief to begin.</p>
                   <button onClick={() => setActiveNav('submit-brief')} style={{ padding: '9px 20px', fontSize: 12, fontWeight: 500, color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)', borderRadius: 4, background: 'transparent', cursor: 'pointer' }}>
-                    Submit your first brief →
+                    Submit a brief &rarr;
                   </button>
-                </>
+                </div>
               )}
             </div>
           )}
