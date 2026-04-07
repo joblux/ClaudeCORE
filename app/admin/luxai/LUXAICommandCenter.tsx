@@ -42,6 +42,15 @@ export default function LUXAICommandCenter() {
     failed: number
     results: Array<{ slug: string; brand_name: string; success: boolean; error?: string; updated?: Record<string, string> }>
   } | null>(null)
+  const [metadataIncomplete, setMetadataIncomplete] = useState<number | null>(null)
+
+  const loadMetadataCount = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/luxai/fill-brand-metadata', { cache: 'no-store' })
+      const d = await res.json()
+      setMetadataIncomplete(typeof d.incomplete === 'number' ? d.incomplete : 0)
+    } catch { /* silent */ }
+  }, [])
 
   // Autopilot state
   const [autopilot, setAutopilot] = useState<Record<string, any>>({})
@@ -105,7 +114,8 @@ export default function LUXAICommandCenter() {
     loadBrands()
     loadQueue()
     loadAutopilot()
-  }, [loadHealth, loadBrands, loadQueue, loadAutopilot])
+    loadMetadataCount()
+  }, [loadHealth, loadBrands, loadQueue, loadAutopilot, loadMetadataCount])
 
   function flash(type: 'success' | 'error', msg: string) {
     setResult({ type, msg })
@@ -268,7 +278,7 @@ export default function LUXAICommandCenter() {
                 <div className={row}>
                   <button
                     className={btnO}
-                    disabled={!!generating}
+                    disabled={!!generating || metadataIncomplete === 0}
                     onClick={async () => {
                       if (generating) return
                       setGenerating('fill-metadata')
@@ -285,6 +295,7 @@ export default function LUXAICommandCenter() {
                           })
                           flash('success', d.message || 'Metadata fill complete')
                           loadHealth()
+                          loadMetadataCount()
                         } else {
                           flash('error', d.message || 'Metadata fill failed')
                         }
@@ -295,7 +306,11 @@ export default function LUXAICommandCenter() {
                       }
                     }}
                   >
-                    {generating === 'fill-metadata' ? 'Filling metadata...' : 'Fill brand metadata (max 10)'}
+                    {generating === 'fill-metadata'
+                      ? 'Filling metadata...'
+                      : metadataIncomplete === 0
+                        ? 'All brand metadata complete ✓'
+                        : `Fill brand metadata (${metadataIncomplete ?? '—'} remaining)`}
                   </button>
                   <span className="text-[10px] text-[#888]">Sector · Headquarters · Description (only fills nulls)</span>
                 </div>

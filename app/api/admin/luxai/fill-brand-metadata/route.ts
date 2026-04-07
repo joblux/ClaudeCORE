@@ -134,6 +134,22 @@ Return only the JSON object.`
   }
 }
 
+export async function GET() {
+  try {
+    const { count, error } = await supabase
+      .from('wikilux_content')
+      .select('slug', { count: 'exact', head: true })
+      .eq('status', 'approved')
+      .or('sector.is.null,headquarters.is.null,description.is.null')
+
+    if (error) throw error
+    return NextResponse.json({ incomplete: count ?? 0 })
+  } catch (e: any) {
+    console.error('[fill-brand-metadata] GET error:', e)
+    return NextResponse.json({ incomplete: 0, error: e?.message || 'Unknown error' }, { status: 500 })
+  }
+}
+
 export async function POST() {
   try {
     const { data: rows, error } = await supabase
