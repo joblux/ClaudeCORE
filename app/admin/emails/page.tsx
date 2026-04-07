@@ -158,7 +158,7 @@ export default function AdminEmailsPage() {
                           onClick={() => handleSendTest(key)}
                           disabled={sending === key}
                           className="p-1.5 text-[#999] hover:text-[#B8975C] hover:bg-[#B8975C]/10 rounded transition-colors disabled:opacity-50"
-                          title="Send test to mo@joblux.com"
+                          title="Send test to alex@joblux.com"
                         >
                           {sending === key ? (
                             <Loader2 size={14} className="animate-spin" />
