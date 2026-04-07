@@ -36,6 +36,12 @@ export default function LUXAICommandCenter() {
   const [selReportType, setSelReportType] = useState('salary')
   const [selEventSector, setSelEventSector] = useState('')
   const [newBrandName, setNewBrandName] = useState('')
+  const [metadataResults, setMetadataResults] = useState<{
+    attempted: number
+    succeeded: number
+    failed: number
+    results: Array<{ slug: string; brand_name: string; success: boolean; error?: string; updated?: Record<string, string> }>
+  } | null>(null)
 
   // Autopilot state
   const [autopilot, setAutopilot] = useState<Record<string, any>>({})
@@ -259,6 +265,65 @@ export default function LUXAICommandCenter() {
                     {generating === 'add-brand' ? 'Adding...' : '+ Add new brand'}
                   </button>
                 </div>
+                <div className={row}>
+                  <button
+                    className={btnO}
+                    disabled={!!generating}
+                    onClick={async () => {
+                      if (generating) return
+                      setGenerating('fill-metadata')
+                      setMetadataResults(null)
+                      try {
+                        const res = await fetch('/api/admin/luxai/fill-brand-metadata', { method: 'POST' })
+                        const d = await res.json()
+                        if (d.success) {
+                          setMetadataResults({
+                            attempted: d.attempted || 0,
+                            succeeded: d.succeeded || 0,
+                            failed: d.failed || 0,
+                            results: d.results || [],
+                          })
+                          flash('success', d.message || 'Metadata fill complete')
+                          loadHealth()
+                        } else {
+                          flash('error', d.message || 'Metadata fill failed')
+                        }
+                      } catch (e: any) {
+                        flash('error', e?.message || 'Network error')
+                      } finally {
+                        setGenerating(null)
+                      }
+                    }}
+                  >
+                    {generating === 'fill-metadata' ? 'Filling metadata...' : 'Fill brand metadata (max 10)'}
+                  </button>
+                  <span className="text-[10px] text-[#888]">Sector · Headquarters · Description (only fills nulls)</span>
+                </div>
+                {metadataResults && (
+                  <div className="mt-2 pt-2 border-t border-[#f5f5f5]">
+                    <div className="text-[10px] text-[#666] mb-1.5">
+                      Attempted: <b className="text-[#111]">{metadataResults.attempted}</b> ·{' '}
+                      <span className="text-[#10B981]">✓ {metadataResults.succeeded}</span> ·{' '}
+                      <span className="text-[#EF4444]">✗ {metadataResults.failed}</span>
+                    </div>
+                    <div className="max-h-[180px] overflow-auto space-y-1">
+                      {metadataResults.results.map((r) => (
+                        <div key={r.slug} className="text-[10px] flex items-start gap-1.5">
+                          <span className={r.success ? 'text-[#10B981]' : 'text-[#EF4444]'}>{r.success ? '✓' : '✗'}</span>
+                          <span className="font-semibold text-[#111]">{r.brand_name}</span>
+                          <span className="text-[#888]">
+                            {r.success
+                              ? `· ${Object.keys(r.updated || {}).join(', ')}`
+                              : `· ${r.error}`}
+                          </span>
+                        </div>
+                      ))}
+                      {metadataResults.results.length === 0 && (
+                        <div className="text-[10px] text-[#888]">No approved brands have missing sector / headquarters / description.</div>
+                      )}
+                    </div>
+                  </div>
+                )}
                 <p className={info}>✓ = live · ○ = empty · ~$0.02/brand</p>
                 <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#f5f5f5] text-[10px] text-[#666]">
                   <button onClick={() => saveAutopilot('brand_refresh', { enabled: !autopilot.brand_refresh?.enabled })} className={`w-6 h-3.5 rounded-full relative cursor-pointer transition-colors ${autopilot.brand_refresh?.enabled ? 'bg-[#10B981]' : 'bg-[#e8e8e8]'}`}>
