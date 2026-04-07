@@ -25,7 +25,6 @@ function getSESClient(): SESClient | null {
 
 interface SendEmailParams {
   to: string | string[]
-  cc?: string | string[]
   subject: string
   body: string
   bodyHtml?: string
@@ -39,7 +38,6 @@ interface SendEmailParams {
  */
 export async function sendEmail({
   to,
-  cc,
   subject,
   body,
   bodyHtml,
@@ -53,14 +51,12 @@ export async function sendEmail({
 
   const sender = from || 'JOBLUX <noreply@joblux.com>'
   const recipients = Array.isArray(to) ? to : [to]
-  const ccRecipients = cc ? (Array.isArray(cc) ? cc : [cc]) : undefined
 
   try {
     const command = new SendEmailCommand({
       Source: sender,
       Destination: {
         ToAddresses: recipients,
-        ...(ccRecipients && ccRecipients.length > 0 ? { CcAddresses: ccRecipients } : {}),
       },
       Message: {
         Subject: {
