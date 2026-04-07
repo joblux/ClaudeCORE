@@ -25,7 +25,6 @@ export function HomepageOpportunities({ assignments }: { assignments: Assignment
             View all careers &rarr;
           </Link>
         </div>
-
         {assignments.slice(0, 3).map((a) => (
           <Link
             key={a.slug}

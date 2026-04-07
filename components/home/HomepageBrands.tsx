@@ -25,7 +25,6 @@ export function HomepageBrands({ brands }: { brands: Brand[] }) {
             Explore 180+ brands &rarr;
           </Link>
         </div>
-
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8,1fr)', gap: 8 }}>
           {brands.map((brand) => {
             const initials = brand.brand_name.substring(0, 2).toUpperCase()
