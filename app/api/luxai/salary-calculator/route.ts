@@ -47,10 +47,10 @@ Guidelines:
 - Keep analysis under 120 words`
 
     const message = await anthropic.messages.create({
-      model: 'claude-haiku-3-5-20241022',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 1000,
       messages: [{ role: 'user', content: prompt }],
-    })
+    }, { timeout: 10000 })
 
     const content = message.content[0]
     if (content.type !== 'text') {

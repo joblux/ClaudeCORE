@@ -40,10 +40,12 @@ export function HomepageSignals({ signals }: { signals: Signal[] }) {
   return (
     <section style={{ padding: '44px 0', borderTop: '0.5px solid #2b2b2b' }}>
       <div style={{ maxWidth: 1220, margin: '0 auto', padding: '0 28px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 18, marginBottom: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 18, marginBottom: 18 }}>
           <div>
-            <h2 style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff' }}>Latest signals</h2>
-            <p style={{ marginTop: 6, color: '#989898', fontSize: '12.8px', lineHeight: 1.7, maxWidth: 560 }}>
+            <div style={{ fontSize: 11, letterSpacing: '1.5px', textTransform: 'uppercase', fontWeight: 600, color: '#fff' }}>
+              Market Signals
+            </div>
+            <p style={{ marginTop: 8, color: '#bbb', fontSize: '12.8px', lineHeight: 1.7, maxWidth: 560 }}>
               Market movement with direct implications for hiring, leadership, and timing.
             </p>
           </div>
@@ -52,7 +54,7 @@ export function HomepageSignals({ signals }: { signals: Signal[] }) {
           </Link>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <div>
           {signals.map((signal) => {
             const color = categoryColors[signal.category] || '#888'
             const label = categoryLabels[signal.category] || signal.category
@@ -60,32 +62,32 @@ export function HomepageSignals({ signals }: { signals: Signal[] }) {
               <Link
                 key={signal.slug}
                 href={`/signals/${signal.slug}`}
-                style={{ display: 'block', padding: 19, background: '#202020', border: '1px solid #2b2b2b', borderRadius: 10, textDecoration: 'none', transition: 'all 0.2s ease' }}
+                className="signal-row"
+                style={{ display: 'flex', alignItems: 'baseline', gap: 12, padding: '9px 0', borderBottom: '0.5px solid #1e1e1e', textDecoration: 'none' }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 10, letterSpacing: '0.9px', textTransform: 'uppercase', fontWeight: 700, color }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
-                    {label}
-                  </div>
-                  <div style={{ fontSize: 11, color: '#6f6f6f' }}>{timeAgo(signal.published_at)}</div>
+                <div style={{ width: 90, flexShrink: 0, fontSize: '9.5px', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.9px', color }}>
+                  {label}
                 </div>
-
-                <div style={{ fontSize: 14, lineHeight: 1.52, color: 'rgba(255,255,255,0.92)', marginBottom: 14 }}>
+                <div style={{ flex: 1, fontSize: '13.5px', color: '#ccc', lineHeight: 1.4 }}>
                   {signal.headline}
                 </div>
-
-                <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
-                  {(signal.brand_tags || []).map((tag) => (
-                    <span key={tag} style={{ fontSize: 10, color: '#818181', background: '#242424', borderRadius: 999, padding: '5px 10px' }}>
-                      {tag}
-                    </span>
-                  ))}
+                <div className="signal-meta" style={{ fontSize: 11, color: '#888', whiteSpace: 'nowrap' }}>
+                  {(signal.brand_tags || []).join(' · ')}
+                </div>
+                <div className="signal-meta" style={{ fontSize: 11, color: '#888', whiteSpace: 'nowrap', textAlign: 'right' }}>
+                  {timeAgo(signal.published_at)}
                 </div>
               </Link>
             )
           })}
         </div>
       </div>
+      <style>{`
+        @media (max-width: 767px) {
+          .signal-row { flex-wrap: wrap; }
+          .signal-row .signal-meta { width: 100%; text-align: left !important; }
+        }
+      `}</style>
     </section>
   )
 }

@@ -39,13 +39,13 @@ export default async function HomePage() {
     eventsRes,
     brandsWikiRes,
   ] = await Promise.all([
-    // Signals for ticker + signals section (limit 6 covers both)
+    // Signals for ticker + signals section
     supabase
       .from('signals')
-      .select('slug, headline, category, brand_tags, published_at')
+      .select('slug, headline, category, brand_tags, published_at', { count: 'exact' })
       .eq('is_published', true)
       .order('published_at', { ascending: false })
-      .limit(6),
+      .limit(8),
     // Active search count for hero stat
     supabase
       .from('search_assignments')
@@ -76,7 +76,7 @@ export default async function HomePage() {
     // Upcoming events
     supabase
       .from('events')
-      .select('slug, title, event_date, location_city, location_country, sector')
+      .select('slug, title, event_date, location_city, location_country, sector', { count: 'exact' })
       .eq('is_published', true)
       .gte('event_date', new Date().toISOString().split('T')[0])
       .order('event_date', { ascending: true })
@@ -108,14 +108,19 @@ export default async function HomePage() {
   return (
     <div style={{ background: '#171717' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
-      <HomepageHero activeSearchCount={activeSearchCount} />
-      <HomepageSignals signals={(signalsRes.data || []).slice(0, 4)} />
-      <HomepageOpportunities assignments={assignmentsRes.data || []} />
-      <HomepageBrands brands={brands} />
+      <HomepageHero
+        assignmentCount={activeSearchCount}
+        signalCount={signalsRes.count || 54}
+        eventCount={eventsRes.count || 9}
+        articleCount={articlesRes.data?.length || 29}
+      />
       <HomepageSalaryInsights
         salaries={salariesRes.data || []}
         articles={articlesRes.data || []}
       />
+      <HomepageOpportunities assignments={assignmentsRes.data || []} />
+      <HomepageBrands brands={brands} />
+      <HomepageSignals signals={(signalsRes.data || []).slice(0, 8)} />
       <HomepageEvents events={(eventsRes.data || []).map((e: any) => ({ ...e, city: e.location_city, country: e.location_country }))} />
       <HomepageBrief />
     </div>

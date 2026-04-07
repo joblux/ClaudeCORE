@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 
 export function HomepageBrief() {
   const [email, setEmail] = useState('')
@@ -35,14 +34,14 @@ export function HomepageBrief() {
   return (
     <section style={{ padding: '44px 0', borderTop: '0.5px solid #2b2b2b' }}>
       <div style={{ maxWidth: 1220, margin: '0 auto', padding: '0 28px' }}>
-        <div style={{ background: 'linear-gradient(180deg,rgba(165,142,40,0.06),rgba(165,142,40,0.02))', border: '1px solid rgba(165,142,40,0.18)', borderRadius: 18, padding: 30, textAlign: 'center' }}>
+        <div style={{ background: '#252525', border: '0.5px solid #2e2e2e', borderRadius: 18, padding: 30, textAlign: 'center' }}>
 
           <div style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', fontSize: 28, marginBottom: 10, fontWeight: 400, color: '#fff' }}>
             The <em style={{ color: '#a58e28' }}>Brief</em>
           </div>
 
-          <div style={{ maxWidth: 620, margin: '0 auto 22px', fontSize: '13.8px', lineHeight: 1.75, color: '#989898' }}>
-            Signals, compensation intelligence, and career movement. Biweekly in your inbox.
+          <div style={{ maxWidth: 620, margin: '0 auto 22px', fontSize: '13.8px', lineHeight: 1.75, color: '#bbb' }}>
+            Biweekly industry news, career intelligence, signals and analysis to your inbox.
           </div>
 
           {status === 'success' ? (
@@ -70,17 +69,6 @@ export function HomepageBrief() {
           {status === 'error' && (
             <p style={{ fontSize: 12, color: '#f44336', marginBottom: 8 }}>{message}</p>
           )}
-
-          <div style={{ fontSize: '11.5px', color: '#6d6d6d' }}>
-            Join professionals worldwide. No spam. Unsubscribe anytime.
-          </div>
-
-          <div style={{ marginTop: 10, fontSize: 12, color: '#7a7a7a', lineHeight: 1.6 }}>
-            Travel editorial preview by{' '}
-            <Link href="/escape" style={{ color: '#a58e28', fontFamily: 'var(--font-playfair), Playfair Display, serif', fontStyle: 'italic', textDecoration: 'none' }}>
-              Escape
-            </Link>
-          </div>
 
         </div>
       </div>
