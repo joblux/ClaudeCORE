@@ -16,9 +16,9 @@ export function HomepageOpportunities({ assignments }: { assignments: Assignment
       <div style={{ maxWidth: 1220, margin: '0 auto', padding: '0 28px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 18, marginBottom: 20 }}>
           <div>
-            <h2 style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff' }}>Confidential opportunities</h2>
-            <p style={{ marginTop: 6, color: '#989898', fontSize: '12.8px', lineHeight: 1.7, maxWidth: 560 }}>
-              Selected assignments across retail, brand, commercial, and leadership functions.
+            <h2 style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff' }}>Opportunities</h2>
+            <p style={{ marginTop: 6, color: '#bbb', fontSize: '12.8px', lineHeight: 1.7, maxWidth: 560 }}>
+              Selected assignments across retail, brand, and leadership functions.
             </p>
           </div>
           <Link href="/careers" style={{ fontSize: 12, color: '#a58e28', whiteSpace: 'nowrap', textDecoration: 'none' }}>
@@ -26,38 +26,16 @@ export function HomepageOpportunities({ assignments }: { assignments: Assignment
           </Link>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
-          {assignments.slice(0, 3).map((a) => (
-            <Link
-              key={a.slug}
-              href={`/careers/${a.slug}`}
-              style={{ background: '#202020', border: '1px solid #2b2b2b', borderRadius: 10, padding: 21, transition: 'all 0.2s ease', display: 'flex', flexDirection: 'column', minHeight: 220, textDecoration: 'none' }}
-            >
-              {a.seniority && (
-                <div style={{ fontSize: 10, letterSpacing: '1px', textTransform: 'uppercase', fontWeight: 700, color: '#a58e28', marginBottom: 10 }}>
-                  {a.seniority}
-                </div>
-              )}
-
-              <div style={{ fontSize: 16, lineHeight: 1.35, fontWeight: 600, color: '#fff', marginBottom: 10 }}>
-                {a.title}
-              </div>
-
-              {a.description && (
-                <div style={{ fontSize: '12.8px', lineHeight: 1.65, color: '#989898', marginBottom: 'auto' }}>
-                  {a.description}
-                </div>
-              )}
-
-              <div style={{ marginTop: 18, paddingTop: 14, borderTop: '0.5px solid #2b2b2b', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {a.location && (
-                  <div style={{ fontSize: '11.5px', color: '#8d8d8d' }}>{a.location}</div>
-                )}
-                <div style={{ fontSize: '10.5px', color: '#777' }}>Brand disclosed after screening</div>
-              </div>
-            </Link>
-          ))}
-        </div>
+        {assignments.slice(0, 3).map((a) => (
+          <Link
+            key={a.slug}
+            href={`/careers/${a.slug}`}
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '0.5px solid #2b2b2b', textDecoration: 'none' }}
+          >
+            <div style={{ fontSize: '13.5px', color: '#ccc' }}>{a.title}</div>
+            {a.location && <div style={{ fontSize: 12, color: '#888' }}>{a.location}</div>}
+          </Link>
+        ))}
       </div>
     </section>
   )

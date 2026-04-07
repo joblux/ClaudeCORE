@@ -36,6 +36,7 @@ export default async function HomePage() {
     assignmentsRes,
     salariesRes,
     articlesRes,
+    articleCountRes,
     eventsRes,
     brandsWikiRes,
   ] = await Promise.all([
@@ -73,6 +74,12 @@ export default async function HomePage() {
       .is('deleted_at', null)
       .order('published_at', { ascending: false })
       .limit(3),
+    // Article count for hero stat
+    supabase
+      .from('bloglux_articles')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'published')
+      .is('deleted_at', null),
     // Upcoming events
     supabase
       .from('events')
@@ -112,7 +119,7 @@ export default async function HomePage() {
         assignmentCount={activeSearchCount}
         signalCount={signalsRes.count || 54}
         eventCount={eventsRes.count || 9}
-        articleCount={articlesRes.data?.length || 29}
+        articleCount={articleCountRes.count || 29}
       />
       <HomepageSalaryInsights
         salaries={salariesRes.data || []}
