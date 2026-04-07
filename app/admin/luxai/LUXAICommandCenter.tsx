@@ -43,12 +43,22 @@ export default function LUXAICommandCenter() {
     results: Array<{ slug: string; brand_name: string; success: boolean; error?: string; updated?: Record<string, string> }>
   } | null>(null)
   const [metadataIncomplete, setMetadataIncomplete] = useState<number | null>(null)
+  const [salarySeedRemaining, setSalarySeedRemaining] = useState<number | null>(null)
+  const [salarySeedLast, setSalarySeedLast] = useState<{ brand_name: string; records_valid: number } | null>(null)
 
   const loadMetadataCount = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/luxai/fill-brand-metadata', { cache: 'no-store' })
       const d = await res.json()
       setMetadataIncomplete(typeof d.incomplete === 'number' ? d.incomplete : 0)
+    } catch { /* silent */ }
+  }, [])
+
+  const loadSalarySeedCount = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/luxai/seed-brand-salaries', { cache: 'no-store' })
+      const d = await res.json()
+      setSalarySeedRemaining(typeof d.remaining === 'number' ? d.remaining : 0)
     } catch { /* silent */ }
   }, [])
 
@@ -115,7 +125,8 @@ export default function LUXAICommandCenter() {
     loadQueue()
     loadAutopilot()
     loadMetadataCount()
-  }, [loadHealth, loadBrands, loadQueue, loadAutopilot, loadMetadataCount])
+    loadSalarySeedCount()
+  }, [loadHealth, loadBrands, loadQueue, loadAutopilot, loadMetadataCount, loadSalarySeedCount])
 
   function flash(type: 'success' | 'error', msg: string) {
     setResult({ type, msg })
@@ -313,6 +324,48 @@ export default function LUXAICommandCenter() {
                         : `Fill brand metadata (${metadataIncomplete ?? '—'} remaining)`}
                   </button>
                   <span className="text-[10px] text-[#888]">Sector · Headquarters · Description (only fills nulls)</span>
+                </div>
+                <div className={row}>
+                  <button
+                    className={btnO}
+                    disabled={!!generating || salarySeedRemaining === 0}
+                    onClick={async () => {
+                      if (generating) return
+                      setGenerating('seed-salaries')
+                      setSalarySeedLast(null)
+                      try {
+                        const res = await fetch('/api/admin/luxai/seed-brand-salaries', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({}),
+                        })
+                        const d = await res.json()
+                        if (d.success) {
+                          setSalarySeedLast({ brand_name: d.brand_name, records_valid: d.records_valid })
+                          flash('success', `${d.brand_name}: ${d.records_valid} records queued (${d.records_skipped} skipped)`)
+                          loadSalarySeedCount()
+                          loadQueue()
+                        } else {
+                          flash('error', d.message || 'Salary seed failed')
+                        }
+                      } catch (e: any) {
+                        flash('error', e?.message || 'Network error')
+                      } finally {
+                        setGenerating(null)
+                      }
+                    }}
+                  >
+                    {generating === 'seed-salaries'
+                      ? 'Seeding...'
+                      : salarySeedRemaining === 0
+                        ? 'All brands have salary data ✓'
+                        : `Seed brand salaries (${salarySeedRemaining ?? '—'} remaining)`}
+                  </button>
+                  {salarySeedLast && (
+                    <span className="text-[10px] text-[#888]">
+                      Last: <b className="text-[#111]">{salarySeedLast.brand_name}</b> — {salarySeedLast.records_valid} queued
+                    </span>
+                  )}
                 </div>
                 {metadataResults && (
                   <div className="mt-2 pt-2 border-t border-[#f5f5f5]">

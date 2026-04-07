@@ -61,6 +61,55 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ success: true, published: true, destination_id: newArticle?.id || null })
   }
 
+  // Salary benchmark: approve and publish to salary_benchmarks
+  if (record.content_type === 'salary_benchmark') {
+    const pc = (record.processed_content || {}) as Record<string, any>
+    const records: any[] = Array.isArray(pc.records) ? pc.records : []
+    const brand_name: string = pc.brand_name || ''
+    const brand_slug: string = pc.brand_slug || ''
+
+    if (!brand_name || !brand_slug || records.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Cannot publish salary benchmark: missing brand_name, brand_slug, or records.' },
+        { status: 400 }
+      )
+    }
+
+    const rows = records.map((r) => ({
+      brand_name,
+      brand_slug,
+      job_title: r.job_title,
+      department: r.department,
+      seniority: r.seniority,
+      city: r.city,
+      country: r.country,
+      currency: r.currency,
+      salary_min: r.salary_min,
+      salary_max: r.salary_max,
+      salary_median: r.salary_median,
+      year_of_data: 2026,
+      source: 'JOBLUX Intelligence',
+      content_origin: 'luxai',
+      is_published: true,
+    }))
+
+    const { error: insertError } = await supabaseAdmin.from('salary_benchmarks').insert(rows)
+    if (insertError) {
+      return NextResponse.json({ success: false, error: insertError.message }, { status: 500 })
+    }
+
+    await supabaseAdmin
+      .from('content_queue')
+      .update({
+        status: 'published',
+        reviewed_at: now,
+        destination_table: 'salary_benchmarks',
+      })
+      .eq('id', params.id)
+
+    return NextResponse.json({ success: true, inserted: rows.length })
+  }
+
   // Unhandled content types: approve only, no publish
   if (record.content_type !== 'signal' && record.content_type !== 'event') {
     const { error } = await supabaseAdmin
