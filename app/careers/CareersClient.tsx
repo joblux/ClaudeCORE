@@ -273,6 +273,7 @@ export default function CareersClient({
   const uniqueCurrencies = Array.from(new Set(salaries.map(s => s.currency)))
 
   const uniqueInterviewBrands = Array.from(new Set(interviews.map(i => i.brand_slug)))
+  const interviewBrandNameBySlug = new Map(interviews.map(i => [i.brand_slug, i.brand_name]))
   const uniqueInterviewDepts = Array.from(new Set(interviews.map(i => i.department)))
   const uniqueInterviewLevels = Array.from(new Set(interviews.map(i => i.seniority)))
   const uniqueInterviewYears = Array.from(new Set(interviews.map(i => String(i.interview_year))))
@@ -919,7 +920,7 @@ export default function CareersClient({
                 <div className="flex gap-1.5 mb-2 flex-wrap">
                   <select value={interviewBrand} onChange={e => setInterviewBrand(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[12px] py-1.5 px-2.5 text-white outline-none focus:border-[#1D9E75]">
                     <option value="all">All Maisons</option>
-                    {uniqueInterviewBrands.map(b => <option key={b} value={b}>{b}</option>)}
+                    {uniqueInterviewBrands.map(b => <option key={b} value={b}>{interviewBrandNameBySlug.get(b) || b}</option>)}
                   </select>
                   <select value={interviewDept} onChange={e => setInterviewDept(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[12px] py-1.5 px-2.5 text-white outline-none focus:border-[#1D9E75]">
                     <option value="all">All Departments</option>
@@ -999,7 +1000,7 @@ export default function CareersClient({
                   <h3 className="text-xs font-semibold uppercase tracking-wide text-[#999] mb-2.5">Top Interviewed Maisons</h3>
                   <div className="space-y-2 text-xs text-[#999]">
                     {uniqueInterviewBrands.slice(0, 5).map((b, i) => (
-                      <div key={b}><span className="text-[#777] mr-2">{String(i + 1).padStart(2, '0')}</span>{b}</div>
+                      <div key={b}><span className="text-[#777] mr-2">{String(i + 1).padStart(2, '0')}</span>{interviewBrandNameBySlug.get(b) || b}</div>
                     ))}
                   </div>
                 </div>
