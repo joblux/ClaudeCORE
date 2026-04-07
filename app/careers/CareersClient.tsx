@@ -279,17 +279,17 @@ export default function CareersClient({
 
   return (
     <div className="min-h-screen bg-[#1a1a1a]">
-      <div className="max-w-[1200px] mx-auto px-7 pt-10 pb-16">
-        <h1 className="text-4xl font-normal text-white mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
+      <div className="max-w-[1200px] mx-auto px-7 pt-7 pb-16">
+        <h1 className="text-[32px] font-normal text-white mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           Careers
         </h1>
-        <p className="text-sm text-[#999] mb-1.5">
+        <p className="text-sm text-[#999] mb-1">
           Confidential opportunities, salary intelligence, and interview preparation
         </p>
-        <p className="text-[11px] text-[#777] mb-6">Real career experiences combined with structured intelligence.</p>
+        <p className="text-[11px] text-[#777] mb-4">Real career experiences combined with structured intelligence.</p>
 
         {/* Main Tabs */}
-        <div className="flex border-b border-[#2a2a2a] mb-8 gap-0">
+        <div className="flex border-b border-[#2a2a2a] mb-5 gap-0">
           {[
             { id: 'assignments', label: 'Assignments', count: String(assignments.length) },
             { id: 'salary', label: 'Salary intelligence', count: `${salaries.length} data points` },
@@ -303,10 +303,10 @@ export default function CareersClient({
                 href={href}
                 scroll={false}
                 className="pb-3 mr-8 text-sm relative transition-colors whitespace-nowrap"
-                style={{ color: activeTab === tab.id ? '#fff' : '#555' }}
+                style={{ color: activeTab === tab.id ? '#fff' : '#666' }}
               >
                 {tab.label}
-                <span className="text-[11px] ml-1" style={{ color: '#444' }}>{tab.count}</span>
+                <span className="text-[11px] ml-1" style={{ color: '#555' }}>{tab.count}</span>
                 {activeTab === tab.id && (
                   <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#1D9E75]" />
                 )}
@@ -319,23 +319,23 @@ export default function CareersClient({
         {activeTab === 'assignments' && (
           <div>
             {/* Info banner */}
-            <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 flex items-start gap-4 mb-6">
-              <div className="w-9 h-9 rounded-full bg-[#2a2a2a] flex items-center justify-center text-base flex-shrink-0">🔒</div>
+            <div className="bg-[#222] border border-[#2a2a2a] rounded-lg p-3 flex items-start gap-4 mb-4">
+              <div className="w-7 h-7 rounded-full bg-[#2a2a2a] flex items-center justify-center text-sm flex-shrink-0">🔒</div>
               <p className="text-xs text-[#999] leading-relaxed">
                 <span className="text-[#ccc] font-medium">These are exclusive JOBLUX search assignments.</span> Brand names are disclosed after initial screening to protect the confidentiality of all parties. Every role is verified, active, and at manager level or above.
               </p>
             </div>
 
             {/* Assignment cards */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               {assignments.map(a => {
                 const isNew = a.activated_at && (Date.now() - new Date(a.activated_at).getTime()) < 7 * 24 * 3600000
                 const displayMaison = a.is_confidential ? null : a.maison
                 const locationStr = a.location || [a.city, a.country].filter(Boolean).join(', ')
                 return (
                   <Link key={a.id} href={`/careers/${a.slug || a.id}`} className="block">
-                    <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 hover:border-[#3a3a3a] transition-colors cursor-pointer">
-                      <div className="flex items-center justify-between mb-3">
+                    <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 hover:border-[#3a3a3a] transition-colors cursor-pointer">
+                      <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           {a.seniority && <span className="text-[10px] font-bold tracking-[1.5px] text-[#fff]">{a.seniority.toUpperCase()}</span>}
                           {isNew && (
@@ -348,9 +348,9 @@ export default function CareersClient({
                           <div className="text-sm font-medium text-[#fff]">{a.salary_display}</div>
                         )}
                       </div>
-                      <h3 className="text-base font-medium text-white mb-2 leading-snug">{a.title}</h3>
+                      <h3 className="text-base font-medium text-white mb-1 leading-snug">{a.title}</h3>
                       {displayMaison && displayMaison !== 'Confidential' && <p className="text-xs text-[#999] mb-1">{displayMaison}</p>}
-                      {a.description && <p className="text-sm text-[#999] leading-relaxed mb-3 line-clamp-2">{a.description}</p>}
+                      {a.description && <p className="text-sm text-[#999] leading-relaxed mb-2 line-clamp-2">{a.description}</p>}
                       <div className="flex items-center gap-2 flex-wrap">
                         {locationStr && <span className="text-[11px] text-[#999]">{locationStr}</span>}
                         {a.contract_type && (
@@ -377,9 +377,9 @@ export default function CareersClient({
         {/* TAB 2: SALARY INTELLIGENCE */}
         {activeTab === 'salary' && (
           <div>
-            <p className="text-[11px] text-[#777] mb-4">Modeled compensation refined with vetted market inputs.</p>
+            <p className="text-[11px] text-[#777] mb-3">Modeled compensation refined with vetted market inputs.</p>
             {/* Sub-tabs */}
-            <div className="flex gap-0 border-b border-[#2a2a2a] mb-5">
+            <div className="flex gap-0 border-b border-[#2a2a2a] mb-3.5">
               {[
                 { id: 'browse', label: 'Browse', locked: false, points: 0 },
                 { id: 'benchmark', label: 'Benchmark', locked: !canAccessBenchmark, points: 10 },
@@ -411,7 +411,7 @@ export default function CareersClient({
             {salarySubTab === 'browse' && (
               <>
                 {/* Stats */}
-                <div className="flex gap-6 items-center text-xs text-[#777] uppercase tracking-wide mb-5">
+                <div className="flex gap-4 items-center text-xs text-[#777] uppercase tracking-wide mb-2.5">
                   <span>{salaries.length} data points</span>
                   <span className="text-[#777]">·</span>
                   <span>{uniqueBrands.length} maisons</span>
@@ -419,10 +419,10 @@ export default function CareersClient({
                   <span>{uniqueCities.length} cities</span>
                 </div>
 
-                <div className="grid grid-cols-[1fr_320px] gap-8">
+                <div className="grid grid-cols-[1fr_290px] gap-6">
                   <div>
                     {/* Filters */}
-                    <div className="flex gap-2 mb-5">
+                    <div className="flex gap-2 mb-2">
                       <div className="relative flex-1">
                         <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 stroke-[#666]" viewBox="0 0 24 24" fill="none" strokeWidth="2">
                           <circle cx="11" cy="11" r="8"/>
@@ -433,49 +433,49 @@ export default function CareersClient({
                           placeholder="Search by role, brand, or city..."
                           value={salarySearch}
                           onChange={e => setSalarySearch(e.target.value)}
-                          className="w-full bg-[#222] border border-[#2a2a2a] rounded-lg text-[13px] py-2.5 pl-10 pr-3.5 text-white placeholder-[#666] outline-none focus:border-[#1D9E75]"
+                          className="w-full bg-[#222] border border-[#2a2a2a] rounded-lg text-[12.5px] py-2 pl-10 pr-3.5 text-white placeholder-[#666] outline-none focus:border-[#1D9E75]"
                         />
                       </div>
                     </div>
 
-                    <div className="flex gap-2 mb-5 flex-wrap">
-                      <select value={salaryBrand} onChange={e => setSalaryBrand(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[13px] py-2.5 px-3.5 text-white outline-none focus:border-[#1D9E75]">
+                    <div className="flex gap-1.5 mb-2 flex-wrap">
+                      <select value={salaryBrand} onChange={e => setSalaryBrand(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[12px] py-1.5 px-2.5 text-white outline-none focus:border-[#1D9E75]">
                         <option value="all">All Brands</option>
                         {uniqueBrands.map(b => <option key={b} value={b}>{b}</option>)}
                       </select>
-                      <select value={salaryDept} onChange={e => setSalaryDept(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[13px] py-2.5 px-3.5 text-white outline-none focus:border-[#1D9E75]">
+                      <select value={salaryDept} onChange={e => setSalaryDept(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[12px] py-1.5 px-2.5 text-white outline-none focus:border-[#1D9E75]">
                         <option value="all">All Departments</option>
                         {uniqueDepts.map(d => <option key={d} value={d}>{d}</option>)}
                       </select>
-                      <select value={salaryLevel} onChange={e => setSalaryLevel(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[13px] py-2.5 px-3.5 text-white outline-none focus:border-[#1D9E75]">
+                      <select value={salaryLevel} onChange={e => setSalaryLevel(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[12px] py-1.5 px-2.5 text-white outline-none focus:border-[#1D9E75]">
                         <option value="all">All Levels</option>
                         {uniqueLevels.map(l => <option key={l} value={l}>{l}</option>)}
                       </select>
-                      <select value={salaryCity} onChange={e => setSalaryCity(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[13px] py-2.5 px-3.5 text-white outline-none focus:border-[#1D9E75]">
+                      <select value={salaryCity} onChange={e => setSalaryCity(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[12px] py-1.5 px-2.5 text-white outline-none focus:border-[#1D9E75]">
                         <option value="all">All Cities</option>
                         {uniqueCities.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
-                      <select value={salaryCurrency} onChange={e => setSalaryCurrency(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[13px] py-2.5 px-3.5 text-white outline-none focus:border-[#1D9E75]">
+                      <select value={salaryCurrency} onChange={e => setSalaryCurrency(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[12px] py-1.5 px-2.5 text-white outline-none focus:border-[#1D9E75]">
                         <option value="all">All Currencies</option>
                         {uniqueCurrencies.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
 
-                    <div className="text-xs text-[#777] mb-3">{filteredSalaries.length} entries</div>
+                    <div className="text-xs text-[#777] mb-2.5">{filteredSalaries.length} entries</div>
 
                     {/* Cards grid */}
-                    <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="grid grid-cols-2 gap-2.5 mb-6">
                       {visibleSalaries.map(s => (
-                        <div key={s.id} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 hover:border-[#3a3a3a] transition-colors">
-                          <div className="flex justify-between items-start mb-3">
+                        <div key={s.id} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-3.5 hover:border-[#3a3a3a] transition-colors">
+                          <div className="flex justify-between items-start mb-1.5">
                             <div>
                               <div className="text-sm font-medium text-white mb-1">{s.job_title}</div>
                               <div className="text-xs text-[#999]">{s.brand_name}</div>
                             </div>
                             <div className="bg-[#2a2a2a] rounded px-2 py-1 text-[10px] text-[#999]">{s.seniority}</div>
                           </div>
-                          <div className="text-[11px] text-[#777] mb-4">{s.city}, {s.country} · {s.department}</div>
-                          <div className="flex justify-between items-center pt-3 border-t border-[#2a2a2a]">
+                          <div className="text-[11px] text-[#777] mb-2.5">{s.city}, {s.country} · {s.department}</div>
+                          <div className="flex justify-between items-center pt-2.5 border-t border-[#2a2a2a]">
                             <span className="text-xs text-[#777]">Range</span>
                             <span className="text-sm font-medium text-white">{s.currency}{s.salary_min / 1000}K–{s.salary_max / 1000}K</span>
                           </div>
@@ -483,7 +483,7 @@ export default function CareersClient({
                       ))}
 
                       {blurredSalaries.map(s => (
-                        <div key={s.id} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 relative overflow-hidden">
+                        <div key={s.id} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-3.5 relative overflow-hidden">
                           <div className="absolute inset-0 backdrop-blur-sm bg-[rgba(34,34,34,0.6)] flex items-center justify-center z-10 rounded-xl">
                             <a href="/contribute" className="text-white text-xs flex items-center gap-2">
                               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -493,15 +493,15 @@ export default function CareersClient({
                               Contribute to unlock
                             </a>
                           </div>
-                          <div className="flex justify-between items-start mb-3">
+                          <div className="flex justify-between items-start mb-1.5">
                             <div>
                               <div className="text-sm font-medium text-white mb-1">{s.job_title}</div>
                               <div className="text-xs text-[#999]">{s.brand_name}</div>
                             </div>
                             <div className="bg-[#2a2a2a] rounded px-2 py-1 text-[10px] text-[#999]">{s.seniority}</div>
                           </div>
-                          <div className="text-[11px] text-[#777] mb-4">{s.city}, {s.country} · {s.department}</div>
-                          <div className="flex justify-between items-center pt-3 border-t border-[#2a2a2a]">
+                          <div className="text-[11px] text-[#777] mb-2.5">{s.city}, {s.country} · {s.department}</div>
+                          <div className="flex justify-between items-center pt-2.5 border-t border-[#2a2a2a]">
                             <span className="text-xs text-[#777]">Range</span>
                             <span className="text-sm font-medium text-white">{s.currency}{s.salary_min / 1000}K–{s.salary_max / 1000}K</span>
                           </div>
@@ -512,17 +512,17 @@ export default function CareersClient({
 
                   {/* Sidebar */}
                   <div>
-                    <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 mb-5">
-                      <h3 className="text-lg font-normal mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>Contribute Your Salary</h3>
-                      <p className="text-xs text-[#999] leading-relaxed mb-4">Contribute your salary data | it takes one minute and strengthens the intelligence for everyone.</p>
-                      <Link href="/contribute" className="block w-full bg-[#1D9E75] text-white text-[13px] font-semibold py-2.5 rounded-md text-center hover:bg-[#17855f] transition-colors">
+                    <div className="bg-[#222] border border-[#2a2a2a] rounded-lg p-3.5 mb-2.5">
+                      <h3 className="text-base font-normal mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>Contribute Your Salary</h3>
+                      <p className="text-xs text-[#999] leading-relaxed mb-2.5">Contribute your salary data | it takes one minute and strengthens the intelligence for everyone.</p>
+                      <Link href="/contribute" className="block w-full bg-[#1D9E75] text-white text-[13px] font-semibold py-2 rounded-md text-center hover:bg-[#17855f] transition-colors">
                         Contribute
                       </Link>
                     </div>
 
-                    <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 mb-5">
-                      <h3 className="text-xs font-semibold uppercase tracking-wide text-[#999] mb-4">How It Works</h3>
-                      <ol className="space-y-3">
+                    <div className="bg-[#222] border border-[#2a2a2a] rounded-lg p-3.5 mb-2.5">
+                      <h3 className="text-xs font-semibold uppercase tracking-wide text-[#999] mb-2.5">How It Works</h3>
+                      <ol className="space-y-2">
                         {[
                           'AI-generated benchmarks from market data',
                           'Enriched with web research and industry reports',
@@ -537,8 +537,8 @@ export default function CareersClient({
                       </ol>
                     </div>
 
-                    <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
-                      <h3 className="text-xs font-semibold uppercase tracking-wide text-[#999] mb-4">Access Tiers</h3>
+                    <div className="bg-[#222] border border-[#2a2a2a] rounded-lg p-3.5">
+                      <h3 className="text-xs font-semibold uppercase tracking-wide text-[#999] mb-2.5">Access Tiers</h3>
                       <div className="space-y-2 text-xs text-[#999] leading-relaxed">
                         <div><strong className="text-white">Basic (0pts):</strong> Browse 2 visible entries</div>
                         <div><strong className="text-white">Standard (10pts):</strong> Full browse + Benchmark</div>
@@ -889,7 +889,7 @@ export default function CareersClient({
         {activeTab === 'interview' && (
           <div>
             {/* Stats */}
-            <div className="flex gap-6 items-center text-xs text-[#777] uppercase tracking-wide mb-5">
+            <div className="flex gap-4 items-center text-xs text-[#777] uppercase tracking-wide mb-2.5">
               <span>{interviews.length} experiences</span>
               <span className="text-[#777]">·</span>
               <span>{uniqueInterviewBrands.length} maisons</span>
@@ -897,10 +897,10 @@ export default function CareersClient({
               <span>Last updated March 2026</span>
             </div>
 
-            <div className="grid grid-cols-[1fr_320px] gap-8">
+            <div className="grid grid-cols-[1fr_290px] gap-6">
               <div>
                 {/* Filters */}
-                <div className="flex gap-2 mb-5">
+                <div className="flex gap-2 mb-2">
                   <div className="relative flex-1">
                     <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 stroke-[#666]" viewBox="0 0 24 24" fill="none" strokeWidth="2">
                       <circle cx="11" cy="11" r="8"/>
@@ -911,41 +911,41 @@ export default function CareersClient({
                       placeholder="Search brand..."
                       value={interviewSearch}
                       onChange={e => setInterviewSearch(e.target.value)}
-                      className="w-full bg-[#222] border border-[#2a2a2a] rounded-lg text-[13px] py-2.5 pl-10 pr-3.5 text-white placeholder-[#666] outline-none focus:border-[#1D9E75]"
+                      className="w-full bg-[#222] border border-[#2a2a2a] rounded-lg text-[12.5px] py-2 pl-10 pr-3.5 text-white placeholder-[#666] outline-none focus:border-[#1D9E75]"
                     />
                   </div>
                 </div>
 
-                <div className="flex gap-2 mb-5 flex-wrap">
-                  <select value={interviewBrand} onChange={e => setInterviewBrand(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[13px] py-2.5 px-3.5 text-white outline-none focus:border-[#1D9E75]">
+                <div className="flex gap-1.5 mb-2 flex-wrap">
+                  <select value={interviewBrand} onChange={e => setInterviewBrand(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[12px] py-1.5 px-2.5 text-white outline-none focus:border-[#1D9E75]">
                     <option value="all">All Maisons</option>
                     {uniqueInterviewBrands.map(b => <option key={b} value={b}>{b}</option>)}
                   </select>
-                  <select value={interviewDept} onChange={e => setInterviewDept(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[13px] py-2.5 px-3.5 text-white outline-none focus:border-[#1D9E75]">
+                  <select value={interviewDept} onChange={e => setInterviewDept(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[12px] py-1.5 px-2.5 text-white outline-none focus:border-[#1D9E75]">
                     <option value="all">All Departments</option>
                     {uniqueInterviewDepts.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
-                  <select value={interviewLevel} onChange={e => setInterviewLevel(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[13px] py-2.5 px-3.5 text-white outline-none focus:border-[#1D9E75]">
+                  <select value={interviewLevel} onChange={e => setInterviewLevel(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[12px] py-1.5 px-2.5 text-white outline-none focus:border-[#1D9E75]">
                     <option value="all">All Levels</option>
                     {uniqueInterviewLevels.map(l => <option key={l} value={l}>{l}</option>)}
                   </select>
-                  <select value={interviewYear} onChange={e => setInterviewYear(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[13px] py-2.5 px-3.5 text-white outline-none focus:border-[#1D9E75]">
+                  <select value={interviewYear} onChange={e => setInterviewYear(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[12px] py-1.5 px-2.5 text-white outline-none focus:border-[#1D9E75]">
                     <option value="all">All Years</option>
                     {uniqueInterviewYears.map(y => <option key={y} value={y}>{y}</option>)}
                   </select>
-                  <select value={interviewDifficulty} onChange={e => setInterviewDifficulty(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[13px] py-2.5 px-3.5 text-white outline-none focus:border-[#1D9E75]">
+                  <select value={interviewDifficulty} onChange={e => setInterviewDifficulty(e.target.value)} className="bg-[#222] border border-[#2a2a2a] rounded-lg text-[12px] py-1.5 px-2.5 text-white outline-none focus:border-[#1D9E75]">
                     <option value="all">All Difficulty</option>
                     {[1, 2, 3, 4, 5].map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
                 </div>
 
-                <div className="text-xs text-[#777] mb-3">{filteredInterviews.length} experiences</div>
+                <div className="text-xs text-[#777] mb-2.5">{filteredInterviews.length} experiences</div>
 
                 {/* Cards */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-2.5">
                   {filteredInterviews.map(i => (
-                    <div key={i.id} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 hover:border-[#3a3a3a] transition-colors">
-                      <div className="flex justify-between items-start mb-3">
+                    <div key={i.id} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-3.5 hover:border-[#3a3a3a] transition-colors">
+                      <div className="flex justify-between items-start mb-1">
                         <div>
                           <div className="text-sm font-medium text-white mb-1">{i.brand_name}</div>
                           <div className="text-xs text-[#999]">{i.job_title}</div>
@@ -956,13 +956,13 @@ export default function CareersClient({
                           ))}
                         </div>
                       </div>
-                      <div className="text-[11px] text-[#777] mb-3">{i.department} · {i.seniority} · {i.location}</div>
-                      <div className="flex gap-2 flex-wrap mb-4">
+                      <div className="text-[11px] text-[#777] mb-2">{i.department} · {i.seniority} · {i.location}</div>
+                      <div className="flex gap-2 flex-wrap mb-2.5">
                         <span className="bg-[#2a2a2a] rounded px-2 py-1 text-[10px] text-[#999]">{i.interview_year}</span>
                         <span className="bg-[#2a2a2a] rounded px-2 py-1 text-[10px] text-[#999]">{i.number_of_rounds} rounds</span>
                         <span className="border border-[#2a2a2a] rounded px-2 py-1 text-[10px] text-[#777]">{i.interview_format}</span>
                       </div>
-                      <div className="pt-3 border-t border-[#2a2a2a]">
+                      <div className="pt-2.5 border-t border-[#2a2a2a]">
                         {session ? (
                           <button
                             onClick={() => handleViewInterview(i)}
@@ -987,16 +987,16 @@ export default function CareersClient({
 
               {/* Sidebar */}
               <div>
-                <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 mb-5">
-                  <h3 className="text-lg font-normal mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>Contribute Your Experience</h3>
-                  <p className="text-xs text-[#999] leading-relaxed mb-4">Contribute your interview experience | it takes one minute and strengthens the intelligence for everyone.</p>
-                  <Link href="/contribute" className="block w-full bg-[#1D9E75] text-white text-[13px] font-semibold py-2.5 rounded-md text-center hover:bg-[#17855f] transition-colors">
+                <div className="bg-[#222] border border-[#2a2a2a] rounded-lg p-3.5 mb-2.5">
+                  <h3 className="text-base font-normal mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>Contribute Your Experience</h3>
+                  <p className="text-xs text-[#999] leading-relaxed mb-2.5">Contribute your interview experience | it takes one minute and strengthens the intelligence for everyone.</p>
+                  <Link href="/contribute" className="block w-full bg-[#1D9E75] text-white text-[13px] font-semibold py-2 rounded-md text-center hover:bg-[#17855f] transition-colors">
                     Contribute
                   </Link>
                 </div>
 
-                <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 mb-5">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-[#999] mb-4">Top Interviewed Maisons</h3>
+                <div className="bg-[#222] border border-[#2a2a2a] rounded-lg p-3.5 mb-2.5">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-[#999] mb-2.5">Top Interviewed Maisons</h3>
                   <div className="space-y-2 text-xs text-[#999]">
                     {uniqueInterviewBrands.slice(0, 5).map((b, i) => (
                       <div key={b}><span className="text-[#777] mr-2">{String(i + 1).padStart(2, '0')}</span>{b}</div>
@@ -1004,9 +1004,9 @@ export default function CareersClient({
                   </div>
                 </div>
 
-                <div className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-[#999] mb-4">How It Works</h3>
-                  <ol className="space-y-3">
+                <div className="bg-[#222] border border-[#2a2a2a] rounded-lg p-3.5">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-[#999] mb-2.5">How It Works</h3>
+                  <ol className="space-y-2">
                     {[
                       'Contribute your interview experience anonymously',
                       'Earn points upon approval by our team',
