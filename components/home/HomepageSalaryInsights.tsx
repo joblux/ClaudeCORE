@@ -28,17 +28,10 @@ export function HomepageSalaryInsights({ salaries }: { salaries: Salary[]; artic
   return (
     <section style={{ padding: '44px 0', borderTop: '0.5px solid #2b2b2b' }}>
       <div style={{ maxWidth: 1220, margin: '0 auto', padding: '0 28px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 18, marginBottom: 20 }}>
-          <div>
-            <div style={{ fontSize: 11, letterSpacing: '1.5px', textTransform: 'uppercase', fontWeight: 600, color: '#fff', marginBottom: 8 }}>
-              Live Salary Benchmarks
-            </div>
-            <h2 style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff' }}>Salary intelligence</h2>
-            <p style={{ marginTop: 6, color: '#bbb', fontSize: '12.8px', lineHeight: 1.7, maxWidth: 560 }}>
-              Verified benchmarks across functions, levels, and markets.
-            </p>
-          </div>
-          <Link href="/careers?tab=salaries" style={{ fontSize: 12, color: '#a58e28', whiteSpace: 'nowrap', textDecoration: 'none' }}>
+        <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>
+          <strong style={{ color: '#fff', fontSize: 14 }}>7,076 salary records</strong>
+          {' '}&mdash; verified across functions, levels, and markets.
+          <Link href="/careers?tab=salaries" style={{ float: 'right', fontSize: 12, color: '#a58e28', textDecoration: 'none' }}>
             Full data &rarr;
           </Link>
         </div>
@@ -49,16 +42,17 @@ export function HomepageSalaryInsights({ salaries }: { salaries: Salary[]; artic
               <div
                 key={i}
                 style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
+                  display: 'grid', gridTemplateColumns: '1fr 160px 130px', gap: 16,
                   padding: '10px 0', borderBottom: '0.5px solid #1e1e1e',
                   ...(i >= 3 ? { filter: 'blur(5px)', opacity: 0.4, userSelect: 'none', pointerEvents: 'none' as const } : {}),
                 }}
               >
                 <div>
                   <div style={{ fontSize: '13.5px', color: '#ccc', marginBottom: 3 }}>{s.job_title}</div>
-                  <div style={{ fontSize: 12, color: '#888' }}>{s.brand_name} &middot; {s.city}</div>
+                  <div style={{ fontSize: 12, color: '#888' }}>{s.brand_name}</div>
                 </div>
-                <div style={{ fontSize: '13.5px', color: '#a58e28', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                <div style={{ fontSize: 12, color: '#888' }}>{s.city}</div>
+                <div style={{ fontSize: '13.5px', color: '#a58e28', fontWeight: 600, whiteSpace: 'nowrap', textAlign: 'right' }}>
                   {formatSalary(s.salary_min, s.salary_max, s.currency)}
                 </div>
               </div>

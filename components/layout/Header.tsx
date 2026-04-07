@@ -47,7 +47,7 @@ export function Header() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    style={{ fontSize: 13, color: isActive ? '#fff' : 'rgba(255,255,255,0.8)', textDecoration: 'none', transition: 'color 0.18s ease' }}
+                    style={{ fontSize: 13.5, color: isActive ? '#fff' : 'rgba(255,255,255,0.8)', textDecoration: 'none', transition: 'color 0.18s ease' }}
                   >
                     {item.label}
                   </Link>
@@ -62,7 +62,7 @@ export function Header() {
               ) : (
                 <button
                   onClick={() => setAccessOpen(true)}
-                  style={{ fontSize: '12.5px', fontWeight: 600, color: '#171717', background: '#a58e28', padding: '10px 18px', borderRadius: 999, border: 'none', cursor: 'pointer', transition: 'background 0.18s ease' }}
+                  style={{ fontSize: '12.5px', fontWeight: 500, color: 'rgba(255,255,255,0.85)', background: 'transparent', padding: '9px 18px', borderRadius: 999, border: '1px solid #333', cursor: 'pointer', transition: 'background 0.18s ease' }}
                 >
                   Access &rarr;
                 </button>
@@ -105,7 +105,7 @@ export function Header() {
               <div style={{ padding: '0 28px 40px' }}>
                 <button
                   onClick={() => { setMobileOpen(false); setAccessOpen(true) }}
-                  style={{ fontSize: '12.5px', fontWeight: 600, color: '#171717', background: '#a58e28', padding: '10px 18px', borderRadius: 999, border: 'none', cursor: 'pointer', display: 'inline-block' }}
+                  style={{ fontSize: '12.5px', fontWeight: 500, color: 'rgba(255,255,255,0.85)', background: 'transparent', padding: '9px 18px', borderRadius: 999, border: '1px solid #333', cursor: 'pointer', display: 'inline-block' }}
                 >
                   Access &rarr;
                 </button>

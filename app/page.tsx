@@ -64,7 +64,7 @@ export default async function HomePage() {
       .from('salary_benchmarks')
       .select('job_title, brand_name, city, salary_min, salary_max, currency')
       .eq('is_published', true)
-      .order('created_at', { ascending: false })
+      .order('brand_name', { ascending: true })
       .limit(5),
     // Insights articles
     supabase
