@@ -169,6 +169,52 @@ function PreviewPanel({ content }: { content: Record<string, any> | null }) {
     return <div style={{ fontSize: 12, color: '#888', padding: '12px 0' }}>Preview unavailable.</div>
   }
 
+  // Salary benchmark preview
+  if (Array.isArray(content.records)) {
+    const records = content.records as any[]
+    const fmt = (n: any) => {
+      const num = Number(n)
+      return Number.isFinite(num) ? num.toLocaleString('en-US') : '\u2014'
+    }
+    return (
+      <div style={{ background: '#fff', border: '1px solid #e8e8e8', borderRadius: 6, padding: '16px 20px', marginTop: 4 }}>
+        <div style={{ fontSize: 15, fontWeight: 600, color: '#111', marginBottom: 2 }}>{content.brand_name || '\u2014'}</div>
+        {content.brand_slug && (
+          <div style={{ fontSize: 11, color: '#888', marginBottom: 12 }}>{content.brand_slug}</div>
+        )}
+        {records.length === 0 ? (
+          <div style={{ fontSize: 12, color: '#888', padding: '8px 0' }}>No salary records in this draft</div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #e8e8e8' }}>
+                  {['Job Title', 'Department', 'Seniority', 'City', 'Currency', 'Median Salary'].map(h => (
+                    <th key={h} style={{ textAlign: 'left', padding: '6px 10px', fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#888' }}>
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {records.map((r, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                    <td style={{ padding: '6px 10px', color: '#111' }}>{r.job_title || '\u2014'}</td>
+                    <td style={{ padding: '6px 10px', color: '#555' }}>{r.department || '\u2014'}</td>
+                    <td style={{ padding: '6px 10px', color: '#555' }}>{r.seniority || '\u2014'}</td>
+                    <td style={{ padding: '6px 10px', color: '#555' }}>{r.city || '\u2014'}</td>
+                    <td style={{ padding: '6px 10px', color: '#555' }}>{r.currency || '\u2014'}</td>
+                    <td style={{ padding: '6px 10px', color: '#111', fontWeight: 500 }}>{fmt(r.salary_median)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   const fields: { label: string; value: any }[] = [
     { label: 'Category', value: content.category || content.sector },
     { label: 'Subtitle', value: content.subtitle },
