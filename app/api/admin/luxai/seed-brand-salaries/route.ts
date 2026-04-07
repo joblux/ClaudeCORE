@@ -88,14 +88,31 @@ function validateRecord(r: any): { ok: true; record: SalaryRecord } | { ok: fals
   }
 }
 
+async function isBrandPending(slug: string): Promise<boolean> {
+  // Already has published salary benchmarks?
+  const { count: benchCount } = await supabase
+    .from('salary_benchmarks')
+    .select('id', { count: 'exact', head: true })
+    .eq('brand_slug', slug)
+  if ((benchCount ?? 0) > 0) return false
+
+  // Already has a non-rejected/non-published draft in content_queue?
+  // Match by processed_content->>brand_slug to be precise.
+  const { data: queued } = await supabase
+    .from('content_queue')
+    .select('id, status')
+    .eq('content_type', 'salary_benchmark')
+    .in('status', ['draft', 'under_review', 'approved'])
+    .filter('processed_content->>brand_slug', 'eq', slug)
+    .limit(1)
+  if (queued && queued.length > 0) return false
+
+  return true
+}
+
 async function findNextTargetSlug(): Promise<string | null> {
   for (const slug of TARGET_BRANDS) {
-    const { count, error } = await supabase
-      .from('salary_benchmarks')
-      .select('id', { count: 'exact', head: true })
-      .eq('brand_slug', slug)
-    if (error) continue
-    if ((count ?? 0) === 0) return slug
+    if (await isBrandPending(slug)) return slug
   }
   return null
 }
@@ -104,11 +121,7 @@ export async function GET() {
   try {
     let remaining = 0
     for (const slug of TARGET_BRANDS) {
-      const { count } = await supabase
-        .from('salary_benchmarks')
-        .select('id', { count: 'exact', head: true })
-        .eq('brand_slug', slug)
-      if ((count ?? 0) === 0) remaining++
+      if (await isBrandPending(slug)) remaining++
     }
     return NextResponse.json({ remaining })
   } catch (e: any) {
