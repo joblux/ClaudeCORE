@@ -447,11 +447,11 @@ function NewAssignmentPage() {
   }, [form.title, form.maison, form.city, form.description])
 
   // ── Submit handler ───────────────────────────────────────────────
-  const handleSubmit = async (submitStatus: 'draft' | 'active') => {
+  const handleSubmit = async (submitStatus: 'draft' | 'published') => {
     setError('')
 
     // Validate required fields for activating
-    if (submitStatus === 'active') {
+    if (submitStatus === 'published') {
       const missing: string[] = []
       if (!form.title.trim()) missing.push('Title')
       if (!form.maison.trim()) missing.push('Maison')
@@ -1248,7 +1248,7 @@ function NewAssignmentPage() {
             </button>
             <button
               type="button"
-              onClick={() => handleSubmit('active')}
+              onClick={() => handleSubmit('published')}
               disabled={saving}
               className="jl-btn jl-btn-primary"
             >

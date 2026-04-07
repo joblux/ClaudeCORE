@@ -80,7 +80,7 @@ export default function BusinessDashboard() {
         // Latest signals
         const { data: sigData } = await supabase
           .from('signals')
-          .select('id, slug, headline, category, brand, published_at')
+          .select('id, slug, headline, category, brand_tags, published_at')
           .eq('is_published', true)
           .order('published_at', { ascending: false })
           .limit(5)
@@ -100,7 +100,7 @@ export default function BusinessDashboard() {
         }
 
         // Search assignments count (employer's active searches)
-        const assignRes = await fetch('/api/assignments?status=active&limit=1')
+        const assignRes = await fetch('/api/assignments?status=published&limit=1')
         if (assignRes.ok) {
           const aData = await assignRes.json()
           setSearchCount(aData.total || 0)

@@ -90,8 +90,8 @@ export async function GET(
 // ---------------------------------------------------------------------------
 // PUT /api/assignments/[id] | update a search assignment (admin only)
 //   - Accepts partial updates (any subset of fields)
-//   - Auto-sets activated_at when status transitions to "active"
-//   - Auto-sets closed_at when status transitions to "closed" or "filled"
+//   - Auto-sets activated_at when status transitions to "published"
+//   - Auto-sets closed_at when status transitions to "closed"
 //   - Always sets updated_at to now()
 // ---------------------------------------------------------------------------
 export async function PUT(
@@ -125,17 +125,13 @@ export async function PUT(
     }
 
     // ---- Status-transition timestamps ----
-    // Set activated_at when moving to "active" and it has not been set yet
+    // Set activated_at when moving to "published" and it has not been set yet
     if (body.status === 'published' && !existing.activated_at && !body.activated_at) {
       body.activated_at = now
     }
 
-    // Set closed_at when moving to "closed" or "filled" and it has not been set yet
-    if (
-      (body.status === 'closed' || body.status === 'filled') &&
-      !existing.closed_at &&
-      !body.closed_at
-    ) {
+    // Set closed_at when moving to "closed" and it has not been set yet
+    if (body.status === 'closed' && !existing.closed_at && !body.closed_at) {
       body.closed_at = now
     }
 

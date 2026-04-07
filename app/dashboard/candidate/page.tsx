@@ -107,7 +107,7 @@ export default function CandidateDashboard() {
         }
 
         // 3. Active careers (search assignments)
-        const rolesRes = await fetch('/api/assignments?status=active&limit=4')
+        const rolesRes = await fetch('/api/assignments?status=published&limit=4')
         if (rolesRes.ok) {
           const rData = await rolesRes.json()
           setRoles(rData.assignments || rData.data || [])
@@ -116,7 +116,7 @@ export default function CandidateDashboard() {
         // 4. Latest signals (direct Supabase, same pattern as signals page)
         const { data: sigData } = await supabase
           .from('signals')
-          .select('id, slug, headline, category, brand, published_at')
+          .select('id, slug, headline, category, brand_tags, published_at')
           .eq('is_published', true)
           .order('published_at', { ascending: false })
           .limit(4)

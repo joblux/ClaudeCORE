@@ -159,7 +159,7 @@ export async function POST(req: NextRequest) {
     const visa_sponsorship = toBool(body.visa_sponsorship)
     const clienteling_experience = toBool(body.clienteling_experience)
 
-    // ---- activated_at: set to now when status is "active" ----
+    // ---- activated_at: set to now when status is "published" ----
     const activated_at =
       body.status === 'published' ? new Date().toISOString() : body.activated_at || null
 

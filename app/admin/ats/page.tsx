@@ -1180,7 +1180,7 @@ export default function AdminATSPage() {
             >
               <option value="">Select an assignment...</option>
               {briefs
-                .filter((b) => b.status === 'active')
+                .filter((b) => b.status === 'published')
                 .map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.title}{b.maison ? ` \u2014 ${b.maison}` : ''}

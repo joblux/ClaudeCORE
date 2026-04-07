@@ -163,10 +163,8 @@ export const START_DATES = [
 
 export const ASSIGNMENT_STATUSES = [
   { value: 'draft', label: 'Draft' },
-  { value: 'active', label: 'Active' },
-  { value: 'on_hold', label: 'On Hold' },
+  { value: 'published', label: 'Published' },
   { value: 'closed', label: 'Closed' },
-  { value: 'filled', label: 'Filled' },
 ] as const
 
 export const ASSIGNMENT_PRIORITIES = [
