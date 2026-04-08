@@ -125,6 +125,9 @@ function renderBody(content: string, heroImageUrl?: string): string {
   // Strip empty paragraphs
   html = html.replace(/<p>\s*<\/p>/g, '')
 
+  // Defensively strip a leading H1 (hero already renders the title)
+  html = html.replace(/^\s*<h1\b[^>]*>[\s\S]*?<\/h1>\s*/i, '')
+
   // Remove duplicate hero image from body
   if (heroImageUrl) {
     const heroBase = heroImageUrl.split('?')[0]
@@ -181,7 +184,7 @@ export default async function ArticlePage({ params }: Props) {
             <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-[#141414]/70 to-[#141414]/40" />
           </div>
         )}
-        <div className="max-w-[1200px] mx-auto px-7 relative z-10 py-14 md:py-20">
+        <div className="max-w-[1200px] mx-auto px-7 relative z-10 py-8 md:py-12">
           <Link href="/insights" className="text-[10px] font-semibold tracking-[2px] uppercase text-[#a58e28] hover:underline transition-colors mb-6 inline-block">&larr; Insights</Link>
           <div className="max-w-3xl">
             <div className="flex items-center gap-3 mb-4">
@@ -216,7 +219,7 @@ export default async function ArticlePage({ params }: Props) {
       </div>
 
       {/* ── CONTENT ───────────────────────────────────────── */}
-      <div className="max-w-[1200px] mx-auto px-7 py-10">
+      <div className="max-w-[1200px] mx-auto px-7 py-6">
         <div className="max-w-[720px] mx-auto">
           <div className="jl-prose-dark" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
 
