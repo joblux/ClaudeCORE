@@ -226,7 +226,7 @@ function InsightsPageInner() {
             <div>
               {/* Featured */}
               {featured && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 items-center">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 items-center">
                   <div className="bg-[#222] border border-[#2a2a2a] rounded-xl h-72 overflow-hidden relative">
                     {featured.cover_image_url ? (
                       <img src={featured.cover_image_url} alt={featured.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
