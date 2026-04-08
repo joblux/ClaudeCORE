@@ -341,10 +341,10 @@ function InsightsPageInner() {
                 </div>
               </div>
 
-              <div>
+              <div style={{ border: '0.5px solid #333', borderRadius: '8px', padding: '16px' }}>
                 <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-3">THE BRIEF</div>
                 <p className="text-xs text-[#999] leading-relaxed mb-3">
-                  Biweekly intelligence for luxury professionals. Signals, salary moves, and assignments | direct to your inbox.
+                  Biweekly intelligence for luxury professionals. Signals, salary moves, and assignments direct to your inbox.
                 </p>
                 <input
                   type="email"
@@ -353,8 +353,8 @@ function InsightsPageInner() {
                   onChange={e => setEmail(e.target.value)}
                   className="w-full bg-[#222] border border-[#2a2a2a] rounded-lg px-3 py-2 text-xs text-[#ccc] outline-none mb-2 focus:border-[#444]"
                 />
-                <button className="w-full bg-[#a58e28] text-[#1a1a1a] text-xs font-semibold py-2.5 rounded-lg hover:bg-[#c4a832] transition-colors">
-                  Subscribe to The Brief
+                <button className="w-full bg-[#555] text-white text-xs font-semibold py-2.5 rounded-lg hover:bg-[#666] transition-colors">
+                  Subscribe
                 </button>
               </div>
             </div>
