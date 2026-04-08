@@ -52,25 +52,10 @@ const PIPELINE_STAGES = [
   { key: 'offer_made', label: 'Placed', color: 'bg-green-100 text-green-700' },
 ]
 
-// ── Launch checklist ─────────────────────────────────────────────────────────
+// ── Tasks (loaded from admin_tasks table) ────────────────────────────────────
 
-const LAUNCH_CHECKLIST = [
-  { label: 'Rotate Anthropic API key', done: true },
-  { label: 'Seed all content', done: true },
-  { label: 'Rotate GitHub PAT', done: true },
-  { label: 'Set up Cloudflare', done: false },
-  { label: 'Update NEXTAUTH_URL', done: false },
-  { label: 'Update OAuth callbacks', done: false },
-  { label: 'Update email domain', done: false },
-  { label: 'Set 301 redirects', done: false },
-  { label: 'Update meta/OG/canonical URLs', done: false },
-  { label: 'Set up GA4 + Search Console', done: false },
-  { label: 'Seed BlogLux articles', done: true },
-  { label: 'Add /dashboard to maintenance bypass', done: true },
-  { label: 'Toggle offline mode off (launch!)', done: false },
-]
+type AdminTask = { id: string; label: string; done: boolean; category: string; completed_at: string | null }
 
-const CHECKLIST_DONE = LAUNCH_CHECKLIST.filter(c => c.done).length
 const CHECKLIST_VISIBLE = 8
 
 // ── System status (TODO: pull from Coolify/Supabase/Anthropic APIs in future) ──
@@ -93,7 +78,28 @@ export default function AdminDashboardPage() {
   })
   const [pipelineData, setPipelineData] = useState<Record<string, number>>({})
   const [activityFeed, setActivityFeed] = useState<any[]>([])
-  const [showAllChecklist, setShowAllChecklist] = useState(false)
+  const [tasks, setTasks] = useState<AdminTask[]>([])
+
+  useEffect(() => {
+    fetch('/api/admin/tasks')
+      .then(r => r.ok ? r.json() : { tasks: [] })
+      .then(d => setTasks(d.tasks || []))
+      .catch(() => {})
+  }, [])
+
+  async function toggleTask(task: AdminTask) {
+    const next = !task.done
+    setTasks(ts => ts.map(t => t.id === task.id ? { ...t, done: next } : t))
+    try {
+      await fetch(`/api/admin/tasks/${task.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ done: next }),
+      })
+    } catch {
+      setTasks(ts => ts.map(t => t.id === task.id ? task : t))
+    }
+  }
 
   useEffect(() => {
     if (!isAdmin) return
@@ -210,8 +216,9 @@ export default function AdminDashboardPage() {
 
   const firstName = name?.split(' ')[0] || 'Mo'
   const pipelineTotal = PIPELINE_STAGES.reduce((sum, s) => sum + (pipelineData[s.key] || 0), 0)
-  const visibleChecklist = showAllChecklist ? LAUNCH_CHECKLIST : LAUNCH_CHECKLIST.slice(0, CHECKLIST_VISIBLE)
-  const hiddenCount = LAUNCH_CHECKLIST.length - CHECKLIST_VISIBLE
+  const tasksDone = tasks.filter(t => t.done).length
+  const tasksTotal = tasks.length
+  const visibleTasks = tasks.filter(t => !t.done).slice(0, CHECKLIST_VISIBLE)
 
   const kpiCards = [
     {
@@ -410,46 +417,47 @@ export default function AdminDashboardPage() {
             )}
           </div>
 
-          {/* Column 2: Launch Checklist */}
+          {/* Column 2: Tasks */}
           <div className="border border-[#e8e8e8] rounded-xl p-4 bg-[#f5f5f5]">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999]">Launch Checklist</span>
-              <span className="text-[11px] font-medium text-[#444444]">{CHECKLIST_DONE}/{LAUNCH_CHECKLIST.length} done</span>
+              <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999]">Tasks</span>
+              <span className="text-[11px] font-medium text-[#444444]">{tasksDone}/{tasksTotal} done</span>
             </div>
 
             {/* Progress bar */}
             <div className="w-full h-1.5 bg-gray-100 rounded-full mb-3 overflow-hidden">
               <div
                 className="h-full bg-[#111111] rounded-full transition-all"
-                style={{ width: `${(CHECKLIST_DONE / LAUNCH_CHECKLIST.length) * 100}%` }}
+                style={{ width: `${tasksTotal > 0 ? (tasksDone / tasksTotal) * 100 : 0}%` }}
               />
             </div>
 
             <div className="space-y-1">
-              {visibleChecklist.map((item, i) => (
-                <div key={i} className="flex items-center gap-2 py-1">
-                  {item.done ? (
-                    <CheckCircle2 size={14} className="text-green-500 flex-shrink-0" />
-                  ) : (
-                    <Circle size={14} className="text-gray-300 flex-shrink-0" />
-                  )}
-                  <span className={`text-xs ${item.done ? 'text-[#999] line-through' : 'text-[#1a1a1a]'}`}>
-                    {item.label}
+              {visibleTasks.map(task => (
+                <div key={task.id} className="flex items-center gap-2 py-1">
+                  <button onClick={() => toggleTask(task)} className="flex-shrink-0">
+                    {task.done ? (
+                      <CheckCircle2 size={14} className="text-green-500" />
+                    ) : (
+                      <Circle size={14} className="text-gray-300 hover:text-[#666] transition-colors" />
+                    )}
+                  </button>
+                  <span className={`text-xs ${task.done ? 'text-[#999] line-through' : 'text-[#1a1a1a]'}`}>
+                    {task.label}
                   </span>
                 </div>
               ))}
+              {visibleTasks.length === 0 && tasksTotal > 0 && (
+                <div className="text-[11px] text-[#999] py-1">All tasks complete.</div>
+              )}
             </div>
 
-            {!showAllChecklist && hiddenCount > 0 && (
-              <button
-                onClick={() => setShowAllChecklist(true)}
-                className="text-[11px] text-[#444444] hover:text-[#8a7622] font-medium mt-2 transition-colors"
-              >
-                +{hiddenCount} more items →
-              </button>
-            )}
-
-            {/* TODO: Move checklist to Supabase table for persistence & editability */}
+            <Link
+              href="/admin/tasks"
+              className="text-[11px] text-[#444444] hover:text-[#111] font-medium mt-2 inline-block transition-colors"
+            >
+              View all →
+            </Link>
           </div>
         </div>
       </div>
