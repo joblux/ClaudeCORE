@@ -124,11 +124,11 @@ export default function BrandsPage() {
         {/* Grid */}
         {!loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {filtered.map(brand => (
+            {filtered.map((brand, idx) => (
               <div
                 key={brand.slug}
                 onClick={() => router.push(`/brands/${brand.slug}`)}
-                className="bg-[#212121] border border-[#2a2a2a] rounded-xl p-4 cursor-pointer transition-colors hover:border-[#3a3a3a]"
+                className={`${idx < 4 ? 'bg-[#262626] border-[#383838]' : 'bg-[#212121] border-[#2a2a2a]'} border rounded-xl p-4 cursor-pointer transition-colors hover:border-[#3a3a3a]`}
               >
                 {/* Top */}
                 <div className="flex items-center gap-3 mb-3">
