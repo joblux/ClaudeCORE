@@ -124,7 +124,7 @@ function InsightsPageInner() {
       // Research reports
       const { data: reportData } = await supabase
         .from('bloglux_articles')
-        .select('id, slug, title, excerpt, category, published_at')
+        .select('id, slug, title, excerpt, category, published_at, cover_image_url')
         .eq('status', 'published')
         .eq('category', 'Research Report')
         .is('deleted_at', null)
@@ -138,6 +138,7 @@ function InsightsPageInner() {
           title: r.title,
           meta: formatDate(r.published_at),
           slug: r.slug,
+          cover_image_url: r.cover_image_url || '',
         })))
       }
 
@@ -367,14 +368,21 @@ function InsightsPageInner() {
         {activeTab === 'Research reports' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {reports.map((r, i) => (
-              <Link key={i} href={r.slug ? `/insights/${r.slug}` : '#'} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 flex gap-4 hover:border-[#3a3a3a] transition-colors block">
-                <div className="w-11 h-11 rounded-lg flex items-center justify-center text-lg flex-shrink-0" style={{ background: 'rgba(165,142,40,0.1)', border: '1px solid rgba(165,142,40,0.2)' }}>
-                  {r.icon}
+              <Link key={i} href={r.slug ? `/insights/${r.slug}` : '#'} className="bg-[#222] border border-[#2a2a2a] rounded-xl overflow-hidden hover:border-[#3a3a3a] transition-colors block">
+                <div className="bg-[#1a1a1a] border-b border-[#2a2a2a] h-44 overflow-hidden relative">
+                  {r.cover_image_url && (
+                    <img src={r.cover_image_url} alt={r.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                  )}
                 </div>
-                <div>
-                  <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-1">{r.label}</div>
-                  <div className="text-sm font-medium text-[#e0e0e0] mb-1 leading-snug">{r.title}</div>
-                  <div className="text-[11px] text-[#999]">{r.meta}</div>
+                <div className="p-5 flex gap-4">
+                  <div className="w-11 h-11 rounded-lg flex items-center justify-center text-lg flex-shrink-0" style={{ background: 'rgba(165,142,40,0.1)', border: '1px solid rgba(165,142,40,0.2)' }}>
+                    {r.icon}
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-1">{r.label}</div>
+                    <div className="text-sm font-medium text-[#e0e0e0] mb-1 leading-snug">{r.title}</div>
+                    <div className="text-[11px] text-[#999]">{r.meta}</div>
+                  </div>
                 </div>
               </Link>
             ))}
