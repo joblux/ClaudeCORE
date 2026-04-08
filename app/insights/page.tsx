@@ -10,22 +10,6 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-const placeholderArticles = [
-  { id: '1', category: 'LEADERSHIP', title: "Kering's creative director cycle | what it means for talent inside the group", excerpt: 'Three CD changes in 18 months. The downstream effects on teams, briefs, and hiring priorities across Gucci, Bottega, and Saint Laurent.', date: 'March 20, 2026', read_time: '6 min', slug: 'kering-creative-director-cycle', cover_image_url: '' },
-  { id: '2', category: 'MARKET INTELLIGENCE', title: "Hard luxury's moment: why watches and jewelry are the growth story of 2026", excerpt: "Cartier, Van Cleef, and Tiffany are all expanding headcount while fashion and leather goods hold steady.", date: 'March 18, 2026', read_time: '5 min', slug: 'hard-luxury-growth-2026', cover_image_url: '' },
-  { id: '3', category: 'CAREER INTELLIGENCE', title: "Dubai is becoming luxury's second headquarters | what that means for careers", excerpt: "Regional HQs, flagship openings, and a growing pool of international talent.", date: 'March 15, 2026', read_time: '7 min', slug: 'dubai-luxury-careers', cover_image_url: '' },
-  { id: '4', category: 'SALARY', title: 'What Hermès really pays | from artisan to director', excerpt: "Based on 847 verified contributions, we map out the full compensation ladder.", date: 'March 12, 2026', read_time: '9 min', slug: 'hermes-salary-guide', cover_image_url: '' },
-  { id: '5', category: 'CAREERS', title: 'How to get hired at Chanel without applying online', excerpt: "Chanel fills over 70% of senior roles through internal referrals and executive search.", date: 'March 10, 2026', read_time: '5 min', slug: 'hired-at-chanel', cover_image_url: '' },
-  { id: '6', category: 'MARKET', title: 'LVMH vs Kering: which group offers better career progression?', excerpt: "We analysed 500+ career paths across both groups.", date: 'March 8, 2026', read_time: '8 min', slug: 'lvmh-vs-kering-careers', cover_image_url: '' },
-]
-
-const placeholderReports = [
-  { icon: '📊', label: 'SALARY REPORT', title: 'Luxury Compensation Report 2026 | Europe Edition', meta: '1,840 data points · Published March 2026', slug: '' },
-  { icon: '🏢', label: 'HIRING REPORT', title: "State of Luxury Hiring Q1 2026 | Who's Growing, Who's Cutting", meta: '52 brands analysed · Published February 2026', slug: '' },
-  { icon: '🌍', label: 'MARKET REPORT', title: 'Asia Pacific Luxury Expansion Index | Retail & Talent Outlook', meta: '12 markets · Published January 2026', slug: '' },
-  { icon: '👔', label: 'CAREER REPORT', title: 'The Luxury Career Ladder | How Professionals Progress Across Maisons', meta: '500+ career paths · Published December 2025', slug: '' },
-]
-
 const topics = ['Salary data', 'Leadership moves', 'LVMH', 'Kering', 'Richemont', 'Asia Pacific', 'Middle East', 'Retail', 'Digital', 'Watches', 'Beauty', 'Career advice']
 const tabs = ['Editorial', 'Research reports', 'Insider voices', 'Luxury map']
 const TAB_SLUG_MAP: Record<string, string> = { 'editorial': 'Editorial', 'research-reports': 'Research reports', 'insider-voices': 'Insider voices', 'luxury-map': 'Luxury map' }
@@ -88,8 +72,8 @@ function InsightsPageInner() {
   const searchParams = useSearchParams()
   const tabParam = searchParams.get('tab') || ''
   const activeTab = TAB_SLUG_MAP[tabParam] || 'Editorial'
-  const [articles, setArticles] = useState(placeholderArticles)
-  const [reports, setReports] = useState(placeholderReports)
+  const [articles, setArticles] = useState<any[]>([])
+  const [reports, setReports] = useState<any[]>([])
   const [voices, setVoices] = useState<any[]>([])
   const [mostRead, setMostRead] = useState<any[]>([])
   const [pinnedFeatured, setPinnedFeatured] = useState<any>(null)
@@ -204,12 +188,7 @@ function InsightsPageInner() {
     ? articles.filter(a => a.id !== pinnedFeatured.id).slice(0, 3)
     : articles.slice(1, 4)
 
-  const displayMostRead = mostRead.length > 0 ? mostRead : [
-    { cat: 'SALARY', title: 'What Hermès really pays | from artisan to director', date: 'March 22, 2026', slug: 'hermes-salary-guide' },
-    { cat: 'CAREERS', title: 'How to get hired at Chanel without applying online', date: 'March 19, 2026', slug: 'hired-at-chanel' },
-    { cat: 'MARKET', title: 'LVMH vs Kering: which group offers better career progression?', date: 'March 14, 2026', slug: 'lvmh-vs-kering-careers' },
-    { cat: 'LEADERSHIP', title: 'The Richemont school of management | and why alumni are in demand', date: 'March 10, 2026', slug: 'richemont-management' },
-  ]
+  const displayMostRead = mostRead
 
   return (
     <div className="min-h-screen bg-[#1a1a1a]">
