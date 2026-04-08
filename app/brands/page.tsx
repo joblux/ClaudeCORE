@@ -104,13 +104,13 @@ export default function BrandsPage() {
         </p>
 
         {/* Search */}
-        <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <div className="flex items-center gap-2 py-6 flex-wrap">
           <input
             type="text"
             placeholder="Search brands..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="bg-white text-[#1a1a1a] text-sm rounded-lg px-3 h-[42px] w-[220px] outline-none flex-shrink-0"
+            className="bg-white text-[#1a1a1a] text-base rounded-lg px-4 h-[48px] w-full max-w-lg outline-none"
           />
         </div>
 
