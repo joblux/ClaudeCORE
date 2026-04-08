@@ -252,11 +252,11 @@ function InsightsPageInner() {
               )}
 
               {/* Latest intelligence */}
-              <div className="flex items-center gap-3 mb-5">
-                <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">LATEST INTELLIGENCE</span>
-                <div className="flex-1 h-px bg-[#2a2a2a]" />
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-[9px] font-medium tracking-[1.5px] text-[#777]">LATEST INTELLIGENCE</span>
+                <div className="flex-1 h-px bg-[#222]" />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
                 {rest.map(article => (
                   <Link key={article.id} href={`/insights/${article.slug}`} className="group cursor-pointer">
                     <div className="bg-[#222] border border-[#2a2a2a] rounded-lg h-44 mb-3 overflow-hidden relative">
