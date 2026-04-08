@@ -136,7 +136,7 @@ export default function BrandsPage() {
                     {getInitials(brand.name)}
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-[#e0e0e0]">{brand.name}</div>
+                    <div className="text-sm font-semibold text-white">{brand.name}</div>
                     {brand.parent_group && (
                       <div className="text-[11px] text-[#999] mt-0.5">{brand.parent_group}</div>
                     )}
@@ -145,7 +145,7 @@ export default function BrandsPage() {
 
                 {/* Tagline */}
                 {brand.tagline && (
-                  <p className="text-[11px] text-[#777] leading-relaxed line-clamp-2">{brand.tagline}</p>
+                  <p className="text-[11px] text-[#777] leading-snug line-clamp-2">{brand.tagline}</p>
                 )}
               </div>
             ))}
