@@ -71,7 +71,7 @@ function VoiceCard({ v }: { v: any }) {
 function InsightsPageInner() {
   const searchParams = useSearchParams()
   const tabParam = searchParams.get('tab') || ''
-  const activeTab = TAB_SLUG_MAP[tabParam] || 'Editorial'
+  const activeTab = TAB_SLUG_MAP[tabParam] || 'Research reports'
   const [articles, setArticles] = useState<any[]>([])
   const [reports, setReports] = useState<any[]>([])
   const [voices, setVoices] = useState<any[]>([])
