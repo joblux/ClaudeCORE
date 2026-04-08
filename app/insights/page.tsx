@@ -222,7 +222,7 @@ function InsightsPageInner() {
 
         {/* ── EDITORIAL TAB ── */}
         {activeTab === 'Editorial' && (
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-10">
+          <div className={`grid grid-cols-1 ${displayMostRead.length >= 8 ? 'lg:grid-cols-[1fr_280px]' : ''} gap-10`}>
             <div>
               {/* Featured */}
               {featured && (
@@ -309,6 +309,7 @@ function InsightsPageInner() {
             </div>
 
             {/* Sidebar */}
+            {displayMostRead.length >= 8 && (
             <div className="space-y-8">
               <div>
                 <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-4">MOST READ</div>
@@ -358,6 +359,7 @@ function InsightsPageInner() {
                 </button>
               </div>
             </div>
+            )}
           </div>
         )}
 
