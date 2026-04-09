@@ -42,9 +42,14 @@ RULES:
 - Generate exactly 10 roles spanning: Retail, Marketing, Digital, Finance, Creative, Operations, HR, Supply Chain
 - Seniority mix: 2 junior, 3 mid, 3 senior, 2 executive
 - Each role has exactly 4 cities: Paris, London, New York, Dubai
-- Salaries must be realistic for luxury industry in each city
+- Salaries must be credible estimates grounded in known luxury industry compensation patterns — these are AI-estimated figures, not verified market data
 - All numbers are annual base salary in local currency
 - 5-8 benefits relevant to ${brandName}
+- These are AI-generated salary estimates for editorial reference only, not verified compensation data
+- Do not present figures with false precision — use ranges that reflect general luxury industry patterns by city and function
+- Avoid overly granular figures that imply exact knowledge (e.g. 73,500). Prefer rounded ranges (e.g. 70k–80k)
+- comp_notes must be clearly framed as an AI estimate, not a verified statement about the brand
+- Never invent brand-specific compensation policies or benefits not publicly known
 - Output valid JSON only`
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
