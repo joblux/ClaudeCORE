@@ -28,7 +28,7 @@ Return ONLY a JSON array (no markdown, no backticks):
     "start_date": "2026-06-15",
     "end_date": "2026-06-18",
     "description": "What this event is, who attends, why it matters [max 300 chars]",
-    "long_description": "A 200-400 word editorial overview of the event. Cover its history, significance in the luxury calendar, what to expect this edition, who the key attendees are, and what makes it unmissable for luxury professionals. Write in an authoritative editorial tone.",
+    "long_description": "A 200-400 word editorial overview of the event. Cover its history, significance in the luxury calendar, what to expect this edition, who the key attendees are, and what makes it unmissable for luxury professionals. Write in an informative tone based on what is publicly known about this event.",
     "highlights": [
       "Key highlight or feature #1",
       "Key highlight or feature #2",
@@ -57,7 +57,7 @@ Return ONLY a JSON array (no markdown, no backticks):
     },
     "career_context": "Why luxury professionals should care [max 200 chars]",
     "organizer": "Organizer name",
-    "attendance": "~5,000",
+    "attendance": "publicly reported or widely estimated attendance, or null if not known",
     "type": "trade_show" | "fashion_week" | "conference" | "exhibition" | "awards" | "summit",
     "website_url": "https://example.com",
     "meta_title": "Event Name | City | JOBLUX Events",
@@ -67,7 +67,7 @@ Return ONLY a JSON array (no markdown, no backticks):
 
 RULES:
 - ${count} events exactly
-- Real or highly realistic events based on actual luxury industry calendar
+- Well-known recurring luxury industry events grounded in the actual luxury calendar — do not invent new events that do not exist
 - Dates between April 2026 and March 2027
 - Mix of cities: Paris, Milan, London, Geneva, New York, Hong Kong, Dubai, Shanghai
 - Include major fashion weeks, watch fairs, art fairs, hospitality summits
@@ -76,6 +76,11 @@ RULES:
 - career_opportunities: 3-5 items per event
 - networking_tips: 3-4 items per event
 - practical_info: all 5 fields filled for each event
+- Only generate events that are real recurring fixtures in the luxury industry calendar
+- Do not invent attendance figures, brand participation lists, or practical details not publicly known
+- Use restrained language for career_opportunities and networking_tips: typically, commonly, often associated with
+- Do not imply guaranteed employer presence, hiring access, or networking outcomes
+- If a field cannot be grounded in known facts about the event, use null rather than inventing plausible detail
 - Output valid JSON array only`
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
