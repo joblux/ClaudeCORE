@@ -19,7 +19,66 @@ export async function POST(request: Request) {
     }
     const reportDesc = typeMap[report_type] || typeMap['salary']
 
-    const prompt = `You are a senior luxury industry analyst writing for JOBLUX. The current year is 2026. Write a substantial research report dated 2026: ${reportDesc}
+    // Fetch JOBLUX platform data so the report is grounded in real counts, not invented figures
+    const [
+      signalsTotalRes,
+      signalsCategoryRes,
+      salaryTotalRes,
+      salaryBrandsRes,
+      wikiluxRes,
+      blogluxRes,
+    ] = await Promise.all([
+      supabase.from('signals').select('*', { count: 'exact', head: true }).eq('is_published', true),
+      supabase.from('signals').select('category').eq('is_published', true),
+      supabase.from('salary_benchmarks').select('*', { count: 'exact', head: true }).eq('is_published', true),
+      supabase.from('salary_benchmarks').select('brand_slug').eq('is_published', true),
+      supabase.from('wikilux_content').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
+      supabase.from('bloglux_articles').select('*', { count: 'exact', head: true }).eq('status', 'published').is('deleted_at', null),
+    ])
+
+    const signalsTotal = signalsTotalRes.count || 0
+    const signalCategoryCounts: Record<string, number> = {
+      contraction: 0,
+      expansion: 0,
+      growth: 0,
+      leadership: 0,
+      merger_acquisition: 0,
+    }
+    for (const row of (signalsCategoryRes.data || []) as Array<{ category: string | null }>) {
+      const key = row.category || ''
+      if (key in signalCategoryCounts) signalCategoryCounts[key]++
+    }
+    const salaryTotal = salaryTotalRes.count || 0
+    const salaryDistinctBrands = new Set(
+      ((salaryBrandsRes.data || []) as Array<{ brand_slug: string | null }>)
+        .map(r => r.brand_slug)
+        .filter((s): s is string => !!s)
+    ).size
+    const wikiluxApproved = wikiluxRes.count || 0
+    const blogluxPublished = blogluxRes.count || 0
+
+    const platformDataBlock = `JOBLUX PLATFORM DATA — use only these figures when referencing platform statistics:
+- Signals (published, total): ${signalsTotal}
+  - contraction: ${signalCategoryCounts.contraction}
+  - expansion: ${signalCategoryCounts.expansion}
+  - growth: ${signalCategoryCounts.growth}
+  - leadership: ${signalCategoryCounts.leadership}
+  - merger_acquisition: ${signalCategoryCounts.merger_acquisition}
+- Salary benchmarks (published): ${salaryTotal} rows across ${salaryDistinctBrands} distinct brands
+- WikiLux brands (approved): ${wikiluxApproved}
+- Bloglux articles (published, not deleted): ${blogluxPublished}`
+
+    const emphasis = (report_type === 'hiring' || report_type === 'market')
+      ? 'Emphasize the signal totals and category breakdown above when characterizing hiring momentum, expansion, contraction, leadership movement, and M&A activity. Do not state figures beyond the signal counts provided.'
+      : (report_type === 'salary')
+      ? 'Emphasize the salary_benchmarks row count and distinct brand coverage above when characterizing compensation data. Do not state salary figures beyond what the platform data covers.'
+      : 'Reference the platform data above where relevant. Do not state figures beyond what is provided.'
+
+    const prompt = `${platformDataBlock}
+
+You are a senior luxury industry analyst writing for JOBLUX. The current year is 2026. Write a substantial research report dated 2026: ${reportDesc}
+
+${emphasis}
 
 Return ONLY a JSON object (no markdown, no backticks):
 {
@@ -27,19 +86,22 @@ Return ONLY a JSON object (no markdown, no backticks):
   "subtitle": "One-line summary [max 150 chars]",
   "slug": "url-friendly-slug",
   "report_type": "${report_type}",
-  "content": "Full report in markdown. 8-12 sections with ## headings. Include data points, percentages, brand names, city comparisons. 1500-2500 words. Professional, data-driven tone.",
+  "content": "Full report in markdown. 8-12 sections with ## headings. 1500-2500 words. Professional, data-driven tone, grounded only in the JOBLUX platform data above.",
   "excerpt": "3-4 sentence executive summary [max 300 chars]",
   "key_findings": ["Finding 1 [max 80 chars]", "Finding 2", "Finding 3", "Finding 4", "Finding 5"],
   "brands_covered": ["Brand1", "Brand2", "Brand3"],
-  "data_points": "1,200+",
   "tags": ["tag1", "tag2", "tag3"],
-  "read_time": 12
+  "read_time": 12,
+  "brand_mentions": ["Brand1", "Brand2"]
 }
 
 RULES:
-- Reference 10+ real luxury brands with specific plausible data
-- Include city-level comparisons (Paris, Milan, London, New York, Dubai, Hong Kong)
-- Key findings must be specific and data-backed (percentages, figures)
+- Only use facts and figures explicitly provided in this prompt (the JOBLUX PLATFORM DATA block above)
+- Do not invent market-wide totals, percentages, or counts not present in the provided data
+- Do not derive, extrapolate, or invent any figure beyond what is fetched
+- Distinguish observation from interpretation
+- Use restrained claim language: suggests, indicates, may imply, points to
+- Never state inferred motives as facts
 - All reports must reference 2026 as the current year | never 2024 or 2025
 - Professional tone | this is a premium intelligence product
 - Output valid JSON only`
@@ -77,19 +139,27 @@ RULES:
       throw new Error(`JSON parse failed: ${e.message}`)
     }
 
-    // Store in bloglux_articles with category "Research Report"
-    const { error } = await supabase.from('bloglux_articles').insert({
+    // Route to content_queue (canonical editorial gate) — not directly to bloglux_articles
+    const slug = report.slug || report.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 80)
+    const { error } = await supabase.from('content_queue').insert({
+      content_type: 'article',
+      source_type: 'joblux_generation',
+      source_name: 'JOBLUX Intelligence',
       title: report.title,
-      subtitle: report.subtitle,
-      slug: report.slug || report.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 80),
-      body: report.content,
-      excerpt: report.excerpt,
-      tags: report.tags,
       category: 'Research Report',
-      read_time_minutes: report.read_time || 12,
+      destination_table: 'bloglux_articles',
       status: 'draft',
-      content_origin: 'ai',
-      author_name: 'JOBLUX Intelligence'
+      processed_content: {
+        title: report.title,
+        subtitle: report.subtitle,
+        slug,
+        body: report.content,
+        excerpt: report.excerpt,
+        tags: report.tags,
+        category: 'Research Report',
+        read_time_minutes: report.read_time || 12,
+        brand_mentions: report.brand_mentions || [],
+      },
     })
 
     if (error) throw error
