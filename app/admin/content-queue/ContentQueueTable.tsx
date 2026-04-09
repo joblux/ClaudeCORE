@@ -234,6 +234,87 @@ function PreviewPanel({ content }: { content: Record<string, any> | null }) {
     { label: 'Confidence', value: content.confidence },
   ]
 
+  // Article body preview (full read-mode)
+  if (typeof content.body === 'string' && content.body.trim()) {
+    const raw = content.body
+    const isHtml = /<[a-z][\s\S]*>/i.test(raw)
+
+    let bodyHtml: string
+    if (isHtml) {
+      bodyHtml = raw
+    } else {
+      // Minimal markdown -> HTML for admin preview
+      const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      const inline = (s: string) => {
+        let out = escape(s)
+        out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+        out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        out = out.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>')
+        return out
+      }
+      bodyHtml = raw
+        .split(/\n{2,}/)
+        .map(block => {
+          const t = block.trim()
+          if (!t) return ''
+          if (/^###\s+/.test(t)) return `<h3>${inline(t.replace(/^###\s+/, ''))}</h3>`
+          if (/^##\s+/.test(t))  return `<h2>${inline(t.replace(/^##\s+/, ''))}</h2>`
+          if (/^#\s+/.test(t))   return `<h1>${inline(t.replace(/^#\s+/, ''))}</h1>`
+          if (/^>\s+/.test(t))   return `<blockquote>${inline(t.replace(/^>\s+/, ''))}</blockquote>`
+          if (/^([-*]|\d+\.)\s+/.test(t)) {
+            const ordered = /^\d+\.\s+/.test(t)
+            const items = t.split(/\n/).map(l => l.replace(/^([-*]|\d+\.)\s+/, '').trim()).filter(Boolean)
+            const tag = ordered ? 'ol' : 'ul'
+            return `<${tag}>${items.map(it => `<li>${inline(it)}</li>`).join('')}</${tag}>`
+          }
+          return `<p>${inline(t).replace(/\n/g, '<br>')}</p>`
+        })
+        .join('')
+    }
+
+    const metaBits: string[] = []
+    if (content.category) metaBits.push(String(content.category))
+    if (content.read_time_minutes) metaBits.push(`${content.read_time_minutes} min read`)
+
+    return (
+      <div style={{ background: '#fff', border: '1px solid #e8e8e8', borderRadius: 6, padding: '36px 44px', marginTop: 4 }}>
+        <style>{`
+          .cq-article-preview h1 { font-size: 24px; font-weight: 600; margin: 1.4em 0 0.5em; color: #111; line-height: 1.3; }
+          .cq-article-preview h2 { font-size: 20px; font-weight: 600; margin: 1.4em 0 0.5em; color: #111; line-height: 1.3; }
+          .cq-article-preview h3 { font-size: 17px; font-weight: 600; margin: 1.3em 0 0.4em; color: #111; line-height: 1.35; }
+          .cq-article-preview p  { margin: 0 0 1.1em; }
+          .cq-article-preview ul, .cq-article-preview ol { margin: 0 0 1.1em 1.3em; padding: 0; }
+          .cq-article-preview li { margin-bottom: 0.4em; }
+          .cq-article-preview a  { color: #1565c0; text-decoration: underline; }
+          .cq-article-preview blockquote { border-left: 3px solid #e8e8e8; margin: 1.2em 0; padding: 0.2em 1em; color: #555; font-style: italic; }
+          .cq-article-preview img { max-width: 100%; height: auto; border-radius: 4px; margin: 1.2em 0; display: block; }
+          .cq-article-preview strong { font-weight: 600; }
+          .cq-article-preview code { background: #f5f5f5; padding: 0.1em 0.35em; border-radius: 3px; font-size: 0.92em; }
+          .cq-article-preview pre  { background: #f5f5f5; padding: 12px 14px; border-radius: 4px; overflow-x: auto; margin: 1.1em 0; }
+          .cq-article-preview pre code { background: transparent; padding: 0; }
+          .cq-article-preview hr { border: 0; border-top: 1px solid #e8e8e8; margin: 2em 0; }
+        `}</style>
+        <div style={{ maxWidth: 680, margin: '0 auto' }}>
+          {content.title && (
+            <h1 style={{ fontSize: 28, fontWeight: 600, color: '#111', lineHeight: 1.25, margin: '0 0 12px', fontFamily: 'Georgia, "Times New Roman", serif' }}>
+              {content.title}
+            </h1>
+          )}
+          {metaBits.length > 0 && (
+            <div style={{ fontSize: 12, color: '#888', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 24, paddingBottom: 16, borderBottom: '1px solid #e8e8e8' }}>
+              {metaBits.join(' · ')}
+            </div>
+          )}
+          <div
+            className="cq-article-preview"
+            style={{ fontSize: 15, color: '#222', lineHeight: 1.75 }}
+            dangerouslySetInnerHTML={{ __html: bodyHtml }}
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div style={{ background: '#fff', border: '1px solid #e8e8e8', borderRadius: 6, padding: '16px 20px', marginTop: 4 }}>
       {fields.map(f => (
