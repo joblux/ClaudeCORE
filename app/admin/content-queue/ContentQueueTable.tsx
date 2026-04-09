@@ -93,7 +93,13 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                 >
                   <td style={{ padding: '12px' }}>
                     <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 3, background: '#e8e8e8', color: '#555' }}>
-                      {item.content_type}
+                      {(() => {
+                        const pcCat = item.processed_content?.category
+                        if (typeof pcCat === 'string' && pcCat.trim()) return pcCat
+                        const itemCat = (item as any).category
+                        if (typeof itemCat === 'string' && itemCat.trim()) return itemCat
+                        return item.content_type
+                      })()}
                     </span>
                   </td>
                   <td style={{ padding: '12px', color: '#111', fontWeight: 500, maxWidth: 300 }} onClick={e => { if (isEditing) e.stopPropagation() }}>
