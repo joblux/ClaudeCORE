@@ -141,6 +141,21 @@ export default function SignalsPage() {
     return s.category?.toLowerCase() === activeFilter.toLowerCase()
   })
 
+  const isTier1 = (s: any): boolean => {
+    const wh = s.what_happened
+    const wim = s.why_it_matters
+    return typeof wh === 'string' && wh.trim().length > 0 &&
+           typeof wim === 'string' && wim.trim().length > 0
+  }
+  const byDateDesc = (a: any, b: any) =>
+    new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime()
+  const tier1Signals = filtered.filter(isTier1).sort(byDateDesc)
+  const tier2Signals = filtered.filter((s: any) => !isTier1(s)).sort(byDateDesc)
+  const orderedSignals = [...tier1Signals, ...tier2Signals]
+
+  const truncate = (s: string, n: number) =>
+    s.length > n ? s.substring(0, n).trimEnd() + '…' : s
+
   return (
     <div className="min-h-screen bg-[#1a1a1a]">
       <div className="max-w-[1200px] mx-auto px-7 pt-10 pb-16">
@@ -200,41 +215,97 @@ export default function SignalsPage() {
               <p className="text-[13px] text-[#999] py-8">No signals match this filter.</p>
             )}
 
-            {filtered.map(signal => {
+            {orderedSignals.map((signal: any) => {
               const colors = BADGE_COLORS[signal.category] || { bg: 'rgba(136,136,136,0.15)', text: '#888' }
               const label = CATEGORY_LABELS[signal.category] || signal.category?.toUpperCase() || 'SIGNAL'
               const href = `/signals/${signal.slug || signal.id}`
-              return (
-                <Link
-                  key={signal.id}
-                  href={href}
-                  className="block border-b border-[#222] py-5 last:border-b-0 group hover:bg-[#222]/30 -mx-3 px-3 rounded transition-colors"
-                >
-                  <div className="flex items-center gap-3 mb-2">
+              const tier1 = isTier1(signal)
+
+              if (tier1) {
+                const wh = truncate(signal.what_happened as string, 120)
+                const ci = signal.career_implications
+                const hasCI = typeof ci === 'string' && ci.trim().length > 0
+                return (
+                  <Link
+                    key={signal.id}
+                    href={href}
+                    className="block border-b border-[#222] py-5 last:border-b-0 group hover:bg-[#222]/30 -mx-3 px-3 rounded transition-colors"
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <span
+                        className="text-[10px] font-bold tracking-[0.1em] px-2 py-[2px] rounded"
+                        style={{ background: colors.bg, color: colors.text }}
+                      >
+                        {label}
+                      </span>
+                      <span className="text-[#555] text-[9px] tracking-widest">ANALYSIS</span>
+                      {signal.brand && <span className="text-[12px] text-[#999]">{signal.brand}</span>}
+                      <span className="text-[11px] text-[#999] ml-auto flex-shrink-0">
+                        {signal.published_at ? timeAgo(signal.published_at) : ''}
+                      </span>
+                    </div>
+                    <h3 className="text-[15px] text-white mb-2 leading-snug group-hover:text-[#ccc] transition-colors">
+                      {signal.headline}
+                    </h3>
+                    <p className="text-[12px] text-[#999] leading-relaxed mb-2">
+                      {wh}
+                    </p>
+                    {hasCI && (
+                      <p className="text-[11px] text-[#777] italic leading-relaxed mb-3">
+                        {truncate(ci as string, 100)}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between">
+                      {signal.region && <span className="text-[11px] text-[#999]">{signal.region}</span>}
+                      <span className="text-[12px] text-[#a58e28] group-hover:text-[#c4a830] transition-colors ml-auto">
+                        Read more →
+                      </span>
+                    </div>
+                  </Link>
+                )
+              }
+
+              // Tier 2 — Signal Brief
+              const ci = signal.career_implications
+              const clickable = typeof ci === 'string' && ci.trim().length > 0
+              const inner = (
+                <>
+                  <div className="flex items-center gap-3 mb-1">
                     <span
                       className="text-[10px] font-bold tracking-[0.1em] px-2 py-[2px] rounded"
                       style={{ background: colors.bg, color: colors.text }}
                     >
                       {label}
                     </span>
+                    <span className="text-[#444] text-[9px] tracking-widest">BRIEF</span>
                     {signal.brand && <span className="text-[12px] text-[#999]">{signal.brand}</span>}
                     <span className="text-[11px] text-[#999] ml-auto flex-shrink-0">
                       {signal.published_at ? timeAgo(signal.published_at) : ''}
                     </span>
                   </div>
-                  <h3 className="text-[15px] text-white mb-2 leading-snug group-hover:text-[#ccc] transition-colors">
+                  <h3 className="text-[13px] text-white leading-snug group-hover:text-[#ccc] transition-colors">
                     {signal.headline}
                   </h3>
-                  <p className="text-[12px] text-[#999] leading-relaxed mb-3">
-                    {signal.summary || (signal as any).context_paragraph || ''}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    {signal.region && <span className="text-[11px] text-[#999]">{signal.region}</span>}
-                    <span className="text-[12px] text-[#a58e28] group-hover:text-[#c4a830] transition-colors ml-auto">
-                      Read more →
-                    </span>
-                  </div>
-                </Link>
+                </>
+              )
+              if (clickable) {
+                return (
+                  <Link
+                    key={signal.id}
+                    href={href}
+                    className="block border-b border-[#222] py-3 last:border-b-0 group hover:bg-[#222]/30 -mx-3 px-3 rounded transition-colors"
+                  >
+                    {inner}
+                  </Link>
+                )
+              }
+              return (
+                <div
+                  key={signal.id}
+                  className="border-b border-[#222] py-3 last:border-b-0 -mx-3 px-3"
+                >
+                  {inner}
+                </div>
               )
             })}
           </div>
