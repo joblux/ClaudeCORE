@@ -12,6 +12,8 @@ type QueueItem = {
   status: string
   created_at: string
   processed_content: Record<string, any> | null
+  duplicate_state?: string | null
+  duplicate_match?: { id: string; title: string; content_type: string; status: string; source: string } | null
 }
 
 const statusBadge: Record<string, { bg: string; text: string }> = {
