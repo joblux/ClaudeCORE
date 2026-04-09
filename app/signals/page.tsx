@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 
@@ -215,7 +215,7 @@ export default function SignalsPage() {
               <p className="text-[13px] text-[#999] py-8">No signals match this filter.</p>
             )}
 
-            {orderedSignals.map((signal: any) => {
+            {orderedSignals.map((signal: any, idx: number) => {
               const colors = BADGE_COLORS[signal.category] || { bg: 'rgba(136,136,136,0.15)', text: '#888' }
               const label = CATEGORY_LABELS[signal.category] || signal.category?.toUpperCase() || 'SIGNAL'
               const href = `/signals/${signal.slug || signal.id}`
@@ -226,6 +226,14 @@ export default function SignalsPage() {
                 ? brandTagList.join(', ')
                 : (signal.brand || '')
               const tier1 = isTier1(signal)
+              const showDivider = !tier1 && idx === tier1Signals.length && tier1Signals.length > 0
+              const divider = showDivider ? (
+                <div className="mt-8 mb-4 flex items-center gap-3">
+                  <div className="h-px flex-1 bg-[#222]" />
+                  <p className="text-[10px] text-[#777] uppercase tracking-[0.14em]">Signal briefs</p>
+                  <div className="h-px flex-1 bg-[#222]" />
+                </div>
+              ) : null
 
               if (tier1) {
                 const wh = truncate(signal.what_happened as string, 120)
@@ -296,22 +304,24 @@ export default function SignalsPage() {
               )
               if (clickable) {
                 return (
-                  <Link
-                    key={signal.id}
-                    href={href}
-                    className="block border-b border-[#222] py-3 last:border-b-0 group hover:bg-[#222]/30 -mx-3 px-3 rounded transition-colors"
-                  >
-                    {inner}
-                  </Link>
+                  <Fragment key={signal.id}>
+                    {divider}
+                    <Link
+                      href={href}
+                      className="block border-b border-[#222] py-3 last:border-b-0 group hover:bg-[#222]/30 -mx-3 px-3 rounded transition-colors"
+                    >
+                      {inner}
+                    </Link>
+                  </Fragment>
                 )
               }
               return (
-                <div
-                  key={signal.id}
-                  className="border-b border-[#222] py-3 last:border-b-0 -mx-3 px-3"
-                >
-                  {inner}
-                </div>
+                <Fragment key={signal.id}>
+                  {divider}
+                  <div className="border-b border-[#222] py-3 last:border-b-0 -mx-3 px-3">
+                    {inner}
+                  </div>
+                </Fragment>
               )
             })}
           </div>
