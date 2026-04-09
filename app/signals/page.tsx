@@ -219,6 +219,12 @@ export default function SignalsPage() {
               const colors = BADGE_COLORS[signal.category] || { bg: 'rgba(136,136,136,0.15)', text: '#888' }
               const label = CATEGORY_LABELS[signal.category] || signal.category?.toUpperCase() || 'SIGNAL'
               const href = `/signals/${signal.slug || signal.id}`
+              const brandTagList = Array.isArray(signal.brand_tags)
+                ? signal.brand_tags.filter((t: any) => typeof t === 'string' && t.trim().length > 0)
+                : []
+              const brandDisplay = brandTagList.length > 0
+                ? brandTagList.join(', ')
+                : (signal.brand || '')
               const tier1 = isTier1(signal)
 
               if (tier1) {
@@ -239,7 +245,7 @@ export default function SignalsPage() {
                         {label}
                       </span>
                       <span className="text-[#555] text-[9px] tracking-widest">ANALYSIS</span>
-                      {signal.brand && <span className="text-[12px] text-[#999]">{signal.brand}</span>}
+                      {brandDisplay && <span className="text-[12px] text-[#999]">{brandDisplay}</span>}
                       <span className="text-[11px] text-[#999] ml-auto flex-shrink-0">
                         {signal.published_at ? timeAgo(signal.published_at) : ''}
                       </span>
@@ -278,7 +284,7 @@ export default function SignalsPage() {
                       {label}
                     </span>
                     <span className="text-[#444] text-[9px] tracking-widest">BRIEF</span>
-                    {signal.brand && <span className="text-[12px] text-[#999]">{signal.brand}</span>}
+                    {brandDisplay && <span className="text-[12px] text-[#999]">{brandDisplay}</span>}
                     <span className="text-[11px] text-[#999] ml-auto flex-shrink-0">
                       {signal.published_at ? timeAgo(signal.published_at) : ''}
                     </span>
