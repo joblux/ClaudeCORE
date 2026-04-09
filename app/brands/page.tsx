@@ -38,6 +38,8 @@ const CATEGORY_LABELS: Record<string, string> = {
   merger_acquisition: 'M&A activity',
 }
 
+const SECTOR_FILTERS = ['All', 'Fashion', 'Jewelry', 'Watches', 'Beauty', 'Hospitality', 'Automotive', 'Spirits & Wine', 'Art & Culture']
+
 const STRIP_VERBS = [
   'confirms', 'announces', 'posts', 'extends', 'appoints', 'promotes',
   'launches', 'names', 'issues', 'faces', 'opens', 'deploys', 'elevates',
@@ -90,7 +92,6 @@ export default function BrandsPage() {
   const [activeFilter, setActiveFilter] = useState('All')
   const [search, setSearch] = useState('')
   const [brands, setBrands] = useState<any[]>([])
-  const [sectors, setSectors] = useState<string[]>(['All'])
   const [loading, setLoading] = useState(true)
   const [brandStats, setBrandStats] = useState<{ total: number; published: number; languages: number }>({ total: 0, published: 0, languages: 9 })
 
@@ -99,7 +100,7 @@ export default function BrandsPage() {
       try {
         const { data } = await supabase
           .from('wikilux_content')
-          .select('slug, brand_name, content, status')
+          .select('slug, brand_name, content, status, sectors')
           .eq('is_published', true)
           .is('deleted_at', null)
           .order('brand_name')
@@ -151,6 +152,7 @@ export default function BrandsPage() {
           return {
             slug: b.slug,
             name: b.brand_name,
+            sectors: Array.isArray(b.sectors) ? b.sectors : [],
             parent_group: ownership,
             status: b.status,
             has_content: content && JSON.stringify(content) !== '{}',
@@ -162,9 +164,7 @@ export default function BrandsPage() {
 
         setBrands(mapped)
 
-        // We don't have sector data in the DB content yet, so no sector filters for now
         // Once we add a sector field to the prompt, this will populate automatically
-        setSectors(['All'])
         setLoading(false)
       } catch {
         setLoading(false)
@@ -179,7 +179,8 @@ export default function BrandsPage() {
 
   const filtered = brands.filter(b => {
     const matchesSearch = b.name.toLowerCase().includes(search.toLowerCase()) || b.slug.includes(search.toLowerCase())
-    return matchesSearch
+    const matchesSector = activeFilter === 'All' || (Array.isArray(b.sectors) && b.sectors.some((s: string) => s.toLowerCase() === activeFilter.toLowerCase()))
+    return matchesSearch && matchesSector
   })
 
   return (
@@ -212,6 +213,26 @@ export default function BrandsPage() {
           />
         </div>
 
+        {/* Sector filter pills */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {SECTOR_FILTERS.map(sector => {
+            const active = activeFilter === sector
+            return (
+              <button
+                key={sector}
+                onClick={() => setActiveFilter(sector)}
+                className="text-[11px] uppercase tracking-wide px-3 py-1.5 rounded-full transition-colors"
+                style={{
+                  backgroundColor: active ? '#111' : '#f5f5f5',
+                  color: active ? '#fff' : '#555',
+                }}
+              >
+                {sector}
+              </button>
+            )
+          })}
+        </div>
+
         {/* Loading */}
         {loading && (
           <div className="flex justify-center py-24">
@@ -235,6 +256,25 @@ export default function BrandsPage() {
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-white">{brand.name}</div>
+                    {Array.isArray(brand.sectors) && brand.sectors.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {brand.sectors.slice(0, 2).map((s: string) => (
+                          <span
+                            key={s}
+                            style={{
+                              backgroundColor: '#e8e8e8',
+                              color: '#555',
+                              fontSize: '10px',
+                              textTransform: 'uppercase',
+                              borderRadius: '3px',
+                              padding: '2px 6px',
+                            }}
+                          >
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     {brand.parent_group && (
                       <div className="text-[11px] text-[#999] mt-0.5">{brand.parent_group}</div>
                     )}
