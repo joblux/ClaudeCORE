@@ -59,7 +59,6 @@ function BrandsAllContent() {
     async function fetchBrands() {
       const [
         brandsRes,
-        brandCountRes,
         salaryCountRes,
         signalCountRes,
         signalsRes,
@@ -71,11 +70,6 @@ function BrandsAllContent() {
           .eq('is_published', true)
           .is('deleted_at', null)
           .order('brand_name'),
-        supabase
-          .from('wikilux_content')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'approved')
-          .is('deleted_at', null),
         supabase
           .from('salary_benchmarks')
           .select('*', { count: 'exact', head: true })
@@ -109,10 +103,15 @@ function BrandsAllContent() {
 
       setAllBrands(mapped)
 
-      // Stats bar counts — sectors derived from the approved brands fetched above
-      const sectorCount = new Set(mapped.map((b: Brand) => b.sector)).size
+      // Stats bar counts — brands reflects the actual directory list rendered on the page,
+      // sectors derived from the same list ignoring empty values
+      const sectorCount = new Set(
+        mapped
+          .map((b: Brand) => (b.sector || '').trim())
+          .filter((s: string) => s.length > 0)
+      ).size
       setStats({
-        brands: brandCountRes.count || 0,
+        brands: mapped.length,
         sectors: sectorCount,
         salaries: salaryCountRes.count || 0,
         signals: signalCountRes.count || 0,
