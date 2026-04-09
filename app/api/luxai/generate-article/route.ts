@@ -22,14 +22,65 @@ export async function POST(request: Request) {
     }
     const topicDesc = topicMap[topic] || topicMap['career-trends']
 
-    const prompt = `You are a luxury industry journalist writing for JOBLUX, a luxury careers intelligence platform. Write a thought leadership article about ${topicDesc}.
+    // Fetch JOBLUX platform data so the article is grounded in real counts, not invented figures
+    const [
+      signalsTotalRes,
+      signalsCategoryRes,
+      salaryTotalRes,
+      salaryBrandsRes,
+      wikiluxRes,
+      blogluxRes,
+    ] = await Promise.all([
+      supabase.from('signals').select('*', { count: 'exact', head: true }).eq('is_published', true),
+      supabase.from('signals').select('category').eq('is_published', true),
+      supabase.from('salary_benchmarks').select('*', { count: 'exact', head: true }).eq('is_published', true),
+      supabase.from('salary_benchmarks').select('brand_slug').eq('is_published', true),
+      supabase.from('wikilux_content').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
+      supabase.from('bloglux_articles').select('*', { count: 'exact', head: true }).eq('status', 'published').is('deleted_at', null),
+    ])
+
+    const signalsTotal = signalsTotalRes.count || 0
+    const signalCategoryCounts: Record<string, number> = {
+      contraction: 0,
+      expansion: 0,
+      growth: 0,
+      leadership: 0,
+      merger_acquisition: 0,
+    }
+    for (const row of (signalsCategoryRes.data || []) as Array<{ category: string | null }>) {
+      const key = row.category || ''
+      if (key in signalCategoryCounts) signalCategoryCounts[key]++
+    }
+    const salaryTotal = salaryTotalRes.count || 0
+    const salaryDistinctBrands = new Set(
+      ((salaryBrandsRes.data || []) as Array<{ brand_slug: string | null }>)
+        .map(r => r.brand_slug)
+        .filter((s): s is string => !!s)
+    ).size
+    const wikiluxApproved = wikiluxRes.count || 0
+    const blogluxPublished = blogluxRes.count || 0
+
+    const platformContextBlock = `JOBLUX PLATFORM CONTEXT — use only these figures when referencing platform data.
+- Signals (published, total): ${signalsTotal}
+  - contraction: ${signalCategoryCounts.contraction}
+  - expansion: ${signalCategoryCounts.expansion}
+  - growth: ${signalCategoryCounts.growth}
+  - leadership: ${signalCategoryCounts.leadership}
+  - merger_acquisition: ${signalCategoryCounts.merger_acquisition}
+- Salary benchmarks (published): ${salaryTotal} rows across ${salaryDistinctBrands} distinct brands
+- WikiLux brands (approved): ${wikiluxApproved}
+- Bloglux articles (published, not deleted): ${blogluxPublished}`
+
+    const prompt = `${platformContextBlock}
+
+You are a luxury industry journalist writing for JOBLUX, a luxury careers intelligence platform. Write a thought leadership article about ${topicDesc}.
 
 Return ONLY a JSON object (no markdown, no backticks):
 {
   "title": "Compelling headline [max 80 chars]",
   "subtitle": "One-line hook [max 120 chars]",
   "slug": "url-friendly-slug",
-  "content": "Full article in markdown format. 4-6 paragraphs. Professional tone. Include specific brand names, data points, and industry insights. [800-1200 words]",
+  "content": "Full article in markdown format. 4-6 paragraphs. Professional tone. [800-1200 words] Ground any figures in the JOBLUX platform context above; reference real luxury brands by name without inventing statistics about them.",
   "excerpt": "2-3 sentence summary for cards [max 200 chars]",
   "tags": ["tag1", "tag2", "tag3", "tag4"],
   "category": "Career Intelligence" | "Brand Analysis" | "Market Report" | "Hiring Strategy",
@@ -38,11 +89,16 @@ Return ONLY a JSON object (no markdown, no backticks):
 }
 
 RULES:
-- Article must reference real luxury brands and plausible industry dynamics
 - Tags should include brand names (lowercase with hyphens) and topic tags
 - Content in markdown: use ## for subheadings, **bold** for emphasis
 - Professional, authoritative tone | not promotional
 - Must include career implications for luxury professionals
+- Content must be relevant to luxury careers intelligence
+- Only use statistics and figures explicitly provided in this prompt or in the injected JOBLUX platform context above
+- Do not invent specific figures, percentages, headcounts, or market totals
+- Use restrained claim language: suggests, indicates, may imply, points to
+- Distinguish observation from interpretation throughout
+- Never state inferred motives or outcomes as facts
 - Output valid JSON only`
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {

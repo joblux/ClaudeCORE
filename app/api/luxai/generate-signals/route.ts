@@ -14,22 +14,73 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })
     }
 
-    const prompt = `You are a luxury industry intelligence analyst for JOBLUX. Generate ${count} luxury industry intelligence signals. These are JOBLUX Intelligence draft items, not press clippings. Do not attribute to any external publication.
+    // Fetch JOBLUX platform data so generation is grounded in real counts, not invented figures
+    const [
+      signalsTotalRes,
+      signalsCategoryRes,
+      salaryTotalRes,
+      salaryBrandsRes,
+      wikiluxRes,
+      blogluxRes,
+    ] = await Promise.all([
+      supabase.from('signals').select('*', { count: 'exact', head: true }).eq('is_published', true),
+      supabase.from('signals').select('category').eq('is_published', true),
+      supabase.from('salary_benchmarks').select('*', { count: 'exact', head: true }).eq('is_published', true),
+      supabase.from('salary_benchmarks').select('brand_slug').eq('is_published', true),
+      supabase.from('wikilux_content').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
+      supabase.from('bloglux_articles').select('*', { count: 'exact', head: true }).eq('status', 'published').is('deleted_at', null),
+    ])
 
-Each signal must be about a REAL luxury brand or group (LVMH, Kering, Hermès, Chanel, Richemont, Prada, Burberry, Cartier, Dior, Gucci, Rolex, Tiffany, etc.)
+    const signalsTotal = signalsTotalRes.count || 0
+    const signalCategoryCounts: Record<string, number> = {
+      contraction: 0,
+      expansion: 0,
+      growth: 0,
+      leadership: 0,
+      merger_acquisition: 0,
+    }
+    for (const row of (signalsCategoryRes.data || []) as Array<{ category: string | null }>) {
+      const key = row.category || ''
+      if (key in signalCategoryCounts) signalCategoryCounts[key]++
+    }
+    const salaryTotal = salaryTotalRes.count || 0
+    const salaryDistinctBrands = new Set(
+      ((salaryBrandsRes.data || []) as Array<{ brand_slug: string | null }>)
+        .map(r => r.brand_slug)
+        .filter((s): s is string => !!s)
+    ).size
+    const wikiluxApproved = wikiluxRes.count || 0
+    const blogluxPublished = blogluxRes.count || 0
+
+    const platformContextBlock = `JOBLUX PLATFORM CONTEXT — for reference only. Do not invent beyond this.
+- Signals (published, total): ${signalsTotal}
+  - contraction: ${signalCategoryCounts.contraction}
+  - expansion: ${signalCategoryCounts.expansion}
+  - growth: ${signalCategoryCounts.growth}
+  - leadership: ${signalCategoryCounts.leadership}
+  - merger_acquisition: ${signalCategoryCounts.merger_acquisition}
+- Salary benchmarks (published): ${salaryTotal} rows across ${salaryDistinctBrands} distinct brands
+- WikiLux brands (approved): ${wikiluxApproved}
+- Bloglux articles (published, not deleted): ${blogluxPublished}`
+
+    const prompt = `${platformContextBlock}
+
+You are a luxury industry intelligence analyst for JOBLUX. Generate ${count} luxury industry intelligence signal drafts. These are JOBLUX Intelligence draft items, not press clippings. Do not attribute to any external publication.
+
+Each signal must reference REAL luxury brands or groups (LVMH, Kering, Hermès, Chanel, Richemont, Prada, Burberry, Cartier, Dior, Gucci, Rolex, Tiffany, etc.) using their exact names.
 
 Return ONLY a JSON array (no markdown, no backticks):
 [
   {
     "category": "growth" | "leadership" | "contraction" | "expansion" | "merger_acquisition",
-    "headline": "Short punchy headline [max 80 chars]",
+    "headline": "Short headline [max 80 chars]",
     "context_paragraph": "2-3 sentences of context explaining the signal [max 300 chars]",
-    "career_implications": "1-2 sentences on what this means for luxury professionals [max 200 chars]",
-    "long_context": "A detailed 150-250 word editorial analysis. Cover the background, what triggered this signal, the strategic context, and what industry observers are noting. Write in an authoritative, precise editorial tone.",
-    "what_happened": "One clear sentence describing the event or development [max 150 chars]",
-    "why_it_matters": "One clear sentence on the broader industry significance [max 150 chars]",
-    "career_detail": ["Specific career impact #1", "Specific career impact #2", "Specific career impact #3"],
-    "brand_impact": ["Impact on brand/group #1", "Impact on brand/group #2", "Impact on brand/group #3"],
+    "career_implications": "1-2 sentences on what this may imply for luxury professionals [max 200 chars]",
+    "long_context": "A 150-250 word editorial analysis. Distinguish what happened from what it may imply. Use restrained claim language (suggests / indicates / may imply / points to). Do not invent figures, dates, or headcounts.",
+    "what_happened": "One clear sentence describing the observation [max 150 chars]",
+    "why_it_matters": "One clear sentence on what this may imply for the industry [max 150 chars]",
+    "career_detail": ["Career impact #1", "Career impact #2", "Career impact #3"],
+    "brand_impact": ["Brand/group impact #1", "Brand/group impact #2", "Brand/group impact #3"],
     "brand_tags": ["BrandName1", "BrandName2"],
     "confidence": "high" | "medium",
     "meta_title": "Headline — Category Signal | JOBLUX Signals",
@@ -48,10 +99,16 @@ RULES:
 - ${count} signals exactly
 - Mix of categories: use at least 3 different categories
 - brand_tags: use exact brand names (Cartier not cartier)
-- career_detail: 2-4 specific career impacts as string array
-- brand_impact: 2-4 specific brand/group impacts as string array
-- Plausible signals based on real industry dynamics
+- career_detail: 2-4 career impacts as string array
+- brand_impact: 2-4 brand/group impacts as string array
 - No duplicate brands across signals
+- Generate signal drafts relevant to luxury careers intelligence
+- Keep signals grounded in credible luxury industry patterns and the JOBLUX platform context provided above
+- Do not invent specific statistics, financial figures, dates, headcounts, or market totals
+- Distinguish what happened from what it may imply
+- Use restrained claim language: suggests, indicates, may imply, points to
+- Never state company motivations as facts
+- Do not present speculative developments as confirmed reported events
 - Output valid JSON array only`
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
