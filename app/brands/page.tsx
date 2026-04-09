@@ -209,7 +209,7 @@ export default function BrandsPage() {
             placeholder="Search brands..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="bg-white text-[#1a1a1a] text-base rounded-lg px-4 h-[48px] w-full max-w-lg outline-none"
+            className="bg-[#222] text-white text-base rounded-lg px-4 h-[48px] w-full max-w-lg outline-none border border-[#2a2a2a] placeholder-[#555]"
           />
         </div>
 
@@ -223,8 +223,8 @@ export default function BrandsPage() {
                 onClick={() => setActiveFilter(sector)}
                 className="text-[11px] uppercase tracking-wide px-3 py-1.5 rounded-full transition-colors"
                 style={{
-                  backgroundColor: active ? '#111' : '#f5f5f5',
-                  color: active ? '#fff' : '#555',
+                  backgroundColor: active ? '#f5f5f5' : '#2a2a2a',
+                  color: active ? '#111' : '#888',
                 }}
               >
                 {sector}
@@ -262,8 +262,8 @@ export default function BrandsPage() {
                           <span
                             key={s}
                             style={{
-                              backgroundColor: '#e8e8e8',
-                              color: '#555',
+                              backgroundColor: '#2a2a2a',
+                              color: '#888', border: '1px solid #333',
                               fontSize: '10px',
                               textTransform: 'uppercase',
                               borderRadius: '3px',
