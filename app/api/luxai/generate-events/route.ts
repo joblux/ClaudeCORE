@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { checkDuplicate } from '@/lib/duplicate-check'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -139,7 +140,10 @@ RULES:
 
     const inserted = []
     const insertErrors = []
+    let skipped = 0
     for (const ev of events) {
+      const _dupe = await checkDuplicate({ content_type: 'event', title: ev.title || ev.name, start_date: ev.start_date, city: ev.location_city })
+      if (_dupe.isDuplicate) { skipped++; console.warn('[JOBLUX DUPLICATE SKIPPED]', ev.title || ev.name); continue }
       const { data: row, error } = await supabase.from('content_queue').insert({
         content_type: 'event',
         source_type: 'joblux_generation',
