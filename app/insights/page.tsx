@@ -368,14 +368,19 @@ function InsightsPageInner() {
         {activeTab === 'Research' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {reports.map((r, i) => (
-              <Link key={i} href={r.slug ? `/insights/${r.slug}` : '#'} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 flex gap-4 hover:border-[#3a3a3a] transition-colors block">
-                <div className="w-11 h-11 rounded-lg flex items-center justify-center text-lg flex-shrink-0" style={{ background: 'rgba(165,142,40,0.1)', border: '1px solid rgba(165,142,40,0.2)' }}>
-                  {r.icon}
-                </div>
-                <div>
-                  <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-1">{r.label}</div>
-                  <div className="text-sm font-medium text-[#e0e0e0] mb-1 leading-snug">{r.title}</div>
-                  <div className="text-[11px] text-[#999]">{r.meta}</div>
+              <Link key={i} href={r.slug ? `/insights/${r.slug}` : '#'} className="bg-[#222] border border-[#2a2a2a] rounded-xl hover:border-[#3a3a3a] transition-colors block overflow-hidden">
+                {r.cover_image_url && (
+                  <img src={r.cover_image_url} alt={r.title} className="rounded-t-xl h-40 w-full object-cover" loading="lazy" />
+                )}
+                <div className="p-5 flex gap-4">
+                  <div className="w-11 h-11 rounded-lg flex items-center justify-center text-lg flex-shrink-0" style={{ background: 'rgba(165,142,40,0.1)', border: '1px solid rgba(165,142,40,0.2)' }}>
+                    {r.icon}
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-1">{r.label}</div>
+                    <div className="text-sm font-medium text-[#e0e0e0] mb-1 leading-snug">{r.title}</div>
+                    <div className="text-[11px] text-[#999]">{r.meta}</div>
+                  </div>
                 </div>
               </Link>
             ))}
