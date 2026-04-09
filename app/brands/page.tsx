@@ -38,6 +38,45 @@ const CATEGORY_LABELS: Record<string, string> = {
   merger_acquisition: 'M&A activity',
 }
 
+const STRIP_VERBS = [
+  'confirms', 'announces', 'posts', 'extends', 'appoints', 'promotes',
+  'launches', 'names', 'issues', 'faces', 'opens', 'deploys', 'elevates',
+  'pursues', 'secures', 'expands', 'accelerates', 'taps', 'nears',
+  'surpasses', 'overtakes', 'experiences', 'signals', 'pushes'
+]
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function compressHeadline(headline: string, brandName: string): string {
+  let h = headline.split('|')[0].trim()
+
+  if (!h) return ''
+
+  // Strip exact brand name at start when present
+  const brandPattern = new RegExp(`^${escapeRegExp(brandName)}\\s+`, 'i')
+  h = h.replace(brandPattern, '').trim()
+
+  // Strip leading subject phrase + weak opener verb
+  const verbPattern = new RegExp(
+    `^[A-ZÀ-ÖØ-Ý0-9&'.\\-\\s]+\\b(${STRIP_VERBS.join('|')})\\b\\s+`,
+    'i'
+  )
+  h = h.replace(verbPattern, '').trim()
+
+  // Cleanup punctuation/spacing
+  h = h.replace(/^[·:,\-\s]+/, '').replace(/\s+/g, ' ').trim()
+
+  if (!h) return ''
+
+  // Capitalize first visible character
+  h = h.charAt(0).toUpperCase() + h.slice(1)
+
+  // Clip to 36 chars
+  return h.length > 36 ? h.slice(0, 33).trimEnd() + '…' : h
+}
+
 export default function BrandsPage() {
   const router = useRouter()
   const [activeFilter, setActiveFilter] = useState('All')
@@ -97,9 +136,8 @@ export default function BrandsPage() {
           if (sig) {
             signal_category = sig.category?.toLowerCase() || null
             const label = signal_category ? CATEGORY_LABELS[signal_category] : null
-            const context = sig.headline || ''
-            const clipped = context.length > 48 ? context.slice(0, 45) + '…' : context
-            intel_line = label ? (clipped ? `${label} · ${clipped}` : label) : clipped
+            const compressed = compressHeadline(sig.headline || '', b.brand_name)
+            intel_line = label ? (compressed ? `${label} · ${compressed}` : label) : compressed
           }
 
           return {
