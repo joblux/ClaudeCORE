@@ -30,6 +30,14 @@ const CATEGORY_COLORS: Record<string, string> = {
   merger_acquisition: '#a78bfa',
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+  growth: 'Hiring',
+  expansion: 'Expanding',
+  leadership: 'Leadership move',
+  contraction: 'Contraction',
+  merger_acquisition: 'M&A activity',
+}
+
 export default function BrandsPage() {
   const router = useRouter()
   const [activeFilter, setActiveFilter] = useState('All')
@@ -87,9 +95,11 @@ export default function BrandsPage() {
           let signal_category: string | null = null
 
           if (sig) {
-            const raw = sig.what_happened || sig.headline || ''
-            intel_line = raw.length > 85 ? raw.slice(0, 82) + '…' : raw
             signal_category = sig.category?.toLowerCase() || null
+            const label = signal_category ? CATEGORY_LABELS[signal_category] : null
+            const context = sig.headline || ''
+            const clipped = context.length > 48 ? context.slice(0, 45) + '…' : context
+            intel_line = label ? (clipped ? `${label} · ${clipped}` : label) : clipped
           }
 
           return {
@@ -193,7 +203,7 @@ export default function BrandsPage() {
                         style={{ backgroundColor: CATEGORY_COLORS[brand.signal_category] }}
                       />
                     )}
-                    <p className="text-[11px] text-[#999] leading-snug line-clamp-1">{brand.intel_line}</p>
+                    <p className="text-[11px] leading-snug line-clamp-1" style={{ color: brand.signal_category && CATEGORY_COLORS[brand.signal_category] ? CATEGORY_COLORS[brand.signal_category] : '#999' }}>{brand.intel_line}</p>
                   </div>
                 ) : brand.tagline ? (
                   <p className="text-[11px] text-[#777] leading-snug line-clamp-2">{brand.tagline}</p>
