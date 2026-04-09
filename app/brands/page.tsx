@@ -22,6 +22,14 @@ function getKeyFact(keyFacts: any[], label: string): string | null {
   return found?.value || null
 }
 
+const CATEGORY_COLORS: Record<string, string> = {
+  growth: '#4ade80',
+  leadership: '#f59e0b',
+  contraction: '#f87171',
+  expansion: '#60a5fa',
+  merger_acquisition: '#a78bfa',
+}
+
 export default function BrandsPage() {
   const router = useRouter()
   const [activeFilter, setActiveFilter] = useState('All')
@@ -46,11 +54,43 @@ export default function BrandsPage() {
           return
         }
 
+        const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
+
+        const { data: signalsData } = await supabase
+          .from('signals')
+          .select('brand_tags, headline, what_happened, category, published_at')
+          .eq('is_published', true)
+          .gte('published_at', ninetyDaysAgo)
+          .order('published_at', { ascending: false })
+
+        const signalMap = new Map<string, { headline: string; what_happened: string | null; category: string }>()
+        for (const sig of signalsData || []) {
+          for (const tag of (sig.brand_tags || []) as string[]) {
+            if (!signalMap.has(tag)) {
+              signalMap.set(tag, {
+                headline: sig.headline,
+                what_happened: sig.what_happened,
+                category: sig.category,
+              })
+            }
+          }
+        }
+
         const mapped = data.map((b: any) => {
           const content = b.content || {}
           const keyFacts = content.key_facts || []
           const stock = content.stock || {}
           const ownership = getKeyFact(keyFacts, 'Ownership') || stock.parent_group || ''
+
+          const sig = signalMap.get(b.brand_name)
+          let intel_line: string | null = null
+          let signal_category: string | null = null
+
+          if (sig) {
+            const raw = sig.what_happened || sig.headline || ''
+            intel_line = raw.length > 85 ? raw.slice(0, 82) + '…' : raw
+            signal_category = sig.category?.toLowerCase() || null
+          }
 
           return {
             slug: b.slug,
@@ -59,6 +99,8 @@ export default function BrandsPage() {
             status: b.status,
             has_content: content && JSON.stringify(content) !== '{}',
             tagline: content.tagline || null,
+            intel_line,
+            signal_category,
           }
         })
 
@@ -143,10 +185,19 @@ export default function BrandsPage() {
                   </div>
                 </div>
 
-                {/* Tagline */}
-                {brand.tagline && (
+                {brand.intel_line ? (
+                  <div className="flex items-start gap-1.5 mt-1">
+                    {brand.signal_category && CATEGORY_COLORS[brand.signal_category] && (
+                      <span
+                        className="mt-[3px] w-1.5 h-1.5 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: CATEGORY_COLORS[brand.signal_category] }}
+                      />
+                    )}
+                    <p className="text-[11px] text-[#999] leading-snug line-clamp-1">{brand.intel_line}</p>
+                  </div>
+                ) : brand.tagline ? (
                   <p className="text-[11px] text-[#777] leading-snug line-clamp-2">{brand.tagline}</p>
-                )}
+                ) : null}
               </div>
             ))}
           </div>
