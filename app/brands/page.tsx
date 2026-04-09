@@ -31,7 +31,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  growth: 'Hiring',
+  growth: 'Growth',
   expansion: 'Expanding',
   leadership: 'Leadership move',
   contraction: 'Contraction',
