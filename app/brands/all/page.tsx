@@ -51,17 +51,50 @@ function BrandsAllContent() {
   const [activeSector, setActiveSector] = useState('All')
   const [search, setSearch] = useState(initialSearch)
   const [sectorResolved, setSectorResolved] = useState(false)
+  const [stats, setStats] = useState({ brands: 0, sectors: 0, salaries: 0, signals: 0 })
+  const [signalLookup, setSignalLookup] = useState<Map<string, { category: string; published_at: string }>>(new Map())
+  const [salarySlugs, setSalarySlugs] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     async function fetchBrands() {
-      const { data } = await supabase
-        .from('wikilux_content')
-        .select('id, slug, brand_name, sector, country, founded, group_name, headquarters, known_for, description')
-        .eq('is_published', true)
-        .is('deleted_at', null)
-        .order('brand_name')
+      const [
+        brandsRes,
+        brandCountRes,
+        salaryCountRes,
+        signalCountRes,
+        signalsRes,
+        salarySlugsRes,
+      ] = await Promise.all([
+        supabase
+          .from('wikilux_content')
+          .select('id, slug, brand_name, sector, country, founded, group_name, headquarters, known_for, description')
+          .eq('is_published', true)
+          .is('deleted_at', null)
+          .order('brand_name'),
+        supabase
+          .from('wikilux_content')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'approved')
+          .is('deleted_at', null),
+        supabase
+          .from('salary_benchmarks')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_published', true),
+        supabase
+          .from('signals')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_published', true),
+        supabase
+          .from('signals')
+          .select('headline, category, brand_tags, published_at')
+          .eq('is_published', true),
+        supabase
+          .from('salary_benchmarks')
+          .select('brand_slug')
+          .eq('is_published', true),
+      ])
 
-      const mapped = (data || []).map((b: any) => ({
+      const mapped = (brandsRes.data || []).map((b: any) => ({
         slug: b.slug,
         name: b.brand_name,
         country: b.country || '',
@@ -75,6 +108,41 @@ function BrandsAllContent() {
       }))
 
       setAllBrands(mapped)
+
+      // Stats bar counts — sectors derived from the approved brands fetched above
+      const sectorCount = new Set(mapped.map((b: Brand) => b.sector)).size
+      setStats({
+        brands: brandCountRes.count || 0,
+        sectors: sectorCount,
+        salaries: salaryCountRes.count || 0,
+        signals: signalCountRes.count || 0,
+      })
+
+      // Signal lookup — normalized brand name -> most recent signal within last 30 days
+      const thirtyDaysAgoMs = Date.now() - 30 * 24 * 60 * 60 * 1000
+      const lookup = new Map<string, { category: string; published_at: string }>()
+      for (const sig of (signalsRes.data || []) as Array<{ category: string; brand_tags: any; published_at: string }>) {
+        const pubMs = sig.published_at ? new Date(sig.published_at).getTime() : 0
+        if (pubMs < thirtyDaysAgoMs) continue
+        const tags = Array.isArray(sig.brand_tags) ? sig.brand_tags : []
+        for (const raw of tags) {
+          if (typeof raw !== 'string') continue
+          const key = raw.trim().toLowerCase()
+          if (!key) continue
+          const existing = lookup.get(key)
+          if (!existing || new Date(existing.published_at).getTime() < pubMs) {
+            lookup.set(key, { category: sig.category, published_at: sig.published_at })
+          }
+        }
+      }
+      setSignalLookup(lookup)
+
+      // Salary slug set — O(1) lookup for brands with published salary data
+      const slugSet = new Set<string>()
+      for (const row of (salarySlugsRes.data || []) as Array<{ brand_slug: string | null }>) {
+        if (row.brand_slug) slugSet.add(row.brand_slug)
+      }
+      setSalarySlugs(slugSet)
 
       // Resolve initial sector from URL slug after data is loaded
       if (initialSector !== 'All') {
@@ -139,6 +207,26 @@ function BrandsAllContent() {
 
       <div className="jl-container py-10">
 
+        {/* Stats bar */}
+        <div className="bg-[#141414] px-6 py-4 mb-8 grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div>
+            <div className="font-sans text-[0.6rem] uppercase tracking-wider text-[#777] mb-1">Brands</div>
+            <div className="jl-serif text-xl font-light text-white">{stats.brands.toLocaleString()}</div>
+          </div>
+          <div>
+            <div className="font-sans text-[0.6rem] uppercase tracking-wider text-[#777] mb-1">Sectors</div>
+            <div className="jl-serif text-xl font-light text-white">{stats.sectors.toLocaleString()}</div>
+          </div>
+          <div>
+            <div className="font-sans text-[0.6rem] uppercase tracking-wider text-[#777] mb-1">Salary data points</div>
+            <div className="jl-serif text-xl font-light text-white">{stats.salaries.toLocaleString()}</div>
+          </div>
+          <div>
+            <div className="font-sans text-[0.6rem] uppercase tracking-wider text-[#777] mb-1">Signals</div>
+            <div className="jl-serif text-xl font-light text-white">{stats.signals.toLocaleString()}</div>
+          </div>
+        </div>
+
         {/* Search */}
         <div className="mb-6">
           <input
@@ -193,27 +281,49 @@ function BrandsAllContent() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {brands.map((brand) => (
-                  <Link
-                    key={brand.slug}
-                    href={`/brands/${brand.slug}`}
-                    className="flex items-center gap-3 p-3 border border-[#2a2a2a] hover:border-[#a58e28] transition-colors group"
-                  >
-                    <div className="w-9 h-9 bg-[#2a2a2a] flex items-center justify-center flex-shrink-0 group-hover:bg-[#a58e28] transition-colors">
-                      <span className="jl-serif text-sm text-[#a58e28] group-hover:text-[#1a1a1a]">
-                        {brand.name[0]}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-sans text-sm font-medium text-[#e0e0e0] group-hover:text-[#a58e28] transition-colors">
-                        {brand.name}
+                {brands.map((brand) => {
+                  const normalizedName = brand.name.trim().toLowerCase()
+                  const signalHit = signalLookup.get(normalizedName)
+                  const dotColor = signalHit
+                    ? (signalHit.category === 'growth' || signalHit.category === 'expansion'
+                        ? 'bg-[#10B981]'
+                      : signalHit.category === 'leadership'
+                        ? 'bg-[#F59E0B]'
+                      : signalHit.category === 'contraction'
+                        ? 'bg-red-500'
+                      : signalHit.category === 'merger_acquisition'
+                        ? 'bg-purple-500'
+                      : null)
+                    : null
+                  const hasSalary = salarySlugs.has(brand.slug)
+                  return (
+                    <Link
+                      key={brand.slug}
+                      href={`/brands/${brand.slug}`}
+                      className="flex items-center gap-3 p-3 border border-[#2a2a2a] hover:border-[#a58e28] transition-colors group"
+                    >
+                      <div className="w-9 h-9 bg-[#2a2a2a] flex items-center justify-center flex-shrink-0 group-hover:bg-[#a58e28] transition-colors">
+                        <span className="jl-serif text-sm text-[#a58e28] group-hover:text-[#1a1a1a]">
+                          {brand.name[0]}
+                        </span>
                       </div>
-                      <div className="font-sans text-[0.6rem] text-[#999] truncate">
-                        {brand.sector} &middot; {brand.country} &middot; Est. {brand.founded}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-sans text-sm font-medium text-[#e0e0e0] group-hover:text-[#a58e28] transition-colors">
+                          {brand.name}
+                          {dotColor && (
+                            <span className={`inline-block w-1 h-1 rounded-full ml-1 align-middle ${dotColor}`} />
+                          )}
+                        </div>
+                        <div className="font-sans text-[0.6rem] text-[#999] truncate">
+                          {brand.sector} &middot; {brand.country} &middot; Est. {brand.founded}
+                          {hasSalary && (
+                            <span className="text-[8px] tracking-wider text-[#666] ml-2 uppercase">SALARY</span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  )
+                })}
               </div>
             </div>
           ))
