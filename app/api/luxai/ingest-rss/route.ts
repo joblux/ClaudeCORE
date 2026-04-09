@@ -52,14 +52,21 @@ Summary: ${description.substring(0, 500)}
 
 Return ONLY valid JSON (no markdown):
 {
-  "headline": "Clean punchy headline max 80 chars",
+  "headline": "Headline that accurately reflects the source article, max 80 chars",
   "category": "growth|leadership|contraction|expansion|merger_acquisition",
   "context_paragraph": "2-3 sentences: what happened and the immediate facts. Max 300 chars.",
-  "strategic_read": "1 tight paragraph: what this move signals strategically — market dynamics, competitive positioning, or brand strategy implications. Max 400 chars.",
-  "career_implications": "2-3 sharp sentences: which roles increase in demand, what profiles win, what skills matter. Be specific not generic. Max 250 chars.",
+  "strategic_read": "1 tight paragraph: what this development may suggest, based only on what the source article states. Max 400 chars.",
+  "career_implications": "2-3 sentences: what career or talent implications this may suggest, if the source indicates any. Max 250 chars.",
   "brand_tags": ["BrandName1"],
   "confidence": "high|medium"
-}`
+}
+
+RULES:
+- Summarize only what the source article actually states — do not add context not present in the source
+- Use restrained claim language: suggests, indicates, may imply, according to this source
+- Do not present speculative implications as confirmed facts
+- If the source does not mention career implications, leave career_implications brief and clearly framed as contextual
+- confidence: use "high" only when the source is explicit and specific; use "medium" when interpretation is limited; never use confidence to justify unsupported claims`
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
