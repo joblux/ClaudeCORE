@@ -70,6 +70,14 @@ function compressHeadline(headline: string, brandName: string): string {
 
   if (!h) return ''
 
+  // Strip leading verb if still present after cleaning
+  const firstWord = h.split(' ')[0]?.toLowerCase().replace(/[^a-z]/g, '')
+  if (firstWord && STRIP_VERBS.includes(firstWord)) {
+    h = h.slice(h.indexOf(' ') + 1).trim()
+  }
+
+  if (!h) return ''
+
   // Capitalize first visible character
   h = h.charAt(0).toUpperCase() + h.slice(1)
 
