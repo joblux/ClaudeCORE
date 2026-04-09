@@ -223,8 +223,8 @@ export default function BrandsPage() {
                 onClick={() => setActiveFilter(sector)}
                 className="text-[11px] uppercase tracking-wide px-3 py-1.5 rounded-full transition-colors"
                 style={{
-                  backgroundColor: active ? '#f5f5f5' : '#2a2a2a',
-                  color: active ? '#111' : '#888',
+                  backgroundColor: active ? '#a58e28' : '#2a2a2a',
+                  color: active ? '#fff' : '#888',
                 }}
               >
                 {sector}
@@ -247,15 +247,15 @@ export default function BrandsPage() {
               <div
                 key={brand.slug}
                 onClick={() => router.push(`/brands/${brand.slug}`)}
-                className={`${idx < 4 ? 'bg-[#262626] border-[#383838]' : 'bg-[#212121] border-[#2a2a2a]'} border rounded-xl p-4 cursor-pointer transition-colors hover:border-[#3a3a3a]`}
+                className={`${idx < 4 ? 'bg-[#262626] border-[#383838]' : 'bg-[#212121] border-[#2a2a2a]'} border rounded-xl p-4 cursor-pointer transition-colors hover:border-[#3a3a3a] flex flex-col min-h-[140px]`}
               >
                 {/* Top */}
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[11px] font-medium text-[#999] flex-shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-[#333] flex items-center justify-center text-[11px] font-medium text-[#aaa] flex-shrink-0">
                     {getInitials(brand.name)}
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-white">{brand.name}</div>
+                    <div className="text-[13px] font-semibold text-white leading-tight">{brand.name}</div>
                     {Array.isArray(brand.sectors) && brand.sectors.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-1">
                         {brand.sectors.slice(0, 2).map((s: string) => (
