@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     if (!brand) return NextResponse.json({ success: false, message: 'Brand not found' }, { status: 404 })
     const brandName = brand.brand_name
 
-    const prompt = `You are a luxury careers analyst for JOBLUX. Generate 5 realistic interview experiences at ${brandName}.
+    const prompt = `You are a luxury careers analyst for JOBLUX. Generate 5 illustrative interview experience drafts based on known luxury industry hiring patterns. These are AI-generated drafts for editorial review, not verified candidate testimonials. The target brand is ${brandName}.
 
 Return ONLY a JSON array (no markdown, no backticks):
 [
@@ -40,11 +40,15 @@ Return ONLY a JSON array (no markdown, no backticks):
 ]
 
 RULES:
-- 5 experiences covering different departments and seniority levels
-- Realistic for ${brandName} specifically | reference their culture, values, interview style
+- 5 experience drafts covering different departments and seniority levels
+- Grounded in general luxury industry interview patterns — do not invent brand-specific internal details not publicly known
 - Mix of outcomes: 3 accepted, 1 rejected, 1 withdrew
-- Locations: mix of cities where ${brandName} operates
-- Questions should be specific to luxury industry and ${brandName}
+- Locations: mix of cities where ${brandName} is known to operate
+- These are AI-generated drafts, not verified candidate testimonials
+- Do not invent specific internal company details, names, or proprietary processes
+- Use restrained language: typical of, commonly reported, often includes
+- Questions and processes should reflect general luxury industry patterns, not fabricated brand specifics
+- Do not present outcomes, difficulty, or number of rounds as verified facts for the brand unless clearly framed as illustrative draft patterns
 - Output valid JSON array only`
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -80,35 +84,28 @@ RULES:
       throw new Error(`JSON parse failed: ${e.message}`)
     }
 
-    const inserted = []
-    for (const iv of interviews) {
-      const { data: row, error } = await supabase.from('interview_experiences').insert({
+    // Route to content_queue (canonical editorial gate) — one record per brand, containing all draft interviews
+    const { error: queueError } = await supabase.from('content_queue').insert({
+      content_type: 'interview',
+      source_type: 'joblux_generation',
+      source_name: 'JOBLUX Intelligence',
+      title: `Interview Experience Drafts — ${brandName}`,
+      category: 'Interview Experience',
+      destination_table: 'interview_experiences',
+      status: 'draft',
+      processed_content: {
         brand_slug: slug,
         brand_name: brandName,
-        job_title: iv.job_title,
-        department: iv.department,
-        seniority: iv.seniority,
-        location: iv.location,
-        interview_year: iv.interview_year,
-        process_duration: iv.process_duration,
-        number_of_rounds: iv.number_of_rounds,
-        interview_format: iv.interview_format,
-        process_description: iv.process_description,
-        questions_asked: iv.questions_asked,
-        tips: iv.tips,
-        outcome: iv.outcome,
-        difficulty: iv.difficulty,
-        content_origin: 'ai',
-        overall_experience: iv.overall_experience
-      }).select().maybeSingle()
-      if (!error && row) inserted.push(row)
-    }
+        interviews,
+      },
+    })
+    if (queueError) throw queueError
 
     await supabase.from('luxai_history').insert({
       type: 'interview_generation',
       model: 'claude-haiku-4-5-20251001',
       prompt: `Generate interviews for ${brandName}`,
-      response: { slug, brand_name: brandName, count: inserted.length },
+      response: { slug, brand_name: brandName, count: interviews.length },
       tokens_used: inputTokens + outputTokens,
       cost_usd: cost,
       status: 'success'
@@ -116,8 +113,8 @@ RULES:
 
     return NextResponse.json({
       success: true,
-      message: `${inserted.length} interview experiences generated for ${brandName}`,
-      data: { count: inserted.length, cost, tokens: inputTokens + outputTokens }
+      message: `${interviews.length} interview experience drafts queued for ${brandName}`,
+      data: { count: interviews.length, cost, tokens: inputTokens + outputTokens }
     })
   } catch (error: any) {
     console.error('Interview generation error:', error)
