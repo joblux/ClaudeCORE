@@ -8,17 +8,14 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const LUXURY_KEYWORDS = [
-  'luxury', 'lvmh', 'kering', 'richemont', 'hermès', 'hermes', 'chanel', 'dior',
-  'gucci', 'prada', 'burberry', 'cartier', 'tiffany', 'rolex', 'fashion', 'retail',
-  'executive', 'ceo', 'creative director', 'acquisition', 'expansion', 'hiring',
-]
-
 const MAX_ITEMS_PER_SOURCE = 5
 
-function isLuxuryRelevant(title: string, description: string): boolean {
+function isBrandRelevant(title: string, description: string, brandNames: Set<string>): boolean {
   const text = `${title} ${description}`.toLowerCase()
-  return LUXURY_KEYWORDS.some(kw => text.includes(kw))
+  for (const brand of brandNames) {
+    if (brand.length > 2 && text.includes(brand)) return true
+  }
+  return false
 }
 
 function parseItems(xml: string): { title: string; link: string; description: string; pubDate: string }[] {
@@ -114,6 +111,17 @@ export async function POST() {
       return NextResponse.json({ success: true, processed: 0, inserted: 0, skipped: 0, message: 'No active RSS sources' })
     }
 
+    // Fetch published brand names for relevance matching
+    const { data: brandData } = await supabase
+      .from('wikilux_content')
+      .select('brand_name')
+      .eq('is_published', true)
+      .is('deleted_at', null)
+
+    const brandNames = new Set(
+      (brandData || []).map((b: any) => (b.brand_name || '').toLowerCase().trim())
+    )
+
     let totalProcessed = 0
     let totalInserted = 0
     let totalSkipped = 0
@@ -144,7 +152,7 @@ export async function POST() {
           if (existing && existing.length > 0) { totalSkipped++; continue }
 
           // Step 4 — Filter for luxury relevance
-          if (!isLuxuryRelevant(item.title, item.description)) { totalSkipped++; continue }
+          if (!isBrandRelevant(item.title, item.description, brandNames)) { totalSkipped++; continue }
 
           totalProcessed++
           sourceProcessed++
