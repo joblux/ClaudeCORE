@@ -107,7 +107,36 @@ export async function POST(request: Request) {
         }
       }
 
-      const prompt = `You are a luxury market intelligence system.
+      // Category-only fallback: signal exists with category but no what_happened
+      const isCategoryOnly = sig && sig.category && (!sig.what_happened || !sig.what_happened.trim())
+
+      const prompt = isCategoryOnly
+        ? `You are a luxury market intelligence system.
+Output a card_intelligence JSON object using category only.
+
+RULES (STRICT):
+- marker: max 3 words, qualitative label only, no numbers, no invented facts
+- derive marker from category using these mappings:
+  expansion → Expanding
+  growth → Strong performance
+  leadership → Leadership move
+  contraction → Contracting
+  merger_acquisition → M&A activity
+- Return ONLY valid JSON. No markdown. No preamble.
+
+Input:
+Brand: ${brandName}
+Signal category: ${signalCategory}
+
+Output format:
+{
+  "marker": "string or null",
+  "marker_type": "growth|expansion|leadership|contraction|merger_acquisition|stable|none",
+  "confidence": "medium",
+  "source": "signal",
+  "source_ref": "signal:${signalId}"
+}`
+        : `You are a luxury market intelligence system.
 Given brand data, output a card_intelligence JSON object.
 
 RULES (STRICT):
@@ -206,6 +235,13 @@ Output format:
         parsed.source_ref = 'stock_snapshot'
       } else {
         parsed.source_ref = 'none'
+      }
+
+      // Category-only path: force confidence/source overrides
+      if (isCategoryOnly && parsed.marker !== null) {
+        parsed.confidence = 'medium'
+        parsed.source = 'signal'
+        parsed.source_ref = `signal:${signalId}`
       }
 
       // Confidence gate
