@@ -11,7 +11,7 @@ const supabase = createClient(
 )
 
 const topics = ['Salary data', 'Leadership moves', 'LVMH', 'Kering', 'Richemont', 'Asia Pacific', 'Middle East', 'Retail', 'Digital', 'Watches', 'Beauty', 'Career advice']
-const tabs = ['Editorial', 'Research', 'Insider voices', 'Luxury map']
+const tabs = ['Editorial', 'Luxury map']
 const TAB_SLUG_MAP: Record<string, string> = { 'editorial': 'Editorial', 'research-reports': 'Research', 'insider-voices': 'Insider voices', 'luxury-map': 'Luxury map' }
 const TAB_TO_SLUG: Record<string, string> = { 'Editorial': 'editorial', 'Research': 'research-reports', 'Insider voices': 'insider-voices', 'Luxury map': 'luxury-map' }
 
