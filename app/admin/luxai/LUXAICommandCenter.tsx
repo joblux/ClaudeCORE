@@ -491,7 +491,12 @@ export default function LUXAICommandCenter() {
                       const res = await fetch('/api/luxai/ingest-rss', { method: 'POST' })
                       const d = await res.json()
                       if (d.success) {
-                        flash('success', d.inserted > 0 ? `${d.inserted} items added to queue` : 'No new items found')
+                        const queued = (d.inserted || 0) - (d.auto_approved || 0)
+                        const parts: string[] = []
+                        if (d.inserted > 0) parts.push(`${d.inserted} inserted`)
+                        if (d.auto_approved > 0) parts.push(`${d.auto_approved} auto-published`)
+                        if (queued > 0) parts.push(`${queued} queued`)
+                        flash('success', parts.length > 0 ? parts.join(' · ') : 'No new items found')
                         loadQueue()
                         loadHealth()
                       } else {
