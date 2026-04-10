@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -9,94 +9,29 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-function getInitials(name: string) {
-  const words = name.split(' ')
-  if (words.length === 1) return name.slice(0, 2)
-  return words.slice(0, 2).map((w: string) => w[0]).join('')
-}
-
-// Helper: extract a value from key_facts array
-function getKeyFact(keyFacts: any[], label: string): string | null {
-  if (!Array.isArray(keyFacts)) return null
-  const found = keyFacts.find((f: any) => f.label?.toLowerCase() === label.toLowerCase())
-  return found?.value || null
-}
-
 const CATEGORY_COLORS: Record<string, string> = {
-  growth: '#4ade80',
-  leadership: '#f59e0b',
-  contraction: '#f87171',
-  expansion: '#60a5fa',
-  merger_acquisition: '#a78bfa',
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  growth: 'Growth',
-  expansion: 'Expanding',
-  leadership: 'Leadership move',
-  contraction: 'Contraction',
-  merger_acquisition: 'M&A activity',
+  growth: '#4CAF50',
+  expansion: '#2196F3',
+  leadership: '#FF9800',
+  contraction: '#f44336',
+  merger_acquisition: '#9C27B0',
 }
 
 const SECTOR_FILTERS = ['All', 'Fashion', 'Jewelry', 'Watches', 'Beauty', 'Hospitality', 'Automotive', 'Spirits & Wine', 'Art & Culture']
 
-const STRIP_VERBS = [
-  'confirms', 'announces', 'posts', 'extends', 'appoints', 'promotes',
-  'launches', 'names', 'issues', 'faces', 'opens', 'deploys', 'elevates',
-  'pursues', 'secures', 'expands', 'accelerates', 'taps', 'nears',
-  'surpasses', 'overtakes', 'experiences', 'signals', 'pushes'
-]
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-}
-
-function compressHeadline(headline: string, brandName: string): string {
-  let h = headline.split('|')[0].trim()
-
-  if (!h) return ''
-
-  // Strip exact brand name at start when present
-  const brandPattern = new RegExp(`^${escapeRegExp(brandName)}\\s+`, 'i')
-  h = h.replace(brandPattern, '').trim()
-
-  // Strip leading subject phrase + weak opener verb
-  const verbPattern = new RegExp(
-    `^[A-ZÀ-ÖØ-Ý0-9&'.\\-\\s]+\\b(${STRIP_VERBS.join('|')})\\b\\s+`,
-    'i'
-  )
-  h = h.replace(verbPattern, '').trim()
-
-  // Cleanup punctuation/spacing
-  h = h.replace(/^[·:,\-\s]+/, '').replace(/\s+/g, ' ').trim()
-
-  if (!h) return ''
-
-  // Strip leading verb if still present after cleaning
-  const firstWord = h.split(' ')[0]?.toLowerCase().replace(/[^a-z]/g, '')
-  if (firstWord && STRIP_VERBS.includes(firstWord)) {
-    h = h.slice(h.indexOf(' ') + 1).trim()
-  }
-
-  if (!h) return ''
-
-  // Capitalize first visible character
-  h = h.charAt(0).toUpperCase() + h.slice(1)
-
-  // Clip to 36 chars
-  return h.length > 36 ? h.slice(0, 33).trimEnd() + '…' : h
+function normalize(s: string): string {
+  return s.trim().toLowerCase().replace(/[^a-z0-9\s]/g, '')
 }
 
 export default function BrandsPage() {
-  const router = useRouter()
   const [activeFilter, setActiveFilter] = useState('All')
   const [search, setSearch] = useState('')
   const [brands, setBrands] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [brandStats, setBrandStats] = useState<{ total: number; published: number; languages: number }>({ total: 0, published: 0, languages: 9 })
+  const [stats, setStats] = useState({ total: 0, sectors: 0, growth: 0, today: 0 })
 
   useEffect(() => {
-    async function fetchBrands() {
+    async function fetchData() {
       try {
         const { data } = await supabase
           .from('wikilux_content')
@@ -105,81 +40,112 @@ export default function BrandsPage() {
           .is('deleted_at', null)
           .order('brand_name')
 
-        if (!data) {
-          setLoading(false)
-          return
-        }
+        if (!data) { setLoading(false); return }
 
         const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
 
         const { data: signalsData } = await supabase
           .from('signals')
-          .select('brand_tags, headline, what_happened, category, published_at')
+          .select('brand_tags, what_happened, category, published_at')
           .eq('is_published', true)
           .gte('published_at', ninetyDaysAgo)
           .order('published_at', { ascending: false })
 
-        const signalMap = new Map<string, { headline: string; what_happened: string | null; category: string }>()
+        // Build signal map: brand name -> most recent signal
+        const signalMap = new Map<string, { what_happened: string | null; category: string; published_at: string }>()
+        const normalizedMap = new Map<string, { what_happened: string | null; category: string; published_at: string }>()
+
         for (const sig of signalsData || []) {
           for (const tag of (sig.brand_tags || []) as string[]) {
-            if (!signalMap.has(tag)) {
-              signalMap.set(tag, {
-                headline: sig.headline,
+            const lower = tag.toLowerCase()
+            if (!signalMap.has(lower)) {
+              signalMap.set(lower, {
                 what_happened: sig.what_happened,
                 category: sig.category,
+                published_at: sig.published_at,
+              })
+            }
+            const norm = normalize(tag)
+            if (!normalizedMap.has(norm)) {
+              normalizedMap.set(norm, {
+                what_happened: sig.what_happened,
+                category: sig.category,
+                published_at: sig.published_at,
               })
             }
           }
         }
 
+        // Compute stats
+        const todayStart = new Date()
+        todayStart.setUTCHours(0, 0, 0, 0)
+        const todayISO = todayStart.toISOString()
+
+        const allSectors = new Set<string>()
+        let growthCount = 0
+        let todayCount = 0
+
         const mapped = data.map((b: any) => {
           const content = b.content || {}
           const keyFacts = content.key_facts || []
           const stock = content.stock || {}
-          const ownership = getKeyFact(keyFacts, 'Ownership') || stock.parent_group || ''
+          const name = b.name || b.brand_name || ''
+          const parentGroup = b.parent_group || b.group_name || getKeyFact(keyFacts, 'Ownership') || stock.parent_group || ''
+          const sectors: string[] = Array.isArray(b.sectors) ? b.sectors : (b.sector ? [b.sector] : [])
 
-          const sig = signalMap.get(b.brand_name)
-          let intel_line: string | null = null
-          let signal_category: string | null = null
+          sectors.forEach(s => allSectors.add(s))
+
+          // Signal matching: exact case-insensitive first, then normalized fallback
+          const sig = signalMap.get(name.toLowerCase()) || normalizedMap.get(normalize(name)) || null
 
           if (sig) {
-            signal_category = sig.category?.toLowerCase() || null
-            const label = signal_category ? CATEGORY_LABELS[signal_category] : null
-            const compressed = compressHeadline(sig.headline || '', b.brand_name)
-            intel_line = label ? (compressed ? `${label} · ${compressed}` : label) : compressed
+            const cat = sig.category?.toLowerCase()
+            if (cat === 'growth' || cat === 'expansion') growthCount++
+            if (sig.published_at >= todayISO) todayCount++
           }
 
           return {
             slug: b.slug,
-            name: b.brand_name,
-            sectors: Array.isArray(b.sectors) ? b.sectors : [],
-            parent_group: ownership,
-            status: b.status,
-            has_content: content && JSON.stringify(content) !== '{}',
-            tagline: content.tagline || null,
-            intel_line,
-            signal_category,
+            name,
+            sectors,
+            parentGroup,
+            signal: sig ? {
+              what_happened: sig.what_happened,
+              category: sig.category?.toLowerCase() || '',
+              published_at: sig.published_at,
+            } : null,
           }
         })
 
-        setBrands(mapped)
+        // Sort: brands with signal first (by published_at desc), rest alphabetical
+        mapped.sort((a: any, b: any) => {
+          if (a.signal && !b.signal) return -1
+          if (!a.signal && b.signal) return 1
+          if (a.signal && b.signal) {
+            return b.signal.published_at.localeCompare(a.signal.published_at)
+          }
+          return a.name.localeCompare(b.name)
+        })
 
-        // Once we add a sector field to the prompt, this will populate automatically
+        setBrands(mapped)
+        setStats({
+          total: data.length,
+          sectors: allSectors.size,
+          growth: growthCount,
+          today: todayCount,
+        })
         setLoading(false)
       } catch {
         setLoading(false)
       }
     }
-    fetchBrands()
-    fetch('/api/brands/stats', { cache: 'no-store' })
-      .then(r => r.json())
-      .then(d => setBrandStats({ total: d.total || 0, published: d.published || 0, languages: d.languages || 9 }))
-      .catch(() => {})
+    fetchData()
   }, [])
 
   const filtered = brands.filter(b => {
-    const matchesSearch = b.name.toLowerCase().includes(search.toLowerCase()) || b.slug.includes(search.toLowerCase())
-    const matchesSector = activeFilter === 'All' || (Array.isArray(b.sectors) && b.sectors.some((s: string) => s.toLowerCase() === activeFilter.toLowerCase()))
+    const q = search.toLowerCase()
+    const matchesSearch = b.name.toLowerCase().includes(q) || b.slug.includes(q)
+    const matchesSector = activeFilter === 'All' || b.sectors.some((s: string) => s === activeFilter)
     return matchesSearch && matchesSector
   })
 
@@ -198,36 +164,37 @@ export default function BrandsPage() {
         <h1 className="text-4xl font-normal text-white mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           Brand intelligence
         </h1>
-        <p className="text-sm text-[#999] mb-7">
-          Career intelligence across {brandStats.published}+ luxury brands. Salaries, culture, leadership, financial health.
+        <p className="text-[13px] text-[#999] mb-3">
+          Career intelligence across {stats.total}+ luxury brands. Salaries, culture, leadership, financial health.
         </p>
 
-        {/* Search */}
-        <div className="flex items-center gap-2 py-6 flex-wrap">
+        {/* Stats bar */}
+        <p className="text-[12px] text-[#777] mb-5">
+          {stats.total} brands &middot; {stats.sectors} sectors &middot; {stats.growth} active growth signals &middot; {stats.today} new signals today
+        </p>
+
+        {/* Search + filter pills */}
+        <div className="flex items-center gap-3 mb-6 flex-wrap">
           <input
             type="text"
             placeholder="Search brands..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="bg-[#222] text-white text-base rounded-lg px-4 h-[48px] w-full max-w-lg outline-none border border-[#2a2a2a] placeholder-[#555]"
+            className="bg-[#222] border border-[#2a2a2a] text-white placeholder-[#555] rounded-lg px-4 h-10 w-[260px] outline-none text-sm"
           />
-        </div>
-
-        {/* Sector filter pills */}
-        <div className="flex flex-wrap gap-2 mb-6">
           {SECTOR_FILTERS.map(sector => {
             const active = activeFilter === sector
             return (
               <button
                 key={sector}
                 onClick={() => setActiveFilter(sector)}
-                className="text-[11px] uppercase tracking-wide px-3 py-1.5 rounded-full transition-colors"
-                style={{
-                  backgroundColor: active ? '#a58e28' : '#2a2a2a',
-                  color: active ? '#fff' : '#888',
-                }}
+                className={`text-[11px] font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                  active
+                    ? 'border-[#a58e28] text-[#1a1a1a] bg-[#a58e28]'
+                    : 'border-[#2a2a2a] text-[#999]'
+                }`}
               >
-                {sector}
+                {sector.toLowerCase()}
               </button>
             )
           })}
@@ -243,58 +210,60 @@ export default function BrandsPage() {
         {/* Grid */}
         {!loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {filtered.map((brand, idx) => (
-              <div
+            {filtered.map(brand => (
+              <Link
                 key={brand.slug}
-                onClick={() => router.push(`/brands/${brand.slug}`)}
-                className={`${idx < 4 ? 'bg-[#262626] border-[#383838]' : 'bg-[#212121] border-[#2a2a2a]'} border rounded-xl p-4 cursor-pointer transition-colors hover:border-[#3a3a3a] flex flex-col min-h-[140px]`}
+                href={`/brands/${brand.slug}`}
+                className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 hover:border-[#333] transition-colors min-h-[160px] flex flex-col justify-between"
               >
-                {/* Top */}
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-full bg-[#333] flex items-center justify-center text-[11px] font-medium text-[#aaa] flex-shrink-0">
-                    {getInitials(brand.name)}
+                {/* Top row */}
+                <div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 bg-[#2a2a2a] rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span className="text-[13px] font-semibold text-[#a58e28]">
+                        {brand.name.slice(0, 2).toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-[14px] font-semibold text-white leading-tight">{brand.name}</div>
+                      {brand.parentGroup && (
+                        <div className="text-[11px] text-[#777] mt-0.5">{brand.parentGroup}</div>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-[13px] font-semibold text-white leading-tight">{brand.name}</div>
-                    {Array.isArray(brand.sectors) && brand.sectors.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {brand.sectors.slice(0, 2).map((s: string) => (
-                          <span
-                            key={s}
-                            style={{
-                              backgroundColor: '#2a2a2a',
-                              color: '#888', border: '1px solid #333',
-                              fontSize: '10px',
-                              textTransform: 'uppercase',
-                              borderRadius: '3px',
-                              padding: '2px 6px',
-                            }}
-                          >
-                            {s}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {brand.parent_group && (
-                      <div className="text-[11px] text-[#999] mt-0.5">{brand.parent_group}</div>
-                    )}
-                  </div>
+
+                  {/* Sectors */}
+                  {brand.sectors.length > 0 && (
+                    <div className="text-[11px] text-[#666] mt-3">
+                      {brand.sectors.slice(0, 3).join(' \u00B7 ')}
+                    </div>
+                  )}
                 </div>
 
-                {brand.intel_line ? (
-                  <div className="flex items-start gap-1.5 mt-1">
-                    {brand.signal_category && CATEGORY_COLORS[brand.signal_category] && (
+                {/* Signal row */}
+                <div className="mt-auto pt-3">
+                  {brand.signal ? (
+                    <div className="flex items-center gap-1.5">
                       <span
-                        className="mt-[3px] w-1.5 h-1.5 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: CATEGORY_COLORS[brand.signal_category] }}
+                        className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: CATEGORY_COLORS[brand.signal.category] || '#777' }}
                       />
-                    )}
-                    <p className="text-[11px] leading-snug line-clamp-1" style={{ color: brand.signal_category && CATEGORY_COLORS[brand.signal_category] ? CATEGORY_COLORS[brand.signal_category] : '#999' }}>{brand.intel_line}</p>
-                  </div>
-                ) : brand.tagline ? (
-                  <p className="text-[11px] text-[#777] leading-snug line-clamp-2">{brand.tagline}</p>
-                ) : null}
-              </div>
+                      <span
+                        className="text-[11px]"
+                        style={{ color: CATEGORY_COLORS[brand.signal.category] || '#777' }}
+                      >
+                        {brand.signal.what_happened
+                          ? brand.signal.what_happened.length > 42
+                            ? brand.signal.what_happened.slice(0, 39).trimEnd() + '...'
+                            : brand.signal.what_happened
+                          : 'Signal detected'}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-[11px] text-[#444]">No recent signal</span>
+                  )}
+                </div>
+              </Link>
             ))}
           </div>
         )}
@@ -302,4 +271,10 @@ export default function BrandsPage() {
       </div>
     </div>
   )
+}
+
+function getKeyFact(keyFacts: any[], label: string): string | null {
+  if (!Array.isArray(keyFacts)) return null
+  const found = keyFacts.find((f: any) => f.label?.toLowerCase() === label.toLowerCase())
+  return found?.value || null
 }
