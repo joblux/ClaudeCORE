@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       const { data, error } = await supabase
         .from('wikilux_content')
         .select('slug, brand_name')
-        .eq('status', 'draft')
+        .eq('is_published', false)
         .or('content.is.null,content.eq.{}')
         .order('slug')
 
