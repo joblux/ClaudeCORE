@@ -184,6 +184,7 @@ export async function POST() {
 
           totalInserted++
 
+          /* AUTO-APPROVE DISABLED — pending relevance gate fix
           // Step 6b — Auto-approve high-confidence sourced signals
           const canAutoApprove =
             structured.confidence === 'high' &&
@@ -244,6 +245,7 @@ export async function POST() {
               console.error(`[RSS ingest] Auto-approve failed for "${structured.headline}":`, publishError.message)
             }
           }
+          */
         }
 
         // Step 7 — Update last_fetched_at
@@ -262,7 +264,7 @@ export async function POST() {
       processed: totalProcessed,
       inserted: totalInserted,
       skipped: totalSkipped,
-      auto_approved: autoApproved,
+      auto_approved: autoApproved, // auto_approved is always 0 until relevance gate is fixed
     })
   } catch (error: any) {
     console.error('[RSS ingest] Fatal error:', error.message)
