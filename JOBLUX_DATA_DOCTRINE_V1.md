@@ -111,3 +111,20 @@ Before approving any content architecture decision — check against this file.
 If in doubt: does this object start from a real source? If no, do not publish it.
 
 ---
+
+## WIKILUX NODE RULE
+One name users search for = one node, if it has its own intelligence life.
+
+A brand earns its own node if:
+- A luxury professional would search for it by name directly
+- It generates distinct signals, hiring, and salary data (even if sparse today)
+- It has a separate operating reality — own leadership, culture, business logic
+
+Group/conglomerate pages exist only if they generate standalone intelligence worth tracking — not automatically because they own brands.
+
+Sub-lines live inside the parent dossier unless they have a fully separate operating entity with its own intelligence life.
+
+Sectors are filters only — not structural layers. A brand can span multiple sectors. Do not overfit sectors.
+Ownership and group structure live inside content.stock — not in URL or page hierarchy.
+
+---
