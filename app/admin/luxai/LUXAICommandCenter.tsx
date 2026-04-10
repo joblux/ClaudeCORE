@@ -248,6 +248,31 @@ export default function LUXAICommandCenter() {
           ))}
         </div>
 
+        {/* Card Intelligence enrichment */}
+        <div className="bg-white border border-[#e8e8e8] rounded-lg px-4 py-3 mb-5 flex items-center gap-3">
+          <button className={btnB} disabled={!!generating} onClick={async () => {
+            if (generating) return
+            setGenerating('card-intel')
+            try {
+              const res = await fetch('/api/luxai/enrich-card-intelligence', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+              const d = await res.json()
+              if (d.success) {
+                flash('success', `${d.written} written · ${d.skipped} skipped`)
+                loadHealth()
+              } else {
+                flash('error', d.message || 'Enrichment failed')
+              }
+            } catch (e: any) {
+              flash('error', e.message || 'Network error')
+            } finally {
+              setGenerating(null)
+            }
+          }}>
+            {generating === 'card-intel' ? 'Enriching...' : 'Enrich Card Intelligence'}
+          </button>
+          <span className="text-[10px] text-[#888]">Run Haiku across all published brands to generate card markers from latest signals</span>
+        </div>
+
         {/* Main layout: pipelines + queue */}
         <div className="grid grid-cols-[1fr_340px] gap-5 items-start">
           {/* LEFT: Content pipelines */}
