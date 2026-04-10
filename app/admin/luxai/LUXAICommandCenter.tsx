@@ -9,12 +9,6 @@ interface HealthStats {
   cost_month: number; requests_month: number
 }
 
-interface QueueItem {
-  id: string; title: string; content_type: string
-  raw_content: any; source_type: string; source_name: string
-  category: string; brand_tags: string[]; status: string; created_at: string
-}
-
 interface BrandOption {
   slug: string; brand_name: string; status: string
 }
@@ -22,7 +16,6 @@ interface BrandOption {
 export default function LUXAICommandCenter() {
   const [health, setHealth] = useState<HealthStats | null>(null)
   const [brands, setBrands] = useState<BrandOption[]>([])
-  const [queue, setQueue] = useState<QueueItem[]>([])
   const [usage, setUsage] = useState<any>(null)
   const [generating, setGenerating] = useState<string | null>(null)
   const [result, setResult] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
@@ -98,14 +91,6 @@ export default function LUXAICommandCenter() {
     } catch { /* silent */ }
   }, [])
 
-  const loadQueue = useCallback(async () => {
-    try {
-      const res = await fetch('/api/admin/luxai/queue')
-      const d = await res.json()
-      setQueue(d.queue || [])
-    } catch { /* silent */ }
-  }, [])
-
   const loadAutopilot = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/luxai/settings')
@@ -122,11 +107,10 @@ export default function LUXAICommandCenter() {
   useEffect(() => {
     loadHealth()
     loadBrands()
-    loadQueue()
     loadAutopilot()
     loadMetadataCount()
     loadSalarySeedCount()
-  }, [loadHealth, loadBrands, loadQueue, loadAutopilot, loadMetadataCount, loadSalarySeedCount])
+  }, [loadHealth, loadBrands, loadAutopilot, loadMetadataCount, loadSalarySeedCount])
 
   function flash(type: 'success' | 'error', msg: string) {
     setResult({ type, msg })
@@ -141,7 +125,6 @@ export default function LUXAICommandCenter() {
       const d = await res.json()
       if (d.success) {
         flash('success', d.message || successMsg || 'Done')
-        loadQueue()
         loadHealth()
       } else {
         flash('error', d.message || 'Generation failed')
@@ -151,31 +134,6 @@ export default function LUXAICommandCenter() {
     } finally {
       setGenerating(null)
     }
-  }
-
-  async function handleApprove(item: QueueItem) {
-    try {
-      await fetch('/api/admin/luxai/approve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: item.id, type: item.content_type, source: item.source_name })
-      })
-      setQueue(q => q.filter(x => x.id !== item.id))
-      flash('success', 'Approved and published')
-      loadHealth()
-    } catch { flash('error', 'Failed to approve') }
-  }
-
-  async function handleReject(item: QueueItem) {
-    try {
-      await fetch('/api/admin/luxai/reject', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: item.id, type: item.content_type, source: item.source_name })
-      })
-      setQueue(q => q.filter(x => x.id !== item.id))
-      flash('success', 'Rejected')
-    } catch { flash('error', 'Failed to reject') }
   }
 
   async function saveAutopilot(key: string, updates: any) {
@@ -192,14 +150,6 @@ export default function LUXAICommandCenter() {
   }
 
   const approvedBrands = brands.filter(b => b.status === 'approved')
-  const queueBadge = (type: string) => {
-    const colors: Record<string, string> = {
-      'wikilux': '#111', 'signal': '#10B981', 'salary': '#3B82F6',
-      'article': '#8B5CF6', 'interview': '#06B6D4', 'event': '#F59E0B',
-      'report': '#EC4899', 'insider': '#6366F1', 'library': '#D946EF'
-    }
-    return colors[type] || '#888'
-  }
 
   // Styles
   const card = 'bg-white border border-[#e8e8e8] rounded-lg mb-3 overflow-hidden'
@@ -273,11 +223,9 @@ export default function LUXAICommandCenter() {
           <span className="text-[10px] text-[#888]">Run Haiku across all published brands to generate card markers from latest signals</span>
         </div>
 
-        {/* Main layout: pipelines + queue */}
-        <div className="grid grid-cols-[1fr_340px] gap-5 items-start">
-          {/* LEFT: Content pipelines */}
-          <div>
-            <div className="text-[10px] font-semibold text-[#999] uppercase tracking-wider mb-2">Content pipelines</div>
+        {/* Content pipelines */}
+        <div>
+          <div className="text-[10px] font-semibold text-[#999] uppercase tracking-wider mb-2">Content pipelines</div>
 
             {/* 1. Brand pages */}
             <div className={card}>
@@ -369,7 +317,6 @@ export default function LUXAICommandCenter() {
                           setSalarySeedLast({ brand_name: d.brand_name, records_valid: d.records_valid })
                           flash('success', `${d.brand_name}: ${d.records_valid} records queued (${d.records_skipped} skipped)`)
                           loadSalarySeedCount()
-                          loadQueue()
                         } else {
                           flash('error', d.message || 'Salary seed failed')
                         }
@@ -497,7 +444,6 @@ export default function LUXAICommandCenter() {
                         if (d.auto_approved > 0) parts.push(`${d.auto_approved} auto-published`)
                         if (queued > 0) parts.push(`${queued} queued`)
                         flash('success', parts.length > 0 ? parts.join(' · ') : 'No new items found')
-                        loadQueue()
                         loadHealth()
                       } else {
                         flash('error', d.message || 'Ingestion failed')
@@ -651,7 +597,6 @@ export default function LUXAICommandCenter() {
                       const d = await res.json()
                       if (d.success) {
                         flash('success', d.inserted > 0 ? `${d.inserted} events added to queue` : 'No new events found')
-                        loadQueue()
                         loadHealth()
                       } else {
                         flash('error', d.message || 'Event ingestion failed')
@@ -723,48 +668,6 @@ export default function LUXAICommandCenter() {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* RIGHT: Approval queue */}
-          <div>
-            <div className="text-[10px] font-semibold text-[#999] uppercase tracking-wider mb-2">
-              Approval queue {queue.length > 0 && <span className="ml-1 bg-[#EF4444] text-white text-[9px] px-1.5 py-0.5 rounded-full">{queue.length}</span>}
-            </div>
-            <div className="bg-white border border-[#e8e8e8] rounded-lg overflow-hidden">
-              {queue.length === 0 ? (
-                <div className="px-4 py-10 text-center">
-                  <p className="text-[12px] text-[#999]">No pending items</p>
-                  <p className="text-[10px] text-[#ccc] mt-1">Generate content to fill the queue</p>
-                </div>
-              ) : (
-                <>
-                  {queue.slice(0, 10).map(item => (
-                    <div key={item.id} className="px-3 py-2.5 border-b border-[#f0f0f0] last:border-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded text-white uppercase" style={{ background: queueBadge(item.content_type?.toLowerCase() || 'wikilux') }}>
-                          {item.content_type || 'Content'}
-                        </span>
-                        <span className="text-[11px] font-medium text-[#111] flex-1 truncate">{item.title}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[9px] text-[#999]">
-                          {item.source_name === 'wikilux' ? 'WikiLux editor' : 'LUXAI'} · {new Date(item.created_at).toLocaleDateString()}
-                        </span>
-                        <div className="flex gap-1">
-                          <button onClick={() => handleApprove(item)} className="px-2 py-1 bg-[#111] text-white text-[9px] font-semibold rounded hover:bg-[#333]">Approve</button>
-                          <button onClick={() => handleReject(item)} className="px-2 py-1 bg-white border border-[#e8e8e8] text-[#EF4444] text-[9px] font-semibold rounded hover:bg-[#FEE2E2]">✕</button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {queue.length > 10 && (
-                    <div className="px-3 py-2 text-center text-[10px] text-[#999] border-t border-[#f0f0f0]">
-                      +{queue.length - 10} more items
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
 
             {/* Where content surfaces */}
             <div className="mt-4">
@@ -800,6 +703,5 @@ export default function LUXAICommandCenter() {
           </div>
         </div>
       </div>
-    </div>
   )
 }
