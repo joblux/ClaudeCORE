@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { checkDuplicate, DuplicateCheckPayload } from '@/lib/duplicate-check'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,10 +10,9 @@ const supabaseAdmin = createClient(
 export async function POST(_req: Request, { params }: { params: { id: string } }) {
   const now = new Date().toISOString()
 
-  // Fetch the queue record
   const { data: record, error: fetchError } = await supabaseAdmin
     .from('content_queue')
-    .select('id, content_type, title, processed_content, source_type, source_name')
+    .select('id, content_type, title, processed_content, source_type, source_name, source_url')
     .eq('id', params.id)
     .maybeSingle()
 
@@ -20,10 +20,60 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ success: false, error: fetchError?.message || 'Record not found' }, { status: 500 })
   }
 
-  // Article: approve and publish to bloglux_articles
+  const pc = (record.processed_content || {}) as Record<string, any>
+
+  let dupePayload: DuplicateCheckPayload | null = null
+
+  if (record.content_type === 'event') {
+    dupePayload = {
+      content_type: 'event',
+      title: pc.title || pc.name || record.title || undefined,
+      start_date: pc.start_date || pc.date || undefined,
+      city: pc.city || pc.location_city || undefined,
+      organizer: pc.organizer || undefined,
+    }
+  } else if (record.content_type === 'signal') {
+    dupePayload = {
+      content_type: 'signal',
+      headline: record.title || undefined,
+      source_url: (record as any).source_url || undefined,
+    }
+  } else if (record.content_type === 'article') {
+    dupePayload = {
+      content_type: 'article',
+      title: pc.title || record.title || undefined,
+      slug: pc.slug || undefined,
+    }
+  } else if (record.content_type === 'salary_benchmark') {
+    dupePayload = {
+      content_type: 'salary_benchmark',
+      brand_slug: pc.brand_slug || undefined,
+    }
+  }
+
+  if (dupePayload) {
+    const dupe = await checkDuplicate(dupePayload, params.id)
+    if (dupe.isDuplicate) {
+      return NextResponse.json(
+        {
+          success: false,
+          blocked: true,
+          reason: 'Approval blocked: duplicate of existing item',
+          match: dupe.match,
+        },
+        { status: 409 }
+      )
+    }
+  }
+
   if (record.content_type === 'article') {
-    const pc = (record.processed_content || {}) as Record<string, any>
-    const slug = pc.slug || (record.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 80)
+    const slug =
+      pc.slug ||
+      (record.title || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .substring(0, 80)
 
     const { data: newArticle, error: insertError } = await supabaseAdmin
       .from('bloglux_articles')
@@ -61,9 +111,7 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ success: true, published: true, destination_id: newArticle?.id || null })
   }
 
-  // Salary benchmark: approve and publish to salary_benchmarks
   if (record.content_type === 'salary_benchmark') {
-    const pc = (record.processed_content || {}) as Record<string, any>
     const records: any[] = Array.isArray(pc.records) ? pc.records : []
     const brand_name: string = pc.brand_name || ''
     const brand_slug: string = pc.brand_slug || ''
@@ -73,6 +121,31 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
         { success: false, error: 'Cannot publish salary benchmark: missing brand_name, brand_slug, or records.' },
         { status: 400 }
       )
+    }
+
+    for (const r of records) {
+      const dupe = await checkDuplicate(
+        {
+          content_type: 'salary_benchmark',
+          brand_slug,
+          job_title: r.job_title,
+          city: r.city,
+          seniority: r.seniority,
+        },
+        params.id
+      )
+
+      if (dupe.isDuplicate) {
+        return NextResponse.json(
+          {
+            success: false,
+            blocked: true,
+            reason: 'Approval blocked: duplicate of existing item',
+            match: dupe.match,
+          },
+          { status: 409 }
+        )
+      }
     }
 
     const rows = records.map((r) => ({
@@ -110,7 +183,6 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ success: true, inserted: rows.length })
   }
 
-  // Unhandled content types: approve only, no publish
   if (record.content_type !== 'signal' && record.content_type !== 'event') {
     const { error } = await supabaseAdmin
       .from('content_queue')
@@ -123,22 +195,29 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ success: true })
   }
 
-  const pc = (record.processed_content || {}) as Record<string, any>
   const slug = (record.title || '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
     .substring(0, 80)
 
-  // Event: approve and publish to events table
   if (record.content_type === 'event') {
     const eventTitle = pc.title || pc.name || record.title
-    const eventSlug = slug || (eventTitle || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 80)
+    const eventSlug =
+      slug ||
+      (eventTitle || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .substring(0, 80)
     const eventStartDate = pc.start_date || pc.date || null
 
     if (!eventTitle || !eventSlug || !eventStartDate) {
       return NextResponse.json(
-        { success: false, error: 'Cannot publish event: missing required fields (name, slug, or start_date). Edit the queue item first.' },
+        {
+          success: false,
+          error: 'Cannot publish event: missing required fields (name, slug, or start_date). Edit the queue item first.',
+        },
         { status: 400 }
       )
     }
@@ -198,7 +277,6 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ success: true, published: true, destination_id: destinationId })
   }
 
-  // Signal: approve and publish to signals table
   const { data: newSignal, error: insertError } = await supabaseAdmin
     .from('signals')
     .insert({
@@ -232,7 +310,6 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
 
   const destinationId = newSignal?.id || null
 
-  // Update queue record to published
   await supabaseAdmin
     .from('content_queue')
     .update({

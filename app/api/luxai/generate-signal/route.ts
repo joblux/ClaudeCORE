@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
+import { checkDuplicate } from '@/lib/duplicate-check'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -13,7 +14,6 @@ const supabase = createClient(
 
 export async function POST(req: NextRequest) {
   try {
-    // Check if signal generation is enabled
     const { data: settings } = await supabase
       .from('luxai_settings')
       .select('value')
@@ -24,7 +24,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Signal generation disabled' }, { status: 403 })
     }
 
-    // Get daily target
     const { data: targetSettings } = await supabase
       .from('luxai_settings')
       .select('value')
@@ -33,7 +32,6 @@ export async function POST(req: NextRequest) {
 
     const dailyTarget = parseInt(targetSettings?.value || '6')
 
-    // Check how many signals generated today
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
@@ -51,7 +49,6 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Generate signal
     const prompt = `You are LUXAI, the luxury industry intelligence engine for JOBLUX | a careers platform.
 
 Generate ONE realistic luxury industry signal (news/intelligence) for today (${new Date().toLocaleDateString()}).
@@ -107,7 +104,6 @@ Guidelines:
       throw new Error('Unexpected response type')
     }
 
-    // Strip markdown backticks and find JSON
     const cleaned = content.text.trim().replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '').trim()
     const first = cleaned.indexOf('{')
     const last = cleaned.lastIndexOf('}')
@@ -119,7 +115,6 @@ Guidelines:
     const tokensUsed = message.usage.input_tokens + message.usage.output_tokens
     const costUsd = (message.usage.input_tokens * 0.0000008) + (message.usage.output_tokens * 0.000004)
 
-    // Log to history
     await supabase.from('luxai_history').insert({
       type: 'signal',
       model: 'claude-haiku-3-5-20241022',
@@ -130,25 +125,44 @@ Guidelines:
       status: 'success',
     })
 
-    // Write to content_queue (canonical editorial gate)
+    const processedPayload = {
+      content: result.content,
+      what_happened: result.what_happened,
+      why_it_matters: result.why_it_matters,
+      long_context: result.long_context,
+      career_detail: result.career_detail,
+      brand_impact: result.brand_impact,
+      meta_title: result.meta_title,
+      meta_description: result.meta_description,
+      category: result.category,
+      confidence: result.confidence || 'high',
+    }
+
+    const dupe = await checkDuplicate({
+      content_type: 'signal',
+      headline: result.title,
+    })
+
+    if (dupe.isDuplicate) {
+      return NextResponse.json({
+        success: false,
+        skipped: true,
+        reason: 'duplicate',
+        match: dupe.match,
+      })
+    }
+
     await supabase.from('content_queue').insert({
       content_type: 'signal',
       source_type: 'joblux_generation',
       source_name: 'luxai',
       title: result.title,
       category: result.category,
-      raw_content: {
-        content: result.content,
-        what_happened: result.what_happened,
-        why_it_matters: result.why_it_matters,
-        long_context: result.long_context,
-        career_detail: result.career_detail,
-        brand_impact: result.brand_impact,
-        meta_title: result.meta_title,
-        meta_description: result.meta_description,
-      },
+      raw_content: processedPayload,
+      processed_content: processedPayload,
       destination_table: 'signals',
       status: 'draft',
+      duplicate_state: 'clean',
     })
 
     return NextResponse.json({
