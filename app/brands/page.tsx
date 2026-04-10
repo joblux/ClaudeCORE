@@ -214,7 +214,7 @@ export default function BrandsPage() {
               <Link
                 key={brand.slug}
                 href={`/brands/${brand.slug}`}
-                className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 hover:border-[#333] transition-colors min-h-[160px] flex flex-col justify-between"
+                className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 hover:border-[#333] transition-colors min-h-[160px] flex flex-col justify-between overflow-hidden"
               >
                 {/* Top row */}
                 <div>
@@ -224,8 +224,8 @@ export default function BrandsPage() {
                         {brand.name.slice(0, 2).toUpperCase()}
                       </span>
                     </div>
-                    <div>
-                      <div className="text-[14px] font-semibold text-white leading-tight">{brand.name}</div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[14px] font-semibold text-white leading-tight truncate">{brand.name}</div>
                       {brand.parentGroup && (
                         <div className="text-[11px] text-[#777] mt-0.5 truncate">{brand.parentGroup}</div>
                       )}
