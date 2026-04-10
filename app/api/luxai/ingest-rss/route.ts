@@ -1,3 +1,4 @@
+// v2 — what_happened field added
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { XMLParser } from 'fast-xml-parser'
@@ -52,11 +53,12 @@ Summary: ${description.substring(0, 500)}
 
 Return ONLY valid JSON (no markdown):
 {
-  "headline": "Headline that accurately reflects the source article, max 80 chars",
+  "headline": "Clean punchy headline max 80 chars",
+  "what_happened": "One sentence max 150 chars — factual summary of the event. No marketing language.",
+  "why_it_matters": "One sentence max 150 chars — industry or career significance.",
   "category": "growth|leadership|contraction|expansion|merger_acquisition",
   "context_paragraph": "2-3 sentences: what happened and the immediate facts. Max 300 chars.",
-  "strategic_read": "1 tight paragraph: what this development may suggest, based only on what the source article states. Max 400 chars.",
-  "career_implications": "2-3 sentences: what career or talent implications this may suggest, if the source indicates any. Max 250 chars.",
+  "career_implications": "2-3 sharp sentences: which roles increase in demand, what profiles win. Max 250 chars.",
   "brand_tags": ["BrandName1"],
   "confidence": "high|medium"
 }
@@ -115,6 +117,7 @@ export async function POST() {
     let totalProcessed = 0
     let totalInserted = 0
     let totalSkipped = 0
+    let autoApproved = 0
 
     for (const source of sources) {
       try {
@@ -151,7 +154,7 @@ export async function POST() {
           if (!structured) { totalSkipped++; continue }
 
           // Step 6 — Insert into content_queue
-          const { error: insertError } = await supabase.from('content_queue').insert({
+          const { data: queueRow, error: insertError } = await supabase.from('content_queue').insert({
             content_type: 'signal',
             source_type: 'external_feed',
             title: structured.headline || item.title,
@@ -171,13 +174,75 @@ export async function POST() {
             brand_tags: structured.brand_tags,
             target_surfaces: ['signals', 'homepage'],
             status: 'draft',
-          })
+          }).select('id').maybeSingle()
 
           if (insertError) {
             console.error(`[RSS ingest] Insert failed for "${item.title}":`, insertError.message)
             totalSkipped++
-          } else {
-            totalInserted++
+            continue
+          }
+
+          totalInserted++
+
+          // Step 6b — Auto-approve high-confidence sourced signals
+          const canAutoApprove =
+            structured.confidence === 'high' &&
+            Array.isArray(structured.brand_tags) && structured.brand_tags.length > 0 &&
+            structured.category && structured.category.trim() !== '' &&
+            structured.what_happened && structured.what_happened.trim() !== '' &&
+            item.link
+
+          if (canAutoApprove && queueRow?.id) {
+            const now = new Date().toISOString()
+            const slug = (structured.headline || '')
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/^-|-$/g, '')
+              .substring(0, 80)
+
+            const { data: newSignal, error: publishError } = await supabase
+              .from('signals')
+              .insert({
+                headline: structured.headline || item.title,
+                category: structured.category,
+                context_paragraph: structured.context_paragraph || null,
+                career_implications: structured.career_implications || null,
+                long_context: structured.strategic_read || structured.long_context || null,
+                what_happened: structured.what_happened || null,
+                why_it_matters: structured.why_it_matters || null,
+                career_detail: structured.career_detail || null,
+                brand_impact: structured.brand_impact || null,
+                brand_tags: structured.brand_tags || null,
+                meta_title: structured.meta_title || null,
+                meta_description: structured.meta_description || null,
+                confidence: structured.confidence || 'high',
+                source_name: source.name,
+                source_url: item.link,
+                content_origin: 'rss',
+                is_published: true,
+                is_pinned: false,
+                published_at: now,
+                slug,
+              })
+              .select('id')
+              .maybeSingle()
+
+            if (!publishError && newSignal?.id) {
+              await supabase
+                .from('content_queue')
+                .update({
+                  status: 'published',
+                  reviewed_at: now,
+                  destination_table: 'signals',
+                  destination_id: newSignal.id,
+                })
+                .eq('id', queueRow.id)
+
+              autoApproved++
+              console.log(`[RSS ingest] Auto-approved: "${structured.headline}"`)
+            } else if (publishError) {
+              console.error(`[RSS ingest] Auto-approve failed for "${structured.headline}":`, publishError.message)
+            }
           }
         }
 
@@ -197,6 +262,7 @@ export async function POST() {
       processed: totalProcessed,
       inserted: totalInserted,
       skipped: totalSkipped,
+      auto_approved: autoApproved,
     })
   } catch (error: any) {
     console.error('[RSS ingest] Fatal error:', error.message)
