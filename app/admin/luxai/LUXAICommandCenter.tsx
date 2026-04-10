@@ -247,7 +247,7 @@ export default function LUXAICommandCenter() {
                     {generating === 'wikilux-single' ? 'Generating...' : 'Generate'}
                   </button>
                   <button className={btnO} disabled={!!generating} onClick={() => callEndpoint('wikilux-all', '/api/luxai/regenerate-wikilux', { mode: 'all' })}>
-                    {generating === 'wikilux-all' ? 'Running...' : `Regen all (${brands.length})`}
+                    {generating === 'wikilux-all' ? 'Running...' : `Regen all (${health?.brands_total || 0})`}
                   </button>
                   <button className={btnO} disabled={!!generating || (health?.brands_empty || 0) === 0} onClick={() => callEndpoint('wikilux-drafts', '/api/luxai/bulk-regenerate-wikilux', {})}>
                     {generating === 'wikilux-drafts' ? 'Regenerating drafts...' : `Regen all drafts (${health?.brands_empty || 0} empty)`}
