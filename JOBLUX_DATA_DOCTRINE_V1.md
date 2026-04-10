@@ -8,6 +8,24 @@ Every object must start from a real source appropriate to its family.
 LuxAI only transforms — never originates (except slow reference facts).
 No family starts with AI. Each family starts with a real source. Then LuxAI transforms it.
 
+WikiLux defines who matters.
+Sources define what is real.
+LuxAI defines how it is structured.
+
+## SOURCING MODEL
+Two layers:
+
+Passive layer — RSS runs in the background. Catches what the 5 configured sources publish that day, filtered against the WikiLux brand list.
+
+Active layer — Brand-first sourcing. For any brand in WikiLux:
+- Signals: search news / press / announcements for the brand
+- Events: search official event / brand / calendar sources for the brand
+- Salaries: search job boards / company careers pages for the brand
+- Interview prep: search job descriptions + brand context for the brand
+- Articles / Reports: built from real imported material already gathered around those brands
+
+The brand list is the center of the sourcing system. JOBLUX does not import broadly. It imports because content matches a brand it tracks.
+
 ## THE FLOW (ALL FAMILIES)
 Source → LuxAI transform → confidence gate → publish → surface
 No exceptions.
