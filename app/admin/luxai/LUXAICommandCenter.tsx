@@ -126,6 +126,7 @@ export default function LUXAICommandCenter() {
       if (d.success) {
         flash('success', d.message || successMsg || 'Done')
         loadHealth()
+        loadMetadataCount()
       } else {
         flash('error', d.message || 'Generation failed')
       }
