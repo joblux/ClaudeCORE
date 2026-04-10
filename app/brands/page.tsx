@@ -169,18 +169,18 @@ export default function BrandsPage() {
         </p>
 
         {/* Stats bar */}
-        <p className="text-[12px] text-[#777] mb-5">
+        <p className="text-[12px] text-[#777] mb-6">
           {stats.total} brands &middot; {stats.sectors} sectors &middot; {stats.growth} active growth signals &middot; {stats.today} new signals today
         </p>
 
         {/* Search + filter pills */}
-        <div className="flex items-center gap-3 mb-6 flex-wrap">
+        <div className="flex items-center gap-4 flex-wrap mt-6 mb-8">
           <input
             type="text"
             placeholder="Search brands..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="bg-[#222] border border-[#2a2a2a] text-white placeholder-[#555] rounded-lg px-4 h-10 w-[260px] outline-none text-sm"
+            className="bg-[#242424] border border-[#3a3a3a] text-white placeholder-[#666] rounded-full px-5 h-11 w-[300px] outline-none text-[13px] focus:border-[#555] transition-colors"
           />
           {SECTOR_FILTERS.map(sector => {
             const active = activeFilter === sector
@@ -188,13 +188,13 @@ export default function BrandsPage() {
               <button
                 key={sector}
                 onClick={() => setActiveFilter(sector)}
-                className={`text-[11px] font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                className={`text-[12px] font-medium px-4 py-2 rounded-full border transition-colors ${
                   active
-                    ? 'border-[#a58e28] text-[#1a1a1a] bg-[#a58e28]'
-                    : 'border-[#2a2a2a] text-[#999]'
+                    ? 'border-[#a58e28] text-[#a58e28] bg-transparent'
+                    : 'border-[#383838] text-[#888] bg-transparent hover:border-[#555] hover:text-[#aaa]'
                 }`}
               >
-                {sector.toLowerCase()}
+                {sector}
               </button>
             )
           })}
