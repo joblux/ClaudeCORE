@@ -227,7 +227,7 @@ export default function BrandsPage() {
                     <div>
                       <div className="text-[14px] font-semibold text-white leading-tight">{brand.name}</div>
                       {brand.parentGroup && (
-                        <div className="text-[11px] text-[#777] mt-0.5">{brand.parentGroup}</div>
+                        <div className="text-[11px] text-[#777] mt-0.5 truncate">{brand.parentGroup}</div>
                       )}
                     </div>
                   </div>
