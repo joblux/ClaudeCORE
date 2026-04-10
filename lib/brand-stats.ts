@@ -20,25 +20,22 @@ export async function getBrandStats(): Promise<BrandStats> {
   const [totalRes, publishedRes, emptyRes] = await Promise.all([
     supabase
       .from('wikilux_content')
-      .select('id', { count: 'exact', head: true })
-      .is('deleted_at', null),
+      .select('id', { count: 'exact', head: true }),
     supabase
       .from('wikilux_content')
       .select('id', { count: 'exact', head: true })
-      .eq('status', 'approved')
-      .eq('is_published', true)
-      .is('deleted_at', null),
+      .eq('is_published', true),
     supabase
       .from('wikilux_content')
       .select('id', { count: 'exact', head: true })
-      .or('status.neq.approved,is_published.neq.true')
-      .is('deleted_at', null),
+      .eq('is_published', false)
+      .or('content.is.null,content.eq.{}'),
   ])
 
   return {
     total: totalRes.count ?? 0,
     published: publishedRes.count ?? 0,
-    empty: (totalRes.count ?? 0) - (publishedRes.count ?? 0),
-    languages: 9, // hardcoded until wikilux_translations table exists
+    empty: emptyRes.count ?? 0,
+    languages: 9,
   }
 }
