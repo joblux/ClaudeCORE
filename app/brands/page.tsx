@@ -249,14 +249,14 @@ export default function BrandsPage() {
                         style={{ backgroundColor: CATEGORY_COLORS[brand.signal.category] || '#777' }}
                       />
                       <span
-                        className="text-[11px]"
+                        className="text-[11px] truncate"
                         style={{ color: CATEGORY_COLORS[brand.signal.category] || '#777' }}
                       >
                         {brand.signal.what_happened
                           ? brand.signal.what_happened.length > 42
                             ? brand.signal.what_happened.slice(0, 39).trimEnd() + '...'
                             : brand.signal.what_happened
-                          : 'Signal detected'}
+                          : 'No recent signal'}
                       </span>
                     </div>
                   ) : (
