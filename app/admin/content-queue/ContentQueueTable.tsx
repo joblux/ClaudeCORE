@@ -166,6 +166,16 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
             const isEditing = editingId === item.id
             const doctrineFlags = computeDoctrineFlags(item)
             const needsReview = doctrineFlags.length > 0
+            // Row decision-state: red = doctrine flag, amber = draft
+            // needing decision, none = read-only (published/rejected/
+            // approved). Rendered as a left-edge stripe on the first td.
+            const isReadOnly =
+              item.status === 'published' || item.status === 'rejected' || item.status === 'approved'
+            const stripeColor = needsReview
+              ? '#dc2626' // red — doctrine flag active
+              : !isReadOnly
+              ? '#a58e28' // amber — draft awaiting decision
+              : 'transparent'
             return (
               <>
                 <tr
@@ -173,21 +183,45 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                   onClick={() => { if (!isEditing) setExpandedId(isExpanded ? null : item.id) }}
                   style={{ borderBottom: isExpanded ? 'none' : '1px solid #e8e8e8', cursor: 'pointer' }}
                 >
-                  <td style={{ padding: '12px' }}>
+                  <td style={{ padding: '12px', borderLeft: `3px solid ${stripeColor}` }}>
                     <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 3, background: '#e8e8e8', color: '#888' }}>
                       {item.content_type}
                     </span>
                   </td>
                   <td style={{ padding: '12px' }}>
-                    <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 3, background: '#e8e8e8', color: '#555' }}>
-                      {(() => {
-                        const pcCat = item.processed_content?.category
-                        if (typeof pcCat === 'string' && pcCat.trim()) return pcCat
-                        const itemCat = (item as any).category
-                        if (typeof itemCat === 'string' && itemCat.trim()) return itemCat
-                        return item.content_type
-                      })()}
-                    </span>
+                    {(() => {
+                      // Type = meaningful subtype within the family.
+                      // NEVER falls back to content_type (the Family
+                      // column already shows that). Different content
+                      // families store their subtype in different
+                      // fields, so derive per family.
+                      const pc = (item.processed_content || {}) as Record<string, unknown>
+                      const cat = typeof pc.category === 'string' ? pc.category.trim() : ''
+                      let subtype: string = cat
+                      if (!subtype && item.content_type === 'event') {
+                        const sector = typeof pc.sector === 'string' ? pc.sector.trim() : ''
+                        if (sector) subtype = sector
+                        else {
+                          const t = typeof pc.type === 'string' ? pc.type.trim() : ''
+                          if (t) subtype = t.replace(/_/g, ' ')
+                        }
+                      }
+                      if (
+                        !subtype &&
+                        (item.content_type === 'salary_benchmark' || item.content_type === 'interview')
+                      ) {
+                        const brand = typeof pc.brand_slug === 'string' ? pc.brand_slug.trim() : ''
+                        if (brand) subtype = brand
+                      }
+                      if (!subtype) {
+                        return <span style={{ fontSize: 11, color: '#bbb' }}>—</span>
+                      }
+                      return (
+                        <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 3, background: '#e8e8e8', color: '#555' }}>
+                          {subtype}
+                        </span>
+                      )
+                    })()}
                   </td>
                   <td style={{ padding: '12px', color: '#111', fontWeight: 500, maxWidth: 300 }} onClick={e => { if (isEditing) e.stopPropagation() }}>
                     {isEditing ? (
@@ -253,8 +287,8 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                       </div>
                     )}
                   </td>
-                  <td style={{ padding: '12px', color: '#888', fontSize: 12 }}>{item.source_type || '\u2014'}</td>
-                  <td style={{ padding: '12px', color: '#888', fontSize: 12 }}>
+                  <td style={{ padding: '12px', color: '#aaa', fontSize: 11 }}>{item.source_type || '\u2014'}</td>
+                  <td style={{ padding: '12px', color: '#aaa', fontSize: 11 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {item.source_name || '\u2014'}
@@ -267,7 +301,7 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                           onClick={e => e.stopPropagation()}
                           title={item.source_url}
                           style={{
-                            fontSize: 10, color: '#1565c0', textDecoration: 'none',
+                            fontSize: 10, color: '#5a8bc4', textDecoration: 'none',
                             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                           }}
                         >
@@ -278,15 +312,15 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                   </td>
                   <td style={{ padding: '12px' }}>
                     <span style={{
-                      display: 'inline-block', fontSize: 10, fontWeight: 600,
+                      display: 'inline-block', fontSize: 11, fontWeight: 700,
                       letterSpacing: '0.08em', textTransform: 'uppercase',
-                      padding: '3px 10px', borderRadius: 3,
+                      padding: '4px 12px', borderRadius: 4,
                       background: badge.bg, color: badge.text,
                     }}>
                       {item.status.replace('_', ' ')}
                     </span>
                   </td>
-                  <td style={{ padding: '12px', color: '#888', fontSize: 12 }}>{formatDate(item.created_at)}</td>
+                  <td style={{ padding: '12px', color: '#aaa', fontSize: 11 }}>{formatDate(item.created_at)}</td>
                   <td style={{ padding: '12px' }} onClick={e => e.stopPropagation()}>
                     <ContentQueueActions
                       id={item.id}

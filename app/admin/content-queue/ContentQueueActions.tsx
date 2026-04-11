@@ -36,6 +36,10 @@ export default function ContentQueueActions({ id, status, onDelete, onEdit }: Pr
   const showDelete = currentStatus === 'draft' || currentStatus === 'rejected'
   const showApproveReject = currentStatus !== 'approved' && currentStatus !== 'rejected' && currentStatus !== 'published'
 
+  // Decision actions are the primary CTA on every draft row.
+  // Approve / Reject are filled buttons for high-contrast visibility.
+  // Edit is a secondary outlined button. Read-only states fall through
+  // to a muted status label.
   return (
     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
       {showApproveReject && (
@@ -43,14 +47,24 @@ export default function ContentQueueActions({ id, status, onDelete, onEdit }: Pr
           <button
             onClick={() => handleAction('approve')}
             disabled={loading}
-            style={{ fontSize: 11, padding: '4px 10px', background: '#e8f5e9', color: '#2e7d32', border: '1px solid #c8e6c9', borderRadius: 3, cursor: 'pointer' }}
+            style={{
+              fontSize: 12, fontWeight: 600, padding: '6px 14px',
+              background: '#2e7d32', color: '#fff',
+              border: '1px solid #2e7d32', borderRadius: 4,
+              cursor: 'pointer', opacity: loading ? 0.5 : 1,
+            }}
           >
             Approve
           </button>
           <button
             onClick={() => handleAction('reject')}
             disabled={loading}
-            style={{ fontSize: 11, padding: '4px 10px', background: '#fce4ec', color: '#c62828', border: '1px solid #f8bbd0', borderRadius: 3, cursor: 'pointer' }}
+            style={{
+              fontSize: 12, fontWeight: 600, padding: '6px 14px',
+              background: '#c62828', color: '#fff',
+              border: '1px solid #c62828', borderRadius: 4,
+              cursor: 'pointer', opacity: loading ? 0.5 : 1,
+            }}
           >
             Reject
           </button>
@@ -60,7 +74,12 @@ export default function ContentQueueActions({ id, status, onDelete, onEdit }: Pr
         <button
           onClick={onEdit}
           disabled={loading}
-          style={{ fontSize: 11, padding: '4px 10px', background: '#fff', color: '#555', border: '1px solid #e8e8e8', borderRadius: 3, cursor: 'pointer' }}
+          style={{
+            fontSize: 12, fontWeight: 500, padding: '6px 14px',
+            background: '#fff', color: '#555',
+            border: '1px solid #d0d0d0', borderRadius: 4,
+            cursor: 'pointer', opacity: loading ? 0.5 : 1,
+          }}
         >
           Edit
         </button>
@@ -69,7 +88,12 @@ export default function ContentQueueActions({ id, status, onDelete, onEdit }: Pr
         <button
           onClick={handleDelete}
           disabled={loading}
-          style={{ fontSize: 11, padding: '4px 10px', background: '#fff', color: '#c62828', border: '1px solid #e8e8e8', borderRadius: 3, cursor: 'pointer' }}
+          style={{
+            fontSize: 12, fontWeight: 500, padding: '6px 14px',
+            background: '#fff', color: '#c62828',
+            border: '1px solid #fecaca', borderRadius: 4,
+            cursor: 'pointer', opacity: loading ? 0.5 : 1,
+          }}
         >
           Delete
         </button>
