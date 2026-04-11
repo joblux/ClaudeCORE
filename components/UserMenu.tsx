@@ -9,7 +9,11 @@ export default function UserMenu() {
   const { isAuthenticated, isLoading, name, firstName, image, isApproved, status } =
     useMember();
   const [open, setOpen] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Reset error state if the image URL itself changes (e.g. session refresh)
+  useEffect(() => { setImgError(false); }, [image]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -39,6 +43,7 @@ export default function UserMenu() {
 
   const displayName = firstName || name?.split(" ")[0] || "Member";
   const initials = displayName.charAt(0).toUpperCase();
+  const showImage = !!image && !imgError;
 
   return (
     <div className="relative" ref={menuRef}>
@@ -46,12 +51,14 @@ export default function UserMenu() {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 hover:opacity-80 transition-opacity"
       >
-        {image ? (
+        {showImage ? (
           <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border border-[#333]">
             <img
-              src={image}
+              src={image as string}
               alt={displayName}
               className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+              onError={() => setImgError(true)}
             />
           </div>
         ) : (
