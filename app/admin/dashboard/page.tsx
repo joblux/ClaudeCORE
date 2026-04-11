@@ -4,11 +4,15 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { useRequireAdmin } from '@/lib/auth-hooks'
+import type { AdminMetrics } from '@/lib/admin-metrics'
 import {
   Briefcase, PenLine, UserCheck, Download, Send,
   CheckCircle2, Circle
 } from 'lucide-react'
 
+// Anon client is still used for the Recent Activity feed (members,
+// contributions). KPI counts come from /api/admin/metrics — the single
+// shared source of truth — never from this client.
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -113,39 +117,28 @@ export default function AdminDashboardPage() {
   }, [isAdmin])
 
   async function fetchKPIs() {
-    // members table is RLS-locked from anon, so the member counts must
-    // come from a service-role admin endpoint. Other tables are readable
-    // by anon and stay on the direct supabase client.
-    type MemberCounts = { total_members?: number; pending_members?: number }
-    const [
-      memberCounts,
-      totalAssignments, activeAssignments,
-      totalArticles,
-      totalBrands,
-      totalSalaries,
-      totalInterviews,
-    ] = await Promise.all([
-      fetch('/api/admin/sidebar-counts', { cache: 'no-store' })
-        .then(r => r.ok ? r.json() : ({}))
-        .catch(() => ({})) as Promise<MemberCounts>,
-      supabase.from('search_assignments').select('id', { count: 'exact', head: true }),
-      supabase.from('search_assignments').select('id', { count: 'exact', head: true }).eq('status', 'published'),
-      supabase.from('bloglux_articles').select('id', { count: 'exact', head: true }).is('deleted_at', null),
-      fetch('/api/brands/stats', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ total: 0, published: 0 })),
-      supabase.from('salary_benchmarks').select('id', { count: 'exact', head: true }),
-      supabase.from('interview_experiences').select('id', { count: 'exact', head: true }).is('deleted_at', null),
-    ])
+    // Single shared source of truth for admin product KPIs.
+    // Server-side reads via service-role inside lib/admin-metrics.ts.
+    // Do NOT add direct supabase reads here for KPI numbers.
+    let m: AdminMetrics | null = null
+    try {
+      const res = await fetch('/api/admin/metrics', { cache: 'no-store' })
+      if (res.ok) m = (await res.json()) as AdminMetrics
+    } catch {
+      /* leave m null → kpis stay at their initial 0 values */
+    }
+    if (!m) return
 
     setKpis({
-      members: memberCounts.total_members ?? 0,
-      pendingMembers: memberCounts.pending_members ?? 0,
-      assignments: totalAssignments.count ?? 0,
-      activeAssignments: activeAssignments.count ?? 0,
-      articles: totalArticles.count ?? 0,
-      brands: totalBrands.total ?? 0,
+      members: m.members.total,
+      pendingMembers: m.members.pending,
+      assignments: m.assignments.total,
+      activeAssignments: m.assignments.active,
+      articles: m.articles.total,
+      brands: m.brands.total,
       failedBrands: 0,
-      salaries: totalSalaries.count ?? 0,
-      interviews: totalInterviews.count ?? 0,
+      salaries: m.salaries.total,
+      interviews: m.interviews.total,
       houses: 0,
     })
   }

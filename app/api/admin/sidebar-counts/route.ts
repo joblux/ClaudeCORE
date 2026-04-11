@@ -1,7 +1,16 @@
+// Sidebar badge counts.
+//
+// Member-related counts (total/pending/pending_business) are sourced
+// from lib/admin-metrics.getAdminMetrics() so the sidebar and the
+// dashboard can never disagree. Review-queue counts (unread messages,
+// pending contributions, etc.) stay local — those are sidebar-specific
+// and not part of the product KPI source of truth.
+
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { getAdminMetrics } from '@/lib/admin-metrics'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,16 +25,14 @@ export async function GET() {
   if (!isAdmin) return NextResponse.json({}, { status: 401 })
 
   try {
-    const [unreadRes, contribRes, commentsRes, internshipsRes, contactRes, consultRes, pendingMembersRes, pendingBusinessRes, totalMembersRes] = await Promise.all([
+    const [unreadRes, contribRes, commentsRes, internshipsRes, contactRes, consultRes, metrics] = await Promise.all([
       supabase.from('conversations').select('id', { count: 'exact', head: true }).gt('unread_count', 0),
       supabase.from('contributions').select('id', { count: 'exact', head: true }).eq('status', 'pending').is('deleted_at', null),
       supabase.from('bloglux_comments').select('id', { count: 'exact', head: true }).eq('is_approved', false),
       supabase.from('internship_listings').select('id', { count: 'exact', head: true }).eq('status', 'pending_review'),
       supabase.from('contact_messages').select('id', { count: 'exact', head: true }).eq('status', 'new'),
       supabase.from('escape_consultations').select('id', { count: 'exact', head: true }).eq('status', 'new'),
-      supabase.from('members').select('id', { count: 'exact', head: true }).eq('status', 'pending').neq('role', 'business'),
-      supabase.from('members').select('id', { count: 'exact', head: true }).eq('status', 'pending').eq('role', 'business'),
-      supabase.from('members').select('id', { count: 'exact', head: true }),
+      getAdminMetrics(),
     ])
 
     return NextResponse.json({
@@ -35,9 +42,10 @@ export async function GET() {
       pending_internships: internshipsRes.count ?? 0,
       new_contact: contactRes.count ?? 0,
       pending_consultations: consultRes.count ?? 0,
-      pending_members: pendingMembersRes.count ?? 0,
-      pending_businesses: pendingBusinessRes.count ?? 0,
-      total_members: totalMembersRes.count ?? 0,
+      // Member counts come from the shared admin-metrics source
+      pending_members: metrics.members.pending,
+      pending_businesses: metrics.members.pending_business,
+      total_members: metrics.members.total,
     })
   } catch {
     return NextResponse.json({})
