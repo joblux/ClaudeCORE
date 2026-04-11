@@ -62,9 +62,14 @@ type AdminTask = { id: string; label: string; done: boolean; category: string; c
 
 const CHECKLIST_VISIBLE = 8
 
-// ── System status (TODO: pull from Coolify/Supabase/Anthropic APIs in future) ──
+// ── System status panel ──
+//
+// Repurposed from a stub to render doctrine alerts + queue depth from
+// the shared admin metrics. Each entry is computed in the component
+// from `metrics` so the panel reflects the same source of truth as
+// the KPI tiles.
 
-const SYSTEM_STATUS: { service: string; detail: string; status: 'green' | 'amber' | 'red' }[] = []
+type StatusEntry = { service: string; detail: string; status: 'green' | 'amber' | 'red' }
 
 // ── Main component ───────────────────────────────────────────────────────────
 
@@ -72,6 +77,7 @@ export default function AdminDashboardPage() {
   const { isAdmin, isLoading: authLoading, name } = useRequireAdmin()
 
   const [loading, setLoading] = useState(true)
+  const [metrics, setMetrics] = useState<AdminMetrics | null>(null)
   const [kpis, setKpis] = useState({
     members: 0, pendingMembers: 0,
     assignments: 0, activeAssignments: 0,
@@ -129,15 +135,19 @@ export default function AdminDashboardPage() {
     }
     if (!m) return
 
+    setMetrics(m)
     setKpis({
       members: m.members.total,
       pendingMembers: m.members.pending,
       assignments: m.assignments.total,
       activeAssignments: m.assignments.active,
-      articles: m.articles.total,
+      // INTELLIGENCE tile reads the published-only count.
+      articles: m.articles.published,
       brands: m.brands.total,
       failedBrands: 0,
-      salaries: m.salaries.total,
+      // SALARY INTELLIGENCE tile reads the sourced-only count.
+      // This will display 0 until salary records gain source URLs.
+      salaries: m.salaries.sourced,
       interviews: m.interviews.total,
       houses: 0,
     })
@@ -213,6 +223,40 @@ export default function AdminDashboardPage() {
   const tasksDone = tasks.filter(t => t.done).length
   const tasksTotal = tasks.length
   const visibleTasks = tasks.filter(t => !t.done).slice(0, CHECKLIST_VISIBLE)
+
+  // Compute System Status entries from the shared admin metrics.
+  // Doctrine alerts render as red, queue depth as amber, nothing
+  // when the platform is clean.
+  const systemStatus: StatusEntry[] = []
+  if (metrics) {
+    const ai = metrics.alerts.ai_in_forbidden_families
+    if (ai.total > 0) {
+      const parts: string[] = []
+      if (ai.articles > 0)   parts.push(`${ai.articles} articles`)
+      if (ai.events > 0)     parts.push(`${ai.events} events`)
+      if (ai.salaries > 0)   parts.push(`${ai.salaries} salaries`)
+      if (ai.interviews > 0) parts.push(`${ai.interviews} interviews`)
+      systemStatus.push({
+        service: 'AI in forbidden families',
+        detail: parts.join(' · '),
+        status: 'red',
+      })
+    }
+    if (metrics.alerts.salaries_missing_source > 0) {
+      systemStatus.push({
+        service: 'Salary source URLs',
+        detail: `${metrics.alerts.salaries_missing_source} missing`,
+        status: 'red',
+      })
+    }
+    if (metrics.queue.drafts > 0) {
+      systemStatus.push({
+        service: 'Content queue',
+        detail: `${metrics.queue.drafts} draft${metrics.queue.drafts !== 1 ? 's' : ''}`,
+        status: 'amber',
+      })
+    }
+  }
 
   // KPI sub-labels: only render meaningful product facts. Removed
   // misleading dev/admin labels ('All seeded', 'All reviewed',
@@ -348,25 +392,28 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* Column 3: System Status */}
+          {/* Column 3: System Status — doctrine alerts + queue depth from shared admin metrics */}
           <div className="border border-[#e8e8e8] rounded-xl p-4 bg-[#f5f5f5]">
             <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] block mb-3">System Status</span>
-            <div className="space-y-2.5">
-              {SYSTEM_STATUS.map((item) => (
-                <div key={item.service} className="flex items-start gap-2.5">
-                  <span className={`w-2 h-2 rounded-full mt-1 flex-shrink-0 ${
-                    item.status === 'green' ? 'bg-green-500' :
-                    item.status === 'amber' ? 'bg-amber-500' :
-                    'bg-red-500'
-                  }`} />
-                  <div className="min-w-0">
-                    <div className="text-xs text-[#1a1a1a] font-medium">{item.service}</div>
-                    <div className="text-[0.6rem] font-normal text-[#aaa]">{item.detail}</div>
+            {systemStatus.length === 0 ? (
+              <p className="text-xs text-[#999]">No alerts.</p>
+            ) : (
+              <div className="space-y-2.5">
+                {systemStatus.map((item) => (
+                  <div key={item.service} className="flex items-start gap-2.5">
+                    <span className={`w-2 h-2 rounded-full mt-1 flex-shrink-0 ${
+                      item.status === 'green' ? 'bg-green-500' :
+                      item.status === 'amber' ? 'bg-amber-500' :
+                      'bg-red-500'
+                    }`} />
+                    <div className="min-w-0">
+                      <div className="text-xs text-[#1a1a1a] font-medium">{item.service}</div>
+                      <div className="text-[0.6rem] font-normal text-[#aaa]">{item.detail}</div>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-            {/* TODO: Pull real data from Coolify, Supabase, Anthropic APIs when available */}
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
