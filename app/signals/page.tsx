@@ -3,6 +3,9 @@
 import { useState, useEffect, Fragment } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
+import Pagination from '@/components/ui/Pagination'
+
+const PAGE_SIZE = 20
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -86,6 +89,10 @@ export default function SignalsPage() {
   const [signals, setSignals] = useState(placeholderSignals)
   const [talentSignals, setTalentSignals] = useState<any[]>([])
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+
+  // Reset to page 1 whenever the filter changes
+  useEffect(() => { setCurrentPage(1) }, [activeFilter])
 
   useEffect(() => {
     async function fetchAll() {
@@ -95,7 +102,7 @@ export default function SignalsPage() {
         .select('*')
         .eq('is_published', true)
         .order('published_at', { ascending: false })
-        .limit(30)
+        .limit(200)
       if (signalData && signalData.length > 0) setSignals(signalData)
 
       // Talent radar | leadership/talent category signals for sidebar
@@ -143,6 +150,11 @@ export default function SignalsPage() {
   const tier1Signals = filtered.filter(isTier1).sort(byDateDesc)
   const tier2Signals = filtered.filter((s: any) => !isTier1(s)).sort(byDateDesc)
   const orderedSignals = [...tier1Signals, ...tier2Signals]
+
+  const pageCount = Math.max(1, Math.ceil(orderedSignals.length / PAGE_SIZE))
+  const safePage = Math.min(currentPage, pageCount)
+  const pageStart = (safePage - 1) * PAGE_SIZE
+  const pageSignals = orderedSignals.slice(pageStart, pageStart + PAGE_SIZE)
 
   const truncate = (s: string, n: number) =>
     s.length > n ? s.substring(0, n).trimEnd() + '…' : s
@@ -196,7 +208,8 @@ export default function SignalsPage() {
               <p className="text-[13px] text-[#999] py-8">No signals match this filter.</p>
             )}
 
-            {orderedSignals.map((signal: any, idx: number) => {
+            {pageSignals.map((signal: any, localIdx: number) => {
+              const idx = pageStart + localIdx
               const colors = BADGE_COLORS[signal.category] || { bg: 'rgba(136,136,136,0.15)', text: '#888' }
               const label = CATEGORY_LABELS[signal.category] || signal.category?.toUpperCase() || 'SIGNAL'
               const href = `/signals/${signal.slug || signal.id}`
@@ -305,6 +318,13 @@ export default function SignalsPage() {
                 </Fragment>
               )
             })}
+
+            <Pagination
+              page={safePage}
+              pageCount={pageCount}
+              onPageChange={setCurrentPage}
+              theme="dark"
+            />
           </div>
 
           {/* RIGHT | Sidebar */}

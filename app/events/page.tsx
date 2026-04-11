@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
+import Pagination from '@/components/ui/Pagination'
+
+const PAGE_SIZE = 12
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -45,6 +48,10 @@ export default function EventsPage() {
   const [activeFilter, setActiveFilter] = useState('All sectors')
   const [events, setEvents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+
+  // Reset to page 1 whenever the filter changes
+  useEffect(() => { setCurrentPage(1) }, [activeFilter])
 
   useEffect(() => {
     async function fetchEvents() {
@@ -53,7 +60,7 @@ export default function EventsPage() {
         .select('*')
         .eq('is_published', true)
         .order('event_date', { ascending: true })
-        .limit(50)
+        .limit(200)
       if (data) setEvents(data)
       setLoading(false)
     }
@@ -67,8 +74,15 @@ export default function EventsPage() {
     return e.sector === activeFilter
   })
 
-  // Group by month
-  const grouped = filtered.reduce((acc: Record<string, any[]>, event) => {
+  // Paginate the filtered list BEFORE grouping so the month-grouped UI on
+  // each page is naturally bounded by PAGE_SIZE.
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const safePage = Math.min(currentPage, pageCount)
+  const pageStart = (safePage - 1) * PAGE_SIZE
+  const pageEvents = filtered.slice(pageStart, pageStart + PAGE_SIZE)
+
+  // Group the current page by month
+  const grouped = pageEvents.reduce((acc: Record<string, any[]>, event) => {
     const key = event.month || 'Upcoming'
     if (!acc[key]) acc[key] = []
     acc[key].push(event)
@@ -234,6 +248,13 @@ export default function EventsPage() {
             {filtered.length === 0 && (
               <p className="text-sm text-[#999] py-10 text-center">No events found for this filter.</p>
             )}
+
+            <Pagination
+              page={safePage}
+              pageCount={pageCount}
+              onPageChange={setCurrentPage}
+              theme="dark"
+            />
           </div>
 
           {/* ── Sidebar ── */}

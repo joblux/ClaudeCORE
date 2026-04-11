@@ -4,6 +4,9 @@ import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
+import Pagination from '@/components/ui/Pagination'
+
+const EDITORIAL_PAGE_SIZE = 3
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -78,6 +81,10 @@ function InsightsPageInner() {
   const [mostRead, setMostRead] = useState<any[]>([])
   const [pinnedFeatured, setPinnedFeatured] = useState<any>(null)
   const [email, setEmail] = useState('')
+  const [editorialPage, setEditorialPage] = useState(1)
+
+  // Reset editorial pagination when switching tabs
+  useEffect(() => { setEditorialPage(1) }, [activeTab])
 
   useEffect(() => {
     async function fetchAll() {
@@ -109,7 +116,7 @@ function InsightsPageInner() {
         .not('category', 'in', '("Research Report","Insider Voice")')
         .is('deleted_at', null)
         .order('published_at', { ascending: false })
-        .limit(6)
+        .limit(60)
 
       if (articleData && articleData.length > 0) {
         setArticles(articleData.map((a: any) => ({
@@ -184,10 +191,18 @@ function InsightsPageInner() {
     fetchAll()
   }, [])
 
+  // Featured stays on page 1 only. The "rest" list paginates.
+  // Remove the featured article from the rest pool so it's never shown twice.
   const featured = pinnedFeatured || articles[0]
-  const rest = pinnedFeatured
-    ? articles.filter(a => a.id !== pinnedFeatured.id).slice(0, 3)
-    : articles.slice(1, 4)
+  const restPool = pinnedFeatured
+    ? articles.filter(a => a.id !== pinnedFeatured.id)
+    : articles.slice(1)
+
+  const editorialPageCount = Math.max(1, Math.ceil(restPool.length / EDITORIAL_PAGE_SIZE))
+  const safeEditorialPage = Math.min(editorialPage, editorialPageCount)
+  const editorialStart = (safeEditorialPage - 1) * EDITORIAL_PAGE_SIZE
+  const rest = restPool.slice(editorialStart, editorialStart + EDITORIAL_PAGE_SIZE)
+  const showFeatured = safeEditorialPage === 1
 
   const displayMostRead = mostRead
 
@@ -223,10 +238,10 @@ function InsightsPageInner() {
 
         {/* ── EDITORIAL TAB ── */}
         {activeTab === 'Editorial' && (
-          <div className={`grid grid-cols-1 ${displayMostRead.length >= 8 ? 'lg:grid-cols-[1fr_280px]' : ''} gap-10`}>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-10">
             <div>
               {/* Featured */}
-              {featured && (
+              {showFeatured && featured && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 items-center">
                   <div className="bg-[#222] border border-[#2a2a2a] rounded-xl h-72 overflow-hidden relative">
                     {featured.cover_image_url ? (
@@ -257,7 +272,7 @@ function InsightsPageInner() {
                 <span className="text-[9px] font-medium tracking-[1.5px] text-[#777]">LATEST INTELLIGENCE</span>
                 <div className="flex-1 h-px bg-[#222]" />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 {rest.map(article => (
                   <Link key={article.id} href={`/insights/${article.slug}`} className="group cursor-pointer">
                     <div className="bg-[#222] border border-[#2a2a2a] rounded-lg h-44 mb-3 overflow-hidden relative">
@@ -279,38 +294,50 @@ function InsightsPageInner() {
                 ))}
               </div>
 
-              {/* Research reports preview */}
-              <div className="flex items-center gap-3 mb-5">
-                <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">JOBLUX RESEARCH</span>
-                <div className="flex-1 h-px bg-[#2a2a2a]" />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-                {reports.slice(0, 4).map(r => (
-                  <Link key={r.title} href={r.slug ? `/insights/${r.slug}` : '#'} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 flex gap-4 hover:border-[#3a3a3a] transition-colors block">
-                    <div className="w-11 h-11 rounded-lg flex items-center justify-center text-lg flex-shrink-0" style={{ background: 'rgba(165,142,40,0.1)', border: '1px solid rgba(165,142,40,0.2)' }}>
-                      {r.icon}
-                    </div>
-                    <div>
-                      <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-1">{r.label}</div>
-                      <div className="text-sm font-medium text-[#e0e0e0] mb-1 leading-snug">{r.title}</div>
-                      <div className="text-[11px] text-[#999]">{r.meta}</div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+              <Pagination
+                page={safeEditorialPage}
+                pageCount={editorialPageCount}
+                onPageChange={setEditorialPage}
+                theme="dark"
+                className="mb-10"
+              />
 
-              {/* Insider voices preview */}
-              <div className="flex items-center gap-3 mb-5">
-                <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">INSIDER VOICES</span>
-                <div className="flex-1 h-px bg-[#2a2a2a]" />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {voices.slice(0, 3).map((v, i) => <VoiceCard key={i} v={v} />)}
-              </div>
+              {/* Front-page-only previews — hidden on archive pages (page 2+) */}
+              {showFeatured && (
+                <>
+                  {/* Research reports preview */}
+                  <div className="flex items-center gap-3 mb-5">
+                    <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">JOBLUX RESEARCH</span>
+                    <div className="flex-1 h-px bg-[#2a2a2a]" />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+                    {reports.slice(0, 4).map(r => (
+                      <Link key={r.title} href={r.slug ? `/insights/${r.slug}` : '#'} className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5 flex gap-4 hover:border-[#3a3a3a] transition-colors block">
+                        <div className="w-11 h-11 rounded-lg flex items-center justify-center text-lg flex-shrink-0" style={{ background: 'rgba(165,142,40,0.1)', border: '1px solid rgba(165,142,40,0.2)' }}>
+                          {r.icon}
+                        </div>
+                        <div>
+                          <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-1">{r.label}</div>
+                          <div className="text-sm font-medium text-[#e0e0e0] mb-1 leading-snug">{r.title}</div>
+                          <div className="text-[11px] text-[#999]">{r.meta}</div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+
+                  {/* Insider voices preview */}
+                  <div className="flex items-center gap-3 mb-5">
+                    <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">INSIDER VOICES</span>
+                    <div className="flex-1 h-px bg-[#2a2a2a]" />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {voices.slice(0, 3).map((v, i) => <VoiceCard key={i} v={v} />)}
+                  </div>
+                </>
+              )}
             </div>
 
-            {/* Sidebar */}
-            {displayMostRead.length >= 8 && (
+            {/* Sidebar — always rendered on lg screens */}
             <div className="space-y-8">
               <div>
                 <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-4">MOST READ</div>
@@ -360,7 +387,6 @@ function InsightsPageInner() {
                 </button>
               </div>
             </div>
-            )}
           </div>
         )}
 

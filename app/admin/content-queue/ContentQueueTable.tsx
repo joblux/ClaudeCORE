@@ -2,6 +2,9 @@
 
 import { useState } from 'react'
 import ContentQueueActions from './ContentQueueActions'
+import Pagination from '@/components/ui/Pagination'
+
+const PAGE_SIZE = 25
 
 type QueueItem = {
   id: string
@@ -35,6 +38,12 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [saving, setSaving] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
+  const safePage = Math.min(currentPage, pageCount)
+  const pageStart = (safePage - 1) * PAGE_SIZE
+  const visibleRows = rows.slice(pageStart, pageStart + PAGE_SIZE)
 
   const handleDelete = (id: string) => {
     setRows(prev => prev.filter(r => r.id !== id))
@@ -82,7 +91,7 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
           </tr>
         </thead>
         <tbody>
-          {rows.map(item => {
+          {visibleRows.map(item => {
             const badge = statusBadge[item.status] || statusBadge.draft
             const isExpanded = expandedId === item.id
             const isEditing = editingId === item.id
@@ -173,6 +182,13 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
           })}
         </tbody>
       </table>
+
+      <Pagination
+        page={safePage}
+        pageCount={pageCount}
+        onPageChange={setCurrentPage}
+        theme="light"
+      />
     </div>
   )
 }

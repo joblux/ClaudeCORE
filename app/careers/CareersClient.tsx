@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import Pagination from '@/components/ui/Pagination'
+
+const ASSIGNMENTS_PAGE_SIZE = 10
 
 const TAB_SLUG_MAP: Record<string, string> = { 'salary-intelligence': 'salary', 'interview-experiences': 'interview' }
 const TAB_TO_SLUG: Record<string, string> = { 'assignments': '', 'salary': 'salary-intelligence', 'interview': 'interview-experiences' }
@@ -75,6 +78,14 @@ export default function CareersClient({
 
   // Reset salary sub-tab when switching to salary tab
   useEffect(() => { if (activeTab === 'salary') setSalarySubTab('browse') }, [activeTab])
+
+  // Assignments pagination
+  const [assignmentsPage, setAssignmentsPage] = useState(1)
+  useEffect(() => { setAssignmentsPage(1) }, [activeTab])
+  const assignmentsPageCount = Math.max(1, Math.ceil(assignments.length / ASSIGNMENTS_PAGE_SIZE))
+  const safeAssignmentsPage = Math.min(assignmentsPage, assignmentsPageCount)
+  const assignmentsStart = (safeAssignmentsPage - 1) * ASSIGNMENTS_PAGE_SIZE
+  const visibleAssignments = assignments.slice(assignmentsStart, assignmentsStart + ASSIGNMENTS_PAGE_SIZE)
 
   // Contribution points state
   const [contributionPoints, setContributionPoints] = useState(0)
@@ -329,7 +340,7 @@ export default function CareersClient({
 
             {/* Assignment cards */}
             <div className="space-y-2">
-              {assignments.map(a => {
+              {visibleAssignments.map(a => {
                 const isNew = a.activated_at && (Date.now() - new Date(a.activated_at).getTime()) < 7 * 24 * 3600000
                 const displayMaison = a.is_confidential ? null : a.maison
                 const locationStr = a.location || [a.city, a.country].filter(Boolean).join(', ')
@@ -372,6 +383,13 @@ export default function CareersClient({
                 )
               })}
             </div>
+
+            <Pagination
+              page={safeAssignmentsPage}
+              pageCount={assignmentsPageCount}
+              onPageChange={setAssignmentsPage}
+              theme="dark"
+            />
           </div>
         )}
 
