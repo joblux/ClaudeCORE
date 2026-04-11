@@ -131,14 +131,6 @@ export default function AdminDashboardPage() {
       supabase.from('interview_experiences').select('id', { count: 'exact', head: true }).is('deleted_at', null),
     ])
 
-    // Count unique houses from interviews
-    const { data: houseData } = await supabase
-      .from('interview_experiences')
-      .select('company')
-      .is('deleted_at', null)
-
-    const uniqueHouses = new Set((houseData || []).map(h => h.company).filter(Boolean)).size
-
     setKpis({
       members: totalMembers.count ?? 0,
       pendingMembers: pendingMembers.count ?? 0,
@@ -149,7 +141,7 @@ export default function AdminDashboardPage() {
       failedBrands: 0,
       salaries: totalSalaries.count ?? 0,
       interviews: totalInterviews.count ?? 0,
-      houses: uniqueHouses,
+      houses: 0,
     })
   }
 
@@ -175,10 +167,14 @@ export default function AdminDashboardPage() {
         .neq('role', 'admin')
         .order('created_at', { ascending: false })
         .limit(6),
+      // Exclude interview_experience contributions: the interview module
+      // is discarded and interview_experiences is empty, so these rows
+      // are ghost activity referencing nothing real.
       supabase
         .from('contributions')
         .select('id, contribution_type, brand_name, status, created_at')
         .is('deleted_at', null)
+        .neq('contribution_type', 'interview_experience')
         .order('created_at', { ascending: false })
         .limit(6),
     ])
@@ -220,18 +216,21 @@ export default function AdminDashboardPage() {
   const tasksTotal = tasks.length
   const visibleTasks = tasks.filter(t => !t.done).slice(0, CHECKLIST_VISIBLE)
 
-  const kpiCards = [
+  // KPI sub-labels: only render meaningful product facts. Removed
+  // misleading dev/admin labels ('All seeded', 'All reviewed',
+  // 'All cached') and meaningless secondary stats (e.g. 'X houses').
+  const kpiCards: { label: string; value: number; sub: string | null; subColor: string }[] = [
     {
       label: 'PROFILES',
       value: kpis.members,
-      sub: kpis.pendingMembers > 0 ? `+${kpis.pendingMembers} pending` : 'All reviewed',
-      subColor: kpis.pendingMembers > 0 ? 'text-green-600' : 'text-[#999]',
+      sub: kpis.pendingMembers > 0 ? `+${kpis.pendingMembers} pending` : null,
+      subColor: 'text-green-600',
     },
     {
       label: 'ASSIGNMENTS',
       value: kpis.assignments,
-      sub: kpis.activeAssignments > 0 ? `${kpis.activeAssignments} active` : 'No active',
-      subColor: kpis.activeAssignments > 0 ? 'text-green-600' : 'text-[#999]',
+      sub: kpis.activeAssignments > 0 ? `${kpis.activeAssignments} active` : null,
+      subColor: 'text-green-600',
     },
     {
       label: 'INTELLIGENCE',
@@ -242,19 +241,19 @@ export default function AdminDashboardPage() {
     {
       label: 'WIKILUX',
       value: kpis.brands,
-      sub: kpis.failedBrands > 0 ? `${kpis.failedBrands} failed` : 'All cached',
-      subColor: kpis.failedBrands > 0 ? 'text-amber-600' : 'text-green-600',
+      sub: kpis.failedBrands > 0 ? `${kpis.failedBrands} failed` : null,
+      subColor: 'text-amber-600',
     },
     {
       label: 'SALARY INTELLIGENCE',
       value: kpis.salaries,
-      sub: 'All seeded',
-      subColor: 'text-green-600',
+      sub: null,
+      subColor: 'text-[#999]',
     },
     {
       label: 'INTERVIEWS',
       value: kpis.interviews,
-      sub: `${kpis.houses} houses`,
+      sub: null,
       subColor: 'text-[#999]',
     },
   ]
@@ -277,7 +276,9 @@ export default function AdminDashboardPage() {
             <div key={kpi.label} className="bg-gray-50 rounded-lg p-3">
               <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#999] mb-1">{kpi.label}</div>
               <div className="text-xl font-medium text-[#1a1a1a]">{kpi.value}</div>
-              <div className={`text-[0.6rem] font-normal mt-0.5 ${kpi.subColor}`}>{kpi.sub}</div>
+              {kpi.sub && (
+                <div className={`text-[0.6rem] font-normal mt-0.5 ${kpi.subColor}`}>{kpi.sub}</div>
+              )}
             </div>
           ))}
         </div>
