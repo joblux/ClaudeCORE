@@ -9,7 +9,8 @@ import {
   LayoutDashboard, Briefcase, Kanban, MessageSquare,
   Users, Building2, Star, FileText, BookOpen,
   Menu, X, LogOut, Mail, Newspaper,
-  Compass, ClipboardList, Settings, Sparkles, MessageCircle, Image, Trash2, CheckSquare
+  Compass, ClipboardList, Settings, Sparkles, MessageCircle, Image, Trash2, CheckSquare,
+  Activity, Calendar
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
@@ -32,6 +33,8 @@ const NAV_SECTIONS = [
     items: [
       { label: 'WikiLux', href: '/admin/wikilux', icon: BookOpen },
       { label: 'Insights', href: '/admin/articles', icon: FileText },
+      { label: 'Signals', href: '/admin/signals', icon: Activity },
+      { label: 'Events', href: '/admin/events', icon: Calendar },
       { label: 'Comments', href: '/admin/bloglux/comments', icon: MessageCircle, countKey: 'pending_comments' },
       { label: 'The Brief', href: '/admin/the-brief', icon: Newspaper },
     ],
@@ -86,6 +89,8 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   '/admin/messages': { title: 'Messages', subtitle: 'Member communications' },
   '/admin/contributions': { title: 'Contributions', subtitle: 'Command center' },
   '/admin/articles': { title: 'Insights', subtitle: 'BlogLux articles' },
+  '/admin/signals': { title: 'Signals', subtitle: 'Intelligence feed' },
+  '/admin/events': { title: 'Events', subtitle: 'Luxury industry calendar' },
   '/admin/bloglux/comments': { title: 'Comments', subtitle: 'Moderation queue' },
   '/admin/the-brief': { title: 'The Brief', subtitle: 'Newsletter management' },
   '/admin/wikilux': { title: 'WikiLux', subtitle: 'Brand encyclopedia' },
