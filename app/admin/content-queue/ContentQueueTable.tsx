@@ -12,11 +12,80 @@ type QueueItem = {
   title: string | null
   source_type: string | null
   source_name: string | null
+  source_url: string | null
   status: string
   created_at: string
   processed_content: Record<string, any> | null
   duplicate_state?: string | null
   duplicate_match?: { id: string; title: string; content_type: string; status: string; source: string } | null
+}
+
+// ── Doctrine flags ──────────────────────────────────────────────────────────
+//
+// The content_queue table itself does NOT carry content_origin,
+// confidence, or requires_review columns. The doctrine flags below are
+// derived from the columns that DO exist:
+//
+//   - source_url        is required when source_type='external_feed'
+//   - source_type       implies the post-approve content_origin:
+//                         joblux_generation → 'ai' / 'luxai'
+//                         external_feed     → 'rss' / 'external'
+//   - processed_content.confidence is the only confidence signal
+//                         available, and only for signal rows. Values
+//                         are strings ('high' | 'medium' | 'low'),
+//                         not numeric scores.
+//
+// JOBLUX_MASTER_DOCTRINE_2026-04-10.md:218 forbids content_origin in
+// ('ai','luxai') for the families: bloglux_articles (article), events,
+// salary_benchmarks, interview_experiences. signals are exempt.
+const FORBIDDEN_AI_FAMILIES = new Set(['article', 'event', 'salary_benchmark', 'interview'])
+
+type DoctrineFlag = {
+  key: string
+  label: string
+  tone: 'red' | 'amber'
+  title: string
+}
+
+function computeDoctrineFlags(row: QueueItem): DoctrineFlag[] {
+  const flags: DoctrineFlag[] = []
+
+  // Missing source_url when required (external_feed must have origin URL)
+  if (row.source_type === 'external_feed' && !(row.source_url && row.source_url.trim())) {
+    flags.push({
+      key: 'no-source-url',
+      label: 'NO SOURCE URL',
+      tone: 'red',
+      title: 'source_type=external_feed but source_url is missing',
+    })
+  }
+
+  // Forbidden-family AI origin (derived from source_type since
+  // content_queue has no content_origin column)
+  if (
+    row.source_type === 'joblux_generation' &&
+    FORBIDDEN_AI_FAMILIES.has(row.content_type)
+  ) {
+    flags.push({
+      key: 'ai-forbidden',
+      label: 'AI · FORBIDDEN FAMILY',
+      tone: 'red',
+      title: `${row.content_type} cannot have content_origin in ('ai','luxai') per doctrine`,
+    })
+  }
+
+  // Low / medium confidence (signals only have a confidence signal today)
+  const conf = row.processed_content?.confidence
+  if (typeof conf === 'string' && conf.toLowerCase() !== 'high' && conf.trim() !== '') {
+    flags.push({
+      key: 'low-confidence',
+      label: `CONFIDENCE: ${conf.toUpperCase()}`,
+      tone: 'amber',
+      title: 'Confidence is not high — needs explicit review before approve',
+    })
+  }
+
+  return flags
 }
 
 const statusBadge: Record<string, { bg: string; text: string }> = {
@@ -95,6 +164,8 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
             const badge = statusBadge[item.status] || statusBadge.draft
             const isExpanded = expandedId === item.id
             const isEditing = editingId === item.id
+            const doctrineFlags = computeDoctrineFlags(item)
+            const needsReview = doctrineFlags.length > 0
             return (
               <>
                 <tr
@@ -143,13 +214,68 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                         </button>
                       </div>
                     ) : (
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
-                        {item.title || '\u2014'}
-                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+                          {item.title || '\u2014'}
+                        </span>
+                        {(needsReview || doctrineFlags.length > 0) && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                            {needsReview && (
+                              <span
+                                title="Doctrine flag(s) active — review required before approve"
+                                style={{
+                                  fontSize: 9, fontWeight: 700, letterSpacing: '0.08em',
+                                  padding: '2px 6px', borderRadius: 3,
+                                  background: '#fef2f2', color: '#dc2626',
+                                  border: '1px solid #fecaca',
+                                }}
+                              >
+                                REVIEW
+                              </span>
+                            )}
+                            {doctrineFlags.map(f => (
+                              <span
+                                key={f.key}
+                                title={f.title}
+                                style={{
+                                  fontSize: 9, fontWeight: 700, letterSpacing: '0.08em',
+                                  padding: '2px 6px', borderRadius: 3,
+                                  background: f.tone === 'red' ? '#fef2f2' : '#fff8e6',
+                                  color: f.tone === 'red' ? '#dc2626' : '#a58e28',
+                                  border: f.tone === 'red' ? '1px solid #fecaca' : '1px solid #f5e6a8',
+                                }}
+                              >
+                                {f.label}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     )}
                   </td>
                   <td style={{ padding: '12px', color: '#888', fontSize: 12 }}>{item.source_type || '\u2014'}</td>
-                  <td style={{ padding: '12px', color: '#888', fontSize: 12 }}>{item.source_name || '\u2014'}</td>
+                  <td style={{ padding: '12px', color: '#888', fontSize: 12 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {item.source_name || '\u2014'}
+                      </span>
+                      {item.source_url && (
+                        <a
+                          href={item.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
+                          title={item.source_url}
+                          style={{
+                            fontSize: 10, color: '#1565c0', textDecoration: 'none',
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          }}
+                        >
+                          source ↗
+                        </a>
+                      )}
+                    </div>
+                  </td>
                   <td style={{ padding: '12px' }}>
                     <span style={{
                       display: 'inline-block', fontSize: 10, fontWeight: 600,

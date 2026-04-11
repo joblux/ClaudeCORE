@@ -17,7 +17,7 @@ export default async function AdminContentQueuePage() {
 
   const { data: items } = await supabase
     .from('content_queue')
-    .select('id, content_type, title, source_type, source_name, status, created_at, processed_content, duplicate_state, duplicate_match')
+    .select('id, content_type, title, source_type, source_name, source_url, status, created_at, processed_content, duplicate_state, duplicate_match')
     .order('created_at', { ascending: false })
 
   const rows = items || []
