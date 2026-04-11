@@ -29,15 +29,11 @@ export default async function AdminContentQueuePage() {
         <div style={{ marginBottom: 24 }}>
           <h1 style={{ fontSize: 20, fontWeight: 600, color: '#111', margin: 0 }}>Content Queue</h1>
           <p style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
-            {rows.length} {rows.length === 1 ? 'item' : 'items'} in queue
+            Review and decide on incoming items.
           </p>
         </div>
 
-        {rows.length === 0 ? (
-          <p style={{ fontSize: 13, color: '#888', textAlign: 'center', padding: 40 }}>Queue is empty.</p>
-        ) : (
-          <ContentQueueTable rows={rows} />
-        )}
+        <ContentQueueTable rows={rows} />
       </div>
     </div>
   )

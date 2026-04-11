@@ -7,18 +7,22 @@ interface Props {
   status: string
   onDelete?: () => void
   onEdit?: () => void
+  // Reports a status change up to the parent so the queue table can
+  // re-filter the row out of its current view immediately. The parent
+  // is the source of truth for row state — this component reads
+  // `status` from props on every render.
+  onStatusChange?: (newStatus: string) => void
 }
 
-export default function ContentQueueActions({ id, status, onDelete, onEdit }: Props) {
-  const [currentStatus, setCurrentStatus] = useState(status)
+export default function ContentQueueActions({ id, status, onDelete, onEdit, onStatusChange }: Props) {
   const [loading, setLoading] = useState(false)
 
   const handleAction = async (action: 'approve' | 'reject') => {
     setLoading(true)
     try {
       const res = await fetch(`/api/admin/content-queue/${id}/${action}`, { method: 'POST' })
-      if (res.ok) {
-        setCurrentStatus(action === 'approve' ? 'published' : 'rejected')
+      if (res.ok && onStatusChange) {
+        onStatusChange(action === 'approve' ? 'published' : 'rejected')
       }
     } catch {}
     setLoading(false)
@@ -33,8 +37,8 @@ export default function ContentQueueActions({ id, status, onDelete, onEdit }: Pr
     setLoading(false)
   }
 
-  const showDelete = currentStatus === 'draft' || currentStatus === 'rejected'
-  const showApproveReject = currentStatus !== 'approved' && currentStatus !== 'rejected' && currentStatus !== 'published'
+  const showDelete = status === 'draft' || status === 'rejected'
+  const showApproveReject = status !== 'approved' && status !== 'rejected' && status !== 'published'
 
   // Decision actions are the primary CTA on every draft row.
   // Approve / Reject are filled buttons for high-contrast visibility.
@@ -99,7 +103,7 @@ export default function ContentQueueActions({ id, status, onDelete, onEdit }: Pr
         </button>
       )}
       {!showApproveReject && !showDelete && (
-        <span style={{ fontSize: 11, color: '#888' }}>{currentStatus}</span>
+        <span style={{ fontSize: 11, color: '#888' }}>{status}</span>
       )}
     </div>
   )

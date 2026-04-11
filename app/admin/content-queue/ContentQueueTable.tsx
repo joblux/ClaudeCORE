@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ContentQueueActions from './ContentQueueActions'
 import Pagination from '@/components/ui/Pagination'
 
@@ -101,21 +101,65 @@ function formatDate(dateStr: string | null): string {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
+// Filter tabs in display order. 'draft' is the default — the page is
+// a decision queue, not a history view.
+const STATUS_TABS: { key: string; label: string }[] = [
+  { key: 'draft',        label: 'Draft' },
+  { key: 'under_review', label: 'Under review' },
+  { key: 'rejected',     label: 'Rejected' },
+  { key: 'published',    label: 'Published' },
+]
+
 export default function ContentQueueTable({ rows: initialRows }: { rows: QueueItem[] }) {
   const [rows, setRows] = useState(initialRows)
+  const [statusFilter, setStatusFilter] = useState<string>('draft')
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [saving, setSaving] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
 
-  const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
+  // Reset pagination whenever the active filter changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { setCurrentPage(1) }, [statusFilter])
+
+  // Per-status counts computed from the local rows array. These drive
+  // both the filter chip labels and the implicit "header count" — the
+  // active chip's count IS the count of what is currently being shown.
+  const counts: Record<string, number> = {}
+  for (const tab of STATUS_TABS) counts[tab.key] = 0
+  for (const r of rows) {
+    if (counts[r.status] !== undefined) counts[r.status]++
+  }
+
+  // Filter, then sort flagged-first then newest-first
+  const filteredRows = rows.filter(r => r.status === statusFilter)
+  const sortedRows = [...filteredRows].sort((a, b) => {
+    const aFlagged = computeDoctrineFlags(a).length > 0 ? 1 : 0
+    const bFlagged = computeDoctrineFlags(b).length > 0 ? 1 : 0
+    if (aFlagged !== bFlagged) return bFlagged - aFlagged
+    const aTime = new Date(a.created_at).getTime()
+    const bTime = new Date(b.created_at).getTime()
+    return bTime - aTime
+  })
+
+  const pageCount = Math.max(1, Math.ceil(sortedRows.length / PAGE_SIZE))
   const safePage = Math.min(currentPage, pageCount)
   const pageStart = (safePage - 1) * PAGE_SIZE
-  const visibleRows = rows.slice(pageStart, pageStart + PAGE_SIZE)
+  const visibleRows = sortedRows.slice(pageStart, pageStart + PAGE_SIZE)
 
   const handleDelete = (id: string) => {
     setRows(prev => prev.filter(r => r.id !== id))
+    if (expandedId === id) setExpandedId(null)
+  }
+
+  // Lifted from ContentQueueActions: when a row is approved or rejected,
+  // update the row's status in this table's state so the filter
+  // automatically removes it from the Draft view and surfaces it under
+  // the appropriate tab. Without this, approved/rejected rows would
+  // linger in Draft until a full page reload.
+  const handleStatusChange = (id: string, newStatus: string) => {
+    setRows(prev => prev.map(r => (r.id === id ? { ...r, status: newStatus } : r)))
     if (expandedId === id) setExpandedId(null)
   }
 
@@ -148,7 +192,48 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
   }
 
   return (
-    <div style={{ overflowX: 'auto' }}>
+    <div>
+      {/* Status filter chips. Active chip's count IS the count of
+          rows currently rendered (filtered + sorted, paginated below). */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+        {STATUS_TABS.map(tab => {
+          const active = statusFilter === tab.key
+          const count = counts[tab.key] || 0
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setStatusFilter(tab.key)}
+              style={{
+                fontSize: 12, fontWeight: 600,
+                padding: '6px 12px', borderRadius: 6,
+                background: active ? '#111' : '#fff',
+                color: active ? '#fff' : '#555',
+                border: active ? '1px solid #111' : '1px solid #e8e8e8',
+                cursor: 'pointer',
+              }}
+            >
+              {tab.label}
+              <span
+                style={{
+                  marginLeft: 8, fontSize: 11, fontWeight: 700,
+                  padding: '1px 6px', borderRadius: 10,
+                  background: active ? 'rgba(255,255,255,0.18)' : '#f0f0f0',
+                  color: active ? '#fff' : '#888',
+                }}
+              >
+                {count}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      {sortedRows.length === 0 ? (
+        <p style={{ fontSize: 13, color: '#888', textAlign: 'center', padding: 40 }}>
+          No {statusFilter.replace('_', ' ')} items.
+        </p>
+      ) : (
+      <div style={{ overflowX: 'auto' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
         <thead>
           <tr style={{ borderBottom: '2px solid #111' }}>
@@ -327,6 +412,7 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                       status={item.status}
                       onDelete={() => handleDelete(item.id)}
                       onEdit={() => startEdit(item)}
+                      onStatusChange={(newStatus) => handleStatusChange(item.id, newStatus)}
                     />
                   </td>
                 </tr>
@@ -349,6 +435,8 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
         onPageChange={setCurrentPage}
         theme="light"
       />
+      </div>
+      )}
     </div>
   )
 }
