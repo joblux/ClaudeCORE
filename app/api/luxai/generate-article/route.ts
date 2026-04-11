@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { checkDuplicate } from '@/lib/duplicate-check'
+import {
+  insertLuxaiQueueItem,
+  checkLuxaiQueueDuplicate,
+  QueueValidationError,
+  queueValidationErrorResponse,
+  type LuxaiQueuePayload,
+} from '@/lib/luxai-rules'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -142,16 +148,13 @@ RULES:
 
     // Write to content_queue (canonical editorial gate) — not directly to bloglux_articles
     const slug = article.slug || article.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 80)
-    const _dupe = await checkDuplicate({ content_type: 'article', title: article.title, slug })
-    if (_dupe.isDuplicate) { console.warn('[JOBLUX DUPLICATE SKIPPED]', article.title); return NextResponse.json({ success: false, skipped: true, reason: 'duplicate', match: _dupe.match }) }
-    const { error } = await supabase.from('content_queue').insert({
+    const queuePayload: LuxaiQueuePayload = {
       content_type: 'article',
       source_type: 'joblux_generation',
       source_name: 'luxai',
       title: article.title,
       category: article.category,
       destination_table: 'bloglux_articles',
-      status: 'draft',
       processed_content: {
         title: article.title,
         subtitle: article.subtitle,
@@ -163,7 +166,10 @@ RULES:
         read_time_minutes: article.read_time || 5,
         brand_mentions: article.brand_mentions || [],
       },
-    })
+    }
+    const _dupe = await checkLuxaiQueueDuplicate(supabase, queuePayload)
+    if (_dupe.isDuplicate) { console.warn('[JOBLUX DUPLICATE SKIPPED]', article.title); return NextResponse.json({ success: false, skipped: true, reason: 'duplicate', match: _dupe.match }) }
+    const { error } = await insertLuxaiQueueItem(supabase, queuePayload)
 
     if (error) throw error
 
@@ -183,6 +189,9 @@ RULES:
       data: { title: article.title, cost, tokens: inputTokens + outputTokens }
     })
   } catch (error: any) {
+    if (error instanceof QueueValidationError) {
+      return queueValidationErrorResponse(error)
+    }
     console.error('Article generation error:', error)
     await supabase.from('luxai_history').insert({
       type: 'article_generation',

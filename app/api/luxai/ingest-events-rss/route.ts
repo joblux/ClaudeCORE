@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { XMLParser } from 'fast-xml-parser'
+import {
+  insertLuxaiQueueItem,
+  QueueValidationError,
+} from '@/lib/luxai-rules'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -179,27 +183,37 @@ export async function POST() {
           if (!structured) { totalSkipped++; continue }
 
           // Insert into content_queue
-          const { error: insertError } = await supabase.from('content_queue').insert({
-            content_type: 'event',
-            source_type: 'external_feed',
-            title: structured.title || structured.name || item.title,
-            raw_content: {
-              title: item.title,
-              link: item.link,
-              description: item.description,
-              pubDate: item.pubDate,
+          let insertError: any = null
+          try {
+            const res = await insertLuxaiQueueItem(supabase, {
+              content_type: 'event',
+              source_type: 'external_feed',
+              title: structured.title || structured.name || item.title,
+              raw_content: {
+                title: item.title,
+                link: item.link,
+                description: item.description,
+                pubDate: item.pubDate,
+                source_name: source.name,
+                feed_url: source.feed_url,
+              },
+              processed_content: structured,
               source_name: source.name,
-              feed_url: source.feed_url,
-            },
-            processed_content: structured,
-            source_name: source.name,
-            source_url: item.link,
-            byline: source.name,
-            category: structured.sector,
-            target_surfaces: ['events', 'homepage'],
-            destination_table: 'events',
-            status: 'draft',
-          })
+              source_url: item.link,
+              byline: source.name,
+              category: structured.sector,
+              target_surfaces: ['events', 'homepage'],
+              destination_table: 'events',
+            })
+            insertError = res.error
+          } catch (e: any) {
+            if (e instanceof QueueValidationError) {
+              console.error(`[Events RSS] Validation failed for "${item.title}":`, e.message)
+              totalSkipped++
+              continue
+            }
+            throw e
+          }
 
           if (insertError) {
             console.error(`[Events RSS] Insert failed for "${item.title}":`, insertError.message)

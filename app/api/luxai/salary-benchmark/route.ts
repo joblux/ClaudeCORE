@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
+import {
+  insertLuxaiQueueItem,
+  QueueValidationError,
+  queueValidationErrorResponse,
+} from '@/lib/luxai-rules'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -124,18 +129,22 @@ Guidelines:
 
     if (requireApproval) {
       // Write to content_queue (canonical editorial gate)
-      await supabase.from('content_queue').insert({
+      // NOTE: salary-benchmark is a documented temporary exception in this
+      // patch — source_url is NOT enforced for salary_benchmark yet because
+      // these payloads are fully internal and have no citable source URL.
+      // processed_content is required and is populated below.
+      await insertLuxaiQueueItem(supabase, {
         content_type: 'salary_benchmark',
         source_type: 'joblux_generation',
         source_name: 'luxai',
         title: `Salary Benchmark: ${job_title}, ${city}`,
         raw_content: { query: body, result },
+        processed_content: { query: body, result },
         destination_table: 'salary_benchmarks',
-        status: 'draft',
       })
-      return NextResponse.json({ 
+      return NextResponse.json({
         queued: true,
-        message: 'Benchmark queued for approval' 
+        message: 'Benchmark queued for approval'
       })
     }
 
@@ -143,8 +152,12 @@ Guidelines:
     return NextResponse.json(result)
 
   } catch (error) {
+    if (error instanceof QueueValidationError) {
+      return queueValidationErrorResponse(error)
+    }
+
     console.error('LUXAI Benchmark error:', error)
-    
+
     // Log error
     await supabase.from('luxai_history').insert({
       type: 'salary_benchmark',

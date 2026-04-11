@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { checkDuplicate } from '@/lib/duplicate-check'
+import {
+  insertLuxaiQueueItem,
+  checkLuxaiQueueDuplicate,
+  QueueValidationError,
+  type LuxaiQueuePayload,
+} from '@/lib/luxai-rules'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -142,9 +147,7 @@ RULES:
     const insertErrors = []
     let skipped = 0
     for (const ev of events) {
-      const _dupe = await checkDuplicate({ content_type: 'event', title: ev.title || ev.name, start_date: ev.start_date, city: ev.location_city })
-      if (_dupe.isDuplicate) { skipped++; console.warn('[JOBLUX DUPLICATE SKIPPED]', ev.title || ev.name); continue }
-      const { data: row, error } = await supabase.from('content_queue').insert({
+      const queuePayload: LuxaiQueuePayload = {
         content_type: 'event',
         source_type: 'joblux_generation',
         title: ev.title || ev.name,
@@ -155,8 +158,26 @@ RULES:
         byline: 'JOBLUX Intelligence',
         category: ev.sector,
         target_surfaces: ['events', 'homepage'],
-        status: 'draft',
-      }).select().maybeSingle()
+        destination_table: 'events',
+      }
+
+      const _dupe = await checkLuxaiQueueDuplicate(supabase, queuePayload)
+      if (_dupe.isDuplicate) { skipped++; console.warn('[JOBLUX DUPLICATE SKIPPED]', ev.title || ev.name); continue }
+
+      let row: any = null
+      let error: any = null
+      try {
+        const res = await insertLuxaiQueueItem(supabase, queuePayload).select().maybeSingle()
+        row = res.data
+        error = res.error
+      } catch (e: any) {
+        if (e instanceof QueueValidationError) {
+          console.error(`[LUXAI events] Validation failed for "${ev.name}":`, e.message)
+          insertErrors.push({ name: ev.name, error: `validation:${e.code}:${e.message}` })
+          continue
+        }
+        throw e
+      }
 
       if (error) {
         console.error(`[LUXAI events] Insert failed for "${ev.name}":`, error.message, error.details)
