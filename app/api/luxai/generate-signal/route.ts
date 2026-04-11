@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
-import { checkDuplicate } from '@/lib/duplicate-check'
+import {
+  insertLuxaiQueueItem,
+  checkLuxaiQueueDuplicate,
+  QueueValidationError,
+  queueValidationErrorResponse,
+  type LuxaiQueuePayload,
+} from '@/lib/luxai-rules'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -138,11 +144,20 @@ Guidelines:
       confidence: result.confidence || 'high',
     }
 
-    const dupe = await checkDuplicate({
+    const queuePayload: LuxaiQueuePayload = {
       content_type: 'signal',
-      headline: result.title,
-    })
+      source_type: 'joblux_generation',
+      // KEEP source_name='luxai' — daily-quota count above queries on it.
+      source_name: 'luxai',
+      title: result.title,
+      category: result.category,
+      raw_content: processedPayload,
+      processed_content: processedPayload,
+      destination_table: 'signals',
+      duplicate_state: 'clean',
+    }
 
+    const dupe = await checkLuxaiQueueDuplicate(supabase, queuePayload)
     if (dupe.isDuplicate) {
       return NextResponse.json({
         success: false,
@@ -152,18 +167,7 @@ Guidelines:
       })
     }
 
-    await supabase.from('content_queue').insert({
-      content_type: 'signal',
-      source_type: 'joblux_generation',
-      source_name: 'luxai',
-      title: result.title,
-      category: result.category,
-      raw_content: processedPayload,
-      processed_content: processedPayload,
-      destination_table: 'signals',
-      status: 'draft',
-      duplicate_state: 'clean',
-    })
+    await insertLuxaiQueueItem(supabase, queuePayload)
 
     return NextResponse.json({
       success: true,
@@ -173,6 +177,10 @@ Guidelines:
     })
 
   } catch (error) {
+    if (error instanceof QueueValidationError) {
+      return queueValidationErrorResponse(error)
+    }
+
     console.error('LUXAI Signal Generator error:', error)
 
     await supabase.from('luxai_history').insert({

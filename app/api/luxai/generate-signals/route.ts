@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { checkDuplicate } from '@/lib/duplicate-check'
+import {
+  insertLuxaiQueueItem,
+  checkLuxaiQueueDuplicate,
+  QueueValidationError,
+  type LuxaiQueuePayload,
+} from '@/lib/luxai-rules'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -175,7 +180,7 @@ RULES:
     const insertErrors = []
     let autoApproved = 0
     for (const s of signals) {
-      const { data: row, error } = await supabase.from('content_queue').insert({
+      const queuePayload: LuxaiQueuePayload = {
         content_type: 'signal',
         source_type: 'joblux_generation',
         title: s.headline,
@@ -187,8 +192,23 @@ RULES:
         category: s.category,
         brand_tags: s.brand_tags,
         target_surfaces: ['signals', 'homepage'],
-        status: 'draft',
-      }).select().maybeSingle()
+        destination_table: 'signals',
+      }
+
+      let row: any = null
+      let error: any = null
+      try {
+        const res = await insertLuxaiQueueItem(supabase, queuePayload).select().maybeSingle()
+        row = res.data
+        error = res.error
+      } catch (e: any) {
+        if (e instanceof QueueValidationError) {
+          console.error(`[LUXAI signals] Validation failed for "${s.headline}":`, e.message)
+          insertErrors.push({ headline: s.headline, error: `validation:${e.code}:${e.message}` })
+          continue
+        }
+        throw e
+      }
 
       if (error) {
         console.error(`[LUXAI signals] Insert failed for "${s.headline}":`, error.message, error.details)
@@ -210,10 +230,7 @@ RULES:
       if (!canAutoApprove) continue
 
       // Duplicate check
-      const dupe = await checkDuplicate({
-        content_type: 'signal',
-        headline: s.headline,
-      }, row.id)
+      const dupe = await checkLuxaiQueueDuplicate(supabase, queuePayload, row.id)
 
       if (dupe.isDuplicate) {
         console.log(`[LUXAI signals] Duplicate detected for "${s.headline}", left as draft`)

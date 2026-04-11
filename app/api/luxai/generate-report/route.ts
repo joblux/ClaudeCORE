@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import {
+  insertLuxaiQueueItem,
+  QueueValidationError,
+  queueValidationErrorResponse,
+} from '@/lib/luxai-rules'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -141,14 +146,13 @@ RULES:
 
     // Route to content_queue (canonical editorial gate) — not directly to bloglux_articles
     const slug = report.slug || report.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 80)
-    const { error } = await supabase.from('content_queue').insert({
+    const { error } = await insertLuxaiQueueItem(supabase, {
       content_type: 'article',
       source_type: 'joblux_generation',
       source_name: 'JOBLUX Intelligence',
       title: report.title,
       category: 'Research Report',
       destination_table: 'bloglux_articles',
-      status: 'draft',
       processed_content: {
         title: report.title,
         subtitle: report.subtitle,
@@ -180,6 +184,9 @@ RULES:
       data: { title: report.title, cost, tokens: inputTokens + outputTokens }
     })
   } catch (error: any) {
+    if (error instanceof QueueValidationError) {
+      return queueValidationErrorResponse(error)
+    }
     console.error('Report generation error:', error)
     return NextResponse.json({ success: false, message: error.message }, { status: 500 })
   }

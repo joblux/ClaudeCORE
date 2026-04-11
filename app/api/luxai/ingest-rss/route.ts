@@ -2,6 +2,10 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { XMLParser } from 'fast-xml-parser'
+import {
+  insertLuxaiQueueItem,
+  QueueValidationError,
+} from '@/lib/luxai-rules'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -162,27 +166,40 @@ export async function POST() {
           if (!structured) { totalSkipped++; continue }
 
           // Step 6 — Insert into content_queue
-          const { data: queueRow, error: insertError } = await supabase.from('content_queue').insert({
-            content_type: 'signal',
-            source_type: 'external_feed',
-            title: structured.headline || item.title,
-            raw_content: {
-              title: item.title,
-              link: item.link,
-              description: item.description,
-              pubDate: item.pubDate,
+          let queueRow: any = null
+          let insertError: any = null
+          try {
+            const res = await insertLuxaiQueueItem(supabase, {
+              content_type: 'signal',
+              source_type: 'external_feed',
+              title: structured.headline || item.title,
+              raw_content: {
+                title: item.title,
+                link: item.link,
+                description: item.description,
+                pubDate: item.pubDate,
+                source_name: source.name,
+                feed_url: source.feed_url,
+              },
+              processed_content: structured,
               source_name: source.name,
-              feed_url: source.feed_url,
-            },
-            processed_content: structured,
-            source_name: source.name,
-            source_url: item.link,
-            byline: source.name,
-            category: structured.category,
-            brand_tags: structured.brand_tags,
-            target_surfaces: ['signals', 'homepage'],
-            status: 'draft',
-          }).select('id').maybeSingle()
+              source_url: item.link,
+              byline: source.name,
+              category: structured.category,
+              brand_tags: structured.brand_tags,
+              target_surfaces: ['signals', 'homepage'],
+              destination_table: 'signals',
+            }).select('id').maybeSingle()
+            queueRow = res.data
+            insertError = res.error
+          } catch (e: any) {
+            if (e instanceof QueueValidationError) {
+              console.error(`[RSS ingest] Validation failed for "${item.title}":`, e.message)
+              totalSkipped++
+              continue
+            }
+            throw e
+          }
 
           if (insertError) {
             console.error(`[RSS ingest] Insert failed for "${item.title}":`, insertError.message)

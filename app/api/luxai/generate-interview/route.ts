@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import {
+  insertLuxaiQueueItem,
+  checkLuxaiQueueDuplicate,
+  QueueValidationError,
+  queueValidationErrorResponse,
+  type LuxaiQueuePayload,
+} from '@/lib/luxai-rules'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -85,20 +92,33 @@ RULES:
     }
 
     // Route to content_queue (canonical editorial gate) — one record per brand, containing all draft interviews
-    const { error: queueError } = await supabase.from('content_queue').insert({
+    const queuePayload: LuxaiQueuePayload = {
       content_type: 'interview',
       source_type: 'joblux_generation',
       source_name: 'JOBLUX Intelligence',
       title: `Interview Experience Drafts — ${brandName}`,
       category: 'Interview Experience',
       destination_table: 'interview_experiences',
-      status: 'draft',
       processed_content: {
         brand_slug: slug,
         brand_name: brandName,
         interviews,
       },
-    })
+    }
+
+    // Interview dedup is a temporary brand_slug-broad safeguard — see
+    // checkLuxaiInterviewDuplicate in lib/luxai-rules.ts.
+    const dupe = await checkLuxaiQueueDuplicate(supabase, queuePayload)
+    if (dupe.isDuplicate) {
+      return NextResponse.json({
+        success: false,
+        skipped: true,
+        reason: 'duplicate',
+        match: dupe.match,
+      })
+    }
+
+    const { error: queueError } = await insertLuxaiQueueItem(supabase, queuePayload)
     if (queueError) throw queueError
 
     await supabase.from('luxai_history').insert({
@@ -117,6 +137,9 @@ RULES:
       data: { count: interviews.length, cost, tokens: inputTokens + outputTokens }
     })
   } catch (error: any) {
+    if (error instanceof QueueValidationError) {
+      return queueValidationErrorResponse(error)
+    }
     console.error('Interview generation error:', error)
     return NextResponse.json({ success: false, message: error.message }, { status: 500 })
   }
