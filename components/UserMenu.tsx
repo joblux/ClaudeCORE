@@ -47,17 +47,19 @@ export default function UserMenu() {
         className="flex items-center gap-2 hover:opacity-80 transition-opacity"
       >
         {image ? (
-          <img
-            src={image}
-            alt={displayName}
-            className="w-8 h-8 rounded-full object-cover border border-[#333]"
-          />
+          <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border border-[#333]">
+            <img
+              src={image}
+              alt={displayName}
+              className="w-full h-full object-cover"
+            />
+          </div>
         ) : (
-          <div className="w-8 h-8 rounded-full bg-[#333] text-[#a58e28] text-xs font-medium flex items-center justify-center border border-[#444]">
+          <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-[#333] text-[#a58e28] text-xs font-medium flex items-center justify-center border border-[#444]">
             {initials}
           </div>
         )}
-        <span className="text-[13px] text-[#ccc] hidden sm:inline">
+        <span className="text-[13px] text-[#ccc] hidden sm:inline leading-none whitespace-nowrap">
           {displayName}
         </span>
       </button>
