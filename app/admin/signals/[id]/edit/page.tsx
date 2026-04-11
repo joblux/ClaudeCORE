@@ -126,14 +126,14 @@ export default function AdminSignalEditPage() {
                   value={signal[f.key] ?? ''}
                   onChange={(e) => update(f.key, e.target.value)}
                   rows={3}
-                  className="w-full border border-[#e8e8e8] rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-[#bbb] transition-colors"
+                  className="w-full border border-[#e8e8e8] rounded-lg px-3 py-2 text-sm bg-white text-[#1a1a1a] focus:outline-none focus:border-[#bbb] transition-colors"
                 />
               ) : (
                 <input
                   type="text"
                   value={signal[f.key] ?? ''}
                   onChange={(e) => update(f.key, e.target.value)}
-                  className="w-full border border-[#e8e8e8] rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-[#bbb] transition-colors"
+                  className="w-full border border-[#e8e8e8] rounded-lg px-3 py-2 text-sm bg-white text-[#1a1a1a] focus:outline-none focus:border-[#bbb] transition-colors"
                 />
               )}
             </div>
@@ -147,7 +147,7 @@ export default function AdminSignalEditPage() {
               type="text"
               value={brandTagsValue}
               onChange={(e) => update('brand_tags', e.target.value)}
-              className="w-full border border-[#e8e8e8] rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-[#bbb] transition-colors"
+              className="w-full border border-[#e8e8e8] rounded-lg px-3 py-2 text-sm bg-white text-[#1a1a1a] focus:outline-none focus:border-[#bbb] transition-colors"
             />
           </div>
 
