@@ -113,16 +113,21 @@ export default function AdminDashboardPage() {
   }, [isAdmin])
 
   async function fetchKPIs() {
+    // members table is RLS-locked from anon, so the member counts must
+    // come from a service-role admin endpoint. Other tables are readable
+    // by anon and stay on the direct supabase client.
+    type MemberCounts = { total_members?: number; pending_members?: number }
     const [
-      totalMembers, pendingMembers,
+      memberCounts,
       totalAssignments, activeAssignments,
       totalArticles,
       totalBrands,
       totalSalaries,
       totalInterviews,
     ] = await Promise.all([
-      supabase.from('members').select('id', { count: 'exact', head: true }),
-      supabase.from('members').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      fetch('/api/admin/sidebar-counts', { cache: 'no-store' })
+        .then(r => r.ok ? r.json() : ({}))
+        .catch(() => ({})) as Promise<MemberCounts>,
       supabase.from('search_assignments').select('id', { count: 'exact', head: true }),
       supabase.from('search_assignments').select('id', { count: 'exact', head: true }).eq('status', 'published'),
       supabase.from('bloglux_articles').select('id', { count: 'exact', head: true }).is('deleted_at', null),
@@ -132,8 +137,8 @@ export default function AdminDashboardPage() {
     ])
 
     setKpis({
-      members: totalMembers.count ?? 0,
-      pendingMembers: pendingMembers.count ?? 0,
+      members: memberCounts.total_members ?? 0,
+      pendingMembers: memberCounts.pending_members ?? 0,
       assignments: totalAssignments.count ?? 0,
       activeAssignments: activeAssignments.count ?? 0,
       articles: totalArticles.count ?? 0,

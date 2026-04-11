@@ -16,7 +16,7 @@ export async function GET() {
   if (!isAdmin) return NextResponse.json({}, { status: 401 })
 
   try {
-    const [unreadRes, contribRes, commentsRes, internshipsRes, contactRes, consultRes, pendingMembersRes, pendingBusinessRes] = await Promise.all([
+    const [unreadRes, contribRes, commentsRes, internshipsRes, contactRes, consultRes, pendingMembersRes, pendingBusinessRes, totalMembersRes] = await Promise.all([
       supabase.from('conversations').select('id', { count: 'exact', head: true }).gt('unread_count', 0),
       supabase.from('contributions').select('id', { count: 'exact', head: true }).eq('status', 'pending').is('deleted_at', null),
       supabase.from('bloglux_comments').select('id', { count: 'exact', head: true }).eq('is_approved', false),
@@ -25,6 +25,7 @@ export async function GET() {
       supabase.from('escape_consultations').select('id', { count: 'exact', head: true }).eq('status', 'new'),
       supabase.from('members').select('id', { count: 'exact', head: true }).eq('status', 'pending').neq('role', 'business'),
       supabase.from('members').select('id', { count: 'exact', head: true }).eq('status', 'pending').eq('role', 'business'),
+      supabase.from('members').select('id', { count: 'exact', head: true }),
     ])
 
     return NextResponse.json({
@@ -36,6 +37,7 @@ export async function GET() {
       pending_consultations: consultRes.count ?? 0,
       pending_members: pendingMembersRes.count ?? 0,
       pending_businesses: pendingBusinessRes.count ?? 0,
+      total_members: totalMembersRes.count ?? 0,
     })
   } catch {
     return NextResponse.json({})
