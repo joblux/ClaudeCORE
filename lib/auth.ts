@@ -88,7 +88,7 @@ export const authOptions: NextAuthOptions = {
       if (email) {
         const { data: member, error } = await supabaseAdmin
           .from("members")
-          .select("id, role, status, first_name, last_name, registration_completed, tier_selected")
+          .select("id, role, status, first_name, last_name, registration_completed, tier_selected, avatar_url")
           .eq("email", email)
           .single();
         if (error) {
@@ -102,6 +102,7 @@ export const authOptions: NextAuthOptions = {
           token.lastName = member.last_name;
           token.registrationCompleted = member.registration_completed;
           token.tierSelected = member.tier_selected;
+          token.avatarUrl = member.avatar_url;
         } else {
           token.status = "new";
         }
@@ -117,6 +118,7 @@ export const authOptions: NextAuthOptions = {
       session.user.lastName = token.lastName as string | undefined;
       session.user.registrationCompleted = token.registrationCompleted as boolean | undefined;
       session.user.tierSelected = token.tierSelected as boolean | undefined;
+      session.user.avatarUrl = (token.avatarUrl as string | null | undefined) ?? null;
       return session;
     },
 
@@ -134,11 +136,83 @@ export const authOptions: NextAuthOptions = {
         .from("members")
         .update({ last_login: new Date().toISOString() })
         .eq("email", user.email);
-      if (account?.provider) {
+
+      if (!account?.provider) return;
+
+      // Record auth provider but DO NOT touch avatar_url here. Avatar
+      // hydration is handled below as a one-shot, only when avatar_url
+      // is currently empty. This preserves user uploads across sign-ins.
+      await supabaseAdmin
+        .from("members")
+        .update({ auth_provider: account.provider })
+        .eq("email", user.email);
+
+      // Hydrate provider photo into the DEDICATED 'avatars' Supabase
+      // Storage bucket exactly once.
+      //
+      // Storage doctrine — DO NOT mix concerns:
+      //   bucket 'avatars' = account/header avatars ONLY (this code path)
+      //   bucket 'media'   = generic media library, hotel photos, article
+      //                      covers, bloglux uploads, etc.
+      //   future bucket    = Profilux private photos (separate, private)
+      //
+      // members.avatar_url points only at objects inside 'avatars'.
+      //
+      // Skip if the column is already populated (user upload OR previous hydration).
+      const { data: existing } = await supabaseAdmin
+        .from("members")
+        .select("id, avatar_url")
+        .eq("email", user.email)
+        .maybeSingle();
+
+      if (!existing?.id || (existing.avatar_url && existing.avatar_url.trim())) {
+        return;
+      }
+
+      const providerImage = user.image;
+      if (!providerImage || typeof providerImage !== "string") return;
+
+      try {
+        // Server-side fetch sends no Referer by default — works for
+        // LinkedIn / Google profile URLs that block third-party browsers.
+        const res = await fetch(providerImage);
+        if (!res.ok) {
+          console.warn(
+            `[avatar-hydrate] fetch failed for ${user.email}: ${res.status}`
+          );
+          return;
+        }
+        const contentType = res.headers.get("content-type") || "image/jpeg";
+        const buf = Buffer.from(await res.arrayBuffer());
+        const storagePath = `${existing.id}.jpg`;
+
+        const { error: uploadErr } = await supabaseAdmin.storage
+          .from("avatars")
+          .upload(storagePath, buf, { contentType, upsert: true });
+
+        if (uploadErr) {
+          console.warn(
+            `[avatar-hydrate] upload failed for ${user.email}: ${uploadErr.message}`
+          );
+          return;
+        }
+
+        const { data: urlData } = supabaseAdmin.storage
+          .from("avatars")
+          .getPublicUrl(storagePath);
+
+        const avatarUrl = urlData.publicUrl;
+        if (!avatarUrl) return;
+
         await supabaseAdmin
           .from("members")
-          .update({ auth_provider: account.provider, avatar_url: user.image || undefined })
-          .eq("email", user.email);
+          .update({ avatar_url: avatarUrl })
+          .eq("id", existing.id);
+      } catch (err) {
+        console.warn(
+          `[avatar-hydrate] unexpected error for ${user.email}:`,
+          err instanceof Error ? err.message : err
+        );
       }
     },
   },

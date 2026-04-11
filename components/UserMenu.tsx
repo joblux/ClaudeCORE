@@ -6,14 +6,14 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 
 export default function UserMenu() {
-  const { isAuthenticated, isLoading, name, firstName, image, isApproved, status } =
+  const { isAuthenticated, isLoading, name, firstName, avatarUrl, isApproved, status } =
     useMember();
   const [open, setOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Reset error state if the image URL itself changes (e.g. session refresh)
-  useEffect(() => { setImgError(false); }, [image]);
+  // Reset error state if the avatar URL itself changes (e.g. session refresh)
+  useEffect(() => { setImgError(false); }, [avatarUrl]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -43,7 +43,7 @@ export default function UserMenu() {
 
   const displayName = firstName || name?.split(" ")[0] || "Member";
   const initials = displayName.charAt(0).toUpperCase();
-  const showImage = !!image && !imgError;
+  const showImage = !!avatarUrl && !imgError;
 
   return (
     <div className="relative" ref={menuRef}>
@@ -54,7 +54,7 @@ export default function UserMenu() {
         {showImage ? (
           <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border border-[#333]">
             <img
-              src={image as string}
+              src={avatarUrl as string}
               alt={displayName}
               className="w-full h-full object-cover"
               referrerPolicy="no-referrer"

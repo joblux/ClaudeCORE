@@ -3,6 +3,15 @@ import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
+// Account avatar storage doctrine — DO NOT mix concerns:
+//   bucket 'avatars' = account/header avatars ONLY (this route)
+//   bucket 'media'   = generic media library, hotel photos, article
+//                      covers, bloglux uploads, etc.
+//   future bucket    = Profilux private photos (separate, private)
+//
+// members.avatar_url points only at objects inside 'avatars'.
+const AVATAR_BUCKET = 'avatars'
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -40,11 +49,13 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer())
-    const storagePath = `avatars/${memberId}.jpg`
+    const storagePath = `${memberId}.jpg`
 
-    // Upload to Supabase Storage bucket "media"
+    // Upload to the dedicated 'avatars' bucket. Avatars do NOT go into
+    // the general 'media' bucket and are NOT registered in media_library —
+    // they are an account-only asset, separate from the editorial library.
     const { error: uploadError } = await supabase.storage
-      .from('media')
+      .from(AVATAR_BUCKET)
       .upload(storagePath, buffer, {
         contentType: file.type,
         upsert: true,
@@ -55,9 +66,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to upload avatar' }, { status: 500 })
     }
 
-    // Get the public URL
+    // Get the public URL from the avatars bucket
     const { data: urlData } = supabase.storage
-      .from('media')
+      .from(AVATAR_BUCKET)
       .getPublicUrl(storagePath)
 
     const avatarUrl = urlData.publicUrl
@@ -72,15 +83,6 @@ export async function POST(req: NextRequest) {
       console.error('Avatar URL update error:', updateError)
       return NextResponse.json({ error: 'Failed to update avatar URL' }, { status: 500 })
     }
-
-    // Insert into media_library
-    await supabase.from('media_library').insert({
-      member_id: memberId,
-      source: 'upload',
-      original_filename: 'avatar.jpg',
-      url: avatarUrl,
-      storage_path: storagePath,
-    })
 
     return NextResponse.json({ avatar_url: avatarUrl })
   } catch (error) {
@@ -99,11 +101,11 @@ export async function DELETE() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const storagePath = `avatars/${memberId}.jpg`
+    const storagePath = `${memberId}.jpg`
 
-    // Delete from storage
+    // Delete from the dedicated avatars bucket
     const { error: deleteError } = await supabase.storage
-      .from('media')
+      .from(AVATAR_BUCKET)
       .remove([storagePath])
 
     if (deleteError) {

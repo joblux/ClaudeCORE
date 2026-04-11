@@ -15,6 +15,7 @@ export function useMember() {
     firstName: session?.user?.firstName,
     lastName: session?.user?.lastName,
     image: session?.user?.image,
+    avatarUrl: session?.user?.avatarUrl ?? null,
     role: session?.user?.role,
     status: session?.user?.status,
     isAdmin: session?.user?.role === "admin",
