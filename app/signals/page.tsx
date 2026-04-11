@@ -29,15 +29,6 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const FILTERS = ['All', 'Market', 'Talent', 'Brand', 'Finance', 'Fashion', 'Watches', 'Hospitality', 'Beauty', 'Real Estate']
 
-const TICKERS = [
-  { name: 'LVMH', ticker: 'MC.PA' },
-  { name: 'Kering', ticker: 'KER.PA' },
-  { name: 'Richemont', ticker: 'CFR.SW' },
-  { name: 'Hermès', ticker: 'RMS.PA' },
-  { name: 'Burberry', ticker: 'BRBY.L' },
-  { name: 'Tapestry', ticker: 'TPR' },
-]
-
 const placeholderSignals = [
   {
     id: '1', slug: 'kering-appoints-blazy-chanel', category: 'leadership',
@@ -194,16 +185,6 @@ export default function SignalsPage() {
           ))}
         </div>
 
-        {/* Tickers bar */}
-        <div className="bg-[#141414] border-t border-b border-[#222] py-3 px-4 mb-8 -mx-7 flex items-center gap-8 overflow-x-auto">
-          {TICKERS.map(t => (
-            <div key={t.ticker} className="flex items-center gap-2 flex-shrink-0">
-              <span className="text-[12px] text-[#888] font-medium">{t.name}</span>
-              <span className="text-[11px] text-[#999]">{t.ticker}</span>
-            </div>
-          ))}
-        </div>
-
         {/* Two-column layout */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
 
@@ -329,18 +310,11 @@ export default function SignalsPage() {
           {/* RIGHT | Sidebar */}
           <div className="space-y-5">
 
-            {/* Market movers | live prices coming */}
+            {/* Market movement | reserved for daily stock/market data — */}
+            {/* neutral placeholder. No fake prices, no editorial signals. */}
             <div className="bg-[#141414] border border-[#1e1e1e] rounded p-5">
-              <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-4">Market movers</p>
-              <div className="space-y-3">
-                {TICKERS.map(t => (
-                  <div key={t.name} className="flex items-center justify-between">
-                    <span className="text-[13px] text-[#ccc]">{t.name}</span>
-                    <span className="text-[11px] text-[#777]">{t.ticker}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="text-[10px] text-[#777] mt-4">Live prices | coming soon</p>
+              <p className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-4">Market movement</p>
+              <p className="text-[11px] text-[#777] leading-relaxed">Daily market data — coming soon</p>
             </div>
 
             {/* Talent radar | real signals from DB */}
