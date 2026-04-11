@@ -73,10 +73,12 @@ export async function POST(req: NextRequest) {
 
     const avatarUrl = urlData.publicUrl
 
-    // Update member record
+    // Update member record. avatar_source = 'upload' marks this avatar as
+    // a sacred user upload — the sign-in hydration callback will skip it
+    // on every subsequent sign-in (rule 1 in lib/auth.ts).
     const { error: updateError } = await supabase
       .from('members')
-      .update({ avatar_url: avatarUrl })
+      .update({ avatar_url: avatarUrl, avatar_source: 'upload' })
       .eq('id', memberId)
 
     if (updateError) {
@@ -113,10 +115,11 @@ export async function DELETE() {
       return NextResponse.json({ error: 'Failed to delete avatar' }, { status: 500 })
     }
 
-    // Set avatar_url to null
+    // Clear both avatar_url and avatar_source. The next sign-in will then
+    // re-hydrate from the current session's provider (rule 3 in lib/auth.ts).
     const { error: updateError } = await supabase
       .from('members')
-      .update({ avatar_url: null })
+      .update({ avatar_url: null, avatar_source: null })
       .eq('id', memberId)
 
     if (updateError) {

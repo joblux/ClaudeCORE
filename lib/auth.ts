@@ -147,8 +147,7 @@ export const authOptions: NextAuthOptions = {
         .update({ auth_provider: account.provider })
         .eq("email", user.email);
 
-      // Hydrate provider photo into the DEDICATED 'avatars' Supabase
-      // Storage bucket exactly once.
+      // Account-avatar policy — strictly enforced on every sign-in.
       //
       // Storage doctrine — DO NOT mix concerns:
       //   bucket 'avatars' = account/header avatars ONLY (this code path)
@@ -156,35 +155,84 @@ export const authOptions: NextAuthOptions = {
       //                      covers, bloglux uploads, etc.
       //   future bucket    = Profilux private photos (separate, private)
       //
-      // members.avatar_url points only at objects inside 'avatars'.
+      // members.avatar_url + members.avatar_source are the source of truth.
       //
-      // Skip if the column is already populated (user upload OR previous hydration).
+      // Rules (in order):
+      //   1. If avatar_source = 'upload' → never touched. User uploads
+      //      survive every sign-in.
+      //   2. If avatar_source already matches the current session's
+      //      provider AND avatar_url is set → no-op. The existing bytes
+      //      came from this same provider on a previous sign-in; we trust
+      //      them and don't re-fetch.
+      //   3. Otherwise (NULL source, or source from a DIFFERENT provider)
+      //      → fetch user.image (the current session's provider picture)
+      //      and overwrite. The avatar must reflect THIS session's
+      //      provider, never another linked provider.
+      //   4. If the fetch fails → wipe avatar_url and avatar_source to
+      //      NULL and remove the storage object. The header falls back to
+      //      initials. NEVER silently substitute another linked provider's
+      //      bytes.
+      const provider = account.provider;
+      if (provider !== "linkedin" && provider !== "google") return;
+
       const { data: existing } = await supabaseAdmin
         .from("members")
-        .select("id, avatar_url")
+        .select("id, avatar_url, avatar_source")
         .eq("email", user.email)
         .maybeSingle();
 
-      if (!existing?.id || (existing.avatar_url && existing.avatar_url.trim())) {
+      if (!existing?.id) return;
+
+      // Rule 1 — sacred upload, never touched
+      if (existing.avatar_source === "upload") return;
+
+      // Rule 2 — same provider, already hydrated, leave alone
+      if (
+        existing.avatar_source === provider &&
+        existing.avatar_url &&
+        existing.avatar_url.trim()
+      ) {
         return;
       }
 
       const providerImage = user.image;
-      if (!providerImage || typeof providerImage !== "string") return;
+      const storagePath = `${existing.id}.jpg`;
+
+      const wipeToInitials = async () => {
+        try {
+          await supabaseAdmin.storage.from("avatars").remove([storagePath]);
+        } catch {
+          /* best-effort */
+        }
+        await supabaseAdmin
+          .from("members")
+          .update({ avatar_url: null, avatar_source: null })
+          .eq("id", existing.id);
+      };
+
+      // Rule 4 prelude — no provider URL on this session at all
+      if (!providerImage || typeof providerImage !== "string") {
+        await wipeToInitials();
+        return;
+      }
 
       try {
         // Server-side fetch sends no Referer by default — works for
         // LinkedIn / Google profile URLs that block third-party browsers.
+        // Signed LinkedIn URLs are fresh at the moment of sign-in.
         const res = await fetch(providerImage);
         if (!res.ok) {
+          // Rule 4 — fetch failed, wipe to initials. Do NOT fall back
+          // to another linked provider.
           console.warn(
-            `[avatar-hydrate] fetch failed for ${user.email}: ${res.status}`
+            `[avatar-hydrate] ${provider} fetch failed for ${user.email}: ${res.status}`
           );
+          await wipeToInitials();
           return;
         }
+
         const contentType = res.headers.get("content-type") || "image/jpeg";
         const buf = Buffer.from(await res.arrayBuffer());
-        const storagePath = `${existing.id}.jpg`;
 
         const { error: uploadErr } = await supabaseAdmin.storage
           .from("avatars")
@@ -194,6 +242,7 @@ export const authOptions: NextAuthOptions = {
           console.warn(
             `[avatar-hydrate] upload failed for ${user.email}: ${uploadErr.message}`
           );
+          await wipeToInitials();
           return;
         }
 
@@ -202,17 +251,23 @@ export const authOptions: NextAuthOptions = {
           .getPublicUrl(storagePath);
 
         const avatarUrl = urlData.publicUrl;
-        if (!avatarUrl) return;
+        if (!avatarUrl) {
+          await wipeToInitials();
+          return;
+        }
 
+        // Rule 3 — success: write the URL and stamp the source as the
+        // current session's provider.
         await supabaseAdmin
           .from("members")
-          .update({ avatar_url: avatarUrl })
+          .update({ avatar_url: avatarUrl, avatar_source: provider })
           .eq("id", existing.id);
       } catch (err) {
         console.warn(
           `[avatar-hydrate] unexpected error for ${user.email}:`,
           err instanceof Error ? err.message : err
         );
+        await wipeToInitials();
       }
     },
   },
