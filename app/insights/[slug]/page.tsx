@@ -6,6 +6,8 @@ import { createClient } from '@supabase/supabase-js'
 import { marked } from 'marked'
 import { getCategoryLabel } from '@/lib/bloglux-options'
 
+export const dynamic = 'force-dynamic'
+
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -21,7 +23,7 @@ async function getArticle(slug: string) {
     .eq('slug', slug)
     .eq('status', 'published')
     .is('deleted_at', null)
-    .single()
+    .maybeSingle()
   if (data) {
     // Map columns to expected shape
     return {
@@ -39,7 +41,7 @@ async function getArticle(slug: string) {
     .select('*')
     .eq('slug', slug)
     .eq('published', true)
-    .single()
+    .maybeSingle()
   return legacy
 }
 
