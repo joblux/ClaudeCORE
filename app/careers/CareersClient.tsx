@@ -173,6 +173,10 @@ export default function CareersClient({
   }
 
   const accessLevel = getAccessLevel()
+  // GATING DISABLED FOR LAUNCH TESTING — original values were tier-based:
+  //   canAccessBenchmark = accessLevel !== 'basic'
+  //   canAccessCompare   = accessLevel === 'premium' || accessLevel === 'full'
+  //   canAccessCalculator= accessLevel === 'full'
   const canAccessBenchmark = true
   const canAccessCompare = true
   const canAccessCalculator = true
@@ -200,7 +204,9 @@ export default function CareersClient({
   })
 
   // Show only 2 salaries for basic access
-  const visibleSalaries = accessLevel === 'basic' ? filteredSalaries.slice(0, 2) : filteredSalaries
+  // GATING DISABLED FOR LAUNCH TESTING — restore original line below to re-enable
+  // const visibleSalaries = accessLevel === 'basic' ? filteredSalaries.slice(0, 2) : filteredSalaries
+  const visibleSalaries = filteredSalaries
   const blurredSalaries: typeof filteredSalaries = []
 
   // Handle benchmark submission
