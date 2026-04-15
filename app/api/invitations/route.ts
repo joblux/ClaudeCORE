@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
       .from('members')
       .select('referral_code, full_name')
       .eq('id', memberId)
-      .single()
+      .maybeSingle()
 
     const referralCode = member?.referral_code || generateInviteCode()
 
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         .select('id')
         .eq('invited_by', memberId)
         .eq('contact_email', email)
-        .single()
+        .maybeSingle()
 
       if (existing) {
         results.push({ email, status: 'already_invited' })
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
         .from('members')
         .select('id')
         .eq('email', email)
-        .single()
+        .maybeSingle()
 
       if (existingMember) {
         results.push({ email, status: 'already_member' })
@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
       .from('members')
       .select('invite_count')
       .eq('id', memberId)
-      .single()
+      .maybeSingle()
 
     const currentCount = memberData?.invite_count || 0
     const sentCount = results.filter(r => r.status === 'sent').length
