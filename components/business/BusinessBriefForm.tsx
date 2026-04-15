@@ -8,14 +8,7 @@ const SECTORS = [
   'Private Client & Family Office', 'Multi-brand Group', 'Other',
 ]
 
-const COMPANY_TYPES = [
-  'Brand', 'Group', 'Agency', 'Family Office', 'Hospitality Operator',
-  'Travel Business', 'Investor', 'Other',
-]
-
-const BRIEF_TYPES = [
-  'Executive search', 'Senior and mid-level search', 'Exploratory brief',
-]
+const BRIEF_TYPES = ['Executive search', 'Manager search', 'Exploratory']
 
 const URGENCY_OPTIONS = ['Immediate', 'Within 30 days', 'Within this quarter', 'Exploratory']
 const CONFIDENTIALITY_OPTIONS = ['Standard', 'Sensitive', 'Highly confidential']
@@ -31,11 +24,20 @@ const FUNCTION_OPTIONS = [
 
 const FOLLOW_UP_OPTIONS = ['Email', 'Call', 'Either']
 
+const FIELD_LABELS: Record<string, string> = {
+  brief_type: 'Brief type',
+  sector: 'Sector',
+  urgency: 'Urgency',
+  confidentiality_level: 'Confidentiality',
+  brief_summary: 'Brief summary',
+  contact_name: 'Contact name',
+  contact_email: 'Work email',
+  preferred_follow_up: 'Preferred follow-up',
+}
+
 const initialForm = {
-  company_name: '',
   company_website: '',
   sector: '',
-  company_type: '',
   geography: '',
   brief_type: '',
   urgency: '',
@@ -54,7 +56,12 @@ const initialForm = {
   best_timing: '',
 }
 
-export default function BusinessBriefForm() {
+type Props = {
+  companyName: string
+  companyType: string
+}
+
+export default function BusinessBriefForm({ companyName, companyType }: Props) {
   const [form, setForm] = useState(initialForm)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -64,14 +71,24 @@ export default function BusinessBriefForm() {
 
   const set = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }))
 
+  const resetForm = () => {
+    setSubmitted(false)
+    setForm(initialForm)
+    setError('')
+    setInvalidFields(new Set())
+  }
+
   const handleSubmit = async () => {
     setError('')
     setInvalidFields(new Set())
 
+    if (!companyName || !companyType) {
+      setError('Your company profile is incomplete. Please update your account before submitting a brief.')
+      return
+    }
+
     const required: { key: string; check: boolean }[] = [
-      { key: 'company_name', check: !form.company_name.trim() },
       { key: 'sector', check: !form.sector },
-      { key: 'company_type', check: !form.company_type },
       { key: 'brief_type', check: !form.brief_type },
       { key: 'urgency', check: !form.urgency },
       { key: 'confidentiality_level', check: !form.confidentiality_level },
@@ -83,22 +100,27 @@ export default function BusinessBriefForm() {
     const missing = required.filter(r => r.check).map(r => r.key)
     if (missing.length > 0) {
       setInvalidFields(new Set(missing))
-      setError(`Please complete all required fields (${missing.length} missing).`)
+      const labels = missing.map(k => FIELD_LABELS[k] || k).join(', ')
+      setError(`Please complete: ${labels}`)
       const first = formRef.current?.querySelector(`[data-field="${missing[0]}"]`) as HTMLElement | null
       if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' })
       return
     }
     setSubmitting(true)
     try {
+      const payload = {
+        ...form,
+        company_name: companyName,
+        company_type: companyType,
+      }
       const res = await fetch('/api/business-briefs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       })
       const data = await res.json()
       if (data.success) {
         setSubmitted(true)
-        setForm(initialForm)
       } else {
         setError(data.error || 'Something went wrong. Please try again.')
       }
@@ -112,9 +134,20 @@ export default function BusinessBriefForm() {
     return (
       <div style={{ background: '#222', border: '1px solid #2a2a2a', borderRadius: 8, padding: '48px 32px', textAlign: 'center' }}>
         <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff', margin: '0 0 12px' }}>Brief received</h2>
-        <p style={{ fontSize: 14, color: '#ccc', lineHeight: 1.6, maxWidth: 480, margin: '0 auto' }}>
+        <p style={{ fontSize: 14, color: '#ccc', lineHeight: 1.6, maxWidth: 480, margin: '0 auto 24px' }}>
           Your brief has been received and will be reviewed privately by the JOBLUX team. If follow-up is required, we will contact you using the details provided.
         </p>
+        <button
+          onClick={resetForm}
+          style={{
+            display: 'inline-block', padding: '12px 32px', fontSize: 14, fontWeight: 600,
+            fontFamily: 'Inter, sans-serif',
+            background: '#a58e28', color: '#111',
+            border: 'none', borderRadius: 4, cursor: 'pointer',
+          }}
+        >
+          Submit another brief
+        </button>
       </div>
     )
   }
@@ -143,10 +176,6 @@ export default function BusinessBriefForm() {
         <h3 style={sectionHeadingStyle}>Company Context</h3>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px 20px' }}>
           <div style={fieldGroupStyle}>
-            <label style={labelStyle}>Company name{requiredStar}</label>
-            <input data-field="company_name" style={{ ...inputStyle, border: borderFor('company_name') }} value={form.company_name} onChange={e => set('company_name', e.target.value)} />
-          </div>
-          <div style={fieldGroupStyle}>
             <label style={labelStyle}>Company website</label>
             <input style={inputStyle} type="url" placeholder="https://" value={form.company_website} onChange={e => set('company_website', e.target.value)} />
           </div>
@@ -155,13 +184,6 @@ export default function BusinessBriefForm() {
             <select data-field="sector" style={{ ...selectStyle, border: borderFor('sector') }} value={form.sector} onChange={e => set('sector', e.target.value)}>
               <option value="">Select...</option>
               {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </div>
-          <div style={fieldGroupStyle}>
-            <label style={labelStyle}>Company type{requiredStar}</label>
-            <select data-field="company_type" style={{ ...selectStyle, border: borderFor('company_type') }} value={form.company_type} onChange={e => set('company_type', e.target.value)}>
-              <option value="">Select...</option>
-              {COMPANY_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div style={{ ...fieldGroupStyle, gridColumn: '1 / -1' }}>

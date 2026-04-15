@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/ses'
+import { adminNewBriefEmail, briefReceivedEmail } from '@/lib/email-templates'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -61,35 +62,34 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
-    // Send notification email to mzaourm@gmail.com
+    // Admin notification
+    const admin = adminNewBriefEmail({
+      companyName: record.company_name,
+      briefType: record.brief_type,
+      urgency: record.urgency,
+      confidentiality: record.confidentiality_level,
+      contactName: record.contact_name,
+      contactEmail: record.contact_email,
+      summary: record.brief_summary,
+    })
     await sendEmail({
       to: 'mzaourm@gmail.com',
       subject: `New Business Brief — ${record.company_name}`,
-      body: [
-        `New business brief submitted on JOBLUX.`,
-        ``,
-        `Company: ${record.company_name}`,
-        `Brief type: ${record.brief_type}`,
-        `Urgency: ${record.urgency}`,
-        `Confidentiality: ${record.confidentiality_level}`,
-        `Contact: ${record.contact_name} (${record.contact_email})`,
-        ``,
-        `Summary:`,
-        record.brief_summary,
-      ].join('\n'),
+      body: admin.text,
+      bodyHtml: admin.html,
     })
 
-    // Send confirmation email to business user
+    // User confirmation
+    const firstName = record.contact_name.split(' ')[0] || record.contact_name
+    const user = briefReceivedEmail({
+      firstName,
+      companyName: record.company_name,
+    })
     await sendEmail({
       to: record.contact_email,
-      subject: `Your brief has been received — JOBLUX`,
-      body: [
-        `Thank you ${record.contact_name}.`,
-        ``,
-        `Your brief regarding ${record.company_name} has been received and will be reviewed privately. If follow-up is required, we will be in touch using the contact details you provided.`,
-        ``,
-        `The JOBLUX team`,
-      ].join('\n'),
+      subject: 'Your brief has been received',
+      body: user.text,
+      bodyHtml: user.html,
     })
 
     return NextResponse.json({ success: true })

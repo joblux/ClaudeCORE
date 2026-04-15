@@ -10,9 +10,9 @@ const supabase = createClient(
 
 export async function POST(req: NextRequest) {
   try {
-    const { company, orgType, firstName, lastName, email, title, country, phone } = await req.json()
+    const { company, orgType, firstName, lastName, email, title, country, city, phone } = await req.json()
 
-    if (!company || !firstName || !lastName || !email || !country) {
+    if (!company || !orgType || !firstName || !lastName || !email || !title || !country || !city || !phone) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
@@ -38,16 +38,17 @@ export async function POST(req: NextRequest) {
           full_name: fullName,
           first_name: firstName,
           last_name: lastName,
-          phone: phone || null,
+          phone,
           country,
+          city,
           role: "business",
           status: "pending",
           registration_completed: true,
           tier_selected: true,
           contact_preference: "email",
           company_name: company,
-          job_title: title || null,
-          org_type: orgType || null,
+          job_title: title,
+          org_type: orgType,
         })
         .eq("id", existing.id)
 
@@ -64,16 +65,17 @@ export async function POST(req: NextRequest) {
           full_name: fullName,
           first_name: firstName,
           last_name: lastName,
-          phone: phone || null,
+          phone,
           country,
+          city,
           role: "business",
           status: "pending",
           registration_completed: true,
           tier_selected: true,
           contact_preference: "email",
           company_name: company,
-          job_title: title || null,
-          org_type: orgType || null,
+          job_title: title,
+          org_type: orgType,
         })
         .select("id, email, full_name")
         .single()
@@ -98,8 +100,8 @@ export async function POST(req: NextRequest) {
       name: fullName,
       email,
       companyName: company,
-      orgType: orgType || undefined,
-      jobTitle: title || undefined,
+      orgType,
+      jobTitle: title,
     })
     sendEmail({
       to: ADMIN_ALERT_EMAIL,

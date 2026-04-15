@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { useSession, signOut } from 'next-auth/react'
+import BusinessBriefForm from '@/components/business/BusinessBriefForm'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -117,28 +118,6 @@ export default function BusinessDashboard() {
   const [searchCount, setSearchCount] = useState(0)
   const [myBriefs, setMyBriefs] = useState<any[]>([])
 
-  // Brief form
-  const [brief, setBrief] = useState({
-    company_name: '', company_website: '', sector: '', company_type: '', geography: '',
-    brief_type: 'Talent search', urgency: '', confidentiality_level: '',
-    mandate_title: '', brief_summary: '', seniority_level: '', function: '',
-    location: '', compensation_range: '', additional_context: '',
-    contact_name: '', contact_email: '', contact_role: '', preferred_follow_up: '', best_timing: '',
-  })
-  const [briefSubmitting, setBriefSubmitting] = useState(false)
-  const [briefSubmitted, setBriefSubmitted] = useState(false)
-  const [briefError, setBriefError] = useState('')
-
-  useEffect(() => {
-    if (briefSubmitted) return
-    setBrief(b => ({
-      ...b,
-      company_name: b.company_name || companyName || '',
-      contact_name: b.contact_name || [firstName, lastName].filter(Boolean).join(' '),
-      contact_email: b.contact_email || (session?.user as any)?.email || '',
-    }))
-  }, [member, session])
-
   // Contribute form
   const [contribTab, setContribTab] = useState<'salary' | 'interview' | 'signal'>('salary')
 
@@ -245,33 +224,6 @@ export default function BusinessDashboard() {
 
   const activeBriefsCount = myBriefs.filter(b => b.status !== 'closed').length
 
-  const setBriefField = (k: string, v: string) => setBrief(prev => ({ ...prev, [k]: v }))
-
-  const handleSubmitBrief = async () => {
-    setBriefError('')
-    if (!brief.company_name.trim() || !brief.sector || !brief.company_type || !brief.brief_type || !brief.urgency || !brief.confidentiality_level || !brief.brief_summary.trim() || !brief.contact_name.trim() || !brief.contact_email.trim() || !brief.preferred_follow_up) {
-      setBriefError('Please complete all required fields.')
-      return
-    }
-    setBriefSubmitting(true)
-    try {
-      const res = await fetch('/api/business-briefs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(brief),
-      })
-      const data = await res.json()
-      if (data.success) {
-        setBriefSubmitted(true)
-      } else {
-        setBriefError(data.error || 'Something went wrong. Please try again.')
-      }
-    } catch {
-      setBriefError('Network error. Please try again.')
-    }
-    setBriefSubmitting(false)
-  }
-
   const handleSendInvite = async () => {
     setInviteMsg('')
     if (!invite.first_name.trim() || !invite.email.trim()) {
@@ -372,161 +324,7 @@ export default function BusinessDashboard() {
         </div>
       </div>
 
-      {briefSubmitted ? (
-        <div style={{ ...bfSec, textAlign: 'center', padding: '40px 24px' }}>
-          <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 20, color: '#fff', marginBottom: 10 }}>Brief received</div>
-          <p style={{ fontSize: 13, color: '#ccc', lineHeight: 1.6, maxWidth: 480, margin: '0 auto' }}>
-            Your brief has been received and will be reviewed privately by the JOBLUX team.
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* Company context */}
-          <div style={bfSec}>
-            <div style={bfSecT}>Company context</div>
-            <div style={bfGrid}>
-              <div><label style={label}>Company name {rq}</label><input style={input} value={brief.company_name} onChange={e => setBriefField('company_name', e.target.value)} /></div>
-              <div><label style={label}>Company website</label><input style={input} placeholder="https://" value={brief.company_website} onChange={e => setBriefField('company_website', e.target.value)} /></div>
-              <div>
-                <label style={label}>Sector {rq}</label>
-                <select style={selectStyle} value={brief.sector} onChange={e => setBriefField('sector', e.target.value)}>
-                  <option value="">Select...</option>
-                  {['Fashion', 'Watches', 'Jewellery', 'Beauty', 'Hospitality', 'Travel', 'Wine & Spirits', 'Design & Interiors', 'Art & Culture', 'Private Client & Family Office', 'Multi-brand Group', 'Other'].map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div>
-                <label style={label}>Company type {rq}</label>
-                <select style={selectStyle} value={brief.company_type} onChange={e => setBriefField('company_type', e.target.value)}>
-                  <option value="">Select...</option>
-                  {['Independent maison', 'Brand', 'Group', 'Agency', 'Family Office', 'Hospitality Operator', 'Travel Business', 'Investor', 'Other'].map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={label}>Geography</label>
-                <input style={input} placeholder="Primary market or region concerned by this brief" value={brief.geography} onChange={e => setBriefField('geography', e.target.value)} />
-              </div>
-            </div>
-          </div>
-
-          {/* Brief type */}
-          <div style={bfSec}>
-            <div style={bfSecT}>Brief type</div>
-            <div style={{ marginBottom: 14 }}>
-              <label style={label}>Brief type {rq}</label>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
-                {['Talent search', 'Intelligence only', 'Exploratory'].map(bt => {
-                  const sel = brief.brief_type === bt
-                  return (
-                    <button
-                      key={bt}
-                      type="button"
-                      onClick={() => setBriefField('brief_type', bt)}
-                      style={{
-                        padding: '7px 14px', fontSize: 11, cursor: 'pointer', borderRadius: 4,
-                        background: sel ? 'rgba(255,255,255,0.06)' : '#222',
-                        border: sel ? '1px solid #fff' : '1px solid #2a2a2a',
-                        color: sel ? '#fff' : '#999',
-                        fontFamily: 'Inter, sans-serif',
-                      }}
-                    >
-                      {bt}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-            <div style={bfGrid}>
-              <div>
-                <label style={label}>Urgency {rq}</label>
-                <select style={selectStyle} value={brief.urgency} onChange={e => setBriefField('urgency', e.target.value)}>
-                  <option value="">Select...</option>
-                  {['Immediate', 'Within 30 days', 'Within this quarter', 'Exploratory'].map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div>
-                <label style={label}>Confidentiality {rq}</label>
-                <select style={selectStyle} value={brief.confidentiality_level} onChange={e => setBriefField('confidentiality_level', e.target.value)}>
-                  <option value="">Select...</option>
-                  {['Standard', 'Sensitive', 'Highly confidential'].map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Role details */}
-          <div style={bfSec}>
-            <div style={bfSecT}>Role details</div>
-            <div style={bfGrid}>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={label}>Role title</label>
-                <input style={input} placeholder="e.g. Head of Retail, Europe" value={brief.mandate_title} onChange={e => setBriefField('mandate_title', e.target.value)} />
-              </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={label}>Brief summary {rq}</label>
-                <textarea style={textarea} placeholder="Describe the role, context, and what you're looking for..." value={brief.brief_summary} onChange={e => setBriefField('brief_summary', e.target.value)} />
-              </div>
-              <div>
-                <label style={label}>Seniority</label>
-                <select style={selectStyle} value={brief.seniority_level} onChange={e => setBriefField('seniority_level', e.target.value)}>
-                  <option value="">Select...</option>
-                  {['Manager', 'Senior Manager', 'Director', 'VP', 'C-level', 'Flexible'].map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div>
-                <label style={label}>Function</label>
-                <select style={selectStyle} value={brief.function} onChange={e => setBriefField('function', e.target.value)}>
-                  <option value="">Select...</option>
-                  {['General Management', 'Retail', 'Marketing & Communications', 'Digital & E-commerce', 'Finance', 'HR & Talent', 'Other'].map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div>
-                <label style={label}>Location</label>
-                <input style={input} placeholder="City, Country" value={brief.location} onChange={e => setBriefField('location', e.target.value)} />
-              </div>
-              <div>
-                <label style={label}>Compensation range</label>
-                <input style={input} placeholder="e.g. €80K–120K" value={brief.compensation_range} onChange={e => setBriefField('compensation_range', e.target.value)} />
-              </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={label}>Additional context</label>
-                <textarea style={textarea} placeholder="Any constraints, sensitivities, comparator brands, or additional notes" value={brief.additional_context} onChange={e => setBriefField('additional_context', e.target.value)} />
-              </div>
-            </div>
-          </div>
-
-          {/* Contact & handling */}
-          <div style={bfSec}>
-            <div style={bfSecT}>Contact & handling</div>
-            <div style={bfGrid}>
-              <div><label style={label}>Contact name {rq}</label><input style={input} value={brief.contact_name} onChange={e => setBriefField('contact_name', e.target.value)} /></div>
-              <div><label style={label}>Work email {rq}</label><input style={input} type="email" value={brief.contact_email} onChange={e => setBriefField('contact_email', e.target.value)} /></div>
-              <div><label style={label}>Role / title</label><input style={input} value={brief.contact_role} onChange={e => setBriefField('contact_role', e.target.value)} /></div>
-              <div>
-                <label style={label}>Preferred follow-up {rq}</label>
-                <select style={selectStyle} value={brief.preferred_follow_up} onChange={e => setBriefField('preferred_follow_up', e.target.value)}>
-                  <option value="">Select...</option>
-                  {['Email', 'Call', 'Either'].map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={label}>Best timing</label>
-                <input style={input} placeholder="Timezone, availability window, or response preference" value={brief.best_timing} onChange={e => setBriefField('best_timing', e.target.value)} />
-              </div>
-            </div>
-          </div>
-
-          {briefError && <div style={{ fontSize: 12, color: '#e24b4a', marginBottom: 10 }}>{briefError}</div>}
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
-            <button onClick={handleSubmitBrief} disabled={briefSubmitting} style={{ ...bfSubBtn, background: briefSubmitting ? '#7a6a1e' : '#a58e28', cursor: briefSubmitting ? 'not-allowed' : 'pointer' }}>
-              {briefSubmitting ? 'Submitting...' : 'Submit brief'}
-            </button>
-            <span style={{ fontSize: 10, color: '#555' }}>
-              <a href="/terms/business" target="_blank" rel="noopener noreferrer" style={{ color: '#999', textDecoration: 'underline' }}>View Terms of Business →</a>
-            </span>
-          </div>
-        </>
-      )}
+      <BusinessBriefForm companyName={companyName} companyType={member?.org_type || ''} />
     </>
   )
 

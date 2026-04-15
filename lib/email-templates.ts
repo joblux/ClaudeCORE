@@ -330,20 +330,19 @@ export function employerApprovalEmail(params: {
 // ────────────────────────────────────────────
 
 export function briefReceivedEmail(params: {
-  firstName?: string
-  roleTitle?: string
+  firstName: string
+  companyName: string
 }): EmailContent {
-  const greeting = params.firstName ? `${params.firstName},` : ''
   const html = layout({
     content: [
-      greeting ? p(greeting) : '',
-      h1('We received your brief'),
-      p(`Thank you for submitting ${params.roleTitle ? `the brief for <strong>${params.roleTitle}</strong>` : 'your search brief'}. A member of our team will be in touch within 48 hours to discuss next steps.`),
-      p('Every conversation is fully confidential.'),
+      p(`Thank you ${params.firstName}. Your brief regarding ${params.companyName} has been received and will be reviewed privately. If follow-up is required, we will be in touch using the contact details you provided.`),
     ].join(''),
     reason: 'You received this because you submitted a search brief.',
   })
-  return { html, text: `${greeting ? greeting + '\n\n' : ''}We received your brief\n\nThank you for submitting your search brief. We'll be in touch within 48 hours.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence` }
+  return {
+    html,
+    text: `Thank you ${params.firstName}. Your brief regarding ${params.companyName} has been received and will be reviewed privately. If follow-up is required, we will be in touch using the contact details you provided.\n\nJOBLUX LLC \u00B7 Luxury Talent Intelligence`,
+  }
 }
 
 export function searchUpdateEmail(params: {
@@ -843,22 +842,30 @@ export function adminNewEmployerEmail(params: {
 }
 
 export function adminNewBriefEmail(params: {
-  employerName: string
   companyName: string
-  roleTitle: string
+  briefType: string
+  urgency: string
+  confidentiality: string
+  contactName: string
+  contactEmail: string
+  summary: string
 }): EmailContent {
+  const truncated = params.summary.length > 200 ? params.summary.slice(0, 200) + '…' : params.summary
   const html = adminLayout([
-    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New search brief</h2>`,
+    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New business brief</h2>`,
     `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
-    adminRow('From', params.employerName),
     adminRow('Company', params.companyName),
-    adminRow('Role', params.roleTitle),
+    adminRow('Brief type', params.briefType),
+    adminRow('Urgency', params.urgency),
+    adminRow('Confidentiality', params.confidentiality),
+    adminRow('Contact', `${params.contactName} (${params.contactEmail})`),
     `</table>`,
-    adminButton('View in admin', `${SITE_URL}/admin/assignments`),
+    `<div style="margin:16px 0;padding:12px;background:#f9f9f9;border-left:3px solid #B8975C;font-size:14px;color:#555;line-height:1.6;">${truncated}</div>`,
+    adminButton('View in admin', `${SITE_URL}/admin/business-briefs`),
   ].join(''))
   return {
     html,
-    text: `New search brief: ${params.roleTitle} at ${params.companyName}\nFrom: ${params.employerName}\n\nView: ${SITE_URL}/admin/assignments`,
+    text: `New business brief\n\nCompany: ${params.companyName}\nBrief type: ${params.briefType}\nUrgency: ${params.urgency}\nConfidentiality: ${params.confidentiality}\nContact: ${params.contactName} (${params.contactEmail})\n\nSummary:\n${truncated}\n\nView: ${SITE_URL}/admin/business-briefs`,
   }
 }
 

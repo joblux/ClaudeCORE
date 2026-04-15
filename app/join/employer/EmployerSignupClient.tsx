@@ -42,7 +42,7 @@ export default function EmployerSignupClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!company || !firstName || !lastName || !email || !country) {
+    if (!company || !orgType || !firstName || !lastName || !email || !title || !country || !city || !phone) {
       setError("Please fill in all required fields.")
       return
     }
@@ -118,8 +118,8 @@ export default function EmployerSignupClient() {
           </div>
 
           <div className="mb-5">
-            <label className={labelClass}>Type of organisation</label>
-            <select value={orgType} onChange={e => setOrgType(e.target.value)} className={selectClass}>
+            <label className={labelClass}>Type of organisation *</label>
+            <select value={orgType} onChange={e => setOrgType(e.target.value)} required className={selectClass}>
               <option value=""></option>
               {ORG_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
@@ -147,8 +147,8 @@ export default function EmployerSignupClient() {
           </div>
 
           <div className="mb-3">
-            <label className={labelClass}>Your title</label>
-            <input type="text" value={title} onChange={e => setTitle(e.target.value)} className={inputClass} />
+            <label className={labelClass}>Your title *</label>
+            <input type="text" value={title} onChange={e => setTitle(e.target.value)} required className={inputClass} />
           </div>
 
           <div className="grid grid-cols-2 gap-3 mb-3">
@@ -160,18 +160,18 @@ export default function EmployerSignupClient() {
               </select>
             </div>
             <div>
-              <label className={labelClass}>City</label>
-              <input type="text" value={city} onChange={e => setCity(e.target.value)} className={inputClass} />
+              <label className={labelClass}>City *</label>
+              <input type="text" value={city} onChange={e => setCity(e.target.value)} required className={inputClass} />
             </div>
           </div>
 
           <div className="mb-6">
-            <label className={labelClass}>Phone</label>
+            <label className={labelClass}>Phone *</label>
             <div className="flex gap-1.5">
               <select value={phoneCode} onChange={e => setPhoneCode(e.target.value)} className="px-2 py-2.5 text-[13px] bg-[#222] border border-[#333] rounded-md text-white outline-none focus:border-[#a58e28] transition-colors appearance-none w-[140px] flex-shrink-0">
                 {PHONE_CODES.map(pc => <option key={pc.code} value={pc.code}>{pc.label}</option>)}
               </select>
-              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="flex-1 min-w-0 px-3 py-2.5 text-[13px] bg-[#222] border border-[#333] rounded-md text-white outline-none focus:border-[#a58e28] transition-colors" />
+              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} required className="flex-1 min-w-0 px-3 py-2.5 text-[13px] bg-[#222] border border-[#333] rounded-md text-white outline-none focus:border-[#a58e28] transition-colors" />
             </div>
           </div>
 
