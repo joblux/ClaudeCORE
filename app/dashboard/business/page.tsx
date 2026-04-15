@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { useSession, signOut } from 'next-auth/react'
-import BusinessBriefForm from '@/components/business/BusinessBriefForm'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -57,37 +56,54 @@ const resourceLinks = [
 ]
 
 const STATUS_BADGE: Record<string, { bg: string; color: string; border: string }> = {
-  new: { bg: 'rgba(77,166,255,0.1)', color: '#4da6ff', border: '1px solid rgba(77,166,255,0.3)' },
-  received: { bg: 'rgba(77,166,255,0.1)', color: '#4da6ff', border: '1px solid rgba(77,166,255,0.3)' },
-  accepted: { bg: 'rgba(93,202,165,0.1)', color: '#5dcaa5', border: '1px solid rgba(93,202,165,0.3)' },
-  under_review: { bg: 'rgba(93,202,165,0.1)', color: '#5dcaa5', border: '1px solid rgba(93,202,165,0.3)' },
+  new: { bg: 'rgba(77,166,255,0.08)', color: '#4da6ff', border: '1px solid rgba(77,166,255,0.3)' },
+  received: { bg: 'rgba(77,166,255,0.08)', color: '#4da6ff', border: '1px solid rgba(77,166,255,0.3)' },
+  accepted: { bg: 'rgba(93,202,165,0.08)', color: '#5dcaa5', border: '1px solid rgba(93,202,165,0.3)' },
+  under_review: { bg: 'rgba(93,202,165,0.08)', color: '#5dcaa5', border: '1px solid rgba(93,202,165,0.3)' },
   active: { bg: 'rgba(165,142,40,0.08)', color: '#a58e28', border: '1px solid rgba(165,142,40,0.25)' },
   in_progress: { bg: 'rgba(165,142,40,0.08)', color: '#a58e28', border: '1px solid rgba(165,142,40,0.25)' },
   done: { bg: 'rgba(255,255,255,0.04)', color: '#999', border: '1px solid #2a2a2a' },
   completed: { bg: 'rgba(255,255,255,0.04)', color: '#999', border: '1px solid #2a2a2a' },
-  closed: { bg: 'rgba(255,255,255,0.02)', color: '#555', border: '1px solid #1e1e1e' },
+  closed: { bg: 'rgba(255,255,255,0.02)', color: '#555', border: '1px solid #1c1c1c' },
 }
 
 const SALARY_ROWS = [
-  { role: 'Store Director', region: 'Paris', range: '€85K–110K', trend: '+4%' },
-  { role: 'Head of Digital', region: 'Paris', range: '€90K–120K', trend: '+7%' },
-  { role: 'Retail Director', region: 'Europe', range: '€95K–130K', trend: '+3%' },
-  { role: 'Workshop Manager', region: 'France', range: '€55K–70K', trend: '+2%' },
+  { role: 'Store Director · Paris', range: '€85K–110K', trend: '+4%' },
+  { role: 'Head of Digital · Paris', range: '€90K–120K', trend: '+7%' },
+  { role: 'Retail Director · Europe', range: '€95K–130K', trend: '+3%' },
+  { role: 'Workshop Manager · France', range: '€55K–70K', trend: '+2%' },
 ]
 
 const UPCOMING_EVENTS = [
-  { date: 'Apr 28', title: 'Watches & Wonders', location: 'Geneva' },
-  { date: 'May 12', title: 'LVMH Innovation Award', location: 'Paris' },
-  { date: 'Jun 03', title: 'Pitti Uomo 110', location: 'Florence' },
+  { mo: 'Apr', dy: '28', title: 'Watches & Wonders Geneva 2026', loc: 'Geneva, Switzerland' },
+  { mo: 'May', dy: '12', title: 'LVMH Innovation Award', loc: 'Paris, France' },
+  { mo: 'Jun', dy: '03', title: 'Pitti Uomo 110', loc: 'Florence, Italy' },
+  { mo: 'Sep', dy: '18', title: 'Milano Fashion Week SS27', loc: 'Milan, Italy' },
 ]
 
 const LATEST_INSIGHTS = [
-  { kind: 'Analysis', title: 'How luxury groups are rethinking talent strategy in 2026' },
-  { kind: 'Report', title: 'Salary benchmarks — European retail leadership' },
-  { kind: 'Editorial', title: 'The quiet return of the generalist executive' },
+  { kind: 'Analysis', color: '#a78bfa', title: 'The quiet revolution in luxury retail staffing', age: '2d ago' },
+  { kind: 'Report', color: '#5dcaa5', title: 'Q1 2026: Luxury compensation trends', age: '5d ago' },
+  { kind: 'Editorial', color: '#ef9f27', title: 'Why watchmakers are hiring outside the industry', age: '1w ago' },
+  { kind: 'Analysis', color: '#a78bfa', title: 'Digital talent migration into luxury hospitality', age: '2w ago' },
 ]
 
-const ATS_LOGOS = ['Workday', 'Greenhouse', 'Lever', 'SAP SuccessFactors', 'SmartRecruiters']
+// ─────────────────────────────── Shared styles
+const input: React.CSSProperties = {
+  width: '100%', background: '#222', border: '1px solid #2a2a2a', borderRadius: 4,
+  padding: '9px 11px', fontSize: 12, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none',
+}
+const selectStyle: React.CSSProperties = { ...input, appearance: 'none' as const }
+const textarea: React.CSSProperties = { ...input, resize: 'vertical' as const, minHeight: 70 }
+const label: React.CSSProperties = { display: 'block', fontSize: 10, color: '#999', marginBottom: 4 }
+const rq = <span style={{ color: '#a58e28' }}>*</span>
+const bfSec: React.CSSProperties = { background: '#1a1a1a', border: '1px solid #1c1c1c', borderRadius: 5, padding: 20, marginBottom: 14 }
+const bfSecT: React.CSSProperties = { fontSize: 13, fontWeight: 500, color: '#fff', marginBottom: 14 }
+const bfGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }
+const bfSubBtn: React.CSSProperties = {
+  display: 'inline-block', padding: '10px 24px', fontSize: 11, fontWeight: 600, color: '#111',
+  background: '#a58e28', border: 'none', borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+}
 
 export default function BusinessDashboard() {
   const { data: session } = useSession()
@@ -100,6 +116,26 @@ export default function BusinessDashboard() {
   const [contributionStats, setContributionStats] = useState<any>(null)
   const [searchCount, setSearchCount] = useState(0)
   const [myBriefs, setMyBriefs] = useState<any[]>([])
+
+  // Brief form
+  const [brief, setBrief] = useState({
+    company_name: '', company_website: '', sector: '', company_type: '', geography: '',
+    brief_type: 'Talent search', urgency: '', confidentiality_level: '',
+    mandate_title: '', brief_summary: '', seniority_level: '', function: '',
+    location: '', compensation_range: '', additional_context: '',
+    contact_name: '', contact_email: '', contact_role: '', preferred_follow_up: '', best_timing: '',
+  })
+  const [briefSubmitting, setBriefSubmitting] = useState(false)
+  const [briefSubmitted, setBriefSubmitted] = useState(false)
+  const [briefError, setBriefError] = useState('')
+
+  // Contribute form
+  const [contribTab, setContribTab] = useState<'salary' | 'interview' | 'signal'>('salary')
+
+  // Invite form
+  const [invite, setInvite] = useState({ first_name: '', email: '', title: '', company: '' })
+  const [inviteSending, setInviteSending] = useState(false)
+  const [inviteMsg, setInviteMsg] = useState('')
 
   useEffect(() => {
     if (!session) return
@@ -158,6 +194,58 @@ export default function BusinessDashboard() {
 
   const activeBriefsCount = myBriefs.filter(b => b.status !== 'closed').length
 
+  const setBriefField = (k: string, v: string) => setBrief(prev => ({ ...prev, [k]: v }))
+
+  const handleSubmitBrief = async () => {
+    setBriefError('')
+    if (!brief.company_name.trim() || !brief.sector || !brief.company_type || !brief.brief_type || !brief.urgency || !brief.confidentiality_level || !brief.brief_summary.trim() || !brief.contact_name.trim() || !brief.contact_email.trim() || !brief.preferred_follow_up) {
+      setBriefError('Please complete all required fields.')
+      return
+    }
+    setBriefSubmitting(true)
+    try {
+      const res = await fetch('/api/business-briefs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(brief),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setBriefSubmitted(true)
+      } else {
+        setBriefError(data.error || 'Something went wrong. Please try again.')
+      }
+    } catch {
+      setBriefError('Network error. Please try again.')
+    }
+    setBriefSubmitting(false)
+  }
+
+  const handleSendInvite = async () => {
+    setInviteMsg('')
+    if (!invite.first_name.trim() || !invite.email.trim()) {
+      setInviteMsg('First name and email are required.')
+      return
+    }
+    setInviteSending(true)
+    try {
+      const res = await fetch('/api/invites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(invite),
+      })
+      if (res.ok) {
+        setInviteMsg('Invitation sent.')
+        setInvite({ first_name: '', email: '', title: '', company: '' })
+      } else {
+        setInviteMsg('Could not send invitation.')
+      }
+    } catch {
+      setInviteMsg('Network error.')
+    }
+    setInviteSending(false)
+  }
+
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', background: '#0f0f0f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -174,284 +262,568 @@ export default function BusinessDashboard() {
   ]
 
   const panelStyle: React.CSSProperties = {
-    background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '18px 20px',
+    background: '#1a1a1a', border: '1px solid #1c1c1c', borderRadius: 5, padding: 16,
   }
   const panelHeaderStyle: React.CSSProperties = {
-    fontSize: 11, fontWeight: 500, color: '#999', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: 12,
+    fontSize: 8, fontWeight: 600, letterSpacing: '1.6px', textTransform: 'uppercase',
   }
-  const panelRowDivider: React.CSSProperties = { borderBottom: '1px solid #1e1e1e' }
+  const rowDivider: React.CSSProperties = { borderBottom: '1px solid #1c1c1c' }
 
-  return (
-    <div style={{ fontFamily: 'Inter, sans-serif', background: '#0f0f0f', minHeight: '100vh' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 28px', display: 'flex', gap: 0, minHeight: '100vh' }}>
-        {/* Sidebar */}
-        <aside style={{ width: 220, borderRight: '1px solid #1e1e1e', padding: '24px 0', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-          {/* Profile */}
-          <div style={{ padding: '0 16px 20px', borderBottom: '1px solid #1e1e1e' }}>
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 600, color: '#ccc', marginBottom: 8 }}>{initials}</div>
-            <div style={{ fontSize: 14, fontWeight: 500, color: '#fff' }}>{[firstName, lastName].filter(Boolean).join(' ') || 'Employer'}</div>
-            {companyName && <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{companyName}</div>}
-            <Link href="/account" style={{ display: 'inline-block', marginTop: 8, fontSize: 12, color: '#999', textDecoration: 'none' }}>Settings</Link>
+  const sidebarBtn = (id: string, label: string) => (
+    <button
+      key={id}
+      onClick={() => setActiveNav(id)}
+      style={{
+        display: 'block', width: '100%', textAlign: 'left', padding: '7px 10px', borderRadius: 4,
+        border: 'none', cursor: 'pointer', fontSize: 12, fontFamily: 'Inter, sans-serif',
+        background: activeNav === id ? 'rgba(255,255,255,0.06)' : 'transparent',
+        color: activeNav === id ? '#fff' : '#999',
+        fontWeight: activeNav === id ? 500 : 400,
+        marginBottom: 1,
+      }}
+    >
+      {label}
+    </button>
+  )
+
+  // ─────────────── Brief form rendered inline (matches prototype)
+  const briefScreen = (
+    <>
+      <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff', marginBottom: 3 }}>Business brief</div>
+      <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, marginBottom: 18 }}>
+        Share your hiring or intelligence requirement. Each brief is handled discreetly and in accordance with our{' '}
+        <a href="/terms/business" target="_blank" rel="noopener noreferrer" style={{ color: '#999', textDecoration: 'underline' }}>Terms of Business</a>.
+      </p>
+
+      {/* How it works */}
+      <div style={{ padding: '16px 18px', background: 'rgba(165,142,40,0.08)', border: '1px solid rgba(165,142,40,0.25)', borderRadius: 5, marginBottom: 18 }}>
+        <div style={{ fontSize: 8, fontWeight: 600, letterSpacing: '1.5px', color: '#a58e28', marginBottom: 10 }}>HOW IT WORKS</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
+          {[
+            { t: '1. Share your brief', d: 'Tell us about the role and context.' },
+            { t: '2. We reach out', d: 'If the brief is a fit, we discuss the mandate.' },
+            { t: '3. We search', d: 'Your JOBLUX consultant runs a discreet search.' },
+            { t: '4. Review candidates', d: 'We present shortlisted candidates for review.' },
+          ].map(s => (
+            <div key={s.t}>
+              <div style={{ fontSize: 11, color: '#fff', fontWeight: 500, marginBottom: 2 }}>{s.t}</div>
+              <div style={{ fontSize: 10, color: '#999', lineHeight: 1.4 }}>{s.d}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid rgba(165,142,40,0.25)' }}>
+          <div style={{ fontSize: 9, color: '#555', marginBottom: 5 }}>Compatible with your existing ATS</div>
+          <div style={{ display: 'flex', gap: 16, opacity: 0.45 }}>
+            {['Workday', 'Greenhouse', 'Lever', 'SAP SuccessFactors', 'SmartRecruiters'].map(a => (
+              <span key={a} style={{ fontSize: 10, color: '#999', fontWeight: 500 }}>{a}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {briefSubmitted ? (
+        <div style={{ ...bfSec, textAlign: 'center', padding: '40px 24px' }}>
+          <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 20, color: '#fff', marginBottom: 10 }}>Brief received</div>
+          <p style={{ fontSize: 13, color: '#ccc', lineHeight: 1.6, maxWidth: 480, margin: '0 auto' }}>
+            Your brief has been received and will be reviewed privately by the JOBLUX team.
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Company context */}
+          <div style={bfSec}>
+            <div style={bfSecT}>Company context</div>
+            <div style={bfGrid}>
+              <div><label style={label}>Company name {rq}</label><input style={input} value={brief.company_name} onChange={e => setBriefField('company_name', e.target.value)} /></div>
+              <div><label style={label}>Company website</label><input style={input} placeholder="https://" value={brief.company_website} onChange={e => setBriefField('company_website', e.target.value)} /></div>
+              <div>
+                <label style={label}>Sector {rq}</label>
+                <select style={selectStyle} value={brief.sector} onChange={e => setBriefField('sector', e.target.value)}>
+                  <option value="">Select...</option>
+                  {['Fashion', 'Watches', 'Jewellery', 'Beauty', 'Hospitality', 'Travel', 'Wine & Spirits', 'Design & Interiors', 'Art & Culture', 'Private Client & Family Office', 'Multi-brand Group', 'Other'].map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={label}>Company type {rq}</label>
+                <select style={selectStyle} value={brief.company_type} onChange={e => setBriefField('company_type', e.target.value)}>
+                  <option value="">Select...</option>
+                  {['Independent maison', 'Brand', 'Group', 'Agency', 'Family Office', 'Hospitality Operator', 'Travel Business', 'Investor', 'Other'].map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={label}>Geography</label>
+                <input style={input} placeholder="Primary market or region concerned by this brief" value={brief.geography} onChange={e => setBriefField('geography', e.target.value)} />
+              </div>
+            </div>
           </div>
 
-          {/* Nav */}
-          <nav style={{ padding: '12px 8px' }}>
-            {navItems.map(section => (
-              <div key={section.section} style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: '#555', letterSpacing: '1.5px', padding: '6px 8px 4px' }}>{section.section}</div>
-                {section.items.map(item => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveNav(item.id)}
-                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '7px 8px', borderRadius: 4, border: 'none', cursor: 'pointer', fontSize: 13, background: activeNav === item.id ? '#1e1e1e' : 'transparent', color: activeNav === item.id ? '#fff' : '#999' }}
-                  >
-                    {item.label}
-                  </button>
-                ))}
+          {/* Brief type */}
+          <div style={bfSec}>
+            <div style={bfSecT}>Brief type</div>
+            <div style={{ marginBottom: 14 }}>
+              <label style={label}>Brief type {rq}</label>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
+                {['Talent search', 'Intelligence only', 'Exploratory'].map(bt => {
+                  const sel = brief.brief_type === bt
+                  return (
+                    <button
+                      key={bt}
+                      type="button"
+                      onClick={() => setBriefField('brief_type', bt)}
+                      style={{
+                        padding: '7px 14px', fontSize: 11, cursor: 'pointer', borderRadius: 4,
+                        background: sel ? 'rgba(165,142,40,0.08)' : '#222',
+                        border: sel ? '1px solid #a58e28' : '1px solid #2a2a2a',
+                        color: sel ? '#a58e28' : '#999',
+                        fontFamily: 'Inter, sans-serif',
+                      }}
+                    >
+                      {bt}
+                    </button>
+                  )
+                })}
               </div>
-            ))}
-
-            {/* Resources */}
-            <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: '#555', letterSpacing: '1.5px', padding: '6px 8px 4px' }}>RESOURCES</div>
-              {resourceLinks.map(r => (
-                <a
-                  key={r.label}
-                  href={r.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '7px 8px', borderRadius: 4, fontSize: 13, color: '#999', textDecoration: 'none' }}
-                >
-                  {r.label}
-                </a>
-              ))}
             </div>
+            <div style={bfGrid}>
+              <div>
+                <label style={label}>Urgency {rq}</label>
+                <select style={selectStyle} value={brief.urgency} onChange={e => setBriefField('urgency', e.target.value)}>
+                  <option value="">Select...</option>
+                  {['Immediate', 'Within 30 days', 'Within this quarter', 'Exploratory'].map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={label}>Confidentiality {rq}</label>
+                <select style={selectStyle} value={brief.confidentiality_level} onChange={e => setBriefField('confidentiality_level', e.target.value)}>
+                  <option value="">Select...</option>
+                  {['Standard', 'Sensitive', 'Highly confidential'].map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
 
-            {/* Invite */}
-            <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: '#555', letterSpacing: '1.5px', padding: '6px 8px 4px' }}>INVITE</div>
+          {/* Role details */}
+          <div style={bfSec}>
+            <div style={bfSecT}>Role details</div>
+            <div style={bfGrid}>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={label}>Role title</label>
+                <input style={input} placeholder="e.g. Head of Retail, Europe" value={brief.mandate_title} onChange={e => setBriefField('mandate_title', e.target.value)} />
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={label}>Brief summary {rq}</label>
+                <textarea style={textarea} placeholder="Describe the role, context, and what you're looking for..." value={brief.brief_summary} onChange={e => setBriefField('brief_summary', e.target.value)} />
+              </div>
+              <div>
+                <label style={label}>Seniority</label>
+                <select style={selectStyle} value={brief.seniority_level} onChange={e => setBriefField('seniority_level', e.target.value)}>
+                  <option value="">Select...</option>
+                  {['Manager', 'Senior Manager', 'Director', 'VP', 'C-level', 'Flexible'].map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={label}>Function</label>
+                <select style={selectStyle} value={brief.function} onChange={e => setBriefField('function', e.target.value)}>
+                  <option value="">Select...</option>
+                  {['General Management', 'Retail', 'Marketing & Communications', 'Digital & E-commerce', 'Finance', 'HR & Talent', 'Other'].map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={label}>Location</label>
+                <input style={input} placeholder="City, Country" value={brief.location} onChange={e => setBriefField('location', e.target.value)} />
+              </div>
+              <div>
+                <label style={label}>Compensation range</label>
+                <input style={input} placeholder="e.g. €80K–120K" value={brief.compensation_range} onChange={e => setBriefField('compensation_range', e.target.value)} />
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={label}>Additional context</label>
+                <textarea style={textarea} placeholder="Any constraints, sensitivities, comparator brands, or additional notes" value={brief.additional_context} onChange={e => setBriefField('additional_context', e.target.value)} />
+              </div>
+            </div>
+          </div>
+
+          {/* Contact & handling */}
+          <div style={bfSec}>
+            <div style={bfSecT}>Contact & handling</div>
+            <div style={bfGrid}>
+              <div><label style={label}>Contact name {rq}</label><input style={input} value={brief.contact_name} onChange={e => setBriefField('contact_name', e.target.value)} /></div>
+              <div><label style={label}>Work email {rq}</label><input style={input} type="email" value={brief.contact_email} onChange={e => setBriefField('contact_email', e.target.value)} /></div>
+              <div><label style={label}>Role / title</label><input style={input} value={brief.contact_role} onChange={e => setBriefField('contact_role', e.target.value)} /></div>
+              <div>
+                <label style={label}>Preferred follow-up {rq}</label>
+                <select style={selectStyle} value={brief.preferred_follow_up} onChange={e => setBriefField('preferred_follow_up', e.target.value)}>
+                  <option value="">Select...</option>
+                  {['Email', 'Call', 'Either'].map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={label}>Best timing</label>
+                <input style={input} placeholder="Timezone, availability window, or response preference" value={brief.best_timing} onChange={e => setBriefField('best_timing', e.target.value)} />
+              </div>
+            </div>
+          </div>
+
+          {briefError && <div style={{ fontSize: 12, color: '#e24b4a', marginBottom: 10 }}>{briefError}</div>}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
+            <button onClick={handleSubmitBrief} disabled={briefSubmitting} style={{ ...bfSubBtn, background: briefSubmitting ? '#7a6a1e' : '#a58e28', cursor: briefSubmitting ? 'not-allowed' : 'pointer' }}>
+              {briefSubmitting ? 'Submitting...' : 'Submit brief'}
+            </button>
+            <span style={{ fontSize: 10, color: '#555' }}>
+              <a href="/terms/business" target="_blank" rel="noopener noreferrer" style={{ color: '#999', textDecoration: 'underline' }}>View Terms of Business →</a>
+            </span>
+          </div>
+        </>
+      )}
+    </>
+  )
+
+  // ─────────────── Add data screen (3 tabs)
+  const adddataScreen = (
+    <>
+      <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff', marginBottom: 3 }}>Add data</div>
+      <div style={{ fontSize: 11, color: '#777', marginBottom: 20 }}>Intelligence is built on contribution</div>
+
+      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #1c1c1c', marginBottom: 20 }}>
+        {[
+          { id: 'salary', label: 'Salary data' },
+          { id: 'interview', label: 'Interview experience' },
+          { id: 'signal', label: 'Market signal' },
+        ].map(t => (
+          <div
+            key={t.id}
+            onClick={() => setContribTab(t.id as any)}
+            style={{
+              fontSize: 12, padding: '10px 18px', cursor: 'pointer',
+              borderBottom: contribTab === t.id ? '2px solid #a58e28' : '2px solid transparent',
+              marginBottom: -1,
+              color: contribTab === t.id ? '#fff' : '#555',
+            }}
+          >
+            {t.label}
+          </div>
+        ))}
+      </div>
+
+      {contribTab === 'salary' && (
+        <div style={bfSec}>
+          <div style={bfSecT}>Salary data</div>
+          <div style={bfGrid}>
+            <div><label style={label}>Company {rq}</label><input style={input} placeholder="e.g. Hublot" /></div>
+            <div><label style={label}>Job title {rq}</label><input style={input} placeholder="e.g. Store Director" /></div>
+            <div><label style={label}>City {rq}</label><input style={input} placeholder="e.g. Paris" /></div>
+            <div><label style={label}>Country {rq}</label><input style={input} placeholder="e.g. France" /></div>
+            <div><label style={label}>Annual base salary {rq}</label><input style={input} placeholder="e.g. 95000" /></div>
+            <div>
+              <label style={label}>Currency {rq}</label>
+              <select style={selectStyle}>
+                {['EUR', 'GBP', 'USD', 'CHF'].map(c => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+            <div><label style={label}>Period</label><input style={input} placeholder="e.g. 2023–2024" /></div>
+            <div><label style={label}>Total compensation</label><input style={input} placeholder="Including bonus if applicable" /></div>
+            <div style={{ gridColumn: '1 / -1' }}><label style={label}>Source URL {rq}</label><input style={input} placeholder="Link to source (job posting, press release, or public record)" /></div>
+          </div>
+          <div style={{ marginTop: 16 }}><button style={bfSubBtn}>Submit salary data</button></div>
+        </div>
+      )}
+
+      {contribTab === 'interview' && (
+        <div style={bfSec}>
+          <div style={bfSecT}>Interview experience</div>
+          <div style={bfGrid}>
+            <div><label style={label}>Company {rq}</label><input style={input} placeholder="e.g. Chanel" /></div>
+            <div><label style={label}>Role applied for {rq}</label><input style={input} placeholder="e.g. Marketing Manager" /></div>
+            <div><label style={label}>Year {rq}</label><input style={input} placeholder="e.g. 2024" /></div>
+            <div>
+              <label style={label}>Outcome</label>
+              <select style={selectStyle}>
+                <option>Select...</option>
+                <option>Offer received</option>
+                <option>Rejected</option>
+                <option>Withdrew</option>
+                <option>Still in process</option>
+              </select>
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}><label style={label}>Number of rounds</label><input style={input} placeholder="e.g. 3" /></div>
+            <div style={{ gridColumn: '1 / -1' }}><label style={label}>Process description {rq}</label><textarea style={textarea} placeholder="Describe the interview process — stages, format, what was assessed..." /></div>
+            <div style={{ gridColumn: '1 / -1' }}><label style={label}>Tips for candidates</label><textarea style={textarea} placeholder="What would you tell someone preparing for this process?" /></div>
+          </div>
+          <div style={{ marginTop: 16 }}><button style={bfSubBtn}>Submit interview data</button></div>
+        </div>
+      )}
+
+      {contribTab === 'signal' && (
+        <div style={bfSec}>
+          <div style={bfSecT}>Market signal</div>
+          <div style={bfGrid}>
+            <div style={{ gridColumn: '1 / -1' }}><label style={label}>Signal headline {rq}</label><input style={input} placeholder="e.g. Kering appoints new CEO for Gucci" /></div>
+            <div>
+              <label style={label}>Category {rq}</label>
+              <select style={selectStyle}>
+                <option>Select...</option>
+                <option>Leadership</option>
+                <option>Growth</option>
+                <option>Contraction</option>
+                <option>Expansion</option>
+                <option>Merger & Acquisition</option>
+              </select>
+            </div>
+            <div><label style={label}>Brand / company</label><input style={input} placeholder="e.g. Gucci" /></div>
+            <div style={{ gridColumn: '1 / -1' }}><label style={label}>Source URL {rq}</label><input style={input} placeholder="Link to original source" /></div>
+            <div style={{ gridColumn: '1 / -1' }}><label style={label}>Context</label><textarea style={textarea} placeholder="Add any additional context or analysis..." /></div>
+          </div>
+          <div style={{ marginTop: 16 }}><button style={bfSubBtn}>Submit signal</button></div>
+        </div>
+      )}
+    </>
+  )
+
+  // ─────────────── Invite screen
+  const inviteScreen = (
+    <>
+      <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff', marginBottom: 3 }}>Invite</div>
+      <div style={{ fontSize: 11, color: '#777', marginBottom: 20 }}>Invite a colleague to request access</div>
+
+      <div style={bfSec}>
+        <div style={bfSecT}>Send an invitation</div>
+        <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, marginBottom: 16 }}>
+          Your colleague will receive a personal link to request access. Their invitation is linked to your account.
+        </p>
+        <div style={bfGrid}>
+          <div><label style={label}>First name {rq}</label><input style={input} placeholder="Their first name" value={invite.first_name} onChange={e => setInvite({ ...invite, first_name: e.target.value })} /></div>
+          <div><label style={label}>Email address {rq}</label><input style={input} placeholder="colleague@company.com" value={invite.email} onChange={e => setInvite({ ...invite, email: e.target.value })} /></div>
+          <div><label style={label}>Title / role</label><input style={input} placeholder="Their title at the company" value={invite.title} onChange={e => setInvite({ ...invite, title: e.target.value })} /></div>
+          <div><label style={label}>Company</label><input style={input} placeholder="Their company" value={invite.company} onChange={e => setInvite({ ...invite, company: e.target.value })} /></div>
+        </div>
+        {inviteMsg && <div style={{ fontSize: 11, color: inviteMsg === 'Invitation sent.' ? '#5dcaa5' : '#e24b4a', marginTop: 12 }}>{inviteMsg}</div>}
+        <div style={{ marginTop: 14 }}>
+          <button onClick={handleSendInvite} disabled={inviteSending} style={{ ...bfSubBtn, background: inviteSending ? '#7a6a1e' : '#a58e28', cursor: inviteSending ? 'not-allowed' : 'pointer' }}>
+            {inviteSending ? 'Sending...' : 'Send invitation'}
+          </button>
+        </div>
+      </div>
+
+      <div style={bfSec}>
+        <div style={bfSecT}>Sent invitations</div>
+        <div style={{ fontSize: 12, color: '#999', padding: '12px 0' }}>
+          No invitations sent yet.
+        </div>
+      </div>
+    </>
+  )
+
+  return (
+    <div style={{ fontFamily: 'Inter, sans-serif', background: '#0f0f0f', minHeight: '100vh', color: '#fff' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 28px', display: 'flex', minHeight: '100vh' }}>
+
+        {/* ──────────────── Sidebar ──────────────── */}
+        <aside style={{ width: 230, background: '#131313', borderRight: '1px solid #1c1c1c', padding: '20px 0', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+          {/* Profile */}
+          <div style={{ padding: '0 18px 16px', borderBottom: '1px solid #1c1c1c', marginBottom: 6 }}>
+            <div style={{ width: 46, height: 46, borderRadius: '50%', background: '#4da6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 600, color: '#fff', marginBottom: 10 }}>
+              {initials}
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 500, color: '#fff' }}>{companyName || [firstName, lastName].filter(Boolean).join(' ') || 'Employer'}</div>
+            {(firstName || lastName) && <div style={{ fontSize: 11, color: '#999', marginTop: 1 }}>{[firstName, lastName].filter(Boolean).join(' ')}</div>}
+            <div style={{ marginTop: 7 }}>
+              <Link href="/account" style={{ fontSize: 10, color: '#555', textDecoration: 'none', display: 'inline-block' }}>Settings</Link>
+            </div>
+          </div>
+
+          {/* Nav sections */}
+          {navItems.map(section => (
+            <div key={section.section} style={{ padding: '0 10px', marginTop: 2 }}>
+              <div style={{ fontSize: 7, fontWeight: 600, letterSpacing: '2px', color: '#555', textTransform: 'uppercase', padding: '12px 8px 5px' }}>{section.section}</div>
+              {section.items.map(item => sidebarBtn(item.id, item.label))}
+            </div>
+          ))}
+
+          {/* Resources (no active state, external links) */}
+          <div style={{ padding: '0 10px', marginTop: 2 }}>
+            <div style={{ fontSize: 7, fontWeight: 600, letterSpacing: '2px', color: '#555', textTransform: 'uppercase', padding: '12px 8px 5px' }}>RESOURCES</div>
+            {resourceLinks.map(r => (
               <a
-                href="/invite"
+                key={r.label}
+                href={r.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ display: 'block', width: '100%', textAlign: 'left', padding: '7px 8px', borderRadius: 4, fontSize: 13, color: '#999', textDecoration: 'none' }}
+                style={{ display: 'block', padding: '7px 10px', borderRadius: 4, fontSize: 12, color: '#999', textDecoration: 'none', marginBottom: 1 }}
               >
-                Invite
+                {r.label}
               </a>
-            </div>
-          </nav>
+            ))}
+          </div>
 
-          {/* Bottom actions */}
-          <div style={{ marginTop: 'auto', padding: '12px 16px', borderTop: '1px solid #1e1e1e', display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <a
-              href="/faq"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ fontSize: 12, color: '#999', textDecoration: 'none' }}
-              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#fff' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#999' }}
+          {/* Invite (inline switch, not external) */}
+          <div style={{ padding: '0 10px', marginTop: 2 }}>
+            <div style={{ fontSize: 7, fontWeight: 600, letterSpacing: '2px', color: '#555', textTransform: 'uppercase', padding: '12px 8px 5px' }}>INVITE</div>
+            {sidebarBtn('invite', 'Invite')}
+          </div>
+
+          {/* Bottom */}
+          <div style={{ marginTop: 'auto', padding: '12px 10px', borderTop: '1px solid #1c1c1c', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <a href="/faq" target="_blank" rel="noopener noreferrer" style={{ display: 'block', fontSize: 12, color: '#999', padding: '8px 10px', textDecoration: 'none', borderRadius: 4 }}>Help</a>
+            <button
+              onClick={() => signOut({ callbackUrl: '/' })}
+              style={{ display: 'block', textAlign: 'left', width: '100%', fontSize: 12, color: '#555', padding: '8px 10px', background: 'none', border: 'none', cursor: 'pointer', borderRadius: 4, fontFamily: 'Inter, sans-serif' }}
             >
-              Help
-            </a>
-            <button onClick={() => signOut({ callbackUrl: '/' })} style={{ display: 'block', width: '100%', padding: '6px 0', textAlign: 'left', fontSize: 12, color: '#999', background: 'none', border: 'none', cursor: 'pointer' }}>Sign out</button>
+              Sign out
+            </button>
           </div>
         </aside>
 
-        {/* Main content */}
-        <main style={{ flex: 1, padding: '32px 40px', minWidth: 0 }}>
-          {/* ── OVERVIEW ── */}
-          {activeNav === 'overview' && (<>
-            <div style={{ marginBottom: 24 }}>
-              <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 24, fontWeight: 400, color: '#fff', margin: 0 }}>Welcome back, {firstName || 'there'}</h1>
-              <p style={{ fontSize: 13, color: '#999', marginTop: 4 }}>{today}</p>
-            </div>
+        {/* ──────────────── Main ──────────────── */}
+        <main style={{ flex: 1, padding: '28px 32px', minWidth: 0, overflow: 'hidden' }}>
 
-            {/* Stat cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 20 }}>
-              {statCards.map(card => (
-                <div key={card.label} style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '16px 18px' }}>
-                  <div style={{ fontSize: 11, color: '#999', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: 8 }}>{card.label}</div>
-                  <div style={{ fontSize: 26, fontWeight: 300, color: card.color, lineHeight: 1 }}>{card.value}</div>
-                </div>
-              ))}
-            </div>
+          {/* Overview */}
+          {activeNav === 'overview' && (
+            <>
+              <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff', marginBottom: 3 }}>Welcome back, {firstName || 'there'}</div>
+              <div style={{ fontSize: 11, color: '#777', marginBottom: 20 }}>{today}</div>
 
-            {/* Row 1 */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-              {/* Market signals */}
-              <div style={panelStyle}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <div style={panelHeaderStyle}>Market signals</div>
-                  <Link href="/signals" style={{ fontSize: 11, color: '#999', textDecoration: 'none' }}>View all →</Link>
-                </div>
-                {signals.length > 0 ? (
-                  <div>
-                    {signals.slice(0, 4).map((s, i, arr) => (
-                      <Link key={s.id} href={`/signals/${s.slug || s.id}`} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid #1e1e1e' : 'none', textDecoration: 'none', alignItems: 'flex-start' }}>
-                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: SIGNAL_COLORS[s.category] || '#888', flexShrink: 0, marginTop: 5 }} />
-                        <span style={{ fontSize: 12, color: '#ccc', flex: 1, lineHeight: 1.4 }}>{s.headline}</span>
-                        <span style={{ fontSize: 10, color: '#999', whiteSpace: 'nowrap' }}>{timeAgo(s.published_at)}</span>
-                      </Link>
-                    ))}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0,1fr))', gap: 10, marginBottom: 20 }}>
+                {statCards.map(c => (
+                  <div key={c.label} style={{ background: '#1a1a1a', border: '1px solid #1c1c1c', borderRadius: 5, padding: '14px 12px' }}>
+                    <div style={{ fontSize: 22, fontWeight: 600, color: c.color, marginBottom: 1 }}>{c.value}</div>
+                    <div style={{ fontSize: 10, color: '#777' }}>{c.label}</div>
                   </div>
-                ) : (
-                  <p style={{ fontSize: 12, color: '#999', margin: 0 }}>No signals yet.</p>
-                )}
+                ))}
               </div>
 
-              {/* Salary benchmarks */}
-              <div style={panelStyle}>
-                <div style={panelHeaderStyle}>Salary benchmarks</div>
-                <div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+                {/* Market signals */}
+                <div style={panelStyle}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <span style={{ ...panelHeaderStyle, color: '#4da6ff' }}>Market signals</span>
+                    <Link href="/signals" style={{ fontSize: 10, color: '#555', textDecoration: 'none' }}>All signals →</Link>
+                  </div>
+                  {signals.length > 0 ? signals.slice(0, 4).map((s, i, arr) => (
+                    <Link key={s.id} href={`/signals/${s.slug || s.id}`} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '7px 0', ...(i < arr.length - 1 ? rowDivider : {}), textDecoration: 'none' }}>
+                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: SIGNAL_COLORS[s.category] || '#888', flexShrink: 0, marginTop: 5 }} />
+                      <span style={{ fontSize: 11, color: '#ccc', flex: 1, lineHeight: 1.4 }}>{s.headline}</span>
+                      <span style={{ fontSize: 9, color: '#555', whiteSpace: 'nowrap' }}>{timeAgo(s.published_at)}</span>
+                    </Link>
+                  )) : <div style={{ fontSize: 11, color: '#999', padding: '7px 0' }}>No signals yet.</div>}
+                </div>
+
+                {/* Salary benchmarks */}
+                <div style={panelStyle}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <span style={{ ...panelHeaderStyle, color: '#5dcaa5' }}>Salary benchmarks</span>
+                    <Link href="/careers?tab=salary" style={{ fontSize: 10, color: '#555', textDecoration: 'none' }}>Full data →</Link>
+                  </div>
                   {SALARY_ROWS.map((r, i) => (
-                    <div key={r.role} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', ...(i < SALARY_ROWS.length - 1 ? panelRowDivider : {}) }}>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 12, color: '#ccc' }}>{r.role}</div>
-                        <div style={{ fontSize: 11, color: '#999' }}>{r.region}</div>
-                      </div>
-                      <div style={{ fontSize: 12, color: '#fff', marginRight: 12 }}>{r.range}</div>
-                      <div style={{ fontSize: 11, color: '#5dcaa5' }}>{r.trend}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Row 2 */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              {/* Upcoming events */}
-              <div style={panelStyle}>
-                <div style={panelHeaderStyle}>Upcoming events</div>
-                <div>
-                  {UPCOMING_EVENTS.map((e, i) => (
-                    <div key={e.title} style={{ display: 'flex', gap: 14, padding: '10px 0', alignItems: 'flex-start', ...(i < UPCOMING_EVENTS.length - 1 ? panelRowDivider : {}) }}>
-                      <div style={{ fontSize: 11, color: '#a58e28', fontWeight: 500, width: 54, flexShrink: 0, letterSpacing: '0.5px', marginTop: 2 }}>{e.date}</div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 12, color: '#ccc' }}>{e.title}</div>
-                        <div style={{ fontSize: 11, color: '#999' }}>{e.location}</div>
-                      </div>
+                    <div key={r.role} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', ...(i < SALARY_ROWS.length - 1 ? rowDivider : {}) }}>
+                      <span style={{ fontSize: 11, color: '#ccc' }}>{r.role}</span>
+                      <span>
+                        <span style={{ fontSize: 11, color: '#a58e28', fontWeight: 500 }}>{r.range}</span>
+                        <span style={{ fontSize: 9, color: '#5dcaa5', marginLeft: 8 }}>{r.trend}</span>
+                      </span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Latest insights */}
-              <div style={panelStyle}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <div style={panelHeaderStyle}>Latest insights</div>
-                  <Link href="/insights" style={{ fontSize: 11, color: '#999', textDecoration: 'none' }}>View all →</Link>
-                </div>
-                <div>
-                  {LATEST_INSIGHTS.map((x, i) => (
-                    <div key={x.title} style={{ padding: '10px 0', ...(i < LATEST_INSIGHTS.length - 1 ? panelRowDivider : {}) }}>
-                      <div style={{ fontSize: 10, color: '#a58e28', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 3 }}>{x.kind}</div>
-                      <div style={{ fontSize: 12, color: '#ccc', lineHeight: 1.4 }}>{x.title}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </>)}
-
-          {/* ── SUBMIT A BRIEF ── */}
-          {activeNav === 'submit-brief' && (
-            <div>
-              <div style={{ marginBottom: 24 }}>
-                <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 24, fontWeight: 400, color: '#fff', margin: 0 }}>Submit a brief</h1>
-                <p style={{ fontSize: 13, color: '#999', marginTop: 4 }}>Share your hiring requirement — reviewed discreetly by the JOBLUX team.</p>
-              </div>
-
-              {/* How it works */}
-              <div style={{ background: 'rgba(165,142,40,0.06)', border: '1px solid rgba(165,142,40,0.2)', borderRadius: 8, padding: '20px 24px', marginBottom: 28 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: '#a58e28', letterSpacing: '1.5px', marginBottom: 14 }}>HOW IT WORKS</div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, marginBottom: 18 }}>
-                  {[
-                    { step: '1', label: 'Share your brief', desc: 'Tell us about the role and context.' },
-                    { step: '2', label: 'We reach out', desc: 'If the brief is a fit, we align on scope.' },
-                    { step: '3', label: 'We search', desc: 'Your JOBLUX consultant runs a discreet search.' },
-                    { step: '4', label: 'Review candidates', desc: 'We present shortlisted candidates for review.' },
-                  ].map(s => (
-                    <div key={s.step}>
-                      <div style={{ fontSize: 20, fontWeight: 300, color: '#a58e28', marginBottom: 4 }}>{s.step}</div>
-                      <div style={{ fontSize: 13, color: '#ccc', fontWeight: 500, marginBottom: 2 }}>{s.label}</div>
-                      <div style={{ fontSize: 12, color: '#999', lineHeight: 1.4 }}>{s.desc}</div>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ paddingTop: 14, borderTop: '1px solid rgba(165,142,40,0.2)' }}>
-                  <div style={{ fontSize: 10, color: '#999', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 8 }}>Compatible with your ATS</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {ATS_LOGOS.map(l => (
-                      <span key={l} style={{ fontSize: 11, color: '#ccc', padding: '5px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid #2a2a2a', borderRadius: 3 }}>{l}</span>
-                    ))}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                {/* Upcoming events */}
+                <div style={panelStyle}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <span style={{ ...panelHeaderStyle, color: '#ef9f27' }}>Upcoming events</span>
+                    <Link href="/events" style={{ fontSize: 10, color: '#555', textDecoration: 'none' }}>All events →</Link>
                   </div>
+                  {UPCOMING_EVENTS.map((e, i) => (
+                    <div key={e.title} style={{ display: 'flex', gap: 10, padding: '7px 0', ...(i < UPCOMING_EVENTS.length - 1 ? rowDivider : {}) }}>
+                      <div style={{ background: '#1f1f1f', borderRadius: 3, padding: '4px 7px', textAlign: 'center', minWidth: 38, flexShrink: 0 }}>
+                        <div style={{ fontSize: 7, color: '#ef9f27', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>{e.mo}</div>
+                        <div style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>{e.dy}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 11, color: '#ccc', lineHeight: 1.3 }}>{e.title}</div>
+                        <div style={{ fontSize: 9, color: '#555', marginTop: 2 }}>{e.loc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Latest insights */}
+                <div style={panelStyle}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <span style={{ ...panelHeaderStyle, color: '#a78bfa' }}>Latest insights</span>
+                    <Link href="/insights" style={{ fontSize: 10, color: '#555', textDecoration: 'none' }}>All insights →</Link>
+                  </div>
+                  {LATEST_INSIGHTS.map((x, i) => (
+                    <div key={x.title} style={{ display: 'flex', gap: 8, padding: '7px 0', ...(i < LATEST_INSIGHTS.length - 1 ? rowDivider : {}) }}>
+                      <span style={{ fontSize: 7, fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', width: 55, paddingTop: 2, color: x.color, flexShrink: 0 }}>{x.kind}</span>
+                      <span style={{ fontSize: 11, color: '#ccc', flex: 1, lineHeight: 1.3 }}>{x.title}</span>
+                      <span style={{ fontSize: 9, color: '#555', whiteSpace: 'nowrap' }}>{x.age}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-
-              <BusinessBriefForm />
-            </div>
+            </>
           )}
 
-          {/* ── REQUEST STATUS ── */}
+          {activeNav === 'submit-brief' && briefScreen}
+
           {activeNav === 'request-status' && (
-            <div>
-              <div style={{ marginBottom: 24 }}>
-                <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 24, fontWeight: 400, color: '#fff', margin: 0 }}>Request status</h1>
-                <p style={{ fontSize: 13, color: '#999', marginTop: 4 }}>Track the progress of briefs you have submitted.</p>
-              </div>
+            <>
+              <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff', marginBottom: 3 }}>Request status</div>
+              <div style={{ fontSize: 11, color: '#777', marginBottom: 20 }}>Track the progress of your briefs</div>
+
               {myBriefs.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {myBriefs.map(b => {
                     const badge = STATUS_BADGE[b.status] || STATUS_BADGE.new
-                    const date = b.created_at ? new Date(b.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''
+                    const date = b.created_at ? new Date(b.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : ''
                     return (
-                      <div key={b.id} style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '20px 24px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                          <div style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>{b.company_name}</div>
-                          <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 10px', borderRadius: 3, background: badge.bg, color: badge.color, border: badge.border, flexShrink: 0 }}>
-                            {b.status.replace('_', ' ')}
-                          </span>
+                      <div key={b.id} style={{ background: '#1a1a1a', border: '1px solid #1c1c1c', borderRadius: 5, padding: '16px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+                        <div>
+                          <div style={{ fontSize: 13, color: '#fff', fontWeight: 500 }}>{b.company_name} — {b.brief_type}</div>
+                          <div style={{ fontSize: 10, color: '#555', marginTop: 3 }}>Submitted {date}</div>
                         </div>
-                        <div style={{ fontSize: 13, color: '#999' }}>{b.brief_type}</div>
-                        <div style={{ fontSize: 12, color: '#777', marginTop: 4 }}>{date}</div>
+                        <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', padding: '4px 10px', borderRadius: 3, background: badge.bg, color: badge.color, border: badge.border, flexShrink: 0 }}>
+                          {b.status.replace('_', ' ')}
+                        </span>
                       </div>
                     )
                   })}
                 </div>
               ) : (
-                <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '28px 24px', textAlign: 'center' }}>
+                <div style={{ background: '#1a1a1a', border: '1px solid #1c1c1c', borderRadius: 5, padding: '28px 24px', textAlign: 'center' }}>
                   <p style={{ fontSize: 13, color: '#999', marginBottom: 14 }}>No active requests yet. Submit a brief to begin.</p>
                   <button onClick={() => setActiveNav('submit-brief')} style={{ padding: '9px 20px', fontSize: 12, fontWeight: 500, color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)', borderRadius: 4, background: 'transparent', cursor: 'pointer' }}>
                     Submit a brief →
                   </button>
                 </div>
               )}
-            </div>
+            </>
           )}
 
-          {/* ── MY CONTRIBUTIONS ── */}
           {activeNav === 'contributions' && (
-            <div>
-              <div style={{ marginBottom: 24 }}>
-                <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 24, fontWeight: 400, color: '#fff', margin: 0 }}>My contributions</h1>
-                <p style={{ fontSize: 13, color: '#999', marginTop: 4 }}>Data you&apos;ve contributed to the intelligence ecosystem</p>
-              </div>
+            <>
+              <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff', marginBottom: 3 }}>My contributions</div>
+              <div style={{ fontSize: 11, color: '#777', marginBottom: 20 }}>Data you&apos;ve contributed to the intelligence ecosystem</div>
 
               {contributions.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {contributions.map((c: any) => {
                     const approved = c.status === 'approved' || c.approved === true
                     return (
-                      <div key={c.id} style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 10, color: '#a58e28', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 4 }}>{c.type || c.contribution_type || 'Data'}</div>
-                          <div style={{ fontSize: 13, color: '#ccc', lineHeight: 1.4 }}>{c.description || c.title || c.summary || '—'}</div>
+                      <div key={c.id} style={{ background: '#1a1a1a', border: '1px solid #1c1c1c', borderRadius: 5, padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(165,142,40,0.08)', color: '#a58e28', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, flexShrink: 0, marginRight: 10 }}>•</div>
+                          <div>
+                            <div style={{ fontSize: 12, color: '#fff' }}>{c.type || c.contribution_type || 'Data'}{c.description ? ` · ${c.description}` : ''}</div>
+                            <div style={{ fontSize: 10, color: '#555', marginTop: 2 }}>{c.created_at ? `Submitted ${new Date(c.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}` : ''}</div>
+                          </div>
                         </div>
                         <span style={{
-                          fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 10px', borderRadius: 3, flexShrink: 0,
-                          background: approved ? 'rgba(93,202,165,0.1)' : 'rgba(165,142,40,0.08)',
-                          color: approved ? '#5dcaa5' : '#a58e28',
-                          border: approved ? '1px solid rgba(93,202,165,0.3)' : '1px solid rgba(165,142,40,0.25)',
+                          fontSize: 8, fontWeight: 600, letterSpacing: '0.8px', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 3,
+                          background: approved ? 'rgba(93,202,165,0.08)' : 'rgba(239,159,39,0.08)',
+                          color: approved ? '#5dcaa5' : '#ef9f27',
+                          border: approved ? '1px solid rgba(93,202,165,0.3)' : '1px solid rgba(239,159,39,0.3)',
                         }}>
                           {approved ? 'Approved' : 'Pending'}
                         </span>
@@ -460,42 +832,23 @@ export default function BusinessDashboard() {
                   })}
                 </div>
               ) : (
-                <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '28px 24px', textAlign: 'center' }}>
+                <div style={{ background: '#1a1a1a', border: '1px solid #1c1c1c', borderRadius: 5, padding: '28px 24px', textAlign: 'center' }}>
                   <p style={{ fontSize: 13, color: '#999', margin: 0 }}>No contributions yet. Add data to strengthen the intelligence ecosystem.</p>
                 </div>
               )}
 
-              <div style={{ marginTop: 18 }}>
-                <button onClick={() => setActiveNav('adddata')} style={{ fontSize: 12, color: '#a58e28', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textDecoration: 'none' }}>
+              <div style={{ textAlign: 'center', marginTop: 14 }}>
+                <button onClick={() => setActiveNav('adddata')} style={{ display: 'inline-block', padding: '8px 18px', fontSize: 11, color: '#a58e28', border: '1px solid rgba(165,142,40,0.25)', borderRadius: 4, background: 'transparent', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
                   Add data →
                 </button>
               </div>
-            </div>
+            </>
           )}
 
-          {/* ── ADD DATA ── */}
-          {activeNav === 'adddata' && (
-            <div>
-              <div style={{ marginBottom: 24 }}>
-                <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 24, fontWeight: 400, color: '#fff', margin: 0 }}>Add data</h1>
-                <p style={{ fontSize: 13, color: '#999', marginTop: 4 }}>Intelligence is built on contribution</p>
-              </div>
+          {activeNav === 'adddata' && adddataScreen}
 
-              <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 6, padding: '28px 24px' }}>
-                <p style={{ fontSize: 13, color: '#ccc', margin: '0 0 18px', lineHeight: 1.5 }}>
-                  This loads the contribution form — same as /contribute.
-                </p>
-                <a
-                  href="/contribute"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ display: 'inline-block', padding: '10px 20px', fontSize: 12, fontWeight: 600, color: '#000', background: '#a58e28', borderRadius: 4, textDecoration: 'none' }}
-                >
-                  Open contribution form →
-                </a>
-              </div>
-            </div>
-          )}
+          {activeNav === 'invite' && inviteScreen}
+
         </main>
       </div>
     </div>
