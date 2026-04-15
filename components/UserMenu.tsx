@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 
 export default function UserMenu() {
-  const { isAuthenticated, isLoading, name, firstName, avatarUrl, isApproved, status } =
+  const { isAuthenticated, isLoading, name, firstName, avatarUrl, isApproved, status, role } =
     useMember();
   const [open, setOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -82,13 +82,15 @@ export default function UserMenu() {
               >
                 Dashboard
               </Link>
-              <Link
-                href="/account"
-                onClick={() => setOpen(false)}
-                className="block px-4 py-2 text-[13px] text-[#ccc] hover:bg-[#2a2a2a] hover:text-white transition-colors"
-              >
-                Account
-              </Link>
+              {role !== 'business' && (
+                <Link
+                  href="/account"
+                  onClick={() => setOpen(false)}
+                  className="block px-4 py-2 text-[13px] text-[#ccc] hover:bg-[#2a2a2a] hover:text-white transition-colors"
+                >
+                  Account
+                </Link>
+              )}
               <Link
                 href="/invite"
                 onClick={() => setOpen(false)}

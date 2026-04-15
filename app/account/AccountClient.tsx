@@ -84,7 +84,7 @@ export default function AccountClient({ member }: { member: any }) {
   const companyRows: { label: string; value: string }[] = [
     { label: 'Company', value: member?.company_name || '—' },
     { label: 'Organisation type', value: member?.org_type || '—' },
-    { label: 'Sector', value: member?.role || '—' },
+    { label: 'Sector', value: member?.sector || '—' },
     { label: 'Country', value: member?.country || '—' },
     { label: 'City', value: member?.city || '—' },
     { label: 'Phone', value: member?.phone || '—' },
@@ -114,7 +114,7 @@ export default function AccountClient({ member }: { member: any }) {
             </div>
             <div>
               <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 14, fontWeight: 500, color: '#fff' }}>{fullName}</div>
-              <div style={{ fontSize: 12, color: '#999' }}>{member?.job_title || member?.role || '—'}</div>
+              <div style={{ fontSize: 12, color: '#999' }}>{member?.role === 'business' ? 'Company account' : (member?.job_title || member?.role || '—')}</div>
               <div style={{ fontSize: 11, color: '#555', marginTop: 1 }}>{member?.email || session?.user?.email || '—'}</div>
             </div>
           </div>
