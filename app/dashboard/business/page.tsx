@@ -141,6 +141,42 @@ export default function BusinessDashboard() {
   // Settings local state
   const [exportRequested, setExportRequested] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [editHolder, setEditHolder] = useState(false)
+  const [editCompany, setEditCompany] = useState(false)
+  const [holderForm, setHolderForm] = useState({ first_name: '', last_name: '' })
+  const [companyForm, setCompanyForm] = useState({ country: '', city: '', phone: '' })
+  const [settingsSaving, setSettingsSaving] = useState(false)
+  const [settingsError, setSettingsError] = useState('')
+
+  const refreshMember = async () => {
+    const memberRes = await fetch('/api/members/me')
+    if (memberRes.ok) setMember(await memberRes.json())
+  }
+
+  const saveProfile = async (payload: Record<string, string>) => {
+    setSettingsError('')
+    setSettingsSaving(true)
+    try {
+      const res = await fetch('/api/members/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || data.error) {
+        setSettingsError(data.error || 'Could not save changes.')
+        setSettingsSaving(false)
+        return false
+      }
+      await refreshMember()
+      setSettingsSaving(false)
+      return true
+    } catch {
+      setSettingsError('Network error. Please try again.')
+      setSettingsSaving(false)
+      return false
+    }
+  }
 
   useEffect(() => {
     if (!session) return
@@ -927,44 +963,132 @@ export default function BusinessDashboard() {
               { label: 'Phone', value: (member as any)?.phone || '—' },
             ]
 
+            const editBtn: React.CSSProperties = { fontSize: 10, color: '#a58e28', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'Inter, sans-serif' }
+            const editInput: React.CSSProperties = { background: '#222', border: '1px solid #2a2a2a', borderRadius: 4, padding: '6px 10px', fontSize: 11, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', width: 200 }
+            const saveBtn: React.CSSProperties = { padding: '6px 14px', fontSize: 10, fontWeight: 600, color: '#111', background: '#a58e28', border: 'none', borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }
+            const cancelBtn: React.CSSProperties = { padding: '6px 14px', fontSize: 10, fontWeight: 500, color: '#999', background: 'transparent', border: '1px solid #2a2a2a', borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }
+
+            const openHolderEdit = () => {
+              setHolderForm({ first_name: member?.first_name || '', last_name: member?.last_name || '' })
+              setSettingsError('')
+              setEditHolder(true)
+            }
+            const openCompanyEdit = () => {
+              setCompanyForm({
+                country: member?.country || '',
+                city: member?.city || '',
+                phone: (member as any)?.phone || '',
+              })
+              setSettingsError('')
+              setEditCompany(true)
+            }
+            const handleSaveHolder = async () => {
+              const ok = await saveProfile({ first_name: holderForm.first_name, last_name: holderForm.last_name })
+              if (ok) setEditHolder(false)
+            }
+            const handleSaveCompany = async () => {
+              const ok = await saveProfile({ country: companyForm.country, city: companyForm.city, phone: companyForm.phone })
+              if (ok) setEditCompany(false)
+            }
+
             return (
               <>
                 {/* Card 1 — Account holder */}
                 <div style={acCard}>
                   <div style={acTh}>
                     <span style={acT}>Account holder</span>
-                    <a href="#" style={acEdit}>Edit →</a>
+                    {!editHolder && <button style={editBtn} onClick={openHolderEdit}>Edit →</button>}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#4da6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 600, color: '#fff', flexShrink: 0 }}>
-                      {initials}
+                  {!editHolder ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#4da6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 600, color: '#fff', flexShrink: 0 }}>
+                        {initials}
+                      </div>
+                      <div>
+                        <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 14, fontWeight: 500, color: '#fff' }}>{fullName}</div>
+                        <div style={{ fontSize: 12, color: '#999' }}>Company account</div>
+                        <div style={{ fontSize: 11, color: '#555', marginTop: 1 }}>{member?.email || session?.user?.email || '—'}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 14, fontWeight: 500, color: '#fff' }}>{fullName}</div>
-                      <div style={{ fontSize: 12, color: '#999' }}>Company account</div>
-                      <div style={{ fontSize: 11, color: '#555', marginTop: 1 }}>{member?.email || session?.user?.email || '—'}</div>
-                    </div>
-                  </div>
+                  ) : (
+                    <>
+                      <div style={acRow}>
+                        <span style={acL}>First name</span>
+                        <input style={editInput} value={holderForm.first_name} onChange={e => setHolderForm({ ...holderForm, first_name: e.target.value })} />
+                      </div>
+                      <div style={{ ...acRow, borderBottom: 'none' }}>
+                        <span style={acL}>Last name</span>
+                        <input style={editInput} value={holderForm.last_name} onChange={e => setHolderForm({ ...holderForm, last_name: e.target.value })} />
+                      </div>
+                      {settingsError && <div style={{ fontSize: 11, color: '#e24b4a', marginTop: 10 }}>{settingsError}</div>}
+                      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 14 }}>
+                        <button style={cancelBtn} onClick={() => { setEditHolder(false); setSettingsError('') }} disabled={settingsSaving}>Cancel</button>
+                        <button style={saveBtn} onClick={handleSaveHolder} disabled={settingsSaving}>{settingsSaving ? 'Saving...' : 'Save'}</button>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Card 2 — Company information */}
                 <div style={acCard}>
                   <div style={acTh}>
                     <span style={acT}>Company information</span>
-                    <a href="#" style={acEdit}>Edit →</a>
+                    {!editCompany && <button style={editBtn} onClick={openCompanyEdit}>Edit →</button>}
                   </div>
-                  {companyRows.map(r => (
-                    <div key={r.label} style={acRow}>
-                      <span style={acL}>{r.label}</span>
-                      <span style={acV}>{r.value}</span>
-                    </div>
-                  ))}
-                  <div style={{ ...acRow, borderBottom: 'none' }}>
-                    <span style={acL}>Status</span>
-                    <span style={{ ...acV, color: isApproved ? '#5dcaa5' : '#fff' }}>
-                      {isApproved ? 'Approved' : (member?.status || '—')}
-                    </span>
-                  </div>
+                  {!editCompany ? (
+                    <>
+                      {companyRows.map(r => (
+                        <div key={r.label} style={acRow}>
+                          <span style={acL}>{r.label}</span>
+                          <span style={acV}>{r.value}</span>
+                        </div>
+                      ))}
+                      <div style={{ ...acRow, borderBottom: 'none' }}>
+                        <span style={acL}>Status</span>
+                        <span style={{ ...acV, color: isApproved ? '#5dcaa5' : '#fff' }}>
+                          {isApproved ? 'Approved' : (member?.status || '—')}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={acRow}>
+                        <span style={acL}>Company</span>
+                        <span style={acV}>{member?.company_name || '—'}</span>
+                      </div>
+                      <div style={acRow}>
+                        <span style={acL}>Organisation type</span>
+                        <span style={acV}>{member?.org_type || '—'}</span>
+                      </div>
+                      <div style={acRow}>
+                        <span style={acL}>Sector</span>
+                        <span style={acV}>{(member as any)?.sector || '—'}</span>
+                      </div>
+                      <div style={acRow}>
+                        <span style={acL}>Country</span>
+                        <input style={editInput} value={companyForm.country} onChange={e => setCompanyForm({ ...companyForm, country: e.target.value })} />
+                      </div>
+                      <div style={acRow}>
+                        <span style={acL}>City</span>
+                        <input style={editInput} value={companyForm.city} onChange={e => setCompanyForm({ ...companyForm, city: e.target.value })} />
+                      </div>
+                      <div style={acRow}>
+                        <span style={acL}>Phone</span>
+                        <input style={editInput} value={companyForm.phone} onChange={e => setCompanyForm({ ...companyForm, phone: e.target.value })} />
+                      </div>
+                      <div style={{ ...acRow, borderBottom: 'none' }}>
+                        <span style={acL}>Status</span>
+                        <span style={{ ...acV, color: isApproved ? '#5dcaa5' : '#fff' }}>
+                          {isApproved ? 'Approved' : (member?.status || '—')}
+                        </span>
+                      </div>
+                      {settingsError && <div style={{ fontSize: 11, color: '#e24b4a', marginTop: 10 }}>{settingsError}</div>}
+                      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 14 }}>
+                        <button style={cancelBtn} onClick={() => { setEditCompany(false); setSettingsError('') }} disabled={settingsSaving}>Cancel</button>
+                        <button style={saveBtn} onClick={handleSaveCompany} disabled={settingsSaving}>{settingsSaving ? 'Saving...' : 'Save'}</button>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Card 3 — Account actions */}
