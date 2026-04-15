@@ -129,6 +129,16 @@ export default function BusinessDashboard() {
   const [briefSubmitted, setBriefSubmitted] = useState(false)
   const [briefError, setBriefError] = useState('')
 
+  useEffect(() => {
+    if (briefSubmitted) return
+    setBrief(b => ({
+      ...b,
+      company_name: b.company_name || companyName || '',
+      contact_name: b.contact_name || [firstName, lastName].filter(Boolean).join(' '),
+      contact_email: b.contact_email || (session?.user as any)?.email || '',
+    }))
+  }, [member, session])
+
   // Contribute form
   const [contribTab, setContribTab] = useState<'salary' | 'interview' | 'signal'>('salary')
 
