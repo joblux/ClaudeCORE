@@ -413,9 +413,9 @@ export default function BusinessDashboard() {
                       onClick={() => setBriefField('brief_type', bt)}
                       style={{
                         padding: '7px 14px', fontSize: 11, cursor: 'pointer', borderRadius: 4,
-                        background: sel ? 'rgba(165,142,40,0.08)' : '#222',
-                        border: sel ? '1px solid #a58e28' : '1px solid #2a2a2a',
-                        color: sel ? '#a58e28' : '#999',
+                        background: sel ? 'rgba(255,255,255,0.06)' : '#222',
+                        border: sel ? '1px solid #fff' : '1px solid #2a2a2a',
+                        color: sel ? '#fff' : '#999',
                         fontFamily: 'Inter, sans-serif',
                       }}
                     >
@@ -638,7 +638,7 @@ export default function BusinessDashboard() {
             onClick={() => setInviteTab(t.id as any)}
             style={{
               fontSize: 12, padding: '10px 18px', cursor: 'pointer',
-              borderBottom: inviteTab === t.id ? '2px solid #a58e28' : '2px solid transparent',
+              borderBottom: inviteTab === t.id ? '2px solid #fff' : '2px solid transparent',
               marginBottom: -1,
               color: inviteTab === t.id ? '#fff' : '#555',
             }}
