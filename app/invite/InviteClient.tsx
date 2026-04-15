@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 
 type Invitation = {
   id: string
@@ -165,20 +164,12 @@ export default function InviteClient() {
   return (
     <div style={{ background: '#0f0f0f', minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: '#fff' }}>
 
-      {/* HEADER */}
-      <div style={{ background: '#0a0a0a', borderBottom: '0.5px solid #1e1e1e', padding: '0 40px' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <img src="/logos/joblux-header.png" alt="JOBLUX" style={{ height: '22px' }} />
-          <Link href="/dashboard" style={{ fontSize: '12px', color: '#fff', opacity: 0.5, textDecoration: 'none' }}>← Dashboard</Link>
-        </div>
-      </div>
-
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 40px 80px' }}>
 
         {/* Page title */}
         <div style={{ marginBottom: '36px' }}>
           <h1 style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontWeight: 400, fontSize: '26px', color: '#fff', margin: '0 0 6px' }}>
-            Invite a Colleague
+            Invite luxury professionals you know
           </h1>
           <p style={{ fontSize: '13px', color: '#fff', opacity: 0.4, margin: 0 }}>
             Introduce discreet professionals to the platform.
