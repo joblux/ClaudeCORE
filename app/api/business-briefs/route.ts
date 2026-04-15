@@ -79,6 +79,19 @@ export async function POST(req: Request) {
       ].join('\n'),
     })
 
+    // Send confirmation email to business user
+    await sendEmail({
+      to: record.contact_email,
+      subject: `Your brief has been received — JOBLUX`,
+      body: [
+        `Thank you ${record.contact_name}.`,
+        ``,
+        `Your brief regarding ${record.company_name} has been received and will be reviewed privately. If follow-up is required, we will be in touch using the contact details you provided.`,
+        ``,
+        `The JOBLUX team`,
+      ].join('\n'),
+    })
+
     return NextResponse.json({ success: true })
   } catch (err: any) {
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
