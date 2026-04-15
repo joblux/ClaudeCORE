@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
-import Link from 'next/link'
 
 export default function AccountClient({ member }: { member: any }) {
   const { data: session } = useSession()
@@ -12,155 +11,168 @@ export default function AccountClient({ member }: { member: any }) {
     ? `${member.first_name[0]}${member.last_name[0]}`.toUpperCase()
     : session?.user?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || '??'
 
-  const tierLabel: Record<string, string> = {
-    rising: 'Emerging Professional',
-    pro: 'Established Professional',
-    executive: 'Senior & Executive',
-    insider: 'Trusted Contributor',
-    business: 'Company',
-  }
+  const fullName = member?.first_name && member?.last_name
+    ? `${member.first_name} ${member.last_name}`
+    : session?.user?.name || '—'
 
   const card: React.CSSProperties = {
-    background: '#141414',
-    border: '0.5px solid #2a2a2a',
-    borderRadius: '8px',
-    padding: '32px',
-    marginBottom: '16px',
+    background: '#1a1a1a',
+    border: '1px solid #1c1c1c',
+    borderRadius: 5,
+    padding: 20,
+    marginBottom: 14,
   }
 
-  const label: React.CSSProperties = {
-    fontSize: '10px',
-    color: '#fff',
-    opacity: 0.35,
-    letterSpacing: '0.1em',
+  const acT: React.CSSProperties = {
+    fontSize: 9,
+    fontWeight: 600,
+    letterSpacing: '1.5px',
+    color: '#555',
     textTransform: 'uppercase',
-    marginBottom: '6px',
   }
 
-  const value: React.CSSProperties = {
-    fontSize: '13px',
-    color: '#fff',
+  const acTh: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
   }
 
-  const sectionTitle: React.CSSProperties = {
-    fontSize: '10px',
-    color: '#fff',
-    letterSpacing: '0.12em',
-    textTransform: 'uppercase',
-    marginBottom: '24px',
-    opacity: 0.5,
+  const acEdit: React.CSSProperties = {
+    fontSize: 10,
+    color: '#a58e28',
+    textDecoration: 'none',
+    fontWeight: 400,
   }
 
-  const btnOutline: React.CSSProperties = {
+  const acRow: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    padding: '9px 0',
+    borderBottom: '1px solid #1c1c1c',
+  }
+
+  const acL: React.CSSProperties = { fontSize: 11, color: '#999' }
+  const acV: React.CSSProperties = { fontSize: 11, color: '#fff' }
+
+  const acAct: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '12px 0',
+    borderBottom: '1px solid #1c1c1c',
+  }
+
+  const acBtn: React.CSSProperties = {
+    padding: '7px 14px',
+    fontSize: 10,
+    fontWeight: 500,
     background: 'transparent',
-    border: '0.5px solid #333',
-    color: '#fff',
-    fontSize: '12px',
-    padding: '8px 18px',
-    borderRadius: '4px',
+    border: '1px solid #2a2a2a',
+    color: '#999',
+    borderRadius: 4,
     cursor: 'pointer',
     fontFamily: 'Inter, sans-serif',
   }
 
+  const acBtnDng: React.CSSProperties = {
+    ...acBtn,
+    color: '#e24b4a',
+    borderColor: 'rgba(226,75,74,0.3)',
+  }
+
+  const companyRows: { label: string; value: string }[] = [
+    { label: 'Company', value: member?.company_name || '—' },
+    { label: 'Organisation type', value: member?.org_type || '—' },
+    { label: 'Sector', value: member?.role || '—' },
+    { label: 'Country', value: member?.country || '—' },
+    { label: 'City', value: member?.city || '—' },
+    { label: 'Phone', value: member?.phone || '—' },
+  ]
+
+  const isApproved = member?.status === 'approved'
+
   return (
     <div style={{ background: '#0f0f0f', minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: '#fff' }}>
-
-      {/* HEADER */}
-      <div style={{ background: '#0a0a0a', borderBottom: '0.5px solid #1e1e1e', padding: '0 40px' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <img src="/logos/joblux-header.png" alt="JOBLUX" style={{ height: '22px' }} />
-          <Link href="/dashboard" style={{ fontSize: '12px', color: '#fff', opacity: 0.5, textDecoration: 'none' }}>← Dashboard</Link>
-        </div>
-      </div>
-
-      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 40px 80px' }}>
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '48px 40px 80px' }}>
 
         {/* Page title */}
-        <div style={{ marginBottom: '36px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontWeight: 400, fontSize: '26px', color: '#fff', margin: '0 0 6px' }}>Account</h1>
-          <p style={{ fontSize: '13px', color: '#fff', opacity: 0.4, margin: 0 }}>Manage your account settings</p>
+        <div style={{ marginBottom: 20 }}>
+          <h1 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: 22, color: '#fff', margin: '0 0 3px' }}>Settings</h1>
+          <p style={{ fontSize: 11, color: '#777', margin: 0 }}>This is the space to manage your account details.</p>
         </div>
 
-        {/* ── SECTION 1: YOUR ACCOUNT ── */}
+        {/* Card 1 — Account holder */}
         <div style={card}>
-          <div style={sectionTitle}>Your account</div>
-
-          {/* Avatar + identity */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '28px', paddingBottom: '28px', borderBottom: '0.5px solid #1e1e1e' }}>
-            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#1e1e1e', border: '0.5px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', color: '#fff', flexShrink: 0 }}>
+          <div style={acTh}>
+            <span style={acT}>Account holder</span>
+            <a href="#" style={acEdit}>Edit →</a>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#4da6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 600, color: '#fff', flexShrink: 0 }}>
               {initials}
             </div>
             <div>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: '#fff', fontWeight: 400, marginBottom: '4px' }}>
-                {member?.first_name && member?.last_name ? `${member.first_name} ${member.last_name}` : session?.user?.name || '—'}
-              </div>
-              <div style={{ fontSize: '12px', color: '#fff', opacity: 0.5, marginBottom: '8px' }}>{member?.email || session?.user?.email}</div>
-              <span style={{ fontSize: '10px', color: '#fff', border: '0.5px solid #333', padding: '3px 10px', borderRadius: '3px', letterSpacing: '0.08em', opacity: 0.7 }}>
-                {tierLabel[member?.role] || member?.role || '—'}
-              </span>
+              <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 14, fontWeight: 500, color: '#fff' }}>{fullName}</div>
+              <div style={{ fontSize: 12, color: '#999' }}>{member?.job_title || member?.role || '—'}</div>
+              <div style={{ fontSize: 11, color: '#555', marginTop: 1 }}>{member?.email || session?.user?.email || '—'}</div>
             </div>
-          </div>
-
-          {/* Read-only fields */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
-            <div><div style={label}>City</div><div style={value}>{member?.city || '—'}</div></div>
-            <div><div style={label}>Country</div><div style={value}>{member?.country || '—'}</div></div>
-            <div><div style={label}>Phone</div><div style={value}>{member?.phone || '—'}</div></div>
-            <div><div style={label}>Job title</div><div style={value}>{member?.job_title || '—'}</div></div>
-            <div><div style={label}>Employer</div><div style={value}>{member?.current_employer || '—'}</div></div>
-            <div>
-              <div style={label}>Status</div>
-              <div style={{ fontSize: '12px', color: '#1D9E75', border: '0.5px solid #1D9E75', padding: '2px 8px', borderRadius: '3px', display: 'inline-block' }}>
-                {member?.status === 'approved' ? 'Approved' : member?.status || '—'}
-              </div>
-            </div>
-          </div>
-
-          {/* Footer nudge */}
-          <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '0.5px solid #1e1e1e', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ fontSize: '11px', color: '#fff', opacity: 0.3 }}>To update your professional details, edit your Profilux.</div>
-            <Link href="/dashboard/candidate/profilux" style={{ fontSize: '12px', color: '#fff', opacity: 0.6, textDecoration: 'none', border: '0.5px solid #333', padding: '6px 14px', borderRadius: '4px' }}>
-              Edit Profilux →
-            </Link>
           </div>
         </div>
 
-        {/* ── SECTION 2: ACCOUNT ACTIONS ── */}
-        <div style={{ ...card, marginBottom: 0 }}>
-          <div style={sectionTitle}>Account actions</div>
-
-          {/* Sign out */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '18px', marginBottom: '18px', borderBottom: '0.5px solid #1e1e1e' }}>
-            <div>
-              <div style={{ fontSize: '13px', color: '#fff', marginBottom: '3px' }}>Sign out</div>
-              <div style={{ fontSize: '11px', color: '#fff', opacity: 0.35 }}>Sign out of your account on this device</div>
+        {/* Card 2 — Company information */}
+        <div style={card}>
+          <div style={acTh}>
+            <span style={acT}>Company information</span>
+            <a href="#" style={acEdit}>Edit →</a>
+          </div>
+          {companyRows.map(r => (
+            <div key={r.label} style={acRow}>
+              <span style={acL}>{r.label}</span>
+              <span style={acV}>{r.value}</span>
             </div>
-            <button style={btnOutline} onClick={() => signOut({ callbackUrl: '/' })}>Sign out</button>
+          ))}
+          <div style={{ ...acRow, borderBottom: 'none' }}>
+            <span style={acL}>Status</span>
+            <span style={{ ...acV, color: isApproved ? '#5dcaa5' : '#fff' }}>
+              {isApproved ? 'Approved' : (member?.status || '—')}
+            </span>
+          </div>
+        </div>
+
+        {/* Card 3 — Account actions */}
+        <div style={{ ...card, marginBottom: 0 }}>
+          <div style={{ ...acT, marginBottom: 14 }}>Account actions</div>
+
+          <div style={acAct}>
+            <div>
+              <div style={{ fontSize: 12, color: '#ccc' }}>Sign out</div>
+              <div style={{ fontSize: 10, color: '#555', marginTop: 1 }}>Sign out of your account on this device</div>
+            </div>
+            <button style={acBtn} onClick={() => signOut({ callbackUrl: '/' })}>Sign out</button>
           </div>
 
-          {/* Export data | GDPR */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '18px', marginBottom: '18px', borderBottom: '0.5px solid #1e1e1e' }}>
+          <div style={acAct}>
             <div>
-              <div style={{ fontSize: '13px', color: '#fff', marginBottom: '3px' }}>Export my data</div>
-              <div style={{ fontSize: '11px', color: '#fff', opacity: 0.35 }}>Download a copy of all your data | GDPR Article 20</div>
+              <div style={{ fontSize: 12, color: '#ccc' }}>Export my data</div>
+              <div style={{ fontSize: 10, color: '#555', marginTop: 1 }}>Download a copy of all your data · GDPR Article 20</div>
             </div>
-            <button style={btnOutline} onClick={() => setExportRequested(true)}>
+            <button style={acBtn} onClick={() => setExportRequested(true)}>
               {exportRequested ? 'Request sent ✓' : 'Request export'}
             </button>
           </div>
 
-          {/* Delete account */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ ...acAct, borderBottom: 'none' }}>
             <div>
-              <div style={{ fontSize: '13px', color: '#f87171', marginBottom: '3px' }}>Delete account</div>
-              <div style={{ fontSize: '11px', color: '#fff', opacity: 0.35 }}>Permanently delete your account and all associated data</div>
+              <div style={{ fontSize: 12, color: '#e24b4a' }}>Delete account</div>
+              <div style={{ fontSize: 10, color: '#555', marginTop: 1 }}>Permanently delete your account and all associated data</div>
             </div>
             {!deleteConfirm ? (
-              <button style={{ ...btnOutline, border: '0.5px solid #f87171', color: '#f87171' }} onClick={() => setDeleteConfirm(true)}>Delete account</button>
+              <button style={acBtnDng} onClick={() => setDeleteConfirm(true)}>Delete account</button>
             ) : (
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button style={btnOutline} onClick={() => setDeleteConfirm(false)}>Cancel</button>
-                <button style={{ ...btnOutline, border: '0.5px solid #f87171', color: '#f87171' }}>Confirm delete</button>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button style={acBtn} onClick={() => setDeleteConfirm(false)}>Cancel</button>
+                <button style={acBtnDng}>Confirm delete</button>
               </div>
             )}
           </div>

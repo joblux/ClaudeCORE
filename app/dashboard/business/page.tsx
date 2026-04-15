@@ -136,6 +136,7 @@ export default function BusinessDashboard() {
   const [invite, setInvite] = useState({ first_name: '', email: '', title: '', company: '' })
   const [inviteSending, setInviteSending] = useState(false)
   const [inviteMsg, setInviteMsg] = useState('')
+  const [inviteTab, setInviteTab] = useState<'email' | 'gmail' | 'linkedin'>('email')
 
   useEffect(() => {
     if (!session) return
@@ -583,34 +584,81 @@ export default function BusinessDashboard() {
   // ─────────────── Invite screen
   const inviteScreen = (
     <>
-      <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff', marginBottom: 3 }}>Invite</div>
+      <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff', marginBottom: 3 }}>Invite luxury professionals you know</div>
       <div style={{ fontSize: 11, color: '#777', marginBottom: 20 }}>Invite a colleague to request access</div>
 
-      <div style={bfSec}>
-        <div style={bfSecT}>Send an invitation</div>
-        <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, marginBottom: 16 }}>
-          Your colleague will receive a personal link to request access. Their invitation is linked to your account.
-        </p>
-        <div style={bfGrid}>
-          <div><label style={label}>First name {rq}</label><input style={input} placeholder="Their first name" value={invite.first_name} onChange={e => setInvite({ ...invite, first_name: e.target.value })} /></div>
-          <div><label style={label}>Email address {rq}</label><input style={input} placeholder="colleague@company.com" value={invite.email} onChange={e => setInvite({ ...invite, email: e.target.value })} /></div>
-          <div><label style={label}>Title / role</label><input style={input} placeholder="Their title at the company" value={invite.title} onChange={e => setInvite({ ...invite, title: e.target.value })} /></div>
-          <div><label style={label}>Company</label><input style={input} placeholder="Their company" value={invite.company} onChange={e => setInvite({ ...invite, company: e.target.value })} /></div>
-        </div>
-        {inviteMsg && <div style={{ fontSize: 11, color: inviteMsg === 'Invitation sent.' ? '#5dcaa5' : '#e24b4a', marginTop: 12 }}>{inviteMsg}</div>}
-        <div style={{ marginTop: 14 }}>
-          <button onClick={handleSendInvite} disabled={inviteSending} style={{ ...bfSubBtn, background: inviteSending ? '#7a6a1e' : '#a58e28', cursor: inviteSending ? 'not-allowed' : 'pointer' }}>
-            {inviteSending ? 'Sending...' : 'Send invitation'}
-          </button>
-        </div>
+      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #1c1c1c', marginBottom: 20 }}>
+        {[
+          { id: 'email', label: 'Email' },
+          { id: 'gmail', label: 'Gmail' },
+          { id: 'linkedin', label: 'LinkedIn' },
+        ].map(t => (
+          <div
+            key={t.id}
+            onClick={() => setInviteTab(t.id as any)}
+            style={{
+              fontSize: 12, padding: '10px 18px', cursor: 'pointer',
+              borderBottom: inviteTab === t.id ? '2px solid #a58e28' : '2px solid transparent',
+              marginBottom: -1,
+              color: inviteTab === t.id ? '#fff' : '#555',
+            }}
+          >
+            {t.label}
+          </div>
+        ))}
       </div>
 
-      <div style={bfSec}>
-        <div style={bfSecT}>Sent invitations</div>
-        <div style={{ fontSize: 12, color: '#999', padding: '12px 0' }}>
-          No invitations sent yet.
+      {inviteTab === 'email' && (
+        <>
+          <div style={bfSec}>
+            <div style={bfSecT}>Send an invitation</div>
+            <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, marginBottom: 16 }}>
+              Your colleague will receive a personal link to request access. Their invitation is linked to your account.
+            </p>
+            <div style={bfGrid}>
+              <div><label style={label}>First name {rq}</label><input style={input} placeholder="Their first name" value={invite.first_name} onChange={e => setInvite({ ...invite, first_name: e.target.value })} /></div>
+              <div><label style={label}>Email address {rq}</label><input style={input} placeholder="colleague@company.com" value={invite.email} onChange={e => setInvite({ ...invite, email: e.target.value })} /></div>
+              <div><label style={label}>Title / role</label><input style={input} placeholder="Their title at the company" value={invite.title} onChange={e => setInvite({ ...invite, title: e.target.value })} /></div>
+              <div><label style={label}>Company</label><input style={input} placeholder="Their company" value={invite.company} onChange={e => setInvite({ ...invite, company: e.target.value })} /></div>
+            </div>
+            {inviteMsg && <div style={{ fontSize: 11, color: inviteMsg === 'Invitation sent.' ? '#5dcaa5' : '#e24b4a', marginTop: 12 }}>{inviteMsg}</div>}
+            <div style={{ marginTop: 14 }}>
+              <button onClick={handleSendInvite} disabled={inviteSending} style={{ ...bfSubBtn, background: inviteSending ? '#7a6a1e' : '#a58e28', cursor: inviteSending ? 'not-allowed' : 'pointer' }}>
+                {inviteSending ? 'Sending...' : 'Send invitation'}
+              </button>
+            </div>
+          </div>
+
+          <div style={bfSec}>
+            <div style={bfSecT}>Sent invitations</div>
+            <div style={{ fontSize: 12, color: '#999', padding: '12px 0' }}>
+              No invitations sent yet.
+            </div>
+          </div>
+        </>
+      )}
+
+      {inviteTab === 'gmail' && (
+        <div style={bfSec}>
+          <button style={{ padding: '10px 20px', fontSize: 12, color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)', borderRadius: 4, background: 'transparent', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+            Connect Gmail
+          </button>
+          <p style={{ fontSize: 11, color: '#999', lineHeight: 1.6, marginTop: 14 }}>
+            We&apos;ll ask permission to read your contacts. We never store or share them.
+          </p>
         </div>
-      </div>
+      )}
+
+      {inviteTab === 'linkedin' && (
+        <div style={bfSec}>
+          <button style={{ padding: '10px 20px', fontSize: 12, color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)', borderRadius: 4, background: 'transparent', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+            Connect LinkedIn
+          </button>
+          <p style={{ fontSize: 11, color: '#999', lineHeight: 1.6, marginTop: 14 }}>
+            We&apos;ll ask permission to read your contacts. We never store or share them.
+          </p>
+        </div>
+      )}
     </>
   )
 
