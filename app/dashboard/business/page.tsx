@@ -316,7 +316,7 @@ export default function BusinessDashboard() {
           <div style={{ fontSize: 9, color: '#555', marginBottom: 5 }}>Compatible with your existing ATS</div>
           <div style={{ display: 'flex', gap: 16, opacity: 0.45 }}>
             {['Workday', 'Greenhouse', 'Lever', 'SAP SuccessFactors', 'SmartRecruiters'].map(a => (
-              <span key={a} style={{ fontSize: 10, color: '#999', fontWeight: 500 }}>{a}</span>
+              <span key={a} style={{ fontSize: 10, color: '#5dcaa5', fontWeight: 500 }}>{a}</span>
             ))}
           </div>
         </div>
@@ -497,7 +497,7 @@ export default function BusinessDashboard() {
             onClick={() => setContribTab(t.id as any)}
             style={{
               fontSize: 12, padding: '10px 18px', cursor: 'pointer',
-              borderBottom: contribTab === t.id ? '2px solid #a58e28' : '2px solid transparent',
+              borderBottom: contribTab === t.id ? '2px solid #fff' : '2px solid transparent',
               marginBottom: -1,
               color: contribTab === t.id ? '#fff' : '#555',
             }}
