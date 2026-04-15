@@ -201,13 +201,10 @@ export default function BusinessDashboard() {
           setSearchCount(aData.total || 0)
         }
 
-        if (memberId) {
-          const { data: briefData } = await supabase
-            .from('business_briefs')
-            .select('id, company_name, brief_type, status, created_at')
-            .eq('created_by', memberId)
-            .order('created_at', { ascending: false })
-          if (briefData) setMyBriefs(briefData)
+        const briefRes = await fetch('/api/business-briefs')
+        if (briefRes.ok) {
+          const data = await briefRes.json()
+          setMyBriefs(data.briefs || [])
         }
       } catch {}
       setLoading(false)

@@ -10,6 +10,26 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+export async function GET() {
+  const session = await getServerSession(authOptions)
+  const memberId = (session?.user as any)?.memberId
+  if (!memberId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('business_briefs')
+    .select('id, company_name, brief_type, status, created_at')
+    .eq('created_by', memberId)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ briefs: data || [] })
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json()
