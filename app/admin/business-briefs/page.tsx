@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 
 type BusinessBrief = {
   id: string
@@ -45,6 +46,7 @@ export default async function AdminBusinessBriefsPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+      <style>{`.jl-brief-link:hover { text-decoration: underline; }`}</style>
       <div style={{ maxWidth: 1060, margin: '0 auto', padding: '32px 24px' }}>
 
         <div style={{ marginBottom: 24 }}>
@@ -73,7 +75,11 @@ export default async function AdminBusinessBriefsPage() {
                   const badge = statusBadge[b.status] || statusBadge.new
                   return (
                     <tr key={b.id} style={{ borderBottom: '1px solid #e8e8e8' }}>
-                      <td style={{ padding: '12px', color: '#111', fontWeight: 500 }}>{b.company_name}</td>
+                      <td style={{ padding: '12px', color: '#111', fontWeight: 500 }}>
+                        <Link href={`/admin/business-briefs/${b.id}`} className="jl-brief-link" style={{ color: '#111', textDecoration: 'none' }}>
+                          {b.company_name}
+                        </Link>
+                      </td>
                       <td style={{ padding: '12px', color: '#111' }}>{b.brief_type}</td>
                       <td style={{ padding: '12px', color: '#111' }}>{b.urgency}</td>
                       <td style={{ padding: '12px', color: '#111' }}>{b.confidentiality_level}</td>
