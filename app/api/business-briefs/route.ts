@@ -61,9 +61,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
-    // Send notification email to alex@joblux.com
+    // Send notification email to mzaourm@gmail.com
     await sendEmail({
-      to: 'alex@joblux.com',
+      to: 'mzaourm@gmail.com',
       subject: `New Business Brief — ${record.company_name}`,
       body: [
         `New business brief submitted on JOBLUX.`,
