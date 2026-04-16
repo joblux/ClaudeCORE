@@ -201,7 +201,7 @@ export default function BusinessBriefForm({ companyName, companyType }: Props) {
 
       {/* Section 3 — Requirement Details */}
       <div style={{ background: '#222', border: '1px solid #2a2a2a', borderRadius: 8, padding: '28px 24px' }}>
-        <h3 style={sectionHeadingStyle}>Requirement Details</h3>
+        <h3 style={sectionHeadingStyle}>Profile</h3>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px 20px' }}>
           <div style={{ ...fieldGroupStyle, gridColumn: '1 / -1' }}>
             <label style={labelStyle}>Role</label>
@@ -303,7 +303,7 @@ export default function BusinessBriefForm({ companyName, companyType }: Props) {
         style={{
           display: 'inline-block', alignSelf: 'flex-start', padding: '12px 32px', fontSize: 14, fontWeight: 600,
           fontFamily: 'Inter, sans-serif',
-          background: submitting ? '#7a6a1e' : '#a58e28', color: '#111',
+          background: submitting ? '#7a6a1e' : '#ffffff', color: '#111',
           border: 'none', borderRadius: 4, cursor: submitting ? 'not-allowed' : 'pointer',
         }}
       >
