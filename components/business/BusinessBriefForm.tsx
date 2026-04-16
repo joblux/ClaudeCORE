@@ -3,12 +3,6 @@
 import { useState, useRef } from 'react'
 import { DEPARTMENTS } from '@/lib/assignment-options'
 
-const SECTORS = [
-  'Fashion', 'Watches & Jewellery', 'Beauty', 'Hospitality', 'Travel',
-  'Wine & Spirits', 'Design & Interiors', 'Art & Culture',
-  'Private Client & Family Office', 'Multi-brand Group', 'Other',
-]
-
 const BRIEF_TYPES = ['Executive search', 'Manager search', 'Exploratory']
 
 const URGENCY_OPTIONS = ['Immediate', 'Within 30 days', 'Within this quarter', 'Exploratory']
@@ -20,7 +14,6 @@ const FOLLOW_UP_OPTIONS = ['Email', 'Call', 'Either']
 
 const FIELD_LABELS: Record<string, string> = {
   brief_type: 'Brief type',
-  sector: 'Sector',
   urgency: 'Urgency',
   confidentiality_level: 'Confidentiality',
   brief_summary: 'Brief summary',
@@ -31,7 +24,6 @@ const FIELD_LABELS: Record<string, string> = {
 
 const initialForm = {
   company_website: '',
-  sector: '',
   geography: '',
   brief_type: '',
   urgency: '',
@@ -43,6 +35,7 @@ const initialForm = {
   location: '',
   compensation_range: '',
   additional_context: '',
+  attached_filename: '',
   contact_name: '',
   contact_email: '',
   contact_role: '',
@@ -82,7 +75,6 @@ export default function BusinessBriefForm({ companyName, companyType }: Props) {
     }
 
     const required: { key: string; check: boolean }[] = [
-      { key: 'sector', check: !form.sector },
       { key: 'brief_type', check: !form.brief_type },
       { key: 'urgency', check: !form.urgency },
       { key: 'confidentiality_level', check: !form.confidentiality_level },
@@ -165,29 +157,6 @@ export default function BusinessBriefForm({ companyName, companyType }: Props) {
   return (
     <div ref={formRef} style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
 
-      {/* Section 1 — Company Context */}
-      <div style={{ background: '#222', border: '1px solid #2a2a2a', borderRadius: 8, padding: '28px 24px' }}>
-        <h3 style={sectionHeadingStyle}>Company Context</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px 20px' }}>
-          <div style={fieldGroupStyle}>
-            <label style={labelStyle}>Company website</label>
-            <input style={inputStyle} type="url" placeholder="https://" value={form.company_website} onChange={e => set('company_website', e.target.value)} />
-          </div>
-          <div style={fieldGroupStyle}>
-            <label style={labelStyle}>Sector{requiredStar}</label>
-            <select data-field="sector" style={{ ...selectStyle, border: borderFor('sector') }} value={form.sector} onChange={e => set('sector', e.target.value)}>
-              <option value="">Select...</option>
-              {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </div>
-          <div style={{ ...fieldGroupStyle, gridColumn: '1 / -1' }}>
-            <label style={labelStyle}>Geography</label>
-            <input style={inputStyle} value={form.geography} onChange={e => set('geography', e.target.value)} />
-            <div style={helperStyle}>Primary market or region concerned by this brief</div>
-          </div>
-        </div>
-      </div>
-
       {/* Section 2 — Brief Type */}
       <div style={{ background: '#222', border: '1px solid #2a2a2a', borderRadius: 8, padding: '28px 24px' }}>
         <h3 style={sectionHeadingStyle}>Brief Type</h3>
@@ -235,7 +204,7 @@ export default function BusinessBriefForm({ companyName, companyType }: Props) {
         <h3 style={sectionHeadingStyle}>Requirement Details</h3>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px 20px' }}>
           <div style={{ ...fieldGroupStyle, gridColumn: '1 / -1' }}>
-            <label style={labelStyle}>Mandate title</label>
+            <label style={labelStyle}>Role</label>
             <input style={inputStyle} placeholder="e.g. Brand Director, Head of Merchandising" value={form.mandate_title} onChange={e => set('mandate_title', e.target.value)} />
           </div>
           <div style={{ ...fieldGroupStyle, gridColumn: '1 / -1' }}>
@@ -267,6 +236,19 @@ export default function BusinessBriefForm({ companyName, companyType }: Props) {
           <div style={{ ...fieldGroupStyle, gridColumn: '1 / -1' }}>
             <label style={labelStyle}>Additional context</label>
             <textarea style={{ ...inputStyle, minHeight: 70, resize: 'vertical' }} placeholder="Any constraints, sensitivities, comparator brands, or additional notes" value={form.additional_context} onChange={e => set('additional_context', e.target.value)} />
+          </div>
+          <div style={{ ...fieldGroupStyle, gridColumn: '1 / -1' }}>
+            <label style={labelStyle}>Attach document</label>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx"
+              style={{ ...inputStyle, padding: '8px 12px', cursor: 'pointer' }}
+              onChange={e => {
+                const file = e.target.files?.[0]
+                if (file) set('attached_filename', file.name)
+              }}
+            />
+            <div style={helperStyle}>Optional — PDF or Word document (job description, org chart, etc.)</div>
           </div>
         </div>
       </div>
