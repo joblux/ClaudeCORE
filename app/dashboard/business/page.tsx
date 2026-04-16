@@ -289,9 +289,9 @@ export default function BusinessDashboard() {
   // ─────────────── Brief form rendered inline (matches prototype)
   const briefScreen = (
     <>
-      <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff', marginBottom: 3 }}>Business brief</div>
+      <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff', marginBottom: 3 }}>Staff request</div>
       <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, marginBottom: 18 }}>
-        Share your hiring or intelligence requirement. Each brief is handled discreetly and in accordance with our{' '}
+        Share your hiring requirement. Each brief is handled discreetly and in accordance with our{' '}
         <a href="/terms/business" target="_blank" rel="noopener noreferrer" style={{ color: '#999', textDecoration: 'underline' }}>Terms of Business</a>.
       </p>
 
@@ -300,7 +300,7 @@ export default function BusinessDashboard() {
         <div style={{ fontSize: 8, fontWeight: 600, letterSpacing: '1.5px', color: '#a58e28', marginBottom: 10 }}>HOW IT WORKS</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
           {[
-            { t: '1. Share your brief', d: 'Tell us about the role and context.' },
+            { t: '1. Share your requirement', d: 'Tell us about the role and context.' },
             { t: '2. We reach out', d: 'If the brief is a fit, we discuss the mandate.' },
             { t: '3. We search', d: 'Your JOBLUX consultant runs a discreet search.' },
             { t: '4. Review candidates', d: 'We present shortlisted candidates for review.' },
