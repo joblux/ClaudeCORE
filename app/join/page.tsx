@@ -162,10 +162,10 @@ function JoinContent() {
 
       <div className="bg-[#1e1e1e] border border-[#2e2e2e] rounded-lg px-8 py-9">
         <h2 className="text-[1.6rem] text-white font-normal text-center mb-1.5" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-          Sign in to JOBLUX
+          Access JOBLUX
         </h2>
         <p className="text-[#888] text-center mb-7" style={{ fontSize: '12px' }}>
-          Access your talent intelligence dashboard.
+          Sign in or request access to continue.
         </p>
 
         {error === "pending" && (
@@ -241,7 +241,7 @@ function JoinContent() {
 
       <div className="text-center mt-5 space-y-2">
         <p style={{ fontSize: '12px' }} className="text-[#999]">
-          Don&apos;t have access?{" "}
+          New to JOBLUX?{" "}
           <a href="/connect" className="text-[#a58e28] underline underline-offset-3 hover:text-[#ccc] transition-colors">
             Request access
           </a>
@@ -258,7 +258,7 @@ export default function JoinPage() {
   return (
     <main className="bg-[#1a1a1a] flex flex-col items-center justify-start px-4 pt-16 pb-12 pt-16 pb-16">
       <p className="text-[10px] tracking-[3px] uppercase text-[#777] text-center mb-4">
-        Welcome back
+        Welcome to JOBLUX
       </p>
       <Suspense fallback={<div className="text-center text-sm text-[#888] py-8">Loading...</div>}>
         <JoinContent />
