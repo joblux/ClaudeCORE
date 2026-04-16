@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     const body = await req.json()
 
     // Validate required fields
-    const required = ['company_name', 'sector', 'company_type', 'brief_type', 'urgency', 'confidentiality_level', 'brief_summary', 'contact_name', 'contact_email', 'preferred_follow_up']
+    const required = ['company_name', 'company_type', 'brief_type', 'urgency', 'confidentiality_level', 'brief_summary', 'contact_name', 'contact_email', 'preferred_follow_up']
     for (const field of required) {
       if (!body[field] || (typeof body[field] === 'string' && !body[field].trim())) {
         return NextResponse.json({ success: false, error: `Missing required field: ${field}` }, { status: 400 })
@@ -54,7 +54,6 @@ export async function POST(req: Request) {
     const record = {
       company_name: body.company_name.trim(),
       company_website: body.company_website?.trim() || null,
-      sector: body.sector,
       company_type: body.company_type,
       geography: body.geography?.trim() || null,
       brief_type: body.brief_type,
