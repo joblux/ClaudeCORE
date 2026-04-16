@@ -255,7 +255,7 @@ export default function SubmitSalaryPage() {
           <button
             onClick={handleSubmit}
             disabled={submitting || !form.job_title || !form.city || !form.country || !form.base_salary}
-            style={{ padding: '11px 28px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 6, background: submitting || !form.job_title || !form.city || !form.country || !form.base_salary ? '#2a2a2a' : '#a58e28', color: submitting || !form.job_title || !form.city || !form.country || !form.base_salary ? '#666' : '#000', cursor: submitting || !form.job_title || !form.city || !form.country || !form.base_salary ? 'not-allowed' : 'pointer', transition: 'background 0.2s' }}
+            style={{ padding: '11px 28px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 6, background: submitting || !form.job_title || !form.city || !form.country || !form.base_salary ? '#2a2a2a' : '#ffffff', color: submitting || !form.job_title || !form.city || !form.country || !form.base_salary ? '#666' : '#111', cursor: submitting || !form.job_title || !form.city || !form.country || !form.base_salary ? 'not-allowed' : 'pointer', transition: 'background 0.2s' }}
           >
             {submitting ? 'Submitting...' : 'Submit salary data →'}
           </button>

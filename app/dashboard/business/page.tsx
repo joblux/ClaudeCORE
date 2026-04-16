@@ -103,7 +103,7 @@ const bfSecT: React.CSSProperties = { fontSize: 14, fontWeight: 500, color: '#ff
 const bfGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }
 const bfSubBtn: React.CSSProperties = {
   display: 'inline-block', padding: '10px 24px', fontSize: 12, fontWeight: 600, color: '#111',
-  background: '#a58e28', border: 'none', borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+  background: '#ffffff', border: 'none', borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif',
 }
 
 export default function BusinessDashboard() {
@@ -468,7 +468,7 @@ export default function BusinessDashboard() {
             </div>
             {inviteMsg && <div style={{ fontSize: 11, color: inviteMsg === 'Invitation sent.' ? '#5dcaa5' : '#e24b4a', marginTop: 12 }}>{inviteMsg}</div>}
             <div style={{ marginTop: 14 }}>
-              <button onClick={handleSendInvite} disabled={inviteSending} style={{ ...bfSubBtn, background: inviteSending ? '#7a6a1e' : '#a58e28', cursor: inviteSending ? 'not-allowed' : 'pointer' }}>
+              <button onClick={handleSendInvite} disabled={inviteSending} style={{ ...bfSubBtn, background: inviteSending ? '#7a6a1e' : '#ffffff', cursor: inviteSending ? 'not-allowed' : 'pointer' }}>
                 {inviteSending ? 'Sending...' : 'Send invitation'}
               </button>
             </div>
@@ -770,7 +770,7 @@ export default function BusinessDashboard() {
 
             const editBtn: React.CSSProperties = { fontSize: 10, color: '#a58e28', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'Inter, sans-serif' }
             const editInput: React.CSSProperties = { background: '#222', border: '1px solid #2a2a2a', borderRadius: 4, padding: '6px 10px', fontSize: 11, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', width: 200 }
-            const saveBtn: React.CSSProperties = { padding: '6px 14px', fontSize: 10, fontWeight: 600, color: '#111', background: '#a58e28', border: 'none', borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }
+            const saveBtn: React.CSSProperties = { padding: '6px 14px', fontSize: 10, fontWeight: 600, color: '#111', background: '#ffffff', border: 'none', borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }
             const cancelBtn: React.CSSProperties = { padding: '6px 14px', fontSize: 10, fontWeight: 500, color: '#999', background: 'transparent', border: '1px solid #2a2a2a', borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }
 
             const openHolderEdit = () => {
