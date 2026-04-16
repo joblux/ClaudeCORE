@@ -128,7 +128,7 @@ export default function BusinessBriefForm({ companyName, companyType }: Props) {
           style={{
             display: 'inline-block', padding: '12px 32px', fontSize: 14, fontWeight: 600,
             fontFamily: 'Inter, sans-serif',
-            background: '#a58e28', color: '#111',
+            background: '#ffffff', color: '#111',
             border: 'none', borderRadius: 4, cursor: 'pointer',
           }}
         >

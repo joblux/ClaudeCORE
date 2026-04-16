@@ -276,9 +276,9 @@ export default function InviteClient() {
                 type="submit"
                 disabled={submitting}
                 style={{
-                  background: '#a58e28',
+                  background: '#ffffff',
                   border: 'none',
-                  color: '#000',
+                  color: '#111',
                   fontSize: '12px',
                   fontWeight: 600,
                   letterSpacing: '0.08em',
