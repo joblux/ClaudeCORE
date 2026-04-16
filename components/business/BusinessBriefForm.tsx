@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { DEPARTMENTS } from '@/lib/assignment-options'
 
 const SECTORS = [
   'Fashion', 'Watches & Jewellery', 'Beauty', 'Hospitality', 'Travel',
@@ -14,13 +15,6 @@ const URGENCY_OPTIONS = ['Immediate', 'Within 30 days', 'Within this quarter', '
 const CONFIDENTIALITY_OPTIONS = ['Standard', 'Sensitive', 'Highly confidential']
 
 const SENIORITY_OPTIONS = ['Manager', 'Senior Manager', 'Director', 'VP', 'C-level', 'Flexible']
-
-const FUNCTION_OPTIONS = [
-  'General Management', 'Strategy', 'Buying & Merchandising',
-  'Marketing & Communications', 'PR & Influence', 'Digital & E-commerce',
-  'Retail', 'Wholesale', 'Operations', 'HR & Talent', 'Finance',
-  'Travel & Advisory', 'Other',
-]
 
 const FOLLOW_UP_OPTIONS = ['Email', 'Call', 'Either']
 
@@ -259,7 +253,7 @@ export default function BusinessBriefForm({ companyName, companyType }: Props) {
             <label style={labelStyle}>Function</label>
             <select style={selectStyle} value={form.function} onChange={e => set('function', e.target.value)}>
               <option value="">Select...</option>
-              {FUNCTION_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+              {DEPARTMENTS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div style={fieldGroupStyle}>
