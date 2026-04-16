@@ -49,7 +49,7 @@ export default function CareerDetailClient({ assignmentId }: { assignmentId: str
         <button
           onClick={handleApply}
           disabled={applying}
-          className="w-full py-3 text-sm font-medium tracking-wide text-[#1a1a1a] bg-[#a58e28] rounded-lg hover:bg-[#b89d2e] transition-colors disabled:opacity-50"
+          className="w-full py-3 text-sm font-medium tracking-wide text-[#111] bg-[#ffffff] rounded-lg hover:bg-[#b89d2e] transition-colors disabled:opacity-50"
         >
           {applying ? 'Submitting...' : 'Express Interest'}
         </button>
