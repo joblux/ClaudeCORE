@@ -92,17 +92,17 @@ const LATEST_INSIGHTS = [
 // ─────────────────────────────── Shared styles
 const input: React.CSSProperties = {
   width: '100%', background: '#222', border: '1px solid #2a2a2a', borderRadius: 4,
-  padding: '9px 11px', fontSize: 12, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none',
+  padding: '10px 12px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none',
 }
 const selectStyle: React.CSSProperties = { ...input, appearance: 'none' as const }
 const textarea: React.CSSProperties = { ...input, resize: 'vertical' as const, minHeight: 70 }
-const label: React.CSSProperties = { display: 'block', fontSize: 10, color: '#999', marginBottom: 4 }
+const label: React.CSSProperties = { display: 'block', fontSize: 11, color: '#999', marginBottom: 4 }
 const rq = <span style={{ color: '#a58e28' }}>*</span>
-const bfSec: React.CSSProperties = { background: '#1a1a1a', border: '1px solid #1c1c1c', borderRadius: 5, padding: 20, marginBottom: 14 }
-const bfSecT: React.CSSProperties = { fontSize: 13, fontWeight: 500, color: '#fff', marginBottom: 14 }
-const bfGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }
+const bfSec: React.CSSProperties = { background: '#1a1a1a', border: '1px solid #1c1c1c', borderRadius: 5, padding: 24, marginBottom: 16 }
+const bfSecT: React.CSSProperties = { fontSize: 14, fontWeight: 500, color: '#fff', marginBottom: 14 }
+const bfGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }
 const bfSubBtn: React.CSSProperties = {
-  display: 'inline-block', padding: '10px 24px', fontSize: 11, fontWeight: 600, color: '#111',
+  display: 'inline-block', padding: '10px 24px', fontSize: 12, fontWeight: 600, color: '#111',
   background: '#a58e28', border: 'none', borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif',
 }
 
@@ -275,7 +275,7 @@ export default function BusinessDashboard() {
       onClick={() => setActiveNav(id)}
       style={{
         display: 'block', width: '100%', textAlign: 'left', padding: '7px 10px', borderRadius: 4,
-        border: 'none', cursor: 'pointer', fontSize: 12, fontFamily: 'Inter, sans-serif',
+        border: 'none', cursor: 'pointer', fontSize: 13, fontFamily: 'Inter, sans-serif',
         background: activeNav === id ? 'rgba(255,255,255,0.06)' : 'transparent',
         color: activeNav === id ? '#fff' : '#999',
         fontWeight: activeNav === id ? 500 : 400,
@@ -512,34 +512,34 @@ export default function BusinessDashboard() {
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 28px', display: 'flex', minHeight: '100vh' }}>
 
         {/* ──────────────── Sidebar ──────────────── */}
-        <aside style={{ width: 230, background: '#131313', borderRight: '1px solid #1c1c1c', padding: '20px 0', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+        <aside style={{ width: 240, background: '#131313', borderRight: '1px solid #1c1c1c', padding: '20px 0', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
           {/* Profile */}
           <div style={{ padding: '0 18px 16px', borderBottom: '1px solid #1c1c1c', marginBottom: 6 }}>
-            <div style={{ width: 46, height: 46, borderRadius: '50%', background: '#4da6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 600, color: '#fff', marginBottom: 10 }}>
+            <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#4da6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 600, color: '#fff', marginBottom: 10 }}>
               {initials}
             </div>
-            <div style={{ fontSize: 14, fontWeight: 500, color: '#fff' }}>{companyName || [firstName, lastName].filter(Boolean).join(' ') || 'Employer'}</div>
+            <div style={{ fontSize: 15, fontWeight: 500, color: '#fff' }}>{companyName || [firstName, lastName].filter(Boolean).join(' ') || 'Employer'}</div>
             {(firstName || lastName) && <div style={{ fontSize: 11, color: '#999', marginTop: 1 }}>{[firstName, lastName].filter(Boolean).join(' ')}</div>}
           </div>
 
           {/* Nav sections */}
           {navItems.map(section => (
             <div key={section.section} style={{ padding: '0 10px', marginTop: 2 }}>
-              <div style={{ fontSize: 7, fontWeight: 600, letterSpacing: '2px', color: '#555', textTransform: 'uppercase', padding: '12px 8px 5px' }}>{section.section}</div>
+              <div style={{ fontSize: 8, fontWeight: 600, letterSpacing: '2px', color: '#555', textTransform: 'uppercase', padding: '12px 8px 5px' }}>{section.section}</div>
               {section.items.map(item => sidebarBtn(item.id, item.label))}
             </div>
           ))}
 
           {/* Resources (no active state, external links) */}
           <div style={{ padding: '0 10px', marginTop: 2 }}>
-            <div style={{ fontSize: 7, fontWeight: 600, letterSpacing: '2px', color: '#555', textTransform: 'uppercase', padding: '12px 8px 5px' }}>RESOURCES</div>
+            <div style={{ fontSize: 8, fontWeight: 600, letterSpacing: '2px', color: '#555', textTransform: 'uppercase', padding: '12px 8px 5px' }}>RESOURCES</div>
             {resourceLinks.map(r => (
               <a
                 key={r.label}
                 href={r.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ display: 'block', padding: '7px 10px', borderRadius: 4, fontSize: 12, color: '#999', textDecoration: 'none', marginBottom: 1 }}
+                style={{ display: 'block', padding: '7px 10px', borderRadius: 4, fontSize: 13, color: '#999', textDecoration: 'none', marginBottom: 1 }}
               >
                 {r.label}
               </a>
@@ -548,13 +548,13 @@ export default function BusinessDashboard() {
 
           {/* Invite (inline switch, not external) */}
           <div style={{ padding: '0 10px', marginTop: 2 }}>
-            <div style={{ fontSize: 7, fontWeight: 600, letterSpacing: '2px', color: '#555', textTransform: 'uppercase', padding: '12px 8px 5px' }}>INVITE</div>
+            <div style={{ fontSize: 8, fontWeight: 600, letterSpacing: '2px', color: '#555', textTransform: 'uppercase', padding: '12px 8px 5px' }}>INVITE</div>
             {sidebarBtn('invite', 'Invite')}
           </div>
 
           {/* Account */}
           <div style={{ padding: '0 10px', marginTop: 2 }}>
-            <div style={{ fontSize: 7, fontWeight: 600, letterSpacing: '2px', color: '#555', textTransform: 'uppercase', padding: '12px 8px 5px' }}>ACCOUNT</div>
+            <div style={{ fontSize: 8, fontWeight: 600, letterSpacing: '2px', color: '#555', textTransform: 'uppercase', padding: '12px 8px 5px' }}>ACCOUNT</div>
             {sidebarBtn('settings', 'Settings')}
           </div>
 
@@ -576,7 +576,7 @@ export default function BusinessDashboard() {
           {/* Overview */}
           {activeNav === 'overview' && (
             <>
-              <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff', marginBottom: 3 }}>Welcome back, {firstName || 'there'}</div>
+              <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 26, fontWeight: 400, color: '#fff', marginBottom: 3 }}>Welcome back, {firstName || 'there'}</div>
               <div style={{ fontSize: 11, color: '#777', marginBottom: 20 }}>{today}</div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0,1fr))', gap: 10, marginBottom: 20 }}>
