@@ -81,7 +81,7 @@ No test framework configured. Coolify auto-deploys on push to main (~3 min).
 ## Design Rules
 
 ### Public pages (dark theme):
-- Gold `#a58e28` — max 3 uses per page: active tab underline, italic accents, primary CTA
+- Gold (#a58e28) — accent color used sparingly for emphasis (tags, highlights, signals of importance). Primary actions use neutral tones (white/dark) to maintain clarity and consistency across varied contexts.
 - Dark bg `#1a1a1a`, cards `#222`, borders `#2a2a2a`
 - Headings: Playfair Display 400. Body: Inter
 - Logo: always `joblux-header.png` — never type "JOBLUX" as text
