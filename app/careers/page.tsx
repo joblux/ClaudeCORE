@@ -11,7 +11,6 @@ const supabase = createClient(
 
 function CareersPageInner() {
   const [assignments, setAssignments] = useState<any[]>([])
-  const [salaries, setSalaries] = useState<any[]>([])
   const [interviews, setInterviews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -24,13 +23,6 @@ function CareersPageInner() {
         .eq('status', 'published')
         .order('activated_at', { ascending: false })
 
-      // Fetch salary benchmarks
-      const { data: salariesData } = await supabase
-        .from('salary_benchmarks')
-        .select('*')
-        .eq('is_published', true)
-        .order('created_at', { ascending: false })
-
       // Fetch interview experiences
       const { data: interviewsData } = await supabase
         .from('interview_experiences')
@@ -39,7 +31,6 @@ function CareersPageInner() {
         .order('created_at', { ascending: false })
 
       setAssignments(assignmentsData || [])
-      setSalaries(salariesData || [])
       setInterviews(interviewsData || [])
       setLoading(false)
     }
@@ -58,7 +49,6 @@ function CareersPageInner() {
   return (
     <CareersClient
       assignments={assignments}
-      salaries={salaries}
       interviews={interviews}
     />
   )
