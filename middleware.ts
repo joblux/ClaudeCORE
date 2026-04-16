@@ -55,6 +55,20 @@ async function getMaintenanceMode(): Promise<boolean> {
 
 const HOLDING_BYPASS = ["/holding", "/api", "/_next", "/logos", "/favicon"];
 
+const ROLE_HOME: Record<string, string> = {
+  business: "/dashboard/business",
+  insider: "/dashboard/insider",
+  executive: "/dashboard/candidate",
+  admin: "/admin",
+};
+
+const PROTECTED_SURFACES: Array<{ prefix: string; role: string }> = [
+  { prefix: "/dashboard/business", role: "business" },
+  { prefix: "/dashboard/insider", role: "insider" },
+  { prefix: "/dashboard/candidate", role: "executive" },
+  { prefix: "/admin", role: "admin" },
+];
+
 export default withAuth(
   async function middleware(req) {
     const { pathname, searchParams } = req.nextUrl;
@@ -104,13 +118,6 @@ export default withAuth(
       }
     }
 
-    // Admin routes — admin only
-    if (pathname.startsWith("/admin")) {
-      if (token?.role !== "admin") {
-        return NextResponse.redirect(new URL("/", req.url));
-      }
-    }
-
     // Protected routes — approved or admin only
     if (
       pathname.startsWith("/dashboard") ||
@@ -122,7 +129,20 @@ export default withAuth(
         return NextResponse.redirect(new URL("/members/pending", req.url));
       }
       if (token?.status !== "approved" && token?.role !== "admin") {
-        return NextResponse.redirect(new URL("/join", req.url));
+        return NextResponse.redirect(new URL("/auth/signin", req.url));
+      }
+    }
+
+    // Role-based surface enforcement — members.role is mirrored to token.role via NextAuth JWT callback
+    const surface = PROTECTED_SURFACES.find((s) => pathname.startsWith(s.prefix));
+    if (surface) {
+      if (!token) {
+        return NextResponse.redirect(new URL("/auth/signin", req.url));
+      }
+      const role = token.role as string | undefined;
+      if (role !== surface.role) {
+        const home = (role && ROLE_HOME[role]) || "/join";
+        return NextResponse.redirect(new URL(home, req.url));
       }
     }
 
