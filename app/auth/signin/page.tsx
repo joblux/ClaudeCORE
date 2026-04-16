@@ -1,8 +1,8 @@
 'use client'
 
 import { signIn } from 'next-auth/react'
-import { useState, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useState, Suspense, useEffect } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 const GoogleIcon = () => (
@@ -21,10 +21,19 @@ const LinkedInIcon = () => (
 )
 
 function SignInContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const hasParams = searchParams.toString().length > 0
+
+  useEffect(() => {
+    if (!hasParams) {
+      router.replace('/join')
+    }
+  }, [hasParams, router])
+
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
-  const searchParams = useSearchParams()
   const error = searchParams.get('error')
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
 
@@ -38,6 +47,10 @@ function SignInContent() {
     } catch {
       setIsSubmitting(false)
     }
+  }
+
+  if (!hasParams) {
+    return null
   }
 
   if (emailSent) {

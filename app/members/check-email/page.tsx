@@ -52,7 +52,7 @@ export default function CheckEmailPage() {
         </div>
 
         <a
-          href="/members"
+          href="/join"
           className="inline-block mt-6 text-xs text-[#a58e28] hover:text-[#1a1a1a] transition-colors"
         >
           ← Back to sign in
