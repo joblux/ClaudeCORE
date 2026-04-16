@@ -265,7 +265,7 @@ export default function BusinessDashboard() {
     background: '#1a1a1a', border: '1px solid #1c1c1c', borderRadius: 5, padding: 16,
   }
   const panelHeaderStyle: React.CSSProperties = {
-    fontSize: 8, fontWeight: 600, letterSpacing: '1.6px', textTransform: 'uppercase',
+    fontSize: 9, fontWeight: 600, letterSpacing: '1.6px', textTransform: 'uppercase',
   }
   const rowDivider: React.CSSProperties = { borderBottom: '1px solid #1c1c1c' }
 
@@ -297,7 +297,7 @@ export default function BusinessDashboard() {
 
       {/* How it works */}
       <div style={{ padding: '16px 18px', background: 'rgba(165,142,40,0.08)', border: '1px solid rgba(165,142,40,0.25)', borderRadius: 5, marginBottom: 18 }}>
-        <div style={{ fontSize: 8, fontWeight: 600, letterSpacing: '1.5px', color: '#a58e28', marginBottom: 10 }}>HOW IT WORKS</div>
+        <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: '1.5px', color: '#a58e28', marginBottom: 10 }}>HOW IT WORKS</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
           {[
             { t: '1. Share your requirement', d: 'Tell us about the role and context.' },
@@ -306,13 +306,13 @@ export default function BusinessDashboard() {
             { t: '4. Review candidates', d: 'We present shortlisted candidates for review.' },
           ].map(s => (
             <div key={s.t}>
-              <div style={{ fontSize: 11, color: '#fff', fontWeight: 500, marginBottom: 2 }}>{s.t}</div>
+              <div style={{ fontSize: 12, color: '#fff', fontWeight: 500, marginBottom: 2 }}>{s.t}</div>
               <div style={{ fontSize: 10, color: '#999', lineHeight: 1.4 }}>{s.d}</div>
             </div>
           ))}
         </div>
         <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid rgba(165,142,40,0.25)' }}>
-          <div style={{ fontSize: 9, color: '#555', marginBottom: 5 }}>Compatible with your existing ATS</div>
+          <div style={{ fontSize: 10, color: '#555', marginBottom: 5 }}>Compatible with your existing ATS</div>
           <div style={{ display: 'flex', gap: 16, opacity: 0.45 }}>
             {['Workday', 'Greenhouse', 'Lever', 'SAP SuccessFactors', 'SmartRecruiters'].map(a => (
               <span key={a} style={{ fontSize: 10, color: '#5dcaa5', fontWeight: 500 }}>{a}</span>
@@ -598,10 +598,10 @@ export default function BusinessDashboard() {
                   {signals.length > 0 ? signals.slice(0, 4).map((s, i, arr) => (
                     <Link key={s.id} href={`/signals/${s.slug || s.id}`} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '7px 0', ...(i < arr.length - 1 ? rowDivider : {}), textDecoration: 'none' }}>
                       <span style={{ width: 6, height: 6, borderRadius: '50%', background: SIGNAL_COLORS[s.category] || '#888', flexShrink: 0, marginTop: 5 }} />
-                      <span style={{ fontSize: 11, color: '#ccc', flex: 1, lineHeight: 1.4 }}>{s.headline}</span>
-                      <span style={{ fontSize: 9, color: '#555', whiteSpace: 'nowrap' }}>{timeAgo(s.published_at)}</span>
+                      <span style={{ fontSize: 12, color: '#ccc', flex: 1, lineHeight: 1.4 }}>{s.headline}</span>
+                      <span style={{ fontSize: 10, color: '#555', whiteSpace: 'nowrap' }}>{timeAgo(s.published_at)}</span>
                     </Link>
-                  )) : <div style={{ fontSize: 11, color: '#999', padding: '7px 0' }}>No signals yet.</div>}
+                  )) : <div style={{ fontSize: 12, color: '#999', padding: '7px 0' }}>No signals yet.</div>}
                 </div>
 
                 {/* Salary benchmarks */}
@@ -612,10 +612,10 @@ export default function BusinessDashboard() {
                   </div>
                   {SALARY_ROWS.map((r, i) => (
                     <div key={r.role} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', ...(i < SALARY_ROWS.length - 1 ? rowDivider : {}) }}>
-                      <span style={{ fontSize: 11, color: '#ccc' }}>{r.role}</span>
+                      <span style={{ fontSize: 12, color: '#ccc' }}>{r.role}</span>
                       <span>
-                        <span style={{ fontSize: 11, color: '#a58e28', fontWeight: 500 }}>{r.range}</span>
-                        <span style={{ fontSize: 9, color: '#5dcaa5', marginLeft: 8 }}>{r.trend}</span>
+                        <span style={{ fontSize: 12, color: '#a58e28', fontWeight: 500 }}>{r.range}</span>
+                        <span style={{ fontSize: 10, color: '#5dcaa5', marginLeft: 8 }}>{r.trend}</span>
                       </span>
                     </div>
                   ))}
@@ -632,12 +632,12 @@ export default function BusinessDashboard() {
                   {UPCOMING_EVENTS.map((e, i) => (
                     <div key={e.title} style={{ display: 'flex', gap: 10, padding: '7px 0', ...(i < UPCOMING_EVENTS.length - 1 ? rowDivider : {}) }}>
                       <div style={{ background: '#1f1f1f', borderRadius: 3, padding: '4px 7px', textAlign: 'center', minWidth: 38, flexShrink: 0 }}>
-                        <div style={{ fontSize: 7, color: '#ef9f27', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>{e.mo}</div>
+                        <div style={{ fontSize: 8, color: '#ef9f27', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>{e.mo}</div>
                         <div style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>{e.dy}</div>
                       </div>
                       <div>
-                        <div style={{ fontSize: 11, color: '#ccc', lineHeight: 1.3 }}>{e.title}</div>
-                        <div style={{ fontSize: 9, color: '#555', marginTop: 2 }}>{e.loc}</div>
+                        <div style={{ fontSize: 12, color: '#ccc', lineHeight: 1.3 }}>{e.title}</div>
+                        <div style={{ fontSize: 10, color: '#555', marginTop: 2 }}>{e.loc}</div>
                       </div>
                     </div>
                   ))}
@@ -651,9 +651,9 @@ export default function BusinessDashboard() {
                   </div>
                   {LATEST_INSIGHTS.map((x, i) => (
                     <div key={x.title} style={{ display: 'flex', gap: 8, padding: '7px 0', ...(i < LATEST_INSIGHTS.length - 1 ? rowDivider : {}) }}>
-                      <span style={{ fontSize: 7, fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', width: 55, paddingTop: 2, color: x.color, flexShrink: 0 }}>{x.kind}</span>
-                      <span style={{ fontSize: 11, color: '#ccc', flex: 1, lineHeight: 1.3 }}>{x.title}</span>
-                      <span style={{ fontSize: 9, color: '#555', whiteSpace: 'nowrap' }}>{x.age}</span>
+                      <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', width: 55, paddingTop: 2, color: x.color, flexShrink: 0 }}>{x.kind}</span>
+                      <span style={{ fontSize: 12, color: '#ccc', flex: 1, lineHeight: 1.3 }}>{x.title}</span>
+                      <span style={{ fontSize: 10, color: '#555', whiteSpace: 'nowrap' }}>{x.age}</span>
                     </div>
                   ))}
                 </div>
@@ -666,7 +666,7 @@ export default function BusinessDashboard() {
           {activeNav === 'request-status' && (
             <>
               <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff', marginBottom: 3 }}>Request status</div>
-              <div style={{ fontSize: 11, color: '#777', marginBottom: 20 }}>Track the progress of your briefs</div>
+              <div style={{ fontSize: 12, color: '#777', marginBottom: 20 }}>Track the progress of your briefs</div>
 
               {myBriefs.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -700,7 +700,7 @@ export default function BusinessDashboard() {
           {activeNav === 'contributions' && (
             <>
               <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 400, color: '#fff', marginBottom: 3 }}>My contributions</div>
-              <div style={{ fontSize: 11, color: '#777', marginBottom: 20 }}>Data you&apos;ve contributed to the intelligence ecosystem</div>
+              <div style={{ fontSize: 12, color: '#777', marginBottom: 20 }}>Data you&apos;ve contributed to the intelligence ecosystem</div>
 
               {contributions.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -751,8 +751,8 @@ export default function BusinessDashboard() {
             const acTh: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }
             const acEdit: React.CSSProperties = { fontSize: 10, color: '#a58e28', textDecoration: 'none', fontWeight: 400 }
             const acRow: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', padding: '9px 0', borderBottom: '1px solid #1c1c1c' }
-            const acL: React.CSSProperties = { fontSize: 11, color: '#999' }
-            const acV: React.CSSProperties = { fontSize: 11, color: '#fff' }
+            const acL: React.CSSProperties = { fontSize: 12, color: '#999' }
+            const acV: React.CSSProperties = { fontSize: 12, color: '#fff' }
             const acAct: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #1c1c1c' }
             const acBtn: React.CSSProperties = { padding: '7px 14px', fontSize: 10, fontWeight: 500, background: 'transparent', border: '1px solid #2a2a2a', color: '#999', borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }
             const acBtnDng: React.CSSProperties = { ...acBtn, color: '#e24b4a', borderColor: 'rgba(226,75,74,0.3)' }
@@ -812,7 +812,7 @@ export default function BusinessDashboard() {
                       <div>
                         <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 14, fontWeight: 500, color: '#fff' }}>{fullName}</div>
                         <div style={{ fontSize: 12, color: '#999' }}>Company account</div>
-                        <div style={{ fontSize: 11, color: '#555', marginTop: 1 }}>{member?.email || session?.user?.email || '—'}</div>
+                        <div style={{ fontSize: 12, color: '#555', marginTop: 1 }}>{member?.email || session?.user?.email || '—'}</div>
                       </div>
                     </div>
                   ) : (
