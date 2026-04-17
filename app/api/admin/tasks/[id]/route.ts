@@ -15,7 +15,14 @@ async function requireAdmin() {
   return (session?.user as any)?.role === 'admin'
 }
 
-const ALLOWED_FIELDS = ['label', 'category', 'priority', 'notes', 'done', 'sort_order'] as const
+const ALLOWED_FIELDS = ['label', 'category', 'priority', 'notes', 'status', 'sort_order'] as const
+const STATUSES = ['open', 'closed', 'validated', 'parked'] as const
+const ALLOWED_TRANSITIONS: Record<string, readonly string[]> = {
+  open: ['closed', 'parked'],
+  closed: ['validated'],
+  validated: [],
+  parked: ['open'],
+}
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   if (!(await requireAdmin())) {
@@ -29,12 +36,43 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (key in body) updates[key] = body[key]
   }
 
-  if ('done' in updates) {
-    updates.completed_at = updates.done ? new Date().toISOString() : null
-  }
-
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
+  }
+
+  if ('status' in updates) {
+    const nextStatus = updates.status
+    if (!STATUSES.includes(nextStatus)) {
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
+    }
+
+    const { data: current, error: fetchError } = await supabase
+      .from('admin_tasks')
+      .select('status, completed_at')
+      .eq('id', params.id)
+      .maybeSingle()
+
+    if (fetchError || !current) {
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 })
+    }
+
+    const currentStatus = current.status || 'open'
+    if (currentStatus !== nextStatus && !ALLOWED_TRANSITIONS[currentStatus].includes(nextStatus)) {
+      return NextResponse.json(
+        { error: `Invalid transition: ${currentStatus} → ${nextStatus}` },
+        { status: 400 }
+      )
+    }
+
+    updates.done = nextStatus === 'closed' || nextStatus === 'validated'
+
+    if (nextStatus === 'closed' && !current.completed_at) {
+      updates.completed_at = new Date().toISOString()
+    } else if (nextStatus === 'open') {
+      updates.completed_at = null
+    }
+    // validated: keep existing completed_at
+    // parked: completed_at already null (transition only from open)
   }
 
   const { data, error } = await supabase

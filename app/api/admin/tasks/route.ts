@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
       category,
       priority: priority || 'normal',
       notes: notes || null,
+      status: 'open',
       done: false,
       sort_order,
     })

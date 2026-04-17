@@ -7,7 +7,7 @@ import { useRequireAdmin } from '@/lib/auth-hooks'
 import type { AdminMetrics } from '@/lib/admin-metrics'
 import {
   Briefcase, PenLine, UserCheck, Download, Send,
-  CheckCircle2, Circle
+  Circle
 } from 'lucide-react'
 
 // Anon client is still used for the Recent Activity feed (members,
@@ -58,7 +58,8 @@ const PIPELINE_STAGES = [
 
 // ── Tasks (loaded from admin_tasks table) ────────────────────────────────────
 
-type AdminTask = { id: string; label: string; done: boolean; category: string; completed_at: string | null }
+type AdminTaskStatus = 'open' | 'closed' | 'validated' | 'parked'
+type AdminTask = { id: string; label: string; status: AdminTaskStatus; done: boolean; category: string; completed_at: string | null }
 
 const CHECKLIST_VISIBLE = 8
 
@@ -97,17 +98,19 @@ export default function AdminDashboardPage() {
       .catch(() => {})
   }, [])
 
-  async function toggleTask(task: AdminTask) {
-    const next = !task.done
-    setTasks(ts => ts.map(t => t.id === task.id ? { ...t, done: next } : t))
+  async function closeTask(task: AdminTask) {
+    if (task.status !== 'open') return
+    const prev = task
+    setTasks(ts => ts.map(t => t.id === task.id ? { ...t, status: 'closed', done: true, completed_at: t.completed_at ?? new Date().toISOString() } : t))
     try {
-      await fetch(`/api/admin/tasks/${task.id}`, {
+      const res = await fetch(`/api/admin/tasks/${task.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ done: next }),
+        body: JSON.stringify({ status: 'closed' }),
       })
+      if (!res.ok) throw new Error()
     } catch {
-      setTasks(ts => ts.map(t => t.id === task.id ? task : t))
+      setTasks(ts => ts.map(t => t.id === task.id ? prev : t))
     }
   }
 
@@ -220,9 +223,9 @@ export default function AdminDashboardPage() {
 
   const firstName = name?.split(' ')[0] || 'Mo'
   const pipelineTotal = PIPELINE_STAGES.reduce((sum, s) => sum + (pipelineData[s.key] || 0), 0)
-  const tasksDone = tasks.filter(t => t.done).length
-  const tasksTotal = tasks.length
-  const visibleTasks = tasks.filter(t => !t.done).slice(0, CHECKLIST_VISIBLE)
+  const tasksDone = tasks.filter(t => t.status === 'closed' || t.status === 'validated').length
+  const tasksTotal = tasks.filter(t => t.status !== 'parked').length
+  const visibleTasks = tasks.filter(t => t.status === 'open').slice(0, CHECKLIST_VISIBLE)
 
   // Compute System Status entries from the shared admin metrics.
   // Doctrine alerts render as red, queue depth as amber, nothing
@@ -481,14 +484,10 @@ export default function AdminDashboardPage() {
             <div className="space-y-1">
               {visibleTasks.map(task => (
                 <div key={task.id} className="flex items-center gap-2 py-1">
-                  <button onClick={() => toggleTask(task)} className="flex-shrink-0">
-                    {task.done ? (
-                      <CheckCircle2 size={14} className="text-green-500" />
-                    ) : (
-                      <Circle size={14} className="text-gray-300 hover:text-[#666] transition-colors" />
-                    )}
+                  <button onClick={() => closeTask(task)} className="flex-shrink-0" title="Close task">
+                    <Circle size={14} className="text-gray-300 hover:text-green-500 transition-colors" />
                   </button>
-                  <span className={`text-xs ${task.done ? 'text-[#999] line-through' : 'text-[#1a1a1a]'}`}>
+                  <span className="text-xs text-[#1a1a1a]">
                     {task.label}
                   </span>
                 </div>

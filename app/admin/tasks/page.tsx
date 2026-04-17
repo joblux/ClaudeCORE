@@ -1,12 +1,15 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { CheckCircle2, Circle, Trash2, Plus } from 'lucide-react'
+import { Circle, CheckCircle, CheckCircle2, PauseCircle, Trash2, Plus } from 'lucide-react'
+
+type Status = 'open' | 'closed' | 'validated' | 'parked'
 
 type Task = {
   id: string
   label: string
   category: string
+  status: Status
   done: boolean
   priority: string | null
   notes: string | null
@@ -15,8 +18,22 @@ type Task = {
 }
 
 const PRIORITIES = ['low', 'normal', 'high', 'critical']
-const FILTERS = ['all', 'active', 'completed'] as const
+const FILTERS = ['all', 'open', 'closed', 'validated', 'parked'] as const
 type Filter = typeof FILTERS[number]
+
+const ALLOWED_NEXT: Record<Status, Status[]> = {
+  open: ['closed', 'parked'],
+  closed: ['validated'],
+  validated: [],
+  parked: ['open'],
+}
+
+function StatusIcon({ status }: { status: Status }) {
+  if (status === 'open')      return <Circle size={16} className="text-[#ccc]" />
+  if (status === 'closed')    return <CheckCircle size={16} className="text-[#666]" />
+  if (status === 'validated') return <CheckCircle2 size={16} className="text-green-500" />
+  return <PauseCircle size={16} className="text-amber-500" />
+}
 
 export default function AdminTasksPage() {
   const [tasks, setTasks] = useState<Task[]>([])
@@ -40,9 +57,8 @@ export default function AdminTasksPage() {
   }, [tasks])
 
   const filtered = useMemo(() => {
-    if (filter === 'active') return tasks.filter(t => !t.done)
-    if (filter === 'completed') return tasks.filter(t => t.done)
-    return tasks
+    if (filter === 'all') return tasks
+    return tasks.filter(t => t.status === filter)
   }, [tasks, filter])
 
   const grouped = useMemo(() => {
@@ -55,22 +71,31 @@ export default function AdminTasksPage() {
     return map
   }, [filtered])
 
-  const total = tasks.length
-  const doneCount = tasks.filter(t => t.done).length
+  const active = tasks.filter(t => t.status !== 'parked')
+  const total = active.length
+  const doneCount = active.filter(t => t.status === 'closed' || t.status === 'validated').length
   const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0
 
-  async function toggleDone(task: Task) {
-    const next = !task.done
-    setTasks(ts => ts.map(t => t.id === task.id ? { ...t, done: next, completed_at: next ? new Date().toISOString() : null } : t))
+  async function transition(task: Task, next: Status) {
+    const prev = task
+    const now = new Date().toISOString()
+    setTasks(ts => ts.map(t => t.id === task.id ? {
+      ...t,
+      status: next,
+      done: next === 'closed' || next === 'validated',
+      completed_at: next === 'closed' && !t.completed_at ? now
+                  : next === 'open' ? null
+                  : t.completed_at,
+    } : t))
     try {
-      await fetch(`/api/admin/tasks/${task.id}`, {
+      const res = await fetch(`/api/admin/tasks/${task.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ done: next }),
+        body: JSON.stringify({ status: next }),
       })
+      if (!res.ok) throw new Error()
     } catch {
-      // revert on failure
-      setTasks(ts => ts.map(t => t.id === task.id ? task : t))
+      setTasks(ts => ts.map(t => t.id === task.id ? prev : t))
     }
   }
 
@@ -180,23 +205,23 @@ export default function AdminTasksPage() {
         <div className="bg-white border border-[#e8e8e8] rounded-xl p-8 text-center text-[13px] text-[#999]">No tasks.</div>
       ) : (
         <div className="space-y-5">
-          {Object.entries(grouped).map(([cat, items]) => (
+          {Object.entries(grouped).map(([cat, items]) => {
+            const groupActive = items.filter(i => i.status !== 'parked')
+            const groupDone = groupActive.filter(i => i.status === 'closed' || i.status === 'validated').length
+            return (
             <div key={cat} className="bg-white border border-[#e8e8e8] rounded-xl overflow-hidden">
               <div className="px-4 py-2.5 border-b border-[#e8e8e8] bg-[#fafafa] flex items-center justify-between">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#666]">{cat}</span>
-                <span className="text-[11px] text-[#999]">{items.filter(i => i.done).length}/{items.length}</span>
+                <span className="text-[11px] text-[#999]">{groupDone}/{groupActive.length}</span>
               </div>
               <div className="divide-y divide-[#f0f0f0]">
-                {items.map(task => (
+                {items.map(task => {
+                  const nexts = ALLOWED_NEXT[task.status]
+                  const dim = task.status === 'closed' || task.status === 'validated' || task.status === 'parked'
+                  return (
                   <div key={task.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#fafafa] group">
-                    <button onClick={() => toggleDone(task)} className="flex-shrink-0">
-                      {task.done ? (
-                        <CheckCircle2 size={16} className="text-green-500" />
-                      ) : (
-                        <Circle size={16} className="text-[#ccc] hover:text-[#666] transition-colors" />
-                      )}
-                    </button>
-                    <span className={`flex-1 text-[13px] ${task.done ? 'text-[#aaa] line-through' : 'text-[#111]'}`}>
+                    <span className="flex-shrink-0"><StatusIcon status={task.status} /></span>
+                    <span className={`flex-1 text-[13px] ${dim ? 'text-[#aaa]' : 'text-[#111]'} ${task.status === 'closed' || task.status === 'validated' ? 'line-through' : ''}`}>
                       {task.label}
                     </span>
                     {task.priority && task.priority !== 'normal' && (
@@ -208,6 +233,20 @@ export default function AdminTasksPage() {
                         {task.priority}
                       </span>
                     )}
+                    <div className="flex items-center gap-1">
+                      {nexts.includes('closed') && (
+                        <button onClick={() => transition(task, 'closed')} className="text-[11px] px-2 py-1 rounded bg-[#f0f0f0] text-[#444] hover:bg-[#111] hover:text-white transition-colors">Close</button>
+                      )}
+                      {nexts.includes('validated') && (
+                        <button onClick={() => transition(task, 'validated')} className="text-[11px] px-2 py-1 rounded bg-green-50 text-green-700 hover:bg-green-600 hover:text-white transition-colors">Validate</button>
+                      )}
+                      {nexts.includes('parked') && (
+                        <button onClick={() => transition(task, 'parked')} className="text-[11px] px-2 py-1 rounded text-[#888] hover:bg-amber-50 hover:text-amber-700 transition-colors">Park</button>
+                      )}
+                      {nexts.includes('open') && (
+                        <button onClick={() => transition(task, 'open')} className="text-[11px] px-2 py-1 rounded text-[#888] hover:bg-[#f0f0f0] hover:text-[#111] transition-colors">Unpark</button>
+                      )}
+                    </div>
                     <button
                       onClick={() => deleteTask(task)}
                       className="opacity-0 group-hover:opacity-100 text-[#bbb] hover:text-red-500 transition-all p-1"
@@ -216,10 +255,10 @@ export default function AdminTasksPage() {
                       <Trash2 size={13} />
                     </button>
                   </div>
-                ))}
+                )})}
               </div>
             </div>
-          ))}
+          )})}
         </div>
       )}
     </div>
