@@ -57,7 +57,6 @@ const NAV_SECTIONS = [
     items: [
       { label: 'Assignments', href: '/admin/assignments', icon: Briefcase },
       { label: 'ATS Pipeline', href: '/admin/ats', icon: Kanban },
-      { label: 'Briefs', href: '/admin/briefs', icon: ClipboardList },
       { label: 'Business Briefs', href: '/admin/business-briefs', icon: FileText },
     ],
   },
@@ -85,7 +84,6 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   '/admin': { title: 'Members', subtitle: 'Member directory' },
   '/admin/assignments': { title: 'Assignments', subtitle: 'Search assignments' },
   '/admin/ats': { title: 'ATS Pipeline', subtitle: 'Applicant tracking' },
-  '/admin/briefs': { title: 'Briefs', subtitle: 'Recruiting requests' },
   '/admin/messages': { title: 'Messages', subtitle: 'Member communications' },
   '/admin/contributions': { title: 'Contributions', subtitle: 'Command center' },
   '/admin/articles': { title: 'Insights', subtitle: 'BlogLux articles' },

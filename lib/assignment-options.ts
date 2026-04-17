@@ -267,8 +267,3 @@ export const COUNTRIES = [
   'New Zealand',
   'Other',
 ] as const
-
-// Backwards-compatible aliases for old names
-export const BRIEF_STATUSES = ASSIGNMENT_STATUSES
-export const BRIEF_PRIORITIES = ASSIGNMENT_PRIORITIES
-export const BRIEF_SOURCES = ASSIGNMENT_SOURCES
