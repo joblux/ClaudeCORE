@@ -108,6 +108,41 @@ export async function PUT(
           .eq('id', contribution.member_id)
       }
 
+      // Promote approved salary contributions to salary_benchmarks (best-effort — do not roll back approval on failure)
+      if (contribution.contribution_type === 'salary_data') {
+        const { data: sal } = await supabase
+          .from('salary_contributions')
+          .select('*')
+          .eq('contribution_id', id)
+          .maybeSingle()
+        if (sal) {
+          const { error: benchErr } = await supabase.from('salary_benchmarks').insert({
+            contribution_id: id,
+            brand_name: contribution.brand_name,
+            brand_slug: contribution.brand_slug,
+            job_title: sal.job_title,
+            department: sal.department,
+            seniority: sal.seniority,
+            city: sal.city,
+            country: sal.country,
+            currency: sal.salary_currency || 'EUR',
+            salary_min: sal.base_salary,
+            salary_max: sal.base_salary,
+            salary_median: sal.base_salary,
+            bonus_min: sal.bonus_amount || null,
+            bonus_max: sal.bonus_amount || null,
+            total_comp_min: sal.total_comp || null,
+            total_comp_max: sal.total_comp || null,
+            year_of_data: sal.year_of_data || null,
+            source: 'Member Contribution',
+            content_origin: 'contributed',
+            is_published: true,
+            created_at: new Date().toISOString(),
+          })
+          if (benchErr) console.error('salary_benchmarks promotion failed:', benchErr.message)
+        }
+      }
+
       // Smart refresh: if this is a wikilux_insight, check if brand page needs regeneration
       if (contribution.contribution_type === 'wikilux_insight' && contribution.brand_slug) {
         const { data: brandContent } = await supabase

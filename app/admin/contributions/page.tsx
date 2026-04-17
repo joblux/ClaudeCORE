@@ -325,11 +325,19 @@ function SalaryTab() {
 
   const act = async (id: string, action: 'approve' | 'reject') => {
     setActioning(id)
-    await fetch('/api/admin/contributions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, type: 'salary', id }),
-    })
+    if (action === 'approve') {
+      await fetch(`/api/contributions/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'approve' }),
+      })
+    } else {
+      await fetch('/api/admin/contributions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, type: 'salary', id }),
+      })
+    }
     setActioning(null)
     fetch_()
   }
@@ -447,11 +455,19 @@ function InterviewsTab() {
 
   const act = async (id: string, action: 'approve' | 'reject') => {
     setActioning(id)
-    await fetch('/api/admin/contributions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, type: 'interviews', id }),
-    })
+    if (action === 'approve') {
+      await fetch(`/api/contributions/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'approve' }),
+      })
+    } else {
+      await fetch('/api/admin/contributions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, type: 'interviews', id }),
+      })
+    }
     setActioning(null)
     fetch_()
   }
