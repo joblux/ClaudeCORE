@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
@@ -18,6 +18,14 @@ const navItems = [
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [accessOpen, setAccessOpen] = useState(false)
+  useEffect(() => {
+    const mql = window.matchMedia('(min-width: 768px)')
+    const handler = (e: MediaQueryListEvent) => {
+      if (e.matches) setMobileOpen(false)
+    }
+    mql.addEventListener('change', handler)
+    return () => mql.removeEventListener('change', handler)
+  }, [])
   const { isAuthenticated } = useMember()
   const pathname = usePathname()
   const isTunnel = pathname.startsWith('/members/complete-registration')
