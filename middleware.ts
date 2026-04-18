@@ -58,15 +58,20 @@ const HOLDING_BYPASS = ["/holding", "/api", "/_next", "/logos", "/favicon"];
 const ROLE_HOME: Record<string, string> = {
   business: "/dashboard/business",
   insider: "/dashboard/insider",
+  insider_contributor: "/dashboard/insider",
+  insider_key_speaker: "/dashboard/insider",
+  rising: "/dashboard/candidate",
+  pro: "/dashboard/candidate",
   executive: "/dashboard/candidate",
+  professional: "/dashboard/candidate",
   admin: "/admin",
 };
 
-const PROTECTED_SURFACES: Array<{ prefix: string; role: string }> = [
-  { prefix: "/dashboard/business", role: "business" },
-  { prefix: "/dashboard/insider", role: "insider" },
-  { prefix: "/dashboard/candidate", role: "executive" },
-  { prefix: "/admin", role: "admin" },
+const PROTECTED_SURFACES: Array<{ prefix: string; roles: string[] }> = [
+  { prefix: "/dashboard/business", roles: ["business"] },
+  { prefix: "/dashboard/insider", roles: ["insider", "insider_contributor", "insider_key_speaker"] },
+  { prefix: "/dashboard/candidate", roles: ["rising", "pro", "executive", "professional"] },
+  { prefix: "/admin", roles: ["admin"] },
 ];
 
 export default withAuth(
@@ -139,9 +144,9 @@ export default withAuth(
       if (!token) {
         return NextResponse.redirect(new URL("/auth/signin", req.url));
       }
-      const role = token.role as string | undefined;
-      if (role !== surface.role) {
-        const home = (role && ROLE_HOME[role]) || "/join";
+      const userRole = token?.role as string | undefined;
+      if (!userRole || !surface.roles.includes(userRole)) {
+        const home = (userRole && ROLE_HOME[userRole]) || "/join";
         return NextResponse.redirect(new URL(home, req.url));
       }
     }
