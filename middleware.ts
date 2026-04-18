@@ -1,5 +1,5 @@
 import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 // In-memory cache for maintenance mode status
@@ -74,6 +74,13 @@ const PROTECTED_SURFACES: Array<{ prefix: string; roles: string[] }> = [
   { prefix: "/admin", roles: ["admin"] },
 ];
 
+function signInRedirect(req: NextRequest) {
+  const url = new URL("/auth/signin", req.url);
+  const target = req.nextUrl.pathname + req.nextUrl.search;
+  url.searchParams.set("callbackUrl", target);
+  return NextResponse.redirect(url);
+}
+
 export default withAuth(
   async function middleware(req) {
     const { pathname, searchParams } = req.nextUrl;
@@ -134,7 +141,7 @@ export default withAuth(
         return NextResponse.redirect(new URL("/members/pending", req.url));
       }
       if (token?.status !== "approved" && token?.role !== "admin") {
-        return NextResponse.redirect(new URL("/auth/signin", req.url));
+        return signInRedirect(req);
       }
     }
 
@@ -142,7 +149,7 @@ export default withAuth(
     const surface = PROTECTED_SURFACES.find((s) => pathname.startsWith(s.prefix));
     if (surface) {
       if (!token) {
-        return NextResponse.redirect(new URL("/auth/signin", req.url));
+        return signInRedirect(req);
       }
       const userRole = token?.role as string | undefined;
       if (!userRole || !surface.roles.includes(userRole)) {
