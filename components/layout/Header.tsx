@@ -20,6 +20,7 @@ export function Header() {
   const [accessOpen, setAccessOpen] = useState(false)
   const { isAuthenticated } = useMember()
   const pathname = usePathname()
+  const isTunnel = pathname.startsWith('/members/complete-registration')
   const router = useRouter()
 
   const handleAccessCard = (href: string) => {
@@ -40,45 +41,51 @@ export function Header() {
             </Link>
 
             {/* Center nav — desktop */}
-            <nav className="hidden md:flex" style={{ gap: 26, alignItems: 'center' }}>
-              {navItems.map((item) => {
-                const isActive = pathname.startsWith(item.href)
-                return (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    style={{ fontSize: 13.5, color: isActive ? '#fff' : 'rgba(255,255,255,0.8)', textDecoration: 'none', transition: 'color 0.18s ease' }}
-                  >
-                    {item.label}
-                  </Link>
-                )
-              })}
-            </nav>
+            {!isTunnel && (
+              <nav className="hidden md:flex" style={{ gap: 26, alignItems: 'center' }}>
+                {navItems.map((item) => {
+                  const isActive = pathname.startsWith(item.href)
+                  return (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      style={{ fontSize: 13.5, color: isActive ? '#fff' : 'rgba(255,255,255,0.8)', textDecoration: 'none', transition: 'color 0.18s ease' }}
+                    >
+                      {item.label}
+                    </Link>
+                  )
+                })}
+              </nav>
+            )}
 
             {/* Right side — desktop */}
-            <div className="hidden md:flex" style={{ alignItems: 'center', gap: 14, flexShrink: 0 }}>
-              {isAuthenticated ? (
-                <UserMenu />
-              ) : (
-                <button
-                  onClick={() => setAccessOpen(true)}
-                  style={{ fontSize: '12.5px', fontWeight: 500, color: 'rgba(255,255,255,0.85)', background: 'transparent', padding: '9px 18px', borderRadius: 999, border: '1px solid #333', cursor: 'pointer', transition: 'background 0.18s ease' }}
-                >
-                  Access &rarr;
-                </button>
-              )}
-            </div>
+            {!isTunnel && (
+              <div className="hidden md:flex" style={{ alignItems: 'center', gap: 14, flexShrink: 0 }}>
+                {isAuthenticated ? (
+                  <UserMenu />
+                ) : (
+                  <button
+                    onClick={() => setAccessOpen(true)}
+                    style={{ fontSize: '12.5px', fontWeight: 500, color: 'rgba(255,255,255,0.85)', background: 'transparent', padding: '9px 18px', borderRadius: 999, border: '1px solid #333', cursor: 'pointer', transition: 'background 0.18s ease' }}
+                  >
+                    Access &rarr;
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* Mobile hamburger */}
-            <div className="md:hidden flex items-center">
-              <button
-                onClick={() => setMobileOpen(!mobileOpen)}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, fontSize: 24, color: 'rgba(255,255,255,0.82)', background: 'none', border: 'none', cursor: 'pointer' }}
-                aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-              >
-                {mobileOpen ? '\u2715' : '\u2630'}
-              </button>
-            </div>
+            {!isTunnel && (
+              <div className="md:hidden flex items-center">
+                <button
+                  onClick={() => setMobileOpen(!mobileOpen)}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, fontSize: 24, color: 'rgba(255,255,255,0.82)', background: 'none', border: 'none', cursor: 'pointer' }}
+                  aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+                >
+                  {mobileOpen ? '\u2715' : '\u2630'}
+                </button>
+              </div>
+            )}
 
           </div>
         </div>
