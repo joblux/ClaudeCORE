@@ -97,38 +97,38 @@ export function Header() {
 
           </div>
         </div>
-
-        {/* Mobile nav overlay */}
-        {mobileOpen && (
-          <div className="md:hidden" style={{ position: 'fixed', inset: 0, top: 84, background: 'rgba(23,23,23,0.98)', zIndex: 50, display: 'flex', flexDirection: 'column' }}>
-            <nav style={{ flex: 1, padding: '32px 28px' }}>
-              {navItems.map((item) => {
-                const isActive = pathname.startsWith(item.href)
-                return (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    style={{ display: 'block', padding: '16px 0', fontSize: 15, borderBottom: '1px solid #2b2b2b', color: isActive ? '#fff' : 'rgba(255,255,255,0.82)', textDecoration: 'none' }}
-                  >
-                    {item.label}
-                  </Link>
-                )
-              })}
-            </nav>
-            {!isAuthenticated && (
-              <div style={{ padding: '0 28px 40px' }}>
-                <button
-                  onClick={() => { setMobileOpen(false); setAccessOpen(true) }}
-                  style={{ fontSize: '12.5px', fontWeight: 500, color: 'rgba(255,255,255,0.85)', background: 'transparent', padding: '9px 18px', borderRadius: 999, border: '1px solid #333', cursor: 'pointer', display: 'inline-block' }}
-                >
-                  Access &rarr;
-                </button>
-              </div>
-            )}
-          </div>
-        )}
       </header>
+
+      {/* Mobile nav overlay */}
+      {mobileOpen && (
+        <div className="md:hidden" style={{ position: 'fixed', inset: 0, top: 84, background: 'rgba(23,23,23,0.98)', zIndex: 60, display: 'flex', flexDirection: 'column' }}>
+          <nav style={{ flex: 1, padding: '32px 28px' }}>
+            {navItems.map((item) => {
+              const isActive = pathname.startsWith(item.href)
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  style={{ display: 'block', padding: '16px 0', fontSize: 15, borderBottom: '1px solid #2b2b2b', color: isActive ? '#fff' : 'rgba(255,255,255,0.82)', textDecoration: 'none' }}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
+          </nav>
+          {!isAuthenticated && (
+            <div style={{ padding: '0 28px 40px' }}>
+              <button
+                onClick={() => { setMobileOpen(false); setAccessOpen(true) }}
+                style={{ fontSize: '12.5px', fontWeight: 500, color: 'rgba(255,255,255,0.85)', background: 'transparent', padding: '9px 18px', borderRadius: 999, border: '1px solid #333', cursor: 'pointer', display: 'inline-block' }}
+              >
+                Access &rarr;
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Access modal */}
       {accessOpen && (
