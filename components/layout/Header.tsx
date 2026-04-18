@@ -101,7 +101,7 @@ export function Header() {
 
       {/* Mobile nav overlay */}
       {mobileOpen && (
-        <div className="md:hidden" style={{ position: 'fixed', inset: 0, top: 84, background: 'rgba(23,23,23,0.98)', zIndex: 60, display: 'flex', flexDirection: 'column' }}>
+        <div className="md:hidden" style={{ position: 'fixed', inset: 0, top: 84, background: '#171717', zIndex: 60, display: 'flex', flexDirection: 'column' }}>
           <nav style={{ flex: 1, padding: '32px 28px' }}>
             {navItems.map((item) => {
               const isActive = pathname.startsWith(item.href)
