@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Fetch matching benchmarks
-    let bmQuery = db.from('salary_benchmarks').select('*').ilike('job_title', `%${job_title}%`)
+    let bmQuery = db.from('salary_benchmarks').select('*').eq('is_published', true).ilike('job_title', `%${job_title}%`)
     if (city) bmQuery = bmQuery.eq('city', city)
     if (department) bmQuery = bmQuery.eq('department', department)
     if (seniority) bmQuery = bmQuery.eq('seniority', seniority)
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     // Broader search if not enough data
     let bmBroad: any[] = []
     if ((exactBms || []).length < 2) {
-      const { data } = await db.from('salary_benchmarks').select('*').ilike('job_title', `%${job_title}%`).limit(20)
+      const { data } = await db.from('salary_benchmarks').select('*').eq('is_published', true).ilike('job_title', `%${job_title}%`).limit(20)
       bmBroad = data || []
     }
 

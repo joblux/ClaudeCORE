@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
     const results = []
 
     for (const item of items) {
-      let bmQuery = db.from('salary_benchmarks').select('*').ilike('job_title', `%${jobTitle}%`)
+      let bmQuery = db.from('salary_benchmarks').select('*').eq('is_published', true).ilike('job_title', `%${jobTitle}%`)
       if (department) bmQuery = bmQuery.eq('department', department)
       if (seniority) bmQuery = bmQuery.eq('seniority', seniority)
 

@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Fetch matching benchmarks
-    let bmQuery = db.from('salary_benchmarks').select('*').ilike('job_title', `%${jobTitle}%`).eq('city', city)
+    let bmQuery = db.from('salary_benchmarks').select('*').eq('is_published', true).ilike('job_title', `%${jobTitle}%`).eq('city', city)
     if (department) bmQuery = bmQuery.eq('department', department)
     if (seniority) bmQuery = bmQuery.eq('seniority', seniority)
     if (brand) bmQuery = bmQuery.ilike('brand_name', `%${brand}%`)
@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
 
     // Same role in other cities
     const { data: otherCityBms } = await db.from('salary_benchmarks').select('city, salary_median, currency')
-      .ilike('job_title', `%${jobTitle}%`).neq('city', city).not('salary_median', 'is', null).limit(10)
+      .eq('is_published', true).ilike('job_title', `%${jobTitle}%`).neq('city', city).not('salary_median', 'is', null).limit(10)
 
     const cityMap = new Map<string, { total: number; count: number; currency: string }>()
     ;(otherCityBms || []).forEach((b: any) => {

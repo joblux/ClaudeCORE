@@ -160,6 +160,7 @@ function BrowseTab({ accessLevel, initialEntries, initialTotal, initialStats, in
       let query = supabase
         .from('salary_benchmarks')
         .select('*', { count: 'exact' })
+        .eq('is_published', true)
 
       const brandSearch = filterBrand || debouncedSearch
       if (brandSearch) query = query.ilike('brand_name', `%${brandSearch}%`)
@@ -209,6 +210,7 @@ function BrowseTab({ accessLevel, initialEntries, initialTotal, initialStats, in
       const { data: allBenchmarks } = await supabase
         .from('salary_benchmarks')
         .select('brand_name, department, seniority, city, country, currency')
+        .eq('is_published', true)
 
       if (allBenchmarks) {
         const brands = new Set<string>()
