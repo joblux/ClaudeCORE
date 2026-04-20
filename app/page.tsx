@@ -3,6 +3,8 @@ import { HomepageHero } from '@/components/home/HomepageHero'
 import { HomepageSignals } from '@/components/home/HomepageSignals'
 import { HomepageOpportunities } from '@/components/home/HomepageOpportunities'
 import { HomepageBrands } from '@/components/home/HomepageBrands'
+import { HomepageSalary } from '@/components/home/HomepageSalary'
+import { HomepageInsights } from '@/components/home/HomepageInsights'
 import { HomepageEvents } from '@/components/home/HomepageEvents'
 import { HomepageBrief } from '@/components/home/HomepageBrief'
 import type { Metadata } from 'next'
@@ -33,6 +35,7 @@ export default async function HomePage() {
     signalsRes,
     activeCountRes,
     assignmentsRes,
+    salariesRes,
     articlesRes,
     articleCountRes,
     eventsRes,
@@ -57,6 +60,13 @@ export default async function HomePage() {
       .eq('status', 'published')
       .order('created_at', { ascending: false })
       .limit(3),
+    // Salary benchmarks — is_published gate preserved from Apr 19 Surface #1 containment
+    supabase
+      .from('salary_benchmarks')
+      .select('job_title, brand_name, city, country, currency, salary_min, salary_max')
+      .eq('is_published', true)
+      .order('created_at', { ascending: false })
+      .limit(5),
     // Insights articles
     supabase
       .from('bloglux_articles')
@@ -114,6 +124,8 @@ export default async function HomePage() {
         eventCount={eventsRes.count || 9}
         articleCount={articleCountRes.count || 29}
       />
+      <HomepageSalary salaries={salariesRes.data || []} />
+      <HomepageInsights articles={articlesRes.data || []} />
       <HomepageOpportunities assignments={assignmentsRes.data || []} />
       <HomepageBrands brands={brands} />
       <HomepageSignals signals={(signalsRes.data || []).slice(0, 8)} />
