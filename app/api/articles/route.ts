@@ -17,6 +17,11 @@ function slugify(text: string): string {
 }
 
 export async function GET() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.role || session.user.role !== "admin") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+
   // Try bloglux_articles first (actual table name)
   const { data, error } = await supabaseAdmin
     .from("bloglux_articles")
