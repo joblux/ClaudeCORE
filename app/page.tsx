@@ -63,6 +63,7 @@ export default async function HomePage() {
       .select('slug, title, category, read_time_minutes, published_at')
       .eq('status', 'published')
       .is('deleted_at', null)
+      .neq('category', 'Insider Voice')
       .order('published_at', { ascending: false })
       .limit(3),
     // Article count for hero stat
@@ -70,6 +71,7 @@ export default async function HomePage() {
       .from('bloglux_articles')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'published')
+      .neq('category', 'Insider Voice')
       .is('deleted_at', null),
     // Upcoming events
     supabase

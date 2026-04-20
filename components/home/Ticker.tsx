@@ -26,6 +26,7 @@ export function Ticker() {
         .select('title, slug, category')
         .eq('status', 'published')
         .eq('featured_homepage', true)
+        .neq('category', 'Insider Voice')
         .order('published_at', { ascending: false })
         .limit(8)
 
@@ -39,6 +40,7 @@ export function Ticker() {
         .from('bloglux_articles')
         .select('title, slug, category')
         .eq('status', 'published')
+        .neq('category', 'Insider Voice')
         .order('published_at', { ascending: false })
         .limit(8)
 

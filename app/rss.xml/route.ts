@@ -11,6 +11,7 @@ export async function GET() {
     .from('bloglux_articles')
     .select('title, slug, meta_description, excerpt, category, author_name, created_at, updated_at, cover_image_url, published_at')
     .eq('status', 'published')
+    .neq('category', 'Insider Voice')
     .order('published_at', { ascending: false })
     .limit(50)
 

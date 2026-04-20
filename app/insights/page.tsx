@@ -95,6 +95,7 @@ function InsightsPageInner() {
         .eq('status', 'published')
         .eq('featured_homepage', true)
         .is('deleted_at', null)
+        .neq('category', 'Insider Voice')
         .maybeSingle()
 
       if (featuredArticle) {
@@ -174,6 +175,7 @@ function InsightsPageInner() {
         .select('id, slug, title, category, published_at, cover_image_url')
         .eq('status', 'published')
         .is('deleted_at', null)
+        .neq('category', 'Insider Voice')
         .order('published_at', { ascending: false })
         .limit(4)
 

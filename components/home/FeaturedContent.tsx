@@ -33,6 +33,7 @@ async function getHomepageFeature(): Promise<Article | null> {
     .select('title, slug, category, excerpt, published_at, read_time_minutes, cover_image_url')
     .eq('status', 'published')
     .eq('homepage_feature', true)
+    .neq('category', 'Insider Voice')
     .limit(1)
     .single()
 
@@ -46,6 +47,7 @@ async function getArticles(): Promise<Article[]> {
     .select('title, slug, category, excerpt, published_at, read_time_minutes, cover_image_url')
     .eq('status', 'published')
     .eq('featured_homepage', true)
+    .neq('category', 'Insider Voice')
     .order('published_at', { ascending: false })
     .limit(8)
 
@@ -55,6 +57,7 @@ async function getArticles(): Promise<Article[]> {
     .from('bloglux_articles')
     .select('title, slug, category, excerpt, published_at, read_time_minutes, cover_image_url')
     .eq('status', 'published')
+    .neq('category', 'Insider Voice')
     .order('published_at', { ascending: false })
     .limit(8)
 
