@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
     // Legacy: bloglux_articles with category='Insider Voice'
     let legacyQuery = supabase
       .from('bloglux_articles')
-      .select('id, slug, title, excerpt, body, author_name, author_role, cover_image_url, external_link, status, created_at, content_origin')
+      .select('id, slug, title, excerpt, body, author_name, author_role, cover_image_url, status, created_at, content_origin')
       .eq('category', 'Insider Voice')
       .is('deleted_at', null)
       .order('created_at', { ascending: false })
@@ -326,7 +326,6 @@ export async function POST(req: NextRequest) {
             author_name: iv.author_name || null,
             author_role: iv.author_role || null,
             cover_image_url: iv.cover_image_url || null,
-            external_link: iv.external_link || null,
             status: 'published',
             content_origin: 'contributed',
             submitted_at: updated.created_at,
