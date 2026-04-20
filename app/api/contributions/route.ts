@@ -15,6 +15,7 @@ const POINTS_MAP: Record<string, number> = {
   wikilux_insight: 5,
   salary_data: 10,
   interview_experience: 10,
+  insider_voice: 5,
 }
 
 // GET /api/contributions | list contributions
@@ -155,6 +156,24 @@ export async function POST(req: NextRequest) {
           outcome: contributionData.outcome || null,
           difficulty: contributionData.difficulty || null,
           overall_experience: contributionData.overall_experience || null,
+        })
+      detailError = error
+    } else if (contribution_type === 'insider_voice') {
+      if (!contributionData.title || !contributionData.excerpt || !contributionData.body) {
+        await supabase.from('contributions').delete().eq('id', contribution.id)
+        return NextResponse.json({ error: 'Missing required fields: title, excerpt, body' }, { status: 400 })
+      }
+      const { error } = await supabase
+        .from('insider_voices')
+        .insert({
+          contribution_id: contribution.id,
+          title: contributionData.title,
+          excerpt: contributionData.excerpt,
+          body: contributionData.body,
+          author_name: contributionData.author_name || null,
+          author_role: contributionData.author_role || null,
+          cover_image_url: contributionData.cover_image_url || null,
+          external_link: contributionData.external_link || null,
         })
       detailError = error
     }

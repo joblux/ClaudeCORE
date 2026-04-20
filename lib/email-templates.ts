@@ -592,6 +592,7 @@ export function contributionSubmittedEmail(params: {
     wikilux_insight: 'brand insight',
     salary_data: 'salary data',
     interview_experience: 'interview experience',
+    insider_voice: 'insider voice',
   }
   const typeLabel = typeLabels[params.contributionType] || 'contribution'
   const greeting = params.firstName ? `${params.firstName},` : ''
@@ -615,6 +616,7 @@ export function contributionApprovedEmail(params: {
     wikilux_insight: 'brand insight',
     salary_data: 'salary data',
     interview_experience: 'interview experience',
+    insider_voice: 'insider voice',
   }
   const typeLabel = typeLabels[params.contributionType] || 'contribution'
   const greeting = params.firstName ? `${params.firstName},` : ''
@@ -638,6 +640,7 @@ export function contributionRejectedEmail(params: {
     wikilux_insight: 'brand insight',
     salary_data: 'salary data',
     interview_experience: 'interview experience',
+    insider_voice: 'insider voice',
   }
   const typeLabel = typeLabels[params.contributionType] || 'contribution'
   const greeting = params.firstName ? `${params.firstName},` : ''
@@ -878,6 +881,7 @@ export function adminNewContributionEmail(params: {
     wikilux_insight: 'Brand Insight',
     salary_data: 'Salary Data',
     interview_experience: 'Interview Experience',
+    insider_voice: 'Insider Voice',
   }
   const typeLabel = typeLabels[params.contributionType] || params.contributionType
   const html = adminLayout([
