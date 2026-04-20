@@ -60,7 +60,7 @@ export default async function HomePage() {
     // Insights articles
     supabase
       .from('bloglux_articles')
-      .select('slug, title, category, read_time_minutes, published_at')
+      .select('slug, title, category, read_time_minutes, published_at, cover_image_url')
       .eq('status', 'published')
       .is('deleted_at', null)
       .neq('category', 'Insider Voice')

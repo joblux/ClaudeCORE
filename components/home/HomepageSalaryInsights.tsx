@@ -15,6 +15,12 @@ interface Article {
   category: string | null
   read_time_minutes: number | null
   published_at: string | null
+  cover_image_url: string | null
+}
+
+function formatDate(d: string | null): string {
+  if (!d) return ''
+  return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
 function formatSalary(min: number, max: number, currency: string): string {
@@ -24,7 +30,7 @@ function formatSalary(min: number, max: number, currency: string): string {
   return `${symbol}${fmtMin}K \u2013 ${symbol}${fmtMax}K`
 }
 
-export function HomepageSalaryInsights({ salaries }: { salaries: Salary[]; articles: Article[] }) {
+export function HomepageSalaryInsights({ salaries, articles }: { salaries: Salary[]; articles: Article[] }) {
   return (
     <section style={{ padding: '44px 0', borderTop: '0.5px solid #2b2b2b' }}>
       <div style={{ maxWidth: 1220, margin: '0 auto', padding: '0 28px' }}>
@@ -66,6 +72,55 @@ export function HomepageSalaryInsights({ salaries }: { salaries: Salary[]; artic
           </Link>
           <p style={{ fontSize: 12, color: '#888' }}>Anonymous. Verified. 30 seconds.</p>
         </div>
+
+        {articles.length > 0 && (
+          <div style={{ marginTop: 40 }}>
+            {/* Eyebrow + All link (mirrors /insights LATEST INTELLIGENCE framing + salary block CTA pattern) */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <span style={{ fontSize: 9, fontWeight: 500, letterSpacing: '1.5px', color: '#777', textTransform: 'uppercase' }}>
+                Latest Insights
+              </span>
+              <div style={{ flex: 1, height: 1, background: '#222' }} />
+              <Link href="/insights" style={{ fontSize: 12, color: '#a58e28', textDecoration: 'none' }}>
+                All insights &rarr;
+              </Link>
+            </div>
+
+            {/* 3-card grid (mirrors /insights latest-intelligence pattern) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {articles.map(article => (
+                <Link key={article.slug} href={`/insights/${article.slug}`} className="group cursor-pointer">
+                  <div className="bg-[#222] border border-[#2a2a2a] rounded-lg h-44 mb-3 overflow-hidden relative">
+                    {article.cover_image_url && (
+                      <img
+                        src={article.cover_image_url}
+                        alt={article.title}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    )}
+                  </div>
+                  {article.category && (
+                    <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-1 uppercase">
+                      {article.category}
+                    </div>
+                  )}
+                  <h3
+                    className="text-sm font-normal text-[#e0e0e0] leading-snug mb-2 group-hover:text-white transition-colors"
+                    style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}
+                  >
+                    {article.title}
+                  </h3>
+                  <div className="flex gap-2 text-[11px] text-[#999]">
+                    {article.published_at && <span>{formatDate(article.published_at)}</span>}
+                    {article.published_at && article.read_time_minutes && <span>&middot;</span>}
+                    {article.read_time_minutes && <span>{article.read_time_minutes} min read</span>}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   )
