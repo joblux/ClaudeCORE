@@ -107,35 +107,35 @@ function VoicesTab() {
   const [revisionNote, setRevisionNote] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
-  const doDelete = async (id: string) => {
+  const doDelete = async (id: string, source: string) => {
     setActioning(id)
     await fetch('/api/admin/contributions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'delete', type: 'voices', id }),
+      body: JSON.stringify({ action: 'delete', type: 'voices', id, source }),
     })
     setActioning(null)
     setDeleteTarget(null)
     fetch_()
   }
 
-  const approve = async (id: string) => {
+  const approve = async (id: string, source: string) => {
     setActioning(id)
     await fetch('/api/admin/contributions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'approve', type: 'voices', id }),
+      body: JSON.stringify({ action: 'approve', type: 'voices', id, source }),
     })
     setActioning(null)
     fetch_()
   }
 
-  const requestRevision = async (id: string) => {
+  const requestRevision = async (id: string, source: string) => {
     setActioning(id)
     await fetch('/api/admin/contributions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'revision', type: 'voices', id, note: revisionNote }),
+      body: JSON.stringify({ action: 'revision', type: 'voices', id, note: revisionNote, source }),
     })
     setActioning(null)
     setRevisionTarget(null)
@@ -143,12 +143,12 @@ function VoicesTab() {
     fetch_()
   }
 
-  const reject = async (id: string) => {
+  const reject = async (id: string, source: string) => {
     setActioning(id)
     await fetch('/api/admin/contributions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'reject', type: 'voices', id, note: rejectNote }),
+      body: JSON.stringify({ action: 'reject', type: 'voices', id, note: rejectNote, source }),
     })
     setActioning(null)
     setRejectTarget(null)
@@ -209,12 +209,14 @@ function VoicesTab() {
                   </button>
                   {['draft', 'submitted', 'review'].includes(item.status) && (
                     <>
-                      <button onClick={() => approve(item.id)} disabled={actioning === item.id} style={{ padding: '5px 12px', fontSize: 11, border: 'none', borderRadius: 5, background: '#1D9E75', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
+                      <button onClick={() => approve(item.id, item.source)} disabled={actioning === item.id} style={{ padding: '5px 12px', fontSize: 11, border: 'none', borderRadius: 5, background: '#1D9E75', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
                         {actioning === item.id ? '...' : 'Publish'}
                       </button>
-                      <button onClick={() => setRevisionTarget(item.id)} style={{ padding: '5px 12px', fontSize: 11, border: '1px solid #e8e8e8', borderRadius: 5, background: '#fff', color: '#e68a00', cursor: 'pointer', fontWeight: 600 }}>
-                        Revise
-                      </button>
+                      {item.source !== 'contribution' && (
+                        <button onClick={() => setRevisionTarget(item.id)} style={{ padding: '5px 12px', fontSize: 11, border: '1px solid #e8e8e8', borderRadius: 5, background: '#fff', color: '#e68a00', cursor: 'pointer', fontWeight: 600 }}>
+                          Revise
+                        </button>
+                      )}
                       <button onClick={() => setRejectTarget(item.id)} style={{ padding: '5px 12px', fontSize: 11, border: '1px solid #fecaca', borderRadius: 5, background: '#fef2f2', color: '#dc2626', cursor: 'pointer', fontWeight: 600 }}>
                         Reject
                       </button>
@@ -261,7 +263,7 @@ function VoicesTab() {
                     style={{ width: '100%', padding: '8px 10px', fontSize: 12, border: '1px solid #e8e2d8', borderRadius: 5, background: '#fff', color: '#111', outline: 'none', resize: 'vertical', minHeight: 60, boxSizing: 'border-box' }}
                   />
                   <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                    <button onClick={() => requestRevision(item.id)} disabled={actioning === item.id} style={{ padding: '6px 14px', fontSize: 12, border: 'none', borderRadius: 5, background: '#e68a00', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
+                    <button onClick={() => requestRevision(item.id, item.source)} disabled={actioning === item.id} style={{ padding: '6px 14px', fontSize: 12, border: 'none', borderRadius: 5, background: '#e68a00', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
                       {actioning === item.id ? '...' : 'Request Revision'}
                     </button>
                     <button onClick={() => { setRevisionTarget(null); setRevisionNote('') }} style={{ padding: '6px 14px', fontSize: 12, border: '1px solid #e8e8e8', borderRadius: 5, background: '#fff', color: '#666', cursor: 'pointer' }}>
@@ -282,7 +284,7 @@ function VoicesTab() {
                     style={{ width: '100%', padding: '8px 10px', fontSize: 12, border: '1px solid #fecaca', borderRadius: 5, background: '#fff', color: '#111', outline: 'none', resize: 'vertical', minHeight: 60, boxSizing: 'border-box' }}
                   />
                   <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                    <button onClick={() => reject(item.id)} disabled={actioning === item.id} style={{ padding: '6px 14px', fontSize: 12, border: 'none', borderRadius: 5, background: '#dc2626', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
+                    <button onClick={() => reject(item.id, item.source)} disabled={actioning === item.id} style={{ padding: '6px 14px', fontSize: 12, border: 'none', borderRadius: 5, background: '#dc2626', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
                       {actioning === item.id ? '...' : 'Confirm Reject'}
                     </button>
                     <button onClick={() => { setRejectTarget(null); setRejectNote('') }} style={{ padding: '6px 14px', fontSize: 12, border: '1px solid #e8e8e8', borderRadius: 5, background: '#fff', color: '#666', cursor: 'pointer' }}>
@@ -294,7 +296,7 @@ function VoicesTab() {
 
               {/* Delete confirmation inline */}
               {deleteTarget === item.id && (
-                <DeleteConfirmInline id={item.id} actioning={actioning} onConfirm={() => doDelete(item.id)} onCancel={() => setDeleteTarget(null)} />
+                <DeleteConfirmInline id={item.id} actioning={actioning} onConfirm={() => doDelete(item.id, item.source)} onCancel={() => setDeleteTarget(null)} />
               )}
             </div>
           ))}

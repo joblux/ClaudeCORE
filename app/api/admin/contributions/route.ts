@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { sendEmail } from '@/lib/ses'
+import { contributionApprovedEmail, contributionRejectedEmail } from '@/lib/email-templates'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,6 +11,14 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .substring(0, 80)
+}
 
 // ── GET: fetch contributions by type ────────────────────────────────────────
 export async function GET(req: NextRequest) {
@@ -23,15 +33,16 @@ export async function GET(req: NextRequest) {
 
   // ── Pending counts for tab badges ─────────────────────────────────────────
   if (type === 'counts') {
-    const [voices, salary, interviews, brand] = await Promise.all([
+    const [voicesLegacy, voicesCanonical, salary, interviews, brand] = await Promise.all([
       supabase.from('bloglux_articles').select('id', { count: 'exact', head: true }).eq('category', 'Insider Voice').in('status', ['draft', 'submitted', 'review']).is('deleted_at', null),
+      supabase.from('contributions').select('id', { count: 'exact', head: true }).eq('contribution_type', 'insider_voice').eq('status', 'pending').is('deleted_at', null),
       supabase.from('contributions').select('id', { count: 'exact', head: true }).eq('contribution_type', 'salary_data').eq('status', 'pending').is('deleted_at', null),
       supabase.from('contributions').select('id', { count: 'exact', head: true }).eq('contribution_type', 'interview_experience').eq('status', 'pending').is('deleted_at', null),
       supabase.from('brand_contributions').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     ])
     return NextResponse.json({
       counts: {
-        voices: voices.count || 0,
+        voices: (voicesLegacy.count || 0) + (voicesCanonical.count || 0),
         salary: salary.count || 0,
         interviews: interviews.count || 0,
         brand: brand.count || 0,
@@ -41,18 +52,58 @@ export async function GET(req: NextRequest) {
 
   // ── Insider Voices ────────────────────────────────────────────────────────
   if (type === 'voices') {
-    let query = supabase
+    // Legacy: bloglux_articles with category='Insider Voice'
+    let legacyQuery = supabase
       .from('bloglux_articles')
-      .select('id, slug, title, excerpt, body, author_name, author_role, cover_image_url, status, created_at, content_origin')
+      .select('id, slug, title, excerpt, body, author_name, author_role, cover_image_url, external_link, status, created_at, content_origin')
       .eq('category', 'Insider Voice')
       .is('deleted_at', null)
       .order('created_at', { ascending: false })
 
-    if (status !== 'all') query = query.eq('status', status)
+    if (status !== 'all') legacyQuery = legacyQuery.eq('status', status)
 
-    const { data, error } = await query
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    return NextResponse.json({ items: data || [] })
+    const { data: legacyRows, error: legacyError } = await legacyQuery
+    if (legacyError) return NextResponse.json({ error: legacyError.message }, { status: 500 })
+
+    // Canonical: contributions + insider_voices (no member join — UI reads neither)
+    const { data: canonicalRows, error: canonicalError } = await supabase
+      .from('contributions')
+      .select('id, status, created_at, insider_voices(title, excerpt, body, author_name, author_role, cover_image_url, external_link)')
+      .eq('contribution_type', 'insider_voice')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
+
+    if (canonicalError) return NextResponse.json({ error: canonicalError.message }, { status: 500 })
+
+    const legacy = (legacyRows || []).map((r: any) => ({ ...r, source: 'legacy' as const }))
+
+    const canonical = (canonicalRows || [])
+      .map((c: any) => {
+        const iv = Array.isArray(c.insider_voices) ? c.insider_voices[0] : c.insider_voices
+        const normalizedStatus = c.status === 'pending' ? 'submitted' : c.status
+        return {
+          id: c.id,
+          slug: null,
+          title: iv?.title || '(Untitled)',
+          excerpt: iv?.excerpt || null,
+          body: iv?.body || null,
+          author_name: iv?.author_name || null,
+          author_role: iv?.author_role || null,
+          cover_image_url: iv?.cover_image_url || null,
+          external_link: iv?.external_link || null,
+          status: normalizedStatus,
+          created_at: c.created_at,
+          content_origin: 'contributed',
+          source: 'contribution' as const,
+        }
+      })
+      .filter((r: any) => status === 'all' || r.status === status)
+
+    const items = [...legacy, ...canonical].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
+
+    return NextResponse.json({ items })
   }
 
   // ── Salary ────────────────────────────────────────────────────────────────
@@ -134,41 +185,193 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { action, type, id, note } = await req.json()
+  const { action, type, id, note, source } = await req.json()
   const adminId = (session.user as any)?.memberId
   const now = new Date().toISOString()
 
   // ── Insider Voices ────────────────────────────────────────────────────────
   if (type === 'voices') {
-    if (action === 'delete') {
-      const { error } = await supabase
-        .from('bloglux_articles')
-        .update({ deleted_at: now, deleted_by: adminId || null })
-        .eq('id', id)
-        .is('deleted_at', null)
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-      return NextResponse.json({ ok: true, deleted: true })
+    // Backward-compat: missing source means legacy (current UI behavior)
+    const voiceSource = source || 'legacy'
+
+    // ── LEGACY (bloglux_articles) — existing logic, unchanged ─────────────
+    if (voiceSource === 'legacy') {
+      if (action === 'delete') {
+        const { error } = await supabase
+          .from('bloglux_articles')
+          .update({ deleted_at: now, deleted_by: adminId || null })
+          .eq('id', id)
+          .is('deleted_at', null)
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+        return NextResponse.json({ ok: true, deleted: true })
+      }
+      if (action === 'approve') {
+        const { error } = await supabase
+          .from('bloglux_articles')
+          .update({ status: 'published', published_at: now, reviewed_by: adminId, reviewed_at: now })
+          .eq('id', id)
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      } else if (action === 'revision') {
+        const { error } = await supabase
+          .from('bloglux_articles')
+          .update({ status: 'revision_requested', revision_note: note || null, reviewed_by: adminId, reviewed_at: now })
+          .eq('id', id)
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      } else {
+        const { error } = await supabase
+          .from('bloglux_articles')
+          .update({ status: 'rejected', reviewed_by: adminId, reviewed_at: now, admin_notes: note || null })
+          .eq('id', id)
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      return NextResponse.json({ ok: true })
     }
-    if (action === 'approve') {
-      const { error } = await supabase
-        .from('bloglux_articles')
-        .update({ status: 'published', published_at: now, reviewed_by: adminId, reviewed_at: now })
-        .eq('id', id)
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    } else if (action === 'revision') {
-      const { error } = await supabase
-        .from('bloglux_articles')
-        .update({ status: 'revision_requested', revision_note: note || null, reviewed_by: adminId, reviewed_at: now })
-        .eq('id', id)
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    } else {
-      const { error } = await supabase
-        .from('bloglux_articles')
-        .update({ status: 'rejected', reviewed_by: adminId, reviewed_at: now, admin_notes: note || null })
-        .eq('id', id)
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // ── CANONICAL (contributions + insider_voices) ────────────────────────
+    if (voiceSource === 'contribution') {
+      // Belt-and-braces: block revision server-side (UI also hides the button)
+      if (action === 'revision') {
+        return NextResponse.json({ error: 'Revision not supported for canonical-path insider voices' }, { status: 400 })
+      }
+
+      if (action === 'delete') {
+        // Soft-delete parent only; insider_voices detail stays (CASCADE only fires on hard delete)
+        const { error } = await supabase
+          .from('contributions')
+          .update({ deleted_at: now, deleted_by: adminId || null })
+          .eq('id', id)
+          .eq('contribution_type', 'insider_voice')
+          .is('deleted_at', null)
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+        return NextResponse.json({ ok: true, deleted: true })
+      }
+
+      if (action === 'reject') {
+        const { data: rejected, error } = await supabase
+          .from('contributions')
+          .update({ status: 'rejected', reviewed_by: adminId, reviewed_at: now, rejection_reason: note || null })
+          .eq('id', id)
+          .eq('contribution_type', 'insider_voice')
+          .select('member_id')
+          .maybeSingle()
+
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+        if (rejected?.member_id) {
+          const { data: memberData } = await supabase
+            .from('members')
+            .select('email, first_name')
+            .eq('id', rejected.member_id)
+            .maybeSingle()
+
+          if (memberData?.email) {
+            const { html, text } = contributionRejectedEmail({
+              firstName: memberData.first_name,
+              contributionType: 'insider_voice',
+              reason: note || undefined,
+            })
+            sendEmail({
+              to: memberData.email,
+              subject: 'Update on your contribution',
+              body: text,
+              bodyHtml: html,
+            }).catch(() => {})
+          }
+        }
+
+        return NextResponse.json({ ok: true })
+      }
+
+      if (action === 'approve') {
+        // 1. Flip contributions.status to 'approved'
+        const { data: updated, error: updateError } = await supabase
+          .from('contributions')
+          .update({ status: 'approved', reviewed_by: adminId, reviewed_at: now })
+          .eq('id', id)
+          .eq('contribution_type', 'insider_voice')
+          .select('member_id, created_at')
+          .maybeSingle()
+
+        if (updateError || !updated) {
+          return NextResponse.json({ error: updateError?.message || 'Contribution not found' }, { status: 500 })
+        }
+
+        // 2. Fetch the insider_voices detail row
+        const { data: iv, error: ivError } = await supabase
+          .from('insider_voices')
+          .select('title, excerpt, body, author_name, author_role, cover_image_url, external_link')
+          .eq('contribution_id', id)
+          .maybeSingle()
+
+        if (ivError || !iv) {
+          await supabase.from('contributions').update({ status: 'pending', reviewed_by: null, reviewed_at: null }).eq('id', id)
+          return NextResponse.json({ error: ivError?.message || 'Insider voice detail not found' }, { status: 500 })
+        }
+
+        // 3. Materialize bloglux_articles row (slug pattern mirrors legacy submit-voice)
+        //    B2c will handle contributor-side slug resolution (my-voices lookup).
+        const slug = `${slugify(iv.title)}-${Date.now().toString(36)}`
+        const wordCount = (iv.body || '').split(/\s+/).filter(Boolean).length
+        const readTime = Math.max(1, Math.ceil(wordCount / 200))
+
+        const { error: insertError } = await supabase
+          .from('bloglux_articles')
+          .insert({
+            slug,
+            title: iv.title,
+            excerpt: iv.excerpt,
+            body: iv.body,
+            category: 'Insider Voice',
+            author_id: updated.member_id,
+            author_name: iv.author_name || null,
+            author_role: iv.author_role || null,
+            cover_image_url: iv.cover_image_url || null,
+            external_link: iv.external_link || null,
+            status: 'published',
+            content_origin: 'contributed',
+            submitted_at: updated.created_at,
+            published_at: now,
+            reviewed_by: adminId,
+            reviewed_at: now,
+            read_time_minutes: readTime,
+            meta_title: iv.title,
+            meta_description: iv.excerpt,
+            created_at: now,
+            updated_at: now,
+          })
+
+        if (insertError) {
+          await supabase.from('contributions').update({ status: 'pending', reviewed_by: null, reviewed_at: null }).eq('id', id)
+          return NextResponse.json({ error: insertError.message }, { status: 500 })
+        }
+
+        // 4. Send approval email to contributor
+        const { data: memberData } = await supabase
+          .from('members')
+          .select('email, first_name')
+          .eq('id', updated.member_id)
+          .maybeSingle()
+
+        if (memberData?.email) {
+          const { html, text } = contributionApprovedEmail({
+            firstName: memberData.first_name,
+            contributionType: 'insider_voice',
+          })
+          sendEmail({
+            to: memberData.email,
+            subject: 'Your contribution is now live',
+            body: text,
+            bodyHtml: html,
+          }).catch(() => {})
+        }
+
+        return NextResponse.json({ ok: true })
+      }
+
+      return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
     }
-    return NextResponse.json({ ok: true })
+
+    return NextResponse.json({ error: 'Unknown source' }, { status: 400 })
   }
 
   // ── Salary ────────────────────────────────────────────────────────────────
