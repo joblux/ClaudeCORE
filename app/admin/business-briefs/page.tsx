@@ -16,9 +16,10 @@ type BusinessBrief = {
 }
 
 const statusBadge: Record<string, { bg: string; text: string }> = {
-  new:          { bg: '#e3f2fd', text: '#1565c0' },
   under_review: { bg: '#fff8e1', text: '#f57f17' },
-  closed:       { bg: '#f5f5f5', text: '#757575' },
+  accepted:     { bg: '#e3f2fd', text: '#1565c0' },
+  in_progress:  { bg: '#ede7f6', text: '#5e35b1' },
+  completed:    { bg: '#e8f5e9', text: '#2e7d32' },
 }
 
 function formatDate(dateStr: string | null): string {
@@ -72,7 +73,7 @@ export default async function AdminBusinessBriefsPage() {
               </thead>
               <tbody>
                 {rows.map(b => {
-                  const badge = statusBadge[b.status] || statusBadge.new
+                  const badge = statusBadge[b.status] || statusBadge.under_review
                   return (
                     <tr key={b.id} style={{ borderBottom: '1px solid #e8e8e8' }}>
                       <td style={{ padding: '12px', color: '#111', fontWeight: 500 }}>

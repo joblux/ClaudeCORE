@@ -345,6 +345,57 @@ export function briefReceivedEmail(params: {
   }
 }
 
+export function briefAcceptedEmail(params: {
+  firstName: string
+  companyName: string
+}): EmailContent & { subject: string } {
+  const html = layout({
+    content: [
+      p(`${params.firstName}, your brief regarding ${params.companyName} has been accepted. We will be in touch shortly to discuss the mandate and confirm next steps.`),
+    ].join(''),
+    reason: 'You received this because you submitted a search brief.',
+  })
+  return {
+    subject: 'Your brief has been accepted',
+    html,
+    text: `${params.firstName}, your brief regarding ${params.companyName} has been accepted. We will be in touch shortly to discuss the mandate and confirm next steps.\n\nJOBLUX LLC · Luxury Talent Intelligence`,
+  }
+}
+
+export function briefInProgressEmail(params: {
+  firstName: string
+  companyName: string
+}): EmailContent & { subject: string } {
+  const html = layout({
+    content: [
+      p(`${params.firstName}, the search for ${params.companyName} is now underway. Our team is identifying suitable candidates and will keep you informed as the process advances.`),
+    ].join(''),
+    reason: 'You received this because you submitted a search brief.',
+  })
+  return {
+    subject: 'Your search is in progress',
+    html,
+    text: `${params.firstName}, the search for ${params.companyName} is now underway. Our team is identifying suitable candidates and will keep you informed as the process advances.\n\nJOBLUX LLC · Luxury Talent Intelligence`,
+  }
+}
+
+export function briefCompletedEmail(params: {
+  firstName: string
+  companyName: string
+}): EmailContent & { subject: string } {
+  const html = layout({
+    content: [
+      p(`${params.firstName}, the search for ${params.companyName} has been completed. We will follow up with a full summary and next steps in a separate communication.`),
+    ].join(''),
+    reason: 'You received this because you submitted a search brief.',
+  })
+  return {
+    subject: 'Your search is complete',
+    html,
+    text: `${params.firstName}, the search for ${params.companyName} has been completed. We will follow up with a full summary and next steps in a separate communication.\n\nJOBLUX LLC · Luxury Talent Intelligence`,
+  }
+}
+
 export function searchUpdateEmail(params: {
   firstName?: string
   roleTitle: string

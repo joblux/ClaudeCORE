@@ -219,7 +219,7 @@ export default function BusinessDashboard() {
   const initials = [firstName, lastName].filter(Boolean).map(n => n[0]).join('').toUpperCase() || 'E'
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 
-  const activeBriefsCount = myBriefs.filter(b => b.status !== 'closed').length
+  const activeBriefsCount = myBriefs.filter(b => b.status !== 'completed').length
 
   const handleSendInvite = async () => {
     setInviteMsg('')

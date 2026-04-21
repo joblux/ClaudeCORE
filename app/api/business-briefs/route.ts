@@ -71,7 +71,7 @@ export async function POST(req: Request) {
       contact_role: body.contact_role?.trim() || null,
       preferred_follow_up: body.preferred_follow_up,
       best_timing: body.best_timing?.trim() || null,
-      status: 'new',
+      status: 'under_review',
       created_by: createdBy,
     }
 
