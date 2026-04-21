@@ -237,7 +237,7 @@ function JoinContent() {
         ) : (
           <>
             <form onSubmit={handleMagicLink} className="flex flex-col items-center">
-              <label htmlFor="email" className="block text-[10px] text-white uppercase tracking-widest mb-2 font-medium self-start">
+              <label htmlFor="email" className="block text-[10px] text-white uppercase tracking-widest mb-2 font-medium">
                 Email address
               </label>
               <input
@@ -254,7 +254,7 @@ function JoinContent() {
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-[#2e2e2e]" />
               </div>
-              <div className="relative flex justify-start">
+              <div className="relative flex justify-center">
                 <span className="bg-[#1e1e1e] px-4 text-[#999] uppercase tracking-widest" style={{ fontSize: '9px' }}>or</span>
               </div>
             </div>
