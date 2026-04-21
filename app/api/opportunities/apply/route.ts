@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { sendEmail } from '@/lib/ses'
-import { applicationConfirmationEmail, adminNewApplicationEmail, ADMIN_ALERT_EMAIL } from '@/lib/email-templates'
+import { applicationConfirmationEmail, adminNewApplicationEmail, RECRUITING_ALERT_EMAIL } from '@/lib/email-templates'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
       assignmentTitle,
     })
     sendEmail({
-      to: ADMIN_ALERT_EMAIL,
+      to: RECRUITING_ALERT_EMAIL,
       subject: `New application: ${memberInfo?.full_name || 'Member'} for ${assignmentTitle}`,
       body: adminText,
       bodyHtml: adminHtml,

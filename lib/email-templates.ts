@@ -1090,4 +1090,5 @@ export function recruitmentUpdateEmail(params: {
 // Export admin email address
 // ────────────────────────────────────────────
 export const ADMIN_ALERT_EMAIL = ADMIN_EMAIL
+export const RECRUITING_ALERT_EMAIL = 'alex@joblux.com'
 // v2

@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/ses'
-import { adminNewBriefEmail, briefReceivedEmail } from '@/lib/email-templates'
+import { adminNewBriefEmail, briefReceivedEmail, RECRUITING_ALERT_EMAIL } from '@/lib/email-templates'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
       summary: record.brief_summary,
     })
     await sendEmail({
-      to: 'alex@joblux.com',
+      to: RECRUITING_ALERT_EMAIL,
       subject: `New Business Brief — ${record.company_name}`,
       body: admin.text,
       bodyHtml: admin.html,
