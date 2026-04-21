@@ -25,6 +25,11 @@ const MailIcon = () => (
   </svg>
 );
 
+const formatProvider = (p: string | null) => {
+  if (!p) return "another method";
+  return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase();
+};
+
 function JoinContent() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,6 +37,7 @@ function JoinContent() {
   const [mode] = useState<"request" | "signin">("request");
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const provider = searchParams.get("provider");
   const ref = searchParams.get("ref");
   const { data: session, status, update } = useSession();
   const router = useRouter();
@@ -183,7 +189,12 @@ function JoinContent() {
             This email is already associated with another sign-in method.
           </div>
         )}
-        {error && error !== "pending" && error !== "rejected" && error !== "OAuthCallback" && error !== "OAuthAccountNotLinked" && (
+        {error === "EmailOnOAuthAccount" && (
+          <div className="mb-5 p-3 bg-[#1a0f0f] border border-[#3a2020] rounded text-[12px] text-[#d47878]">
+            This account was created with {formatProvider(provider)}. Please continue with {formatProvider(provider)}.
+          </div>
+        )}
+        {error && error !== "pending" && error !== "rejected" && error !== "OAuthCallback" && error !== "OAuthAccountNotLinked" && error !== "EmailOnOAuthAccount" && (
           <div className="mb-5 p-3 bg-[#1a0f0f] border border-[#3a2020] rounded text-[12px] text-[#d47878]">
             Something went wrong. Please try again.
           </div>

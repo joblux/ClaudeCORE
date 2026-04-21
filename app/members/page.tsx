@@ -5,12 +5,18 @@ import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
+const formatProvider = (p: string | null) => {
+  if (!p) return "another method";
+  return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase();
+};
+
 function SignInContent() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const provider = searchParams.get("provider");
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +53,12 @@ function SignInContent() {
           This email is already associated with another sign-in method.
         </div>
       )}
-      {error && error !== "pending" && error !== "rejected" && error !== "inactivity" && error !== "OAuthAccountNotLinked" && (
+      {error === "EmailOnOAuthAccount" && (
+        <div className="mb-6 p-4 bg-[#fde8e8] border border-[#e8c0c0] rounded-sm text-sm text-[#1a1a1a]">
+          This account was created with {formatProvider(provider)}. Please continue with {formatProvider(provider)}.
+        </div>
+      )}
+      {error && error !== "pending" && error !== "rejected" && error !== "inactivity" && error !== "OAuthAccountNotLinked" && error !== "EmailOnOAuthAccount" && (
         <div className="mb-6 p-4 bg-[#fde8e8] border border-[#e8c0c0] rounded-sm text-sm text-[#1a1a1a]">
           Something went wrong. Please try again.
         </div>

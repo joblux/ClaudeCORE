@@ -75,6 +75,18 @@ export const authOptions: NextAuthOptions = {
         .select("id, status, role")
         .eq("email", user.email)
         .single();
+      if (account?.provider === "email" && member) {
+        const { data: existingProviders } = await supabaseAdmin
+          .from("nextauth_accounts")
+          .select("provider")
+          .eq("member_id", member.id)
+          .neq("provider", "email");
+
+        if (existingProviders && existingProviders.length > 0) {
+          const conflictProvider = existingProviders[0].provider;
+          return `/join?error=EmailOnOAuthAccount&provider=${encodeURIComponent(conflictProvider)}`;
+        }
+      }
       if (member) {
         if (member.status === "approved" || member.role === "admin") return true;
         if (member.status === "pending") return true;
