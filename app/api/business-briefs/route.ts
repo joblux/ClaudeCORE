@@ -104,12 +104,28 @@ export async function POST(req: Request) {
       firstName,
       companyName: record.company_name,
     })
-    await sendEmail({
-      to: record.contact_email,
-      subject: 'Your brief has been received',
-      body: user.text,
-      bodyHtml: user.html,
-    })
+    let accountHolderEmail: string | null = null
+    if (createdBy) {
+      const { data: holder } = await supabaseAdmin
+        .from('members')
+        .select('email')
+        .eq('id', createdBy)
+        .maybeSingle()
+      accountHolderEmail = holder?.email ?? null
+    }
+    const recipients = Array.from(new Set(
+      [record.contact_email, accountHolderEmail]
+        .filter((e): e is string => typeof e === 'string' && e.length > 0)
+        .map(e => e.trim().toLowerCase())
+    ))
+    for (const to of recipients) {
+      await sendEmail({
+        to,
+        subject: 'Your brief has been received',
+        body: user.text,
+        bodyHtml: user.html,
+      })
+    }
 
     return NextResponse.json({ success: true })
   } catch (err: any) {

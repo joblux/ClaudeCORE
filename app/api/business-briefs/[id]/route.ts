@@ -78,14 +78,29 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       if (status === 'accepted')    content = briefAcceptedEmail(params)
       if (status === 'in_progress') content = briefInProgressEmail(params)
       if (status === 'completed')   content = briefCompletedEmail(params)
-      const recipientEmail = data.contact_email
-      if (content && recipientEmail) {
-        await sendEmail({
-          to: recipientEmail,
-          subject: content.subject,
-          body: content.text,
-          bodyHtml: content.html,
-        })
+      let accountHolderEmail: string | null = null
+      if (data.created_by) {
+        const { data: holder } = await supabaseAdmin
+          .from('members')
+          .select('email')
+          .eq('id', data.created_by)
+          .maybeSingle()
+        accountHolderEmail = holder?.email ?? null
+      }
+      const recipients = Array.from(new Set(
+        [data.contact_email, accountHolderEmail]
+          .filter((e): e is string => typeof e === 'string' && e.length > 0)
+          .map(e => e.trim().toLowerCase())
+      ))
+      if (content && recipients.length > 0) {
+        for (const to of recipients) {
+          await sendEmail({
+            to,
+            subject: content.subject,
+            body: content.text,
+            bodyHtml: content.html,
+          })
+        }
       }
     } catch (e) {
       console.error('brief status email failed:', e)
