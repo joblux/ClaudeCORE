@@ -34,6 +34,7 @@ function JoinContent() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [precheckError, setPrecheckError] = useState<{ provider: string } | null>(null);
   const [mode] = useState<"request" | "signin">("request");
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
@@ -136,6 +137,20 @@ function JoinContent() {
     if (!email) return;
     setIsSubmitting(true);
     try {
+      setPrecheckError(null);
+
+      const preRes = await fetch("/api/auth/check-provider", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const preData = await preRes.json().catch(() => null);
+
+      if (preData?.status === "provider_mismatch" && preData?.provider) {
+        setPrecheckError({ provider: preData.provider });
+        return;
+      }
+
       const tierValue = tier || (typeof window !== "undefined" ? sessionStorage.getItem("joblux_pending_tier") : null);
       const callbackUrl = tierValue ? `/join?pending_tier=${tierValue}` : "/join";
       const result = await signIn("email", { email, redirect: false, callbackUrl });
@@ -198,6 +213,11 @@ function JoinContent() {
         {error === "EmailOnOAuthAccount" && (
           <div className="mb-5 p-3 bg-[#1a0f0f] border border-[#3a2020] rounded text-[12px] text-[#d47878]">
             This account was created with {formatProvider(provider)}. Please continue with {formatProvider(provider)}.
+          </div>
+        )}
+        {precheckError && (
+          <div className="mb-5 p-3 bg-[#1a0f0f] border border-[#3a2020] rounded text-[12px] text-[#d47878]">
+            This account was created with {formatProvider(precheckError.provider)}. Please continue with {formatProvider(precheckError.provider)}.
           </div>
         )}
         {error && error !== "pending" && error !== "rejected" && error !== "OAuthCallback" && error !== "OAuthAccountNotLinked" && error !== "EmailOnOAuthAccount" && (

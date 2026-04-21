@@ -14,6 +14,7 @@ function SignInContent() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [precheckError, setPrecheckError] = useState<{ provider: string } | null>(null);
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const provider = searchParams.get("provider");
@@ -24,6 +25,20 @@ function SignInContent() {
     if (!email) return;
     setIsSubmitting(true);
     try {
+      setPrecheckError(null);
+
+      const preRes = await fetch("/api/auth/check-provider", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const preData = await preRes.json().catch(() => null);
+
+      if (preData?.status === "provider_mismatch" && preData?.provider) {
+        setPrecheckError({ provider: preData.provider });
+        return;
+      }
+
       const result = await signIn("email", { email, redirect: false });
 
       if (result?.url && result.url.includes("?error=")) {
@@ -63,6 +78,11 @@ function SignInContent() {
       {error === "EmailOnOAuthAccount" && (
         <div className="mb-6 p-4 bg-[#fde8e8] border border-[#e8c0c0] rounded-sm text-sm text-[#1a1a1a]">
           This account was created with {formatProvider(provider)}. Please continue with {formatProvider(provider)}.
+        </div>
+      )}
+      {precheckError && (
+        <div className="mb-6 p-4 bg-[#fde8e8] border border-[#e8c0c0] rounded-sm text-sm text-[#1a1a1a]">
+          This account was created with {formatProvider(precheckError.provider)}. Please continue with {formatProvider(precheckError.provider)}.
         </div>
       )}
       {error && error !== "pending" && error !== "rejected" && error !== "inactivity" && error !== "OAuthAccountNotLinked" && error !== "EmailOnOAuthAccount" && (
