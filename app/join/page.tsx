@@ -178,7 +178,12 @@ function JoinContent() {
             Your application was not approved. Contact us for more information.
           </div>
         )}
-        {error && error !== "pending" && error !== "rejected" && error !== "OAuthCallback" && (
+        {error === "OAuthAccountNotLinked" && (
+          <div className="mb-5 p-3 bg-[#1a0f0f] border border-[#3a2020] rounded text-[12px] text-[#d47878]">
+            This email is already associated with another sign-in method.
+          </div>
+        )}
+        {error && error !== "pending" && error !== "rejected" && error !== "OAuthCallback" && error !== "OAuthAccountNotLinked" && (
           <div className="mb-5 p-3 bg-[#1a0f0f] border border-[#3a2020] rounded text-[12px] text-[#d47878]">
             Something went wrong. Please try again.
           </div>

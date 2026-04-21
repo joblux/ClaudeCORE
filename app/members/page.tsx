@@ -42,7 +42,12 @@ function SignInContent() {
           Your application was not approved.
         </div>
       )}
-      {error && error !== "pending" && error !== "rejected" && error !== "inactivity" && (
+      {error === "OAuthAccountNotLinked" && (
+        <div className="mb-6 p-4 bg-[#fde8e8] border border-[#e8c0c0] rounded-sm text-sm text-[#1a1a1a]">
+          This email is already associated with another sign-in method.
+        </div>
+      )}
+      {error && error !== "pending" && error !== "rejected" && error !== "inactivity" && error !== "OAuthAccountNotLinked" && (
         <div className="mb-6 p-4 bg-[#fde8e8] border border-[#e8c0c0] rounded-sm text-sm text-[#1a1a1a]">
           Something went wrong. Please try again.
         </div>
