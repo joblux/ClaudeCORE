@@ -138,7 +138,13 @@ function JoinContent() {
     try {
       const tierValue = tier || (typeof window !== "undefined" ? sessionStorage.getItem("joblux_pending_tier") : null);
       const callbackUrl = tierValue ? `/join?pending_tier=${tierValue}` : "/join";
-      await signIn("email", { email, redirect: false, callbackUrl });
+      const result = await signIn("email", { email, redirect: false, callbackUrl });
+
+      if (result?.url && result.url.includes("?error=")) {
+        router.push(result.url);
+        return;
+      }
+
       setEmailSent(true);
       const refCode = typeof window !== "undefined" ? sessionStorage.getItem("joblux_ref") : null;
       if (refCode) {

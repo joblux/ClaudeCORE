@@ -2,7 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
 const formatProvider = (p: string | null) => {
@@ -17,13 +17,20 @@ function SignInContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const provider = searchParams.get("provider");
+  const router = useRouter();
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
     setIsSubmitting(true);
     try {
-      await signIn("email", { email, redirect: false });
+      const result = await signIn("email", { email, redirect: false });
+
+      if (result?.url && result.url.includes("?error=")) {
+        router.push(result.url);
+        return;
+      }
+
       setEmailSent(true);
     } catch {
     } finally {
