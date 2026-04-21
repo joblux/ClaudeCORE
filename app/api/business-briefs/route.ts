@@ -92,7 +92,7 @@ export async function POST(req: Request) {
       summary: record.brief_summary,
     })
     await sendEmail({
-      to: 'mzaourm@gmail.com',
+      to: 'alex@joblux.com',
       subject: `New Business Brief — ${record.company_name}`,
       body: admin.text,
       bodyHtml: admin.html,
