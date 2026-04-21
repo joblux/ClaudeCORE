@@ -18,7 +18,7 @@
 
 const SITE_URL = 'https://joblux.com'
 const HELP_URL = `${SITE_URL}/faq`
-const ADMIN_EMAIL = 'luxuryistime@gmail.com'
+const ADMIN_EMAIL = 'info@joblux.com'
 
 // ────────────────────────────────────────────
 // Logo SVG (inline gold, footer only)
