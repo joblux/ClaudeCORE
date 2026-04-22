@@ -3,10 +3,13 @@
 import { useState } from 'react'
 
 const STATUS_OPTIONS: { value: string; label: string }[] = [
+  { value: 'new',          label: 'New' },
   { value: 'under_review', label: 'Under review' },
   { value: 'accepted',     label: 'Accepted' },
   { value: 'in_progress',  label: 'In progress' },
   { value: 'completed',    label: 'Completed' },
+  { value: 'closed',       label: 'Closed' },
+  { value: 'archived',     label: 'Archived' },
 ]
 
 export default function StatusControl({ briefId, initialStatus }: { briefId: string; initialStatus: string }) {

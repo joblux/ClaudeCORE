@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import StatusControl from './StatusControl'
+import AdminNotesEditor from './AdminNotesEditor'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,6 +33,14 @@ type BusinessBrief = {
   status: string
   created_by: string | null
   created_at: string
+  admin_notes: string | null
+}
+
+type Submitter = {
+  id: string
+  full_name: string | null
+  email: string | null
+  role: string | null
 }
 
 function fmtDateTime(dateStr: string | null): string {
@@ -104,6 +113,16 @@ export default async function AdminBusinessBriefDetailPage({ params }: { params:
 
   const b = brief as BusinessBrief
 
+  let submitter: Submitter | null = null
+  if (b.created_by) {
+    const { data: m } = await supabaseAdmin
+      .from('members')
+      .select('id, full_name, email, role')
+      .eq('id', b.created_by)
+      .maybeSingle()
+    submitter = m as Submitter | null
+  }
+
   return (
     <div style={{ background: '#fafaf5', minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px 64px' }}>
@@ -123,6 +142,31 @@ export default async function AdminBusinessBriefDetailPage({ params }: { params:
             </div>
           </div>
           <StatusControl briefId={b.id} initialStatus={b.status} />
+        </div>
+
+        <div style={{ ...cardStyle, marginTop: 16 }}>
+          <div style={sectionLabelStyle}>Submitted by</div>
+          {submitter ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+              <Field label="Name" value={submitter.full_name} />
+              <Field label="Email" value={submitter.email} />
+              <Field label="Role" value={submitter.role} />
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{
+                display: 'inline-block', fontSize: 10, fontWeight: 600,
+                letterSpacing: '0.08em', textTransform: 'uppercase',
+                padding: '3px 10px', borderRadius: 3,
+                background: '#fafafa', color: '#888', border: '1px solid #eee',
+              }}>
+                Orphan
+              </span>
+              <span style={{ fontSize: 12, color: '#888' }}>
+                {b.created_by ? 'Submitter UUID does not match any member record.' : 'No submitter identity on this brief.'}
+              </span>
+            </div>
+          )}
         </div>
 
         <div style={{ ...cardStyle, marginTop: 16 }}>
@@ -172,8 +216,13 @@ export default async function AdminBusinessBriefDetailPage({ params }: { params:
           </div>
         </div>
 
+        <div style={{ ...cardStyle, marginTop: 16 }}>
+          <div style={sectionLabelStyle}>Internal notes</div>
+          <AdminNotesEditor briefId={b.id} initialNotes={b.admin_notes} />
+        </div>
+
         <div style={{ fontSize: 12, color: '#aaa', marginTop: 16 }}>
-          Created {fmtDateTime(b.created_at)}{b.created_by ? ` · by ${b.created_by}` : ''}
+          Created {fmtDateTime(b.created_at)}
         </div>
 
       </div>

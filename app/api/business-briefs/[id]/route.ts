@@ -10,7 +10,7 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const ALLOWED_STATUSES = ['under_review', 'accepted', 'in_progress', 'completed'] as const
+const ALLOWED_STATUSES = ['new', 'under_review', 'accepted', 'in_progress', 'completed', 'closed', 'archived'] as const
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions)
@@ -51,14 +51,25 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const status = body?.status
-  if (!status || !ALLOWED_STATUSES.includes(status)) {
+  const rawStatus = body?.status
+  const rawNotes  = body?.admin_notes
+  const hasStatus = typeof rawStatus === 'string'
+  const hasNotes  = typeof rawNotes === 'string'
+
+  if (!hasStatus && !hasNotes) {
+    return NextResponse.json({ error: 'Provide status or admin_notes' }, { status: 400 })
+  }
+  if (hasStatus && !(ALLOWED_STATUSES as readonly string[]).includes(rawStatus)) {
     return NextResponse.json({ error: `Invalid status. Allowed: ${ALLOWED_STATUSES.join(', ')}` }, { status: 400 })
   }
 
+  const update: { status?: string; admin_notes?: string } = {}
+  if (hasStatus) update.status = rawStatus
+  if (hasNotes)  update.admin_notes = rawNotes
+
   const { data, error } = await supabaseAdmin
     .from('business_briefs')
-    .update({ status })
+    .update(update)
     .eq('id', params.id)
     .select('*')
     .maybeSingle()
@@ -70,14 +81,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
-  if (status === 'accepted' || status === 'in_progress' || status === 'completed') {
+  if (hasStatus && (rawStatus === 'accepted' || rawStatus === 'in_progress' || rawStatus === 'completed')) {
     try {
       const firstName = data.contact_name?.split(' ')[0] || data.contact_name
       const params = { firstName, companyName: data.company_name }
       let content
-      if (status === 'accepted')    content = briefAcceptedEmail(params)
-      if (status === 'in_progress') content = briefInProgressEmail(params)
-      if (status === 'completed')   content = briefCompletedEmail(params)
+      if (rawStatus === 'accepted')    content = briefAcceptedEmail(params)
+      if (rawStatus === 'in_progress') content = briefInProgressEmail(params)
+      if (rawStatus === 'completed')   content = briefCompletedEmail(params)
       let accountHolderEmail: string | null = null
       if (data.created_by) {
         const { data: holder } = await supabaseAdmin
