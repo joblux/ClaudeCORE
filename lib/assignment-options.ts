@@ -181,6 +181,7 @@ export const ASSIGNMENT_SOURCES = [
   'Import (JSON)',
   'Import (URL Scrape)',
   'Client Submission',
+  'Brief',
   'API Feed',
 ] as const
 

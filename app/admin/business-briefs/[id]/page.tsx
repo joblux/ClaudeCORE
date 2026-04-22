@@ -5,6 +5,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import StatusControl from './StatusControl'
 import AdminNotesEditor from './AdminNotesEditor'
+import CreateAssignmentFromBrief from './CreateAssignmentFromBrief'
 
 export const dynamic = 'force-dynamic'
 
@@ -123,6 +124,13 @@ export default async function AdminBusinessBriefDetailPage({ params }: { params:
     submitter = m as Submitter | null
   }
 
+  const { count: existingAssignmentCount } = await supabaseAdmin
+    .from('search_assignments')
+    .select('id', { count: 'exact', head: true })
+    .eq('source_brief_id', b.id)
+
+  const showCreateCta = b.status === 'accepted'
+
   return (
     <div style={{ background: '#fafaf5', minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px 64px' }}>
@@ -141,7 +149,12 @@ export default async function AdminBusinessBriefDetailPage({ params }: { params:
               {b.brief_type} · {b.urgency}
             </div>
           </div>
-          <StatusControl briefId={b.id} initialStatus={b.status} />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
+            <StatusControl briefId={b.id} initialStatus={b.status} />
+            {showCreateCta && (
+              <CreateAssignmentFromBrief briefId={b.id} existingCount={existingAssignmentCount ?? 0} />
+            )}
+          </div>
         </div>
 
         <div style={{ ...cardStyle, marginTop: 16 }}>
