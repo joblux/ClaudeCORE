@@ -40,6 +40,23 @@ const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: 'archived',     label: 'Archived' },
 ]
 
+type PresetState = {
+  search: string
+  statusFilter: string
+  companyFilter: string
+  orphanOnly: boolean
+  includeArchived: boolean
+}
+
+const PRESETS: { key: string; label: string; state: PresetState }[] = [
+  { key: 'all_active',   label: 'All active',   state: { search: '', statusFilter: 'all',          companyFilter: 'all', orphanOnly: false, includeArchived: false } },
+  { key: 'new',          label: 'New',          state: { search: '', statusFilter: 'new',          companyFilter: 'all', orphanOnly: false, includeArchived: false } },
+  { key: 'under_review', label: 'Under review', state: { search: '', statusFilter: 'under_review', companyFilter: 'all', orphanOnly: false, includeArchived: false } },
+  { key: 'in_progress',  label: 'In progress',  state: { search: '', statusFilter: 'in_progress',  companyFilter: 'all', orphanOnly: false, includeArchived: false } },
+  { key: 'accepted',     label: 'Accepted',     state: { search: '', statusFilter: 'accepted',     companyFilter: 'all', orphanOnly: false, includeArchived: false } },
+  { key: 'orphans',      label: 'Orphans',      state: { search: '', statusFilter: 'all',          companyFilter: 'all', orphanOnly: true,  includeArchived: false } },
+]
+
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '—'
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -89,6 +106,22 @@ export default function BriefsTable({ rows }: { rows: BriefsTableRow[] }) {
     orphanOnly ||
     includeArchived
 
+  const activePresetKey = PRESETS.find(p =>
+    p.state.search === search.trim() &&
+    p.state.statusFilter === statusFilter &&
+    p.state.companyFilter === companyFilter &&
+    p.state.orphanOnly === orphanOnly &&
+    p.state.includeArchived === includeArchived
+  )?.key ?? null
+
+  function applyPreset(state: PresetState) {
+    setSearch(state.search)
+    setStatusFilter(state.statusFilter)
+    setCompanyFilter(state.companyFilter)
+    setOrphanOnly(state.orphanOnly)
+    setIncludeArchived(state.includeArchived)
+  }
+
   function resetFilters() {
     setSearch('')
     setStatusFilter('all')
@@ -99,6 +132,29 @@ export default function BriefsTable({ rows }: { rows: BriefsTableRow[] }) {
 
   return (
     <div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+        {PRESETS.map(p => {
+          const isActive = activePresetKey === p.key
+          return (
+            <button
+              key={p.key}
+              onClick={() => applyPreset(p.state)}
+              style={{
+                fontSize: 12, fontWeight: isActive ? 600 : 500,
+                padding: '7px 14px',
+                background: isActive ? '#111' : '#fff',
+                color: isActive ? '#fff' : '#111',
+                border: isActive ? '1px solid #111' : '1px solid #e8e8e8',
+                borderRadius: 4, cursor: 'pointer',
+                fontFamily: 'Inter, system-ui, sans-serif',
+              }}
+            >
+              {p.label}
+            </button>
+          )
+        })}
+      </div>
+
       <div style={{
         display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'flex-end',
         padding: '14px 16px', background: '#fff',
