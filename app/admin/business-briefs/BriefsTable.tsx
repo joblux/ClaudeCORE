@@ -61,6 +61,7 @@ export default function BriefsTable({ rows }: { rows: BriefsTableRow[] }) {
   const [statusFilter, setStatusFilter] = useState('all')
   const [companyFilter, setCompanyFilter] = useState('all')
   const [orphanOnly, setOrphanOnly] = useState(false)
+  const [includeArchived, setIncludeArchived] = useState(false)
 
   const companyOptions = useMemo(() => {
     const set = new Set<string>()
@@ -70,26 +71,30 @@ export default function BriefsTable({ rows }: { rows: BriefsTableRow[] }) {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
+    const userWantsArchived = includeArchived || statusFilter === 'archived'
     return rows.filter(r => {
+      if (!userWantsArchived && r.status === 'archived') return false
       if (q && !r.company_name.toLowerCase().includes(q)) return false
       if (statusFilter !== 'all' && r.status !== statusFilter) return false
       if (companyFilter !== 'all' && r.company_name !== companyFilter) return false
       if (orphanOnly && r.submitter !== null) return false
       return true
     })
-  }, [rows, search, statusFilter, companyFilter, orphanOnly])
+  }, [rows, search, statusFilter, companyFilter, orphanOnly, includeArchived])
 
   const filtersActive =
     search.trim() !== '' ||
     statusFilter !== 'all' ||
     companyFilter !== 'all' ||
-    orphanOnly
+    orphanOnly ||
+    includeArchived
 
   function resetFilters() {
     setSearch('')
     setStatusFilter('all')
     setCompanyFilter('all')
     setOrphanOnly(false)
+    setIncludeArchived(false)
   }
 
   return (
@@ -146,6 +151,16 @@ export default function BriefsTable({ rows }: { rows: BriefsTableRow[] }) {
             style={{ cursor: 'pointer' }}
           />
           Orphan only
+        </label>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#111', cursor: 'pointer', paddingBottom: 7 }}>
+          <input
+            type="checkbox"
+            checked={includeArchived}
+            onChange={e => setIncludeArchived(e.target.checked)}
+            style={{ cursor: 'pointer' }}
+          />
+          Include archived
         </label>
 
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12, paddingBottom: 7 }}>
