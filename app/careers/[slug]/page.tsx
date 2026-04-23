@@ -6,7 +6,7 @@ import { CURRENCY_SYMBOLS } from '@/lib/assignment-options'
 import CareerDetailClient from './CareerDetailClient'
 
 // ── Select fields (public only) ─────────────────────────────────────
-const SELECT_FIELDS = 'id, title, slug, maison, is_confidential, city, country, region, remote_policy, department, seniority, contract_type, description, responsibilities, requirements, nice_to_haves, about_maison, salary_min, salary_max, salary_currency, salary_period, salary_display, product_category, client_segment, languages_required, clienteling_experience, travel_percentage, luxury_sector_experience, benefits, relocation_offered, visa_sponsorship, start_date, team_size, seo_title, seo_description, location, reference_number, activated_at, closing_date, bonus_commission'
+const SELECT_FIELDS = 'id, title, slug, maison, is_confidential, confidentiality_level, show_brand, show_salary, show_location, city, country, region, remote_policy, department, seniority, contract_type, description, responsibilities, requirements, nice_to_haves, about_maison, salary_min, salary_max, salary_currency, salary_period, salary_display, product_category, client_segment, languages_required, clienteling_experience, travel_percentage, luxury_sector_experience, benefits, relocation_offered, visa_sponsorship, start_date, team_size, seo_title, seo_description, location, reference_number, activated_at, closing_date, bonus_commission'
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -61,12 +61,12 @@ function buildJsonLd(assignment: any): object {
     datePosted: assignment.activated_at,
     employmentType: mapEmploymentType(assignment.contract_type),
   }
-  if (!assignment.is_confidential && assignment.maison) {
+  if (assignment.show_brand !== false && assignment.maison) {
     ld.hiringOrganization = { '@type': 'Organization', name: assignment.maison }
   } else {
     ld.hiringOrganization = { '@type': 'Organization', name: 'Confidential | Leading Luxury Maison' }
   }
-  if (assignment.city || assignment.country) {
+  if (assignment.show_location !== false && (assignment.city || assignment.country)) {
     ld.jobLocation = {
       '@type': 'Place',
       address: { '@type': 'PostalAddress', addressLocality: assignment.city, addressCountry: assignment.country },
@@ -82,14 +82,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const supabase = createServerSupabaseClient()
   const { data: assignment } = await supabase
     .from('search_assignments')
-    .select('title, maison, is_confidential, city, country, description, seo_title, seo_description')
+    .select('title, maison, is_confidential, show_brand, show_salary, show_location, city, country, description, seo_title, seo_description')
     .eq('slug', params.slug)
     .eq('status', 'published')
     .single()
 
   if (!assignment) return { title: 'Position Not Found | JOBLUX' }
 
-  const displayMaison = assignment.is_confidential ? 'Leading Luxury Maison' : assignment.maison || 'JOBLUX'
+  const displayMaison = assignment.show_brand === false ? 'Leading Luxury Maison' : assignment.maison || 'JOBLUX'
   const location = [assignment.city, assignment.country].filter(Boolean).join(', ')
   const title = assignment.seo_title || `${assignment.title} at ${displayMaison} | ${location} | JOBLUX`
   const desc = assignment.seo_description || (assignment.description || '').slice(0, 160)
@@ -117,7 +117,7 @@ export default async function CareerDetailPage({ params }: { params: { slug: str
 
   if (!assignment) notFound()
 
-  const displayMaison = assignment.is_confidential
+  const displayMaison = assignment.show_brand === false
     ? 'Confidential Maison'
     : assignment.maison || 'JOBLUX'
   const salary = getSalaryDisplay(assignment)
@@ -152,12 +152,12 @@ export default async function CareerDetailPage({ params }: { params: { slug: str
             </h1>
 
             <div className="flex items-center gap-2 mb-3 flex-wrap">
-              {!assignment.is_confidential && assignment.maison && assignment.maison !== 'Confidential' ? (
+              {assignment.show_brand !== false && assignment.maison && assignment.maison !== 'Confidential' ? (
                 <span className="text-[13px] text-[#a58e28]">{assignment.maison}</span>
               ) : (
                 <span className="text-[13px] text-[#999]">Confidential Maison</span>
               )}
-              {assignment.is_confidential && (
+              {assignment.show_brand === false && (
                 <span className="text-[10px] font-semibold tracking-[1.5px] px-2 py-0.5 rounded bg-[rgba(165,142,40,0.1)] text-[#a58e28] border border-[rgba(165,142,40,0.2)]">
                   CONFIDENTIAL
                 </span>
@@ -165,7 +165,7 @@ export default async function CareerDetailPage({ params }: { params: { slug: str
             </div>
 
             <div className="flex flex-wrap gap-3 items-center">
-              {locationStr && (
+              {locationStr && assignment.show_location !== false && (
                 <span className="text-[13px] text-[#999]">{locationStr}</span>
               )}
               {assignment.contract_type && (
@@ -202,7 +202,7 @@ export default async function CareerDetailPage({ params }: { params: { slug: str
             <div>
 
               {/* Salary */}
-              {salary && (
+              {salary && assignment.show_salary !== false && (
                 <div className="p-5 bg-[#222] border border-[#2a2a2a] rounded-xl mb-8">
                   <div className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] mb-2">Compensation</div>
                   <p className="text-2xl text-white" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>{salary}</p>
@@ -271,7 +271,7 @@ export default async function CareerDetailPage({ params }: { params: { slug: str
               )}
 
               {/* About the Maison */}
-              {assignment.about_maison && !assignment.is_confidential && (
+              {assignment.about_maison && assignment.show_brand !== false && (
                 <>
                   <div className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] mb-3">About the Maison</div>
                   <div className="text-[15px] text-[#ccc] leading-[1.8] mb-10 whitespace-pre-line">
@@ -281,7 +281,7 @@ export default async function CareerDetailPage({ params }: { params: { slug: str
               )}
 
               {/* Confidential notice */}
-              {assignment.is_confidential && (
+              {assignment.show_brand === false && (
                 <div className="p-4 bg-[#222] border border-[#2a2a2a] rounded-xl mb-10">
                   <p className="text-xs text-[#999] leading-relaxed">
                     <strong className="text-white">Confidential assignment.</strong> The maison name will be disclosed after initial screening. All expressions of interest are handled with full discretion by the JOBLUX team.

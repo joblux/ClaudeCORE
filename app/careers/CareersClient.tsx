@@ -25,6 +25,10 @@ interface Assignment {
   contract_type: string
   salary_display: string
   is_confidential: boolean
+  show_brand?: boolean
+  show_salary?: boolean
+  show_location?: boolean
+  confidentiality_level?: string
   activated_at: string
 }
 
@@ -168,7 +172,7 @@ export default function CareersClient({
             <div className="space-y-2">
               {visibleAssignments.map(a => {
                 const isNew = a.activated_at && (Date.now() - new Date(a.activated_at).getTime()) < 7 * 24 * 3600000
-                const displayMaison = a.is_confidential ? null : a.maison
+                const displayMaison = a.show_brand === false ? null : a.maison
                 const locationStr = a.location || [a.city, a.country].filter(Boolean).join(', ')
                 return (
                   <Link key={a.id} href={`/careers/${a.slug || a.id}`} className="block">
@@ -182,7 +186,7 @@ export default function CareersClient({
                             </span>
                           )}
                         </div>
-                        {a.salary_display && (
+                        {a.salary_display && a.show_salary !== false && (
                           <div className="text-sm font-medium text-[#fff]">{a.salary_display}</div>
                         )}
                       </div>
@@ -190,7 +194,7 @@ export default function CareersClient({
                       {displayMaison && displayMaison !== 'Confidential' && <p className="text-xs text-[#999] mb-1">{displayMaison}</p>}
                       {a.description && <p className="text-sm text-[#999] leading-relaxed mb-2 line-clamp-2">{a.description}</p>}
                       <div className="flex items-center gap-2 flex-wrap">
-                        {locationStr && <span className="text-[11px] text-[#999]">{locationStr}</span>}
+                        {locationStr && a.show_location !== false && <span className="text-[11px] text-[#999]">{locationStr}</span>}
                         {a.contract_type && (
                           <>
                             <span className="text-[11px] text-[#777]">·</span>
