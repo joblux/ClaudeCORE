@@ -56,6 +56,10 @@ interface AssignmentFormState {
   title: string
   maison: string
   is_confidential: boolean
+  confidentiality_level: string
+  show_brand: boolean
+  show_salary: boolean
+  show_location: boolean
   status: string
   source: string
   priority: string
@@ -118,6 +122,15 @@ interface AssignmentFormState {
   source_brief_id: string
 }
 
+// ── Confidentiality presets (local to this form only) ──────────────
+// Selecting a preset seeds the 3 booleans. Toggling a boolean afterward
+// does NOT change the preset label — the booleans are the source of truth.
+const CONFIDENTIALITY_PRESETS: Record<string, { show_brand: boolean; show_salary: boolean; show_location: boolean }> = {
+  public:       { show_brand: true,  show_salary: true,  show_location: true },
+  partial:      { show_brand: false, show_salary: true,  show_location: true },
+  confidential: { show_brand: false, show_salary: false, show_location: true },
+}
+
 // ── Label -> DB-enum maps (local to this form only) ─────────────────
 // DB CHECK constraints require internal enum values. The select options render
 // human-readable labels; we translate them at submit time.
@@ -158,6 +171,10 @@ const EMPTY_FORM: AssignmentFormState = {
   title: '',
   maison: '',
   is_confidential: false,
+  confidentiality_level: 'public',
+  show_brand: true,
+  show_salary: true,
+  show_location: true,
   status: 'draft',
   source: 'Manual Entry',
   priority: 'normal',
@@ -400,6 +417,10 @@ function NewAssignmentPage() {
           title: assignment.title || '',
           maison: assignment.maison || '',
           is_confidential: assignment.is_confidential || false,
+          confidentiality_level: assignment.confidentiality_level || 'public',
+          show_brand: assignment.show_brand ?? true,
+          show_salary: assignment.show_salary ?? true,
+          show_location: assignment.show_location ?? true,
           status: assignment.status || 'draft',
           source: assignment.source || 'Manual Entry',
           priority: assignment.priority || 'normal',
@@ -525,6 +546,8 @@ function NewAssignmentPage() {
       team_size: form.team_size ? Number(form.team_size) : null,
       // salary_display: toggle maps checked -> 'true', unchecked -> ''
       salary_display: form.salary_display,
+      // legacy mirror: is_confidential tracks !show_brand during the Item 6 transition
+      is_confidential: !form.show_brand,
       contract_type: CONTRACT_TYPE_TO_DB[form.contract_type] ?? form.contract_type,
       seniority: SENIORITY_TO_DB[form.seniority] ?? form.seniority,
       // remote_policy is nullable in DB; coerce '' -> null so CHECK constraint is satisfied when unselected
@@ -643,13 +666,57 @@ function NewAssignmentPage() {
               </p>
             </div>
 
-            {/* Confidential toggle */}
-            <Toggle
-              checked={form.is_confidential}
-              onChange={(val) => updateField('is_confidential', val)}
-              label="Confidential Assignment"
-              description="Only visible to approved Professional+, Business and Insider members."
-            />
+            {/* Confidentiality preset + per-field overrides */}
+            <div className="space-y-4">
+              <div>
+                <label className="jl-label">Confidentiality preset</label>
+                <select
+                  className="jl-input w-full"
+                  value={form.confidentiality_level}
+                  onChange={(e) => {
+                    const level = e.target.value
+                    const seed = CONFIDENTIALITY_PRESETS[level]
+                    if (!seed) {
+                      updateField('confidentiality_level', level)
+                      return
+                    }
+                    setForm((f) => ({
+                      ...f,
+                      confidentiality_level: level,
+                      show_brand: seed.show_brand,
+                      show_salary: seed.show_salary,
+                      show_location: seed.show_location,
+                    }))
+                  }}
+                >
+                  <option value="public">Public</option>
+                  <option value="partial">Partial</option>
+                  <option value="confidential">Confidential</option>
+                </select>
+                <p className="text-xs text-[#999] mt-1">
+                  Selects a preset that seeds the toggles below. You can override each toggle independently.
+                </p>
+              </div>
+
+              <Toggle
+                checked={form.show_brand}
+                onChange={(val) => updateField('show_brand', val)}
+                label="Show brand / maison"
+                description="When off, the maison is hidden from candidate-facing surfaces."
+              />
+              <Toggle
+                checked={form.show_salary}
+                onChange={(val) => updateField('show_salary', val)}
+                label="Show salary"
+                description="When off, salary range is hidden from candidate-facing surfaces."
+              />
+              <Toggle
+                checked={form.show_location}
+                onChange={(val) => updateField('show_location', val)}
+                label="Show location"
+                description="When off, location fields are hidden from candidate-facing surfaces."
+              />
+            </div>
 
             {/* Status + Source */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
