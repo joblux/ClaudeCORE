@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { sendEmail } from '@/lib/ses'
+import { contributionSubmittedEmail, adminNewContributionEmail, ADMIN_ALERT_EMAIL } from '@/lib/email-templates'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -59,6 +61,35 @@ export async function POST(request: Request) {
       })
 
     if (error) throw error
+
+    // Fire-and-forget submitter confirmation
+    {
+      const { html, text } = contributionSubmittedEmail({
+        firstName: member.first_name,
+        contributionType: 'brand_correction',
+      })
+      sendEmail({
+        to: contributorEmail,
+        subject: 'Thank you for your contribution',
+        body: text,
+        bodyHtml: html,
+      }).catch(() => {})
+    }
+
+    // Fire-and-forget admin alert
+    {
+      const { html: adminHtml, text: adminText } = adminNewContributionEmail({
+        contributionType: 'brand_correction',
+        contributorName,
+        brand: brand_slug,
+      })
+      sendEmail({
+        to: ADMIN_ALERT_EMAIL,
+        subject: `New contribution: brand_correction from ${contributorName}`,
+        body: adminText,
+        bodyHtml: adminHtml,
+      }).catch(() => {})
+    }
 
     return NextResponse.json({ success: true, message: 'Correction submitted successfully' })
   } catch (error: any) {

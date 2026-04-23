@@ -644,6 +644,7 @@ export function contributionSubmittedEmail(params: {
     salary_data: 'salary data',
     interview_experience: 'interview experience',
     insider_voice: 'insider voice',
+    brand_correction: 'brand correction',
   }
   const typeLabel = typeLabels[params.contributionType] || 'contribution'
   const greeting = params.firstName ? `${params.firstName},` : ''
@@ -668,6 +669,7 @@ export function contributionApprovedEmail(params: {
     salary_data: 'salary data',
     interview_experience: 'interview experience',
     insider_voice: 'insider voice',
+    brand_correction: 'brand correction',
   }
   const typeLabel = typeLabels[params.contributionType] || 'contribution'
   const greeting = params.firstName ? `${params.firstName},` : ''
@@ -692,6 +694,7 @@ export function contributionRejectedEmail(params: {
     salary_data: 'salary data',
     interview_experience: 'interview experience',
     insider_voice: 'insider voice',
+    brand_correction: 'brand correction',
   }
   const typeLabel = typeLabels[params.contributionType] || 'contribution'
   const greeting = params.firstName ? `${params.firstName},` : ''
@@ -933,6 +936,7 @@ export function adminNewContributionEmail(params: {
     salary_data: 'Salary Data',
     interview_experience: 'Interview Experience',
     insider_voice: 'Insider Voice',
+    brand_correction: 'Brand Correction',
   }
   const typeLabel = typeLabels[params.contributionType] || params.contributionType
   const html = adminLayout([
