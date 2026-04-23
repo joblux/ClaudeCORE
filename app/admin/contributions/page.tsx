@@ -20,6 +20,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; label: string }>
   revision_requested: { bg: '#fff3e0', text: '#e68a00', label: 'Revision' },
   published:          { bg: '#e6f7ef', text: '#1D9E75', label: 'Published' },
   approved:           { bg: '#e6f7ef', text: '#1D9E75', label: 'Approved' },
+  accepted:           { bg: '#e6f7ef', text: '#1D9E75', label: 'Approved' },
   archived:           { bg: '#f5f5f5', text: '#666',    label: 'Archived' },
   rejected:           { bg: '#fef2f2', text: '#dc2626', label: 'Rejected' },
 }
@@ -618,14 +619,14 @@ function BrandTab() {
   return (
     <div>
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, alignItems: 'center' }}>
-        {['all', 'pending', 'approved', 'rejected'].map(f => (
+        {['all', 'pending', 'accepted', 'rejected'].map(f => (
           <button key={f} onClick={() => setFilter(f)} style={{
             padding: '5px 12px', borderRadius: 6, border: '1px solid', fontSize: 12, cursor: 'pointer',
             borderColor: filter === f ? '#111' : '#e8e8e8',
             background: filter === f ? '#111' : '#fff',
             color: filter === f ? '#fff' : '#666',
           }}>
-            {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+            {f === 'all' ? 'All' : f === 'accepted' ? 'Approved' : f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
         ))}
         {pending > 0 && (

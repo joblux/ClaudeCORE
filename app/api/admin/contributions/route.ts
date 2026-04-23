@@ -471,11 +471,54 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, deleted: true })
     }
     const newStatus = action === 'approve' ? 'accepted' : 'rejected'
+
+    const { data: row } = await supabase
+      .from('brand_contributions')
+      .select('user_id')
+      .eq('id', id)
+      .maybeSingle()
+
     const { error } = await supabase
       .from('brand_contributions')
       .update({ status: newStatus, reviewed_by: adminId, reviewed_at: now, admin_notes: note || null })
       .eq('id', id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    if (row?.user_id) {
+      const { data: memberData } = await supabase
+        .from('members')
+        .select('email, first_name')
+        .eq('id', row.user_id)
+        .maybeSingle()
+
+      if (memberData?.email) {
+        if (action === 'approve') {
+          const { html, text } = contributionApprovedEmail({
+            firstName: memberData.first_name,
+            contributionType: 'brand_correction',
+          })
+          sendEmail({
+            to: memberData.email,
+            subject: 'Your contribution is now live',
+            body: text,
+            bodyHtml: html,
+          }).catch(() => {})
+        } else {
+          const { html, text } = contributionRejectedEmail({
+            firstName: memberData.first_name,
+            contributionType: 'brand_correction',
+            reason: note || undefined,
+          })
+          sendEmail({
+            to: memberData.email,
+            subject: 'Update on your contribution',
+            body: text,
+            bodyHtml: html,
+          }).catch(() => {})
+        }
+      }
+    }
+
     return NextResponse.json({ ok: true })
   }
 
