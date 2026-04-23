@@ -531,6 +531,8 @@ function NewAssignmentPage() {
       remote_policy: form.remote_policy
         ? (REMOTE_POLICY_TO_DB[form.remote_policy] ?? form.remote_policy)
         : null,
+      // source_brief_id is a nullable UUID; coerce '' -> null to avoid 22P02 invalid uuid syntax
+      source_brief_id: form.source_brief_id || null,
     }
 
     try {
