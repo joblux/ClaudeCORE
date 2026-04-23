@@ -403,7 +403,7 @@ export default function InsiderDashboard() {
       </div>
 
       {/* Main */}
-      <main style={{ flex: 1, padding: '32px 40px', maxWidth: 900 }}>
+      <main style={{ flex: 1, padding: '32px 40px', maxWidth: 900, margin: '0 auto' }}>
         <div style={{ marginBottom: 28 }}>
           <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 24, fontWeight: 400, color: '#fff', margin: 0 }}>
             {loading ? 'Loading...' : activeNav === 'write-voice' ? 'Write a Perspective' : `Welcome back, ${firstName}`}
