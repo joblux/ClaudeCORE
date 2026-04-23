@@ -113,6 +113,9 @@ interface AssignmentFormState {
   fee_agreement: string
   fee_amount: string
   internal_notes: string
+
+  // Link to brief (optional)
+  source_brief_id: string
 }
 
 // ── Default empty form ───────────────────────────────────────────────
@@ -170,6 +173,8 @@ const EMPTY_FORM: AssignmentFormState = {
   fee_agreement: '',
   fee_amount: '',
   internal_notes: '',
+
+  source_brief_id: '',
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -330,6 +335,15 @@ function NewAssignmentPage() {
   const editId = searchParams.get('id')
   const isEditMode = Boolean(editId)
 
+  const [briefOptions, setBriefOptions] = useState<Array<{ id: string; company_name: string; brief_type: string; status: string }>>([])
+
+  useEffect(() => {
+    fetch('/api/admin/business-briefs')
+      .then((r) => r.json())
+      .then((d) => setBriefOptions(d.briefs ?? []))
+      .catch(() => setBriefOptions([]))
+  }, [])
+
   const [form, setForm] = useState<AssignmentFormState>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -401,6 +415,8 @@ function NewAssignmentPage() {
           fee_agreement: assignment.fee_agreement || '',
           fee_amount: assignment.fee_amount || '',
           internal_notes: assignment.internal_notes || '',
+
+          source_brief_id: assignment.source_brief_id || '',
         })
       })
       .catch((err) => setError(err.message))
@@ -1211,6 +1227,23 @@ function NewAssignmentPage() {
                   onChange={(e) => updateField('fee_amount', e.target.value)}
                 />
               </div>
+            </div>
+
+            {/* Link to brief (optional) */}
+            <div>
+              <label className="jl-label">Link to brief (optional)</label>
+              <select
+                className="jl-input w-full"
+                value={form.source_brief_id}
+                onChange={(e) => updateField('source_brief_id', e.target.value)}
+              >
+                <option value="">— None —</option>
+                {briefOptions.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.company_name} — {b.brief_type} ({b.status})
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Internal Notes */}
