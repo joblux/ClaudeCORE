@@ -527,7 +527,10 @@ function NewAssignmentPage() {
       salary_display: form.salary_display,
       contract_type: CONTRACT_TYPE_TO_DB[form.contract_type] ?? form.contract_type,
       seniority: SENIORITY_TO_DB[form.seniority] ?? form.seniority,
-      remote_policy: REMOTE_POLICY_TO_DB[form.remote_policy] ?? form.remote_policy,
+      // remote_policy is nullable in DB; coerce '' -> null so CHECK constraint is satisfied when unselected
+      remote_policy: form.remote_policy
+        ? (REMOTE_POLICY_TO_DB[form.remote_policy] ?? form.remote_policy)
+        : null,
     }
 
     try {
