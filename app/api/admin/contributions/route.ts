@@ -470,7 +470,7 @@ export async function POST(req: NextRequest) {
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       return NextResponse.json({ ok: true, deleted: true })
     }
-    const newStatus = action === 'approve' ? 'approved' : 'rejected'
+    const newStatus = action === 'approve' ? 'accepted' : 'rejected'
     const { error } = await supabase
       .from('brand_contributions')
       .update({ status: newStatus, reviewed_by: adminId, reviewed_at: now, admin_notes: note || null })
