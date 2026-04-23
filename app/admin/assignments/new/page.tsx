@@ -118,6 +118,41 @@ interface AssignmentFormState {
   source_brief_id: string
 }
 
+// ── Label -> DB-enum maps (local to this form only) ─────────────────
+// DB CHECK constraints require internal enum values. The select options render
+// human-readable labels; we translate them at submit time.
+// Entries not in the map are passed through as-is (covers empty string).
+const CONTRACT_TYPE_TO_DB: Record<string, string> = {
+  'Permanent (CDI)': 'permanent',
+  'Fixed-term (CDD)': 'fixed-term',
+  'Freelance / Consultant': 'freelance',
+  'Temporary / Seasonal': 'fixed-term',
+  'Internship (Stage)': 'internship',
+  'Apprenticeship': 'internship',
+  'Part-time': 'permanent',
+  'Executive Interim': 'interim',
+}
+
+const SENIORITY_TO_DB: Record<string, string> = {
+  'Intern/Trainee': 'intern',
+  'Junior (0–2 yrs)': 'junior',
+  'Mid-level (3–5 yrs)': 'mid-level',
+  'Senior (6–10 yrs)': 'senior',
+  'Lead / Manager': 'senior',
+  'Director': 'director',
+  'VP / Head of': 'vp',
+  'C-Suite / Executive': 'c-suite',
+  'Board / Advisory': 'c-suite',
+}
+
+const REMOTE_POLICY_TO_DB: Record<string, string> = {
+  'On-site': 'on-site',
+  'Hybrid': 'hybrid',
+  'Remote': 'remote',
+  'Flexible': 'flexible',
+  'Travel Required': 'flexible',
+}
+
 // ── Default empty form ───────────────────────────────────────────────
 const EMPTY_FORM: AssignmentFormState = {
   title: '',
@@ -481,6 +516,7 @@ function NewAssignmentPage() {
     setSaving(true)
 
     // Build the payload, converting numeric strings to numbers
+    // and translating display labels to DB-safe enum values for the 3 CHECK-constrained fields.
     const payload = {
       ...form,
       status: submitStatus,
@@ -489,6 +525,9 @@ function NewAssignmentPage() {
       team_size: form.team_size ? Number(form.team_size) : null,
       // salary_display: toggle maps checked -> 'true', unchecked -> ''
       salary_display: form.salary_display,
+      contract_type: CONTRACT_TYPE_TO_DB[form.contract_type] ?? form.contract_type,
+      seniority: SENIORITY_TO_DB[form.seniority] ?? form.seniority,
+      remote_policy: REMOTE_POLICY_TO_DB[form.remote_policy] ?? form.remote_policy,
     }
 
     try {
