@@ -183,6 +183,20 @@ export default function CandidateDashboard() {
 
   return (
     <div className="min-h-screen bg-[#1a1a1a]">
+      {/* ── Top bar (self-contained; replaces public Header on /dashboard) ── */}
+      <div style={{ borderBottom: '1px solid #1e1e1e', padding: '12px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Link href="/" style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontWeight: 500, fontSize: 17, color: '#fff', letterSpacing: '0.04em', textDecoration: 'none' }}>JOBLUX</Link>
+          <span style={{ color: '#444', fontSize: 13 }}>/</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: '#a58e28', letterSpacing: '0.14em', textTransform: 'uppercase' }}>Dashboard</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          <Link href="/careers" style={{ fontSize: 12, color: '#999', textDecoration: 'none' }}>Careers</Link>
+          <Link href="/signals" style={{ fontSize: 12, color: '#999', textDecoration: 'none' }}>Signals</Link>
+          <Link href="/insights" style={{ fontSize: 12, color: '#999', textDecoration: 'none' }}>Insights</Link>
+        </div>
+      </div>
+
       <div className="max-w-[1200px] mx-auto px-7 pt-10 pb-16">
 
         {/* ── Welcome ── */}
