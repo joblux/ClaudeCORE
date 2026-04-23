@@ -73,7 +73,7 @@ export default function SubmitCorrectionPage() {
             <div style={{ fontSize: 28, marginBottom: 12 }}>✓</div>
             <div style={{ fontSize: 16, color: '#fff', fontWeight: 500, marginBottom: 6 }}>Correction submitted</div>
             <p style={{ fontSize: 13, color: '#999', marginBottom: 16 }}>
-              Your correction will be reviewed by the editorial team. Thank you for improving JOBLUX intelligence.
+              Your submission was recorded. The admin team will review it.
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
               <button onClick={() => { setSubmitted(false); setForm({ brand_slug: '', issue_description: '', suggested_correction: '', source_url: '' }) }} style={{ padding: '8px 20px', fontSize: 12, border: '1px solid rgba(165,142,40,0.3)', borderRadius: 4, background: 'transparent', color: '#a58e28', cursor: 'pointer' }}>
@@ -98,7 +98,7 @@ export default function SubmitCorrectionPage() {
         <Link href="/dashboard/insider" style={{ fontSize: 12, color: '#a58e28', textDecoration: 'none', marginBottom: 20, display: 'inline-block' }}>← Back to dashboard</Link>
 
         <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 24, fontWeight: 400, color: '#fff', margin: '0 0 6px' }}>Flag a Brand Correction</h1>
-        <p style={{ fontSize: 13, color: '#999', marginBottom: 24 }}>Flag an inaccuracy or outdated detail so the intelligence layer improves. Corrections are reviewed by the editorial team.</p>
+        <p style={{ fontSize: 13, color: '#999', marginBottom: 24 }}>Flag an inaccuracy or outdated detail. Submissions are reviewed by the admin team.</p>
 
         <div style={{ background: '#1a1a1a', border: '1px solid #1e1e1e', borderRadius: 8, padding: 24 }}>
           {/* Brand */}
@@ -154,7 +154,7 @@ export default function SubmitCorrectionPage() {
             {submitting ? 'Submitting...' : 'Submit correction →'}
           </button>
           <div style={{ fontSize: 11, color: '#666', marginTop: 8 }}>
-            Corrections are reviewed before being applied.
+            Submissions are reviewed by the admin team.
           </div>
         </div>
       </div>

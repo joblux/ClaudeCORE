@@ -661,10 +661,10 @@ function BrandTab() {
                   {item.status === 'pending' && (
                     <>
                       <button onClick={() => act(item.id, 'approve')} disabled={actioning === item.id} style={{ padding: '5px 12px', fontSize: 11, border: 'none', borderRadius: 5, background: '#1D9E75', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
-                        {actioning === item.id ? '...' : 'Apply'}
+                        {actioning === item.id ? '...' : 'Approve'}
                       </button>
                       <button onClick={() => act(item.id, 'reject')} style={{ padding: '5px 12px', fontSize: 11, border: '1px solid #fecaca', borderRadius: 5, background: '#fef2f2', color: '#dc2626', cursor: 'pointer', fontWeight: 600 }}>
-                        Dismiss
+                        Reject
                       </button>
                     </>
                   )}

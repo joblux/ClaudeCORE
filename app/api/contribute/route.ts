@@ -56,7 +56,6 @@ export async function POST(request: Request) {
         issue_description,
         suggested_correction,
         source_url: source_url || null,
-        created_at: new Date().toISOString(),
       })
 
     if (error) throw error
