@@ -163,6 +163,16 @@ export async function POST(req: NextRequest) {
     const activated_at =
       body.status === 'published' ? new Date().toISOString() : body.activated_at || null
 
+    // ---- location: derive from city + country when not explicitly provided ----
+    // DB requires location NOT NULL; the form only collects city + country separately.
+    const location =
+      body.location && String(body.location).trim()
+        ? String(body.location).trim()
+        : [body.city, body.country]
+            .map((v) => String(v || '').trim())
+            .filter(Boolean)
+            .join(', ')
+
     // ---- Build the insert payload ----
     // Spread the original body first so every form field is captured,
     // then overwrite the fields we explicitly processed above.
@@ -182,6 +192,7 @@ export async function POST(req: NextRequest) {
       visa_sponsorship,
       clienteling_experience,
       activated_at,
+      location,
     }
 
     // ---- Insert into DB ----
