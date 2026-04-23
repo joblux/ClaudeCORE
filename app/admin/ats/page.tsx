@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useRequireAdmin } from '@/lib/auth-hooks'
 import {
   PIPELINE_STAGES,
@@ -134,7 +134,13 @@ export default function AdminATSPage() {
 
   /* ---- UI state ---- */
   const [view, setView] = useState<'board' | 'table'>('board')
-  const [briefFilter, setBriefFilter] = useState('')
+  const searchParams = useSearchParams()
+  const [briefFilter, setBriefFilter] = useState(() => searchParams?.get('search_assignment_id') ?? '')
+
+  // Keep briefFilter in sync if the URL param changes after initial mount
+  useEffect(() => {
+    setBriefFilter(searchParams?.get('search_assignment_id') ?? '')
+  }, [searchParams])
   const [terminalToggles, setTerminalToggles] = useState<Record<string, boolean>>({})
 
   /* ---- table-specific state ---- */

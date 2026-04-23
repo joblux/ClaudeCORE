@@ -52,6 +52,18 @@ export default function AdminAssignmentsPage() {
       .finally(() => setLoading(false))
   }, [isAdmin, statusFilter, search])
 
+  // Per-assignment applicant count, fetched from dedicated admin endpoint
+  // (endpoint paginates internally; safe for any applications table size).
+  const [applicantCounts, setApplicantCounts] = useState<Record<string, number>>({})
+
+  useEffect(() => {
+    if (!isAdmin) return
+    fetch('/api/admin/assignments/applicant-counts')
+      .then((res) => res.json())
+      .then((data) => setApplicantCounts(data.counts ?? {}))
+      .catch(() => setApplicantCounts({}))
+  }, [isAdmin])
+
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') setSearch(searchInput)
   }
@@ -122,7 +134,7 @@ export default function AdminAssignmentsPage() {
         {/* Table */}
         <div className="border border-[#e8e8e8] rounded-xl overflow-x-auto bg-[#f5f5f5]" style={{ minWidth: 0 }}>
           <div style={{ minWidth: 800 }}>
-          <div className="hidden lg:grid bg-gray-50 px-5 py-3 text-[11px] uppercase tracking-wide text-[#999] font-medium" style={{ gridTemplateColumns: '0.6fr 2fr 1fr 0.7fr 0.6fr 0.7fr 0.8fr' }}>
+          <div className="hidden lg:grid bg-gray-50 px-5 py-3 text-[11px] uppercase tracking-wide text-[#999] font-medium" style={{ gridTemplateColumns: '0.6fr 2fr 1fr 0.7fr 0.6fr 0.7fr 0.8fr 0.7fr' }}>
             <div>Ref</div>
             <div>Title</div>
             <div>Maison</div>
@@ -130,6 +142,7 @@ export default function AdminAssignmentsPage() {
             <div>Priority</div>
             <div>City</div>
             <div>Created</div>
+            <div>Pipeline</div>
           </div>
 
           {loading ? (
@@ -144,7 +157,7 @@ export default function AdminAssignmentsPage() {
                 <div
                   key={a.id}
                   className="grid items-center px-5 py-3 border-t border-[#e8e8e8] hover:bg-[#fafafa]/50 transition-colors"
-                  style={{ gridTemplateColumns: '0.6fr 2fr 1fr 0.7fr 0.6fr 0.7fr 0.8fr' }}
+                  style={{ gridTemplateColumns: '0.6fr 2fr 1fr 0.7fr 0.6fr 0.7fr 0.8fr 0.7fr' }}
                 >
                   <div className="text-xs text-[#999] font-mono">{a.reference_number || '—'}</div>
                   <div>
@@ -167,6 +180,14 @@ export default function AdminAssignmentsPage() {
                   <div className={`hidden lg:block text-xs font-semibold capitalize ${pc}`}>{a.priority}</div>
                   <div className="hidden lg:block text-xs text-[#999]">{a.city || '—'}</div>
                   <div className="hidden lg:block text-xs text-[#999]">{formatDate(a.created_at)}</div>
+                  <div className="hidden lg:block text-xs">
+                    <Link
+                      href={`/admin/ats?search_assignment_id=${a.id}`}
+                      className="text-[#1a1a1a] hover:text-[#444444] transition-colors"
+                    >
+                      {applicantCounts[a.id] ?? 0} applicant{(applicantCounts[a.id] ?? 0) === 1 ? '' : 's'} →
+                    </Link>
+                  </div>
                 </div>
               )
             })
