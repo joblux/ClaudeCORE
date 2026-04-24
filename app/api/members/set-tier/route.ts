@@ -25,6 +25,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid tier' }, { status: 400 })
     }
 
+    const { data: existing, error: existingError } = memberId
+      ? await supabase
+          .from('members')
+          .select('tier_selected, registration_completed')
+          .eq('id', memberId)
+          .maybeSingle()
+      : await supabase
+          .from('members')
+          .select('tier_selected, registration_completed')
+          .eq('email', email!)
+          .maybeSingle()
+
+    if (existingError) {
+      return NextResponse.json(
+        { error: 'Unable to verify tier status' },
+        { status: 500 }
+      )
+    }
+
+    if (existing?.tier_selected || existing?.registration_completed) {
+      return NextResponse.json(
+        { error: 'Tier already set. Contact support to change your account type.' },
+        { status: 403 }
+      )
+    }
+
     const update = { role: tier, tier_selected: true }
     const { error } = memberId
       ? await supabase.from('members').update(update).eq('id', memberId)
