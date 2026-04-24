@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { useSession } from 'next-auth/react'
+import { getStageColor, getStageLabel } from '@/types/application'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -329,8 +330,14 @@ export default function CandidateDashboard() {
                       {maisonLabel} · Applied {timeAgo(a.applied_at)}
                     </div>
                   </div>
-                  <span className="text-[10px] font-semibold px-2 py-1 rounded border border-[rgba(165,142,40,0.3)] text-[#a58e28] whitespace-nowrap uppercase tracking-wider">
-                    {a.current_stage.replace(/_/g, ' ')}
+                  <span
+                    className="text-[10px] font-semibold px-2 py-1 rounded border whitespace-nowrap uppercase tracking-wider"
+                    style={{
+                      borderColor: `${getStageColor(a.current_stage)}55`,
+                      color: getStageColor(a.current_stage),
+                    }}
+                  >
+                    {getStageLabel(a.current_stage)}
                   </span>
                 </>
               )
