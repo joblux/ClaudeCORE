@@ -1009,6 +1009,7 @@ export function adminNewApplicationEmail(params: {
   applicantEmail: string
   tier: string
   assignmentTitle: string
+  applicationId: string
 }): EmailContent {
   const html = adminLayout([
     `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New application</h2>`,
@@ -1018,11 +1019,11 @@ export function adminNewApplicationEmail(params: {
     adminRow('Tier', params.tier),
     adminRow('Position', params.assignmentTitle),
     `</table>`,
-    adminButton('Review in admin', `${SITE_URL}/admin/assignments`),
+    adminButton('Review in admin', `${SITE_URL}/admin/ats/${params.applicationId}`),
   ].join(''))
   return {
     html,
-    text: `New application: ${params.applicantName} for ${params.assignmentTitle}\nEmail: ${params.applicantEmail}\nTier: ${params.tier}\n\nReview: ${SITE_URL}/admin/assignments`,
+    text: `New application: ${params.applicantName} for ${params.assignmentTitle}\nEmail: ${params.applicantEmail}\nTier: ${params.tier}\n\nReview: ${SITE_URL}/admin/ats/${params.applicationId}`,
   }
 }
 

@@ -78,7 +78,7 @@ const SAMPLE_DATA: Record<string, () => { html: string; text: string; subject: s
     return { html, text, subject: 'New contribution: Salary Data from Sophie Martin' }
   },
   admin_new_application: () => {
-    const { html, text } = adminNewApplicationEmail({ applicantName: 'Elena Ricci', applicantEmail: 'elena@example.com', tier: 'Professional', assignmentTitle: 'VP of Retail Operations | Cartier' })
+    const { html, text } = adminNewApplicationEmail({ applicantName: 'Elena Ricci', applicantEmail: 'elena@example.com', tier: 'Professional', assignmentTitle: 'VP of Retail Operations | Cartier', applicationId: 'sample-application-id' })
     return { html, text, subject: 'New application: Elena Ricci for VP of Retail Operations | Cartier' }
   },
   admin_new_escape: () => {

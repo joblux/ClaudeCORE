@@ -121,6 +121,7 @@ export async function POST(req: NextRequest) {
       applicantEmail: memberInfo?.email || session.user.email || '',
       tier: memberInfo?.role || 'member',
       assignmentTitle,
+      applicationId: application.id,
     })
     sendEmail({
       to: RECRUITING_ALERT_EMAIL,
