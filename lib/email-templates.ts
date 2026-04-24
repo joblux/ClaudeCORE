@@ -1026,6 +1026,27 @@ export function adminNewApplicationEmail(params: {
   }
 }
 
+export function adminApplicationWithdrawnEmail(params: {
+  candidateName: string
+  candidateEmail: string
+  roleTitle: string
+  applicationId: string
+}): EmailContent {
+  const html = adminLayout([
+    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">Application withdrawn</h2>`,
+    `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
+    adminRow('Candidate', params.candidateName),
+    adminRow('Email', params.candidateEmail),
+    adminRow('Position', params.roleTitle),
+    `</table>`,
+    adminButton('View in admin', `${SITE_URL}/admin/ats/${params.applicationId}`),
+  ].join(''))
+  return {
+    html,
+    text: `Application withdrawn: ${params.candidateName} — ${params.roleTitle}\nEmail: ${params.candidateEmail}\n\nView: ${SITE_URL}/admin/ats/${params.applicationId}`,
+  }
+}
+
 // ────────────────────────────────────────────
 // Legacy compatibility wrappers
 // ────────────────────────────────────────────

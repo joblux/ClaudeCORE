@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { sendEmail } from '@/lib/ses'
-import { applicationStatusEmail, RECRUITING_ALERT_EMAIL } from '@/lib/email-templates'
+import { applicationStatusEmail, adminApplicationWithdrawnEmail, RECRUITING_ALERT_EMAIL } from '@/lib/email-templates'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -93,10 +93,17 @@ export async function POST(
   const roleTitle = assignment?.title || 'an application'
   const firstName = candidateName.split(' ')[0]
 
+  const adminTpl = adminApplicationWithdrawnEmail({
+    candidateName,
+    candidateEmail: candidateEmail || 'unknown',
+    roleTitle,
+    applicationId: id,
+  })
   sendEmail({
     to: RECRUITING_ALERT_EMAIL,
     subject: `Application withdrawn: ${candidateName} — ${roleTitle}`,
-    body: `${candidateName} (${candidateEmail || 'no email'}) has withdrawn their application for ${roleTitle}.\n\nView in admin: https://joblux.com/admin/ats/${id}`,
+    body: adminTpl.text,
+    bodyHtml: adminTpl.html,
   }).catch(() => {})
 
   if (candidateEmail) {

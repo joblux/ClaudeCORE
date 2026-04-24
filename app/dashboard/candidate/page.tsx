@@ -169,8 +169,11 @@ export default function CandidateDashboard() {
 
   // ── Withdraw handler ──────────────────────────────────────────────
   const [withdrawingId, setWithdrawingId] = useState<string | null>(null)
-  const handleWithdraw = async (appId: string) => {
-    if (!confirm('Withdraw this application? This cannot be undone.')) return
+  const [confirmWithdrawId, setConfirmWithdrawId] = useState<string | null>(null)
+  const confirmAndWithdraw = async () => {
+    const appId = confirmWithdrawId
+    if (!appId) return
+    setConfirmWithdrawId(null)
     setWithdrawingId(appId)
     try {
       const res = await fetch(`/api/applications/${appId}/withdraw`, { method: 'POST' })
@@ -364,7 +367,7 @@ export default function CandidateDashboard() {
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        handleWithdraw(a.id)
+                        setConfirmWithdrawId(a.id)
                       }}
                       disabled={withdrawingId === a.id}
                       className="text-[10px] text-[#888] hover:text-[#ccc] underline underline-offset-2 whitespace-nowrap disabled:opacity-50"
@@ -504,6 +507,38 @@ export default function CandidateDashboard() {
         </div>
 
       </div>
+      {confirmWithdrawId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          onClick={() => setConfirmWithdrawId(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#1a1a1a] border border-[#333] rounded-lg max-w-md w-full mx-4 p-6 shadow-2xl"
+          >
+            <h3 className="text-[#e0e0e0] text-base font-medium mb-3">Withdraw application?</h3>
+            <p className="text-[#999] text-sm mb-6 leading-relaxed">
+              This cannot be undone. The hiring team will be notified.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmWithdrawId(null)}
+                className="text-[12px] text-[#999] hover:text-[#ccc] px-4 py-2"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmAndWithdraw}
+                className="text-[12px] font-semibold text-[#1a1a1a] bg-[#a58e28] hover:bg-[#b89a2e] px-4 py-2 rounded uppercase tracking-wider"
+              >
+                Withdraw
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
