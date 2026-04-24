@@ -1,3 +1,32 @@
+## ACTIVE CHAIN
+
+Execution order for recruiting loop stabilization. Ledger statuses untouched — this is the mental map, not DB truth.
+
+### LAST SHIPPED
+Candidate application polish:
+- branded withdraw admin email
+- dark withdraw confirmation modal
+- verified live (commit 0b5f6f2)
+
+### CURRENT STEP
+Start 3a/3b/3c recruiting cleanup:
+- 26c8dc62 — Application admin email link target fix
+- 05e02bc8 — ATS stage-move wiring verification
+- d1c6faba — Job page post-login redirect
+
+### NEXT
+- a4541f31 — Assignment form "Save as Draft" broken for blank form (CHECK violations on empty-string seniority/contract_type)
+- 7695e7fb — Bridge redirect UX quirk ("Edit Search Assignment" heading post-bridge)
+- 54ab4af6 — Business briefs POST: sector field validated but not persisted
+- 5838b4b3 — Brief form attachments not delivered in admin notification email
+- 43079207 — Business briefs: stale-UUID orphans on created_by + no FK constraint
+- f1c6d564 — JOBLUX_STATE.md refresh (paste Apr 23 version + re-upload to project knowledge)
+
+### LATER (ProfiLux-dependent)
+- 18e3dec0 — Candidate–Job Matching Score (ProfiLux-ready)
+- 1f7ccd56 — Matching absent in candidate dashboard feed
+- 0be2284c — CV parse lifecycle non-operational (cv_parsed_at never written)
+
 # JOBLUX_STATE.md
 **Single source of truth — replaces all previous docs**
 **Last updated:** April 13, 2026
