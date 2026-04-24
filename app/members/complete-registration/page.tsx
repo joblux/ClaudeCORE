@@ -67,7 +67,7 @@ export default function CompleteRegistrationPage() {
   // Step 4 | CV Upload
   const [cvFile, setCvFile] = useState<File | null>(null)
   const [cvUploading, setCvUploading] = useState(false)
-  const [cvUrl, setCvUrl] = useState('')
+  const [cvPath, setCvPath] = useState('')
   const [cvError, setCvError] = useState('')
   const [savedIncomplete, setSavedIncomplete] = useState(false)
 
@@ -99,7 +99,7 @@ export default function CompleteRegistrationPage() {
   const fullPhone = phoneNumber ? `${phoneCode} ${phoneNumber}` : ''
 
   // --- Submit registration ---
-  const submitRegistration = async (uploadedCvUrl?: string, memberStatus: 'pending' | 'incomplete' = 'pending') => {
+  const submitRegistration = async (uploadedCvPath?: string, memberStatus: 'pending' | 'incomplete' = 'pending') => {
     setIsSubmitting(true)
     setError('')
     try {
@@ -114,7 +114,7 @@ export default function CompleteRegistrationPage() {
           city,
           country,
           contactPref: 'email',
-          cv_url: uploadedCvUrl || cvUrl || null,
+          cv_url: uploadedCvPath || cvPath || null,
           status: memberStatus,
         }),
       })
@@ -159,9 +159,9 @@ export default function CompleteRegistrationPage() {
         throw new Error(d.error || 'Upload failed')
       }
       const data = await res.json()
-      setCvUrl(data.url)
+      setCvPath(data.path)
       setCvUploading(false)
-      await submitRegistration(data.url)
+      await submitRegistration(data.path)
     } catch (err: unknown) {
       setCvError(err instanceof Error ? err.message : 'Upload failed')
       setCvUploading(false)
@@ -271,8 +271,8 @@ export default function CompleteRegistrationPage() {
             ) : (
               <>
                 <label className="block cursor-pointer">
-                  <div className={'border-2 border-dashed rounded-sm p-12 text-center transition-colors ' + (cvFile && cvUrl ? 'border-[#a58e28] bg-[#a58e2808]' : 'border-[#333] hover:border-[#555]')}>
-                    {cvFile && cvUrl ? (
+                  <div className={'border-2 border-dashed rounded-sm p-12 text-center transition-colors ' + (cvFile && cvPath ? 'border-[#a58e28] bg-[#a58e2808]' : 'border-[#333] hover:border-[#555]')}>
+                    {cvFile && cvPath ? (
                       <div>
                         <div className="text-[#a58e28] mb-2" style={{ fontSize: '13px' }}>{cvFile.name}</div>
                         <div className="text-[#aaa]" style={{ fontSize: '11px' }}>Uploaded successfully</div>

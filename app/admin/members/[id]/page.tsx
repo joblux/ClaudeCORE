@@ -725,14 +725,28 @@ function DocumentsTab({ member }: { member: MemberProfile }) {
                 return (
                   <tr key={d.id} className="border-t border-[#f0f0f0] hover:bg-[#fafafa]">
                     <td className="px-4 py-3">
-                      <a
-                        href={d.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#111] font-medium no-underline hover:underline"
+                      <button
+                        onClick={async () => {
+                          try {
+                            const res = await fetch('/api/admin/cv/sign', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ documentId: d.id }),
+                            });
+                            if (!res.ok) {
+                              console.error('CV sign failed:', res.status);
+                              return;
+                            }
+                            const { url } = await res.json();
+                            if (url) window.open(url, '_blank', 'noopener,noreferrer');
+                          } catch (err) {
+                            console.error('CV sign error:', err);
+                          }
+                        }}
+                        className="text-[#111] font-medium no-underline hover:underline bg-transparent border-0 p-0 cursor-pointer text-left"
                       >
                         {d.file_name}
-                      </a>
+                      </button>
                       {d.label && <span className="text-xs text-[#999] ml-2">({d.label})</span>}
                     </td>
                     <td className="px-4 py-3">
