@@ -320,8 +320,9 @@ export default function CandidateDashboard() {
             {myApplications.map((a: any) => {
               const brief = a.search_assignment
               const maisonLabel = brief?.is_confidential ? 'Confidential Maison' : (brief?.maison || '—')
-              return (
-                <div key={a.id} className="flex items-center gap-3 px-5 py-4">
+              const slug = brief?.slug
+              const rowContent = (
+                <>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm text-[#e0e0e0] mb-1 truncate">{brief?.title || 'Assignment'}</div>
                     <div className="text-[11px] text-[#999]">
@@ -331,6 +332,15 @@ export default function CandidateDashboard() {
                   <span className="text-[10px] font-semibold px-2 py-1 rounded border border-[rgba(165,142,40,0.3)] text-[#a58e28] whitespace-nowrap uppercase tracking-wider">
                     {a.current_stage.replace(/_/g, ' ')}
                   </span>
+                </>
+              )
+              return slug ? (
+                <Link key={a.id} href={`/careers/${slug}`} className="flex items-center gap-3 px-5 py-4 hover:bg-[#2a2a2a] transition-colors cursor-pointer">
+                  {rowContent}
+                </Link>
+              ) : (
+                <div key={a.id} className="flex items-center gap-3 px-5 py-4">
+                  {rowContent}
                 </div>
               )
             })}

@@ -27,7 +27,7 @@ export async function GET(_req: NextRequest) {
       id,
       current_stage,
       applied_at,
-      search_assignment:search_assignments!search_assignment_id(id, title, maison, is_confidential)
+      search_assignment:search_assignments!search_assignment_id(id, title, maison, is_confidential, slug)
     `)
     .eq('member_id', memberId)
     .order('applied_at', { ascending: false })
