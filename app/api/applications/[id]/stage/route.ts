@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { sendEmail } from '@/lib/ses'
+import { applicationStatusEmail } from '@/lib/email-templates'
+import { getStageLabel } from '@/types/application'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -125,6 +128,35 @@ export async function PUT(
 
     if (historyError) {
       console.error('[PUT /api/applications/[id]/stage] History insert error:', historyError)
+    }
+
+    // Notify candidate of stage change.
+    // Guards:
+    //   - only send if stage actually changed
+    //   - skip 'withdrawn' (handled by withdraw endpoint)
+    //   - require candidate email to exist
+    if (fromStage !== stage && stage !== 'withdrawn') {
+      const member = (updated as any).member
+      const assignment = (updated as any).search_assignment
+      const candidateEmail = member?.email
+      const candidateName = member?.full_name || ''
+      const firstName = candidateName.split(' ')[0] || undefined
+      const roleTitle = assignment?.title || 'your application'
+
+      if (candidateEmail) {
+        const stageLabel = getStageLabel(stage)
+        const tpl = applicationStatusEmail({
+          firstName,
+          roleTitle,
+          statusMessage: `Your application is now at the ${stageLabel} stage.`,
+        })
+        sendEmail({
+          to: candidateEmail,
+          subject: `Update: ${roleTitle}`,
+          body: tpl.text,
+          bodyHtml: tpl.html,
+        }).catch(() => {})
+      }
     }
 
     return NextResponse.json(updated)

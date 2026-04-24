@@ -167,6 +167,24 @@ export default function CandidateDashboard() {
     fetchAll()
   }, [session, memberId])
 
+  // ── Withdraw handler ──────────────────────────────────────────────
+  const [withdrawingId, setWithdrawingId] = useState<string | null>(null)
+  const handleWithdraw = async (appId: string) => {
+    if (!confirm('Withdraw this application? This cannot be undone.')) return
+    setWithdrawingId(appId)
+    try {
+      const res = await fetch(`/api/applications/${appId}/withdraw`, { method: 'POST' })
+      if (!res.ok) throw new Error('Failed')
+      setMyApplications((prev) =>
+        prev.map((a: any) => (a.id === appId ? { ...a, current_stage: 'withdrawn' } : a))
+      )
+    } catch {
+      alert('Failed to withdraw. Please try again.')
+    } finally {
+      setWithdrawingId(null)
+    }
+  }
+
   // ── Derived values ────────────────────────────────────────────────
   const firstName = memberData?.first_name || (session?.user?.name || 'there').split(' ')[0]
   const today = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
@@ -322,6 +340,7 @@ export default function CandidateDashboard() {
               const brief = a.search_assignment
               const maisonLabel = brief?.is_confidential ? 'Confidential Maison' : (brief?.maison || '—')
               const slug = brief?.slug
+              const isTerminal = ['offer_accepted', 'offer_declined', 'rejected', 'withdrawn'].includes(a.current_stage)
               const rowContent = (
                 <>
                   <div className="flex-1 min-w-0">
@@ -339,6 +358,20 @@ export default function CandidateDashboard() {
                   >
                     {getStageLabel(a.current_stage)}
                   </span>
+                  {!isTerminal && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        handleWithdraw(a.id)
+                      }}
+                      disabled={withdrawingId === a.id}
+                      className="text-[10px] text-[#888] hover:text-[#ccc] underline underline-offset-2 whitespace-nowrap disabled:opacity-50"
+                    >
+                      {withdrawingId === a.id ? 'Withdrawing...' : 'Withdraw'}
+                    </button>
+                  )}
                 </>
               )
               return slug ? (
