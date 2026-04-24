@@ -88,6 +88,7 @@ export default function CandidateDashboard() {
   const [events, setEvents] = useState<any[]>([])
   const [contributions, setContributions] = useState<any[]>([])
   const [contributionStats, setContributionStats] = useState<any>(null)
+  const [myApplications, setMyApplications] = useState<any[]>([])
 
   // ── Fetch all data ────────────────────────────────────────────────
   useEffect(() => {
@@ -145,6 +146,15 @@ export default function CandidateDashboard() {
           // Contribution points
           const pointsRes = await fetch('/api/contributions/my-points')
           if (pointsRes.ok) setContributionStats(await pointsRes.json())
+        }
+
+        // 7. My applications
+        if (memberId) {
+          const appsRes = await fetch('/api/applications/mine')
+          if (appsRes.ok) {
+            const aData = await appsRes.json()
+            setMyApplications(aData.applications || [])
+          }
         }
 
       } catch (err) {
@@ -292,6 +302,45 @@ export default function CandidateDashboard() {
               icon="◎"
               title="No active opportunities yet"
               description="New career opportunities are published regularly. Complete your Profilux profile to get matched when they go live."
+              actionLabel="Browse Careers →"
+              actionHref="/careers"
+            />
+          </div>
+        )}
+
+        {/* ── My Applications ── */}
+        <div className="flex items-center gap-3 mb-4">
+          <span className="text-[10px] font-semibold tracking-[2px] text-[#a58e28]">MY APPLICATIONS</span>
+          <div className="flex-1 h-px bg-[#2a2a2a]" />
+        </div>
+        {loading ? (
+          <div className="space-y-3 mb-8">{[1,2,3].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
+        ) : myApplications.length > 0 ? (
+          <div className="bg-[#222] border border-[#2a2a2a] rounded-xl divide-y divide-[#1e1e1e] mb-8">
+            {myApplications.map((a: any) => {
+              const brief = a.search_assignment
+              const maisonLabel = brief?.is_confidential ? 'Confidential Maison' : (brief?.maison || '—')
+              return (
+                <div key={a.id} className="flex items-center gap-3 px-5 py-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm text-[#e0e0e0] mb-1 truncate">{brief?.title || 'Assignment'}</div>
+                    <div className="text-[11px] text-[#999]">
+                      {maisonLabel} · Applied {timeAgo(a.applied_at)}
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-semibold px-2 py-1 rounded border border-[rgba(165,142,40,0.3)] text-[#a58e28] whitespace-nowrap uppercase tracking-wider">
+                    {a.current_stage.replace(/_/g, ' ')}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="bg-[#222] border border-[#2a2a2a] rounded-xl mb-8">
+            <EmptySection
+              icon="◈"
+              title="No applications yet"
+              description="Browse open opportunities and submit your interest."
               actionLabel="Browse Careers →"
               actionHref="/careers"
             />
