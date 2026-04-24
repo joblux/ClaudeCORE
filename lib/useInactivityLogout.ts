@@ -11,6 +11,7 @@ const CHECK_INTERVAL_MS = 30 * 1000            // Check every 30s in normal mode
 const COUNTDOWN_INTERVAL_MS = 1000             // Check every 1s during warning
 const STORAGE_KEY = "joblux_last_activity"
 const FORM_STORAGE_KEY = "joblux_unsaved_form"
+const RETURN_TO_KEY = "joblux_return_to"
 const ACTIVITY_EVENTS = ["mousemove", "mousedown", "keydown", "scroll", "touchstart", "click"] as const
 
 function now() {
@@ -161,6 +162,10 @@ export function useInactivityLogout() {
 
   const performLogout = useCallback(() => {
     saveFormData()
+    // Save return path for post-login redirect
+    try {
+      sessionStorage.setItem(RETURN_TO_KEY, window.location.pathname + window.location.search)
+    } catch {}
     // Clean up storage
     try { localStorage.removeItem(STORAGE_KEY) } catch {}
     signOut({ callbackUrl: "/members?error=inactivity" })
