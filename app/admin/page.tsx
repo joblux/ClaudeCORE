@@ -396,7 +396,25 @@ function AdminPageContent() {
                           </a>
                           {m.cv_url && (
                             <button
-                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCvPreview(m.cv_url!); }}
+                              onClick={async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                try {
+                                  const res = await fetch('/api/admin/cv/sign', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ memberId: m.id }),
+                                  });
+                                  if (!res.ok) {
+                                    console.error('CV sign failed:', res.status);
+                                    return;
+                                  }
+                                  const { url } = await res.json();
+                                  if (url) setCvPreview(url);
+                                } catch (err) {
+                                  console.error('CV sign error:', err);
+                                }
+                              }}
                               className="flex-shrink-0 text-[9px] uppercase tracking-wide px-1.5 py-0.5 bg-[#dbeafe] text-[#1d4ed8] rounded hover:bg-[#bfdbfe] transition-colors"
                             >
                               CV

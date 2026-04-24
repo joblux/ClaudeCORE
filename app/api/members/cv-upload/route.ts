@@ -54,23 +54,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to upload file. Please try again.' }, { status: 500 })
     }
 
-    // Get the URL (signed or public depending on bucket config)
-    const { data: urlData } = supabase.storage
-      .from('member-cvs')
-      .getPublicUrl(data.path)
-
     // Save to member_documents table so it appears in admin Documents tab
     await supabase.from('member_documents').insert({
       member_id: memberId,
       document_type: 'cv',
       file_name: file.name,
-      file_url: urlData.publicUrl,
+      file_url: data.path,
       file_size: buffer.length,
       is_primary: true,
       uploaded_at: new Date().toISOString(),
     })
 
-    return NextResponse.json({ success: true, url: urlData.publicUrl })
+    const { error: memberUpdateError } = await supabase
+      .from('members')
+      .update({ cv_url: data.path })
+      .eq('id', memberId)
+
+    if (memberUpdateError) {
+      console.error('members.cv_url update failed after upload:', memberUpdateError)
+      return NextResponse.json({ error: 'Upload succeeded but profile update failed. Please try again.' }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true, path: data.path })
   } catch (err) {
     console.error('CV upload error:', err)
     return NextResponse.json({ error: 'Upload failed. Please try again.' }, { status: 500 })

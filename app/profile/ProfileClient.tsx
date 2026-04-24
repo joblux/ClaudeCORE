@@ -2125,14 +2125,29 @@ export default function ProfileClient({ email }: { email: string }) {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <a
-                        href={doc.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-sans text-xs text-[#a58e28] hover:underline min-h-0 min-w-0"
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const res = await fetch('/api/members/cv/sign', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ documentId: doc.id }),
+                            });
+                            if (!res.ok) {
+                              console.error('CV sign failed:', res.status);
+                              return;
+                            }
+                            const { url } = await res.json();
+                            if (url) window.open(url, '_blank', 'noopener,noreferrer');
+                          } catch (err) {
+                            console.error('CV sign error:', err);
+                          }
+                        }}
+                        className="font-sans text-xs text-[#a58e28] hover:underline min-h-0 min-w-0 bg-transparent border-0 p-0 cursor-pointer"
                       >
                         Download
-                      </a>
+                      </button>
                       <button
                         type="button"
                         onClick={() => deleteDocument(doc.id)}
