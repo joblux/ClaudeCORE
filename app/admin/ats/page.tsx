@@ -1034,7 +1034,7 @@ export default function AdminATSPage() {
                       </div>
                     </td>
                     {/* Assignment */}
-                    <td style={{ padding: '10px 12px', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <td style={{ padding: '10px 12px', color: BLACK, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {app.search_assignment?.title ?? '\u2014'}
                     </td>
                     {/* Maison */}
