@@ -425,6 +425,42 @@ All tabbed pages use `?tab=` query params. Brands: 5 tabs (~760 sitemap URLs).
 
 ---
 
+## 24. PROFILUX ENFORCEMENT & ADMISSION THRESHOLD (REFOUNDATION)
+
+**Status:** Locked. Refoundation enforcement, not new doctrine. Do not create a new doctrine file.
+
+**Drift reset phrase:** *"follow L1–L5 + M6 exactly"*
+
+### L1–L5 — ProfiLux locks
+
+- **L1** — ProfiLux is the unified object across candidate dashboard, admin review, ATS/recruiting, and client submission. No parallel candidate records.
+- **L2** — Candidate-authored core is canonical. Recruiter overlay (notes, assessments, internal flags) is additive, never replacing. Client-shared version is a render of the same data.
+- **L3** — Minimum ProfiLux satisfies three constraints simultaneously: sufficient for Mo's admission review; sufficient for the recruiting loop to operate (search, shortlist, basic match signals); sufficient to be presentable to a client if Mo chose to submit early.
+- **L4** — Readiness ProfiLux is the application + matching threshold. Above readiness, candidate is fully functional in the recruiting loop and self-serve application is meaningful.
+- **L5** — Admin candidate surface is recruiting-loop-shaped. Pending review is one entry; the same surface family supports search, shortlist, profile management, client submission.
+
+### M6 — Minimum ProfiLux for admission
+
+Required fields before submission for Mo's review:
+
+- **Identity:** full name (first, last); city + country; primary email (OAuth-confirmed)
+- **Professional core:** current/most-recent role (brand + title + start date, end date if not current); one additional prior role (brand + title + dates); total years of experience; seniority level (per JOBLUX 9-level vocabulary, aligned with tier)
+- **Luxury fit:** primary sector (one of 8 locked sectors); sub-sector or specialization (per 35 subsectors / 28 specializations vocabulary)
+- **Capability:** at least one language with proficiency
+- **Authenticity:** CV file uploaded (prefill source, retained as evidence); user confirmation that the prefilled ProfiLux is accurate
+- **Phone:** OPTIONAL at M6
+
+CV alone does not create a candidate. **User confirmation of M6 is the act that creates a Pending Candidate.**
+
+### Phone policy
+
+- **Optional at M6 (admission).**
+- **Required at readiness, before any client submission.**
+
+Excluded from M6 (deferred to readiness): salary expectations, availability, education detail, skills/clienteling/product categories, photo, bio, portfolio, references, sharing settings.
+
+---
+
 *This document replaces: JOBLUX_MASTER_DOC_v1.docx, JOBLUX_Consolidated_System_v1_1.docx, JOBLUX_CURRENT_STATE_v1_1.docx, JOBLUX_SYSTEM_BLUEPRINT_v1.docx, JOBLUX_Architecture_Blueprint_v2.docx, Claude_build_charter.docx, and all previous context/handoff files.*
 
 *Update this file at the end of every session. Replace in project. One document, always current.*
