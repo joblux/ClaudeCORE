@@ -65,9 +65,9 @@ export default function CareerDetailClient({ assignmentId }: { assignmentId: str
 
   return (
     <div className="p-5 bg-[#222] border border-[#2a2a2a] text-center rounded-xl">
-      <div className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-2">Professionals Only</div>
+      <div className="text-[10px] text-[#a58e28] uppercase tracking-[0.14em] font-medium mb-2">Approved Professionals</div>
       <p className="text-xs text-[#999] mb-4">
-        Sign in to view full details and express interest.
+        Sign in or request access to express interest in this role.
       </p>
       <div className="flex items-center justify-center gap-3">
         <Link
@@ -82,10 +82,15 @@ export default function CareerDetailClient({ assignmentId }: { assignmentId: str
           Sign in
         </Link>
         <Link
-          href="/connect"
+          href="/select-profile"
+          onClick={() => {
+            try {
+              sessionStorage.setItem("joblux_return_to", window.location.pathname + window.location.search)
+            } catch {}
+          }}
           className="px-4 py-2 text-[11px] font-medium tracking-wide text-[#ccc] border border-[#333] rounded hover:border-[#555] transition-colors"
         >
-          Connect
+          Request access
         </Link>
       </div>
     </div>
