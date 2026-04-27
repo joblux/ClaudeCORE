@@ -41,20 +41,23 @@ schema → enums → constraints → routes → UX.
 Execution order locked to the Apr 25 handoff: ProfiLux as the recruiting-loop backbone. Current focus is the /connect vocabulary audit and its surgical follow-through.
 
 ### LAST SHIPPED
-/connect vocabulary audit — Bundle 1 (route/array changes only):
+Bundle 2 first item (commit 8e341a4, ledger 7533ac41):
+- /join redirects unauthenticated visitors to /members when no ?tier=, ?pending_tier=, ?error=, ?ref=
+- Live verified Apr 27 incognito: bare /join -> /members; ?error=pending banner shown; ?ref=test stays
+- 1 file, +7 lines
+
+/connect vocabulary audit — Bundle 1 (commit e349aab, 5 files, +5/-13):
 - /connect footer Sign in -> /members
 - /members footer Request access -> /connect
 - /select-profile: insider tile removed; grid lg:grid-cols-3
 - Header access modal RETURNING card -> /members
 - /careers/[slug] Request access -> /connect
-- Commit e349aab — 5 files, +5/-13
 
 ### CURRENT STEP
-Bundle 2 — /join becomes internal plumbing only:
-- /join page: redirect unauthenticated visitors to /members when no ?tier= and no ?pending_tier=
-- Auth machinery retargets: lib/auth-hooks.ts, lib/auth-server.ts, lib/auth.ts, middleware.ts ROLE_HOME, /invite, /account, /members/complete-registration — bare /join -> /members
+c8a3555a — Rebuild /members against current doctrine (dark #1a1a1a, Playfair, /join aesthetic, kill-word cleanup). Pulled forward Apr 27: routing more traffic to legacy /members creates UX regression. Must close before resuming Bundle 2 retargets.
 
 ### NEXT
+- Bundle 2 remaining retargets (PAUSED until c8a3555a closes): lib/auth-hooks.ts, lib/auth-server.ts, lib/auth.ts, middleware.ts ROLE_HOME, /invite, /account, /members/complete-registration — bare /join -> /members
 - Resume locked recruiting-loop flow (ProfiLux -> Admin candidate surface -> ATS fusion)
 - M6 minimum ProfiLux for admission (ledger 29f95a84) — schedule when implementation phase begins
 
