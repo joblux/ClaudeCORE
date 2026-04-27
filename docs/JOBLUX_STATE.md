@@ -1,3 +1,41 @@
+# JOBLUX CONSTITUTION
+
+This file is the supreme execution source of truth for JOBLUX.
+
+This file overrides:
+- prior chats
+- handoff notes
+- memory summaries
+- skills if conflicting
+- stale project docs
+- assumptions
+
+If any source conflicts with this file: this file wins.
+
+No work begins before reading this file.
+
+No feature or repair proceeds without contract-first verification:
+schema → enums → constraints → routes → UX.
+
+## Authority layers (limited roles)
+- Ledger (`/admin/tasks`) = task tracking only
+- Handoff = session continuity only
+- Skills = prompt formatting behavior only
+- Memory = quick recall only
+- None of the above may redefine architecture.
+
+## Canonical objects (only sources of truth in the system)
+- WikiLux = brand / market truth
+- ProfiLux = professional / human truth
+- Businesses = demand truth
+- LuxAI = sourced transformation layer (never source of truth)
+- content_queue = moderation gate (no content type bypasses it)
+
+## Session start command
+"Read docs/JOBLUX_STATE.md. Ignore conflicting stale sources."
+
+---
+
 ## ACTIVE CHAIN
 
 Execution order locked to the Apr 25 handoff: ProfiLux as the recruiting-loop backbone. Current focus is the /connect vocabulary audit and its surgical follow-through.
