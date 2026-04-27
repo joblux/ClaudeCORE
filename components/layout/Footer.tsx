@@ -22,7 +22,7 @@ export function Footer() {
             <Link href="/signals" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Signals</Link>
             <Link href="/insights" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Industry news &amp; analysis</Link>
             <Link href="/the-brief" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Biweekly newsletter</Link>
-            <Link href="/interviews" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Interview experiences</Link>
+            <Link href="/careers?tab=interview-experiences" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Interview experiences</Link>
             <Link href="/careers" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Careers intelligence</Link>
           </div>
 

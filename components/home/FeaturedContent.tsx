@@ -183,7 +183,7 @@ export async function InterviewIntelligence() {
             const initials = (exp.brand_name || '??').slice(0, 2).toUpperCase()
 
             return (
-              <Link key={exp.id} href="/interviews" className="block group">
+              <Link key={exp.id} href="/careers?tab=interview-experiences" className="block group">
                 <div className="flex items-start gap-4 p-4 border border-[#e8e2d8] hover:border-[#a58e28] transition-colors">
                   <div className="w-12 h-12 bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
                     <span className="jl-serif text-base text-[#a58e28]">{initials}</span>
@@ -207,7 +207,7 @@ export async function InterviewIntelligence() {
           Confidential interview experiences contributed by luxury professionals.
         </p>
       )}
-      <Link href="/interviews" className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors">
+      <Link href="/careers?tab=interview-experiences" className="inline-block mt-3 font-sans text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[#a58e28] hover:text-[#9a6f0a] transition-colors">
         More interviews →
       </Link>
     </div>
