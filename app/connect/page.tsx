@@ -87,7 +87,7 @@ export default function ConnectPage() {
         </p>
         <p className="text-xs text-[#777]">
           Already have access?{" "}
-          <Link href="/members" className="text-[#999] underline hover:text-[#aaa] transition-colors">
+          <Link href="/join" className="text-[#999] underline hover:text-[#aaa] transition-colors">
             Sign in here
           </Link>
         </p>

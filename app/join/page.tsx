@@ -61,13 +61,6 @@ function JoinContent() {
     }
   }, [ref]);
 
-  // Bare /join (no tier, no error, no ref) — redirect unauthenticated visitors to /members
-  useEffect(() => {
-    if (status !== "unauthenticated") return;
-    if (tier || pendingTierParam || error || ref) return;
-    router.replace("/members");
-  }, [status, tier, pendingTierParam, error, ref, router]);
-
   // Post-auth routing — applies pending tier from sessionStorage or URL param
   useEffect(() => {
     if (status !== "authenticated" || !session?.user) return;
