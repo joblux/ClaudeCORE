@@ -1,27 +1,34 @@
 ## ACTIVE CHAIN
 
-Execution order for recruiting loop stabilization. Ledger statuses untouched — this is the mental map, not DB truth.
+Execution order locked to the Apr 25 handoff: ProfiLux as the recruiting-loop backbone. Current focus is the /connect vocabulary audit and its surgical follow-through.
 
 ### LAST SHIPPED
-Recruiting cleanup polish:
-- 26c8dc62 — Application admin email link target fix (closed)
-- 05e02bc8 — ATS stage-move wiring verification (validated)
-- d1c6faba — Job page post-login redirect (closed)
-- a4541f31 — Assignment "Save as Draft" CHECK violation (closed)
-- 7695e7fb — Bridge redirect heading polish, commit bf93091 (closed)
+/connect vocabulary audit — Bundle 1 (route/array changes only):
+- /connect footer Sign in -> /members
+- /members footer Request access -> /connect
+- /select-profile: insider tile removed; grid lg:grid-cols-3
+- Header access modal RETURNING card -> /members
+- /careers/[slug] Request access -> /connect
+- Commit e349aab — 5 files, +5/-13
 
 ### CURRENT STEP
-- 54ab4af6 — Business briefs POST: sector field validated as required but not persisted (dropped from insert record)
+Bundle 2 — /join becomes internal plumbing only:
+- /join page: redirect unauthenticated visitors to /members when no ?tier= and no ?pending_tier=
+- Auth machinery retargets: lib/auth-hooks.ts, lib/auth-server.ts, lib/auth.ts, middleware.ts ROLE_HOME, /invite, /account, /members/complete-registration — bare /join -> /members
 
 ### NEXT
-- 5838b4b3 — Brief form attachments not delivered in admin notification email
-- 43079207 — Business briefs: stale-UUID orphans on created_by (8/10) + no FK constraint
-- f1c6d564 — JOBLUX_STATE.md refresh (paste Apr 23 version + re-upload to project knowledge)
+- Resume locked recruiting-loop flow (ProfiLux -> Admin candidate surface -> ATS fusion)
+- M6 minimum ProfiLux for admission (ledger 29f95a84) — schedule when implementation phase begins
 
 ### LATER (ProfiLux-dependent)
-- 18e3dec0 — Candidate–Job Matching Score (ProfiLux-ready)
+- 18e3dec0 — Candidate-Job Matching Score (ProfiLux-ready)
 - 1f7ccd56 — Matching absent in candidate dashboard feed
 - 0be2284c — CV parse lifecycle non-operational (cv_parsed_at never written)
+
+### PARKED (adjacent, not active thread)
+- 54ab4af6 — Business briefs POST: sector field validated but not persisted
+- 5838b4b3 — Brief form attachments not delivered in admin notification email
+- 43079207 — Business briefs: stale-UUID orphans on created_by + no FK constraint
 
 # JOBLUX_STATE.md
 **Single source of truth — replaces all previous docs**
