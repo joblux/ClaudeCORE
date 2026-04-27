@@ -3,20 +3,19 @@
 Execution order for recruiting loop stabilization. Ledger statuses untouched — this is the mental map, not DB truth.
 
 ### LAST SHIPPED
-Recruiting cleanup chain (3a/3b/3c):
-- 26c8dc62 — Application admin email link target fix (commit 5619a3c)
-- 05e02bc8 — ATS stage-move wiring verified clean (no commit, audit only)
-- d1c6faba — Job page post-login redirect (commit 8c02622)
+Recruiting cleanup polish:
+- 26c8dc62 — Application admin email link target fix (closed)
+- 05e02bc8 — ATS stage-move wiring verification (validated)
+- d1c6faba — Job page post-login redirect (closed)
+- a4541f31 — Assignment "Save as Draft" CHECK violation (closed)
+- 7695e7fb — Bridge redirect heading polish, commit bf93091 (closed)
 
 ### CURRENT STEP
-Start NEXT-list rotation. First item:
-- a4541f31 — Assignment form "Save as Draft" broken for blank form (CHECK violations on empty-string seniority/contract_type)
+- 54ab4af6 — Business briefs POST: sector field validated as required but not persisted (dropped from insert record)
 
 ### NEXT
-- 7695e7fb — Bridge redirect UX quirk ("Edit Search Assignment" heading post-bridge)
-- 54ab4af6 — Business briefs POST: sector field validated but not persisted
 - 5838b4b3 — Brief form attachments not delivered in admin notification email
-- 43079207 — Business briefs: stale-UUID orphans on created_by + no FK constraint
+- 43079207 — Business briefs: stale-UUID orphans on created_by (8/10) + no FK constraint
 - f1c6d564 — JOBLUX_STATE.md refresh (paste Apr 23 version + re-upload to project knowledge)
 
 ### LATER (ProfiLux-dependent)
