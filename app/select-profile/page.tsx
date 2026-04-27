@@ -27,14 +27,6 @@ const PROFILES = [
     features: ['Everything in Established','Comprehensive sector-level intelligence','Strategic compensation visibility','Priority for confidential assignments','Deepest intelligence layer'],
     cta: 'Select Senior & Executive',
   },
-
-  {
-    key: 'insider', overline: 'TRUSTED CONTRIBUTOR', title: 'Trusted Contributor',
-    description: 'For experienced professionals, content partners, and intelligence contributors whose knowledge strengthens the ecosystem.',
-    approval: 'Reviewed by JOBLUX', featured: false,
-    features: ['Shape the intelligence ecosystem directly','Contribute insights & editorial perspective','Deepest access to all intelligence layers','Review and enrich platform intelligence','Recognised as a trusted industry voice'],
-    cta: 'Request Contributor Access',
-  },
 ]
 
 export default function SelectProfilePage() {
@@ -103,7 +95,7 @@ export default function SelectProfilePage() {
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
             {PROFILES.map((profile) => <ProfileCard key={profile.key} profile={profile} submitting={submitting} onSelect={handleSelect} />)}
           </div>
           <div className="border-t border-[#2a2a2a] pt-8 text-center">

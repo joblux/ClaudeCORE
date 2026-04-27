@@ -82,7 +82,7 @@ export default function CareerDetailClient({ assignmentId }: { assignmentId: str
           Sign in
         </Link>
         <Link
-          href="/select-profile"
+          href="/connect"
           onClick={() => {
             try {
               sessionStorage.setItem("joblux_return_to", window.location.pathname + window.location.search)

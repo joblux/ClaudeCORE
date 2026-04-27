@@ -144,7 +144,7 @@ export default function MembersPage() {
           </Suspense>
         </div>
         <p className="text-center text-xs text-[#999] mt-6 leading-relaxed">All profiles are reviewed by the JOBLUX team.</p>
-        <p className="text-center text-xs mt-3"><Link href="/join" className="text-[#a58e28] hover:text-[#1a1a1a] transition-colors">Request access</Link></p>
+        <p className="text-center text-xs mt-3"><Link href="/connect" className="text-[#a58e28] hover:text-[#1a1a1a] transition-colors">Request access</Link></p>
       </div>
     </main>
   );

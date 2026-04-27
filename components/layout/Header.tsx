@@ -155,7 +155,7 @@ export function Header() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               {/* Returning */}
               <div
-                onClick={() => handleAccessCard('/join')}
+                onClick={() => handleAccessCard('/members')}
                 style={{ border: '1px solid #2b2b2b', background: '#202020', borderRadius: 12, padding: 20, cursor: 'pointer', transition: 'border-color 0.18s ease' }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#383838' }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#2b2b2b' }}
