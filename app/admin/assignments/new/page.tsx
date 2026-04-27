@@ -386,6 +386,7 @@ function NewAssignmentPage() {
   const searchParams = useSearchParams()
   const editId = searchParams.get('id')
   const isEditMode = Boolean(editId)
+  const fromBrief = searchParams.get('source') === 'brief'
 
   const [briefOptions, setBriefOptions] = useState<Array<{ id: string; company_name: string; brief_type: string; status: string }>>([])
 
@@ -614,11 +615,15 @@ function NewAssignmentPage() {
             &larr; Back to Assignments
           </Link>
           <h1 className="jl-serif text-2xl md:text-3xl text-[#1a1a1a] mt-4">
-            {isEditMode ? 'Edit Search Assignment' : 'New Search Assignment'}
+            {isEditMode
+              ? (fromBrief ? 'Finalize Search Assignment' : 'Edit Search Assignment')
+              : 'New Search Assignment'}
           </h1>
           <p className="text-sm text-[#666] mt-1">
             {isEditMode
-              ? 'Update details for this search assignment.'
+              ? (fromBrief
+                  ? 'Review and finalize the assignment created from this business brief.'
+                  : 'Update details for this search assignment.')
               : 'Create a new search assignment for the JOBLUX platform.'}
           </p>
         </div>

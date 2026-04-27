@@ -20,7 +20,7 @@ export default function CreateAssignmentFromBrief({ briefId, existingCount }: Pr
       }
       const data = await res.json()
       if (!data.assignment_id) throw new Error('Missing assignment id in response')
-      router.push(`/admin/assignments/new?id=${data.assignment_id}`)
+      router.push(`/admin/assignments/new?id=${data.assignment_id}&source=brief`)
     } catch (err: any) {
       setError(err.message)
       setCreating(false)
