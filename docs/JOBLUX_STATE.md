@@ -3,19 +3,16 @@
 Execution order for recruiting loop stabilization. Ledger statuses untouched — this is the mental map, not DB truth.
 
 ### LAST SHIPPED
-Candidate application polish:
-- branded withdraw admin email
-- dark withdraw confirmation modal
-- verified live (commit 0b5f6f2)
+Recruiting cleanup chain (3a/3b/3c):
+- 26c8dc62 — Application admin email link target fix (commit 5619a3c)
+- 05e02bc8 — ATS stage-move wiring verified clean (no commit, audit only)
+- d1c6faba — Job page post-login redirect (commit 8c02622)
 
 ### CURRENT STEP
-Start 3a/3b/3c recruiting cleanup:
-- 26c8dc62 — Application admin email link target fix
-- 05e02bc8 — ATS stage-move wiring verification
-- d1c6faba — Job page post-login redirect
+Start NEXT-list rotation. First item:
+- a4541f31 — Assignment form "Save as Draft" broken for blank form (CHECK violations on empty-string seniority/contract_type)
 
 ### NEXT
-- a4541f31 — Assignment form "Save as Draft" broken for blank form (CHECK violations on empty-string seniority/contract_type)
 - 7695e7fb — Bridge redirect UX quirk ("Edit Search Assignment" heading post-bridge)
 - 54ab4af6 — Business briefs POST: sector field validated but not persisted
 - 5838b4b3 — Brief form attachments not delivered in admin notification email
