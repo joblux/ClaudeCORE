@@ -522,6 +522,15 @@ function NewAssignmentPage() {
   const handleSubmit = async (submitStatus: 'draft' | 'published') => {
     setError('')
 
+    // Validate CHECK-constrained fields required for any save (draft or published)
+    const missingForSave: string[] = []
+    if (!form.seniority) missingForSave.push('Seniority')
+    if (!form.contract_type) missingForSave.push('Contract type')
+    if (missingForSave.length > 0) {
+      setError(`Required fields missing: ${missingForSave.join(', ')}`)
+      return
+    }
+
     // Validate required fields for activating
     if (submitStatus === 'published') {
       const missing: string[] = []
