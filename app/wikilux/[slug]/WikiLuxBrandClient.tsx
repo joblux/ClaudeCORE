@@ -706,7 +706,7 @@ export default function WikiLuxBrandClient({
                           <div className="jl-overline-gold mb-2">Professionals Only</div>
                           <p className="font-sans text-xs text-[#888] mb-3">Sign in to access full hiring intelligence</p>
                           <div className="flex items-center justify-center gap-2">
-                            <Link href="/members" className="jl-btn jl-btn-gold text-[0.6rem] py-1.5 px-3">Sign In</Link>
+                            <Link href="/connect" className="jl-btn jl-btn-gold text-[0.6rem] py-1.5 px-3">Sign In</Link>
                             <Link href="/join" className="jl-btn jl-btn-ghost text-[0.6rem] py-1.5 px-3">Request Access</Link>
                           </div>
                         </div>

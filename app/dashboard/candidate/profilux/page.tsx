@@ -118,7 +118,7 @@ export default function ProfiluxPage() {
   })
 
   useEffect(() => {
-    if (status === 'unauthenticated') router.push('/members')
+    if (status === 'unauthenticated') router.push('/auth/signin')
   }, [status, router])
 
   useEffect(() => {

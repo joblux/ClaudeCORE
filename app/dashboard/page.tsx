@@ -10,7 +10,7 @@ export default function DashboardRouter() {
 
   useEffect(() => {
     if (status === 'loading') return
-    if (!session) { router.push('/members'); return }
+    if (!session) { router.push('/auth/signin'); return }
 
     const role = (session.user as any)?.role
 

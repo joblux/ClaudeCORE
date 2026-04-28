@@ -71,7 +71,7 @@ export default function CareerDetailClient({ assignmentId }: { assignmentId: str
       </p>
       <div className="flex items-center justify-center gap-3">
         <Link
-          href="/members"
+          href="/connect"
           onClick={() => {
             try {
               sessionStorage.setItem("joblux_return_to", window.location.pathname + window.location.search)

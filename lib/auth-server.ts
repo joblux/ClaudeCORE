@@ -25,7 +25,7 @@ export async function getCurrentMember() {
 
 export async function requireAuth() {
   const member = await getCurrentMember();
-  if (!member) redirect("/members");
+  if (!member) redirect("/auth/signin");
   return member;
 }
 
@@ -39,6 +39,6 @@ export async function requireApproved() {
   const member = await requireAuth();
   if (member.status === "new") redirect("/join");
   if (member.status === "pending") redirect("/members/pending");
-  if (!member.isApproved) redirect("/members");
+  if (!member.isApproved) redirect("/auth/signin");
   return member;
 }

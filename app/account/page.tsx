@@ -21,7 +21,7 @@ export default async function AccountPage() {
   if (!memberId) redirect("/join")
   if (status === "new") redirect("/join")
   if (status === "pending") redirect("/members/pending")
-  if (status !== "approved" && role !== "admin") redirect("/members")
+  if (status !== "approved" && role !== "admin") redirect("/auth/signin")
 
   // Fetch full member data from Supabase
   const { data: member } = await supabase

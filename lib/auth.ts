@@ -90,7 +90,7 @@ export const authOptions: NextAuthOptions = {
       if (member) {
         if (member.status === "approved" || member.role === "admin") return true;
         if (member.status === "pending") return true;
-        if (member.status === "rejected") return "/members?error=rejected";
+        if (member.status === "rejected") return "/auth/signin?error=rejected";
       }
       return true;
     },

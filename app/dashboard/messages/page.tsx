@@ -123,7 +123,7 @@ export default function CandidateMessagesPage() {
     return (
       <div style={{ fontFamily: 'Inter, system-ui, sans-serif', padding: '60px 20px', textAlign: 'center', color: '#888', fontSize: 14 }}>
         <p>Please sign in to view your messages.</p>
-        <Link href="/members" style={{ color: '#a58e28', fontSize: 13 }}>Sign In</Link>
+        <Link href="/auth/signin" style={{ color: '#a58e28', fontSize: 13 }}>Sign In</Link>
       </div>
     )
   }

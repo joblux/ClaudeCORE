@@ -168,7 +168,7 @@ export function useInactivityLogout() {
     } catch {}
     // Clean up storage
     try { localStorage.removeItem(STORAGE_KEY) } catch {}
-    signOut({ callbackUrl: "/members?error=inactivity" })
+    signOut({ callbackUrl: "/auth/signin?error=inactivity" })
   }, [])
 
   // Attach activity listeners
