@@ -38,38 +38,25 @@ schema → enums → constraints → routes → UX.
 
 ## ACTIVE CHAIN
 
-Execution order locked to the Apr 25 handoff: ProfiLux as the recruiting-loop backbone. Current focus is the /connect vocabulary audit and its surgical follow-through.
+Execution order locked to the Apr 28 cleanup. The /members surface is fully retired. Recruiting-loop work resumes.
 
 ### LAST SHIPPED
-Bundle 2 first item (commit 8e341a4, ledger 7533ac41):
-- /join redirects unauthenticated visitors to /members when no ?tier=, ?pending_tier=, ?error=, ?ref=
-- Live verified Apr 27 incognito: bare /join -> /members; ?error=pending banner shown; ?ref=test stays
-- 1 file, +7 lines
-
-/connect vocabulary audit — Bundle 1 (commit e349aab, 5 files, +5/-13):
-- /connect footer Sign in -> /members
-- /members footer Request access -> /connect
-- /select-profile: insider tile removed; grid lg:grid-cols-3
-- Header access modal RETURNING card -> /members
-- /careers/[slug] Request access -> /connect
+/members surface fully retired across two commits:
+- ecb2b7a (Apr 27) — fix(members): kill legacy /members root, restore /join as canonical access. Deleted app/members/page.tsx (151 lines), retargeted /connect footer + Header RETURNING card, reverted bare /join → /members redirect from 8e341a4. Closes c8a3555a as "do not rebuild — route is dead."
+- 3887e6e (Apr 28) — fix(routing): remove dead /members redirects. Cleaned up 11 residual references across 10 files (auth guards/callbacks → /auth/signin preserving query params; public CTAs → /connect). Live verified: signed-out /dashboard chain, career detail Sign In, server-rendered /brands HTML clean.
 
 ### CURRENT STEP
-c8a3555a — Rebuild /members against current doctrine (dark #1a1a1a, Playfair, /join aesthetic, kill-word cleanup). Pulled forward Apr 27: routing more traffic to legacy /members creates UX regression. Must close before resuming Bundle 2 retargets.
+- 54ab4af6 — Business briefs POST: sector field validated as required but not persisted (dropped from insert record)
 
 ### NEXT
-- Bundle 2 remaining retargets (PAUSED until c8a3555a closes): lib/auth-hooks.ts, lib/auth-server.ts, lib/auth.ts, middleware.ts ROLE_HOME, /invite, /account, /members/complete-registration — bare /join -> /members
-- Resume locked recruiting-loop flow (ProfiLux -> Admin candidate surface -> ATS fusion)
-- M6 minimum ProfiLux for admission (ledger 29f95a84) — schedule when implementation phase begins
-
-### LATER (ProfiLux-dependent)
-- 18e3dec0 — Candidate-Job Matching Score (ProfiLux-ready)
-- 1f7ccd56 — Matching absent in candidate dashboard feed
-- 0be2284c — CV parse lifecycle non-operational (cv_parsed_at never written)
-
-### PARKED (adjacent, not active thread)
-- 54ab4af6 — Business briefs POST: sector field validated but not persisted
 - 5838b4b3 — Brief form attachments not delivered in admin notification email
 - 43079207 — Business briefs: stale-UUID orphans on created_by + no FK constraint
+- f1c6d564 — JOBLUX_STATE.md refresh / reconcile stale legacy body sections to current repo truth
+
+### LATER (ProfiLux-dependent)
+- 18e3dec0 — Candidate–Job Matching Score (ProfiLux-ready)
+- 1f7ccd56 — Matching absent in candidate dashboard feed
+- 0be2284c — CV parse lifecycle non-operational (cv_parsed_at never written)
 
 # JOBLUX_STATE.md
 **Single source of truth — replaces all previous docs**
