@@ -35,6 +35,8 @@ type BusinessBrief = {
   created_by: string | null
   created_at: string
   admin_notes: string | null
+  attachment_path: string | null
+  attachment_filename: string | null
 }
 
 type Submitter = {
@@ -122,6 +124,14 @@ export default async function AdminBusinessBriefDetailPage({ params }: { params:
       .eq('id', b.created_by)
       .maybeSingle()
     submitter = m as Submitter | null
+  }
+
+  let attachmentUrl: string | null = null
+  if (b.attachment_path) {
+    const { data: signed } = await supabaseAdmin.storage
+      .from('business-brief-attachments')
+      .createSignedUrl(b.attachment_path, 3600)
+    attachmentUrl = signed?.signedUrl || null
   }
 
   const { count: existingAssignmentCount } = await supabaseAdmin
@@ -217,6 +227,13 @@ export default async function AdminBusinessBriefDetailPage({ params }: { params:
             </div>
           )}
         </div>
+
+        {b.attachment_path && b.attachment_filename && attachmentUrl && (
+          <div style={{ ...cardStyle, marginTop: 16 }}>
+            <div style={sectionLabelStyle}>Attachment</div>
+            <a href={attachmentUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14, color: '#111', textDecoration: 'underline' }}>{b.attachment_filename}</a>
+          </div>
+        )}
 
         <div style={{ ...cardStyle, marginTop: 16 }}>
           <div style={sectionLabelStyle}>Contact</div>
