@@ -38,25 +38,24 @@ schema → enums → constraints → routes → UX.
 
 ## ACTIVE CHAIN
 
-Execution order locked to the Apr 28 close-out. /members surface retired earlier today; sector field shipped; brief attachment flow shipped end-to-end (Layers A/B/C). HEAD = e9825f5.
+Execution order for recruiting loop stabilization. Ledger statuses untouched — this is the mental map, not DB truth.
 
 ### LAST SHIPPED
-Apr 28 — recruiting loop hardening:
-- 3887e6e — fix(routing): remove dead /members redirects. 11 references across 10 files retargeted to /auth/signin or /connect.
-- cec2221 — docs(state): rotate ACTIVE CHAIN — /members fully retired.
-- 3031923 — feat(briefs): add required sector field to business brief flow. Closes 54ab4af6.
-- 4bf68d0 — feat(briefs): upload + persist attachment (Layer A). PDF/Word stored in private bucket business-brief-attachments, path + filename persisted on business_briefs row.
-- 8217d67 — feat(briefs): include attachment link in brief alert email (Layer B). Alex receives clickable filename in admin notification.
-- 757cd67 — feat(briefs): extend signed URL TTL to 3 days. Email link stable for 72h post-receipt.
-- 250b215 — feat(admin/briefs): show attachment with fresh signed URL (superseded by Layer C).
-- e9825f5 — feat(admin/briefs): just-in-time signed URL for attachment download (Layer C). Admin page button generates fresh URL per click via /api/admin/business-briefs/[id]/sign-attachment endpoint, pattern copied from /api/admin/cv/sign. Closes 5838b4b3.
+3a/3b/3c recruiting cleanup + assignment/brief follow-ups:
+- 26c8dc62 — Application admin email link target fix
+- 05e02bc8 — ATS stage-move wiring verification (validated)
+- d1c6faba — Job page post-login redirect
+- a4541f31 — Assignment "Save as Draft" CHECK violations
+- 7695e7fb — Bridge redirect "Edit Search Assignment" heading
+- 54ab4af6 — Business briefs POST sector field persistence
+- 5838b4b3 — Brief form attachments in admin notification email
 
 ### CURRENT STEP
-- 43079207 — Business briefs: stale-UUID orphans on created_by (8/10) + no FK constraint — data-quality + integrity gap
+- f1c6d564 — JOBLUX_STATE.md refresh (state doc rotation, in progress this session)
 
 ### NEXT
-- 735d3603 — Brief admin email: enrich content (show all filled fields) + fix View in admin to deep-link to /admin/business-briefs/[id]. Follow-up to 5838b4b3 closure.
-- f1c6d564 — JOBLUX_STATE.md refresh / reconcile stale legacy body sections to current repo truth.
+- 43079207 — Business briefs: stale-UUID orphans on created_by (8/10) + no FK constraint
+- 735d3603 — Brief admin email: enrich content (all filled fields) + fix View deep-link to /admin/business-briefs/[id]
 
 ### LATER (ProfiLux-dependent)
 - 18e3dec0 — Candidate–Job Matching Score (ProfiLux-ready)
