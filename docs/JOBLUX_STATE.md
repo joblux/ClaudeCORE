@@ -38,24 +38,23 @@ schema → enums → constraints → routes → UX.
 
 ## ACTIVE CHAIN
 
-Execution order for recruiting loop stabilization. Ledger statuses untouched — this is the mental map, not DB truth.
+Execution order. Ledger statuses untouched — this is the mental map, not DB truth.
 
 ### LAST SHIPPED
-3a/3b/3c recruiting cleanup + assignment/brief follow-ups:
-- 26c8dc62 — Application admin email link target fix
-- 05e02bc8 — ATS stage-move wiring verification (validated)
-- d1c6faba — Job page post-login redirect
-- a4541f31 — Assignment "Save as Draft" CHECK violations
-- 7695e7fb — Bridge redirect "Edit Search Assignment" heading
-- 54ab4af6 — Business briefs POST sector field persistence
-- 5838b4b3 — Brief form attachments in admin notification email
+Apr 28 session — recruiting brief loop hardening (4 closes):
+- f1c6d564 — JOBLUX_STATE.md ACTIVE CHAIN rotation (commit dd769ea)
+- 43079207 — Business briefs: orphan UUIDs cleared, FK to members(id) ON DELETE SET NULL added, created_by index added (DB-only)
+- 00e95d0f — POST /api/business-briefs auth gate (commit 1528159, verified live 401)
+- 735d3603 — Brief admin alert email enriched with all filled brief fields + deep-link to /admin/business-briefs/{id} (commit 8e43f41, end-to-end verified)
 
 ### CURRENT STEP
-- f1c6d564 — JOBLUX_STATE.md refresh (state doc rotation, in progress this session)
+Resequence from broader ledger. Next session opens by:
+1. Reading docs/JOBLUX_STATE.md (this file)
+2. Querying admin_tasks via Supabase MCP for open items, prioritized
+3. Picking the first surgical, self-contained item that doesn't require ProfiLux or product decisions
 
 ### NEXT
-- 43079207 — Business briefs: stale-UUID orphans on created_by (8/10) + no FK constraint
-- 735d3603 — Brief admin email: enrich content (all filled fields) + fix View deep-link to /admin/business-briefs/[id]
+(empty — chain exhausted, see CURRENT STEP for resequencing protocol)
 
 ### LATER (ProfiLux-dependent)
 - 18e3dec0 — Candidate–Job Matching Score (ProfiLux-ready)
