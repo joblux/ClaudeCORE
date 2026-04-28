@@ -5,6 +5,8 @@ import { DEPARTMENTS } from '@/lib/assignment-options'
 
 const BRIEF_TYPES = ['Executive search', 'Manager search', 'Exploratory']
 
+const SECTORS = ['Fashion', 'Jewelry', 'Watches', 'Beauty', 'Hospitality', 'Automotive', 'Spirits & Wine', 'Art & Culture', 'Other']
+
 const URGENCY_OPTIONS = ['Immediate', 'Within 30 days', 'Within this quarter', 'Exploratory']
 const CONFIDENTIALITY_OPTIONS = ['Standard', 'Sensitive', 'Highly confidential']
 
@@ -14,6 +16,7 @@ const FOLLOW_UP_OPTIONS = ['Email', 'Call', 'Either']
 
 const FIELD_LABELS: Record<string, string> = {
   brief_type: 'Brief type',
+  sector: 'Sector',
   urgency: 'Urgency',
   confidentiality_level: 'Confidentiality',
   brief_summary: 'Brief summary',
@@ -26,6 +29,7 @@ const initialForm = {
   company_website: '',
   geography: '',
   brief_type: '',
+  sector: '',
   urgency: '',
   confidentiality_level: '',
   mandate_title: '',
@@ -76,6 +80,7 @@ export default function BusinessBriefForm({ companyName, companyType }: Props) {
 
     const required: { key: string; check: boolean }[] = [
       { key: 'brief_type', check: !form.brief_type },
+      { key: 'sector', check: !form.sector },
       { key: 'urgency', check: !form.urgency },
       { key: 'confidentiality_level', check: !form.confidentiality_level },
       { key: 'brief_summary', check: !form.brief_summary.trim() },
@@ -181,7 +186,14 @@ export default function BusinessBriefForm({ companyName, companyType }: Props) {
             ))}
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px 20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '18px 20px' }}>
+          <div style={fieldGroupStyle}>
+            <label style={labelStyle}>Sector{requiredStar}</label>
+            <select data-field="sector" style={{ ...selectStyle, border: borderFor('sector') }} value={form.sector} onChange={e => set('sector', e.target.value)}>
+              <option value="">Select...</option>
+              {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
           <div style={fieldGroupStyle}>
             <label style={labelStyle}>Urgency{requiredStar}</label>
             <select data-field="urgency" style={{ ...selectStyle, border: borderFor('urgency') }} value={form.urgency} onChange={e => set('urgency', e.target.value)}>
