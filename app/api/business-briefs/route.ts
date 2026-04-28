@@ -35,6 +35,13 @@ const ATTACHMENT_ALLOWED_EXTS = ['.pdf', '.doc', '.docx']
 
 export async function POST(req: Request) {
   try {
+    // Require authenticated business member before any work
+    const session = await getServerSession(authOptions)
+    const memberId = (session?.user as any)?.memberId
+    if (!memberId) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
     const formData = await req.formData()
     const body: Record<string, string> = {}
     formData.forEach((value, key) => {
@@ -62,15 +69,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // Get session for created_by (nullable)
-    let createdBy: string | null = null
-    try {
-      const session = await getServerSession(authOptions)
-      if (session?.user && (session.user as any).memberId) {
-        createdBy = (session.user as any).memberId
-      }
-    } catch {}
-
     const record = {
       company_name: body.company_name.trim(),
       company_website: body.company_website?.trim() || null,
@@ -93,7 +91,7 @@ export async function POST(req: Request) {
       preferred_follow_up: body.preferred_follow_up,
       best_timing: body.best_timing?.trim() || null,
       status: 'under_review',
-      created_by: createdBy,
+      created_by: memberId,
     }
 
     const { data: inserted, error } = await supabaseAdmin
@@ -164,11 +162,11 @@ export async function POST(req: Request) {
       companyName: record.company_name,
     })
     let accountHolderEmail: string | null = null
-    if (createdBy) {
+    if (memberId) {
       const { data: holder } = await supabaseAdmin
         .from('members')
         .select('email')
-        .eq('id', createdBy)
+        .eq('id', memberId)
         .maybeSingle()
       accountHolderEmail = holder?.email ?? null
     }
