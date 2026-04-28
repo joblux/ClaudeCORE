@@ -906,8 +906,13 @@ export function adminNewBriefEmail(params: {
   contactName: string
   contactEmail: string
   summary: string
+  attachmentUrl?: string
+  attachmentFilename?: string
 }): EmailContent {
   const truncated = params.summary.length > 200 ? params.summary.slice(0, 200) + '…' : params.summary
+  const attachmentRow = params.attachmentUrl && params.attachmentFilename
+    ? adminRow('Attachment', `<a href="${params.attachmentUrl}" style="color:#B8975C;text-decoration:underline;">${params.attachmentFilename}</a>`)
+    : ''
   const html = adminLayout([
     `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New business brief</h2>`,
     `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
@@ -916,13 +921,17 @@ export function adminNewBriefEmail(params: {
     adminRow('Urgency', params.urgency),
     adminRow('Confidentiality', params.confidentiality),
     adminRow('Contact', `${params.contactName} (${params.contactEmail})`),
+    attachmentRow,
     `</table>`,
     `<div style="margin:16px 0;padding:12px;background:#f9f9f9;border-left:3px solid #B8975C;font-size:14px;color:#555;line-height:1.6;">${truncated}</div>`,
     adminButton('View in admin', `${SITE_URL}/admin/business-briefs`),
   ].join(''))
+  const attachmentText = params.attachmentUrl && params.attachmentFilename
+    ? `\nAttachment: ${params.attachmentFilename} — ${params.attachmentUrl}`
+    : ''
   return {
     html,
-    text: `New business brief\n\nCompany: ${params.companyName}\nBrief type: ${params.briefType}\nUrgency: ${params.urgency}\nConfidentiality: ${params.confidentiality}\nContact: ${params.contactName} (${params.contactEmail})\n\nSummary:\n${truncated}\n\nView: ${SITE_URL}/admin/business-briefs`,
+    text: `New business brief\n\nCompany: ${params.companyName}\nBrief type: ${params.briefType}\nUrgency: ${params.urgency}\nConfidentiality: ${params.confidentiality}\nContact: ${params.contactName} (${params.contactEmail})${attachmentText}\n\nSummary:\n${truncated}\n\nView: ${SITE_URL}/admin/business-briefs`,
   }
 }
 

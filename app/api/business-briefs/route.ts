@@ -106,7 +106,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: error?.message || 'Insert failed' }, { status: 500 })
     }
 
-    // Upload attachment if present, then update row
+    // Upload attachment if present, then update row + sign URL for email
+    let attachmentSignedUrl: string | null = null
+    let attachmentFilename: string | null = null
     if (attachment && attachment.size > 0) {
       try {
         const buffer = Buffer.from(await attachment.arrayBuffer())
@@ -123,6 +125,11 @@ export async function POST(req: Request) {
             .from('business_briefs')
             .update({ attachment_path: path, attachment_filename: attachment.name })
             .eq('id', inserted.id)
+          attachmentFilename = attachment.name
+          const { data: signed } = await supabaseAdmin.storage
+            .from('business-brief-attachments')
+            .createSignedUrl(path, 3600)
+          attachmentSignedUrl = signed?.signedUrl || null
         } else {
           console.error('Brief attachment upload failed:', uploadError)
         }
@@ -140,6 +147,8 @@ export async function POST(req: Request) {
       contactName: record.contact_name,
       contactEmail: record.contact_email,
       summary: record.brief_summary,
+      attachmentUrl: attachmentSignedUrl || undefined,
+      attachmentFilename: attachmentFilename || undefined,
     })
     await sendEmail({
       to: RECRUITING_ALERT_EMAIL,
