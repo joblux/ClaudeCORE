@@ -30,15 +30,35 @@ export async function GET() {
   return NextResponse.json({ briefs: data || [] })
 }
 
+const ATTACHMENT_MAX_SIZE = 10 * 1024 * 1024
+const ATTACHMENT_ALLOWED_EXTS = ['.pdf', '.doc', '.docx']
+
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
+    const formData = await req.formData()
+    const body: Record<string, string> = {}
+    formData.forEach((value, key) => {
+      if (typeof value === 'string') body[key] = value
+    })
 
     // Validate required fields
     const required = ['company_name', 'company_type', 'brief_type', 'sector', 'urgency', 'confidentiality_level', 'brief_summary', 'contact_name', 'contact_email', 'preferred_follow_up']
     for (const field of required) {
-      if (!body[field] || (typeof body[field] === 'string' && !body[field].trim())) {
+      if (!body[field] || !body[field].trim()) {
         return NextResponse.json({ success: false, error: `Missing required field: ${field}` }, { status: 400 })
+      }
+    }
+
+    // Optional attachment validation
+    const attachment = formData.get('attachment') as File | null
+    if (attachment && attachment.size > 0) {
+      const lower = attachment.name.toLowerCase()
+      const validExt = ATTACHMENT_ALLOWED_EXTS.some(ext => lower.endsWith(ext))
+      if (!validExt) {
+        return NextResponse.json({ success: false, error: 'Unsupported file type. Please upload a PDF or Word document.' }, { status: 400 })
+      }
+      if (attachment.size > ATTACHMENT_MAX_SIZE) {
+        return NextResponse.json({ success: false, error: 'File too large. Maximum size is 10MB.' }, { status: 400 })
       }
     }
 
@@ -76,10 +96,39 @@ export async function POST(req: Request) {
       created_by: createdBy,
     }
 
-    const { error } = await supabaseAdmin.from('business_briefs').insert(record)
+    const { data: inserted, error } = await supabaseAdmin
+      .from('business_briefs')
+      .insert(record)
+      .select('id')
+      .maybeSingle()
 
-    if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    if (error || !inserted) {
+      return NextResponse.json({ success: false, error: error?.message || 'Insert failed' }, { status: 500 })
+    }
+
+    // Upload attachment if present, then update row
+    if (attachment && attachment.size > 0) {
+      try {
+        const buffer = Buffer.from(await attachment.arrayBuffer())
+        const safeName = attachment.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+        const path = `${inserted.id}/${Date.now()}-${safeName}`
+        const { error: uploadError } = await supabaseAdmin.storage
+          .from('business-brief-attachments')
+          .upload(path, buffer, {
+            contentType: attachment.type || 'application/octet-stream',
+            upsert: false,
+          })
+        if (!uploadError) {
+          await supabaseAdmin
+            .from('business_briefs')
+            .update({ attachment_path: path, attachment_filename: attachment.name })
+            .eq('id', inserted.id)
+        } else {
+          console.error('Brief attachment upload failed:', uploadError)
+        }
+      } catch (uploadErr) {
+        console.error('Brief attachment processing error:', uploadErr)
+      }
     }
 
     // Admin notification

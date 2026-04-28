@@ -54,6 +54,7 @@ type Props = {
 
 export default function BusinessBriefForm({ companyName, companyType }: Props) {
   const [form, setForm] = useState(initialForm)
+  const [attachment, setAttachment] = useState<File | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
@@ -99,19 +100,23 @@ export default function BusinessBriefForm({ companyName, companyType }: Props) {
     }
     setSubmitting(true)
     try {
-      const payload = {
-        ...form,
-        company_name: companyName,
-        company_type: companyType,
+      const formData = new FormData()
+      Object.entries(form).forEach(([key, value]) => {
+        formData.append(key, value)
+      })
+      formData.append('company_name', companyName)
+      formData.append('company_type', companyType)
+      if (attachment) {
+        formData.append('attachment', attachment)
       }
       const res = await fetch('/api/business-briefs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: formData,
       })
       const data = await res.json()
       if (data.success) {
         setSubmitted(true)
+        setAttachment(null)
       } else {
         setError(data.error || 'Something went wrong. Please try again.')
       }
@@ -257,7 +262,10 @@ export default function BusinessBriefForm({ companyName, companyType }: Props) {
               style={{ ...inputStyle, padding: '8px 12px', cursor: 'pointer' }}
               onChange={e => {
                 const file = e.target.files?.[0]
-                if (file) set('attached_filename', file.name)
+                if (file) {
+                  setAttachment(file)
+                  set('attached_filename', file.name)
+                }
               }}
             />
             <div style={helperStyle}>Optional — PDF or Word document (job description, org chart, etc.)</div>
