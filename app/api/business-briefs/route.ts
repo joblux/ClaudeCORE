@@ -128,7 +128,7 @@ export async function POST(req: Request) {
           attachmentFilename = attachment.name
           const { data: signed } = await supabaseAdmin.storage
             .from('business-brief-attachments')
-            .createSignedUrl(path, 3600)
+            .createSignedUrl(path, 259200)
           attachmentSignedUrl = signed?.signedUrl || null
         } else {
           console.error('Brief attachment upload failed:', uploadError)
