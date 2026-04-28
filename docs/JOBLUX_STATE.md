@@ -38,20 +38,25 @@ schema → enums → constraints → routes → UX.
 
 ## ACTIVE CHAIN
 
-Execution order locked to the Apr 28 cleanup. The /members surface is fully retired. Recruiting-loop work resumes.
+Execution order locked to the Apr 28 close-out. /members surface retired earlier today; sector field shipped; brief attachment flow shipped end-to-end (Layers A/B/C). HEAD = e9825f5.
 
 ### LAST SHIPPED
-/members surface fully retired across two commits:
-- ecb2b7a (Apr 27) — fix(members): kill legacy /members root, restore /join as canonical access. Deleted app/members/page.tsx (151 lines), retargeted /connect footer + Header RETURNING card, reverted bare /join → /members redirect from 8e341a4. Closes c8a3555a as "do not rebuild — route is dead."
-- 3887e6e (Apr 28) — fix(routing): remove dead /members redirects. Cleaned up 11 residual references across 10 files (auth guards/callbacks → /auth/signin preserving query params; public CTAs → /connect). Live verified: signed-out /dashboard chain, career detail Sign In, server-rendered /brands HTML clean.
+Apr 28 — recruiting loop hardening:
+- 3887e6e — fix(routing): remove dead /members redirects. 11 references across 10 files retargeted to /auth/signin or /connect.
+- cec2221 — docs(state): rotate ACTIVE CHAIN — /members fully retired.
+- 3031923 — feat(briefs): add required sector field to business brief flow. Closes 54ab4af6.
+- 4bf68d0 — feat(briefs): upload + persist attachment (Layer A). PDF/Word stored in private bucket business-brief-attachments, path + filename persisted on business_briefs row.
+- 8217d67 — feat(briefs): include attachment link in brief alert email (Layer B). Alex receives clickable filename in admin notification.
+- 757cd67 — feat(briefs): extend signed URL TTL to 3 days. Email link stable for 72h post-receipt.
+- 250b215 — feat(admin/briefs): show attachment with fresh signed URL (superseded by Layer C).
+- e9825f5 — feat(admin/briefs): just-in-time signed URL for attachment download (Layer C). Admin page button generates fresh URL per click via /api/admin/business-briefs/[id]/sign-attachment endpoint, pattern copied from /api/admin/cv/sign. Closes 5838b4b3.
 
 ### CURRENT STEP
-- 54ab4af6 — Business briefs POST: sector field validated as required but not persisted (dropped from insert record)
+- 43079207 — Business briefs: stale-UUID orphans on created_by (8/10) + no FK constraint — data-quality + integrity gap
 
 ### NEXT
-- 5838b4b3 — Brief form attachments not delivered in admin notification email
-- 43079207 — Business briefs: stale-UUID orphans on created_by + no FK constraint
-- f1c6d564 — JOBLUX_STATE.md refresh / reconcile stale legacy body sections to current repo truth
+- 735d3603 — Brief admin email: enrich content (show all filled fields) + fix View in admin to deep-link to /admin/business-briefs/[id]. Follow-up to 5838b4b3 closure.
+- f1c6d564 — JOBLUX_STATE.md refresh / reconcile stale legacy body sections to current repo truth.
 
 ### LATER (ProfiLux-dependent)
 - 18e3dec0 — Candidate–Job Matching Score (ProfiLux-ready)
