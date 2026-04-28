@@ -6,6 +6,7 @@ import Link from 'next/link'
 import StatusControl from './StatusControl'
 import AdminNotesEditor from './AdminNotesEditor'
 import CreateAssignmentFromBrief from './CreateAssignmentFromBrief'
+import BriefAttachmentButton from './BriefAttachmentButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -126,14 +127,6 @@ export default async function AdminBusinessBriefDetailPage({ params }: { params:
     submitter = m as Submitter | null
   }
 
-  let attachmentUrl: string | null = null
-  if (b.attachment_path) {
-    const { data: signed } = await supabaseAdmin.storage
-      .from('business-brief-attachments')
-      .createSignedUrl(b.attachment_path, 3600)
-    attachmentUrl = signed?.signedUrl || null
-  }
-
   const { count: existingAssignmentCount } = await supabaseAdmin
     .from('search_assignments')
     .select('id', { count: 'exact', head: true })
@@ -228,10 +221,10 @@ export default async function AdminBusinessBriefDetailPage({ params }: { params:
           )}
         </div>
 
-        {b.attachment_path && b.attachment_filename && attachmentUrl && (
+        {b.attachment_path && b.attachment_filename && (
           <div style={{ ...cardStyle, marginTop: 16 }}>
             <div style={sectionLabelStyle}>Attachment</div>
-            <a href={attachmentUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14, color: '#111', textDecoration: 'underline' }}>{b.attachment_filename}</a>
+            <BriefAttachmentButton briefId={b.id} filename={b.attachment_filename} />
           </div>
         )}
 
