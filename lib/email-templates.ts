@@ -899,39 +899,95 @@ export function adminNewEmployerEmail(params: {
 }
 
 export function adminNewBriefEmail(params: {
+  briefId: string
   companyName: string
+  companyWebsite?: string | null
+  companyType?: string | null
+  geography?: string | null
   briefType: string
+  sector?: string | null
   urgency: string
   confidentiality: string
+  mandateTitle?: string | null
+  seniorityLevel?: string | null
+  functionArea?: string | null
+  location?: string | null
+  compensationRange?: string | null
   contactName: string
   contactEmail: string
+  contactRole?: string | null
+  preferredFollowUp?: string | null
+  bestTiming?: string | null
   summary: string
+  additionalContext?: string | null
   attachmentUrl?: string
   attachmentFilename?: string
 }): EmailContent {
-  const truncated = params.summary.length > 200 ? params.summary.slice(0, 200) + '…' : params.summary
+  const SUMMARY_CAP = 1500
+  const truncated = params.summary.length > SUMMARY_CAP ? params.summary.slice(0, SUMMARY_CAP) + '…' : params.summary
+  const truncatedContext = params.additionalContext && params.additionalContext.length > SUMMARY_CAP
+    ? params.additionalContext.slice(0, SUMMARY_CAP) + '…'
+    : params.additionalContext || ''
+
   const attachmentRow = params.attachmentUrl && params.attachmentFilename
     ? adminRow('Attachment', `<a href="${params.attachmentUrl}" style="color:#B8975C;text-decoration:underline;">${params.attachmentFilename}</a>`)
     : ''
+
+  const optionalRow = (label: string, value?: string | null) =>
+    value && value.trim() ? adminRow(label, value) : ''
+
+  const additionalContextBlock = truncatedContext
+    ? `<div style="margin:8px 0 16px;padding:12px;background:#f9f9f9;border-left:3px solid #999;font-size:14px;color:#555;line-height:1.6;"><div style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 6px;">Additional context</div>${truncatedContext}</div>`
+    : ''
+
   const html = adminLayout([
     `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">New business brief</h2>`,
     `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
     adminRow('Company', params.companyName),
+    optionalRow('Website', params.companyWebsite),
+    optionalRow('Company type', params.companyType),
+    optionalRow('Geography', params.geography),
     adminRow('Brief type', params.briefType),
+    optionalRow('Sector', params.sector),
     adminRow('Urgency', params.urgency),
     adminRow('Confidentiality', params.confidentiality),
+    optionalRow('Mandate title', params.mandateTitle),
+    optionalRow('Seniority', params.seniorityLevel),
+    optionalRow('Function', params.functionArea),
+    optionalRow('Location', params.location),
+    optionalRow('Compensation', params.compensationRange),
     adminRow('Contact', `${params.contactName} (${params.contactEmail})`),
+    optionalRow('Contact role', params.contactRole),
+    optionalRow('Preferred follow-up', params.preferredFollowUp),
+    optionalRow('Best timing', params.bestTiming),
     attachmentRow,
     `</table>`,
-    `<div style="margin:16px 0;padding:12px;background:#f9f9f9;border-left:3px solid #B8975C;font-size:14px;color:#555;line-height:1.6;">${truncated}</div>`,
-    adminButton('View in admin', `${SITE_URL}/admin/business-briefs`),
+    `<div style="margin:16px 0 8px;padding:12px;background:#f9f9f9;border-left:3px solid #B8975C;font-size:14px;color:#555;line-height:1.6;"><div style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 6px;">Brief summary</div>${truncated}</div>`,
+    additionalContextBlock,
+    adminButton('View in admin', `${SITE_URL}/admin/business-briefs/${params.briefId}`),
   ].join(''))
+
   const attachmentText = params.attachmentUrl && params.attachmentFilename
     ? `\nAttachment: ${params.attachmentFilename} — ${params.attachmentUrl}`
     : ''
+  const optionalText = (label: string, value?: string | null) =>
+    value && value.trim() ? `\n${label}: ${value}` : ''
+  const additionalContextText = truncatedContext ? `\n\nAdditional context:\n${truncatedContext}` : ''
+
   return {
     html,
-    text: `New business brief\n\nCompany: ${params.companyName}\nBrief type: ${params.briefType}\nUrgency: ${params.urgency}\nConfidentiality: ${params.confidentiality}\nContact: ${params.contactName} (${params.contactEmail})${attachmentText}\n\nSummary:\n${truncated}\n\nView: ${SITE_URL}/admin/business-briefs`,
+    text: `New business brief
+
+Company: ${params.companyName}${optionalText('Website', params.companyWebsite)}${optionalText('Company type', params.companyType)}${optionalText('Geography', params.geography)}
+Brief type: ${params.briefType}${optionalText('Sector', params.sector)}
+Urgency: ${params.urgency}
+Confidentiality: ${params.confidentiality}${optionalText('Mandate title', params.mandateTitle)}${optionalText('Seniority', params.seniorityLevel)}${optionalText('Function', params.functionArea)}${optionalText('Location', params.location)}${optionalText('Compensation', params.compensationRange)}
+Contact: ${params.contactName} (${params.contactEmail})${optionalText('Contact role', params.contactRole)}${optionalText('Preferred follow-up', params.preferredFollowUp)}${optionalText('Best timing', params.bestTiming)}${attachmentText}
+
+Summary:
+${truncated}${additionalContextText}
+
+View: ${SITE_URL}/admin/business-briefs/${params.briefId}`,
   }
 }
 

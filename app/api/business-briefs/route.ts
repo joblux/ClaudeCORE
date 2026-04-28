@@ -138,13 +138,27 @@ export async function POST(req: Request) {
 
     // Admin notification
     const admin = adminNewBriefEmail({
+      briefId: inserted.id,
       companyName: record.company_name,
+      companyWebsite: record.company_website,
+      companyType: record.company_type,
+      geography: record.geography,
       briefType: record.brief_type,
+      sector: record.sector,
       urgency: record.urgency,
       confidentiality: record.confidentiality_level,
+      mandateTitle: record.mandate_title,
+      seniorityLevel: record.seniority_level,
+      functionArea: record.function,
+      location: record.location,
+      compensationRange: record.compensation_range,
       contactName: record.contact_name,
       contactEmail: record.contact_email,
+      contactRole: record.contact_role,
+      preferredFollowUp: record.preferred_follow_up,
+      bestTiming: record.best_timing,
       summary: record.brief_summary,
+      additionalContext: record.additional_context,
       attachmentUrl: attachmentSignedUrl || undefined,
       attachmentFilename: attachmentFilename || undefined,
     })
