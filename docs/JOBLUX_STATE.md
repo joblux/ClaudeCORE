@@ -40,26 +40,39 @@ schema → enums → constraints → routes → UX.
 
 Execution order. Ledger statuses untouched — this is the mental map, not DB truth.
 
-### LAST SHIPPED
-Apr 28 session — recruiting brief loop hardening (4 closes):
-- f1c6d564 — JOBLUX_STATE.md ACTIVE CHAIN rotation (commit dd769ea)
-- 43079207 — Business briefs: orphan UUIDs cleared, FK to members(id) ON DELETE SET NULL added, created_by index added (DB-only)
-- 00e95d0f — POST /api/business-briefs auth gate (commit 1528159, verified live 401)
-- 735d3603 — Brief admin alert email enriched with all filled brief fields + deep-link to /admin/business-briefs/{id} (commit 8e43f41, end-to-end verified)
+### LAST SHIPPED (Apr 29 2026 session — ProfiLux Refoundation pivot to CV-first)
+- Migration `add_m6_confirmed_at_to_members` applied — column `members.m6_confirmed_at timestamptz` (neutral additive, all rows NULL)
+- Migration `add_cv_parsed_data_to_members` applied — column `members.cv_parsed_data jsonb` (neutral additive, all rows NULL)
+- RPC `submit_m6_admission` created — INERT, no route calls it, parked for replacement (incompatible with locked Apr-14 11-screen prototype)
+- File written locally: `app/api/members/cv-parse/route.ts` (579 lines, build green Apr 29 17:57)
+- pdf-parse v2 PDFParse API patch applied (v1 default-callable removed in v2.4.5)
+- Parser model verified: `claude-haiku-4-5` ($1/$5 per MTok, Anthropic active)
 
-### CURRENT STEP
-Resequence from broader ledger. Next session opens by:
-1. Reading docs/JOBLUX_STATE.md (this file)
-2. Querying admin_tasks via Supabase MCP for open items, prioritized
-3. Picking the first surgical, self-contained item that doesn't require ProfiLux or product decisions
+### CURRENT STEP — strict order, no skip, no resequence from broader ledger
+1. **CV asset preservation fixture tests** (mandatory before any commit). Snapshot/diff approach pre/post parse on a fixture member with a real PDF uploaded:
+   - `members.cv_url` identical pre/post
+   - `member_documents` rows identical pre/post (id, file_name, file_url, is_primary)
+   - `member-cvs` bucket file existence + size identical pre/post
+   - Run on success path AND on forced error path (e.g. corrupt ANTHROPIC_API_KEY)
+   - Static inspection: confirm zero `update({cv_url})`, zero `member_documents` writes, zero `storage.upload/remove/move` in route code
+2. If all asset preservation tests pass → commit + push `app/api/members/cv-parse/route.ts`
+3. Only after commit → resume UI tunnel build per `~/Desktop/joblux-prototypes/profilux-journey.html` (11 screens: Access → Tier → Auth → CV upload → Parsing modal → Identity verify → Experience verify → Sectors & Languages → Availability → Recap & Submit → Pending → Vitrine)
 
-### NEXT
-(empty — chain exhausted, see CURRENT STEP for resequencing protocol)
+### DO NOT
+- Do not pick `269e4ff9` (rejection emails missing) or any other generic admin_tasks item
+- Do not resequence backlog from broader ledger
+- Do not commit/push until fixture tests green AND Mo explicitly approves
 
-### LATER (ProfiLux-dependent)
+### PARKED (admin_tasks status=parked, created Apr 29 2026)
+- `2847ac29` — Audit + migrate Anthropic model IDs across repo before Sonnet 4 retirement (deadline Jun 15 2026)
+- `1e6162ea` — Replace inert RPC submit_m6_admission (incompatible with locked Apr-14 11-screen proto)
+
+### LEDGER NOTE
+- Ticket `0be2284c` (CV parse lifecycle non-operational, 5/5 cv_url rows have cv_parsed_at=NULL) remains OPEN until cv-parse route committed + producing `cv_parsed_at` writes in production. Do not close until then.
+
+### LATER (ProfiLux-dependent, post-Phase 2 join UI)
 - 18e3dec0 — Candidate–Job Matching Score (ProfiLux-ready)
 - 1f7ccd56 — Matching absent in candidate dashboard feed
-- 0be2284c — CV parse lifecycle non-operational (cv_parsed_at never written)
 
 # JOBLUX_STATE.md
 **Single source of truth — replaces all previous docs**
