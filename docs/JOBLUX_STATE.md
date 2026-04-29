@@ -40,51 +40,56 @@ schema → enums → constraints → routes → UX.
 
 Execution order. Ledger statuses untouched — this is the mental map, not DB truth.
 
-### LAST SHIPPED (Apr 29 2026 session — ProfiLux Refoundation pivot to CV-first)
-- Migration `add_m6_confirmed_at_to_members` applied — column `members.m6_confirmed_at timestamptz` (neutral additive, all rows NULL)
-- Migration `add_cv_parsed_data_to_members` applied — column `members.cv_parsed_data jsonb` (neutral additive, all rows NULL)
-- RPC `submit_m6_admission` created — INERT, no route calls it, parked for replacement (incompatible with locked Apr-14 11-screen prototype)
-- File written locally (uncommitted): `app/api/members/cv-parse/route.ts` (579 lines, build green Apr 29 17:57)
-- pdf-parse v2 PDFParse API patch applied (v1 default-callable removed in v2.4.5)
-- Parser model verified: `claude-haiku-4-5` ($1/$5 per MTok, Anthropic active)
-- **Static inspection PASS** on `app/api/members/cv-parse/route.ts` (Apr 29 18:00):
-  - Zero writes to `cv_url` (only `.select`, `.eq`, `.download(member.cv_url)`, comparison reads, and `cv_storage_path: member.cv_url` value pass-through)
-  - Zero `member_documents` writes (table not referenced — only mentioned in 2 comments)
-  - Zero storage write ops (no `upload`, `remove`, `move`, `copy`)
-  - Only allowed `members` UPDATE fields: `cv_parsed_data`, `cv_parsed_at`, `updated_at` (single update block at line 538–544)
+### LAST SHIPPED (Apr 30 2026 session — sanitization patch on cv-parse route)
+- Sanitization patch applied to `app/api/members/cv-parse/route.ts` (uncommitted, untracked):
+  - `logHistory` param type no longer accepts `response`
+  - `luxai_history.response` hardcoded to `{}` (line 249)
+  - Success-path `logHistory` call no longer passes `response: finalPayload`
+- Post-patch grep: exactly one `response: {}` line in source
+- TypeScript check: `npx tsc --noEmit` EXIT=0
+- DB audit: `luxai_history` where `type='cv_parse'` → 0 rows (no historical leakage to purge)
+- Fixture `zaharablend@gmail.com` (`6a522cbf-806f-438b-b6c7-c1c90da88326`) created on live via Google OAuth — DB/storage verified, but unusable for localhost dynamic test (provider conflict on magic-link). Row preserved in DB, untouched.
+- Static inspection findings logged: F8 (authz session-bound, body ignored), F9 (JWT staleness on schema additions), F-mime (member_documents.mime_type NULL pre-existing), F-cv_url (5/8 cv_url rows full-URL format, breaks `.download()`).
+- No parse executed. No commit. No push of parser route.
 
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
-1. **Read-only DB verification** of fixture candidates with `cv_url IS NOT NULL`. Identify a viable fixture member, confirm CV file exists in `member-cvs` bucket, capture pre-parse snapshot (cv_url, member_documents rows, bucket file metadata).
-2. **Dynamic pre/post parse fixture tests** (mandatory before any commit). Trigger parser on the fixture member, then verify:
-   - `members.cv_url` identical pre/post
-   - `member_documents` rows identical pre/post (id, file_name, file_url, is_primary)
-   - `member-cvs` bucket file existence + size identical pre/post
-   - Run on success path AND on forced error path (e.g. corrupt ANTHROPIC_API_KEY)
-3. **Commit + push `app/api/members/cv-parse/route.ts`** ONLY if dynamic tests are green AND Mo explicitly approves.
-4. Only after commit + push → resume UI tunnel build per `~/Desktop/joblux-prototypes/profilux-journey.html` (11 screens: Access → Tier → Auth → CV upload → Parsing modal → Identity verify → Experience verify → Sectors & Languages → Availability → Recap & Submit → Pending → Vitrine).
+1. **Confirm local server** — `npm run dev`, route exists locally only, no prod route.
+2. **Create fresh fixture for localhost** — fresh email alias never used with Google (e.g. `mzaourm+cvparse01@gmail.com`). Sign in via Email magic-link on localhost only. Upload Mo-controlled or synthetic CV. Stop after upload.
+3. **Read-only fixture verification** — M/D/B pre-snapshot via Supabase MCP.
+4. **Success-path dynamic test** — curl `POST localhost:3000/api/members/cv-parse` with localhost session cookie, no body. Report HTTP status + body keys only + elapsed + dev terminal errors. Do not paste parsed CV.
+5. **Post-snapshot verification** — confirm cv_url/member_documents/storage unchanged, cv_parsed_at + cv_parsed_data populated, luxai_history has one cv_parse success row with `response = {}`.
+6. **Forced-error path** — corrupt `ANTHROPIC_API_KEY`, restart dev, re-run curl, verify zero mutation outside `members.cv_parsed_*`, luxai_history error row has `response = {}`, restore key, restart.
+7. **Commit + push** `app/api/members/cv-parse/route.ts` ONLY if both paths green AND Mo explicitly approves.
+8. After commit/push → resume UI tunnel build (11-screen ProfiLux journey).
 
 ### DO NOT
-- Do not pick `269e4ff9` (rejection emails missing) or any other generic admin_tasks item
-- Do not resequence backlog from broader ledger
-- Do not commit/push the parser route until dynamic fixture tests green AND Mo explicitly approves
+- Use Hélène BILLARD as fixture (consent unconfirmed, blocked permanently).
+- Use ZaharaBlend on localhost (Google-bound, provider conflict).
+- Mint JWE/JWT cookies as workaround.
+- Add localhost callback to Google OAuth Console (out of scope).
+- Delete any DB row without explicit Mo order after read-only proof.
+- Commit/push the parser route until dynamic tests green AND Mo explicitly approves.
+- Resequence backlog from broader ledger.
 
-### SESSION NOTE
-- **Repo rail repaired Apr 29 2026.** Mid-session pivot from form-first M6 to CV-first ProfiLux Refoundation prototype. State doc rotation initially failed (manual block printed only), causing next-session drift toward generic ledger items. Fix: explicit `str_replace` patch on this file, validated by `PATCH OK` + `git diff` + post-read. Drift prevented going forward by explicit CURRENT STEP locking inside this file (see DO NOT section). All future session opens must read this file first and execute CURRENT STEP only.
+### SESSION NOTE (Apr 30)
+- Sanitization scope was added mid-session (GPT-approved, out of original Apr 29 CURRENT STEP) — `luxai_history.response` was found to store full Haiku output, undocumented in static inspection PASS. Patch closes that leak before any real CV touches the route.
+- Localhost auth detour: ~3h burned on Google OAuth localhost mismatch + JWT mint workaround. Root cause: fixture created via prod Google OAuth, then required localhost session. New rule: **for any local-route test, fixture auth must be localhost-compatible from creation.** Email magic-link only.
+- If blocked >15 min on any path tomorrow, stop and pick simplest path before continuing.
 
 ### PARKED (admin_tasks status=parked, created Apr 29 2026)
 - `2847ac29` — Audit + migrate Anthropic model IDs across repo before Sonnet 4 retirement (deadline Jun 15 2026)
 - `1e6162ea` — Replace inert RPC submit_m6_admission (incompatible with locked Apr-14 11-screen proto)
 
+### NEW FINDINGS LOGGED (out of immediate scope, surface separately)
+- **F-cv_url** — 5/8 `members.cv_url` rows store full-URL format; breaks `.download()` contract. Pipeline format inconsistency between Apr 4–18 and Apr 25+ uploads.
+- **F-mime** — `member_documents.mime_type` NULL on recent rows despite bucket having `application/pdf`. Pre-existing pipeline gap.
+- **F8** — `/api/members/cv-parse` is session-bound: reads `memberId` from session, ignores request body. Document in route docs when UI tunnel is built.
+- **F9** — JWT staleness: token claims set on sign-in only, schema additions to `members` won't propagate to existing JWTs until next sign-in.
+
 ### LEDGER NOTE
 - Ticket `0be2284c` (CV parse lifecycle non-operational, 5/5 cv_url rows have cv_parsed_at=NULL) remains OPEN until cv-parse route committed + producing `cv_parsed_at` writes in production. Do not close until then.
 
-### LATER (ProfiLux-dependent, post-Phase 2 join UI)
-- 18e3dec0 — Candidate–Job Matching Score (ProfiLux-ready)
-- 1f7ccd56 — Matching absent in candidate dashboard feed
-
-# JOBLUX_STATE.md
-**Single source of truth — replaces all previous docs**
-**Last updated:** April 13, 2026
+**Last updated:** April 30, 2026
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
