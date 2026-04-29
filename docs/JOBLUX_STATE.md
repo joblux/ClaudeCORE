@@ -44,24 +44,32 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 - Migration `add_m6_confirmed_at_to_members` applied — column `members.m6_confirmed_at timestamptz` (neutral additive, all rows NULL)
 - Migration `add_cv_parsed_data_to_members` applied — column `members.cv_parsed_data jsonb` (neutral additive, all rows NULL)
 - RPC `submit_m6_admission` created — INERT, no route calls it, parked for replacement (incompatible with locked Apr-14 11-screen prototype)
-- File written locally: `app/api/members/cv-parse/route.ts` (579 lines, build green Apr 29 17:57)
+- File written locally (uncommitted): `app/api/members/cv-parse/route.ts` (579 lines, build green Apr 29 17:57)
 - pdf-parse v2 PDFParse API patch applied (v1 default-callable removed in v2.4.5)
 - Parser model verified: `claude-haiku-4-5` ($1/$5 per MTok, Anthropic active)
+- **Static inspection PASS** on `app/api/members/cv-parse/route.ts` (Apr 29 18:00):
+  - Zero writes to `cv_url` (only `.select`, `.eq`, `.download(member.cv_url)`, comparison reads, and `cv_storage_path: member.cv_url` value pass-through)
+  - Zero `member_documents` writes (table not referenced — only mentioned in 2 comments)
+  - Zero storage write ops (no `upload`, `remove`, `move`, `copy`)
+  - Only allowed `members` UPDATE fields: `cv_parsed_data`, `cv_parsed_at`, `updated_at` (single update block at line 538–544)
 
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
-1. **CV asset preservation fixture tests** (mandatory before any commit). Snapshot/diff approach pre/post parse on a fixture member with a real PDF uploaded:
+1. **Read-only DB verification** of fixture candidates with `cv_url IS NOT NULL`. Identify a viable fixture member, confirm CV file exists in `member-cvs` bucket, capture pre-parse snapshot (cv_url, member_documents rows, bucket file metadata).
+2. **Dynamic pre/post parse fixture tests** (mandatory before any commit). Trigger parser on the fixture member, then verify:
    - `members.cv_url` identical pre/post
    - `member_documents` rows identical pre/post (id, file_name, file_url, is_primary)
    - `member-cvs` bucket file existence + size identical pre/post
    - Run on success path AND on forced error path (e.g. corrupt ANTHROPIC_API_KEY)
-   - Static inspection: confirm zero `update({cv_url})`, zero `member_documents` writes, zero `storage.upload/remove/move` in route code
-2. If all asset preservation tests pass → commit + push `app/api/members/cv-parse/route.ts`
-3. Only after commit → resume UI tunnel build per `~/Desktop/joblux-prototypes/profilux-journey.html` (11 screens: Access → Tier → Auth → CV upload → Parsing modal → Identity verify → Experience verify → Sectors & Languages → Availability → Recap & Submit → Pending → Vitrine)
+3. **Commit + push `app/api/members/cv-parse/route.ts`** ONLY if dynamic tests are green AND Mo explicitly approves.
+4. Only after commit + push → resume UI tunnel build per `~/Desktop/joblux-prototypes/profilux-journey.html` (11 screens: Access → Tier → Auth → CV upload → Parsing modal → Identity verify → Experience verify → Sectors & Languages → Availability → Recap & Submit → Pending → Vitrine).
 
 ### DO NOT
 - Do not pick `269e4ff9` (rejection emails missing) or any other generic admin_tasks item
 - Do not resequence backlog from broader ledger
-- Do not commit/push until fixture tests green AND Mo explicitly approves
+- Do not commit/push the parser route until dynamic fixture tests green AND Mo explicitly approves
+
+### SESSION NOTE
+- **Repo rail repaired Apr 29 2026.** Mid-session pivot from form-first M6 to CV-first ProfiLux Refoundation prototype. State doc rotation initially failed (manual block printed only), causing next-session drift toward generic ledger items. Fix: explicit `str_replace` patch on this file, validated by `PATCH OK` + `git diff` + post-read. Drift prevented going forward by explicit CURRENT STEP locking inside this file (see DO NOT section). All future session opens must read this file first and execute CURRENT STEP only.
 
 ### PARKED (admin_tasks status=parked, created Apr 29 2026)
 - `2847ac29` — Audit + migrate Anthropic model IDs across repo before Sonnet 4 retirement (deadline Jun 15 2026)
