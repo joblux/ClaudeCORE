@@ -58,15 +58,23 @@ Reference, not new shipment:
 
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
 
-1. **Wire cv-parse to UI** — add Parse trigger in `/dashboard/candidate/profilux` flow. Implementation MUST follow `docs/PROFILUX_MATRIX_V1.md` contract:
-   - Use the resolver `resolveProfiLux(memberId)` for all reads
-   - Use `projectFor(view, 'editor')` for the editor surface
-   - Parse output is L1 only — never auto-writes to `members.*` (L2 sovereignty per §5.2 of Matrix v1)
-   - User-confirmed prefill goes through L2 edit endpoints (which must call `computeProfileCompleteness` after write)
-   - No direct `members.*` or `cv_parsed_data` reads in UI components
-   - Begin with discussion/scoping before any code
+**Path C locked (Apr 30 late evening).** Audit revealed `/api/profilux` reads/writes the FROZEN-OUT standalone `profilux` table (Matrix v1 §9 violation in code today). cv-parse cannot wire to a surface that violates the contract it's supposed to serve. Migration sequenced first.
 
-2. **Resume 11-screen ProfiLux tunnel** — Refoundation L1-L5 + M6 enforcement, gated on item 1.
+1. **Migrate `/api/profilux` to Matrix v1 contract** — refactor route handlers to read/write `members.*` per Matrix v1 §6 (resolver) and §11 (forbidden patterns):
+   - Build `lib/profilux/resolveProfiLux.ts` (Q3 contract: L2 wins, L1 fills NULL gaps, single server-side function)
+   - Build `lib/profilux/projectFor.ts` (Q5 contract: 6 surface projections, single switch)
+   - Build `lib/profilux/computeProfileCompleteness.ts` (Q4 contract: recompute on write)
+   - Build `lib/profilux/computeM6Eligible.ts` (Q6 contract: computed from resolved view)
+   - Refactor `/api/profilux` GET to return `projectFor(resolveProfiLux(memberId), 'editor')`
+   - Refactor `/api/profilux` POST to write `members.*` flat columns + recompute completeness (NOT the standalone `profilux` table)
+   - Refactor `/api/members/me` to include `profile_completeness`, `m6_confirmed_at`, `cv_url`, `cv_parsed_at` (currently all missing)
+   - Park `/api/profilux/reset-link` separately (still writes frozen-out table; not in v1 scope until sharing UX is rebuilt)
+   - **No data migration of the 3 standalone `profilux` rows.** They are dormant (`sharing_enabled = false` on all 3, 0 live public routes). Treat as frozen legacy data; cleanup is a separate post-v1 deprecation session.
+   - **Implementation likely breaks into:** (1) Matrix utilities, (2) `/api/profilux` GET migration, (3) `/api/profilux` POST migration, (4) `/api/members/me` alignment. Do not pre-commit to commit count; sequence ships as it lands cleanly.
+
+2. **Wire cv-parse to UI** — add Parse trigger in `/dashboard/candidate/profilux` flow, gated on item 1. Parse output writes L1 only (`cv_parsed_data`). User-confirmed prefill goes through the migrated L2 edit endpoints. No direct `members.*` or `cv_parsed_data` reads in UI.
+
+3. **Resume 11-screen ProfiLux tunnel** — Refoundation L1-L5 + M6 enforcement, gated on items 1+2.
 
 ### DO NOT
 - Touch cv-parse route again unless a new bug surfaces (currently green in prod, do not regress).
@@ -74,27 +82,33 @@ Reference, not new shipment:
 - Use Hélène BILLARD as fixture (consent unconfirmed, blocked permanently).
 - Read `members.*` or `cv_parsed_data` directly from any UI surface for ProfiLux fields — go through `projectFor`.
 - Implement L1 → L2 silent writes from any code path.
+- Migrate the 3 dormant `profilux` standalone rows during item 1 — data migration is post-v1 cleanup, not part of route migration.
+- Wire cv-parse to UI before item 1 lands (would create the parallel-surface mess Matrix v1 was written to prevent).
+- Touch `/api/profilux/reset-link` during item 1 — sharing UX is a separate post-migration concern.
 - Resequence backlog from broader ledger.
 
-### SESSION NOTE (Apr 30 evening — Matrix v1 close)
-- Spec session ran Q1–Q6 + 2 follow-ups (LinkedIn handling, Public vs Client share distinction) with GPT as guardrail and Mo as final approver.
-- DB audit performed read-only via Supabase MCP before any locks: confirmed 4 parallel candidate stores (`members.*`, `profilux` standalone with 3 test rows, `candidate_profiles` empty/FK'd, plus 4 empty relational child tables). v1 scope deliberately frozen to `members` row only — relational migration is v2.
-- Spec doc committed in single isolated commit (one new file, no STATE bundling, no code mixed in) per governance rule.
-- `.env.local` cleanup followed Matrix v1 commit, also single-scope. Two backups preserved 24h then deletable.
-- Discipline observation: clean Q-by-Q lock pattern (Claude AI proposal → GPT recommendation → Mo signoff → next Q) prevented spec drift. Reusable pattern for future architecture work.
+### SESSION NOTE (Apr 30 late evening — audit + Path C re-sequence)
+- Two-stage read-only audit performed before any wiring work: (1) cv-parse → UI surface inventory; (2) `/api/profilux` + `/api/members/me` + `/api/profilux/reset-link` integration audit.
+- Audit findings forced re-sequencing: `/api/profilux` GET reads from the standalone `profilux` table (Matrix v1 §9 frozen-out), POST writes to it, reset-link writes to it. The entire ProfiLux UI surface today operates against the wrong source of truth. cv-parse cannot wire cleanly until that path is migrated.
+- DB verification via Supabase MCP: standalone `profilux` table has 3 rows, ALL with `sharing_enabled = false`, 0 live public routes. Schema confirms no `member_id` FK — the table is fully detached, linked only by email. Dormant, not data-loss-risky.
+- Path C decision (Mo + GPT, this session): migrate `/api/profilux` to Matrix v1 contract first; cv-parse UI second; tunnel third. Path B (parallel surfaces) explicitly rejected as "the trap Matrix v1 was written to prevent." No data migration on the 3 dormant rows in v1 scope.
+- Discipline observation: the audit caught a major architectural drift before any code was touched. Read-only-first is now reinforced as a hard pattern: audit → reconcile → spec/sequence → code.
 
 ### PARKED (admin_tasks status=parked, created Apr 29 2026)
 - `2847ac29` — Audit + migrate Anthropic model IDs across repo before Sonnet 4 retirement (deadline Jun 15 2026)
 - `1e6162ea` — Replace inert RPC `submit_m6_admission` (incompatible with locked Apr-14 11-screen proto)
 
 ### NEW FINDINGS LOGGED (out of immediate scope, surface separately)
-*Carried forward from Apr 30 afternoon rotation, all still open:*
+*Carried forward from prior rotations, plus 3 added Apr 30 late evening:*
 - **F-luxuryrecruiter** — Legacy domain `luxuryrecruiter.com` resurfaced in `.env.local` (now cleaned per CURRENT STEP item 1 close, but repo still has refs in `SETUP-GUIDE.md`, `.env.example`, `scripts/seed-all.sh`). Full audit needed across: repo source code, .env files (Coolify), DNS records, OAuth provider redirect URLs, SES verified identities, hardcoded refs in middleware/auth/email templates. Dedicated session required.
 - **F-magiclink-delivery** — Magic-link UI works, NextAuth token created in DB, but SES delivery to gmail address never completed during the Apr 30 morning session. Cause not isolated. STATE sections 2/19/20 are STALE and claim magic-link not configured — they are wrong: magic-link IS configured at code level, but delivery channel uncertain.
 - **F-pdfparse-anthropic-files** — Followup to F-pdfworker fix: evaluate Anthropic Files API native PDF input (Haiku 4.5 supports PDF document blocks) as v2 of parser path. Documented as deferred in `docs/PROFILUX_MATRIX_V1.md` §13.
 - **F-admin_tasks-trigger** — `admin_tasks` `done` and `completed_at` derive trigger does NOT fire on direct UPDATE via Supabase MCP, only on PATCH route. Trigger logic likely lives in API route handler, not in DB trigger.
-- **F-cv_url-format-mixed** — 5/8 `members.cv_url` rows in full-URL format, 3/8 in path-only. Route now handles both via `normalizeCvStoragePath` helper. Optional cleanup migration. Future uploads should write path-only consistently — verify upload route.
-- **F-cv-parse-no-ui** — cv-parse route functional but no UI button calls it. **Now CURRENT STEP item 1.**
+- **F-cv_url-format-mixed** — 5/8 `members.cv_url` rows in full-URL format, 3/8 in path-only. Route now handles both via `normalizeCvStoragePath` helper. Audit confirmed current upload route (`app/api/members/cv-upload/route.ts:68-71`) writes path-only consistently — legacy rows are historical, not from current code.
+- **F-cv-parse-no-ui** — cv-parse route functional but no UI button calls it. **Now CURRENT STEP item 2** (gated on item 1 migration).
+- **F-public-slug-stub** *(NEW Apr 30 late evening)* — `app/[slug]/page.tsx` (156 lines) reads from frozen-out standalone `profilux` table at lines 26–31, uses `.single()` instead of `.maybeSingle()` (CLAUDE.md violation). DB verified dormant: 3 rows, all `sharing_enabled = false`, 0 live public routes. Compiles and serves but never returns data. Park as separate cleanup ticket alongside `profilux` table retirement (Matrix v1 §13).
+- **F-members-me-incomplete** *(NEW Apr 30 late evening)* — `/api/members/me/route.ts` (25 lines) selects 12 fields, returns NONE of: `profile_completeness`, `m6_confirmed_at`, `cv_parsed_data`, `cv_url`, `cv_parsed_at`. Dashboard cannot display any L3 status today even if the cached fields existed. Will be addressed inside CURRENT STEP item 1 (migration).
+- **F-profilux-frozen-table-routes** *(NEW Apr 30 late evening)* — `/api/profilux/route.ts` (150 lines) GET reads standalone `profilux` table (lines 17–21), POST writes to it (lines 134–144); `/api/profilux/reset-link/route.ts` (58 lines) reads + writes the same table. 7 `from('profilux')` hits across these two routes. This is the migration scope of CURRENT STEP item 1.
 
 ### LEDGER NOTE
 - Ticket `0be2284c` CLOSED Apr 30 (verified: status=closed, done=true, completed_at=2026-04-30 13:08:46).
@@ -102,7 +116,7 @@ Reference, not new shipment:
 - `.env.local` cleanup: not a ledger ticket — local-only side effect, captured in this rotation only.
 - Outstanding parked items unchanged.
 
-**Last updated:** April 30, 2026 (evening — Matrix v1 spec + .env.local cleanup)
+**Last updated:** April 30, 2026 (late evening — audit + Path C re-sequence)
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
