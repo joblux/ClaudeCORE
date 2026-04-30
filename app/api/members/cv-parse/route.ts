@@ -361,10 +361,9 @@ export async function POST(req: NextRequest) {
 
   try {
     if (isPdf) {
-      const { PDFParse } = await import('pdf-parse')
-      const parser = new PDFParse({ data: new Uint8Array(buffer) })
-      const result = await parser.getText()
-      extractedText = (result.text || '').trim()
+      const pdfParse = ((await import('pdf-parse')) as any).default
+      const data = await pdfParse(buffer)
+      extractedText = (data.text || '').trim()
       extractionMethod = 'pdf-parse'
     } else if (isDocx) {
       const mammoth = await import('mammoth')
