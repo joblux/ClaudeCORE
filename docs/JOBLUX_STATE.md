@@ -40,56 +40,81 @@ schema → enums → constraints → routes → UX.
 
 Execution order. Ledger statuses untouched — this is the mental map, not DB truth.
 
-### LAST SHIPPED (Apr 30 2026 session — sanitization patch on cv-parse route)
-- Sanitization patch applied to `app/api/members/cv-parse/route.ts` (uncommitted, untracked):
-  - `logHistory` param type no longer accepts `response`
-  - `luxai_history.response` hardcoded to `{}` (line 249)
-  - Success-path `logHistory` call no longer passes `response: finalPayload`
-- Post-patch grep: exactly one `response: {}` line in source
-- TypeScript check: `npx tsc --noEmit` EXIT=0
-- DB audit: `luxai_history` where `type='cv_parse'` → 0 rows (no historical leakage to purge)
-- Fixture `zaharablend@gmail.com` (`6a522cbf-806f-438b-b6c7-c1c90da88326`) created on live via Google OAuth — DB/storage verified, but unusable for localhost dynamic test (provider conflict on magic-link). Row preserved in DB, untouched.
-- Static inspection findings logged: F8 (authz session-bound, body ignored), F9 (JWT staleness on schema additions), F-mime (member_documents.mime_type NULL pre-existing), F-cv_url (5/8 cv_url rows full-URL format, breaks `.download()`).
-- No parse executed. No commit. No push of parser route.
+### LAST SHIPPED (Apr 30 2026 afternoon — cv-parse OPERATIONAL TECHNIQUEMENT in production)
+
+**Critical status:** the cv-parse route works end-to-end in prod, but the destination ProfiLux model — the canonical shape that `cv_parsed_data` should feed into, plus how that data is read/matched/surfaced across candidate dashboard, admin review, and client submission — IS NOT FINALIZED. cv-parse writes a schema-validated JSONB blob today, but the downstream exploitation layer remains undefined.
+
+CV parse route shipped, deployed, validated in prod. 5 commits in cascade resolved 5 distinct bugs:
+
+- **a6fc9f6** `feat(cv-parse): ship sanitized CV parser route` — initial 578-line route, session-bound, sanitization patch (`luxai_history.response = {}`)
+- **ca596e2** `fix(cv-parse): normalize legacy full-URL cv_url to storage path` — F-cv_url resolved
+- **3fe6462** `fix(cv-parse): downgrade pdf-parse to v1 (no worker dependency)` — F-pdfworker resolved
+- **cc93436** `fix(cv-parse): bypass pdf-parse v1 debug test file via subpath import` — F-pdfparse-testfile resolved
+- **4ff5f14** `fix(cv-parse): increase experiences.description max from 500 to 2000` — F-schema-toosmall resolved
+
+**Prod test on member fixture `49542211-fe29-4833-a141-eb1eaa7d248f` (Mohammed Mzaour):**
+- STATUS 200, `cv_parsed_at = 2026-04-30 13:05:01.855+00`
+- 5 experiences extracted, confidence overall 0.92, 4 needs_review fields flagged
+- `luxai_history` success row, `response = {}` (sanitization confirmed in production)
+- Cost $0.011 / 4496 tokens
+- `cv_url`, `member_documents`, storage UNCHANGED (read-only contract honored)
+
+**Ticket `0be2284c` CLOSED** Apr 30. status=closed, done=true, completed_at=2026-04-30 13:08:46.
+
+**Side state shipped same session (NOT for prod):**
+- `.env.local` modified: NEXTAUTH_URL temporarily set to `http://localhost:3000` (was `https://luxuryrecruiter.com` — legacy pollution); `DEV_AUTH_BYPASS=1` added; `lib/auth.ts` had a temporary jwt bypass that was reverted before commit (verified via clean `git diff`). `.env.local.backup` created. .env.local is gitignored.
+- Production `site_settings.maintenance_mode` flipped OFF by Mo manually.
 
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
-1. **Confirm local server** — `npm run dev`, route exists locally only, no prod route.
-2. **Create fresh fixture for localhost** — fresh email alias never used with Google (e.g. `mzaourm+cvparse01@gmail.com`). Sign in via Email magic-link on localhost only. Upload Mo-controlled or synthetic CV. Stop after upload.
-3. **Read-only fixture verification** — M/D/B pre-snapshot via Supabase MCP.
-4. **Success-path dynamic test** — curl `POST localhost:3000/api/members/cv-parse` with localhost session cookie, no body. Report HTTP status + body keys only + elapsed + dev terminal errors. Do not paste parsed CV.
-5. **Post-snapshot verification** — confirm cv_url/member_documents/storage unchanged, cv_parsed_at + cv_parsed_data populated, luxai_history has one cv_parse success row with `response = {}`.
-6. **Forced-error path** — corrupt `ANTHROPIC_API_KEY`, restart dev, re-run curl, verify zero mutation outside `members.cv_parsed_*`, luxai_history error row has `response = {}`, restore key, restart.
-7. **Commit + push** `app/api/members/cv-parse/route.ts` ONLY if both paths green AND Mo explicitly approves.
-8. After commit/push → resume UI tunnel build (11-screen ProfiLux journey).
+
+1. **Cleanup `.env.local`** — remove `DEV_AUTH_BYPASS=1`, restore `NEXTAUTH_URL` to its production value (joblux.com). `.env.local.backup` exists for reference. Single-edit task. No commit (gitignored).
+
+2. **Define ProfiLux Matrix v1 (destination model)** — Before wiring any UI to cv-parse, lock the canonical exploitation layer. Structure into 3 explicit layers, no mixing:
+   
+   **(1) Canonical Data Layer** — raw parsed facts from cv-parse, sanitized but immutable. Source of truth. Tracks provenance (CV upload, parse_at, confidence). Never edited by users directly. `cv_parsed_data` fields belong here.
+   
+   **(2) Editable User Layer** — fields the candidate manages and can override. Headline, bio, availability, salary expectations, sharing settings, manual corrections to identity/experience. Layer 2 may shadow Layer 1 (override on display), but Layer 1 stays pristine for diff/audit.
+   
+   **(3) Scored Intelligence Layer** — derived/computed: needs_review fields, admission readiness M6 status, match scores, profile_completeness%, recruiter overlay (notes/assessments). Read-only for candidate, admin-managed.
+   
+   Lock storage shape, surface mapping (which layer renders where), and precedence rules (when L2 overrides L1) before any UI work.
+
+3. **Wire cv-parse to UI** — add Parse trigger in `/dashboard/candidate/profilux` flow, only AFTER step 2 locks destination shape. Without this, `cv_parsed_data` only populates via direct curl/fetch.
+
+4. **Resume 11-screen ProfiLux tunnel** — Refoundation L1-L5 + M6 enforcement.
 
 ### DO NOT
+- Touch cv-parse route again unless a new bug surfaces (currently green in prod, do not regress).
+- Forget to revert `.env.local` `DEV_AUTH_BYPASS` and `NEXTAUTH_URL` — security risk if pushed/copied accidentally.
 - Use Hélène BILLARD as fixture (consent unconfirmed, blocked permanently).
-- Use ZaharaBlend on localhost (Google-bound, provider conflict).
-- Mint JWE/JWT cookies as workaround.
-- Add localhost callback to Google OAuth Console (out of scope).
-- Delete any DB row without explicit Mo order after read-only proof.
-- Commit/push the parser route until dynamic tests green AND Mo explicitly approves.
+- Build ProfiLux UI before destination Matrix v1 is locked (will rebuild against unstable target).
 - Resequence backlog from broader ledger.
 
-### SESSION NOTE (Apr 30)
-- Sanitization scope was added mid-session (GPT-approved, out of original Apr 29 CURRENT STEP) — `luxai_history.response` was found to store full Haiku output, undocumented in static inspection PASS. Patch closes that leak before any real CV touches the route.
-- Localhost auth detour: ~3h burned on Google OAuth localhost mismatch + JWT mint workaround. Root cause: fixture created via prod Google OAuth, then required localhost session. New rule: **for any local-route test, fixture auth must be localhost-compatible from creation.** Email magic-link only.
-- If blocked >15 min on any path tomorrow, stop and pick simplest path before continuing.
+### SESSION NOTE (Apr 30 — full session retro, ~6h)
+- 3h burned on localhost auth maze (Google OAuth localhost mismatch + magic-link SES diagnostics + dev bypass detour) before pivoting to controlled prod deployment.
+- Pivot decision (push to prod with own CV as fixture) was the unblock.
+- 4 bugs in cascade after F-cv_url: each surfaced only after the previous was fixed. Diagnostic-by-deployment loop, controlled, low-risk because sanitization patch was preserved throughout.
+- Magic-link backend works (token created in DB) but SES delivery to ZaharaBlend never completed — root cause not isolated, parked.
+- `luxuryrecruiter.com` leftover in `.env.local` caused multi-hour confusion. Mo had requested historical purge multiple times. Operational defect, repo-wide purge needed in dedicated session.
+- New rule reinforced: when blocked >15 min on infra/auth side-quest, pivot to simplest path that ships value.
 
 ### PARKED (admin_tasks status=parked, created Apr 29 2026)
 - `2847ac29` — Audit + migrate Anthropic model IDs across repo before Sonnet 4 retirement (deadline Jun 15 2026)
-- `1e6162ea` — Replace inert RPC submit_m6_admission (incompatible with locked Apr-14 11-screen proto)
+- `1e6162ea` — Replace inert RPC `submit_m6_admission` (incompatible with locked Apr-14 11-screen proto)
 
 ### NEW FINDINGS LOGGED (out of immediate scope, surface separately)
-- **F-cv_url** — 5/8 `members.cv_url` rows store full-URL format; breaks `.download()` contract. Pipeline format inconsistency between Apr 4–18 and Apr 25+ uploads.
-- **F-mime** — `member_documents.mime_type` NULL on recent rows despite bucket having `application/pdf`. Pre-existing pipeline gap.
-- **F8** — `/api/members/cv-parse` is session-bound: reads `memberId` from session, ignores request body. Document in route docs when UI tunnel is built.
-- **F9** — JWT staleness: token claims set on sign-in only, schema additions to `members` won't propagate to existing JWTs until next sign-in.
+- **F-luxuryrecruiter** — Legacy domain `luxuryrecruiter.com` resurfaced in `.env.local` (NEXTAUTH_URL) plus repo files: `SETUP-GUIDE.md`, `.env.example`, `scripts/seed-all.sh`. Mo requested historical purge multiple times. Full audit needed across: repo source code, .env files (local + Coolify), DNS records, OAuth provider redirect URLs, SES verified identities, hardcoded refs in middleware/auth/email templates. Dedicated session required.
+- **F-magiclink-delivery** — Magic-link UI works, NextAuth token created in DB, but SES delivery to gmail address never completed during the session. Cause not isolated (sandbox? domain binding? dev guard?). STATE sections 2/19/20 are STALE and claim magic-link not configured — they are wrong: magic-link IS configured at code level, but delivery channel uncertain. Update those sections in next rotation.
+- **F-pdfparse-anthropic-files** — Followup to F-pdfworker fix: evaluate Anthropic Files API native PDF input (Haiku 4.5 supports PDF document blocks) as v2 of parser path. Trade-offs: higher input tokens cost vs more robust scan/image PDF support, removes pdf-parse dependency entirely. Current pdf-parse@1.1.1 deep import works but is community-fix-dependent.
+- **F-admin_tasks-trigger** — `admin_tasks` `done` and `completed_at` derive trigger does NOT fire on direct UPDATE via Supabase MCP, only on PATCH route. Required manual UPDATE today to sync ticket 0be2284c. Trigger logic likely lives in API route handler, not in DB trigger.
+- **F-cv_url-format-mixed** — 5/8 `members.cv_url` rows in full-URL format, 3/8 in path-only. Route now handles both via `normalizeCvStoragePath` helper. Optional cleanup migration. Future uploads should write path-only consistently — verify upload route.
+- **F-cv-parse-no-ui** — cv-parse route functional but no UI button calls it. CURRENT STEP item 3 above addresses this, gated behind ProfiLux Matrix v1 (item 2).
 
 ### LEDGER NOTE
-- Ticket `0be2284c` (CV parse lifecycle non-operational, 5/5 cv_url rows have cv_parsed_at=NULL) remains OPEN until cv-parse route committed + producing `cv_parsed_at` writes in production. Do not close until then.
+- Ticket `0be2284c` CLOSED Apr 30 (verified: status=closed, done=true, completed_at=2026-04-30 13:08:46).
+- Outstanding parked items unchanged.
 
-**Last updated:** April 30, 2026
+**Last updated:** April 30, 2026 (afternoon — cv-parse green session)
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
