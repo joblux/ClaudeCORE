@@ -361,7 +361,7 @@ export async function POST(req: NextRequest) {
 
   try {
     if (isPdf) {
-      const pdfParse = ((await import('pdf-parse')) as any).default
+      const pdfParse = ((await import('pdf-parse/lib/pdf-parse.js')) as any).default
       const data = await pdfParse(buffer)
       extractedText = (data.text || '').trim()
       extractionMethod = 'pdf-parse'
