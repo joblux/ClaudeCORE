@@ -257,6 +257,17 @@ async function logHistory(payload: {
   }
 }
 
+// Normalize cv_url to storage path-only.
+// Legacy rows store full Supabase Storage URLs; new uploads store path-only.
+function normalizeCvStoragePath(cvUrl: string): string {
+  const value = cvUrl.trim()
+  if (!value.startsWith('http://') && !value.startsWith('https://')) {
+    return value
+  }
+  const match = value.match(/\/(?:object\/public|object\/sign|object\/authenticated)\/member-cvs\/(.+?)(?:\?|$)/)
+  return match ? match[1] : value
+}
+
 export async function POST(req: NextRequest) {
   // Auth
   const session = await getServerSession(authOptions)
@@ -287,6 +298,8 @@ export async function POST(req: NextRequest) {
     return errorResponse('M6_NO_CV_UPLOADED', 'No CV uploaded for this member', 400)
   }
 
+  const cvPath = normalizeCvStoragePath(member.cv_url)
+
   // Idempotence: short window cache, ONLY if cached parse refers to the SAME cv_url
   // (a re-upload changes cv_url, in which case we must re-parse)
   if (member.cv_parsed_at && member.cv_parsed_data) {
@@ -297,7 +310,7 @@ export async function POST(req: NextRequest) {
       'source' in (member.cv_parsed_data as any)
         ? (member.cv_parsed_data as any).source?.cv_storage_path
         : null
-    const samePath = cachedPath === member.cv_url
+    const samePath = typeof cachedPath === 'string' && normalizeCvStoragePath(cachedPath) === cvPath
     if (ageMs < IDEMPOTENCE_WINDOW_SECONDS * 1000 && samePath) {
       return NextResponse.json({
         success: true,
@@ -311,7 +324,7 @@ export async function POST(req: NextRequest) {
   // Download CV from Storage (read-only — never modifies cv_url, member_documents, or bucket contents)
   const { data: fileBlob, error: dlErr } = await supabase.storage
     .from('member-cvs')
-    .download(member.cv_url)
+    .download(cvPath)
 
   if (dlErr || !fileBlob) {
     console.error('[cv-parse] CV file download error:', dlErr)
@@ -321,7 +334,7 @@ export async function POST(req: NextRequest) {
   const buffer = Buffer.from(await fileBlob.arrayBuffer())
 
   // Detect format
-  const lowerPath = member.cv_url.toLowerCase()
+  const lowerPath = cvPath.toLowerCase()
   const isPdf = lowerPath.endsWith('.pdf')
   const isDocx = lowerPath.endsWith('.docx')
   const isDoc = lowerPath.endsWith('.doc') && !isDocx
@@ -509,7 +522,7 @@ export async function POST(req: NextRequest) {
   })
 
   // Compose final payload
-  const fileName = member.cv_url.split('/').pop() || ''
+  const fileName = cvPath.split('/').pop() || ''
   const fileType: 'pdf' | 'docx' = isPdf ? 'pdf' : 'docx'
 
   const finalPayload = {
@@ -518,7 +531,7 @@ export async function POST(req: NextRequest) {
     source: {
       file_name: fileName,
       file_type: fileType,
-      cv_storage_path: member.cv_url,
+      cv_storage_path: cvPath,
       extraction_method: extractionMethod,
     },
     identity: validated.identity,
