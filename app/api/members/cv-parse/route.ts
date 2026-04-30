@@ -119,7 +119,7 @@ experiences
 - start_date and end_date: use ISO format. Accept partial precision: "YYYY-MM-DD", "YYYY-MM", or "YYYY". Use null if absent. Imperfect dates are fine — flag them in needs_review.
 - is_current: true ONLY if the CV explicitly indicates "Present", "Current", "Now", "en cours", "actuellement", "attuale", "actual", or end_date is missing for the most recent role.
 - raw_dates_text: copy the original date string from the CV (e.g. "Mar 2019 – Present", "déc. 2020 – aujourd'hui") to preserve evidence for review.
-- description: short summary if present in the CV, max 500 chars. Null if absent.
+- description: short summary if present in the CV, max 2000 chars. Null if absent.
 - Do NOT include education entries here. Internships in companies count as experiences only if listed under work/professional sections.
 - If you genuinely cannot identify either company OR job_title, do not emit the row.
 
@@ -193,7 +193,7 @@ const CvParsedDataSchema = z.object({
     start_date: z.string().nullable(),
     end_date: z.string().nullable(),
     is_current: z.boolean(),
-    description: z.string().max(500).nullable(),
+    description: z.string().max(2000).nullable(),
     raw_dates_text: z.string().nullable(),
   })),
   education: z.array(z.object({
