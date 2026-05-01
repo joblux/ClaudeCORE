@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
-import { resolveProfiLux, projectFor } from '@/lib/profilux'
+import {
+  resolveProfiLux,
+  projectFor,
+  computeProfileCompleteness,
+} from '@/lib/profilux'
 import type {
   EditorProjection,
   ProfiLuxResolved,
@@ -86,6 +90,17 @@ function toLegacyProfile(view: ProfiLuxResolved) {
   }
 }
 
+// Build the standard editor response: { surface, view, profile }.
+// Used by both GET and POST (Phase 2.2 D8-A — POST returns same shape as GET).
+function buildEditorResponse(resolved: ProfiLuxResolved) {
+  const projection = projectFor(resolved, 'editor') as EditorProjection
+  return {
+    surface: projection.surface,
+    view: projection.view,
+    profile: toLegacyProfile(projection.view),
+  }
+}
+
 // =============================================================================
 // GET — Matrix v1 (Phase 2.1, ledger 0c04c8b9)
 // Reads members.* via resolveProfiLux + projectFor('editor').
@@ -126,16 +141,34 @@ export async function GET() {
     return NextResponse.json({ surface: 'editor', view: null, profile: null })
   }
 
-  // Project for editor surface (identity wrap — no masking) + legacy adapter
-  const projection = projectFor(resolved, 'editor') as EditorProjection
-  const profile = toLegacyProfile(projection.view)
-
-  return NextResponse.json({
-    surface: projection.surface,
-    view: projection.view,
-    profile,
-  })
+  return NextResponse.json(buildEditorResponse(resolved))
 }
+
+// =============================================================================
+// POST — Matrix v1 (Phase 2.2, ledger 4397dd97)
+// Writes editor body to members.* flat columns only.
+// Recomputes profile_completeness against post-write resolved view.
+// Returns { surface, view, profile } — same shape as GET (D8-A).
+//
+// SCOPE — Option δ (locked by GPT, Phase 2.2):
+// The following editor body fields are accepted but NOT persisted in v1:
+//   - experience[]      (no L2 column; Matrix v1 §6.4/§9 — L1 passthrough only)
+//   - languages[]       (no L2 column; L1 passthrough only)
+//   - sectors[]         (no L2 column; L1 passthrough only)
+//   - specialisations[] (no L2 column; expertise_tags semantically different)
+//   - markets[]         (no L2 column; market_knowledge vs desired_locations ambiguous)
+//   - sharingEnabled, shareSlug (frozen per GPT D5, sharing UX out of scope)
+// Storage for these fields is part of Phase 4 editor rebuild (ledger 8f82b3ac).
+// Phase 2.2 charter: persist only fields with existing L2 columns. Save returns
+// 200; arrays silently drop on round-trip until Phase 4 lands. Documented data
+// loss; per GPT D7-A no UI banner in this phase.
+//
+// FORBIDDEN per STATE DO NOT + GPT rulings:
+//   - No writes to cv_parsed_data jsonb (UI → L1 silent writes forbidden)
+//   - No schema migrations
+//   - No writes to the frozen profilux standalone table
+//   - No touching legacy calculateProfileCompleteness (STATE C5)
+// =============================================================================
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
@@ -145,46 +178,79 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json()
 
-  const { data: existing } = await supabase
-    .from('profilux')
-    .select('id, share_slug')
+  // Resolve email → member.id
+  const { data: member, error: memberErr } = await supabase
+    .from('members')
+    .select('id')
     .eq('email', session.user.email)
-    .single()
+    .maybeSingle()
 
-  const profileData = {
-    email: session.user.email,
-    first_name: body.firstName,
-    last_name: body.lastName,
-    city: body.city,
-    nationality: body.nationality,
-    headline: body.headline,
-    bio: body.bio,
-    experience: body.experience,
-    specialisations: body.specialisations,
-    languages: body.languages,
-    sectors: body.sectors,
-    markets: body.markets,
-    salary_expectation: body.salaryExpectation,
-    availability: body.availability,
-    sharing_enabled: body.sharingEnabled,
-    share_slug: existing?.share_slug || body.shareSlug || null,
+  if (memberErr) {
+    return NextResponse.json({ error: memberErr.message }, { status: 500 })
+  }
+  if (!member) {
+    return NextResponse.json({ error: 'Member not found' }, { status: 404 })
+  }
+
+  // L2 flat write payload — only fields with existing members.* columns.
+  // Editor's array fields (experience, languages, sectors, specialisations,
+  // markets) and frozen sharing fields are intentionally absent here.
+  const updatePayload = {
+    first_name: body.firstName ?? null,
+    last_name: body.lastName ?? null,
+    city: body.city ?? null,
+    nationality: body.nationality ?? null,
+    headline: body.headline ?? null,
+    bio: body.bio ?? null,
+    availability: body.availability ?? null, // editor enum written verbatim; GET normalize handles round-trip
+    desired_salary_max:
+      typeof body.salaryExpectation === 'number' && body.salaryExpectation > 0
+        ? body.salaryExpectation
+        : null, // single editor value → max bucket; min untouched (Phase 4 owns range UX)
+    desired_salary_currency: body.salaryCurrency ?? null,
     updated_at: new Date().toISOString(),
   }
 
-  if (existing?.id) {
-    const { error } = await supabase
-      .from('profilux')
-      .update(profileData)
-      .eq('id', existing.id)
+  const { error: updateErr } = await supabase
+    .from('members')
+    .update(updatePayload)
+    .eq('id', member.id)
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  } else {
-    const { error } = await supabase
-      .from('profilux')
-      .insert({ ...profileData, created_at: new Date().toISOString() })
-
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (updateErr) {
+    return NextResponse.json({ error: updateErr.message }, { status: 500 })
   }
 
-  return NextResponse.json({ success: true })
+  // Recompute completeness against the post-write resolved view.
+  // Order matters: write first, then resolve fresh state, then persist score.
+  let resolved: ProfiLuxResolved | null
+  try {
+    resolved = await resolveProfiLux(member.id, supabase)
+  } catch (e: any) {
+    return NextResponse.json(
+      { error: e?.message ?? 'resolveProfiLux failed' },
+      { status: 500 }
+    )
+  }
+  if (!resolved) {
+    return NextResponse.json({ error: 'Member not found post-write' }, { status: 500 })
+  }
+
+  const score = computeProfileCompleteness(resolved)
+  if (score !== resolved.profile_completeness) {
+    const { error: scoreErr } = await supabase
+      .from('members')
+      .update({
+        profile_completeness: score,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', member.id)
+
+    if (scoreErr) {
+      return NextResponse.json({ error: scoreErr.message }, { status: 500 })
+    }
+    // Reflect new score in the response without re-resolving
+    resolved = { ...resolved, profile_completeness: score }
+  }
+
+  return NextResponse.json(buildEditorResponse(resolved))
 }
