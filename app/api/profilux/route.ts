@@ -27,11 +27,13 @@ const supabase = createClient(
 // directly. Lossy mappings are commented inline.
 // =============================================================================
 
-function normalizeAvailability(raw: string | null): string {
-  // Legacy editor enum: 'active' | 'open' | 'passive' | 'unavailable' | ''.
+function normalizeAvailability(raw: string | null): string | null {
+  // Legacy editor enum: 'active' | 'open' | 'passive' | 'unavailable' | null.
   // members.availability is free-text (no enum constraint, verified May 2026).
-  // Only value currently live in DB is 'not_actively_looking' (column default).
-  if (!raw) return ''
+  // Phase 4.0 (§4.5 adapter constraint): NULL in DB MUST surface as null to
+  // the client, NOT '' or 'open'. Minting defaults from NULL caused
+  // F-availability-default-drift (NULL → 'open' round-trip on Continue).
+  if (!raw) return null
   switch (raw) {
     case 'active':
     case 'actively_looking':
@@ -47,7 +49,7 @@ function normalizeAvailability(raw: string | null): string {
     case 'unavailable':
       return 'unavailable'
     default:
-      return ''
+      return null
   }
 }
 
@@ -82,7 +84,7 @@ function toLegacyProfile(view: ProfiLuxResolved) {
     markets: view.market_knowledge ?? [], // LOSSY: closest semantic for v1
     salaryExpectation:
       view.desired_salary_max ?? view.desired_salary_min ?? 0, // LOSSY: collapses range to single value
-    salaryCurrency: view.desired_salary_currency ?? 'EUR',
+    salaryCurrency: view.desired_salary_currency ?? null, // §4.5 adapter constraint: surface NULL as null, not 'EUR'
     availability: normalizeAvailability(view.availability),
     sharingEnabled: false, // FROZEN: sharing UX out of scope per GPT D5 (Phase 2.1)
     shareSlug: null, // FROZEN: sharing UX out of scope per GPT D5 (Phase 2.1)
@@ -168,6 +170,12 @@ export async function GET() {
 //   - No schema migrations
 //   - No writes to the frozen profilux standalone table
 //   - No touching legacy calculateProfileCompleteness (STATE C5)
+//
+// PHASE 4.0 (ledger 8f82b3ac): implements PROFILUX_MATRIX_V1.md §4.5 L2 write
+// contract:
+//   W1 — empty-string '' → NULL coercion before write
+//   W2 — partial-body write: only write columns explicitly present in body
+//   W3 — recompute is unconditional (preserved from Phase 2.2)
 // =============================================================================
 
 export async function POST(req: NextRequest) {
@@ -192,24 +200,36 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Member not found' }, { status: 404 })
   }
 
-  // L2 flat write payload — only fields with existing members.* columns.
+  // §4.5 W1: coerce empty/whitespace strings to NULL before write.
+  const coerceEmpty = (v: unknown): string | null => {
+    if (v === null || v === undefined) return null
+    if (typeof v !== 'string') return null
+    const trimmed = v.trim()
+    return trimmed === '' ? null : trimmed
+  }
+
+  // §4.5 W2: partial-body write — only include columns explicitly present in body.
   // Editor's array fields (experience, languages, sectors, specialisations,
-  // markets) and frozen sharing fields are intentionally absent here.
-  const updatePayload = {
-    first_name: body.firstName ?? null,
-    last_name: body.lastName ?? null,
-    city: body.city ?? null,
-    nationality: body.nationality ?? null,
-    headline: body.headline ?? null,
-    bio: body.bio ?? null,
-    availability: body.availability ?? null, // editor enum written verbatim; GET normalize handles round-trip
-    desired_salary_max:
+  // markets) and frozen sharing fields remain intentionally absent (Option δ).
+  const has = (k: string) => Object.prototype.hasOwnProperty.call(body, k)
+  const updatePayload: Record<string, unknown> = {}
+
+  if (has('firstName')) updatePayload.first_name = coerceEmpty(body.firstName)
+  if (has('lastName')) updatePayload.last_name = coerceEmpty(body.lastName)
+  if (has('city')) updatePayload.city = coerceEmpty(body.city)
+  if (has('nationality')) updatePayload.nationality = coerceEmpty(body.nationality)
+  if (has('headline')) updatePayload.headline = coerceEmpty(body.headline)
+  if (has('bio')) updatePayload.bio = coerceEmpty(body.bio)
+  if (has('availability')) updatePayload.availability = coerceEmpty(body.availability)
+  if (has('salaryExpectation')) {
+    updatePayload.desired_salary_max =
       typeof body.salaryExpectation === 'number' && body.salaryExpectation > 0
         ? body.salaryExpectation
-        : null, // single editor value → max bucket; min untouched (Phase 4 owns range UX)
-    desired_salary_currency: body.salaryCurrency ?? null,
-    updated_at: new Date().toISOString(),
+        : null // single editor value → max bucket; min untouched (Phase 4 owns range UX)
   }
+  if (has('salaryCurrency')) updatePayload.desired_salary_currency = coerceEmpty(body.salaryCurrency)
+
+  updatePayload.updated_at = new Date().toISOString()
 
   const { error: updateErr } = await supabase
     .from('members')

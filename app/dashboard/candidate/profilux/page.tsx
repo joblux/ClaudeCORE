@@ -83,8 +83,8 @@ interface ProfileData {
   sectors: string[]
   markets: string[]
   salaryExpectation: number
-  salaryCurrency: string
-  availability: string
+  salaryCurrency: string | null
+  availability: string | null
   sharingEnabled: boolean
   shareSlug: string
 }
@@ -119,8 +119,8 @@ export default function ProfiluxPage() {
     sectors: [],
     markets: [],
     salaryExpectation: 0,
-    salaryCurrency: 'EUR',
-    availability: 'open',
+    salaryCurrency: null,
+    availability: null,
     sharingEnabled: false,
     shareSlug: '',
   })
@@ -321,9 +321,9 @@ export default function ProfiluxPage() {
     setProfile(prev => ({ ...prev, experience: prev.experience.filter(e => e.id !== id) }))
   }
 
-  const formatSalary = (val: number, currency: string) => {
+  const formatSalary = (val: number, currency: string | null) => {
     const symbols: Record<string, string> = { EUR: '\u20ac', USD: '$', GBP: '\u00a3', AED: 'AED ' }
-    const sym = symbols[currency] || '\u20ac'
+    const sym = symbols[currency ?? ''] || '\u20ac'
     if (val >= 1000) return `${sym}${Math.round(val / 1000)}K`
     return `${sym}${val}`
   }
@@ -652,7 +652,7 @@ export default function ProfiluxPage() {
                 <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '20px', margin: '0 0 8px' }}>Salary expectation</h2>
                 <p style={{ fontSize: '13px', color: '#666', fontWeight: 300, margin: '0 0 24px', lineHeight: 1.7 }}>Used only by Mo to match you to appropriately scoped opportunities. Never shown publicly.</p>
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-                  <select value={profile.salaryCurrency} onChange={e => setProfile(p => ({ ...p, salaryCurrency: e.target.value }))} style={{ ...inputStyle, width: '100px' }}>
+                  <select value={profile.salaryCurrency ?? 'EUR'} onChange={e => setProfile(p => ({ ...p, salaryCurrency: e.target.value }))} style={{ ...inputStyle, width: '100px' }}>
                     {['EUR', 'USD', 'GBP', 'AED', 'CHF'].map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                   <input type="range" min={40000} max={500000} step={5000} value={profile.salaryExpectation} onChange={e => setProfile(p => ({ ...p, salaryExpectation: Number(e.target.value) }))} style={{ flex: 1 }} />
