@@ -40,33 +40,21 @@ schema → enums → constraints → routes → UX.
 
 Execution order. Ledger statuses untouched — this is the mental map, not DB truth.
 
-### LAST SHIPPED (May 1 2026 early — Matrix v1 utilities, inert)
+### LAST SHIPPED (May 1 2026 — Phase 2 ProfiLux Matrix v1 route migrations COMPLETE)
 
-- **c908fde** `feat(profilux): add Matrix v1 utilities (resolve, project, M6, completeness)` — 7 files under `lib/profilux/` (types, _m6Groups, resolveProfiLux, computeM6Eligible, computeProfileCompleteness, projectFor, index). 1045 insertions, 0 modifications elsewhere. Pure-as-possible: only `resolveProfiLux` touches the DB (single `.maybeSingle()`); compute and project utilities are pure functions. Type-checked clean. Pushed to `origin/main`. **Inert at runtime — no route consumes the utilities yet.**
+- **26daffc** `feat(profilux): migrate /api/profilux GET to Matrix v1 (Phase 2.1, ledger 0c04c8b9)` — GET handler refactored to read from `members.*` via `resolveProfiLux(member.id, supabase) → projectFor(view, 'editor')`. Returns `{ surface: 'editor', view, profile }`. Frozen `profilux` standalone table no longer read. Editor-mode legacy adapter `toLegacyProfile(view)` documents lossy mappings (`specialisations ← expertise_tags`, `markets ← market_knowledge`, `salaryExpectation ← desired_salary_max ?? desired_salary_min ?? 0`, `languages.map(l => l.language)` drops proficiency, `experience.id = String(index)`). Sharing fields frozen (`sharingEnabled: false, shareSlug: null`) per GPT D5. `availability` normalized via switch in adapter. Validated end-to-end via Chrome probe + DB read of test row (Baya, member id `273c3950...`). Ledger `0c04c8b9` closed.
 
-- **Visual baseline locked for ProfiLux rebuild** (not a commit — captured here): GPT-approved storyboard direction (8.7/10) becomes the visual reference for any future tunnel/editor/dashboard work. ProfiLux = native premium extension of the candidate dashboard, not a bolted-on tool. DNA preserved (palette, cards, typography, spacing). Elevated execution (top step rail, right live preview rail, refined completion ring, luxury microcopy, calmer hierarchy). Avoid: generic form labels, crowded boxes, bright CTA spam, recruiter SaaS vibes.
+- **8874626** `feat(profilux): migrate /api/profilux POST to Matrix v1 (Phase 2.2, ledger 4397dd97)` — POST handler refactored to write `members.*` flat columns only (Option δ, GPT-locked). 9 mapped fields: `first_name, last_name, city, nationality, headline, bio, availability` (verbatim editor enum), `desired_salary_max ← body.salaryExpectation || null` (single-value→max bucket, min untouched), `desired_salary_currency, updated_at`. After write: `resolveProfiLux` re-fetched, `computeProfileCompleteness(resolved)` recomputed, second UPDATE persists `profile_completeness` only when score changed. Editor array fields (experience, languages, sectors, specialisations, markets) accepted in body but NOT persisted; documented in code as deferred to Phase 4. Frozen `profilux` standalone table fully abandoned. No `cv_parsed_data` writes (β rejected per STATE DO NOT). Returns `{ surface, view, profile }` matching GET shape (D8-A symmetry). Validated end-to-end: round-trip persistence (headline, salary), completeness recomputed (33 = G1 + G6, M6 weighted), Option δ array drop confirmed (5 fields silently dropped). Ledger `4397dd97` closed.
 
-- **Copy framing locked** for any product-facing surface build:
-  - G1: prestige language at build time ("ProfiLux Passport," "Match Ready," "Executive Ready," "Unlock discreet opportunities," "We extracted your career foundations," ATS one-line differentiators)
-  - G2: no quick-start mode in v1 — parked as v2
-  - G3: only post-M6 reward microstate in v1 ("Visible to luxury houses · in private matching" + matching-assignment count if real); other reward moments parked
-  - Executive-presence guardrail: every copy/microstate decision reads as "building executive presence, not filling a profile"
-
-- **Admin direction approved as-is** — light SaaS shell stays, no redesign. Future polish (typography, spacing, ATS row signals) parked behind candidate-side ProfiLux catch-up. Hard rule: admin must not outshine member experience.
+- **da64053** + **17ee41e** `Phase 2.3 — /api/members/me Matrix v1 alignment (ledger 081f3beb)` — two-commit phase. **da64053** initial deploy used GPT-locked decisions D9-β (adapter shim, no `DashboardProjection` extension), D10-A (`resolveProfiLux` for ProfiLux/L3/CV portion), D11-A (`m6_confirmed_at` always returned, even when null), R6-A (second targeted SELECT for `company_name`, `org_type`, `approved_at` — kept off `ProfiLuxResolved` because they are member/dashboard metadata, not ProfiLux fields). Initial shape `{ surface: 'members-me', view, member: <legacy 16-field flat> }` mirrored `/api/profilux`'s `.profile` envelope. **REGRESSION DETECTED LIVE:** `/api/members/me` consumers (candidate + business dashboards) store the raw response body via `setMember(await res.json())` and read fields off the top level (e.g. `member.first_name`) — unlike `/api/profilux` consumers which extract a sub-key (`pData.profile || pData`). Legacy fields under nested `.member` were unreachable. Caught via business dashboard render (Mohammed/Hublot): page rendered, no 500, but `last_name`/`company_name` empty (silent failure with empty-string fallbacks). **17ee41e** F2 fix per GPT: spread the 16 legacy fields at top level alongside `surface` + `view` (additive). UI consumers untouched. `lib/profilux/*` untouched. `MemberRow`/`ProfiLuxResolved`/`DashboardProjection` untouched. Validated end-to-end on both consumers (executive: Baya / business: Mohammed-Hublot): API top-level shape, dashboard render, sidebar/settings card/brief form `org_type` propagation, save round-trip via `refreshMember`. Closes `F-members-me-incomplete` (4 L3/CV adds: `profile_completeness`, `m6_confirmed_at`, `cv_url`, `cv_parsed_at`). Ledger `081f3beb` closed.
 
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
 
-**Path C item 1 sub-task 1 CLOSED** (utilities). Phase 2 — route migrations — is now active. Each migration: read-only audit → plan → GPT review → Code prompt → review → commit → push. One defect, one deploy, verify before next.
+Phase 2 — route migrations — **COMPLETE**. All three routes (`/api/profilux` GET, `/api/profilux` POST, `/api/members/me`) now consume Matrix v1 utilities. Frozen `profilux` standalone table no longer read or written by any active route.
 
-1. **Phase 2.1 — Migrate `/api/profilux` GET to Matrix v1** *(ledger `0c04c8b9`)* — refactor GET handler to return `projectFor(resolveProfiLux(memberId, supabase), 'editor')`. The 150-line route currently reads from frozen-out standalone `profilux` table at lines 17–21. After migration: reads from `members.*` via the resolver. No data migration of the 3 dormant `profilux` rows. No UI changes.
+1. **Phase 3 — Wire cv-parse to UI** *(ledger `3a781f8b`, status: open)* — Phase 2 gate removed. Add Parse trigger in `/dashboard/candidate/profilux` flow. Parse output writes L1 only (`cv_parsed_data` jsonb). User-confirmed prefill goes through migrated L2 edit endpoints (Phase 2.2 POST). No direct `members.*` or `cv_parsed_data` reads in UI. cv-parse route itself (ledger `17a3534e`) stays untouched per DO NOT — Phase 3 is purely the UI wire.
 
-2. **Phase 2.2 — Migrate `/api/profilux` POST to Matrix v1** *(ledger `4397dd97`)* — gated on 2.1. Refactor POST to write `members.*` flat columns (NOT the standalone `profilux` table). After write: call `computeProfileCompleteness(resolveProfiLux(memberId))` and persist to `members.profile_completeness`. Lines 134–144 are the current frozen-out write target.
-
-3. **Phase 2.3 — Align `/api/members/me`** *(ledger `081f3beb`)* — gated on 2.2. Closes F-members-me-incomplete. 25-line route currently selects 12 fields, none are L3. Add `profile_completeness`, `m6_confirmed_at`, `cv_url`, `cv_parsed_at`. Optionally use `projectFor(view, 'dashboard')` if the surface fits.
-
-**Phase 3 — Wire cv-parse to UI** *(ledger `3a781f8b`, parked)* — gated on Phase 2 complete. Add Parse trigger in `/dashboard/candidate/profilux` flow. Parse output writes L1 only. User-confirmed prefill goes through migrated L2 edit endpoints. No direct `members.*` or `cv_parsed_data` reads in UI.
-
-**Phase 4 — Premium ProfiLux tunnel + editor rebuild** *(ledger `8f82b3ac`, parked)* — gated on Phase 3. Visual baseline + copy framing + executive-presence guardrail all locked. 11-screen target.
+**Phase 4 — Premium ProfiLux tunnel + editor rebuild** *(ledger `8f82b3ac`, parked)* — gated on Phase 3. Visual baseline + copy framing + executive-presence guardrail all locked. 11-screen target. Will replace the `toLegacyProfile`/`toLegacyMember` adapter shims when consumers migrate to read `view` directly.
 
 **Phase 5 — Admin polish** *(ledger `35469863`, parked)* — gated on Phase 4 candidate-side landing first.
 
@@ -77,20 +65,21 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 - Use Hélène BILLARD as fixture (consent unconfirmed, blocked permanently).
 - Read `members.*` or `cv_parsed_data` directly from any UI surface for ProfiLux fields — go through `projectFor`.
 - Implement L1 → L2 silent writes from any code path.
-- Migrate the 3 dormant `profilux` standalone rows during Phase 2 — data migration is post-v1 cleanup.
-- Wire cv-parse to UI before Phase 2 lands.
-- Touch `/api/profilux/reset-link` during Phase 2 — sharing UX rebuild is a separate post-migration concern.
-- Refactor legacy `calculateProfileCompleteness` in `app/api/members/profile/route.ts` during Phase 2 — separate commit after Phase 2.3 lands. Per Mo decision C5.
+- Migrate the 3 dormant `profilux` standalone rows — data migration is post-v1 cleanup, tracked in ledger `6aef236e`.
+- Touch `/api/profilux/reset-link` during Phase 3 — sharing UX rebuild is a separate post-migration concern.
+- Refactor legacy `calculateProfileCompleteness` in `app/api/members/profile/route.ts` during Phase 3 — separate commit, per Mo decision C5. Best handled together with `f6508e54` and the Phase 4 editor rebuild.
+- Fix the dashboard 8-field completeness divergence (`f6508e54`) during Phase 3 — flagged-only finding, no fix scheduled in this phase.
+- Touch UI consumers of `/api/members/me` or `/api/profilux` during Phase 3 unless the cv-parse wire genuinely requires it. Adapter shims keep them working.
 - Resequence backlog from broader ledger.
 - Build any product-facing surface (tunnel, editor, dashboard, admin) without first read-only inspecting the live components per the visual guardrail.
 - Drift from the executive-presence guardrail in any copy or microstate.
 
-### SESSION NOTE (May 1 2026 — utilities shipped + visual baseline locked)
+### SESSION NOTE (May 1 2026 — Phase 2 shipped + F2 correction logged)
 
-- Two artifacts produced and validated by GPT this session: (1) three-mask projection preview, (2) 11-screen journey storyboard scoring 8.7/10. Both treated as working alignment, not committed to repo.
-- Live JOBLUX vocabulary captured via read-only audit before any visual was drawn — preserved tunnel chrome (tab steps + sidebar + circular progress), card patterns, gold/green discipline, admin SaaS shell.
-- Old ProfiLux UI declared visually outdated relative to the new direction. Old vocabulary preserved as patterns; field names and copy moved to Matrix v1 + GPT-locked framing.
-- Discipline observation: the four-utility commit was inert by design and verified inert before push. The next phase touches live runtime — read-only audits remain mandatory before each migration prompt.
+- Three commits shipped to `origin/main` this session: 26daffc (2.1 GET), 8874626 (2.2 POST), da64053 + 17ee41e (2.3 + F2 fix).
+- F2 correction was the meaningful course-correct of the session: GPT-approved D9-β plan called for nested `.member` envelope mirroring `/api/profilux`'s `.profile`. Audit step missed that the two routes have asymmetric consumer access patterns — `/api/profilux` consumers extract a sub-key, `/api/members/me` consumers do not. Caught live on business dashboard, fixed by spreading legacy fields at top level. Lesson for future audits: when planning adapter shape, explicitly inspect each consumer's `setX(await res.json())` line to confirm what they actually read.
+- Pre-existing finding logged for future cleanup, not fixed: `f6508e54` (triple completeness divergence — dashboard frontend 8-field calc / `members.profile_completeness` M6-weighted DB column / legacy `calculateProfileCompleteness` route). Three systems coexist, never collide because consumers read different sources.
+- Discipline observation: TSC clean is necessary but not sufficient. The da64053 nested-shape regression passed type-checking because consumers use `any` types and silent-failure with empty-string fallbacks. Live validation on both consumers caught it.
 
 ### PARKED (admin_tasks status=parked)
 
@@ -98,13 +87,14 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 - `1e6162ea` — Replace inert RPC `submit_m6_admission` (incompatible with locked Apr-14 11-screen proto)
 - `9b806aa3` — F-luxuryrecruiter — repo-wide purge of legacy domain
 - `6aad3904` — Security review backlog — 37 remaining findings from ultra-review 2026-04-24
-- `3a781f8b` — Phase 3 cv-parse UI wire (gated on Phase 2)
 - `8f82b3ac` — Phase 4 premium ProfiLux tunnel + editor rebuild (gated on Phase 3)
 - `35469863` — Phase 5 admin polish (gated on Phase 4)
 
 ### NEW FINDINGS LOGGED (out of immediate scope, surface separately)
 
-*Carried forward from prior rotations. No new findings this session — utilities commit was clean.*
+- **f6508e54** — F-completeness-triple-system — 3 divergent profile_completeness calculations coexist (dashboard frontend 8-field, members.profile_completeness DB column M6-weighted, legacy `calculateProfileCompleteness` in /api/members/profile/route.ts). Logged this session, status=open priority=normal. Best handled with STATE C5 + Phase 4.
+
+*Carried forward from prior rotations:*
 
 - **F-luxuryrecruiter** — see parked `9b806aa3`
 - **F-magiclink-delivery** — Magic-link UI works, NextAuth token created, but SES delivery uncertain
@@ -112,18 +102,17 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 - **F-admin_tasks-trigger** — `done` and `completed_at` derive trigger only fires via PATCH route, not direct UPDATE
 - **F-cv_url-format-mixed** — 5/8 rows full-URL, 3/8 path-only; `normalizeCvStoragePath` handles both
 - **F-public-slug-stub** — `app/[slug]/page.tsx` reads frozen-out `profilux` table; uses `.single()` not `.maybeSingle()`. Park alongside `profilux` table retirement (ledger `6aef236e`).
-- **F-members-me-incomplete** — addressed by Phase 2.3 (`081f3beb`)
-- **F-profilux-frozen-table-routes** — addressed by Phase 2.1 + 2.2 (`0c04c8b9` + `4397dd97`)
+- **F-members-me-incomplete** — closed by Phase 2.3 (`081f3beb`)
+- **F-profilux-frozen-table-routes** — closed by Phase 2.1 + 2.2 (`0c04c8b9` + `4397dd97`)
 
 ### LEDGER NOTE
 
-- `c908fde` utilities commit: not a ledger ticket on its own — captured as LAST SHIPPED in this rotation.
-- Storyboard validation: not a ledger ticket — visual baseline lock captured here.
-- F-cv-parse-no-ui (`17a3534e`) CLOSED, superseded by Phase 3 (`3a781f8b`).
-- Six new ledger rows added: `0c04c8b9`, `4397dd97`, `081f3beb` (open, Phase 2 sub-tasks); `3a781f8b`, `8f82b3ac`, `35469863` (parked, Phases 3–5).
+- Three Phase 2 sub-task rows closed this session: `0c04c8b9` (2.1), `4397dd97` (2.2), `081f3beb` (2.3 + F2 follow-up).
+- One row unparked: `3a781f8b` (Phase 3) parked → open. This is now CURRENT STEP.
+- One new finding row added: `f6508e54` (open, normal).
 - Outstanding parked items unchanged.
 
-**Last updated:** May 1, 2026 (early — utilities shipped + visual baseline locked + Phase 2 sequenced)
+**Last updated:** May 1, 2026 (Phase 2 complete + F2 correction logged + Phase 3 unparked)
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
