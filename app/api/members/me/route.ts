@@ -11,7 +11,7 @@ const supabase = createClient(
 )
 
 // =============================================================================
-// LEGACY ADAPTER — Phase 2.3 transition shim.
+// LEGACY ADAPTER — Phase 2.3 transition shim (F2 reshape).
 // Maps Matrix v1 ProfiLuxResolved (+ a small set of non-ProfiLux member columns
 // fetched separately, per GPT R6-A) → legacy flat member shape consumed by:
 //   - app/dashboard/candidate/page.tsx  (reads member.first_name only)
@@ -23,6 +23,17 @@ const supabase = createClient(
 // company_name / org_type / approved_at sourced via second SELECT (R6-A) —
 // these are member/dashboard metadata, not ProfiLux fields, and intentionally
 // kept off ProfiLuxResolved.
+//
+// SHAPE NOTE (F2, 2026-05-01):
+// Initial Phase 2.3 deploy nested legacy fields under `.member`, mirroring
+// /api/profilux's `.profile` envelope. That broke /api/members/me consumers
+// because they store the raw response body and read fields off the top level
+// (e.g. setMember(await res.json()); ...; member.first_name). Unlike
+// /api/profilux consumers which do setProfilux(pData.profile || pData),
+// /api/members/me consumers do not extract a sub-key.
+//
+// FIX (F2 per GPT): spread the 16 legacy fields at the top level alongside
+// surface/view. Phase 4 still reads `view` directly. UI untouched.
 // =============================================================================
 
 type MemberMeta = {
@@ -58,13 +69,15 @@ function toLegacyMember(view: ProfiLuxResolved, meta: MemberMeta) {
 // GET — Matrix v1 (Phase 2.3, ledger 081f3beb)
 // Reads members.* via resolveProfiLux + targeted second SELECT for non-ProfiLux
 // member metadata (company_name, org_type, approved_at).
-// Returns { surface, view, member } — Matrix v1 native + legacy shim.
+// Returns the 16 legacy fields spread at the top level, plus additive
+// `surface` + `view` for Matrix v1 consumers (F2 shape).
 //
-// SCOPE per GPT D9-β + D10-A + D11-A + R6-A:
+// SCOPE per GPT D9-β + D10-A + D11-A + R6-A + F2:
 //   - resolveProfiLux owns the ProfiLux/L3/CV portion of the response
 //   - Second SELECT covers business/member metadata not on ProfiLuxResolved
 //   - DashboardProjection NOT used (forbidden — projection scope decision out of phase)
 //   - m6_confirmed_at included even when null (forward-compatible, free)
+//   - Legacy fields at top level for backward-compat with raw consumers (F2)
 //
 // FORBIDDEN per STATE DO NOT + GPT rulings:
 //   - No extension of MemberRow, ProfiLuxResolved, or lib/profilux utilities
@@ -91,7 +104,7 @@ export async function GET() {
   }
   if (!member) {
     return NextResponse.json(
-      { surface: "members-me", view: null, member: null },
+      { error: "Member not found", surface: "members-me", view: null },
       { status: 404 }
     )
   }
@@ -108,7 +121,7 @@ export async function GET() {
   }
   if (!resolved) {
     return NextResponse.json(
-      { surface: "members-me", view: null, member: null },
+      { error: "Member not found", surface: "members-me", view: null },
       { status: 404 }
     )
   }
@@ -132,9 +145,14 @@ export async function GET() {
     approved_at: metaRow?.approved_at ?? null,
   }
 
+  const legacy = toLegacyMember(resolved, meta)
+
+  // F2 shape: spread legacy fields at top level for backward-compat with
+  // consumers that read fields directly off the response body. surface +
+  // view are additive for Matrix v1 / Phase 4 readers.
   return NextResponse.json({
+    ...legacy,
     surface: "members-me",
     view: resolved,
-    member: toLegacyMember(resolved, meta),
   })
 }
