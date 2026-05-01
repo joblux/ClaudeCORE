@@ -60,11 +60,19 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 - **DB cleanup 2026-05-01** — Two surgical UPDATEs ran on `members`: `nationality = ''` → NULL (1 row, luxuryretailsale), `bio = ''` → NULL (1 row, luxuryretailsale). Post-cleanup Q1 inventory: zero empty-string rows across all 6 identity fields. `availability='open'` and `desired_salary_currency='EUR'` historical drift left untouched per forward-only policy (cannot programmatically distinguish drift from authored value).
 
+- **917e6dc** `docs(matrix): §7.6 EditorView projection addendum (Phase 4.A prep)` — Spec foundation for Phase 4.A. Inserts §7.6 in `docs/PROFILUX_MATRIX_V1.md` defining the `EditorView` projection (TS-style contract), the 11-screen read/write map, and the locked principle that **availability + readiness fields are NOT M6 admission blockers**. Pure additive (+108 / -0). UI consumes EditorView only — never raw `view` or legacy `profile`. M6 admission logic intentionally out of scope; deferred to a future spec patch.
+
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
 
-Phase 4.0 + Phase 4.1 — write contract + inverse-mapping — **VALIDATED** (commits 12e597f + c7cd53a, live-tested 2026-05-01). Three findings closed: F-empty-string-vs-null, F-availability-default-drift, F-currency-default-applied. DB pollution cleaned (2 rows nationality/bio).
+Phase 4 spec foundation — **§7.6 EditorView addendum SHIPPED** (commit 917e6dc, 2026-05-02). Phase 4.A implementation can now reference §7.6 as the consuming spec.
 
-1. **Phase 4 proper — Premium ProfiLux tunnel + editor rebuild** *(ledger `8f82b3ac`, status: open)* — Full 11-screen tunnel + editor rebuild per locked visual baseline + copy framing + executive-presence guardrail. Will replace `toLegacyProfile`/`toLegacyMember` adapter shims when consumers migrate to read `view` directly. Verify-first UX/design plan only until further notice: visual prototype review against locked screenshots, copy audit, partial-body POST contract for the rebuilt editor (per §4.5 W2 full opt-in), sentinel decision (Option D dirty-diff per Phase 4.0 audit). No code until written design proposal is reviewed by GPT.
+1. **Phase 4.A sub-phase 2 — Vocabulary patch** *(next deliverable, status: queued)* — Locate or define canonical vocabulary files for the 11-screen editor. Scope: 9-level seniority enum, 28-item specializations list, 8 sectors / 35 subsectors, departments list, contract types, numeric input + dropdown component patterns. **Locked decisions for vocabulary patch:**
+   - Lowest seniority value = `entry_level`, display label = "Entry Level"
+   - "Intern" forbidden in ProfiLux/UI/public copy (already on JOBLUX kill-words list)
+   - Canonical file location TBD (likely `lib/profile-options.ts` vs `lib/profilux/vocabulary.ts` — to decide in scoped prompt)
+   No code tonight. Awaits scoped prompt.
+
+2. **Phase 4.A — Editor implementation** *(ledger `8f82b3ac`, status: open)* — 11-screen tunnel rebuild consuming `EditorView`. Per Lot 3 §4 sequence: spec patch → vocabulary patch → 4.A reads `view` → 4.B deprecate `toLegacyProfile` → 4.C migrate consumers (3 files / 4 fetch sites) → 4.D remove `toLegacyProfile` → 4.E `/api/members/me` cutover. `normalizeAvailability` retained per D2.
 
 **Phase 5 — Admin polish** *(ledger `35469863`, parked)* — gated on Phase 4 candidate-side landing first.
 
@@ -116,10 +124,11 @@ Phase 4.0 + Phase 4.1 — write contract + inverse-mapping — **VALIDATED** (co
 
 ### LEDGER NOTE
 
-- Phase 3 (3a781f8b) and Phase 4 (8f82b3ac) tracked separately. Phase 4 still status=open in DB ledger; Phase 4.0 and 4.1 are sub-deliverables of Phase 4 charter, validated forward but ledger row stays open until full editor rebuild ships.
-- Three findings effectively closed via 12e597f + c7cd53a + cleanup SQL: F-empty-string-vs-null, F-availability-default-drift, F-currency-default-applied. STATE annotation only — DB ledger rows for these findings remain status=parked (forward-only fix, no code rollback).
+- Phase 4 spec foundation shipped. Phase 4 ledger row (`8f82b3ac`) stays open until full editor rebuild lands.
+- Vocabulary patch is next sub-deliverable. Locked seniority: lowest value `entry_level`, label "Entry Level", "Intern" forbidden.
+- Three findings closed earlier in session via 12e597f + c7cd53a + cleanup SQL: F-empty-string-vs-null, F-availability-default-drift, F-currency-default-applied (forward-only fix; DB ledger rows remain status=parked).
 
-**Last updated:** May 1, 2026 (Phase 4.0 + 4.1 shipped + validated + DB cleanup + 3 findings closed)
+**Last updated:** May 2, 2026 (Phase 4.A spec foundation shipped — §7.6 EditorView addendum)
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
