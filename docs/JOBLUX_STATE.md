@@ -50,11 +50,21 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 - **408cd7d** `feat(profilux): wire cv-parse to candidate UI (Phase 3, ledger 3a781f8b)` — Single-file change to `app/dashboard/candidate/profilux/page.tsx`. CV card above the 7-step form (upload / parse / re-parse). Identity-only prefill (firstName, lastName, city, nationality), no overwrite of non-empty fields, no silent POST. User saves via existing Continue → Phase 2.2 POST. Reads `cv_url` + `cv_parsed_at` from `/api/members/me`. Live-validated end-to-end on prod (no-overwrite path + fresh-upload-prefill-persist path). Ledger `3a781f8b` validated.
 
+- **dba6d2a** `docs(matrix): add §4.5 L2 write contract (Phase 4.0 prep)` — Spec patch establishing the L2 write contract: W1 (empty-string '' → NULL coercion), W2 (partial-body / explicit-presence write), W3 (unconditional recompute), Adapter constraint (no minting EUR/open from NULL on read).
+
+- **12e597f** `fix(profilux): Phase 4.0 write contract + null default drift fix` — Two-file atomic patch implementing §4.5 W1 + W2: `app/api/profilux/route.ts` (coerceEmpty helper, hasOwnProperty presence guards, adapter null preservation) + `app/dashboard/candidate/profilux/page.tsx` (availability/salaryCurrency widened to `string | null`, initial state null, EUR display-only fallback in salary select). TSC clean.
+
+- **cb5c948** `docs(matrix): §4.5 inverse-mapping rule (Phase 4.1 prep)` — Spec extension: when read-side adapter collapses multiple DB-canonical values into a single UI value, write endpoint MUST apply inverse mapping. UI `open` → DB `not_actively_looking` (canonical default).
+
+- **c7cd53a** `fix(profilux): Phase 4.1 inverse-mapping rule for availability` — Single-file patch to `app/api/profilux/route.ts`. Adds `denormalizeAvailability` helper (right-inverse of `normalizeAvailability` for canonical defaults). POST availability now uses denormalize instead of coerceEmpty. Live-validated end-to-end on prod across 2 scenarios (untouched Continue + explicit user pick): DB conserve `not_actively_looking` in both cases. TSC clean.
+
+- **DB cleanup 2026-05-01** — Two surgical UPDATEs ran on `members`: `nationality = ''` → NULL (1 row, luxuryretailsale), `bio = ''` → NULL (1 row, luxuryretailsale). Post-cleanup Q1 inventory: zero empty-string rows across all 6 identity fields. `availability='open'` and `desired_salary_currency='EUR'` historical drift left untouched per forward-only policy (cannot programmatically distinguish drift from authored value).
+
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
 
-Phase 3 — Wire cv-parse to UI — **VALIDATED** (commit 408cd7d, 2026-05-01).
+Phase 4.0 + Phase 4.1 — write contract + inverse-mapping — **VALIDATED** (commits 12e597f + c7cd53a, live-tested 2026-05-01). Three findings closed: F-empty-string-vs-null, F-availability-default-drift, F-currency-default-applied. DB pollution cleaned (2 rows nationality/bio).
 
-1. **Phase 4 — Premium ProfiLux tunnel + editor rebuild** *(ledger `8f82b3ac`, status: open)* — Visual baseline + copy framing + executive-presence guardrail locked. 11-screen target. Will replace `toLegacyProfile`/`toLegacyMember` adapter shims when consumers migrate to read `view` directly. Phase 4 must also design out 3 default-write side effects from Phase 2.2 POST (F-empty-string-vs-null, F-availability-default-drift, F-currency-default-applied). Verify-first only until further notice: read-only audit of `/api/profilux` GET + POST, resolver L1→L2 cascade, editor UI consumers. No code until written design proposal is reviewed by GPT.
+1. **Phase 4 proper — Premium ProfiLux tunnel + editor rebuild** *(ledger `8f82b3ac`, status: open)* — Full 11-screen tunnel + editor rebuild per locked visual baseline + copy framing + executive-presence guardrail. Will replace `toLegacyProfile`/`toLegacyMember` adapter shims when consumers migrate to read `view` directly. Verify-first UX/design plan only until further notice: visual prototype review against locked screenshots, copy audit, partial-body POST contract for the rebuilt editor (per §4.5 W2 full opt-in), sentinel decision (Option D dirty-diff per Phase 4.0 audit). No code until written design proposal is reviewed by GPT.
 
 **Phase 5 — Admin polish** *(ledger `35469863`, parked)* — gated on Phase 4 candidate-side landing first.
 
@@ -85,9 +95,9 @@ Phase 3 — Wire cv-parse to UI — **VALIDATED** (commit 408cd7d, 2026-05-01).
 
 ### NEW FINDINGS LOGGED (out of immediate scope, surface separately)
 
-- **F-empty-string-vs-null** — Phase 2.2 POST writes "" instead of NULL when form fields are blank. Best handled with Phase 4. Parked.
-- **F-availability-default-drift** — Phase 2.2 POST overwrites availability with form-state default on every Continue. Best handled with Phase 4. Parked.
-- **F-currency-default-applied** — Phase 2.2 POST writes desired_salary_currency=EUR from form-state default. Same root cause as availability drift. Parked.
+- **F-empty-string-vs-null** — Phase 2.2 POST writes "" instead of NULL when form fields are blank. Best handled with Phase 4. Parked. → CLOSED 2026-05-01 by 12e597f + c7cd53a + cleanup SQL.
+- **F-availability-default-drift** — Phase 2.2 POST overwrites availability with form-state default on every Continue. Best handled with Phase 4. Parked. → CLOSED 2026-05-01 by 12e597f + c7cd53a + cleanup SQL.
+- **F-currency-default-applied** — Phase 2.2 POST writes desired_salary_currency=EUR from form-state default. Same root cause as availability drift. Parked. → CLOSED 2026-05-01 by 12e597f + c7cd53a + cleanup SQL.
 - **F-roles-constraint-drift** — `members.role` constraint accepts 5 legacy values still (professional, member, senior, insider_contributor, insider_key_speaker). Cleanup. Parked.
 - **F-registration-role-mismatch** — Suspected drift between intended role at registration and stored role. 30-min audit before public launch. Parked.
 
@@ -106,11 +116,10 @@ Phase 3 — Wire cv-parse to UI — **VALIDATED** (commit 408cd7d, 2026-05-01).
 
 ### LEDGER NOTE
 
-- Closed + validated: `3a781f8b` (Phase 3).
-- Unparked: `8f82b3ac` (Phase 4) parked → open. Now CURRENT STEP.
-- Five new findings added (parked): F-empty-string-vs-null, F-availability-default-drift, F-currency-default-applied, F-roles-constraint-drift, F-registration-role-mismatch.
+- Phase 3 (3a781f8b) and Phase 4 (8f82b3ac) tracked separately. Phase 4 still status=open in DB ledger; Phase 4.0 and 4.1 are sub-deliverables of Phase 4 charter, validated forward but ledger row stays open until full editor rebuild ships.
+- Three findings effectively closed via 12e597f + c7cd53a + cleanup SQL: F-empty-string-vs-null, F-availability-default-drift, F-currency-default-applied. STATE annotation only — DB ledger rows for these findings remain status=parked (forward-only fix, no code rollback).
 
-**Last updated:** May 1, 2026 (Phase 3 shipped + validated + Phase 4 unparked + 5 findings parked)
+**Last updated:** May 1, 2026 (Phase 4.0 + 4.1 shipped + validated + DB cleanup + 3 findings closed)
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
