@@ -147,10 +147,20 @@ Implementation pattern (server):
 
 **Adapter constraint (Phase 4.0).** Read-side adapters (e.g. `toLegacyProfile` in `app/api/profilux/route.ts`) MUST NOT mint synthetic default values from `NULL` for fields covered by W1. Specifically: `desired_salary_currency` and `availability` MUST surface as `null` to the client when DB is `NULL`. Minting `'EUR'` or `'open'` from `NULL` causes a NULL → default round-trip drift on Continue.
 
+**Inverse-mapping rule (Phase 4.1).** When a read-side adapter collapses multiple DB-canonical values into a single UI-editor value (lossy normalization), the L2 write endpoint MUST apply an inverse mapping before writing back. Without it, every read+write round-trip silently rewrites the DB-canonical value to whichever UI value the adapter emitted, corrupting historical data. Specifically for `availability`:
+
+- UI `active` → DB `actively_looking`
+- UI `open` → DB `not_actively_looking` (canonical default; collapses prior values `open`, `considering`, `open_to_opportunities`, `not_actively_looking`)
+- UI `passive` → DB `passively_exploring`
+- UI `unavailable` → DB `unavailable`
+- UI `null` or empty → DB `null`
+
+Implementation: server-side `denormalizeAvailability(uiValue)` helper, called before `coerceEmpty()` in the POST handler. Read-side `normalizeAvailability` remains the source of truth for the collapse mapping; the write-side helper is its right inverse for the canonical default of each collapsed group.
+
 **Test expectations:**
 - POST with `{firstName: ''}` → DB writes `NULL` (W1).
 - POST with no `availability` key → DB unchanged for `availability` (W2).
-- POST with `{availability: 'open'}` from a user who actually picked it → DB writes `'open'` (correct authored value).
+- POST with `{availability: 'open'}` (UI value) → DB writes `'not_actively_looking'` (canonical default; Phase 4.1 inverse-mapping rule).
 - GET response from `/api/profilux` for a row with `desired_salary_currency = NULL` → response field is `null`, not `'EUR'`.
 
 ---
