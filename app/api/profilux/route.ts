@@ -53,6 +53,30 @@ function normalizeAvailability(raw: string | null): string | null {
   }
 }
 
+// Inverse of normalizeAvailability (PROFILUX_MATRIX_V1 §4.5 Phase 4.1).
+// Maps UI-editor availability values back to DB-canonical values before write.
+// Necessary because normalizeAvailability collapses multiple DB values into single UI values
+// on read; without an inverse, every read+write round-trip rewrites the DB-canonical value.
+function denormalizeAvailability(uiValue: string | null | undefined): string | null {
+  if (uiValue === null || uiValue === undefined) return null
+  const trimmed = typeof uiValue === 'string' ? uiValue.trim() : ''
+  if (trimmed === '') return null
+  switch (trimmed) {
+    case 'active':
+      return 'actively_looking'
+    case 'open':
+      return 'not_actively_looking' // canonical default per §4.5 Phase 4.1
+    case 'passive':
+      return 'passively_exploring'
+    case 'unavailable':
+      return 'unavailable'
+    default:
+      // If a non-UI value somehow reaches the write path (e.g. a DB-canonical value
+      // sent by a future client), pass it through unchanged. Forward-compat.
+      return trimmed
+  }
+}
+
 function mapLegacyExperiences(experiences: ResolvedExperience[]) {
   // LOSSY: L1 has no 'group' or stable 'id'. Editor uses 'id' for delete; array
   // index is stable enough for read-only render. Phase 2.2 POST will not
@@ -176,6 +200,7 @@ export async function GET() {
 //   W1 — empty-string '' → NULL coercion before write
 //   W2 — partial-body write: only write columns explicitly present in body
 //   W3 — recompute is unconditional (preserved from Phase 2.2)
+// Phase 4.1: inverse-mapping rule for availability (denormalizeAvailability).
 // =============================================================================
 
 export async function POST(req: NextRequest) {
@@ -220,7 +245,7 @@ export async function POST(req: NextRequest) {
   if (has('nationality')) updatePayload.nationality = coerceEmpty(body.nationality)
   if (has('headline')) updatePayload.headline = coerceEmpty(body.headline)
   if (has('bio')) updatePayload.bio = coerceEmpty(body.bio)
-  if (has('availability')) updatePayload.availability = coerceEmpty(body.availability)
+  if (has('availability')) updatePayload.availability = denormalizeAvailability(body.availability)
   if (has('salaryExpectation')) {
     updatePayload.desired_salary_max =
       typeof body.salaryExpectation === 'number' && body.salaryExpectation > 0
