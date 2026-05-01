@@ -48,13 +48,13 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 - **da64053** + **17ee41e** `Phase 2.3 — /api/members/me Matrix v1 alignment (ledger 081f3beb)` — two-commit phase. **da64053** initial deploy used GPT-locked decisions D9-β (adapter shim, no `DashboardProjection` extension), D10-A (`resolveProfiLux` for ProfiLux/L3/CV portion), D11-A (`m6_confirmed_at` always returned, even when null), R6-A (second targeted SELECT for `company_name`, `org_type`, `approved_at` — kept off `ProfiLuxResolved` because they are member/dashboard metadata, not ProfiLux fields). Initial shape `{ surface: 'members-me', view, member: <legacy 16-field flat> }` mirrored `/api/profilux`'s `.profile` envelope. **REGRESSION DETECTED LIVE:** `/api/members/me` consumers (candidate + business dashboards) store the raw response body via `setMember(await res.json())` and read fields off the top level (e.g. `member.first_name`) — unlike `/api/profilux` consumers which extract a sub-key (`pData.profile || pData`). Legacy fields under nested `.member` were unreachable. Caught via business dashboard render (Mohammed/Hublot): page rendered, no 500, but `last_name`/`company_name` empty (silent failure with empty-string fallbacks). **17ee41e** F2 fix per GPT: spread the 16 legacy fields at top level alongside `surface` + `view` (additive). UI consumers untouched. `lib/profilux/*` untouched. `MemberRow`/`ProfiLuxResolved`/`DashboardProjection` untouched. Validated end-to-end on both consumers (executive: Baya / business: Mohammed-Hublot): API top-level shape, dashboard render, sidebar/settings card/brief form `org_type` propagation, save round-trip via `refreshMember`. Closes `F-members-me-incomplete` (4 L3/CV adds: `profile_completeness`, `m6_confirmed_at`, `cv_url`, `cv_parsed_at`). Ledger `081f3beb` closed.
 
+- **408cd7d** `feat(profilux): wire cv-parse to candidate UI (Phase 3, ledger 3a781f8b)` — Single-file change to `app/dashboard/candidate/profilux/page.tsx`. CV card above the 7-step form (upload / parse / re-parse). Identity-only prefill (firstName, lastName, city, nationality), no overwrite of non-empty fields, no silent POST. User saves via existing Continue → Phase 2.2 POST. Reads `cv_url` + `cv_parsed_at` from `/api/members/me`. Live-validated end-to-end on prod (no-overwrite path + fresh-upload-prefill-persist path). Ledger `3a781f8b` validated.
+
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
 
-Phase 2 — route migrations — **COMPLETE**. All three routes (`/api/profilux` GET, `/api/profilux` POST, `/api/members/me`) now consume Matrix v1 utilities. Frozen `profilux` standalone table no longer read or written by any active route.
+Phase 3 — Wire cv-parse to UI — **VALIDATED** (commit 408cd7d, 2026-05-01).
 
-1. **Phase 3 — Wire cv-parse to UI** *(ledger `3a781f8b`, status: open)* — Phase 2 gate removed. Add Parse trigger in `/dashboard/candidate/profilux` flow. Parse output writes L1 only (`cv_parsed_data` jsonb). User-confirmed prefill goes through migrated L2 edit endpoints (Phase 2.2 POST). No direct `members.*` or `cv_parsed_data` reads in UI. cv-parse route itself (ledger `17a3534e`) stays untouched per DO NOT — Phase 3 is purely the UI wire.
-
-**Phase 4 — Premium ProfiLux tunnel + editor rebuild** *(ledger `8f82b3ac`, parked)* — gated on Phase 3. Visual baseline + copy framing + executive-presence guardrail all locked. 11-screen target. Will replace the `toLegacyProfile`/`toLegacyMember` adapter shims when consumers migrate to read `view` directly.
+1. **Phase 4 — Premium ProfiLux tunnel + editor rebuild** *(ledger `8f82b3ac`, status: open)* — Visual baseline + copy framing + executive-presence guardrail locked. 11-screen target. Will replace `toLegacyProfile`/`toLegacyMember` adapter shims when consumers migrate to read `view` directly. Phase 4 must also design out 3 default-write side effects from Phase 2.2 POST (F-empty-string-vs-null, F-availability-default-drift, F-currency-default-applied). Verify-first only until further notice: read-only audit of `/api/profilux` GET + POST, resolver L1→L2 cascade, editor UI consumers. No code until written design proposal is reviewed by GPT.
 
 **Phase 5 — Admin polish** *(ledger `35469863`, parked)* — gated on Phase 4 candidate-side landing first.
 
@@ -74,13 +74,6 @@ Phase 2 — route migrations — **COMPLETE**. All three routes (`/api/profilux`
 - Build any product-facing surface (tunnel, editor, dashboard, admin) without first read-only inspecting the live components per the visual guardrail.
 - Drift from the executive-presence guardrail in any copy or microstate.
 
-### SESSION NOTE (May 1 2026 — Phase 2 shipped + F2 correction logged)
-
-- Three commits shipped to `origin/main` this session: 26daffc (2.1 GET), 8874626 (2.2 POST), da64053 + 17ee41e (2.3 + F2 fix).
-- F2 correction was the meaningful course-correct of the session: GPT-approved D9-β plan called for nested `.member` envelope mirroring `/api/profilux`'s `.profile`. Audit step missed that the two routes have asymmetric consumer access patterns — `/api/profilux` consumers extract a sub-key, `/api/members/me` consumers do not. Caught live on business dashboard, fixed by spreading legacy fields at top level. Lesson for future audits: when planning adapter shape, explicitly inspect each consumer's `setX(await res.json())` line to confirm what they actually read.
-- Pre-existing finding logged for future cleanup, not fixed: `f6508e54` (triple completeness divergence — dashboard frontend 8-field calc / `members.profile_completeness` M6-weighted DB column / legacy `calculateProfileCompleteness` route). Three systems coexist, never collide because consumers read different sources.
-- Discipline observation: TSC clean is necessary but not sufficient. The da64053 nested-shape regression passed type-checking because consumers use `any` types and silent-failure with empty-string fallbacks. Live validation on both consumers caught it.
-
 ### PARKED (admin_tasks status=parked)
 
 - `2847ac29` — Audit + migrate Anthropic model IDs across repo before Sonnet 4 retirement (deadline Jun 15 2026)
@@ -91,6 +84,12 @@ Phase 2 — route migrations — **COMPLETE**. All three routes (`/api/profilux`
 - `35469863` — Phase 5 admin polish (gated on Phase 4)
 
 ### NEW FINDINGS LOGGED (out of immediate scope, surface separately)
+
+- **F-empty-string-vs-null** — Phase 2.2 POST writes "" instead of NULL when form fields are blank. Best handled with Phase 4. Parked.
+- **F-availability-default-drift** — Phase 2.2 POST overwrites availability with form-state default on every Continue. Best handled with Phase 4. Parked.
+- **F-currency-default-applied** — Phase 2.2 POST writes desired_salary_currency=EUR from form-state default. Same root cause as availability drift. Parked.
+- **F-roles-constraint-drift** — `members.role` constraint accepts 5 legacy values still (professional, member, senior, insider_contributor, insider_key_speaker). Cleanup. Parked.
+- **F-registration-role-mismatch** — Suspected drift between intended role at registration and stored role. 30-min audit before public launch. Parked.
 
 - **f6508e54** — F-completeness-triple-system — 3 divergent profile_completeness calculations coexist (dashboard frontend 8-field, members.profile_completeness DB column M6-weighted, legacy `calculateProfileCompleteness` in /api/members/profile/route.ts). Logged this session, status=open priority=normal. Best handled with STATE C5 + Phase 4.
 
@@ -107,12 +106,11 @@ Phase 2 — route migrations — **COMPLETE**. All three routes (`/api/profilux`
 
 ### LEDGER NOTE
 
-- Three Phase 2 sub-task rows closed this session: `0c04c8b9` (2.1), `4397dd97` (2.2), `081f3beb` (2.3 + F2 follow-up).
-- One row unparked: `3a781f8b` (Phase 3) parked → open. This is now CURRENT STEP.
-- One new finding row added: `f6508e54` (open, normal).
-- Outstanding parked items unchanged.
+- Closed + validated: `3a781f8b` (Phase 3).
+- Unparked: `8f82b3ac` (Phase 4) parked → open. Now CURRENT STEP.
+- Five new findings added (parked): F-empty-string-vs-null, F-availability-default-drift, F-currency-default-applied, F-roles-constraint-drift, F-registration-role-mismatch.
 
-**Last updated:** May 1, 2026 (Phase 2 complete + F2 correction logged + Phase 3 unparked)
+**Last updated:** May 1, 2026 (Phase 3 shipped + validated + Phase 4 unparked + 5 findings parked)
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
