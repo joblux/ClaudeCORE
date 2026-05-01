@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -97,6 +97,14 @@ export default function ProfiluxPage() {
   const [copied, setCopied] = useState(false)
   const [showAddExp, setShowAddExp] = useState(false)
   const [newExp, setNewExp] = useState<Partial<Experience>>({ current: false })
+  const [cvUrl, setCvUrl] = useState<string | null>(null)
+  const [cvParsedAt, setCvParsedAt] = useState<string | null>(null)
+  const [parsing, setParsing] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [parseError, setParseError] = useState<string | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [needsReviewCount, setNeedsReviewCount] = useState<number | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [profile, setProfile] = useState<ProfileData>({
     firstName: '',
@@ -134,6 +142,20 @@ export default function ProfiluxPage() {
       } catch {}
     }
     if (status === 'authenticated') fetchProfile()
+  }, [status])
+
+  useEffect(() => {
+    const fetchCvState = async () => {
+      try {
+        const res = await fetch('/api/members/me')
+        if (res.ok) {
+          const data = await res.json()
+          setCvUrl(data?.cv_url ?? null)
+          setCvParsedAt(data?.cv_parsed_at ?? null)
+        }
+      } catch {}
+    }
+    if (status === 'authenticated') fetchCvState()
   }, [status])
 
   const completedSteps = [
@@ -204,6 +226,80 @@ export default function ProfiluxPage() {
     }
   }
 
+  const applyCvPrefill = (parsed: any) => {
+    if (!parsed || typeof parsed !== 'object') return
+    const id = parsed.identity ?? {}
+    setProfile(prev => {
+      const patch: any = {}
+      if (!prev.firstName?.trim() && typeof id.first_name === 'string' && id.first_name.trim()) patch.firstName = id.first_name
+      if (!prev.lastName?.trim() && typeof id.last_name === 'string' && id.last_name.trim()) patch.lastName = id.last_name
+      if (!prev.city?.trim() && typeof id.city === 'string' && id.city.trim()) patch.city = id.city
+      if (!prev.nationality?.trim() && typeof id.nationality === 'string' && id.nationality.trim()) patch.nationality = id.nationality
+      return { ...prev, ...patch }
+    })
+  }
+
+  const mapParseError = (code: string | null): string => {
+    switch (code) {
+      case 'M6_NO_CV_UPLOADED': return 'Upload a CV first.'
+      case 'M6_DOC_FORMAT_UNSUPPORTED': return 'Use PDF or .docx.'
+      case 'M6_CV_TEXT_TOO_SHORT': return 'We could not read your CV. Try a text-based PDF.'
+      case 'M6_PARSER_TIMEOUT': return 'Parsing timed out. Try again.'
+      case 'M6_PARSER_FAILED':
+      case 'M6_PARSER_INVALID_OUTPUT': return 'Parsing failed. Try again.'
+      default: return 'Something went wrong. Try again.'
+    }
+  }
+
+  const handleUploadClick = () => {
+    setUploadError(null)
+    fileInputRef.current?.click()
+  }
+
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setUploadError(null)
+    try {
+      const fd = new FormData()
+      fd.append('cv', file)
+      const res = await fetch('/api/members/cv-upload', { method: 'POST', body: fd })
+      if (res.ok) {
+        const data = await res.json().catch(() => ({}))
+        const newPath = data?.path ?? data?.cv_url ?? null
+        setCvUrl(newPath ?? 'uploaded')
+        setCvParsedAt(null)
+        setNeedsReviewCount(null)
+      } else {
+        setUploadError('Upload failed. Try again.')
+      }
+    } catch {
+      setUploadError('Upload failed. Try again.')
+    }
+    setUploading(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const handleParse = async () => {
+    setParsing(true)
+    setParseError(null)
+    try {
+      const res = await fetch('/api/members/cv-parse', { method: 'POST' })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok && data?.success) {
+        setCvParsedAt(typeof data?.parsed_at === 'string' ? data.parsed_at : new Date().toISOString())
+        setNeedsReviewCount(typeof data?.needs_review_count === 'number' ? data.needs_review_count : null)
+        applyCvPrefill(data?.parsed)
+      } else {
+        setParseError(mapParseError(data?.error ?? null))
+      }
+    } catch {
+      setParseError(mapParseError(null))
+    }
+    setParsing(false)
+  }
+
   const addExperience = () => {
     if (!newExp.role || !newExp.brand) return
     const entry: Experience = {
@@ -272,6 +368,10 @@ export default function ProfiluxPage() {
     fontFamily: 'Inter, sans-serif',
   })
 
+  const parsedDateLabel = (cvParsedAt && !isNaN(new Date(cvParsedAt).getTime()))
+    ? new Date(cvParsedAt).toLocaleDateString()
+    : 'recently'
+
   return (
     <div style={{ background: '#1a1a1a', minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: '#fff' }}>
 
@@ -310,6 +410,73 @@ export default function ProfiluxPage() {
             ))}
           </div>
           <div style={{ background: '#111', borderBottom: '1px solid #1e1e1e' }} />
+        </div>
+
+        {/* CV CARD — Phase 3 */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 240px', gap: '32px', marginBottom: '24px' }}>
+          <div style={{ background: '#222', border: '1px solid #333', borderRadius: '6px', padding: '20px 24px' }}>
+            <div style={{ fontSize: '10px', color: '#1D9E75', letterSpacing: '0.1em', marginBottom: '10px', fontWeight: 600, textTransform: 'uppercase' }}>CV</div>
+
+            {!cvUrl && (
+              <>
+                <div style={{ fontSize: '13px', color: '#aaa', marginBottom: '14px', fontWeight: 300 }}>Upload your CV to prefill your profile.</div>
+                <button
+                  onClick={handleUploadClick}
+                  disabled={uploading}
+                  style={{ background: '#fff', border: 'none', color: '#000', fontSize: '12px', padding: '8px 18px', borderRadius: '4px', cursor: uploading ? 'default' : 'pointer', fontFamily: 'Inter, sans-serif', opacity: uploading ? 0.5 : 1 }}
+                >
+                  {uploading ? 'Uploading...' : 'Upload CV'}
+                </button>
+              </>
+            )}
+
+            {cvUrl && !cvParsedAt && (
+              <>
+                <div style={{ fontSize: '13px', color: '#aaa', marginBottom: '14px', fontWeight: 300 }}>
+                  CV uploaded. <button onClick={handleUploadClick} disabled={uploading} style={{ background: 'transparent', border: 'none', color: '#aaa', fontSize: '13px', textDecoration: 'underline', textUnderlineOffset: '3px', cursor: 'pointer', padding: 0, fontFamily: 'Inter, sans-serif' }}>{uploading ? 'Uploading...' : 'Replace'}</button>
+                </div>
+                <button
+                  onClick={handleParse}
+                  disabled={parsing}
+                  style={{ background: '#fff', border: 'none', color: '#000', fontSize: '12px', padding: '8px 18px', borderRadius: '4px', cursor: parsing ? 'default' : 'pointer', fontFamily: 'Inter, sans-serif', opacity: parsing ? 0.5 : 1 }}
+                >
+                  {parsing ? 'Parsing...' : 'Parse CV'}
+                </button>
+              </>
+            )}
+
+            {cvUrl && cvParsedAt && (
+              <>
+                <div style={{ fontSize: '13px', color: '#aaa', marginBottom: '14px', fontWeight: 300 }}>
+                  CV parsed {parsedDateLabel}. <button onClick={handleUploadClick} disabled={uploading} style={{ background: 'transparent', border: 'none', color: '#aaa', fontSize: '13px', textDecoration: 'underline', textUnderlineOffset: '3px', cursor: 'pointer', padding: 0, fontFamily: 'Inter, sans-serif' }}>{uploading ? 'Uploading...' : 'Replace'}</button>
+                </div>
+                <button
+                  onClick={handleParse}
+                  disabled={parsing}
+                  style={{ background: 'transparent', border: '1px solid #444', color: '#aaa', fontSize: '12px', padding: '8px 18px', borderRadius: '4px', cursor: parsing ? 'default' : 'pointer', fontFamily: 'Inter, sans-serif', opacity: parsing ? 0.5 : 1 }}
+                >
+                  {parsing ? 'Parsing...' : 'Re-parse'}
+                </button>
+              </>
+            )}
+
+            {(parseError || uploadError) && (
+              <div style={{ marginTop: '10px', fontSize: '11px', color: '#ff6b6b' }}>{parseError || uploadError}</div>
+            )}
+
+            {needsReviewCount !== null && needsReviewCount > 0 && (
+              <div style={{ marginTop: '10px', fontSize: '11px', color: '#888' }}>{needsReviewCount} {needsReviewCount === 1 ? 'item' : 'items'} to review</div>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.docx"
+              onChange={handleFileSelected}
+              style={{ display: 'none' }}
+            />
+          </div>
+          <div />
         </div>
 
         {/* MAIN GRID */}
