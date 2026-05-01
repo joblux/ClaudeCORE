@@ -301,6 +301,114 @@ They are not the same projection. Future product decisions may diverge them furt
 
 ---
 
+### 7.6 Editor projection (Phase 4 rebuild)
+
+The `editor` surface returns a dedicated `EditorView` projection consumed by the rebuilt 11-screen ProfiLux tunnel. The shape uses Matrix v1 §6 ProfiLuxResolved field names (no legacy camelCase). Spec contract only — implementation deferred to Phase 4.A.
+
+**Locked decisions:**
+- Availability is part of the Readiness Layer, NOT an M6 admission blocker. Final M6 admission logic is out of scope for this addendum.
+- `normalizeAvailability` retained on read; `denormalizeAvailability` retained on write. UI uses 4-value enum (active / open / passive / unavailable).
+- UI consumes `EditorView` only — never raw `view` or legacy `profile`.
+
+#### 7.6.1 EditorView shape
+
+```typescript
+interface EditorView {
+  // Identity
+  first_name: string | null
+  last_name: string | null
+  city: string | null
+  country: string | null
+  nationality: string | null
+  phone: string | null
+
+  // Position
+  job_title: string | null
+  current_employer: string | null
+  seniority: string | null
+  total_years_experience: number | null
+
+  // Luxury fit
+  years_in_luxury: number | null
+  sectors: string[]
+  product_categories: string[]
+  expertise_tags: string[]
+
+  // Experience + education (L1)
+  experiences: ResolvedExperience[]
+  education: ResolvedEducation[]
+  university: string | null
+  field_of_study: string | null
+  graduation_year: number | null
+
+  // Availability + targets (Readiness — NOT admission)
+  availability: 'active' | 'open' | 'passive' | 'unavailable' | null
+  desired_locations: string[]
+  desired_departments: string[]
+  desired_contract_types: string[]
+  desired_salary_min: number | null
+  desired_salary_max: number | null
+  desired_salary_currency: string | null
+  open_to_relocation: boolean | null
+  relocation_preferences: string | null
+
+  // Narrative
+  headline: string | null
+  bio: string | null
+  avatar_url: string | null
+  linkedin_url: string | null
+
+  // Languages, markets, skills
+  languages: ResolvedLanguage[]
+  market_knowledge: string[]
+  key_skills: string[]
+
+  // Clienteling
+  clienteling_experience: boolean | null
+  clienteling_description: string | null
+
+  // CV meta (read-only)
+  cv_meta: {
+    cv_url: string | null
+    cv_parsed_at: string | null
+    needs_review: number
+  }
+
+  // Computed (read-only)
+  profile_completeness: number
+}
+```
+
+Notes:
+- Strings default to `null`. Arrays default to `[]`. Numbers default to `null`.
+- L1-only fields (`sectors`, `experiences`, `education`, `languages`) are read from `cv_parsed_data`. Editor renders but does NOT write them via this contract.
+- `availability` is shown as the 4-value UI enum on read (via `normalizeAvailability`) and inverse-mapped on write (via `denormalizeAvailability`) per §4.5.
+
+#### 7.6.2 Per-screen read/write map
+
+The 11-screen flow (per Lot 2 design proposal) maps to EditorView fields:
+
+| Screen | Name | Reads | Writes (partial-body POST) |
+|---|---|---|---|
+| 1 | Identity | first_name, last_name, city, country, nationality, phone | first_name, last_name, city, country, nationality, phone |
+| 2 | Headline + bio | headline, bio, avatar_url | headline, bio, avatar_url |
+| 3 | Current position | job_title, current_employer, seniority, total_years_experience | job_title, current_employer, seniority, total_years_experience |
+| 4 | Luxury fit | years_in_luxury, sectors, product_categories, expertise_tags | years_in_luxury, product_categories, expertise_tags |
+| 5 | Career history | experiences (L1) | (none — L1 read-only) |
+| 6 | Education + languages | university, field_of_study, graduation_year, education, languages | university, field_of_study, graduation_year |
+| 7 | Skills + markets | key_skills, market_knowledge | key_skills, market_knowledge |
+| 8 | Clienteling | clienteling_experience, clienteling_description | clienteling_experience, clienteling_description |
+| 9 | Availability + targets | availability, desired_locations, desired_departments, desired_contract_types, open_to_relocation, relocation_preferences | availability, desired_locations, desired_departments, desired_contract_types, open_to_relocation, relocation_preferences |
+| 10 | Salary expectations | desired_salary_min, desired_salary_max, desired_salary_currency | desired_salary_min, desired_salary_max, desired_salary_currency |
+| 11 | Confirm + share | profile_completeness, cv_meta | (separate confirm route — out of scope for this addendum) |
+
+Rules:
+- Each screen sends only listed write fields, only if user touched them (per §4.5 W2 partial-body).
+- Untouched fields absent from body. Untouched range slider thumbs serialize as null/absent.
+- Availability + readiness fields (Screens 9–10) are NOT M6 admission blockers. Admission logic is defined elsewhere in a future spec patch.
+
+---
+
 ## 8. M6 eligibility and confirmation
 
 Two distinct concepts. Do not conflate.
