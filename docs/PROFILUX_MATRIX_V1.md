@@ -128,6 +128,31 @@ L3 cached fields are recomputed:
 
 Recompute lives in route code (cv-parse route + L2 edit endpoints), not in DB triggers.
 
+### 4.5 L2 write contract
+
+L2 edit endpoints (`/api/profilux` POST and any future ProfiLux write route) follow these rules. Violations corrupt DB integrity and are forbidden.
+
+**Rule W1 — Empty-string coercion.** Any incoming string value that is `''` (after trim) MUST be coerced to `NULL` before write. The form default for unfilled string fields is empty; storing `''` pollutes the canonical "unset" representation and breaks the §5.2 prefill rule ("L1 prefills only when L2 is NULL"). Applies to: `first_name`, `last_name`, `city`, `country`, `nationality`, `phone`, `bio`, `headline`, `linkedin_url`, `job_title`, `current_employer`, `university`, `field_of_study`, `clienteling_description`, `availability`, `desired_salary_currency`, `relocation_preferences`.
+
+**Rule W2 — Partial body / explicit-presence write.** L2 edit endpoints MUST only write columns that are explicitly present in the request body. Columns absent from the body MUST NOT be written, regardless of nullishness. Form-state defaults (e.g. `availability='open'`, `salaryCurrency='EUR'`) sent with the full state object on every Continue would otherwise overwrite real DB values with form defaults the user never authored.
+
+Implementation pattern (server):
+- Test `Object.prototype.hasOwnProperty.call(body, 'fieldName')` to detect presence.
+- Only include the column in the `update()` payload if present.
+- Apply Rule W1 coercion to the value if present.
+
+**Rule W3 — Recompute is unconditional.** §4.4 recompute boundary applies regardless of whether the body included scoring-relevant fields. Recompute on every L2 write attempt, even no-op writes.
+
+**Backwards compat note (Phase 2.2 → Phase 4.0).** Legacy clients (current `app/dashboard/candidate/profilux/page.tsx`) send the full `ProfileData` object on every save. Post-W2, the server still receives and writes those fields — Rule W2 is opt-in for clients that send partial bodies; for clients that send full objects, Rule W1 alone is enough to stop the empty-string pollution. Rule W2 fully takes effect when the Phase 4 editor rebuild migrates to dirty-only POSTs.
+
+**Adapter constraint (Phase 4.0).** Read-side adapters (e.g. `toLegacyProfile` in `app/api/profilux/route.ts`) MUST NOT mint synthetic default values from `NULL` for fields covered by W1. Specifically: `desired_salary_currency` and `availability` MUST surface as `null` to the client when DB is `NULL`. Minting `'EUR'` or `'open'` from `NULL` causes a NULL → default round-trip drift on Continue.
+
+**Test expectations:**
+- POST with `{firstName: ''}` → DB writes `NULL` (W1).
+- POST with no `availability` key → DB unchanged for `availability` (W2).
+- POST with `{availability: 'open'}` from a user who actually picked it → DB writes `'open'` (correct authored value).
+- GET response from `/api/profilux` for a row with `desired_salary_currency = NULL` → response field is `null`, not `'EUR'`.
+
 ---
 
 ## 5. Re-upload / overwrite rule
