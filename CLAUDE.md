@@ -132,3 +132,19 @@ Every horizontal band: `max-width:1200px` + `margin:0 auto` + `padding:0 28px`
 - When Supabase returns correct data but Next.js shows null: check middleware redirects and container staleness first
 - Confirm which file renders the live URL before touching any code
 - Never paste full terminal output from zip/file-listing commands — causes context exhaustion
+
+---
+
+## JOBLUX Claude Code Execution Protocol
+
+- One mission per prompt.
+- Split work into Inspect → Patch → Verify → Ship.
+- Do not combine audit, patch, validation, commit, and roadmap in one prompt.
+- Long outputs must go to /tmp artifacts.
+- Terminal output must be short: status, diff stat, artifact paths, pass/fail.
+- Do not print full diffs or long files inline unless explicitly asked.
+- Do not propose unrelated next work during execution.
+- If Mo makes a remark, treat it as a signal unless explicitly phrased as an instruction.
+- Product/user-facing decisions wait for Mo.
+- Technical execution can proceed only inside approved scope.
+- Stop after completing the requested step and wait.
