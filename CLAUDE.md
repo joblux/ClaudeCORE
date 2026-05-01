@@ -148,3 +148,4 @@ Every horizontal band: `max-width:1200px` + `margin:0 auto` + `padding:0 28px`
 - Product/user-facing decisions wait for Mo.
 - Technical execution can proceed only inside approved scope.
 - Stop after completing the requested step and wait.
+- Before any UI/design task, read DESIGN.md first.
