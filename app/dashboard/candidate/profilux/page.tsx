@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import type { EditorView } from '@/lib/profilux/types'
-import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS } from '@/lib/profilux/vocabulary'
+import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS } from '@/lib/profilux/vocabulary'
 
 const TOTAL = 11
 const SCREEN_TITLES = [
@@ -56,6 +56,12 @@ type Screen6Draft = {
   graduation_year: string
 }
 
+type Screen10Draft = {
+  desired_salary_min: number | null
+  desired_salary_max: number | null
+  desired_salary_currency: string | null
+}
+
 function draftFrom(e: EditorView): Screen3Draft {
   return {
     job_title: e.job_title ?? '',
@@ -88,6 +94,12 @@ function draftFrom6(e: EditorView): Screen6Draft {
   }
 }
 
+const draftFrom10 = (e: EditorView): Screen10Draft => ({
+  desired_salary_min: e.desired_salary_min,
+  desired_salary_max: e.desired_salary_max,
+  desired_salary_currency: e.desired_salary_currency,
+})
+
 export default function ProfiluxPage() {
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -109,6 +121,10 @@ export default function ProfiluxPage() {
   const [saving6, setSaving6] = useState(false)
   const [savedAt6, setSavedAt6] = useState<number | null>(null)
   const [saveError6, setSaveError6] = useState<string | null>(null)
+  const [draft10, setDraft10] = useState<Screen10Draft | null>(null)
+  const [saving10, setSaving10] = useState(false)
+  const [savedAt10, setSavedAt10] = useState<number | null>(null)
+  const [saveError10, setSaveError10] = useState<string | null>(null)
 
   const refetch = async () => {
     const res = await fetch('/api/profilux')
@@ -121,6 +137,7 @@ export default function ProfiluxPage() {
       setDraft4(draftFrom4(e))
       setDraft8(draftFrom8(e))
       setDraft6(draftFrom6(e))
+      setDraft10(draftFrom10(e))
     }
     return e
   }
@@ -240,6 +257,32 @@ export default function ProfiluxPage() {
       setSaveError6(String(err))
     } finally {
       setSaving6(false)
+    }
+  }
+
+  async function handleSave10() {
+    if (!draft10) return
+    setSaving10(true)
+    setSaveError10(null)
+    try {
+      const body: Record<string, unknown> = {
+        desired_salary_min: draft10.desired_salary_min,
+        desired_salary_max: draft10.desired_salary_max,
+        desired_salary_currency: draft10.desired_salary_currency,
+      }
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      await refetch()
+      setSavedAt10(Date.now())
+      setTimeout(() => setSavedAt10((t) => (t && Date.now() - t >= 2000 ? null : t)), 2100)
+    } catch (err) {
+      setSaveError10(String(err))
+    } finally {
+      setSaving10(false)
     }
   }
 
@@ -439,10 +482,29 @@ export default function ProfiluxPage() {
         </div>
       )
       case 10: return (
-        <div style={grid}>
-          <div style={label}>Target compensation (min)</div><div>{e.desired_salary_min ?? <NotSet />}</div>
-          <div style={label}>Target compensation (max)</div><div>{e.desired_salary_max ?? <NotSet />}</div>
-          <div style={label}>Currency</div><div>{e.desired_salary_currency ?? <NotSet />}</div>
+        <div style={{ maxWidth: 900 }}>
+          <div style={grid}>
+            <div style={label}>Target compensation (min)</div>
+            <div><input style={input} type="number" min={0} value={draft10?.desired_salary_min ?? ''} onChange={(ev) => setDraft10(d => d && ({ ...d, desired_salary_min: ev.target.value === '' ? null : Number(ev.target.value) }))} placeholder="e.g. 80000" /></div>
+            <div style={label}>Target compensation (max)</div>
+            <div><input style={input} type="number" min={0} value={draft10?.desired_salary_max ?? ''} onChange={(ev) => setDraft10(d => d && ({ ...d, desired_salary_max: ev.target.value === '' ? null : Number(ev.target.value) }))} placeholder="e.g. 120000" /></div>
+            <div style={label}>Currency</div>
+            <div>
+              <select style={input} value={draft10?.desired_salary_currency ?? ''} onChange={(ev) => setDraft10(d => d && ({ ...d, desired_salary_currency: ev.target.value === '' ? null : ev.target.value }))}>
+                <option value="">— Not specified —</option>
+                {PROFILUX_CURRENCY_OPTIONS.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+            <button style={saving10 || !draft10 ? saveBtnDis : saveBtn} disabled={saving10 || !draft10} onClick={handleSave10}>
+              {saving10 ? 'Saving…' : 'Save'}
+            </button>
+            {savedAt10 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
+            {saveError10 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError10}</span>}
+          </div>
         </div>
       )
       case 11: return (
