@@ -280,6 +280,14 @@ export async function POST(req: NextRequest) {
   if (has('clienteling_description')) {
     updatePayload.clienteling_description = coerceEmpty(body.clienteling_description)
   }
+  if (has('university')) updatePayload.university = coerceEmpty(body.university)
+  if (has('field_of_study')) updatePayload.field_of_study = coerceEmpty(body.field_of_study)
+  if (has('graduation_year')) {
+    updatePayload.graduation_year =
+      typeof body.graduation_year === 'number' && body.graduation_year >= 0
+        ? body.graduation_year
+        : null
+  }
   if (has('availability')) updatePayload.availability = denormalizeAvailability(body.availability)
   if (has('salaryExpectation')) {
     updatePayload.desired_salary_max =
