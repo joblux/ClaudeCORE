@@ -123,6 +123,7 @@ function buildEditorResponse(resolved: ProfiLuxResolved) {
   return {
     surface: projection.surface,
     view: projection.view,
+    editor: projection.editor,
     profile: toLegacyProfile(projection.view),
   }
 }
