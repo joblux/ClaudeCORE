@@ -212,10 +212,10 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json()
 
-  // Resolve email → member.id
+  // Resolve email → member.id (+ pre-write salary range for §4.5 range guard)
   const { data: member, error: memberErr } = await supabase
     .from('members')
-    .select('id')
+    .select('id, desired_salary_min, desired_salary_max')
     .eq('email', session.user.email)
     .maybeSingle()
 
@@ -288,6 +288,21 @@ export async function POST(req: NextRequest) {
         ? body.graduation_year
         : null
   }
+  if (has('desired_salary_min')) {
+    updatePayload.desired_salary_min =
+      typeof body.desired_salary_min === 'number' && body.desired_salary_min >= 0
+        ? body.desired_salary_min
+        : null
+  }
+  if (has('desired_salary_max')) {
+    updatePayload.desired_salary_max =
+      typeof body.desired_salary_max === 'number' && body.desired_salary_max >= 0
+        ? body.desired_salary_max
+        : null
+  }
+  if (has('desired_salary_currency')) {
+    updatePayload.desired_salary_currency = coerceEmpty(body.desired_salary_currency)
+  }
   if (has('availability')) updatePayload.availability = denormalizeAvailability(body.availability)
   if (has('salaryExpectation')) {
     updatePayload.desired_salary_max =
@@ -296,6 +311,27 @@ export async function POST(req: NextRequest) {
         : null // single editor value → max bucket; min untouched (Phase 4 owns range UX)
   }
   if (has('salaryCurrency')) updatePayload.desired_salary_currency = coerceEmpty(body.salaryCurrency)
+
+  // §4.5 range validation: reject only when both values are present and min > max.
+  // Allows min-only, max-only, both-null. No silent swap.
+  const finalMin =
+    'desired_salary_min' in updatePayload
+      ? updatePayload.desired_salary_min
+      : member.desired_salary_min
+  const finalMax =
+    'desired_salary_max' in updatePayload
+      ? updatePayload.desired_salary_max
+      : member.desired_salary_max
+  if (
+    typeof finalMin === 'number' &&
+    typeof finalMax === 'number' &&
+    finalMin > finalMax
+  ) {
+    return NextResponse.json(
+      { error: 'desired_salary_min cannot exceed desired_salary_max' },
+      { status: 400 }
+    )
+  }
 
   updatePayload.updated_at = new Date().toISOString()
 
