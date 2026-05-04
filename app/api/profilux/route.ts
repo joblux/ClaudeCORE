@@ -255,6 +255,22 @@ export async function POST(req: NextRequest) {
         ? body.total_years_experience
         : null
   }
+  if (has('years_in_luxury')) {
+    updatePayload.years_in_luxury =
+      typeof body.years_in_luxury === 'number' && body.years_in_luxury >= 0
+        ? body.years_in_luxury
+        : null
+  }
+  if (has('product_categories')) {
+    updatePayload.product_categories = Array.isArray(body.product_categories)
+      ? body.product_categories
+      : null
+  }
+  if (has('expertise_tags')) {
+    updatePayload.expertise_tags = Array.isArray(body.expertise_tags)
+      ? body.expertise_tags
+      : null
+  }
   if (has('availability')) updatePayload.availability = denormalizeAvailability(body.availability)
   if (has('salaryExpectation')) {
     updatePayload.desired_salary_max =
