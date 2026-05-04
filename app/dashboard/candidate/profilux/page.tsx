@@ -45,6 +45,11 @@ type Screen4Draft = {
   expertise_tags: string[]
 }
 
+type Screen8Draft = {
+  clienteling_experience: boolean | null
+  clienteling_description: string
+}
+
 function draftFrom(e: EditorView): Screen3Draft {
   return {
     job_title: e.job_title ?? '',
@@ -62,6 +67,13 @@ function draftFrom4(e: EditorView): Screen4Draft {
   }
 }
 
+function draftFrom8(e: EditorView): Screen8Draft {
+  return {
+    clienteling_experience: e.clienteling_experience,
+    clienteling_description: e.clienteling_description ?? '',
+  }
+}
+
 export default function ProfiluxPage() {
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -75,6 +87,10 @@ export default function ProfiluxPage() {
   const [saving4, setSaving4] = useState(false)
   const [savedAt4, setSavedAt4] = useState<number | null>(null)
   const [saveError4, setSaveError4] = useState<string | null>(null)
+  const [draft8, setDraft8] = useState<Screen8Draft>({ clienteling_experience: null, clienteling_description: '' })
+  const [saving8, setSaving8] = useState(false)
+  const [savedAt8, setSavedAt8] = useState<number | null>(null)
+  const [saveError8, setSaveError8] = useState<string | null>(null)
 
   const refetch = async () => {
     const res = await fetch('/api/profilux')
@@ -85,6 +101,7 @@ export default function ProfiluxPage() {
     if (e) {
       setDraft(draftFrom(e))
       setDraft4(draftFrom4(e))
+      setDraft8(draftFrom8(e))
     }
     return e
   }
@@ -151,6 +168,32 @@ export default function ProfiluxPage() {
       setSaveError4(String(err))
     } finally {
       setSaving4(false)
+    }
+  }
+
+  async function handleSave8() {
+    setSaving8(true)
+    setSaveError8(null)
+    try {
+      const exp = draft8.clienteling_experience
+      const descRaw = draft8.clienteling_description.trim()
+      const body: Record<string, unknown> = {
+        clienteling_experience: exp,
+        clienteling_description: exp === true && descRaw !== '' ? descRaw : null,
+      }
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      await refetch()
+      setSavedAt8(Date.now())
+      setTimeout(() => setSavedAt8((t) => (t && Date.now() - t >= 2000 ? null : t)), 2100)
+    } catch (err) {
+      setSaveError8(String(err))
+    } finally {
+      setSaving8(false)
     }
   }
 
@@ -283,9 +326,50 @@ export default function ProfiluxPage() {
         </div>
       )
       case 8: return (
-        <div style={grid}>
-          <div style={label}>Clienteling experience</div><div>{e.clienteling_experience ? 'Yes' : <NotSet />}</div>
-          <div style={label}>Clienteling background</div><div>{e.clienteling_description ?? <NotSet />}</div>
+        <div style={{ maxWidth: 900 }}>
+          <div style={sectionLabel}>Clienteling experience</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+            <button
+              type="button"
+              style={draft8.clienteling_experience === true ? chipActive : chip}
+              onClick={() => setDraft8(prev => prev.clienteling_experience === true
+                ? { clienteling_experience: null, clienteling_description: '' }
+                : { clienteling_experience: true, clienteling_description: prev.clienteling_description })}
+            >
+              Yes
+            </button>
+            <button
+              type="button"
+              style={draft8.clienteling_experience === false ? chipActive : chip}
+              onClick={() => setDraft8(prev => ({
+                clienteling_experience: prev.clienteling_experience === false ? null : false,
+                clienteling_description: '',
+              }))}
+            >
+              No
+            </button>
+          </div>
+
+          {draft8.clienteling_experience === true && (
+            <>
+              <div style={sectionLabel}>Background description</div>
+              <textarea
+                style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 80, resize: 'vertical' }}
+                rows={3}
+                value={draft8.clienteling_description}
+                onChange={(ev) => setDraft8(prev => ({ ...prev, clienteling_description: ev.target.value }))}
+                placeholder="Briefly describe your clienteling experience"
+              />
+            </>
+          )}
+
+          <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+            <button style={saving8 ? saveBtnDis : saveBtn} disabled={saving8} onClick={handleSave8}>
+              {saving8 ? 'Saving…' : 'Save'}
+            </button>
+            {savedAt8 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
+            {saveError8 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError8}</span>}
+          </div>
         </div>
       )
       case 9: return (
