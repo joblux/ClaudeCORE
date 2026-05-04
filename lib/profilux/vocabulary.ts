@@ -212,6 +212,21 @@ export const PROFILUX_EXPERTISE_TAG_OPTIONS = [
 ] as const
 
 // -------------------------------------------------------------------------
+// 9. Currency — 9 (ISO 4217 codes)
+// -------------------------------------------------------------------------
+export const PROFILUX_CURRENCY_OPTIONS = [
+  'EUR',
+  'USD',
+  'GBP',
+  'CHF',
+  'AED',
+  'HKD',
+  'SGD',
+  'JPY',
+  'CNY',
+] as const
+
+// -------------------------------------------------------------------------
 // Type unions (derived)
 // -------------------------------------------------------------------------
 export type ProfiLuxSeniority        = typeof PROFILUX_SENIORITY_OPTIONS[number]['value']
@@ -222,6 +237,7 @@ export type ProfiLuxDepartment       = typeof PROFILUX_DEPARTMENT_OPTIONS[number
 export type ProfiLuxContractType     = typeof PROFILUX_CONTRACT_TYPE_OPTIONS[number]['value']
 export type ProfiLuxProductCategory  = typeof PROFILUX_PRODUCT_CATEGORY_OPTIONS[number]['value']
 export type ProfiLuxExpertiseTag     = typeof PROFILUX_EXPERTISE_TAG_OPTIONS[number]['value']
+export type ProfiLuxCurrency         = (typeof PROFILUX_CURRENCY_OPTIONS)[number]
 
 // -------------------------------------------------------------------------
 // Grouped object (single import for editor screens)
@@ -235,4 +251,5 @@ export const PROFILUX_VOCABULARY = {
   contract_types:     PROFILUX_CONTRACT_TYPE_OPTIONS,
   product_categories: PROFILUX_PRODUCT_CATEGORY_OPTIONS,
   expertise_tags:     PROFILUX_EXPERTISE_TAG_OPTIONS,
+  currency:           PROFILUX_CURRENCY_OPTIONS,
 } as const
