@@ -343,9 +343,78 @@ export type DashboardProjection = {
 }
 
 // --- Editor projection -------------------------------------------------------
+// Phase 4.A-0: §7.6 native flat shape (EditorView) added alongside raw `view`.
+// `view` retained for backward compatibility with /api/profilux legacy adapter.
+
+export type EditorAvailability =
+  | 'active'
+  | 'open'
+  | 'passive'
+  | 'unavailable'
+  | null
+
+export type EditorCvMeta = {
+  cv_url: string | null
+  cv_parsed_at: string | null
+  needs_review: number
+}
+
+export type EditorView = {
+  // Identity
+  first_name: string | null
+  last_name: string | null
+  city: string | null
+  country: string | null
+  nationality: string | null
+  phone: string | null
+  // Position
+  job_title: string | null
+  current_employer: string | null
+  seniority: string | null
+  total_years_experience: number | null
+  // Luxury fit
+  years_in_luxury: number | null
+  sectors: string[]
+  product_categories: string[]
+  expertise_tags: string[]
+  // Experience + education (L1)
+  experiences: ResolvedExperience[]
+  education: ResolvedEducation[]
+  university: string | null
+  field_of_study: string | null
+  graduation_year: number | null
+  // Availability + targets (Readiness — NOT M6 admission)
+  availability: EditorAvailability
+  desired_locations: string[]
+  desired_departments: string[]
+  desired_contract_types: string[]
+  desired_salary_min: number | null
+  desired_salary_max: number | null
+  desired_salary_currency: string | null
+  open_to_relocation: boolean | null
+  relocation_preferences: string | null
+  // Narrative
+  headline: string | null
+  bio: string | null
+  avatar_url: string | null
+  linkedin_url: string | null
+  // Languages, markets, skills
+  languages: ResolvedLanguage[]
+  market_knowledge: string[]
+  key_skills: string[]
+  // Clienteling
+  clienteling_experience: boolean | null
+  clienteling_description: string | null
+  // CV meta (read-only)
+  cv_meta: EditorCvMeta
+  // Computed (read-only)
+  profile_completeness: number
+}
+
 export type EditorProjection = {
   surface: 'editor'
   view: ProfiLuxResolved
+  editor: EditorView
 }
 
 // --- Public projection (/p/[name], V1 V3 V4 V5 V7) --------------------------

@@ -31,6 +31,8 @@ import type {
   PublicExperience,
   PublicProjection,
   Surface,
+  EditorView,
+  EditorAvailability,
 } from './types'
 
 /** "Laurent" → "L."; null/empty → null. */
@@ -93,6 +95,7 @@ export function projectFor(
       const editor: EditorProjection = {
         surface: 'editor',
         view,
+        editor: projectEditorView(view),
       }
       return editor
     }
@@ -191,5 +194,94 @@ export function projectFor(
       }
       return ats
     }
+  }
+}
+
+
+// =============================================================================
+// projectEditorView — Phase 4.A-0
+// =============================================================================
+//
+// §7.6 native flat shape projector. Strict subset of ProfiLuxResolved:
+// - System fields (id, email, role, status, ...) dropped
+// - cv_meta tightened to { cv_url, cv_parsed_at, needs_review: number }
+// - availability normalized to 4-value EditorAvailability union
+// - profile_completeness coerced to number (?? 0)
+
+function normalizeEditorAvailability(value: string | null): EditorAvailability {
+  if (value == null) return null
+  switch (value) {
+    case 'actively_looking':
+      return 'active'
+    case 'not_actively_looking':
+    case 'open':
+    case 'considering':
+    case 'open_to_opportunities':
+      return 'open'
+    case 'passively_exploring':
+    case 'passive':
+      return 'passive'
+    case 'unavailable':
+      return 'unavailable'
+    default:
+      return null
+  }
+}
+
+export function projectEditorView(view: ProfiLuxResolved): EditorView {
+  return {
+    // Identity
+    first_name: view.first_name,
+    last_name: view.last_name,
+    city: view.city,
+    country: view.country,
+    nationality: view.nationality,
+    phone: view.phone,
+    // Position
+    job_title: view.job_title,
+    current_employer: view.current_employer,
+    seniority: view.seniority,
+    total_years_experience: view.total_years_experience,
+    // Luxury fit
+    years_in_luxury: view.years_in_luxury,
+    sectors: view.sectors,
+    product_categories: view.product_categories,
+    expertise_tags: view.expertise_tags,
+    // Experience + education
+    experiences: view.experiences,
+    education: view.education,
+    university: view.university,
+    field_of_study: view.field_of_study,
+    graduation_year: view.graduation_year,
+    // Availability + targets
+    availability: normalizeEditorAvailability(view.availability),
+    desired_locations: view.desired_locations,
+    desired_departments: view.desired_departments,
+    desired_contract_types: view.desired_contract_types,
+    desired_salary_min: view.desired_salary_min,
+    desired_salary_max: view.desired_salary_max,
+    desired_salary_currency: view.desired_salary_currency,
+    open_to_relocation: view.open_to_relocation,
+    relocation_preferences: view.relocation_preferences,
+    // Narrative
+    headline: view.headline,
+    bio: view.bio,
+    avatar_url: view.avatar_url,
+    linkedin_url: view.linkedin_url,
+    // Languages, markets, skills
+    languages: view.languages,
+    market_knowledge: view.market_knowledge,
+    key_skills: view.key_skills,
+    // Clienteling
+    clienteling_experience: view.clienteling_experience,
+    clienteling_description: view.clienteling_description,
+    // CV meta
+    cv_meta: {
+      cv_url: view.cv_meta?.cv_url ?? null,
+      cv_parsed_at: view.cv_meta?.cv_parsed_at ?? null,
+      needs_review: view.cv_meta?.needs_review?.length ?? 0,
+    },
+    // Computed
+    profile_completeness: view.profile_completeness ?? 0,
   }
 }
