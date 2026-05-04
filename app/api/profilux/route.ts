@@ -271,6 +271,15 @@ export async function POST(req: NextRequest) {
       ? body.expertise_tags
       : null
   }
+  if (has('clienteling_experience')) {
+    updatePayload.clienteling_experience =
+      typeof body.clienteling_experience === 'boolean'
+        ? body.clienteling_experience
+        : null
+  }
+  if (has('clienteling_description')) {
+    updatePayload.clienteling_description = coerceEmpty(body.clienteling_description)
+  }
   if (has('availability')) updatePayload.availability = denormalizeAvailability(body.availability)
   if (has('salaryExpectation')) {
     updatePayload.desired_salary_max =
