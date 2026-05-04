@@ -62,17 +62,13 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 - **917e6dc** `docs(matrix): §7.6 EditorView projection addendum (Phase 4.A prep)` — Spec foundation for Phase 4.A. Inserts §7.6 in `docs/PROFILUX_MATRIX_V1.md` defining the `EditorView` projection (TS-style contract), the 11-screen read/write map, and the locked principle that **availability + readiness fields are NOT M6 admission blockers**. Pure additive (+108 / -0). UI consumes EditorView only — never raw `view` or legacy `profile`. M6 admission logic intentionally out of scope; deferred to a future spec patch.
 
+- **eb1093a** `feat(profilux): canonical vocabulary contract (Phase 4.A sub-phase 2)` — Adds `lib/profilux/vocabulary.ts` as the single source of truth for ProfiLux option lists consumed by the rebuilt 11-screen editor. Greenfield file; no consumer migration in this sub-phase; no DB changes. Six locked option groups: seniority (9), sectors (8), subsectors (35), specializations (28), departments (20), contract_types (6). Lowest seniority = `entry_level`. JOBLUX kill words ('Intern', 'members') excluded. DB columns are free-text / text[] with no CHECK constraints — values enforced in code only per PROFILUX_MATRIX_V1 §4.5 + §7.6. TSC clean.
+
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
 
 Phase 4 spec foundation — **§7.6 EditorView addendum SHIPPED** (commit 917e6dc, 2026-05-02). Phase 4.A implementation can now reference §7.6 as the consuming spec.
 
-1. **Phase 4.A sub-phase 2 — Vocabulary patch** *(next deliverable, status: queued)* — Locate or define canonical vocabulary files for the 11-screen editor. Scope: 9-level seniority enum, 28-item specializations list, 8 sectors / 35 subsectors, departments list, contract types, numeric input + dropdown component patterns. **Locked decisions for vocabulary patch:**
-   - Lowest seniority value = `entry_level`, display label = "Entry Level"
-   - "Intern" forbidden in ProfiLux/UI/public copy (already on JOBLUX kill-words list)
-   - Canonical file location TBD (likely `lib/profile-options.ts` vs `lib/profilux/vocabulary.ts` — to decide in scoped prompt)
-   No code tonight. Awaits scoped prompt.
-
-2. **Phase 4.A — Editor implementation** *(ledger `8f82b3ac`, status: open)* — 11-screen tunnel rebuild consuming `EditorView`. Per Lot 3 §4 sequence: spec patch → vocabulary patch → 4.A reads `view` → 4.B deprecate `toLegacyProfile` → 4.C migrate consumers (3 files / 4 fetch sites) → 4.D remove `toLegacyProfile` → 4.E `/api/members/me` cutover. `normalizeAvailability` retained per D2.
+1. **Phase 4.A — Editor implementation** *(ledger `8f82b3ac`, status: open)* — 11-screen tunnel rebuild consuming `EditorView`. Per Lot 3 §4 sequence: spec patch → vocabulary patch → 4.A reads `view` → 4.B deprecate `toLegacyProfile` → 4.C migrate consumers (3 files / 4 fetch sites) → 4.D remove `toLegacyProfile` → 4.E `/api/members/me` cutover. `normalizeAvailability` retained per D2.
 
 **Phase 5 — Admin polish** *(ledger `35469863`, parked)* — gated on Phase 4 candidate-side landing first.
 
@@ -125,10 +121,10 @@ Phase 4 spec foundation — **§7.6 EditorView addendum SHIPPED** (commit 917e6d
 ### LEDGER NOTE
 
 - Phase 4 spec foundation shipped. Phase 4 ledger row (`8f82b3ac`) stays open until full editor rebuild lands.
-- Vocabulary patch is next sub-deliverable. Locked seniority: lowest value `entry_level`, label "Entry Level", "Intern" forbidden.
+- Vocabulary patch SHIPPED (commit `eb1093a`, 2026-05-04). Canonical file: `lib/profilux/vocabulary.ts`. Editor implementation (ledger `8f82b3ac`) remains open and is now the active CURRENT STEP.
 - Three findings closed earlier in session via 12e597f + c7cd53a + cleanup SQL: F-empty-string-vs-null, F-availability-default-drift, F-currency-default-applied (forward-only fix; DB ledger rows remain status=parked).
 
-**Last updated:** May 2, 2026 (Phase 4.A spec foundation shipped — §7.6 EditorView addendum)
+**Last updated:** May 4, 2026 (Phase 4.A sub-phase 2 vocabulary patch shipped — `eb1093a`)
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
