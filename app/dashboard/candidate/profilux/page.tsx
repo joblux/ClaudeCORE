@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import type { EditorView } from '@/lib/profilux/types'
+import { PROFILUX_SENIORITY_OPTIONS } from '@/lib/profilux/vocabulary'
 
 const TOTAL = 11
 const SCREEN_TITLES = [
@@ -24,22 +25,49 @@ const btn: React.CSSProperties = { background: 'transparent', color: '#fff', bor
 const btnDis: React.CSSProperties = { ...btn, color: '#555', borderColor: '#222', cursor: 'not-allowed' }
 const card: React.CSSProperties = { border: '1px solid #2a2a2a', padding: 16, marginBottom: 8, fontSize: 13 }
 const sectionLabel: React.CSSProperties = { marginTop: 24, color: '#999', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }
+const input: React.CSSProperties = { background: 'transparent', color: '#fff', border: '1px solid #333', padding: '8px 10px', fontFamily: 'Inter, sans-serif', fontSize: 14, width: '100%', maxWidth: 400, outline: 'none' }
+const select: React.CSSProperties = { ...input, appearance: 'none', backgroundImage: 'linear-gradient(45deg, transparent 50%, #999 50%), linear-gradient(135deg, #999 50%, transparent 50%)', backgroundPosition: 'calc(100% - 14px) 50%, calc(100% - 9px) 50%', backgroundSize: '5px 5px, 5px 5px', backgroundRepeat: 'no-repeat', paddingRight: 28 }
+const saveBtn: React.CSSProperties = { ...btn, background: '#fff', color: '#1a1a1a', borderColor: '#fff' }
+const saveBtnDis: React.CSSProperties = { ...saveBtn, opacity: 0.5, cursor: 'not-allowed' }
+
+type Screen3Draft = {
+  job_title: string
+  current_employer: string
+  seniority: string
+  total_years_experience: string
+}
+
+function draftFrom(e: EditorView): Screen3Draft {
+  return {
+    job_title: e.job_title ?? '',
+    current_employer: e.current_employer ?? '',
+    seniority: e.seniority ?? '',
+    total_years_experience: e.total_years_experience != null ? String(e.total_years_experience) : '',
+  }
+}
 
 export default function ProfiluxPage() {
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [step, setStep] = useState(1)
+  const [draft, setDraft] = useState<Screen3Draft>({ job_title: '', current_employer: '', seniority: '', total_years_experience: '' })
+  const [saving, setSaving] = useState(false)
+  const [savedAt, setSavedAt] = useState<number | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
+
+  const refetch = async () => {
+    const res = await fetch('/api/profilux')
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const data = await res.json()
+    const e: EditorView | null = data.editor ?? null
+    setEditor(e)
+    if (e) setDraft(draftFrom(e))
+    return e
+  }
 
   useEffect(() => {
-    fetch('/api/profilux')
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const data = await res.json()
-        setEditor(data.editor ?? null)
-      })
-      .catch((e) => setError(String(e)))
-      .finally(() => setLoading(false))
+    refetch().catch((e) => setError(String(e))).finally(() => setLoading(false))
   }, [])
 
   if (loading) return <div style={wrap}>Loading…</div>
@@ -47,6 +75,34 @@ export default function ProfiluxPage() {
   if (!editor) return <div style={wrap}>No editor data.</div>
 
   const e = editor
+
+  async function handleSave() {
+    setSaving(true)
+    setSaveError(null)
+    try {
+      const yearsRaw = draft.total_years_experience.trim()
+      const yearsNum = yearsRaw === '' ? null : Number(yearsRaw)
+      const body: Record<string, unknown> = {
+        job_title: draft.job_title,
+        current_employer: draft.current_employer,
+        seniority: draft.seniority,
+        total_years_experience: yearsNum != null && Number.isFinite(yearsNum) && yearsNum >= 0 ? yearsNum : null,
+      }
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      await refetch()
+      setSavedAt(Date.now())
+      setTimeout(() => setSavedAt((t) => (t && Date.now() - t >= 2000 ? null : t)), 2100)
+    } catch (err) {
+      setSaveError(String(err))
+    } finally {
+      setSaving(false)
+    }
+  }
 
   function renderStep() {
     switch (step) {
@@ -67,11 +123,31 @@ export default function ProfiluxPage() {
         </div>
       )
       case 3: return (
-        <div style={grid}>
-          <div style={label}>Job title</div><div>{e.job_title ?? <NotSet />}</div>
-          <div style={label}>Current employer</div><div>{e.current_employer ?? <NotSet />}</div>
-          <div style={label}>Seniority</div><div>{e.seniority ?? <NotSet />}</div>
-          <div style={label}>Years of experience</div><div>{e.total_years_experience ?? <NotSet />}</div>
+        <div style={{ maxWidth: 900 }}>
+          <div style={grid}>
+            <div style={label}>Job title</div>
+            <div><input style={input} value={draft.job_title} onChange={(ev) => setDraft({ ...draft, job_title: ev.target.value })} placeholder="e.g. Boutique Director" /></div>
+            <div style={label}>Current employer</div>
+            <div><input style={input} value={draft.current_employer} onChange={(ev) => setDraft({ ...draft, current_employer: ev.target.value })} placeholder="e.g. Hermès" /></div>
+            <div style={label}>Seniority</div>
+            <div>
+              <select style={select} value={draft.seniority} onChange={(ev) => setDraft({ ...draft, seniority: ev.target.value })}>
+                <option value="">— Select seniority —</option>
+                {PROFILUX_SENIORITY_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+            <div style={label}>Years of experience</div>
+            <div><input style={input} type="number" min={0} value={draft.total_years_experience} onChange={(ev) => setDraft({ ...draft, total_years_experience: ev.target.value })} placeholder="e.g. 12" /></div>
+          </div>
+          <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+            <button style={saving ? saveBtnDis : saveBtn} disabled={saving} onClick={handleSave}>
+              {saving ? 'Saving…' : 'Save'}
+            </button>
+            {savedAt && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
+            {saveError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError}</span>}
+          </div>
         </div>
       )
       case 4: return (
