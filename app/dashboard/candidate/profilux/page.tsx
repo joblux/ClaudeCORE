@@ -50,6 +50,12 @@ type Screen8Draft = {
   clienteling_description: string
 }
 
+type Screen6Draft = {
+  university: string
+  field_of_study: string
+  graduation_year: string
+}
+
 function draftFrom(e: EditorView): Screen3Draft {
   return {
     job_title: e.job_title ?? '',
@@ -74,6 +80,14 @@ function draftFrom8(e: EditorView): Screen8Draft {
   }
 }
 
+function draftFrom6(e: EditorView): Screen6Draft {
+  return {
+    university: e.university ?? '',
+    field_of_study: e.field_of_study ?? '',
+    graduation_year: e.graduation_year == null ? '' : String(e.graduation_year),
+  }
+}
+
 export default function ProfiluxPage() {
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -91,6 +105,10 @@ export default function ProfiluxPage() {
   const [saving8, setSaving8] = useState(false)
   const [savedAt8, setSavedAt8] = useState<number | null>(null)
   const [saveError8, setSaveError8] = useState<string | null>(null)
+  const [draft6, setDraft6] = useState<Screen6Draft>({ university: '', field_of_study: '', graduation_year: '' })
+  const [saving6, setSaving6] = useState(false)
+  const [savedAt6, setSavedAt6] = useState<number | null>(null)
+  const [saveError6, setSaveError6] = useState<string | null>(null)
 
   const refetch = async () => {
     const res = await fetch('/api/profilux')
@@ -102,6 +120,7 @@ export default function ProfiluxPage() {
       setDraft(draftFrom(e))
       setDraft4(draftFrom4(e))
       setDraft8(draftFrom8(e))
+      setDraft6(draftFrom6(e))
     }
     return e
   }
@@ -194,6 +213,33 @@ export default function ProfiluxPage() {
       setSaveError8(String(err))
     } finally {
       setSaving8(false)
+    }
+  }
+
+  async function handleSave6() {
+    setSaving6(true)
+    setSaveError6(null)
+    try {
+      const yearRaw = draft6.graduation_year.trim()
+      const yearNum = yearRaw === '' ? null : Number(yearRaw)
+      const body: Record<string, unknown> = {
+        university: draft6.university,
+        field_of_study: draft6.field_of_study,
+        graduation_year: yearNum != null && Number.isFinite(yearNum) && yearNum >= 0 ? yearNum : null,
+      }
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      await refetch()
+      setSavedAt6(Date.now())
+      setTimeout(() => setSavedAt6((t) => (t && Date.now() - t >= 2000 ? null : t)), 2100)
+    } catch (err) {
+      setSaveError6(String(err))
+    } finally {
+      setSaving6(false)
     }
   }
 
@@ -300,9 +346,19 @@ export default function ProfiluxPage() {
       case 6: return (
         <div style={{ maxWidth: 900 }}>
           <div style={grid}>
-            <div style={label}>University</div><div>{e.university ?? <NotSet />}</div>
-            <div style={label}>Field of study</div><div>{e.field_of_study ?? <NotSet />}</div>
-            <div style={label}>Graduation year</div><div>{e.graduation_year ?? <NotSet />}</div>
+            <div style={label}>University</div>
+            <div><input style={input} value={draft6.university} onChange={(ev) => setDraft6({ ...draft6, university: ev.target.value })} placeholder="e.g. Swiss School of Business" /></div>
+            <div style={label}>Field of study</div>
+            <div><input style={input} value={draft6.field_of_study} onChange={(ev) => setDraft6({ ...draft6, field_of_study: ev.target.value })} placeholder="e.g. Business Administration" /></div>
+            <div style={label}>Graduation year</div>
+            <div><input style={input} type="number" min={0} value={draft6.graduation_year} onChange={(ev) => setDraft6({ ...draft6, graduation_year: ev.target.value })} placeholder="e.g. 2018" /></div>
+          </div>
+          <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+            <button style={saving6 ? saveBtnDis : saveBtn} disabled={saving6} onClick={handleSave6}>
+              {saving6 ? 'Saving…' : 'Save'}
+            </button>
+            {savedAt6 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
+            {saveError6 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError6}</span>}
           </div>
           <div style={sectionLabel}>Education</div>
           {e.education.length === 0 && <NoneSel />}
