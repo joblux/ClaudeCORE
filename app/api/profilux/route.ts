@@ -246,6 +246,15 @@ export async function POST(req: NextRequest) {
   if (has('nationality')) updatePayload.nationality = coerceEmpty(body.nationality)
   if (has('headline')) updatePayload.headline = coerceEmpty(body.headline)
   if (has('bio')) updatePayload.bio = coerceEmpty(body.bio)
+  if (has('job_title')) updatePayload.job_title = coerceEmpty(body.job_title)
+  if (has('current_employer')) updatePayload.current_employer = coerceEmpty(body.current_employer)
+  if (has('seniority')) updatePayload.seniority = coerceEmpty(body.seniority)
+  if (has('total_years_experience')) {
+    updatePayload.total_years_experience =
+      typeof body.total_years_experience === 'number' && body.total_years_experience >= 0
+        ? body.total_years_experience
+        : null
+  }
   if (has('availability')) updatePayload.availability = denormalizeAvailability(body.availability)
   if (has('salaryExpectation')) {
     updatePayload.desired_salary_max =
