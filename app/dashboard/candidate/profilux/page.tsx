@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import type { EditorView } from '@/lib/profilux/types'
-import { PROFILUX_SENIORITY_OPTIONS } from '@/lib/profilux/vocabulary'
+import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS } from '@/lib/profilux/vocabulary'
 
 const TOTAL = 11
 const SCREEN_TITLES = [
@@ -29,6 +29,8 @@ const input: React.CSSProperties = { background: 'transparent', color: '#fff', b
 const select: React.CSSProperties = { ...input, appearance: 'none', backgroundImage: 'linear-gradient(45deg, transparent 50%, #999 50%), linear-gradient(135deg, #999 50%, transparent 50%)', backgroundPosition: 'calc(100% - 14px) 50%, calc(100% - 9px) 50%', backgroundSize: '5px 5px, 5px 5px', backgroundRepeat: 'no-repeat', paddingRight: 28 }
 const saveBtn: React.CSSProperties = { ...btn, background: '#fff', color: '#1a1a1a', borderColor: '#fff' }
 const saveBtnDis: React.CSSProperties = { ...saveBtn, opacity: 0.5, cursor: 'not-allowed' }
+const chip: React.CSSProperties = { background: 'transparent', color: '#ccc', border: '1px solid #444', padding: '6px 12px', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13, borderRadius: 999 }
+const chipActive: React.CSSProperties = { ...chip, background: 'rgba(165, 142, 40, 0.15)', color: '#fff', borderColor: '#a58e28' }
 
 type Screen3Draft = {
   job_title: string
@@ -37,12 +39,26 @@ type Screen3Draft = {
   total_years_experience: string
 }
 
+type Screen4Draft = {
+  years_in_luxury: string
+  product_categories: string[]
+  expertise_tags: string[]
+}
+
 function draftFrom(e: EditorView): Screen3Draft {
   return {
     job_title: e.job_title ?? '',
     current_employer: e.current_employer ?? '',
     seniority: e.seniority ?? '',
     total_years_experience: e.total_years_experience != null ? String(e.total_years_experience) : '',
+  }
+}
+
+function draftFrom4(e: EditorView): Screen4Draft {
+  return {
+    years_in_luxury: e.years_in_luxury == null ? '' : String(e.years_in_luxury),
+    product_categories: e.product_categories ?? [],
+    expertise_tags: e.expertise_tags ?? [],
   }
 }
 
@@ -55,6 +71,10 @@ export default function ProfiluxPage() {
   const [saving, setSaving] = useState(false)
   const [savedAt, setSavedAt] = useState<number | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [draft4, setDraft4] = useState<Screen4Draft>({ years_in_luxury: '', product_categories: [], expertise_tags: [] })
+  const [saving4, setSaving4] = useState(false)
+  const [savedAt4, setSavedAt4] = useState<number | null>(null)
+  const [saveError4, setSaveError4] = useState<string | null>(null)
 
   const refetch = async () => {
     const res = await fetch('/api/profilux')
@@ -62,7 +82,10 @@ export default function ProfiluxPage() {
     const data = await res.json()
     const e: EditorView | null = data.editor ?? null
     setEditor(e)
-    if (e) setDraft(draftFrom(e))
+    if (e) {
+      setDraft(draftFrom(e))
+      setDraft4(draftFrom4(e))
+    }
     return e
   }
 
@@ -101,6 +124,33 @@ export default function ProfiluxPage() {
       setSaveError(String(err))
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleSave4() {
+    setSaving4(true)
+    setSaveError4(null)
+    try {
+      const yearsRaw = draft4.years_in_luxury.trim()
+      const yearsNum = yearsRaw === '' ? null : Number(yearsRaw)
+      const body: Record<string, unknown> = {
+        years_in_luxury: yearsNum != null && Number.isFinite(yearsNum) && yearsNum >= 0 ? yearsNum : null,
+        product_categories: draft4.product_categories,
+        expertise_tags: draft4.expertise_tags,
+      }
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      await refetch()
+      setSavedAt4(Date.now())
+      setTimeout(() => setSavedAt4((t) => (t && Date.now() - t >= 2000 ? null : t)), 2100)
+    } catch (err) {
+      setSaveError4(String(err))
+    } finally {
+      setSaving4(false)
     }
   }
 
@@ -151,11 +201,45 @@ export default function ProfiluxPage() {
         </div>
       )
       case 4: return (
-        <div style={grid}>
-          <div style={label}>Sectors</div><div>{e.sectors.length ? e.sectors.join(', ') : <NoneSel />}</div>
-          <div style={label}>Years in luxury</div><div>{e.years_in_luxury ?? <NotSet />}</div>
-          <div style={label}>Product categories</div><div>{e.product_categories.length ? e.product_categories.join(', ') : <NoneSel />}</div>
-          <div style={label}>Areas of expertise</div><div>{e.expertise_tags.length ? e.expertise_tags.join(', ') : <NoneSel />}</div>
+        <div style={{ maxWidth: 900 }}>
+          <div style={grid}>
+            <div style={label}>Sectors</div><div>{e.sectors.length ? e.sectors.join(', ') : <NoneSel />}</div>
+            <div style={label}>Years in luxury</div>
+            <div><input style={input} type="number" min={0} value={draft4.years_in_luxury} onChange={(ev) => setDraft4({ ...draft4, years_in_luxury: ev.target.value })} placeholder="e.g. 8" /></div>
+          </div>
+          <div style={sectionLabel}>Product categories</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+            {PROFILUX_PRODUCT_CATEGORY_OPTIONS.map((o) => (
+              <button
+                key={o.value}
+                type="button"
+                style={draft4.product_categories.includes(o.value) ? chipActive : chip}
+                onClick={() => setDraft4({ ...draft4, product_categories: draft4.product_categories.includes(o.value) ? draft4.product_categories.filter(v => v !== o.value) : [...draft4.product_categories, o.value] })}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+          <div style={sectionLabel}>Areas of expertise</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+            {PROFILUX_EXPERTISE_TAG_OPTIONS.map((o) => (
+              <button
+                key={o.value}
+                type="button"
+                style={draft4.expertise_tags.includes(o.value) ? chipActive : chip}
+                onClick={() => setDraft4({ ...draft4, expertise_tags: draft4.expertise_tags.includes(o.value) ? draft4.expertise_tags.filter(v => v !== o.value) : [...draft4.expertise_tags, o.value] })}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+          <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+            <button style={saving4 ? saveBtnDis : saveBtn} disabled={saving4} onClick={handleSave4}>
+              {saving4 ? 'Saving…' : 'Save'}
+            </button>
+            {savedAt4 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
+            {saveError4 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError4}</span>}
+          </div>
         </div>
       )
       case 5: return (
