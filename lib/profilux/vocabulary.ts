@@ -172,23 +172,67 @@ export const PROFILUX_CONTRACT_TYPE_OPTIONS = [
 ] as const
 
 // -------------------------------------------------------------------------
+// 7. Product categories — 16
+// -------------------------------------------------------------------------
+export const PROFILUX_PRODUCT_CATEGORY_OPTIONS = [
+  { value: 'ready_to_wear',           label: 'Ready-to-Wear' },
+  { value: 'leather_goods',           label: 'Leather Goods' },
+  { value: 'handbags',                label: 'Handbags' },
+  { value: 'footwear',                label: 'Footwear' },
+  { value: 'accessories',             label: 'Accessories' },
+  { value: 'fine_jewelry',            label: 'Fine Jewelry' },
+  { value: 'high_jewelry',            label: 'High Jewelry' },
+  { value: 'watches',                 label: 'Watches' },
+  { value: 'fragrance',               label: 'Fragrance' },
+  { value: 'skincare',                label: 'Skincare' },
+  { value: 'makeup',                  label: 'Makeup' },
+  { value: 'eyewear',                 label: 'Eyewear' },
+  { value: 'home_lifestyle',          label: 'Home & Lifestyle' },
+  { value: 'wines_spirits',           label: 'Wines & Spirits' },
+  { value: 'hospitality_experiences', label: 'Hospitality Experiences' },
+  { value: 'art_collectibles',        label: 'Art & Collectibles' },
+] as const
+
+// -------------------------------------------------------------------------
+// 8. Expertise tags — 12
+// -------------------------------------------------------------------------
+export const PROFILUX_EXPERTISE_TAG_OPTIONS = [
+  { value: 'vic_program_management',    label: 'VIC Program Management' },
+  { value: 'brand_storytelling',        label: 'Brand Storytelling' },
+  { value: 'event_activation',          label: 'Event Activation' },
+  { value: 'omnichannel',               label: 'Omnichannel' },
+  { value: 'high_value_sales',          label: 'High-Value Sales' },
+  { value: 'team_leadership',           label: 'Team Leadership' },
+  { value: 'store_opening',             label: 'Store Opening' },
+  { value: 'market_development',        label: 'Market Development' },
+  { value: 'luxury_hospitality',        label: 'Luxury Hospitality' },
+  { value: 'bespoke_made_to_measure',   label: 'Bespoke & Made-to-Measure' },
+  { value: 'craftsmanship_storytelling', label: 'Craftsmanship Storytelling' },
+  { value: 'archive_heritage',          label: 'Archive & Heritage' },
+] as const
+
+// -------------------------------------------------------------------------
 // Type unions (derived)
 // -------------------------------------------------------------------------
-export type ProfiLuxSeniority      = typeof PROFILUX_SENIORITY_OPTIONS[number]['value']
-export type ProfiLuxSector         = typeof PROFILUX_SECTOR_OPTIONS[number]['value']
-export type ProfiLuxSubsector      = typeof PROFILUX_SUBSECTOR_OPTIONS[number]['value']
-export type ProfiLuxSpecialization = typeof PROFILUX_SPECIALIZATION_OPTIONS[number]['value']
-export type ProfiLuxDepartment     = typeof PROFILUX_DEPARTMENT_OPTIONS[number]['value']
-export type ProfiLuxContractType   = typeof PROFILUX_CONTRACT_TYPE_OPTIONS[number]['value']
+export type ProfiLuxSeniority        = typeof PROFILUX_SENIORITY_OPTIONS[number]['value']
+export type ProfiLuxSector           = typeof PROFILUX_SECTOR_OPTIONS[number]['value']
+export type ProfiLuxSubsector        = typeof PROFILUX_SUBSECTOR_OPTIONS[number]['value']
+export type ProfiLuxSpecialization   = typeof PROFILUX_SPECIALIZATION_OPTIONS[number]['value']
+export type ProfiLuxDepartment       = typeof PROFILUX_DEPARTMENT_OPTIONS[number]['value']
+export type ProfiLuxContractType     = typeof PROFILUX_CONTRACT_TYPE_OPTIONS[number]['value']
+export type ProfiLuxProductCategory  = typeof PROFILUX_PRODUCT_CATEGORY_OPTIONS[number]['value']
+export type ProfiLuxExpertiseTag     = typeof PROFILUX_EXPERTISE_TAG_OPTIONS[number]['value']
 
 // -------------------------------------------------------------------------
 // Grouped object (single import for editor screens)
 // -------------------------------------------------------------------------
 export const PROFILUX_VOCABULARY = {
-  seniority:       PROFILUX_SENIORITY_OPTIONS,
-  sectors:         PROFILUX_SECTOR_OPTIONS,
-  subsectors:      PROFILUX_SUBSECTOR_OPTIONS,
-  specializations: PROFILUX_SPECIALIZATION_OPTIONS,
-  departments:     PROFILUX_DEPARTMENT_OPTIONS,
-  contract_types:  PROFILUX_CONTRACT_TYPE_OPTIONS,
+  seniority:          PROFILUX_SENIORITY_OPTIONS,
+  sectors:            PROFILUX_SECTOR_OPTIONS,
+  subsectors:         PROFILUX_SUBSECTOR_OPTIONS,
+  specializations:    PROFILUX_SPECIALIZATION_OPTIONS,
+  departments:        PROFILUX_DEPARTMENT_OPTIONS,
+  contract_types:     PROFILUX_CONTRACT_TYPE_OPTIONS,
+  product_categories: PROFILUX_PRODUCT_CATEGORY_OPTIONS,
+  expertise_tags:     PROFILUX_EXPERTISE_TAG_OPTIONS,
 } as const
