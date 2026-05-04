@@ -74,11 +74,15 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 - **5b3152c** `feat(profilux): user-facing labels + empty-state polish (Phase 4.A)` — Replaces raw field names with American English labels per JOBLUX copy doctrine. GPT-locked: "Current employer", "Target compensation (max)", "Years of experience", "Areas of expertise", "Markets", "Skills". Empty-states neutralized on screens 3/4/8 ("Not specified" / "None selected"). Actionable hints retained on screen 7 ("Add markets/skills to improve matching"). Section labels uppercased (EDUCATION, LANGUAGES). Completeness rendered as `49%`. Booleans (false) → "Not specified" (false ≠ absence; explicit "No" deferred to write UX). Browser-validated all 11 screens. +53 / -51. TSC clean.
 
+- **993d6de** `feat(profilux): accept 4 Screen 3 write fields in /api/profilux POST (Phase 4.A)` — Adds `job_title`, `current_employer`, `seniority`, `total_years_experience` to POST handler in `app/api/profilux/route.ts`. Snake_case direct (Variant α — aligned with `EditorView` §7.6, no new camelCase legacy debt). Strings via `coerceEmpty` (W1). Number guarded inline (`>= 0`; zero is valid for entry-level). Partial-body W2 + recompute W3 inherited from existing pattern. Inserted just before `if (has('availability'))`. Existing 6 legacy camelCase keys (`firstName`, `lastName`, `city`, `nationality`, `headline`, `bio`, `salaryExpectation`, `salaryCurrency`) untouched — Phase 4.B/4.C will harmonize. +9 / -0. TSC clean.
+
+- **ce1f3c9** `feat(profilux): write-enabled Screen 3 (Phase 4.A)` — First write-enabled screen. Inputs for `job_title` (text), `current_employer` (text), `seniority` (select using `PROFILUX_SENIORITY_OPTIONS`), `total_years_experience` (number, min 0). POST `/api/profilux` with snake_case body, partial-body W2. Local `draft` state separate from `editor`. Refetch on save success, stay on Screen 3, inline "Saved" indicator (green `#1D9E75`, 2s timeout), error span on fail. Screens 1-2 and 4-11 unchanged. 248 lines, +89 / -13. TSC clean. **Browser + DB validated end-to-end on Testuser Mzaour:** save POST 200, DB persisted `seniority='senior_manager'` + `total_years_experience=12`, `profile_completeness` recomputed `49% → 66%` (W3 confirmed), `job_title` + `current_employer` unchanged (W2 partial-body confirmed), no other screens affected. First production consumption of `lib/profilux/vocabulary.ts` (shipped eb1093a).
+
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
 
 Phase 4 spec foundation — **§7.6 EditorView addendum SHIPPED** (commit 917e6dc, 2026-05-02). Phase 4.A implementation can now reference §7.6 as the consuming spec.
 
-1. **Phase 4.A — First write-enabled screen selection** *(ledger `8f82b3ac`, status: open)* — Read-only 11-screen shell shipped and browser-validated (`27e90cf` + `60ed661` + `5b3152c`). Next decision: select which screen receives write/input UI first. No implementation yet. Sequence after selection: write UI on chosen screen → POST contract validation against §4.5 W1/W2/W3 → extend to other screens → 4.B deprecate `toLegacyProfile` → 4.C migrate consumers (3 files / 4 fetch sites) → 4.D remove `toLegacyProfile` → 4.E `/api/members/me` cutover. `normalizeAvailability` / `denormalizeAvailability` retained per D2 + Phase 4.1.
+1. **Phase 4.A — Next write-enabled screen selection** *(ledger `8f82b3ac`, status: open)* — Screen 3 (Current Position) write-enabled, browser + DB validated end-to-end (`993d6de` route + `ce1f3c9` UI). POST contract validated against §4.5 W1/W2/W3 (empty-string coercion, partial-body, completeness recompute). Vocabulary `PROFILUX_SENIORITY_OPTIONS` consumed in production for the first time. Next decision: select which screen receives write/input UI next. No implementation yet. Sequence after selection: write UI on chosen screen → extend write coverage → 4.B deprecate `toLegacyProfile` → 4.C migrate consumers (3 files / 4 fetch sites) → 4.D remove `toLegacyProfile` → 4.E `/api/members/me` cutover. `normalizeAvailability` / `denormalizeAvailability` retained per D2 + Phase 4.1.
 
 **Phase 5 — Admin polish** *(ledger `35469863`, parked)* — gated on Phase 4 candidate-side landing first.
 
@@ -134,7 +138,7 @@ Phase 4 spec foundation — **§7.6 EditorView addendum SHIPPED** (commit 917e6d
 - Vocabulary patch SHIPPED (commit `eb1093a`, 2026-05-04). Canonical file: `lib/profilux/vocabulary.ts`. Editor implementation (ledger `8f82b3ac`) remains open and is now the active CURRENT STEP.
 - Three findings closed earlier in session via 12e597f + c7cd53a + cleanup SQL: F-empty-string-vs-null, F-availability-default-drift, F-currency-default-applied (forward-only fix; DB ledger rows remain status=parked).
 
-**Last updated:** May 4, 2026 (Phase 4.A read-only 11-screen shell shipped — `5b3152c`)
+**Last updated:** May 4, 2026 (Phase 4.A Screen 3 write-enabled, browser+DB validated — `ce1f3c9`)
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
