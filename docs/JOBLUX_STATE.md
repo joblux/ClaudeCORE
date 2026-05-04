@@ -64,11 +64,13 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 - **eb1093a** `feat(profilux): canonical vocabulary contract (Phase 4.A sub-phase 2)` — Adds `lib/profilux/vocabulary.ts` as the single source of truth for ProfiLux option lists consumed by the rebuilt 11-screen editor. Greenfield file; no consumer migration in this sub-phase; no DB changes. Six locked option groups: seniority (9), sectors (8), subsectors (35), specializations (28), departments (20), contract_types (6). Lowest seniority = `entry_level`. JOBLUX kill words ('Intern', 'members') excluded. DB columns are free-text / text[] with no CHECK constraints — values enforced in code only per PROFILUX_MATRIX_V1 §4.5 + §7.6. TSC clean.
 
+- **44fde68** `feat(profilux): add EditorView projection (Phase 4.A-0)` — Implements §7.6 EditorView as a flat projection in `lib/profilux/`. Adds `EditorView`, `EditorAvailability`, `EditorCvMeta` types in `types.ts`. Extends `EditorProjection` with `editor: EditorView` (additive, backward-compatible — `view: ProfiLuxResolved` retained). Adds `projectEditorView(view)` projector in `projectFor.ts` with isolated `normalizeEditorAvailability` helper. `projectFor('editor')` now returns `{ surface, view, editor }`. No UI changes. No route changes. Restores spec ↔ code alignment (§7.6 was previously spec-only). +161 / -0. TSC clean.
+
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
 
 Phase 4 spec foundation — **§7.6 EditorView addendum SHIPPED** (commit 917e6dc, 2026-05-02). Phase 4.A implementation can now reference §7.6 as the consuming spec.
 
-1. **Phase 4.A — Editor implementation** *(ledger `8f82b3ac`, status: open)* — 11-screen tunnel rebuild consuming `EditorView`. Per Lot 3 §4 sequence: spec patch → vocabulary patch → 4.A reads `view` → 4.B deprecate `toLegacyProfile` → 4.C migrate consumers (3 files / 4 fetch sites) → 4.D remove `toLegacyProfile` → 4.E `/api/members/me` cutover. `normalizeAvailability` retained per D2.
+1. **Phase 4.A — Editor implementation (consume `projection.editor`, not legacy `profile`)** *(ledger `8f82b3ac`, status: open)* — 11-screen tunnel rebuild consuming the §7.6 `EditorView` shape now exposed at `projection.editor` (shipped via 44fde68). Per Lot 3 §4 sequence: spec patch → vocabulary patch → EditorView projection (4.A-0) → 4.A reads `editor` → 4.B deprecate `toLegacyProfile` → 4.C migrate consumers (3 files / 4 fetch sites) → 4.D remove `toLegacyProfile` → 4.E `/api/members/me` cutover. `normalizeAvailability` retained per D2.
 
 **Phase 5 — Admin polish** *(ledger `35469863`, parked)* — gated on Phase 4 candidate-side landing first.
 
@@ -124,7 +126,7 @@ Phase 4 spec foundation — **§7.6 EditorView addendum SHIPPED** (commit 917e6d
 - Vocabulary patch SHIPPED (commit `eb1093a`, 2026-05-04). Canonical file: `lib/profilux/vocabulary.ts`. Editor implementation (ledger `8f82b3ac`) remains open and is now the active CURRENT STEP.
 - Three findings closed earlier in session via 12e597f + c7cd53a + cleanup SQL: F-empty-string-vs-null, F-availability-default-drift, F-currency-default-applied (forward-only fix; DB ledger rows remain status=parked).
 
-**Last updated:** May 4, 2026 (Phase 4.A sub-phase 2 vocabulary patch shipped — `eb1093a`)
+**Last updated:** May 4, 2026 (Phase 4.A-0 EditorView projection shipped — `44fde68`)
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
