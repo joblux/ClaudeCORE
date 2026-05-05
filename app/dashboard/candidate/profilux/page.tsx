@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import type { EditorView } from '@/lib/profilux/types'
-import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS } from '@/lib/profilux/vocabulary'
+import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS } from '@/lib/profilux/vocabulary'
 
 const TOTAL = 11
 const SCREEN_TITLES = [
@@ -71,6 +71,11 @@ type Screen9Draft = {
   relocation_preferences: string
 }
 
+type Screen7Draft = {
+  key_skills: string[]
+  market_knowledge: string[]
+}
+
 function draftFrom(e: EditorView): Screen3Draft {
   return {
     job_title: e.job_title ?? '',
@@ -100,6 +105,13 @@ function draftFrom6(e: EditorView): Screen6Draft {
     university: e.university ?? '',
     field_of_study: e.field_of_study ?? '',
     graduation_year: e.graduation_year == null ? '' : String(e.graduation_year),
+  }
+}
+
+function draftFrom7(e: EditorView): Screen7Draft {
+  return {
+    key_skills: e.key_skills ?? [],
+    market_knowledge: e.market_knowledge ?? [],
   }
 }
 
@@ -147,6 +159,10 @@ export default function ProfiluxPage() {
   const [saving9, setSaving9] = useState(false)
   const [savedAt9, setSavedAt9] = useState<number | null>(null)
   const [saveError9, setSaveError9] = useState<string | null>(null)
+  const [draft7, setDraft7] = useState<Screen7Draft>({ key_skills: [], market_knowledge: [] })
+  const [saving7, setSaving7] = useState(false)
+  const [savedAt7, setSavedAt7] = useState<number | null>(null)
+  const [saveError7, setSaveError7] = useState<string | null>(null)
 
   const refetch = async () => {
     const res = await fetch('/api/profilux')
@@ -161,6 +177,7 @@ export default function ProfiluxPage() {
       setDraft6(draftFrom6(e))
       setDraft10(draftFrom10(e))
       setDraft9(draftFrom9(e))
+      setDraft7(draftFrom7(e))
     }
     return e
   }
@@ -339,6 +356,30 @@ export default function ProfiluxPage() {
     }
   }
 
+  async function handleSave7() {
+    setSaving7(true)
+    setSaveError7(null)
+    try {
+      const body: Record<string, unknown> = {
+        key_skills: draft7.key_skills,
+        market_knowledge: draft7.market_knowledge,
+      }
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      await refetch()
+      setSavedAt7(Date.now())
+      setTimeout(() => setSavedAt7((t) => (t && Date.now() - t >= 2000 ? null : t)), 2100)
+    } catch (err) {
+      setSaveError7(String(err))
+    } finally {
+      setSaving7(false)
+    }
+  }
+
   function renderStep() {
     switch (step) {
       case 1: return (
@@ -472,9 +513,42 @@ export default function ProfiluxPage() {
         </div>
       )
       case 7: return (
-        <div style={grid}>
-          <div style={label}>Markets</div><div>{e.market_knowledge.length ? e.market_knowledge.join(', ') : <Hint>Add markets to improve matching</Hint>}</div>
-          <div style={label}>Skills</div><div>{e.key_skills.length ? e.key_skills.join(', ') : <Hint>Add skills to improve matching</Hint>}</div>
+        <div style={{ maxWidth: 900 }}>
+          <div style={sectionLabel}>Skills</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+            {PROFILUX_SKILL_OPTIONS.map((o) => (
+              <button
+                key={o.value}
+                type="button"
+                style={draft7.key_skills.includes(o.value) ? chipActive : chip}
+                onClick={() => setDraft7({ ...draft7, key_skills: draft7.key_skills.includes(o.value) ? draft7.key_skills.filter(v => v !== o.value) : [...draft7.key_skills, o.value] })}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+
+          <div style={sectionLabel}>Markets</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+            {PROFILUX_MARKET_OPTIONS.map((o) => (
+              <button
+                key={o}
+                type="button"
+                style={draft7.market_knowledge.includes(o) ? chipActive : chip}
+                onClick={() => setDraft7({ ...draft7, market_knowledge: draft7.market_knowledge.includes(o) ? draft7.market_knowledge.filter(v => v !== o) : [...draft7.market_knowledge, o] })}
+              >
+                {o}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+            <button style={saving7 ? saveBtnDis : saveBtn} disabled={saving7} onClick={handleSave7}>
+              {saving7 ? 'Saving…' : 'Save'}
+            </button>
+            {savedAt7 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
+            {saveError7 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError7}</span>}
+          </div>
         </div>
       )
       case 8: return (
