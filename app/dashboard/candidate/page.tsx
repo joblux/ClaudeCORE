@@ -105,7 +105,7 @@ export default function CandidateDashboard() {
         const profiluxRes = await fetch('/api/profilux')
         if (profiluxRes.ok) {
           const pData = await profiluxRes.json()
-          setProfilux(pData.profile || pData)
+          setProfilux(pData.editor ?? null)
         }
 
         // 3. Active careers (search assignments)
@@ -198,13 +198,13 @@ export default function CandidateDashboard() {
     if (!profilux) return 0
     let filled = 0
     let total = 8
-    if (profilux.firstName || profilux.first_name) filled++
-    if (profilux.lastName || profilux.last_name) filled++
+    if (profilux.first_name) filled++
+    if (profilux.last_name) filled++
     if (profilux.headline || profilux.job_title) filled++
     if (profilux.bio) filled++
     if (profilux.city) filled++
-    if ((profilux.experience || []).length > 0 || (profilux.work_experiences || []).length > 0) filled++
-    if ((profilux.specialisations || []).length > 0) filled++
+    if ((profilux.experiences || []).length > 0) filled++
+    if ((profilux.expertise_tags || []).length > 0) filled++
     if ((profilux.languages || []).length > 0) filled++
     return Math.round((filled / total) * 100)
   })()
