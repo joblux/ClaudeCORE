@@ -326,6 +326,16 @@ export async function POST(req: NextRequest) {
   if (has('relocation_preferences')) {
     updatePayload.relocation_preferences = coerceEmpty(body.relocation_preferences)
   }
+  if (has('key_skills')) {
+    updatePayload.key_skills = Array.isArray(body.key_skills)
+      ? body.key_skills
+      : null
+  }
+  if (has('market_knowledge')) {
+    updatePayload.market_knowledge = Array.isArray(body.market_knowledge)
+      ? body.market_knowledge
+      : null
+  }
   if (has('salaryExpectation')) {
     updatePayload.desired_salary_max =
       typeof body.salaryExpectation === 'number' && body.salaryExpectation > 0
