@@ -19,43 +19,7 @@ const supabase = createClient(
 )
 
 // =============================================================================
-// LEGACY ADAPTER — Phase 2.1 transition shim.
-// Maps Matrix v1 ProfiLuxResolved → legacy camelCase profile shape consumed by:
-//   - app/dashboard/candidate/page.tsx           (read-only completion bar)
-//   - app/dashboard/candidate/profilux/page.tsx  (editor)
-// REMOVE in Phase 4 (ledger 8f82b3ac) when the editor rebuild reads `view`
-// directly. Lossy mappings are commented inline.
-// =============================================================================
 
-function normalizeAvailability(raw: string | null): string | null {
-  // Legacy editor enum: 'active' | 'open' | 'passive' | 'unavailable' | null.
-  // members.availability is free-text (no enum constraint, verified May 2026).
-  // Phase 4.0 (§4.5 adapter constraint): NULL in DB MUST surface as null to
-  // the client, NOT '' or 'open'. Minting defaults from NULL caused
-  // F-availability-default-drift (NULL → 'open' round-trip on Continue).
-  if (!raw) return null
-  switch (raw) {
-    case 'active':
-    case 'actively_looking':
-      return 'active'
-    case 'open':
-    case 'considering':
-    case 'open_to_opportunities':
-    case 'not_actively_looking': // DB default → display as "Considering opportunities"
-      return 'open'
-    case 'passive':
-    case 'passively_exploring':
-      return 'passive'
-    case 'unavailable':
-      return 'unavailable'
-    default:
-      return null
-  }
-}
-
-// Inverse of normalizeAvailability (PROFILUX_MATRIX_V1 §4.5 Phase 4.1).
-// Maps UI-editor availability values back to DB-canonical values before write.
-// Necessary because normalizeAvailability collapses multiple DB values into single UI values
 // on read; without an inverse, every read+write round-trip rewrites the DB-canonical value.
 function denormalizeAvailability(uiValue: string | null | undefined): string | null {
   if (uiValue === null || uiValue === undefined) return null
@@ -77,54 +41,12 @@ function denormalizeAvailability(uiValue: string | null | undefined): string | n
   }
 }
 
-function mapLegacyExperiences(experiences: ResolvedExperience[]) {
-  // LOSSY: L1 has no 'group' or stable 'id'. Editor uses 'id' for delete; array
-  // index is stable enough for read-only render. Phase 2.2 POST will not
-  // preserve these legacy ids anyway.
-  return experiences.map((e, i) => ({
-    id: String(i),
-    role: e.job_title ?? '',
-    brand: e.company ?? '',
-    group: '', // LOSSY: no source in Matrix v1
-    location: [e.city, e.country].filter(Boolean).join(', '),
-    from: e.start_date ? e.start_date.slice(0, 4) : '',
-    to: e.end_date ? e.end_date.slice(0, 4) : '',
-    current: e.end_date === null,
-  }))
-}
-
-function toLegacyProfile(view: ProfiLuxResolved) {
-  return {
-    firstName: view.first_name ?? '',
-    lastName: view.last_name ?? '',
-    city: view.city ?? '',
-    nationality: view.nationality ?? '',
-    headline: view.headline ?? '',
-    bio: view.bio ?? '',
-    experience: mapLegacyExperiences(view.experiences),
-    specialisations: view.expertise_tags ?? [], // LOSSY: closest semantic for v1
-    languages: view.languages.map((l) => l.language), // LOSSY: drops proficiency
-    sectors: view.sectors ?? [],
-    markets: view.market_knowledge ?? [], // LOSSY: closest semantic for v1
-    salaryExpectation:
-      view.desired_salary_max ?? view.desired_salary_min ?? 0, // LOSSY: collapses range to single value
-    salaryCurrency: view.desired_salary_currency ?? null, // §4.5 adapter constraint: surface NULL as null, not 'EUR'
-    availability: normalizeAvailability(view.availability),
-    sharingEnabled: false, // FROZEN: sharing UX out of scope per GPT D5 (Phase 2.1)
-    shareSlug: null, // FROZEN: sharing UX out of scope per GPT D5 (Phase 2.1)
-    photoUrl: view.avatar_url,
-  }
-}
-
-// Build the standard editor response: { surface, view, profile }.
-// Used by both GET and POST (Phase 2.2 D8-A — POST returns same shape as GET).
 function buildEditorResponse(resolved: ProfiLuxResolved) {
   const projection = projectFor(resolved, 'editor') as EditorProjection
   return {
     surface: projection.surface,
     view: projection.view,
     editor: projection.editor,
-    profile: toLegacyProfile(projection.view),
   }
 }
 
@@ -151,7 +73,7 @@ export async function GET() {
     return NextResponse.json({ error: memberErr.message }, { status: 500 })
   }
   if (!member) {
-    return NextResponse.json({ surface: 'editor', view: null, profile: null })
+    return NextResponse.json({ surface: 'editor', view: null, editor: null })
   }
 
   // Single resolver call — Rule A applied internally
@@ -165,7 +87,7 @@ export async function GET() {
     )
   }
   if (!resolved) {
-    return NextResponse.json({ surface: 'editor', view: null, profile: null })
+    return NextResponse.json({ surface: 'editor', view: null, editor: null })
   }
 
   return NextResponse.json(buildEditorResponse(resolved))
