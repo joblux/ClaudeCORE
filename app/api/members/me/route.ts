@@ -32,14 +32,13 @@ const supabase = createClient(
 // /api/profilux consumers which do setProfilux(pData.profile || pData),
 // /api/members/me consumers do not extract a sub-key.
 //
-// FIX (F2 per GPT): spread the 16 legacy fields at the top level alongside
+// FIX (F2 per GPT): spread the 8 fields at the top level alongside
 // surface/view. Phase 4 still reads `view` directly. UI untouched.
 // =============================================================================
 
 type MemberMeta = {
   company_name: string | null
   org_type: string | null
-  approved_at: string | null
 }
 
 function toLegacyMember(view: ProfiLuxResolved, meta: MemberMeta) {
@@ -49,19 +48,10 @@ function toLegacyMember(view: ProfiLuxResolved, meta: MemberMeta) {
     last_name: view.last_name,
     email: view.email,
     company_name: meta.company_name,
-    job_title: view.job_title,
     org_type: meta.org_type,
     country: view.country,
     city: view.city,
-    avatar_url: view.avatar_url,
     status: view.status,
-    approved_at: meta.approved_at,
-    role: view.role,
-    // 4 L3 / CV adds (Phase 2.3 — closes F-members-me-incomplete)
-    profile_completeness: view.profile_completeness,
-    m6_confirmed_at: view.m6_confirmed_at,
-    cv_url: view.cv_meta?.cv_url ?? null,
-    cv_parsed_at: view.cv_meta?.cv_parsed_at ?? null,
   }
 }
 
@@ -69,7 +59,7 @@ function toLegacyMember(view: ProfiLuxResolved, meta: MemberMeta) {
 // GET — Matrix v1 (Phase 2.3, ledger 081f3beb)
 // Reads members.* via resolveProfiLux + targeted second SELECT for non-ProfiLux
 // member metadata (company_name, org_type, approved_at).
-// Returns the 16 legacy fields spread at the top level, plus additive
+// Returns the 8 fields spread at the top level, plus additive
 // `surface` + `view` for Matrix v1 consumers (F2 shape).
 //
 // SCOPE per GPT D9-β + D10-A + D11-A + R6-A + F2:
@@ -131,7 +121,7 @@ export async function GET() {
   // intentionally not part of ProfiLuxResolved.
   const { data: metaRow, error: metaErr } = await supabase
     .from("members")
-    .select("company_name, org_type, approved_at")
+    .select("company_name, org_type")
     .eq("id", member.id)
     .maybeSingle()
 
@@ -142,7 +132,6 @@ export async function GET() {
   const meta: MemberMeta = {
     company_name: metaRow?.company_name ?? null,
     org_type: metaRow?.org_type ?? null,
-    approved_at: metaRow?.approved_at ?? null,
   }
 
   const legacy = toLegacyMember(resolved, meta)
