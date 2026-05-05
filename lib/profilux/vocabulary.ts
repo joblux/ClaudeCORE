@@ -248,6 +248,50 @@ export const PROFILUX_LOCATION_OPTIONS = [
 ] as const
 
 // -------------------------------------------------------------------------
+// 11. Skills — 20 (operational execution skills, distinct from expertise tags)
+// -------------------------------------------------------------------------
+export const PROFILUX_SKILL_OPTIONS = [
+  { value: 'p_and_l_management',         label: 'P&L Management' },
+  { value: 'budgeting_forecasting',      label: 'Budgeting & Forecasting' },
+  { value: 'kpi_reporting',              label: 'KPI Reporting' },
+  { value: 'inventory_management',       label: 'Inventory Management' },
+  { value: 'vendor_negotiation',         label: 'Vendor Negotiation' },
+  { value: 'contract_negotiation',       label: 'Contract Negotiation' },
+  { value: 'crm_systems',                label: 'CRM Systems' },
+  { value: 'erp_systems',                label: 'ERP Systems' },
+  { value: 'salesforce',                 label: 'Salesforce' },
+  { value: 'sap',                        label: 'SAP' },
+  { value: 'data_analysis',              label: 'Data Analysis' },
+  { value: 'excel_advanced',             label: 'Advanced Excel' },
+  { value: 'powerpoint_executive_decks', label: 'Executive Presentations' },
+  { value: 'project_management',         label: 'Project Management' },
+  { value: 'agile_scrum',                label: 'Agile / Scrum' },
+  { value: 'recruiting_hiring',          label: 'Recruiting & Hiring' },
+  { value: 'team_coaching',              label: 'Team Coaching' },
+  { value: 'audit_compliance',           label: 'Audit & Compliance' },
+  { value: 'public_speaking',            label: 'Public Speaking' },
+  { value: 'copywriting',                label: 'Copywriting' },
+] as const
+
+// -------------------------------------------------------------------------
+// 12. Markets — 12 (regional macro knowledge, distinct from city/job-location preferences)
+// -------------------------------------------------------------------------
+export const PROFILUX_MARKET_OPTIONS = [
+  'Western Europe',
+  'Eastern Europe',
+  'North America',
+  'Latin America',
+  'Greater China',
+  'Japan',
+  'South Korea',
+  'Southeast Asia',
+  'India',
+  'GCC / Middle East',
+  'Africa',
+  'Oceania',
+] as const
+
+// -------------------------------------------------------------------------
 // Type unions (derived)
 // -------------------------------------------------------------------------
 export type ProfiLuxSeniority        = typeof PROFILUX_SENIORITY_OPTIONS[number]['value']
@@ -260,6 +304,8 @@ export type ProfiLuxProductCategory  = typeof PROFILUX_PRODUCT_CATEGORY_OPTIONS[
 export type ProfiLuxExpertiseTag     = typeof PROFILUX_EXPERTISE_TAG_OPTIONS[number]['value']
 export type ProfiLuxCurrency         = (typeof PROFILUX_CURRENCY_OPTIONS)[number]
 export type ProfiLuxLocation         = (typeof PROFILUX_LOCATION_OPTIONS)[number]
+export type ProfiLuxSkill            = typeof PROFILUX_SKILL_OPTIONS[number]['value']
+export type ProfiLuxMarket           = (typeof PROFILUX_MARKET_OPTIONS)[number]
 
 // -------------------------------------------------------------------------
 // Grouped object (single import for editor screens)
@@ -275,4 +321,6 @@ export const PROFILUX_VOCABULARY = {
   expertise_tags:     PROFILUX_EXPERTISE_TAG_OPTIONS,
   currency:           PROFILUX_CURRENCY_OPTIONS,
   location:           PROFILUX_LOCATION_OPTIONS,
+  skills:             PROFILUX_SKILL_OPTIONS,
+  markets:            PROFILUX_MARKET_OPTIONS,
 } as const
