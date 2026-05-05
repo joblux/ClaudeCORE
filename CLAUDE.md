@@ -1,7 +1,13 @@
 # CLAUDE.md
 
 Execution rules for Claude Code working in this repository.
-Full platform state is in `docs/JOBLUX_STATE.md` — read it before any scoped task.
+
+Required session-start reading, in order:
+1. `docs/JOBLUX_STATE.md` — supreme source of truth. Overrides this file, `docs/WORKFLOW_RULES.md`, skills, memory, and chat history. Read before any scoped task.
+2. `docs/WORKFLOW_RULES.md` — output discipline and session-start procedure.
+
+Canonical contracts referenced by STATE:
+- `docs/PROFILUX_MATRIX_V1.md` — ProfiLux storage, resolver, and projection contract (§7.6 EditorView, §4.5 L2 write contract).
 
 ---
 
