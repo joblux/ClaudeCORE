@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import type { EditorView } from '@/lib/profilux/types'
-import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS } from '@/lib/profilux/vocabulary'
+import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS } from '@/lib/profilux/vocabulary'
 
 const TOTAL = 11
 const SCREEN_TITLES = [
@@ -62,6 +62,15 @@ type Screen10Draft = {
   desired_salary_currency: string | null
 }
 
+type Screen9Draft = {
+  availability: 'active' | 'open' | 'passive' | 'unavailable' | null
+  desired_locations: string[]
+  desired_departments: string[]
+  desired_contract_types: string[]
+  open_to_relocation: boolean | null
+  relocation_preferences: string
+}
+
 function draftFrom(e: EditorView): Screen3Draft {
   return {
     job_title: e.job_title ?? '',
@@ -100,6 +109,15 @@ const draftFrom10 = (e: EditorView): Screen10Draft => ({
   desired_salary_currency: e.desired_salary_currency,
 })
 
+const draftFrom9 = (e: EditorView): Screen9Draft => ({
+  availability: e.availability,
+  desired_locations: e.desired_locations ?? [],
+  desired_departments: e.desired_departments ?? [],
+  desired_contract_types: e.desired_contract_types ?? [],
+  open_to_relocation: e.open_to_relocation,
+  relocation_preferences: e.relocation_preferences ?? '',
+})
+
 export default function ProfiluxPage() {
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -125,6 +143,10 @@ export default function ProfiluxPage() {
   const [saving10, setSaving10] = useState(false)
   const [savedAt10, setSavedAt10] = useState<number | null>(null)
   const [saveError10, setSaveError10] = useState<string | null>(null)
+  const [draft9, setDraft9] = useState<Screen9Draft>({ availability: null, desired_locations: [], desired_departments: [], desired_contract_types: [], open_to_relocation: null, relocation_preferences: '' })
+  const [saving9, setSaving9] = useState(false)
+  const [savedAt9, setSavedAt9] = useState<number | null>(null)
+  const [saveError9, setSaveError9] = useState<string | null>(null)
 
   const refetch = async () => {
     const res = await fetch('/api/profilux')
@@ -138,6 +160,7 @@ export default function ProfiluxPage() {
       setDraft8(draftFrom8(e))
       setDraft6(draftFrom6(e))
       setDraft10(draftFrom10(e))
+      setDraft9(draftFrom9(e))
     }
     return e
   }
@@ -283,6 +306,36 @@ export default function ProfiluxPage() {
       setSaveError10(String(err))
     } finally {
       setSaving10(false)
+    }
+  }
+
+  async function handleSave9() {
+    setSaving9(true)
+    setSaveError9(null)
+    try {
+      const exp = draft9.open_to_relocation
+      const prefRaw = draft9.relocation_preferences.trim()
+      const body: Record<string, unknown> = {
+        availability: draft9.availability,
+        desired_locations: draft9.desired_locations,
+        desired_departments: draft9.desired_departments,
+        desired_contract_types: draft9.desired_contract_types,
+        open_to_relocation: exp,
+        relocation_preferences: exp === true && prefRaw !== '' ? prefRaw : null,
+      }
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      await refetch()
+      setSavedAt9(Date.now())
+      setTimeout(() => setSavedAt9((t) => (t && Date.now() - t >= 2000 ? null : t)), 2100)
+    } catch (err) {
+      setSaveError9(String(err))
+    } finally {
+      setSaving9(false)
     }
   }
 
@@ -472,13 +525,106 @@ export default function ProfiluxPage() {
         </div>
       )
       case 9: return (
-        <div style={grid}>
-          <div style={label}>Availability</div><div>{e.availability ?? <NotSet />}</div>
-          <div style={label}>Target locations</div><div>{e.desired_locations.length ? e.desired_locations.join(', ') : <NoneSel />}</div>
-          <div style={label}>Target departments</div><div>{e.desired_departments.length ? e.desired_departments.join(', ') : <NoneSel />}</div>
-          <div style={label}>Contract types</div><div>{e.desired_contract_types.length ? e.desired_contract_types.join(', ') : <NoneSel />}</div>
-          <div style={label}>Open to relocation</div><div>{e.open_to_relocation ? 'Yes' : <NotSet />}</div>
-          <div style={label}>Relocation preferences</div><div>{e.relocation_preferences ?? <NotSet />}</div>
+        <div style={{ maxWidth: 900 }}>
+          <div style={grid}>
+            <div style={label}>Availability</div>
+            <div>
+              <select style={select} value={draft9.availability ?? ''} onChange={(ev) => setDraft9({ ...draft9, availability: ev.target.value === '' ? null : ev.target.value as Screen9Draft['availability'] })}>
+                <option value="">— Not specified —</option>
+                <option value="active">Actively looking</option>
+                <option value="open">Open to opportunities</option>
+                <option value="passive">Passively exploring</option>
+                <option value="unavailable">Not available</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={sectionLabel}>Target locations</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+            {PROFILUX_LOCATION_OPTIONS.map((o) => (
+              <button
+                key={o}
+                type="button"
+                style={draft9.desired_locations.includes(o) ? chipActive : chip}
+                onClick={() => setDraft9({ ...draft9, desired_locations: draft9.desired_locations.includes(o) ? draft9.desired_locations.filter(v => v !== o) : [...draft9.desired_locations, o] })}
+              >
+                {o}
+              </button>
+            ))}
+          </div>
+
+          <div style={sectionLabel}>Target departments</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+            {PROFILUX_DEPARTMENT_OPTIONS.map((o) => (
+              <button
+                key={o.value}
+                type="button"
+                style={draft9.desired_departments.includes(o.value) ? chipActive : chip}
+                onClick={() => setDraft9({ ...draft9, desired_departments: draft9.desired_departments.includes(o.value) ? draft9.desired_departments.filter(v => v !== o.value) : [...draft9.desired_departments, o.value] })}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+
+          <div style={sectionLabel}>Contract types</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+            {PROFILUX_CONTRACT_TYPE_OPTIONS.map((o) => (
+              <button
+                key={o.value}
+                type="button"
+                style={draft9.desired_contract_types.includes(o.value) ? chipActive : chip}
+                onClick={() => setDraft9({ ...draft9, desired_contract_types: draft9.desired_contract_types.includes(o.value) ? draft9.desired_contract_types.filter(v => v !== o.value) : [...draft9.desired_contract_types, o.value] })}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+
+          <div style={sectionLabel}>Open to relocation</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+            <button
+              type="button"
+              style={draft9.open_to_relocation === true ? chipActive : chip}
+              onClick={() => setDraft9(prev => prev.open_to_relocation === true
+                ? { ...prev, open_to_relocation: null, relocation_preferences: '' }
+                : { ...prev, open_to_relocation: true })}
+            >
+              Yes
+            </button>
+            <button
+              type="button"
+              style={draft9.open_to_relocation === false ? chipActive : chip}
+              onClick={() => setDraft9(prev => ({
+                ...prev,
+                open_to_relocation: prev.open_to_relocation === false ? null : false,
+                relocation_preferences: '',
+              }))}
+            >
+              No
+            </button>
+          </div>
+
+          {draft9.open_to_relocation === true && (
+            <>
+              <div style={sectionLabel}>Relocation preferences</div>
+              <textarea
+                style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 80, resize: 'vertical' }}
+                rows={3}
+                value={draft9.relocation_preferences}
+                onChange={(ev) => setDraft9(prev => ({ ...prev, relocation_preferences: ev.target.value }))}
+                placeholder="e.g. EU only, willing to relocate within 3 months"
+              />
+            </>
+          )}
+
+          <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+            <button style={saving9 ? saveBtnDis : saveBtn} disabled={saving9} onClick={handleSave9}>
+              {saving9 ? 'Saving…' : 'Save'}
+            </button>
+            {savedAt9 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
+            {saveError9 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError9}</span>}
+          </div>
         </div>
       )
       case 10: return (
