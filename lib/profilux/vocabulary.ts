@@ -227,6 +227,27 @@ export const PROFILUX_CURRENCY_OPTIONS = [
 ] as const
 
 // -------------------------------------------------------------------------
+// 10. Locations — 15 (Europe → North America → Middle East → Asia-Pacific)
+// -------------------------------------------------------------------------
+export const PROFILUX_LOCATION_OPTIONS = [
+  'Paris',
+  'London',
+  'Milan',
+  'Geneva',
+  'Zurich',
+  'New York',
+  'Los Angeles',
+  'Miami',
+  'Dubai',
+  'Riyadh',
+  'Hong Kong',
+  'Singapore',
+  'Tokyo',
+  'Shanghai',
+  'Seoul',
+] as const
+
+// -------------------------------------------------------------------------
 // Type unions (derived)
 // -------------------------------------------------------------------------
 export type ProfiLuxSeniority        = typeof PROFILUX_SENIORITY_OPTIONS[number]['value']
@@ -238,6 +259,7 @@ export type ProfiLuxContractType     = typeof PROFILUX_CONTRACT_TYPE_OPTIONS[num
 export type ProfiLuxProductCategory  = typeof PROFILUX_PRODUCT_CATEGORY_OPTIONS[number]['value']
 export type ProfiLuxExpertiseTag     = typeof PROFILUX_EXPERTISE_TAG_OPTIONS[number]['value']
 export type ProfiLuxCurrency         = (typeof PROFILUX_CURRENCY_OPTIONS)[number]
+export type ProfiLuxLocation         = (typeof PROFILUX_LOCATION_OPTIONS)[number]
 
 // -------------------------------------------------------------------------
 // Grouped object (single import for editor screens)
@@ -252,4 +274,5 @@ export const PROFILUX_VOCABULARY = {
   product_categories: PROFILUX_PRODUCT_CATEGORY_OPTIONS,
   expertise_tags:     PROFILUX_EXPERTISE_TAG_OPTIONS,
   currency:           PROFILUX_CURRENCY_OPTIONS,
+  location:           PROFILUX_LOCATION_OPTIONS,
 } as const
