@@ -304,6 +304,28 @@ export async function POST(req: NextRequest) {
     updatePayload.desired_salary_currency = coerceEmpty(body.desired_salary_currency)
   }
   if (has('availability')) updatePayload.availability = denormalizeAvailability(body.availability)
+  if (has('desired_locations')) {
+    updatePayload.desired_locations = Array.isArray(body.desired_locations)
+      ? body.desired_locations
+      : null
+  }
+  if (has('desired_departments')) {
+    updatePayload.desired_departments = Array.isArray(body.desired_departments)
+      ? body.desired_departments
+      : null
+  }
+  if (has('desired_contract_types')) {
+    updatePayload.desired_contract_types = Array.isArray(body.desired_contract_types)
+      ? body.desired_contract_types
+      : null
+  }
+  if (has('open_to_relocation')) {
+    updatePayload.open_to_relocation =
+      typeof body.open_to_relocation === 'boolean' ? body.open_to_relocation : null
+  }
+  if (has('relocation_preferences')) {
+    updatePayload.relocation_preferences = coerceEmpty(body.relocation_preferences)
+  }
   if (has('salaryExpectation')) {
     updatePayload.desired_salary_max =
       typeof body.salaryExpectation === 'number' && body.salaryExpectation > 0
