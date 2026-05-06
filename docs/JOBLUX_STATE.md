@@ -104,6 +104,8 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 - **Phase 4.A milestone CLOSED** — All planned write-enabled screens shipped: 3 (Current Position), 4 (Luxury Fit), 6 (Education), 7 (Skills+Markets), 8 (Clienteling), 9 (Availability+Targets), 10 (Compensation). Screen 5 (Career History) remains read-only L1 by spec. Screen 11 (Confirm) remains separate `m6_confirmed_at` route. Vocabulary now consumed by 7 screens with 11 vocabularies registered.
 
+- **PROFILUX_RELOAD_UX_MAP.md captured** — `docs/PROFILUX_RELOAD_UX_MAP.md` locked May 6 2026 PM. Canonical UX architecture capture for the ProfiLux Reload, frozen before frontend rewrite. Capture-with-provenance model: locked sections cite MATRIX v1.1 §§14–20 + MODEL.md verbatim; approved-capture sections (§2 View/Edit/Manage triad, §3 9+8 sections, §11 responsive, §§12.2–12.4 component families) labeled "pending MATRIX promotion" and listed in §13 promotion checklist. No code, no implementation. Substrate per MATRIX §13 survives the rewrite (`EditorView`, §4.5 write contract, vocabulary, resolver/projector). Pending MATRIX promotions preserved for future scoped session.
+
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
 
 Phase 4.A completed 2026-05-05. All seven planned write-enabled screens shipped and validated end-to-end (Screens 3, 4, 6, 7, 8, 9, 10). Vocabulary contract consumed by 7 screens. POST contract validated against §4.5 W1/W2/W3 across all write surfaces.
