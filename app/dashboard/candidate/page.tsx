@@ -193,21 +193,8 @@ export default function CandidateDashboard() {
   const today = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
   const tierLabel = TIER_LABELS[role || ''] || 'PROFESSIONAL'
 
-  // Profilux completion calculation
-  const profiluxCompletion = (() => {
-    if (!profilux) return 0
-    let filled = 0
-    let total = 8
-    if (profilux.first_name) filled++
-    if (profilux.last_name) filled++
-    if (profilux.headline || profilux.job_title) filled++
-    if (profilux.bio) filled++
-    if (profilux.city) filled++
-    if ((profilux.experiences || []).length > 0) filled++
-    if ((profilux.expertise_tags || []).length > 0) filled++
-    if ((profilux.languages || []).length > 0) filled++
-    return Math.round((filled / total) * 100)
-  })()
+  // Profile completeness — server value, single source of truth (Matrix v1 §10.1)
+  const profiluxCompletion = profilux?.profile_completeness ?? 0
 
   // ══════════════════════════════════════════════════════════════════
   // RENDER
@@ -240,8 +227,8 @@ export default function CandidateDashboard() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
             <Link href="/dashboard/candidate/profilux" className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 hover:border-[#3a3a3a] transition-colors block">
               <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-2">PROFILE</div>
-              <div className="text-sm text-[#ccc] mb-1">{profiluxCompletion === 100 ? 'Complete' : `${profiluxCompletion}% done`}</div>
-              <div className="text-[11px] text-[#999]">{profiluxCompletion === 100 ? 'View your Profilux' : 'Finish to unlock matching'}</div>
+              <div className="text-sm text-[#ccc] mb-1">{profiluxCompletion === 100 ? 'Up to date' : `${profiluxCompletion}% complete`}</div>
+              <div className="text-[11px] text-[#999]">Continue editing</div>
             </Link>
             <Link href="/careers" className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 hover:border-[#3a3a3a] transition-colors block">
               <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-2">CAREERS</div>
@@ -262,7 +249,6 @@ export default function CandidateDashboard() {
         )}
 
         {/* ── Profilux bar ── */}
-        {profiluxCompletion < 100 && (
         <div className="bg-[#222] border border-[rgba(165,142,40,0.2)] rounded-xl p-4 flex items-center gap-5 mb-8">
           <div className="flex-shrink-0">
             <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-1">PROFILUX</div>
@@ -273,14 +259,13 @@ export default function CandidateDashboard() {
               <div className="h-full bg-[#1D9E75] rounded-full transition-all" style={{ width: `${profiluxCompletion}%` }} />
             </div>
             <div className="text-[11px] text-[#999]">
-              {`${profiluxCompletion}% complete · Fill in to unlock full matching`}
+              {`${profiluxCompletion}% complete · Your profile is a living document — keep refining it.`}
             </div>
           </div>
           <Link href="/dashboard/candidate/profilux" className="bg-white text-[#1a1a1a] text-xs font-semibold px-4 py-2 rounded-lg hover:opacity-85 transition-opacity whitespace-nowrap">
             Continue →
           </Link>
         </div>
-        )}
 
         {/* ── Careers (matched roles) ── */}
         <div className="flex items-center gap-3 mb-4">
