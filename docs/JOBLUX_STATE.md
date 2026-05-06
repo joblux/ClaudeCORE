@@ -118,7 +118,25 @@ Phase 4.A completed 2026-05-05. All seven planned write-enabled screens shipped 
 
 - **Phase 4 chain milestone CLOSED in STATE** — Phase 4 entirely shipped May 5 2026. ProfiLux contract harmonized: `/api/profilux` emits `{surface, view, editor}` (no legacy `profile`); `/api/members/me` emits 8 live fields + `surface` + `view`. `toLegacyProfile` adapter removed entirely. `toLegacyMember` slimmed to live consumers. EditorView §7.6 is the canonical UI shape. Phase 4 chain (4.B audit → 4.C consumer migration → 4.D adapter removal → 4.E members/me slim) closed in single session. Ledger DB rows for `8f82b3ac` (Phase 4.B/C/D/E) not synced this session — defer to next session ledger reconciliation.
 
+- **Audits + doctrine reconciliation 2026-05-06 PM session** — Four audit artifacts committed (Phase 1 DB schema, Phase 2 API/routes `97d461f`, Phase 4 parser/resolver `df1a5ef`, mini Phase 5 candidate frontend `eb295d8`). Mini P5 confirmed `app/dashboard/candidate/profilux/page.tsx` is literal 754-line 11-screen tunnel implementation per MATRIX v1 §7.6.2 — slated for passport rewrite. Strategic working-loop baseline locked: v12 ProfiLux candidate ecosystem HTML prototype (View/Edit/Manage modes, 9 default sections + 8 library sections, no placeholders, no dead controls).
+
+- **c3297d3** `docs(profilux): v1.1 reconciliation patch — May 6 addendum` — MATRIX v1 → v1.1 promotion via dynamic-range Python patch script (3 docs, +307/−111). Substrate (storage / resolver / projections / write contract / vocabulary / parser) intact. Product-behavior layer reconciled with `docs/PROFILUX_MODEL.md` (May 6 lock). MATRIX changes: §2 rewritten (living object), §7.4 extended (maskable layer cross-ref), §7.6 rewritten (passport-with-drawer UX), §7.6.2 retired (11-screen tunnel), §8 rewritten (matching-entry replaces M6 admission; `computeM6Eligible` + `computeProfileCompleteness` retained as backend-only signals), §9 rewritten (`profilux` standalone reclassified share-state-only), §11 reconciled, §13 updated, §§14–20 added (UX doctrine, Tier model, Maskable layer, CV merge target, Public URL activation, Settings surface, Matching-entry doctrine). STATE changes: §24 rewritten (living-object model supersedes M6 admission/L1–L5), §11 candidate dashboard reframed (readiness signal, not admission gate), §12 ProfiLux replaced (living-object summary), DO NOT block reclassified `profilux` table. MODEL changes: cross-reference to MATRIX v1.1 §§14–20 added under header. GPT-locked v1.1 patch list executed surgically — no full v2 redraft. Patches landed via two-step dynamic range fix (M6 §8 fence mismatch + MODEL header markdown hard-break trailing spaces) after literal-marker approach failed twice.
+
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
+
+**Next: Phase 3 full frontend audit (option A from prior triage), grounded in MATRIX v1.1 contract.**
+
+Phase 4.5 and B reconciliation closed in 2026-05-06 PM session. Doctrine now formally locked. Implementation work resumes per existing one-defect-one-deploy discipline.
+
+Open items in priority order:
+1. **Phase 3 frontend audit** — full sweep of candidate/business/insider/admin frontend surfaces against MATRIX v1.1 + MODEL doctrine. Mini P5 covered only `app/dashboard/candidate/profilux/page.tsx`. Need: dashboard candidate page, public `/p/[slug]` page, `/profile` legacy, business dashboard, ATS surfaces. Output: gap map vs MATRIX v1.1 §§14–20.
+2. **Frontend rewrite — passport-with-drawer** — `app/dashboard/candidate/profilux/page.tsx` from 754-line 11-screen tunnel to passport-with-drawer per MATRIX v1.1 §7.6 + §14. API contract underneath survives. Standalone scoped session.
+3. **B39 CV bucket repair execution** — `member-cvs` already private (HTTP 400 confirmed), but 5 broken URLs in `member_documents.file_url` + 5 in `members.cv_url`. Repair plan locked, no code written. Resume with fresh `/ultrareview` first.
+4. **Tier 1 schema** — `notice_period`, `work_authorization`, `salary_history`, `reporting_line`, `budget_responsibility`, `team_size`. Required for matching entry per MATRIX v1.1 §15.2 + §20. PARKED until product trigger.
+
+Earlier-session prior context (carried forward):
+- Phase 4.A milestone CLOSED 2026-05-05. All 7 write-enabled screens shipped (3, 4, 6, 7, 8, 9, 10).
+- Phase 4.B/C/D/E chain closed 2026-05-05 — ProfiLux contract harmonized: `/api/profilux` emits `{surface, view, editor}`, `/api/members/me` emits 8 live fields. `toLegacyProfile` adapter removed.
 
 **ProfiLux Reload recovery — start from the live /dashboard/candidate Continue button.**
 
@@ -197,7 +215,7 @@ Phase 5 admin polish is NOT next. It remains parked (ledger 35469863). Phase 4 P
 - Phase 4.A.10b SHIPPED 2026-05-04 (commit `2d8f07f`). Route POST snake_case salary fields + range guard live in prod, validated 6 scenarios.
 - Phase 4.A.10c SHIPPED 2026-05-04 (commit `fbcf6c6`). Screen 10 write-enabled, browser + DB validated. F-save-error-body-dropped logged.
 
-**Last updated:** May 4, 2026 (Phase 4.A.10 Screen 10 write-enabled, browser+DB validated — `fbcf6c6`)
+**Last updated:** May 6, 2026 (v1.1 reconciliation patch landed — `c3297d3`. Mini P5 audit — `eb295d8`. ProfiLux doctrine formally locked.)
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
