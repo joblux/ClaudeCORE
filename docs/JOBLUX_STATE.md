@@ -120,17 +120,25 @@ Phase 4.A completed 2026-05-05. All seven planned write-enabled screens shipped 
 
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
 
-Phase 4 closed 2026-05-05. No CURRENT STEP successor pre-defined in STATE.
+**ProfiLux Reload recovery — start from the live /dashboard/candidate Continue button.**
 
-Open candidates (require explicit selection in next session, not auto-promoted):
-- **Phase 5 — Admin polish** *(ledger `35469863`, parked)* — Phase 4 gating now lifted.
-- **Hydration errors finding** — React #425/#418/#423 pre-existing across all dashboards. Hydration mismatches at runtime, no functional impact, but should be diagnosed before broader UX work.
-- **Stale docblock sweep** — `/api/members/me/route.ts` lines 23, 61, 120 reference removed `approved_at` field; line 21 area "REMOVE in Phase 4 when consumers migrate" header partially stale; "// Original 12 fields (preserved verbatim)" comment now describes 8. Cosmetic only, can fold into next functional commit on this file.
-- **STATE drift on cv-parse source** — STATE line 51 (Phase 3 cv-parse description) references `/api/members/me` for `cv_url` + `cv_parsed_at`; reality post-Phase 4 is `/api/profilux` editor `e.cv_meta.*`. Doc-only correction.
-- **Ledger reconciliation** — `admin_tasks` rows for Phase 4.B/C/D/E need closure; STATE drift on cv-parse needs DB log.
+Phase 5 admin polish is NOT next. It remains parked (ledger 35469863). Phase 4 ProfiLux tunnel + editor rebuild (8f82b3ac) is preserved as substrate but its wizard/tunnel framing is replaced by the canonical model below.
 
-**Phase 5 — Admin polish** *(ledger `35469863`, parked)* — gated on Phase 4 candidate-side landing first.
+**Locked doctrine (May 6, 2026):**
+- ProfiLux is a single living professional profile object, owned continuously by the user.
+- Not a wizard. Not submit / pending / review. Not frozen. Not Mo-approved.
+- Mo approval applies to platform access at registration, and to contributions (brand corrections, salaries, insider voices) — never to the ProfiLux itself.
+- Flow: approved user dashboard → Continue ProfiLux (existing CTA on /dashboard/candidate) → fresh CV upload → Haiku parse → populated living ProfiLux document → user edits / owns it continuously.
+- All projections read the same object: self dashboard, ATS view, recruiter view, public share /p/[name], PDF exports, matching layer.
 
+**Canonical doctrine doc:** docs/PROFILUX_MODEL.md (committed ecb60a5, May 6 2026).
+**Umbrella ledger row:** 88d4bd79-f0d4-4e9c-9125-e00df2699ca6 (Recruiting System / high / open).
+**Directional prototype (NOT an implementation source):** ~/Desktop/joblux-prototypes/profilux_flow_v3.html.
+
+**Next session opens with planning, not code:**
+1. Decide retirement of inert RPC submit_m6_admission (ledger 1e6162ea) under this model.
+2. Reconcile M6 admission enforcement (ledger 29f95a84) — what survives the no-pending shift, what gets dropped.
+3. Audit the gap between prod (/api/upload-cv, /api/profilux, /dashboard/candidate/profilux) and the Reload model — produce a written delta before any code.
 ### DO NOT
 
 - Touch cv-parse route again unless a new bug surfaces (currently green in prod).
