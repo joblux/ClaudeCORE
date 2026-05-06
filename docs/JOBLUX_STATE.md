@@ -146,7 +146,7 @@ Phase 5 admin polish is NOT next. It remains parked (ledger 35469863). Phase 4 P
 - Use Hélène BILLARD as fixture (consent unconfirmed, blocked permanently).
 - Read `members.*` or `cv_parsed_data` directly from any UI surface for ProfiLux fields — go through `projectFor`.
 - Implement L1 → L2 silent writes from any code path.
-- Migrate the 3 dormant `profilux` standalone rows — data migration is post-v1 cleanup, tracked in ledger `6aef236e`.
+- Do not treat `profilux` standalone table as fully dormant — it is reclassified as share-state-only (holds `share_slug` + `sharing_enabled` for `/p/[name]`; written by `/api/profilux/reset-link`, read by `app/[slug]/page.tsx`). Full retirement remains a post-v1.1 cleanup, tracked in ledger `6aef236e`.
 - Touch `/api/profilux/reset-link` during Phase 3 — sharing UX rebuild is a separate post-migration concern.
 - Refactor legacy `calculateProfileCompleteness` in `app/api/members/profile/route.ts` during Phase 3 — separate commit, per Mo decision C5. Best handled together with `f6508e54` and the Phase 4 editor rebuild.
 - Fix the dashboard 8-field completeness divergence (`f6508e54`) during Phase 3 — flagged-only finding, no fix scheduled in this phase.
@@ -412,8 +412,8 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 
 ### Candidate (`/dashboard/candidate`):
 - 4-card next-steps: Profile, Careers, Intelligence, Contribute
-- Conditional ProfiLux completion bar
-- ProfiLux 7-step form at `/dashboard/candidate/profilux`
+- ProfiLux completion bar (backend-computed readiness signal; not an admission gate)
+- ProfiLux editor at `/dashboard/candidate/profilux` (currently 11-screen tunnel; passport rewrite pending per MODEL)
 
 ### Business (`/dashboard/business`):
 - Submit brief CTA
@@ -433,13 +433,14 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 
 ## 12. PROFILUX
 
-- 7-step form: Personal, Experience, Expertise & Languages, Sectors, Salary, Availability, Share
-- Profile completeness % calculated and stored
-- `profile_completeness` field in members table
-- Fields cover: personal info, work experiences, education, languages, skills, luxury-specific data (sectors, product categories, client segments, clienteling), availability, salary expectations
-- CV upload exists (stored in Supabase storage)
-- `cv_parsed_at` field exists but parsing NOT implemented
-- Two surfaces currently: ProfiLux (dark, `/dashboard/candidate/profilux`) and Profile (light, `/profile`) — overlap exists
+- Living object, owned continuously by user (per MODEL May 6, MATRIX v1.1 §2)
+- Current implementation: 11-screen tunnel (Phase 4.A complete) at `/dashboard/candidate/profilux`. Passport-with-drawer UX rewrite pending (MATRIX v1.1 §7.6).
+- Storage contract: `members.*` flat columns + `cv_parsed_data` jsonb (per MATRIX v1 §3 layer model)
+- Resolver: `lib/profilux/resolveProfiLux` returns `ProfiLuxResolved` (single shape, all surfaces)
+- 6 surface projections via `projectFor`: dashboard / editor / public / admin / ats / client
+- CV pipeline: Haiku 4.5 parser at `/api/members/cv-parse`, schema_v1.0, locked sectors + proficiencies
+- `members.profile_completeness` computed via `computeProfileCompleteness` (backend-only readiness signal — not user-facing admission)
+- Two surfaces: ProfiLux (`/dashboard/candidate/profilux`) and `/profile` (legacy, scheduled for retirement)
 
 ---
 
@@ -593,41 +594,30 @@ All tabbed pages use `?tab=` query params. Brands: 5 tabs (~760 sitemap URLs).
 
 ---
 
-## 24. PROFILUX ENFORCEMENT & ADMISSION THRESHOLD (REFOUNDATION)
+## 24. PROFILUX DOCTRINE — LIVING OBJECT MODEL
 
-**Status:** Locked. Refoundation enforcement.
+**Status:** Locked May 6, 2026. Supersedes prior M6 admission doctrine.
 
-**Implementation contract:** see `docs/PROFILUX_MATRIX_V1.md` (commit `5cb1e0d`). That doc is the canonical ProfiLux storage / resolver / projection contract. This §24 stays as the product doctrine summary (L1–L5 + M6 fields); the Matrix v1 doc governs how it is implemented in code. On conflict, pause and reconcile against STATE before coding.
+**Canonical doctrine doc:** `docs/PROFILUX_MODEL.md`
+**Implementation contract:** `docs/PROFILUX_MATRIX_V1.md` (v1.1 — May 6 addendum)
 
-**Drift reset phrase:** *"follow L1–L5 + M6 exactly"*
+**Core principle:** ProfiLux is a single living professional profile object, owned continuously by the user. It is not a wizard, not a submission, not a pending object, not approved by Mo, not frozen.
 
-### L1–L5 — ProfiLux locks
+**Mo approval scope (narrow):** platform access at registration + contributions (brand corrections, salary data, insider voices). Never to ProfiLux itself.
 
-- **L1** — ProfiLux is the unified object across candidate dashboard, admin review, ATS/recruiting, and client submission. No parallel candidate records.
-- **L2** — Candidate-authored core is canonical. Recruiter overlay (notes, assessments, internal flags) is additive, never replacing. Client-shared version is a render of the same data.
-- **L3** — Minimum ProfiLux satisfies three constraints simultaneously: sufficient for Mo's admission review; sufficient for the recruiting loop to operate (search, shortlist, basic match signals); sufficient to be presentable to a client if Mo chose to submit early.
-- **L4** — Readiness ProfiLux is the application + matching threshold. Above readiness, candidate is fully functional in the recruiting loop and self-serve application is meaningful.
-- **L5** — Admin candidate surface is recruiting-loop-shaped. Pending review is one entry; the same surface family supports search, shortlist, profile management, client submission.
+**Flow:** approved user dashboard → Continue ProfiLux → fresh CV upload → Haiku parse → populated living document → user edits / owns continuously.
 
-### M6 — Minimum ProfiLux for admission
+**All projections read the same object:** self dashboard, ATS, recruiter view, public share `/p/[name]`, PDF exports, matching layer.
 
-Required fields before submission for Mo's review:
+**Field tier model (per MODEL):**
+- **Tier 0** — seeded at signup: name, email, location
+- **Tier 1** — recruiter-critical (PARKED, schema not yet built): notice period, work authorization, salary history, reporting line, budget responsibility, team size
+- **Tier 2** — credibility enrichment (PARKED, schema not yet built): structured certifications, awards, references, portfolio, publications, memberships
+- **Existing Phase 4 fields** — see `lib/profilux/types.ts` `EditorView`
 
-- **Identity:** full name (first, last); city + country; primary email (OAuth-confirmed)
-- **Professional core:** current/most-recent role (brand + title + start date, end date if not current); one additional prior role (brand + title + dates); total years of experience; seniority level (per JOBLUX 9-level vocabulary, aligned with tier)
-- **Luxury fit:** primary sector (one of 8 locked sectors); sub-sector or specialization (per 35 subsectors / 28 specializations vocabulary)
-- **Capability:** at least one language with proficiency
-- **Authenticity:** CV file uploaded (prefill source, retained as evidence); user confirmation that the prefilled ProfiLux is accurate
-- **Phone:** OPTIONAL at M6
+**Matching entry (replaces M6 admission):** backend-only readiness signal. No user-facing confirm action. No threshold percentage. No "Pending Candidate" state. Computed from Tier 1 core fields when those land + explicit consent (future, not derived from `availability` by default).
 
-CV alone does not create a candidate. **User confirmation of M6 is the act that creates a Pending Candidate.**
-
-### Phone policy
-
-- **Optional at M6 (admission).**
-- **Required at readiness, before any client submission.**
-
-Excluded from M6 (deferred to readiness): salary expectations, availability, education detail, skills/clienteling/product categories, photo, bio, portfolio, references, sharing settings.
+**Drift reset phrase:** *"living object, not wizard / not submission / not approval"*
 
 ---
 

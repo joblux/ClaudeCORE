@@ -3,6 +3,8 @@
 **Status:** Locked May 6, 2026  
 **Supersedes:** ProfiLux journey wizard, M6 admission gate, submit / pending / approval workflow
 
+**Technical contract lives in `docs/PROFILUX_MATRIX_V1.md` v1.1 §§14–20.**
+
 ---
 
 ## 1. CANONICAL OBJECT
