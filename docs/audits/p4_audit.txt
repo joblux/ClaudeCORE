@@ -1,0 +1,2401 @@
+=== A1. LIB/PROFILUX FILE STRUCTURE ===
+lib/profilux:
+total 144
+-rw-r--r--   1 momo  staff   2723 May  1 00:49 _m6Groups.ts
+drwxr-xr-x  10 momo  staff    320 May  5 12:45 .
+drwxr-xr-x@ 27 momo  staff    864 May  1 00:49 ..
+-rw-r--r--   1 momo  staff    533 May  1 00:49 computeM6Eligible.ts
+-rw-r--r--   1 momo  staff   1035 May  1 00:49 computeProfileCompleteness.ts
+-rw-r--r--   1 momo  staff   1095 May  1 00:49 index.ts
+-rw-r--r--   1 momo  staff   9666 May  4 10:58 projectFor.ts
+-rw-r--r--   1 momo  staff   6975 May  1 00:49 resolveProfiLux.ts
+-rw-r--r--   1 momo  staff  15325 May  4 10:58 types.ts
+-rw-r--r--   1 momo  staff  17235 May  5 12:45 vocabulary.ts
+
+lib/profilux/:
+total 144
+-rw-r--r--   1 momo  staff   2723 May  1 00:49 _m6Groups.ts
+drwxr-xr-x  10 momo  staff    320 May  5 12:45 .
+drwxr-xr-x@ 27 momo  staff    864 May  1 00:49 ..
+-rw-r--r--   1 momo  staff    533 May  1 00:49 computeM6Eligible.ts
+-rw-r--r--   1 momo  staff   1035 May  1 00:49 computeProfileCompleteness.ts
+-rw-r--r--   1 momo  staff   1095 May  1 00:49 index.ts
+-rw-r--r--   1 momo  staff   9666 May  4 10:58 projectFor.ts
+-rw-r--r--   1 momo  staff   6975 May  1 00:49 resolveProfiLux.ts
+-rw-r--r--   1 momo  staff  15325 May  4 10:58 types.ts
+-rw-r--r--   1 momo  staff  17235 May  5 12:45 vocabulary.ts
+
+lib/profilux
+lib/profilux/vocabulary.ts
+lib/profilux/_m6Groups.ts
+lib/profilux/computeM6Eligible.ts
+lib/profilux/types.ts
+lib/profilux/resolveProfiLux.ts
+lib/profilux/index.ts
+lib/profilux/projectFor.ts
+lib/profilux/computeProfileCompleteness.ts
+
+=== A2. CV-PARSE HELPER FILES ===
+lib/profilux/_m6Groups.ts
+lib/profilux/types.ts
+lib/profilux/resolveProfiLux.ts
+lib/profilux/projectFor.ts
+
+=== B1. lib/profilux.ts (or main entry) FULL CONTENT ===
+--- lib/profilux/index.ts ---
+/**
+ * Barrel export — Matrix v1 utilities.
+ *
+ * Consumer call sites:
+ *   import { resolveProfiLux, projectFor, computeM6Eligible,
+ *            computeProfileCompleteness } from '@/lib/profilux'
+ *
+ * The _m6Groups module is private (underscore prefix) and is NOT exported
+ * here. Surfaces and routes consume only the four utilities + types.
+ */
+
+export { resolveProfiLux } from './resolveProfiLux'
+export { computeM6Eligible } from './computeM6Eligible'
+export { computeProfileCompleteness } from './computeProfileCompleteness'
+export { projectFor } from './projectFor'
+
+export type {
+  // L1
+  CvParsedConfidence,
+  CvParsedData,
+  CvParsedEducation,
+  CvParsedExperience,
+  CvParsedIdentity,
+  CvParsedLanguage,
+  CvParsedNeedsReviewItem,
+  // L2
+  MemberRow,
+  // Resolved
+  ProfiLuxResolved,
+  ResolvedCvMeta,
+  ResolvedEducation,
+  ResolvedExperience,
+  ResolvedLanguage,
+  // Surface + projections
+  AdminProjection,
+  AtsProjection,
+  ClientProjection,
+  DashboardProjection,
+  EditorProjection,
+  ProjectedView,
+  PublicExperience,
+  PublicProjection,
+  Surface,
+} from './types'
+
+=== B2. ALL FILES INSIDE lib/profilux/ (if directory) ===
+
+--- lib/profilux/_m6Groups.ts ---
+/**
+ * Shared M6 group predicates — single source of truth for Matrix v1 §8.2.
+ *
+ * Consumed by:
+ *   - computeM6Eligible    (AND of the six)
+ *   - computeProfileCompleteness  (weighted sum of the six)
+ *
+ * Underscore prefix = private helper; not part of barrel export.
+ *
+ * Rule A non-empty predicate (locked Apr 30):
+ *   - string: !== null && !== ''
+ *   - array:  !== null && length > 0
+ *   - default literals (e.g. availability='not_actively_looking') are
+ *     treated as non-empty per Mo's locked decision. No semantic
+ *     reinterpretation in v1.
+ */
+
+import type { ProfiLuxResolved } from './types'
+
+export type M6Groups = {
+  G1: boolean // Identity
+  G2: boolean // Position
+  G3: boolean // Luxury relevance
+  G4: boolean // Experience
+  G5: boolean // Availability
+  G6: boolean // CV
+}
+
+/** Non-empty string per Rule A. */
+function nonEmptyString(s: string | null | undefined): boolean {
+  return typeof s === 'string' && s.trim() !== ''
+}
+
+/** Non-empty array per Rule A. */
+function nonEmptyArray<T>(arr: T[] | null | undefined): boolean {
+  return Array.isArray(arr) && arr.length > 0
+}
+
+export function computeM6Groups(view: ProfiLuxResolved): M6Groups {
+  // G1 — Identity: first_name, last_name, city, country
+  const G1 =
+    nonEmptyString(view.first_name) &&
+    nonEmptyString(view.last_name) &&
+    nonEmptyString(view.city) &&
+    nonEmptyString(view.country)
+
+  // G2 — Position: job_title, current_employer, seniority, total_years_experience
+  const G2 =
+    nonEmptyString(view.job_title) &&
+    nonEmptyString(view.current_employer) &&
+    nonEmptyString(view.seniority) &&
+    typeof view.total_years_experience === 'number'
+
+  // G3 — Luxury relevance: years_in_luxury + ≥1 sector + ≥1 of (product_categories ∪ expertise_tags)
+  const G3 =
+    typeof view.years_in_luxury === 'number' &&
+    nonEmptyArray(view.sectors) &&
+    (nonEmptyArray(view.product_categories) ||
+      nonEmptyArray(view.expertise_tags))
+
+  // G4 — Experience: ≥1 cv_parsed_data.experiences entry with both company AND job_title
+  const G4 =
+    Array.isArray(view.experiences) &&
+    view.experiences.some(
+      (e) => nonEmptyString(e.company) && nonEmptyString(e.job_title),
+    )
+
+  // G5 — Availability: availability non-empty + ≥1 of desired_locations / desired_departments / desired_contract_types
+  const G5 =
+    nonEmptyString(view.availability) &&
+    (nonEmptyArray(view.desired_locations) ||
+      nonEmptyArray(view.desired_departments) ||
+      nonEmptyArray(view.desired_contract_types))
+
+  // G6 — CV: cv_url non-empty (sourced from cv_meta — single source of truth)
+  const G6 = nonEmptyString(view.cv_meta?.cv_url ?? null)
+
+  return { G1, G2, G3, G4, G5, G6 }
+}
+
+--- lib/profilux/computeM6Eligible.ts ---
+/**
+ * computeM6Eligible — Matrix v1 §8.1, §8.2.
+ *
+ * Pure function. No DB. No async.
+ * Boolean: are all six M6 groups satisfied?
+ *
+ * Distinct from m6_confirmed_at (§8.3): eligibility is computed on demand;
+ * confirmation is a user action that sets the timestamp.
+ */
+
+import { computeM6Groups } from './_m6Groups'
+import type { ProfiLuxResolved } from './types'
+
+export function computeM6Eligible(view: ProfiLuxResolved): boolean {
+  const g = computeM6Groups(view)
+  return g.G1 && g.G2 && g.G3 && g.G4 && g.G5 && g.G6
+}
+
+--- lib/profilux/computeProfileCompleteness.ts ---
+/**
+ * computeProfileCompleteness — Matrix v1 §4.4 + §10.
+ *
+ * Pure function. No DB. No async.
+ * Returns 0..100 based on six M6 groups, binary scoring per Mo decision C3.
+ *
+ * Weights (locked C2): 17 / 17 / 17 / 16 / 17 / 16 = 100.
+ *
+ * Replaces legacy app/api/members/profile/route.ts calculateProfileCompleteness
+ * (incompatible per C1: counted dormant relational tables, read raw rows
+ * instead of resolved view, disagreed with M6 on what matters). Legacy route
+ * refactor scheduled separately (C5).
+ *
+ * Coupling: identical group predicates as computeM6Eligible via shared
+ * _m6Groups module. Single source of truth — no drift.
+ */
+
+import { computeM6Groups } from './_m6Groups'
+import type { ProfiLuxResolved } from './types'
+
+export function computeProfileCompleteness(view: ProfiLuxResolved): number {
+  const g = computeM6Groups(view)
+  let score = 0
+  if (g.G1) score += 17
+  if (g.G2) score += 17
+  if (g.G3) score += 17
+  if (g.G4) score += 16
+  if (g.G5) score += 17
+  if (g.G6) score += 16
+  return score
+}
+
+--- lib/profilux/index.ts ---
+/**
+ * Barrel export — Matrix v1 utilities.
+ *
+ * Consumer call sites:
+ *   import { resolveProfiLux, projectFor, computeM6Eligible,
+ *            computeProfileCompleteness } from '@/lib/profilux'
+ *
+ * The _m6Groups module is private (underscore prefix) and is NOT exported
+ * here. Surfaces and routes consume only the four utilities + types.
+ */
+
+export { resolveProfiLux } from './resolveProfiLux'
+export { computeM6Eligible } from './computeM6Eligible'
+export { computeProfileCompleteness } from './computeProfileCompleteness'
+export { projectFor } from './projectFor'
+
+export type {
+  // L1
+  CvParsedConfidence,
+  CvParsedData,
+  CvParsedEducation,
+  CvParsedExperience,
+  CvParsedIdentity,
+  CvParsedLanguage,
+  CvParsedNeedsReviewItem,
+  // L2
+  MemberRow,
+  // Resolved
+  ProfiLuxResolved,
+  ResolvedCvMeta,
+  ResolvedEducation,
+  ResolvedExperience,
+  ResolvedLanguage,
+  // Surface + projections
+  AdminProjection,
+  AtsProjection,
+  ClientProjection,
+  DashboardProjection,
+  EditorProjection,
+  ProjectedView,
+  PublicExperience,
+  PublicProjection,
+  Surface,
+} from './types'
+
+--- lib/profilux/projectFor.ts ---
+/**
+ * projectFor — Matrix v1 §7 single projector.
+ *
+ * Pure function. No DB. No async.
+ * Single switch over Surface, returns surface-specific shape.
+ *
+ * Masks per Mo's V1–V9 decisions (locked Apr 30):
+ *   V1: public last_name → initial only
+ *   V2: client share last_name → full
+ *   V3: current_employer → hidden public, visible client
+ *   V4: brands_worked_with → hidden public, visible client
+ *   V5: public experiences → company anonymized to null (UI placeholder)
+ *   V6: dashboard → identity strip + L3 status + membership + CV status
+ *   V7: public hides nationality, DOB, graduation_year, salary, availability,
+ *       software_tools, keywords, clienteling_description
+ *   V8: client share hides email, phone, linkedin_url
+ *   V9: ATS = full operational, no L1 raw, no admin overlay
+ *
+ * No per-field toggles in v1 (deterministic only).
+ */
+
+import type {
+  AdminProjection,
+  AtsProjection,
+  ClientProjection,
+  CvParsedData,
+  DashboardProjection,
+  EditorProjection,
+  ProfiLuxResolved,
+  ProjectedView,
+  PublicExperience,
+  PublicProjection,
+  Surface,
+  EditorView,
+  EditorAvailability,
+} from './types'
+
+/** "Laurent" → "L."; null/empty → null. */
+function toInitial(name: string | null): string | null {
+  if (!name || typeof name !== 'string') return null
+  const trimmed = name.trim()
+  if (trimmed === '') return null
+  return `${trimmed[0].toUpperCase()}.`
+}
+
+/** Strip company from each experience (V5). */
+function anonymizeExperiences(
+  exps: ProfiLuxResolved['experiences'],
+): PublicExperience[] {
+  return exps.map((e) => ({
+    company: null,
+    job_title: e.job_title,
+    city: e.city,
+    country: e.country,
+    start_date: e.start_date,
+    end_date: e.end_date,
+    description: e.description,
+  }))
+}
+
+export function projectFor(
+  view: ProfiLuxResolved,
+  surface: Surface,
+  // For admin, caller may optionally pass the raw L1 jsonb so the projection
+  // can carry it without a re-fetch. Other surfaces ignore it.
+  cvParsedDataRaw?: CvParsedData | null,
+): ProjectedView {
+  switch (surface) {
+    case 'dashboard': {
+      const memberSince = view.created_at ?? null
+      const cvNeedsReviewCount = view.cv_meta?.needs_review?.length ?? 0
+      const dash: DashboardProjection = {
+        surface: 'dashboard',
+        first_name: view.first_name,
+        last_name: view.last_name,
+        avatar_url: view.avatar_url,
+        headline: view.headline,
+        job_title: view.job_title,
+        current_employer: view.current_employer,
+        city: view.city,
+        country: view.country,
+        profile_completeness: view.profile_completeness,
+        m6_confirmed_at: view.m6_confirmed_at,
+        access_level: view.access_level,
+        contribution_points: view.contribution_points,
+        member_since: memberSince,
+        cv_parsed_at: view.cv_meta?.cv_parsed_at ?? null,
+        cv_confidence: view.cv_meta?.confidence ?? null,
+        cv_needs_review_count: cvNeedsReviewCount,
+      }
+      return dash
+    }
+
+    case 'editor': {
+      const editor: EditorProjection = {
+        surface: 'editor',
+        view,
+        editor: projectEditorView(view),
+      }
+      return editor
+    }
+
+    case 'public': {
+      const pub: PublicProjection = {
+        surface: 'public',
+        first_name: view.first_name,
+        last_name: toInitial(view.last_name), // V1
+        avatar_url: view.avatar_url,
+        headline: view.headline,
+        bio: view.bio,
+        city: view.city,
+        country: view.country,
+        // V7: nationality, DOB hidden — not included
+        job_title: view.job_title,
+        // V3: current_employer hidden — not included
+        seniority: view.seniority,
+        total_years_experience: view.total_years_experience,
+        years_in_luxury: view.years_in_luxury,
+        department: view.department,
+        speciality: view.speciality,
+        maison: view.maison,
+        // V7: software_tools, keywords hidden — not included
+        key_skills: view.key_skills,
+        certifications: view.certifications,
+        product_categories: view.product_categories,
+        // V4: brands_worked_with hidden — not included
+        client_segment_experience: view.client_segment_experience,
+        market_knowledge: view.market_knowledge,
+        expertise_tags: view.expertise_tags,
+        clienteling_experience: view.clienteling_experience,
+        // V7: clienteling_description hidden — not included
+        sectors: view.sectors,
+        languages: view.languages,
+        experiences: anonymizeExperiences(view.experiences), // V5
+        // V7: graduation_year hidden — not included
+        university: view.university,
+        field_of_study: view.field_of_study,
+      }
+      return pub
+    }
+
+    case 'client': {
+      const client: ClientProjection = {
+        surface: 'client',
+        first_name: view.first_name,
+        last_name: view.last_name, // V2: full
+        avatar_url: view.avatar_url,
+        headline: view.headline,
+        bio: view.bio,
+        city: view.city,
+        country: view.country,
+        // V8: email, phone, linkedin_url hidden — not included
+        // V7: nationality, DOB hidden — not included
+        job_title: view.job_title,
+        current_employer: view.current_employer, // V3: visible
+        seniority: view.seniority,
+        total_years_experience: view.total_years_experience,
+        years_in_luxury: view.years_in_luxury,
+        department: view.department,
+        speciality: view.speciality,
+        maison: view.maison,
+        key_skills: view.key_skills,
+        certifications: view.certifications,
+        product_categories: view.product_categories,
+        brands_worked_with: view.brands_worked_with, // V4: visible
+        client_segment_experience: view.client_segment_experience,
+        market_knowledge: view.market_knowledge,
+        expertise_tags: view.expertise_tags,
+        // V7: software_tools, keywords, clienteling_description hidden
+        clienteling_experience: view.clienteling_experience,
+        sectors: view.sectors,
+        languages: view.languages,
+        experiences: view.experiences, // V5: full
+        university: view.university,
+        field_of_study: view.field_of_study,
+        // V7: graduation_year hidden
+      }
+      return client
+    }
+
+    case 'admin': {
+      const admin: AdminProjection = {
+        surface: 'admin',
+        view,
+        cv_parsed_data_raw: cvParsedDataRaw ?? null,
+      }
+      return admin
+    }
+
+    case 'ats': {
+      const ats: AtsProjection = {
+        surface: 'ats',
+        view,
+      }
+      return ats
+    }
+  }
+}
+
+
+// =============================================================================
+// projectEditorView — Phase 4.A-0
+// =============================================================================
+//
+// §7.6 native flat shape projector. Strict subset of ProfiLuxResolved:
+// - System fields (id, email, role, status, ...) dropped
+// - cv_meta tightened to { cv_url, cv_parsed_at, needs_review: number }
+// - availability normalized to 4-value EditorAvailability union
+// - profile_completeness coerced to number (?? 0)
+
+function normalizeEditorAvailability(value: string | null): EditorAvailability {
+  if (value == null) return null
+  switch (value) {
+    case 'actively_looking':
+      return 'active'
+    case 'not_actively_looking':
+    case 'open':
+    case 'considering':
+    case 'open_to_opportunities':
+      return 'open'
+    case 'passively_exploring':
+    case 'passive':
+      return 'passive'
+    case 'unavailable':
+      return 'unavailable'
+    default:
+      return null
+  }
+}
+
+export function projectEditorView(view: ProfiLuxResolved): EditorView {
+  return {
+    // Identity
+    first_name: view.first_name,
+    last_name: view.last_name,
+    city: view.city,
+    country: view.country,
+    nationality: view.nationality,
+    phone: view.phone,
+    // Position
+    job_title: view.job_title,
+    current_employer: view.current_employer,
+    seniority: view.seniority,
+    total_years_experience: view.total_years_experience,
+    // Luxury fit
+    years_in_luxury: view.years_in_luxury,
+    sectors: view.sectors,
+    product_categories: view.product_categories,
+    expertise_tags: view.expertise_tags,
+    // Experience + education
+    experiences: view.experiences,
+    education: view.education,
+    university: view.university,
+    field_of_study: view.field_of_study,
+    graduation_year: view.graduation_year,
+    // Availability + targets
+    availability: normalizeEditorAvailability(view.availability),
+    desired_locations: view.desired_locations,
+    desired_departments: view.desired_departments,
+    desired_contract_types: view.desired_contract_types,
+    desired_salary_min: view.desired_salary_min,
+    desired_salary_max: view.desired_salary_max,
+    desired_salary_currency: view.desired_salary_currency,
+    open_to_relocation: view.open_to_relocation,
+    relocation_preferences: view.relocation_preferences,
+    // Narrative
+    headline: view.headline,
+    bio: view.bio,
+    avatar_url: view.avatar_url,
+    linkedin_url: view.linkedin_url,
+    // Languages, markets, skills
+    languages: view.languages,
+    market_knowledge: view.market_knowledge,
+    key_skills: view.key_skills,
+    // Clienteling
+    clienteling_experience: view.clienteling_experience,
+    clienteling_description: view.clienteling_description,
+    // CV meta
+    cv_meta: {
+      cv_url: view.cv_meta?.cv_url ?? null,
+      cv_parsed_at: view.cv_meta?.cv_parsed_at ?? null,
+      needs_review: view.cv_meta?.needs_review?.length ?? 0,
+    },
+    // Computed
+    profile_completeness: view.profile_completeness ?? 0,
+  }
+}
+
+--- lib/profilux/resolveProfiLux.ts ---
+/**
+ * resolveProfiLux — Matrix v1 §6 single resolver.
+ *
+ * Per D3 (Mo, Apr 30): hybrid signature
+ *   (memberId, supabase) => Promise<ProfiLuxResolved | null>
+ * Caller passes the Supabase client (controls auth context — admin routes
+ * should pass a service-role client).
+ *
+ * Rule A precedence (§6.2):
+ *   1. members.<field> if non-empty → return it
+ *   2. else cv_parsed_data.<L1 path> if present → return it
+ *   3. else null/empty
+ *
+ * §6.3: members.email always wins (never read L1 email).
+ *
+ * cv_url is intentionally surfaced only via cv_meta on ProfiLuxResolved
+ * (single source of truth). M6 group G6 reads cv_meta.cv_url.
+ */
+
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type {
+  CvParsedData,
+  CvParsedExperience,
+  CvParsedEducation,
+  CvParsedLanguage,
+  MemberRow,
+  ProfiLuxResolved,
+  ResolvedCvMeta,
+  ResolvedEducation,
+  ResolvedExperience,
+  ResolvedLanguage,
+} from './types'
+
+/** Non-empty string per Rule A. */
+function nonEmptyStr(s: string | null | undefined): boolean {
+  return typeof s === 'string' && s.trim() !== ''
+}
+
+/** Pick L2 if non-empty, else L1, else null (string). */
+function pickStr(
+  l2: string | null | undefined,
+  l1: string | null | undefined,
+): string | null {
+  if (nonEmptyStr(l2)) return l2 as string
+  if (nonEmptyStr(l1)) return l1 as string
+  return null
+}
+
+/** Coerce a possibly-null array to a guaranteed array. */
+function arr<T>(v: T[] | null | undefined): T[] {
+  return Array.isArray(v) ? v : []
+}
+
+function mapExperiences(
+  l1: CvParsedExperience[] | undefined,
+): ResolvedExperience[] {
+  return arr(l1).map((e) => ({
+    company: e.company ?? null,
+    job_title: e.job_title ?? null,
+    city: e.city ?? null,
+    country: e.country ?? null,
+    start_date: e.start_date ?? null,
+    end_date: e.end_date ?? null,
+    description: e.description ?? null,
+  }))
+}
+
+function mapEducation(
+  l1: CvParsedEducation[] | undefined,
+): ResolvedEducation[] {
+  return arr(l1).map((e) => ({
+    institution: e.institution ?? null,
+    degree: e.degree ?? null,
+    field_of_study: e.field_of_study ?? null,
+    start_year: e.start_year ?? null,
+    graduation_year: e.graduation_year ?? null,
+    city: e.city ?? null,
+    country: e.country ?? null,
+  }))
+}
+
+function mapLanguages(l1: CvParsedLanguage[] | undefined): ResolvedLanguage[] {
+  return arr(l1).map((l) => ({
+    language: l.language,
+    proficiency: l.proficiency ?? null,
+  }))
+}
+
+/**
+ * Fetch a member row + apply Rule A → ProfiLuxResolved.
+ * Returns null if no member with that id exists.
+ */
+export async function resolveProfiLux(
+  memberId: string,
+  supabase: SupabaseClient,
+): Promise<ProfiLuxResolved | null> {
+  const { data, error } = await supabase
+    .from('members')
+    .select('*')
+    .eq('id', memberId)
+    .maybeSingle()
+
+  if (error) throw error
+  if (!data) return null
+
+  const row = data as MemberRow
+  const cv: CvParsedData | null = row.cv_parsed_data ?? null
+  const ident = cv?.identity
+
+  // Identity (Rule A on mapped fields; email is L2-only per §6.3)
+  const first_name = pickStr(row.first_name, ident?.first_name)
+  const last_name = pickStr(row.last_name, ident?.last_name)
+  const city = pickStr(row.city, ident?.city)
+  const country = pickStr(row.country, ident?.country)
+  const nationality = pickStr(row.nationality, ident?.nationality)
+  const phone = pickStr(row.phone, ident?.phone)
+
+  // Professional core mapped from most-recent experience when L2 NULL
+  const recent = arr<CvParsedExperience>(cv?.experiences)[0]
+  const job_title = pickStr(row.job_title, recent?.job_title)
+  const current_employer = pickStr(row.current_employer, recent?.company)
+
+  // Education flat from first L1 record when L2 NULL
+  const firstEdu = arr<CvParsedEducation>(cv?.education)[0]
+  const university = pickStr(row.university ?? null, firstEdu?.institution)
+  const field_of_study = pickStr(
+    row.field_of_study ?? null,
+    firstEdu?.field_of_study,
+  )
+  const graduation_year =
+    row.graduation_year !== null && row.graduation_year !== undefined
+      ? row.graduation_year
+      : firstEdu?.graduation_year ?? null
+
+  const cv_meta: ResolvedCvMeta = {
+    cv_url: row.cv_url ?? null,
+    cv_parsed_at: row.cv_parsed_at ?? null,
+    schema_version: cv?.schema_version ?? null,
+    parsed_at: cv?.parsed_at ?? null,
+    confidence: cv?.confidence ?? null,
+    needs_review: arr(cv?.needs_review),
+  }
+
+  const resolved: ProfiLuxResolved = {
+    // Identity
+    id: row.id,
+    email: row.email, // §6.3: always L2
+    first_name,
+    last_name,
+    city,
+    country,
+    nationality,
+    phone,
+    bio: row.bio,
+    headline: row.headline,
+    avatar_url: row.avatar_url,
+    linkedin_url: row.linkedin_url,
+    date_of_birth: row.date_of_birth,
+    // Professional core
+    job_title,
+    current_employer,
+    seniority: row.seniority,
+    total_years_experience: row.total_years_experience,
+    years_in_luxury: row.years_in_luxury,
+    department: row.department,
+    speciality: row.speciality,
+    maison: row.maison,
+    // Capability arrays (NULL → [])
+    key_skills: arr(row.key_skills),
+    software_tools: arr(row.software_tools),
+    certifications: arr(row.certifications),
+    product_categories: arr(row.product_categories),
+    brands_worked_with: arr(row.brands_worked_with),
+    client_segment_experience: arr(row.client_segment_experience),
+    market_knowledge: arr(row.market_knowledge),
+    expertise_tags: arr(row.expertise_tags),
+    keywords: arr(row.keywords),
+    // Clienteling
+    clienteling_experience: row.clienteling_experience,
+    clienteling_description: row.clienteling_description,
+    // Availability + salary
+    availability: row.availability,
+    desired_salary_min: row.desired_salary_min,
+    desired_salary_max: row.desired_salary_max,
+    desired_salary_currency: row.desired_salary_currency,
+    open_to_relocation: row.open_to_relocation,
+    relocation_preferences: row.relocation_preferences,
+    desired_locations: arr(row.desired_locations),
+    desired_contract_types: arr(row.desired_contract_types),
+    desired_departments: arr(row.desired_departments),
+    // Education flat
+    university,
+    field_of_study,
+    graduation_year,
+    // L1 passthroughs
+    sectors: arr(cv?.sectors),
+    languages: mapLanguages(cv?.languages),
+    experiences: mapExperiences(cv?.experiences),
+    education: mapEducation(cv?.education),
+    // System
+    role: row.role,
+    status: row.status,
+    access_level: row.access_level,
+    tier_selected: row.tier_selected,
+    registration_completed: row.registration_completed,
+    contact_preference: row.contact_preference,
+    contribution_points: row.contribution_points,
+    profile_visibility: row.profile_visibility,
+    // L3 cached
+    profile_completeness: row.profile_completeness,
+    m6_confirmed_at: row.m6_confirmed_at,
+    // L1 metadata
+    cv_meta,
+    // Provenance
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  }
+
+  return resolved
+}
+
+--- lib/profilux/types.ts ---
+/**
+ * ProfiLux Matrix v1 — types
+ *
+ * Spec: docs/PROFILUX_MATRIX_V1.md
+ * Authority: docs/JOBLUX_STATE.md (supreme; this file is subordinate per §12.1)
+ *
+ * v1 scope:
+ *   - L1 = members.cv_parsed_data (jsonb)
+ *   - L2 = members.* flat columns
+ *   - L3 = members.profile_completeness, members.m6_confirmed_at,
+ *          plus L1 metadata read-through
+ *
+ * No relational L2 (work_experiences / education_records / member_languages /
+ * member_sectors are §9 dormant in v1).
+ */
+
+// =============================================================================
+// L1 — CvParsedData
+// =============================================================================
+//
+// Shape duplicated from app/api/members/cv-parse/route.ts CvParsedDataSchema
+// (zod schema, that route line ~178).
+//
+// SOURCE OF TRUTH for drift: app/api/members/cv-parse/route.ts CvParsedDataSchema.
+// Per Matrix v1 §12.2, if the cv-parse zod schema changes, this type must
+// follow in the same change set. Do not change one without the other.
+//
+// Reason for duplication (not zod inference): Mo decision D2 — keep cv-parse
+// route untouched while utilities are built.
+
+export type CvParsedExperience = {
+  company: string | null
+  job_title: string | null
+  city: string | null
+  country: string | null
+  start_date: string | null
+  end_date: string | null
+  description: string | null
+}
+
+export type CvParsedEducation = {
+  institution: string | null
+  degree: string | null
+  field_of_study: string | null
+  start_year: number | null
+  graduation_year: number | null
+  city: string | null
+  country: string | null
+}
+
+export type CvParsedLanguage = {
+  language: string
+  proficiency:
+    | 'native'
+    | 'fluent'
+    | 'professional'
+    | 'conversational'
+    | 'basic'
+    | null
+}
+
+export type CvParsedConfidence = {
+  identity: number
+  experiences: number
+  education: number
+  sectors: number
+  languages: number
+}
+
+export type CvParsedNeedsReviewItem = {
+  section: 'identity' | 'experiences' | 'education' | 'sectors' | 'languages'
+  index: number
+  reason: string
+}
+
+export type CvParsedIdentity = {
+  first_name: string | null
+  last_name: string | null
+  email: string | null
+  phone: string | null
+  city: string | null
+  country: string | null
+  nationality: string | null
+}
+
+export type CvParsedData = {
+  identity: CvParsedIdentity
+  experiences: CvParsedExperience[]
+  education: CvParsedEducation[]
+  sectors: string[]
+  languages: CvParsedLanguage[]
+  availability: null
+  confidence: CvParsedConfidence
+  needs_review: CvParsedNeedsReviewItem[]
+  parsed_at?: string
+  schema_version?: string
+  source?: Record<string, unknown>
+}
+
+// =============================================================================
+// MemberRow — typed view of relevant members.* columns
+// =============================================================================
+//
+// Hand-typed from verified live schema (Apr 30 2026, 57-column query against
+// information_schema.columns). Not derived from types/member-profile.ts —
+// that type is L2-shaped + relational; this one is the raw DB row.
+
+export type MemberRow = {
+  id: string
+  email: string // NOT NULL per schema
+  // Identity (L2)
+  first_name: string | null
+  last_name: string | null
+  city: string | null
+  country: string | null
+  nationality: string | null
+  phone: string | null
+  bio: string | null
+  headline: string | null
+  avatar_url: string | null
+  linkedin_url: string | null
+  date_of_birth: string | null
+  // Professional core (L2)
+  job_title: string | null
+  current_employer: string | null
+  seniority: string | null
+  total_years_experience: number | null
+  years_in_luxury: number | null
+  department: string | null
+  speciality: string | null
+  maison: string | null
+  // Capability arrays (L2)
+  key_skills: string[] | null
+  software_tools: string[] | null
+  certifications: string[] | null
+  product_categories: string[] | null
+  brands_worked_with: string[] | null
+  client_segment_experience: string[] | null
+  market_knowledge: string[] | null
+  expertise_tags: string[] | null
+  keywords: string[] | null // default '{}'::text[] in schema
+  // Clienteling (L2)
+  clienteling_experience: boolean // default false
+  clienteling_description: string | null
+  // Availability + salary (L2)
+  availability: string | null // default 'not_actively_looking'
+  desired_salary_min: number | null
+  desired_salary_max: number | null
+  desired_salary_currency: string | null
+  open_to_relocation: boolean // default false
+  relocation_preferences: string | null
+  desired_locations: string[] | null
+  desired_contract_types: string[] | null
+  desired_departments: string[] | null
+  // Education flat (L2)
+  university: string | null
+  field_of_study: string | null
+  graduation_year: number | null
+  // System / read-only
+  role: string // member_role enum, NOT NULL, default 'professional'
+  status: string // member_status enum, NOT NULL, default 'pending'
+  access_level: string | null // default 'basic'
+  tier_selected: boolean | null // default false
+  registration_completed: boolean | null
+  contact_preference: string | null // default 'email_only'
+  contribution_points: number | null // default 0
+  profile_visibility: string | null // default 'team_only'
+  // L1 provenance
+  cv_url: string | null
+  cv_parsed_at: string | null
+  cv_parsed_data: CvParsedData | null
+  // L3 cached
+  profile_completeness: number | null // default 0
+  m6_confirmed_at: string | null
+  // Timestamps
+  created_at?: string
+  updated_at?: string
+}
+
+// =============================================================================
+// ProfiLuxResolved — output of resolveProfiLux(memberId, supabase)
+// =============================================================================
+//
+// Single shape every read path consumes (Matrix v1 §6.1, §10.2).
+// L2 wins over L1 per Rule A (§6.2). L1 fills NULL gaps for mapped fields.
+//
+// cv_url is intentionally surfaced only via cv_meta on ProfiLuxResolved
+// (single source of truth). M6 group G6 reads cv_meta.cv_url.
+
+export type ResolvedExperience = {
+  company: string | null
+  job_title: string | null
+  city: string | null
+  country: string | null
+  start_date: string | null
+  end_date: string | null
+  description: string | null
+}
+
+export type ResolvedEducation = {
+  institution: string | null
+  degree: string | null
+  field_of_study: string | null
+  start_year: number | null
+  graduation_year: number | null
+  city: string | null
+  country: string | null
+}
+
+export type ResolvedLanguage = {
+  language: string
+  proficiency:
+    | 'native'
+    | 'fluent'
+    | 'professional'
+    | 'conversational'
+    | 'basic'
+    | null
+}
+
+export type ResolvedCvMeta = {
+  cv_url: string | null
+  cv_parsed_at: string | null
+  schema_version: string | null
+  parsed_at: string | null
+  confidence: CvParsedConfidence | null
+  needs_review: CvParsedNeedsReviewItem[]
+}
+
+export type ProfiLuxResolved = {
+  // Identity
+  id: string
+  email: string // always L2 (§6.3)
+  first_name: string | null
+  last_name: string | null
+  city: string | null
+  country: string | null
+  nationality: string | null
+  phone: string | null
+  bio: string | null
+  headline: string | null
+  avatar_url: string | null
+  linkedin_url: string | null
+  date_of_birth: string | null
+  // Professional core
+  job_title: string | null
+  current_employer: string | null
+  seniority: string | null
+  total_years_experience: number | null
+  years_in_luxury: number | null
+  department: string | null
+  speciality: string | null
+  maison: string | null
+  // Capability arrays (always arrays, NULL → [])
+  key_skills: string[]
+  software_tools: string[]
+  certifications: string[]
+  product_categories: string[]
+  brands_worked_with: string[]
+  client_segment_experience: string[]
+  market_knowledge: string[]
+  expertise_tags: string[]
+  keywords: string[]
+  // Clienteling
+  clienteling_experience: boolean
+  clienteling_description: string | null
+  // Availability + salary
+  availability: string | null
+  desired_salary_min: number | null
+  desired_salary_max: number | null
+  desired_salary_currency: string | null
+  open_to_relocation: boolean
+  relocation_preferences: string | null
+  desired_locations: string[]
+  desired_contract_types: string[]
+  desired_departments: string[]
+  // Education flat
+  university: string | null
+  field_of_study: string | null
+  graduation_year: number | null
+  // L1 passthroughs (no L2 store v1, §6.4)
+  sectors: string[]
+  languages: ResolvedLanguage[]
+  experiences: ResolvedExperience[]
+  education: ResolvedEducation[]
+  // System
+  role: string
+  status: string
+  access_level: string | null
+  tier_selected: boolean | null
+  registration_completed: boolean | null
+  contact_preference: string | null
+  contribution_points: number | null
+  profile_visibility: string | null
+  // L3 cached
+  profile_completeness: number | null
+  m6_confirmed_at: string | null
+  // L1 metadata (resolver-internal, see §10.1)
+  cv_meta: ResolvedCvMeta
+  // Provenance
+  created_at?: string
+  updated_at?: string
+}
+
+// =============================================================================
+// Surface + ProjectedView
+// =============================================================================
+//
+// Six surfaces per Matrix v1 §7.2. Conservative deterministic masks per Mo's
+// V1–V9 decisions. No per-field toggles in v1.
+
+export type Surface =
+  | 'dashboard'
+  | 'editor'
+  | 'public'
+  | 'admin'
+  | 'ats'
+  | 'client'
+
+// --- Dashboard projection (V6) ----------------------------------------------
+export type DashboardProjection = {
+  surface: 'dashboard'
+  // Identity strip
+  first_name: string | null
+  last_name: string | null
+  avatar_url: string | null
+  headline: string | null
+  job_title: string | null
+  current_employer: string | null
+  city: string | null
+  country: string | null
+  // L3 status
+  profile_completeness: number | null
+  m6_confirmed_at: string | null
+  // Membership snapshot (own only)
+  access_level: string | null
+  contribution_points: number | null
+  member_since: string | null
+  // CV status
+  cv_parsed_at: string | null
+  cv_confidence: CvParsedConfidence | null
+  cv_needs_review_count: number
+}
+
+// --- Editor projection -------------------------------------------------------
+// Phase 4.A-0: §7.6 native flat shape (EditorView) added alongside raw `view`.
+// `view` retained for backward compatibility with /api/profilux legacy adapter.
+
+export type EditorAvailability =
+  | 'active'
+  | 'open'
+  | 'passive'
+  | 'unavailable'
+  | null
+
+export type EditorCvMeta = {
+  cv_url: string | null
+  cv_parsed_at: string | null
+  needs_review: number
+}
+
+export type EditorView = {
+  // Identity
+  first_name: string | null
+  last_name: string | null
+  city: string | null
+  country: string | null
+  nationality: string | null
+  phone: string | null
+  // Position
+  job_title: string | null
+  current_employer: string | null
+  seniority: string | null
+  total_years_experience: number | null
+  // Luxury fit
+  years_in_luxury: number | null
+  sectors: string[]
+  product_categories: string[]
+  expertise_tags: string[]
+  // Experience + education (L1)
+  experiences: ResolvedExperience[]
+  education: ResolvedEducation[]
+  university: string | null
+  field_of_study: string | null
+  graduation_year: number | null
+  // Availability + targets (Readiness — NOT M6 admission)
+  availability: EditorAvailability
+  desired_locations: string[]
+  desired_departments: string[]
+  desired_contract_types: string[]
+  desired_salary_min: number | null
+  desired_salary_max: number | null
+  desired_salary_currency: string | null
+  open_to_relocation: boolean | null
+  relocation_preferences: string | null
+  // Narrative
+  headline: string | null
+  bio: string | null
+  avatar_url: string | null
+  linkedin_url: string | null
+  // Languages, markets, skills
+  languages: ResolvedLanguage[]
+  market_knowledge: string[]
+  key_skills: string[]
+  // Clienteling
+  clienteling_experience: boolean | null
+  clienteling_description: string | null
+  // CV meta (read-only)
+  cv_meta: EditorCvMeta
+  // Computed (read-only)
+  profile_completeness: number
+}
+
+export type EditorProjection = {
+  surface: 'editor'
+  view: ProfiLuxResolved
+  editor: EditorView
+}
+
+// --- Public projection (/p/[name], V1 V3 V4 V5 V7) --------------------------
+export type PublicExperience = {
+  company: null // V5: anonymized — UI renders placeholder
+  job_title: string | null
+  city: string | null
+  country: string | null
+  start_date: string | null
+  end_date: string | null
+  description: string | null
+}
+
+export type PublicProjection = {
+  surface: 'public'
+  // Identity
+  first_name: string | null
+  last_name: string | null // V1: initial only — first letter + '.'
+  avatar_url: string | null
+  headline: string | null
+  bio: string | null
+  city: string | null
+  country: string | null
+  // Professional (curated)
+  job_title: string | null
+  // current_employer hidden (V3)
+  seniority: string | null
+  total_years_experience: number | null
+  years_in_luxury: number | null
+  department: string | null
+  speciality: string | null
+  maison: string | null
+  // Capability (curated; software_tools, keywords hidden V7)
+  key_skills: string[]
+  certifications: string[]
+  product_categories: string[]
+  // brands_worked_with hidden (V4)
+  client_segment_experience: string[]
+  market_knowledge: string[]
+  expertise_tags: string[]
+  // Clienteling
+  clienteling_experience: boolean
+  // L1 passthrough
+  sectors: string[]
+  languages: ResolvedLanguage[]
+  experiences: PublicExperience[] // anonymized
+  // Education (graduation_year hidden V7)
+  university: string | null
+  field_of_study: string | null
+}
+
+// --- Client share projection (V2 V3 V4 V5 V7 V8) ----------------------------
+export type ClientProjection = {
+  surface: 'client'
+  // Identity
+  first_name: string | null
+  last_name: string | null // V2: full
+  avatar_url: string | null
+  headline: string | null
+  bio: string | null
+  city: string | null
+  country: string | null
+  // email, phone, linkedin_url hidden (V8)
+  // Professional (full)
+  job_title: string | null
+  current_employer: string | null // V3: visible
+  seniority: string | null
+  total_years_experience: number | null
+  years_in_luxury: number | null
+  department: string | null
+  speciality: string | null
+  maison: string | null
+  // Capability (full minus operational)
+  key_skills: string[]
+  certifications: string[]
+  product_categories: string[]
+  brands_worked_with: string[] // V4: visible
+  client_segment_experience: string[]
+  market_knowledge: string[]
+  expertise_tags: string[]
+  // Clienteling
+  clienteling_experience: boolean
+  // L1 passthrough
+  sectors: string[]
+  languages: ResolvedLanguage[]
+  experiences: ResolvedExperience[] // V5: full
+  // Education
+  university: string | null
+  field_of_study: string | null
+}
+
+// --- Admin projection (full + L1 raw) ---------------------------------------
+export type AdminProjection = {
+  surface: 'admin'
+  view: ProfiLuxResolved
+  cv_parsed_data_raw: CvParsedData | null
+}
+
+// --- ATS projection (V9) ----------------------------------------------------
+export type AtsProjection = {
+  surface: 'ats'
+  view: ProfiLuxResolved
+}
+
+export type ProjectedView =
+  | DashboardProjection
+  | EditorProjection
+  | PublicProjection
+  | ClientProjection
+  | AdminProjection
+  | AtsProjection
+
+--- lib/profilux/vocabulary.ts ---
+/**
+ * lib/profilux/vocabulary.ts
+ *
+ * Canonical ProfiLux vocabulary contract (Phase 4.A sub-phase 2).
+ *
+ * Source of truth for the rebuilt 11-screen ProfiLux editor and any future
+ * surface that needs ProfiLux option lists. Authoritative ahead of legacy
+ * lib/profile-options.ts and lib/assignment-options.ts; consumer migration
+ * happens in later sub-phases (4.A → 4.E per STATE).
+ *
+ * Rules:
+ * - DB columns are free-text / text[] with no CHECK constraints; values are
+ *   enforced in code only. See PROFILUX_MATRIX_V1 §4.5 + §7.6.
+ * - Lowercase snake_case values. Polished American-English labels.
+ * - "Intern" and "members" are JOBLUX kill words; forbidden anywhere.
+ * - Lowest seniority is `entry_level`.
+ *
+ * Do not migrate consumers in this sub-phase. Do not re-export from legacy
+ * option files. Temporary duplication is accepted; hidden coupling is not.
+ */
+
+// -------------------------------------------------------------------------
+// 1. Seniority — 9 levels (locked, STATE)
+// -------------------------------------------------------------------------
+export const PROFILUX_SENIORITY_OPTIONS = [
+  { value: 'entry_level',     label: 'Entry Level' },
+  { value: 'coordinator',     label: 'Coordinator' },
+  { value: 'specialist',      label: 'Specialist' },
+  { value: 'manager',         label: 'Manager' },
+  { value: 'senior_manager',  label: 'Senior Manager' },
+  { value: 'director',        label: 'Director' },
+  { value: 'senior_director', label: 'Senior Director' },
+  { value: 'vice_president',  label: 'Vice President' },
+  { value: 'c_suite',         label: 'C-Suite' },
+] as const
+
+// -------------------------------------------------------------------------
+// 2. Sectors — 8 (locked, STATE §18)
+// -------------------------------------------------------------------------
+export const PROFILUX_SECTOR_OPTIONS = [
+  { value: 'fashion',      label: 'Fashion' },
+  { value: 'jewelry',      label: 'Jewelry' },
+  { value: 'watches',      label: 'Watches' },
+  { value: 'beauty',       label: 'Beauty' },
+  { value: 'hospitality',  label: 'Hospitality' },
+  { value: 'automotive',   label: 'Automotive' },
+  { value: 'spirits_wine', label: 'Spirits & Wine' },
+  { value: 'art_culture',  label: 'Art & Culture' },
+] as const
+
+// -------------------------------------------------------------------------
+// 3. Subsectors — 35
+// Each subsector belongs to exactly one sector (sector field provided
+// for editor cascading; consumers may ignore).
+// -------------------------------------------------------------------------
+export const PROFILUX_SUBSECTOR_OPTIONS = [
+  // Fashion (7)
+  { value: 'ready_to_wear',     label: 'Ready-to-Wear',     sector: 'fashion' },
+  { value: 'leather_goods',     label: 'Leather Goods',     sector: 'fashion' },
+  { value: 'footwear',          label: 'Footwear',          sector: 'fashion' },
+  { value: 'accessories',       label: 'Accessories',       sector: 'fashion' },
+  { value: 'eyewear',           label: 'Eyewear',           sector: 'fashion' },
+  { value: 'lingerie',          label: 'Lingerie',          sector: 'fashion' },
+  { value: 'athleisure',        label: 'Athleisure',        sector: 'fashion' },
+  // Jewelry (2)
+  { value: 'fine_jewelry',      label: 'Fine Jewelry',      sector: 'jewelry' },
+  { value: 'high_jewelry',      label: 'High Jewelry',      sector: 'jewelry' },
+  // Watches (2)
+  { value: 'haute_horlogerie',  label: 'Haute Horlogerie',  sector: 'watches' },
+  { value: 'fine_watchmaking',  label: 'Fine Watchmaking',  sector: 'watches' },
+  // Beauty (5)
+  { value: 'skincare',          label: 'Skincare',          sector: 'beauty' },
+  { value: 'fragrance',         label: 'Fragrance',         sector: 'beauty' },
+  { value: 'makeup',            label: 'Makeup',            sector: 'beauty' },
+  { value: 'haircare',          label: 'Haircare',          sector: 'beauty' },
+  { value: 'wellness',          label: 'Wellness',          sector: 'beauty' },
+  // Hospitality (6)
+  { value: 'hotels',            label: 'Hotels',            sector: 'hospitality' },
+  { value: 'resorts',           label: 'Resorts',           sector: 'hospitality' },
+  { value: 'fine_dining',       label: 'Fine Dining',       sector: 'hospitality' },
+  { value: 'private_clubs',     label: 'Private Clubs',     sector: 'hospitality' },
+  { value: 'cruises',           label: 'Cruises',           sector: 'hospitality' },
+  { value: 'spas',              label: 'Spas',              sector: 'hospitality' },
+  // Automotive (5)
+  { value: 'luxury_cars',       label: 'Luxury Cars',       sector: 'automotive' },
+  { value: 'sports_cars',       label: 'Sports Cars',       sector: 'automotive' },
+  { value: 'hypercars',         label: 'Hypercars',         sector: 'automotive' },
+  { value: 'yachts',            label: 'Yachts',            sector: 'automotive' },
+  { value: 'private_aviation',  label: 'Private Aviation',  sector: 'automotive' },
+  // Spirits & Wine (5)
+  { value: 'champagne',         label: 'Champagne',         sector: 'spirits_wine' },
+  { value: 'wine',              label: 'Wine',              sector: 'spirits_wine' },
+  { value: 'whisky',            label: 'Whisky',            sector: 'spirits_wine' },
+  { value: 'cognac',            label: 'Cognac',            sector: 'spirits_wine' },
+  { value: 'spirits',           label: 'Spirits',           sector: 'spirits_wine' },
+  // Art & Culture (3)
+  { value: 'auction_houses',    label: 'Auction Houses',    sector: 'art_culture' },
+  { value: 'galleries',         label: 'Galleries',         sector: 'art_culture' },
+  { value: 'art_advisory',      label: 'Art Advisory',      sector: 'art_culture' },
+] as const
+
+// -------------------------------------------------------------------------
+// 4. Specializations — 28
+// -------------------------------------------------------------------------
+export const PROFILUX_SPECIALIZATION_OPTIONS = [
+  { value: 'retail_management',       label: 'Retail Management' },
+  { value: 'store_management',        label: 'Store Management' },
+  { value: 'clienteling',             label: 'Clienteling' },
+  { value: 'vip_relations',           label: 'VIP Relations' },
+  { value: 'personal_shopping',       label: 'Personal Shopping' },
+  { value: 'visual_merchandising',    label: 'Visual Merchandising' },
+  { value: 'store_design',            label: 'Store Design' },
+  { value: 'brand_management',        label: 'Brand Management' },
+  { value: 'marketing_communications', label: 'Marketing & Communications' },
+  { value: 'public_relations',        label: 'Public Relations' },
+  { value: 'digital_marketing',       label: 'Digital Marketing' },
+  { value: 'ecommerce',               label: 'E-Commerce' },
+  { value: 'crm',                     label: 'CRM' },
+  { value: 'social_media',            label: 'Social Media' },
+  { value: 'buying_merchandising',    label: 'Buying & Merchandising' },
+  { value: 'supply_chain',            label: 'Supply Chain' },
+  { value: 'product_development',     label: 'Product Development' },
+  { value: 'design',                  label: 'Design' },
+  { value: 'craftsmanship_atelier',   label: 'Craftsmanship & Atelier' },
+  { value: 'quality_control',         label: 'Quality Control' },
+  { value: 'training_development',    label: 'Training & Development' },
+  { value: 'talent_acquisition',      label: 'Talent Acquisition' },
+  { value: 'finance_controlling',     label: 'Finance & Controlling' },
+  { value: 'legal_compliance',        label: 'Legal & Compliance' },
+  { value: 'real_estate_expansion',   label: 'Real Estate & Expansion' },
+  { value: 'wholesale_distribution',  label: 'Wholesale & Distribution' },
+  { value: 'press_relations',         label: 'Press Relations' },
+  { value: 'after_sales_service',     label: 'After-Sales Service' },
+] as const
+
+// -------------------------------------------------------------------------
+// 5. Departments — 20
+// -------------------------------------------------------------------------
+export const PROFILUX_DEPARTMENT_OPTIONS = [
+  { value: 'retail',                label: 'Retail' },
+  { value: 'wholesale',             label: 'Wholesale' },
+  { value: 'marketing',             label: 'Marketing' },
+  { value: 'communications',        label: 'Communications' },
+  { value: 'digital',               label: 'Digital' },
+  { value: 'ecommerce',             label: 'E-Commerce' },
+  { value: 'merchandising',         label: 'Merchandising' },
+  { value: 'buying',                label: 'Buying' },
+  { value: 'design',                label: 'Design' },
+  { value: 'product_development',   label: 'Product Development' },
+  { value: 'supply_chain',          label: 'Supply Chain' },
+  { value: 'operations',            label: 'Operations' },
+  { value: 'finance',               label: 'Finance' },
+  { value: 'legal',                 label: 'Legal' },
+  { value: 'human_resources',       label: 'Human Resources' },
+  { value: 'training',              label: 'Training' },
+  { value: 'real_estate',           label: 'Real Estate' },
+  { value: 'business_development',  label: 'Business Development' },
+  { value: 'client_services',       label: 'Client Services' },
+  { value: 'executive_leadership',  label: 'Executive Leadership' },
+] as const
+
+// -------------------------------------------------------------------------
+// 6. Contract types — 6 (locked, GPT)
+// -------------------------------------------------------------------------
+export const PROFILUX_CONTRACT_TYPE_OPTIONS = [
+  { value: 'permanent',  label: 'Permanent' },
+  { value: 'fixed_term', label: 'Fixed Term' },
+  { value: 'freelance',  label: 'Freelance' },
+  { value: 'consulting', label: 'Consulting' },
+  { value: 'temporary',  label: 'Temporary' },
+  { value: 'part_time',  label: 'Part Time' },
+] as const
+
+// -------------------------------------------------------------------------
+// 7. Product categories — 16
+// -------------------------------------------------------------------------
+export const PROFILUX_PRODUCT_CATEGORY_OPTIONS = [
+  { value: 'ready_to_wear',           label: 'Ready-to-Wear' },
+  { value: 'leather_goods',           label: 'Leather Goods' },
+  { value: 'handbags',                label: 'Handbags' },
+  { value: 'footwear',                label: 'Footwear' },
+  { value: 'accessories',             label: 'Accessories' },
+  { value: 'fine_jewelry',            label: 'Fine Jewelry' },
+  { value: 'high_jewelry',            label: 'High Jewelry' },
+  { value: 'watches',                 label: 'Watches' },
+  { value: 'fragrance',               label: 'Fragrance' },
+  { value: 'skincare',                label: 'Skincare' },
+  { value: 'makeup',                  label: 'Makeup' },
+  { value: 'eyewear',                 label: 'Eyewear' },
+  { value: 'home_lifestyle',          label: 'Home & Lifestyle' },
+  { value: 'wines_spirits',           label: 'Wines & Spirits' },
+  { value: 'hospitality_experiences', label: 'Hospitality Experiences' },
+  { value: 'art_collectibles',        label: 'Art & Collectibles' },
+] as const
+
+// -------------------------------------------------------------------------
+// 8. Expertise tags — 12
+// -------------------------------------------------------------------------
+export const PROFILUX_EXPERTISE_TAG_OPTIONS = [
+  { value: 'vic_program_management',    label: 'VIC Program Management' },
+  { value: 'brand_storytelling',        label: 'Brand Storytelling' },
+  { value: 'event_activation',          label: 'Event Activation' },
+  { value: 'omnichannel',               label: 'Omnichannel' },
+  { value: 'high_value_sales',          label: 'High-Value Sales' },
+  { value: 'team_leadership',           label: 'Team Leadership' },
+  { value: 'store_opening',             label: 'Store Opening' },
+  { value: 'market_development',        label: 'Market Development' },
+  { value: 'luxury_hospitality',        label: 'Luxury Hospitality' },
+  { value: 'bespoke_made_to_measure',   label: 'Bespoke & Made-to-Measure' },
+  { value: 'craftsmanship_storytelling', label: 'Craftsmanship Storytelling' },
+  { value: 'archive_heritage',          label: 'Archive & Heritage' },
+] as const
+
+// -------------------------------------------------------------------------
+// 9. Currency — 9 (ISO 4217 codes)
+// -------------------------------------------------------------------------
+export const PROFILUX_CURRENCY_OPTIONS = [
+  'EUR',
+  'USD',
+  'GBP',
+  'CHF',
+  'AED',
+  'HKD',
+  'SGD',
+  'JPY',
+  'CNY',
+] as const
+
+// -------------------------------------------------------------------------
+// 10. Locations — 15 (Europe → North America → Middle East → Asia-Pacific)
+// -------------------------------------------------------------------------
+export const PROFILUX_LOCATION_OPTIONS = [
+  'Paris',
+  'London',
+  'Milan',
+  'Geneva',
+  'Zurich',
+  'New York',
+  'Los Angeles',
+  'Miami',
+  'Dubai',
+  'Riyadh',
+  'Hong Kong',
+  'Singapore',
+  'Tokyo',
+  'Shanghai',
+  'Seoul',
+] as const
+
+// -------------------------------------------------------------------------
+// 11. Skills — 20 (operational execution skills, distinct from expertise tags)
+// -------------------------------------------------------------------------
+export const PROFILUX_SKILL_OPTIONS = [
+  { value: 'p_and_l_management',         label: 'P&L Management' },
+  { value: 'budgeting_forecasting',      label: 'Budgeting & Forecasting' },
+  { value: 'kpi_reporting',              label: 'KPI Reporting' },
+  { value: 'inventory_management',       label: 'Inventory Management' },
+  { value: 'vendor_negotiation',         label: 'Vendor Negotiation' },
+  { value: 'contract_negotiation',       label: 'Contract Negotiation' },
+  { value: 'crm_systems',                label: 'CRM Systems' },
+  { value: 'erp_systems',                label: 'ERP Systems' },
+  { value: 'salesforce',                 label: 'Salesforce' },
+  { value: 'sap',                        label: 'SAP' },
+  { value: 'data_analysis',              label: 'Data Analysis' },
+  { value: 'excel_advanced',             label: 'Advanced Excel' },
+  { value: 'powerpoint_executive_decks', label: 'Executive Presentations' },
+  { value: 'project_management',         label: 'Project Management' },
+  { value: 'agile_scrum',                label: 'Agile / Scrum' },
+  { value: 'recruiting_hiring',          label: 'Recruiting & Hiring' },
+  { value: 'team_coaching',              label: 'Team Coaching' },
+  { value: 'audit_compliance',           label: 'Audit & Compliance' },
+  { value: 'public_speaking',            label: 'Public Speaking' },
+  { value: 'copywriting',                label: 'Copywriting' },
+] as const
+
+// -------------------------------------------------------------------------
+// 12. Markets — 12 (regional macro knowledge, distinct from city/job-location preferences)
+// -------------------------------------------------------------------------
+export const PROFILUX_MARKET_OPTIONS = [
+  'Western Europe',
+  'Eastern Europe',
+  'North America',
+  'Latin America',
+  'Greater China',
+  'Japan',
+  'South Korea',
+  'Southeast Asia',
+  'India',
+  'GCC / Middle East',
+  'Africa',
+  'Oceania',
+] as const
+
+// -------------------------------------------------------------------------
+// Type unions (derived)
+// -------------------------------------------------------------------------
+export type ProfiLuxSeniority        = typeof PROFILUX_SENIORITY_OPTIONS[number]['value']
+export type ProfiLuxSector           = typeof PROFILUX_SECTOR_OPTIONS[number]['value']
+export type ProfiLuxSubsector        = typeof PROFILUX_SUBSECTOR_OPTIONS[number]['value']
+export type ProfiLuxSpecialization   = typeof PROFILUX_SPECIALIZATION_OPTIONS[number]['value']
+export type ProfiLuxDepartment       = typeof PROFILUX_DEPARTMENT_OPTIONS[number]['value']
+export type ProfiLuxContractType     = typeof PROFILUX_CONTRACT_TYPE_OPTIONS[number]['value']
+export type ProfiLuxProductCategory  = typeof PROFILUX_PRODUCT_CATEGORY_OPTIONS[number]['value']
+export type ProfiLuxExpertiseTag     = typeof PROFILUX_EXPERTISE_TAG_OPTIONS[number]['value']
+export type ProfiLuxCurrency         = (typeof PROFILUX_CURRENCY_OPTIONS)[number]
+export type ProfiLuxLocation         = (typeof PROFILUX_LOCATION_OPTIONS)[number]
+export type ProfiLuxSkill            = typeof PROFILUX_SKILL_OPTIONS[number]['value']
+export type ProfiLuxMarket           = (typeof PROFILUX_MARKET_OPTIONS)[number]
+
+// -------------------------------------------------------------------------
+// Grouped object (single import for editor screens)
+// -------------------------------------------------------------------------
+export const PROFILUX_VOCABULARY = {
+  seniority:          PROFILUX_SENIORITY_OPTIONS,
+  sectors:            PROFILUX_SECTOR_OPTIONS,
+  subsectors:         PROFILUX_SUBSECTOR_OPTIONS,
+  specializations:    PROFILUX_SPECIALIZATION_OPTIONS,
+  departments:        PROFILUX_DEPARTMENT_OPTIONS,
+  contract_types:     PROFILUX_CONTRACT_TYPE_OPTIONS,
+  product_categories: PROFILUX_PRODUCT_CATEGORY_OPTIONS,
+  expertise_tags:     PROFILUX_EXPERTISE_TAG_OPTIONS,
+  currency:           PROFILUX_CURRENCY_OPTIONS,
+  location:           PROFILUX_LOCATION_OPTIONS,
+  skills:             PROFILUX_SKILL_OPTIONS,
+  markets:            PROFILUX_MARKET_OPTIONS,
+} as const
+
+=== C. PROFILUX TYPES (definitions + usages) ===
+  TYPE: ProfiLuxResolved
+lib/profilux/types.ts:230:export type ProfiLuxResolved = {
+  TYPE: EditorProjection
+lib/profilux/types.ts:414:export type EditorProjection = {
+  TYPE: ResolvedExperience
+lib/profilux/types.ts:190:export type ResolvedExperience = {
+  ALL OTHER PROFILUX TYPES exported:
+lib/profilux/_m6Groups.ts:20:export type M6Groups = {
+lib/profilux/index.ts:17:export type {
+lib/profilux/types.ts:108:export type MemberRow = {
+lib/profilux/types.ts:190:export type ResolvedExperience = {
+lib/profilux/types.ts:200:export type ResolvedEducation = {
+lib/profilux/types.ts:210:export type ResolvedLanguage = {
+lib/profilux/types.ts:221:export type ResolvedCvMeta = {
+lib/profilux/types.ts:230:export type ProfiLuxResolved = {
+lib/profilux/types.ts:31:export type CvParsedExperience = {
+lib/profilux/types.ts:312:export type Surface =
+lib/profilux/types.ts:321:export type DashboardProjection = {
+lib/profilux/types.ts:349:export type EditorAvailability =
+lib/profilux/types.ts:356:export type EditorCvMeta = {
+lib/profilux/types.ts:362:export type EditorView = {
+lib/profilux/types.ts:41:export type CvParsedEducation = {
+lib/profilux/types.ts:414:export type EditorProjection = {
+lib/profilux/types.ts:421:export type PublicExperience = {
+lib/profilux/types.ts:431:export type PublicProjection = {
+lib/profilux/types.ts:470:export type ClientProjection = {
+lib/profilux/types.ts:51:export type CvParsedLanguage = {
+lib/profilux/types.ts:510:export type AdminProjection = {
+lib/profilux/types.ts:517:export type AtsProjection = {
+lib/profilux/types.ts:522:export type ProjectedView =
+lib/profilux/types.ts:62:export type CvParsedConfidence = {
+lib/profilux/types.ts:70:export type CvParsedNeedsReviewItem = {
+lib/profilux/types.ts:76:export type CvParsedIdentity = {
+lib/profilux/types.ts:86:export type CvParsedData = {
+lib/profilux/vocabulary.ts:297:export type ProfiLuxSeniority        = typeof PROFILUX_SENIORITY_OPTIONS[number]['value']
+lib/profilux/vocabulary.ts:298:export type ProfiLuxSector           = typeof PROFILUX_SECTOR_OPTIONS[number]['value']
+lib/profilux/vocabulary.ts:299:export type ProfiLuxSubsector        = typeof PROFILUX_SUBSECTOR_OPTIONS[number]['value']
+lib/profilux/vocabulary.ts:300:export type ProfiLuxSpecialization   = typeof PROFILUX_SPECIALIZATION_OPTIONS[number]['value']
+lib/profilux/vocabulary.ts:301:export type ProfiLuxDepartment       = typeof PROFILUX_DEPARTMENT_OPTIONS[number]['value']
+lib/profilux/vocabulary.ts:302:export type ProfiLuxContractType     = typeof PROFILUX_CONTRACT_TYPE_OPTIONS[number]['value']
+lib/profilux/vocabulary.ts:303:export type ProfiLuxProductCategory  = typeof PROFILUX_PRODUCT_CATEGORY_OPTIONS[number]['value']
+lib/profilux/vocabulary.ts:304:export type ProfiLuxExpertiseTag     = typeof PROFILUX_EXPERTISE_TAG_OPTIONS[number]['value']
+lib/profilux/vocabulary.ts:305:export type ProfiLuxCurrency         = (typeof PROFILUX_CURRENCY_OPTIONS)[number]
+lib/profilux/vocabulary.ts:306:export type ProfiLuxLocation         = (typeof PROFILUX_LOCATION_OPTIONS)[number]
+lib/profilux/vocabulary.ts:307:export type ProfiLuxSkill            = typeof PROFILUX_SKILL_OPTIONS[number]['value']
+lib/profilux/vocabulary.ts:308:export type ProfiLuxMarket           = (typeof PROFILUX_MARKET_OPTIONS)[number]
+  ALL PROJECTION-RELATED TYPES:
+lib/profilux/types.ts:306:// Surface + ProjectedView
+lib/profilux/types.ts:312:export type Surface =
+lib/profilux/types.ts:321:export type DashboardProjection = {
+lib/profilux/types.ts:414:export type EditorProjection = {
+lib/profilux/types.ts:431:export type PublicProjection = {
+lib/profilux/types.ts:470:export type ClientProjection = {
+lib/profilux/types.ts:510:export type AdminProjection = {
+lib/profilux/types.ts:517:export type AtsProjection = {
+lib/profilux/types.ts:523:  | DashboardProjection
+lib/profilux/types.ts:524:  | EditorProjection
+lib/profilux/types.ts:525:  | PublicProjection
+lib/profilux/types.ts:526:  | ClientProjection
+lib/profilux/types.ts:527:  | AdminProjection
+lib/profilux/types.ts:528:  | AtsProjection
+lib/profilux/index.ts:9: * here. Surfaces and routes consume only the four utilities + types.
+lib/profilux/index.ts:34:  // Surface + projections
+lib/profilux/index.ts:35:  AdminProjection,
+lib/profilux/index.ts:36:  AtsProjection,
+lib/profilux/index.ts:37:  ClientProjection,
+lib/profilux/index.ts:38:  DashboardProjection,
+lib/profilux/index.ts:39:  EditorProjection,
+lib/profilux/index.ts:42:  PublicProjection,
+lib/profilux/index.ts:43:  Surface,
+lib/profilux/projectFor.ts:5: * Single switch over Surface, returns surface-specific shape.
+lib/profilux/projectFor.ts:23:  AdminProjection,
+lib/profilux/projectFor.ts:24:  AtsProjection,
+lib/profilux/projectFor.ts:25:  ClientProjection,
+lib/profilux/projectFor.ts:27:  DashboardProjection,
+lib/profilux/projectFor.ts:28:  EditorProjection,
+lib/profilux/projectFor.ts:32:  PublicProjection,
+lib/profilux/projectFor.ts:33:  Surface,
+lib/profilux/projectFor.ts:63:  surface: Surface,
+lib/profilux/projectFor.ts:72:      const dash: DashboardProjection = {
+lib/profilux/projectFor.ts:95:      const editor: EditorProjection = {
+lib/profilux/projectFor.ts:104:      const pub: PublicProjection = {
+lib/profilux/projectFor.ts:143:      const client: ClientProjection = {
+lib/profilux/projectFor.ts:182:      const admin: AdminProjection = {
+lib/profilux/projectFor.ts:191:      const ats: AtsProjection = {
+
+=== D. RESOLVER + PROJECTOR + COMPLETENESS FUNCTIONS ===
+  FUNCTION: resolveProfiLux — definition + .from() calls + .select() fields
+lib/profilux/resolveProfiLux.ts:93:export async function resolveProfiLux(
+  --- DETAIL: lib/profilux/resolveProfiLux.ts ---
+    Tables read in this file:
+    Selected fields per .from():
+99:    .select('*')
+
+  FUNCTION: projectFor — definition + projection variants
+lib/profilux/projectFor.ts:61:export function projectFor(
+
+  FUNCTION: computeProfileCompleteness — definition + counted fields
+lib/profilux/computeProfileCompleteness.ts:21:export function computeProfileCompleteness(view: ProfiLuxResolved): number {
+  --- DETAIL: lib/profilux/computeProfileCompleteness.ts ---
+
+=== E. L1 FALLBACK from cv_parsed_data ===
+  Reads of cv_parsed_data:
+lib/profilux/_m6Groups.ts:61:  // G4 — Experience: ≥1 cv_parsed_data.experiences entry with both company AND job_title
+lib/profilux/types.ts:8: *   - L1 = members.cv_parsed_data (jsonb)
+lib/profilux/types.ts:171:  cv_parsed_data: CvParsedData | null
+lib/profilux/types.ts:513:  cv_parsed_data_raw: CvParsedData | null
+lib/profilux/resolveProfiLux.ts:11: *   2. else cv_parsed_data.<L1 path> if present → return it
+lib/profilux/resolveProfiLux.ts:107:  const cv: CvParsedData | null = row.cv_parsed_data ?? null
+lib/profilux/projectFor.ts:185:        cv_parsed_data_raw: cvParsedDataRaw ?? null,
+  Writes to cv_parsed_data (should appear only in cv-parse route):
+app/api/members/cv-parse/route.ts:546:  // Storage: write only cv_parsed_data, cv_parsed_at, updated_at
+
+=== F. RELATIONAL TABLES — does resolver use them? ===
+
+  TABLE: work_experiences in lib/
+
+  TABLE: career_history in lib/
+
+  TABLE: education_records in lib/
+
+  TABLE: member_languages in lib/
+
+  TABLE: member_sectors in lib/
+
+  TABLE: member_domains in lib/
+
+  TABLE: member_documents in lib/
+
+  TABLE: member_ai_reviews in lib/
+
+=== G. NORMALIZATION / DENORMALIZATION / INVERSE MAPPING ===
+lib/duplicate-check.ts:37:function normalize(str?: string): string {
+lib/duplicate-check.ts:86:  const nTitle = normalize(p.title)
+lib/duplicate-check.ts:95:      if (normalize(e.title) === nTitle || normalize(e.name) === nTitle) {
+lib/duplicate-check.ts:114:      if (normalize(r.title) === nTitle) {
+lib/duplicate-check.ts:121:    const nCity = normalize(p.city)
+lib/duplicate-check.ts:130:      if (normalize(e.city) === nCity || normalize(e.location_city) === nCity) {
+lib/duplicate-check.ts:143:  const nHeadline = normalize(p.headline)
+lib/duplicate-check.ts:182:      if (normalize(s.headline) === nHeadline) {
+lib/duplicate-check.ts:201:      if (normalize(r.title) === nHeadline) {
+lib/duplicate-check.ts:214:  const nTitle = normalize(p.title)
+lib/duplicate-check.ts:256:      if (normalize(a.title) === nTitle) {
+lib/duplicate-check.ts:275:      if (normalize(r.title) === nTitle) {
+lib/duplicate-check.ts:288:  const nBrand = normalize(p.brand_slug)
+lib/duplicate-check.ts:304:    if (normalize(pc.brand_slug) === nBrand) {
+lib/duplicate-check.ts:316:    const nJob = normalize(p.job_title)
+lib/duplicate-check.ts:317:    const nCity = normalize(p.city)
+lib/duplicate-check.ts:318:    const nSeniority = normalize(p.seniority)
+lib/duplicate-check.ts:327:        normalize(r.brand_slug) === nBrand &&
+lib/duplicate-check.ts:328:        normalize(r.job_title) === nJob &&
+lib/duplicate-check.ts:329:        normalize(r.city) === nCity &&
+lib/duplicate-check.ts:330:        normalize(r.seniority) === nSeniority
+lib/supabase-adapter.ts:73:      const normalizedEmail = email.toLowerCase().trim();
+lib/supabase-adapter.ts:76:      const emailDomain = normalizedEmail.split("@")[1];
+lib/supabase-adapter.ts:80:        .or(`email.eq.${normalizedEmail},domain.eq.${emailDomain}`)
+lib/supabase-adapter.ts:88:        .eq("email", normalizedEmail)
+lib/profilux/projectFor.ts:208:// - availability normalized to 4-value EditorAvailability union
+lib/profilux/projectFor.ts:211:function normalizeEditorAvailability(value: string | null): EditorAvailability {
+lib/profilux/projectFor.ts:257:    availability: normalizeEditorAvailability(view.availability),
+
+=== H. CV-PARSE ROUTE — FULL CONTENT ===
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import Anthropic from '@anthropic-ai/sdk'
+import { z } from 'zod'
+
+export const maxDuration = 60
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+const PARSER_MODEL = 'claude-haiku-4-5'
+const PARSER_MAX_TOKENS = 4000
+const PARSER_TEMPERATURE = 0
+const SCHEMA_VERSION = '1.0'
+const MIN_CV_TEXT_CHARS = 100
+const MAX_CV_TEXT_CHARS = 50000
+const IDEMPOTENCE_WINDOW_SECONDS = 60
+
+// Verified Apr 29 2026 against Anthropic public pricing pages.
+// Source: anthropic.com/claude/haiku, platform.claude.com/docs/en/about-claude/pricing
+// Haiku 4.5: $1 / 1M input tokens, $5 / 1M output tokens.
+const HAIKU_4_5_INPUT_COST_PER_TOKEN = 0.000001
+const HAIKU_4_5_OUTPUT_COST_PER_TOKEN = 0.000005
+
+const LOCKED_SECTORS = [
+  'Fashion', 'Jewelry', 'Watches', 'Beauty',
+  'Hospitality', 'Automotive', 'Spirits & Wine', 'Art & Culture',
+] as const
+
+const LOCKED_PROFICIENCIES = [
+  'Native', 'Fluent', 'Professional', 'Conversational', 'Basic',
+] as const
+
+const SYSTEM_PROMPT = `You are a CV parser for JOBLUX, a luxury careers intelligence platform.
+
+ROLE
+Your task is NORMALIZATION, not validation. You convert a dirty, unstructured, possibly multilingual CV into a structured ProfiLux JSON draft. Downstream steps (user review, admin approval, profile refinement) handle validation and completeness. Your job is to capture everything useful that is present, faithfully, without inventing.
+
+OUTPUT FORMAT
+Return ONLY a single JSON object. No markdown, no code fences, no commentary, no preamble. Start with { and end with }.
+
+LANGUAGE HANDLING
+The CV may be in any language (French, English, Italian, Spanish, Arabic, German, etc.). Extract content faithfully regardless of language. Preserve names, companies, job titles, cities, and descriptions in the CV's ORIGINAL language. Translate values into English ONLY for the locked vocabularies (sectors, language proficiency).
+
+JSON SCHEMA
+
+{
+  "identity": {
+    "first_name": string|null,
+    "last_name": string|null,
+    "city": string|null,
+    "country": string|null,
+    "nationality": string|null,
+    "phone": string|null,
+    "email": string|null
+  },
+  "experiences": [
+    {
+      "company": string|null,
+      "job_title": string|null,
+      "city": string|null,
+      "country": string|null,
+      "start_date": string|null,
+      "end_date": string|null,
+      "is_current": boolean,
+      "description": string|null,
+      "raw_dates_text": string|null
+    }
+  ],
+  "education": [
+    {
+      "institution": string|null,
+      "degree_level": string|null,
+      "field_of_study": string|null,
+      "city": string|null,
+      "country": string|null,
+      "start_year": integer|null,
+      "graduation_year": integer|null
+    }
+  ],
+  "sectors": [string],
+  "languages": [
+    { "language": string, "proficiency": string|null }
+  ],
+  "availability": null,
+  "confidence": {
+    "identity": number,
+    "experiences": number,
+    "education": number,
+    "sectors": number,
+    "languages": number,
+    "overall": number
+  },
+  "needs_review": [
+    {
+      "section": string,
+      "index": integer,
+      "field": string,
+      "reason": string,
+      "raw_value": string|null
+    }
+  ]
+}
+
+EXTRACTION RULES
+
+identity
+- Extract name, location, nationality, phone, email if present in the CV header or contact block.
+- Do NOT infer nationality from country of residence.
+- email and phone: copy verbatim from the CV.
+
+experiences
+- One entry per professional position. Most recent first.
+- Capture as much as you can. If company is uncertain or job_title is missing, you MAY still emit the row with that field null AND add an entry to needs_review describing the gap. Useful partial data is better than dropping a position.
+- start_date and end_date: use ISO format. Accept partial precision: "YYYY-MM-DD", "YYYY-MM", or "YYYY". Use null if absent. Imperfect dates are fine — flag them in needs_review.
+- is_current: true ONLY if the CV explicitly indicates "Present", "Current", "Now", "en cours", "actuellement", "attuale", "actual", or end_date is missing for the most recent role.
+- raw_dates_text: copy the original date string from the CV (e.g. "Mar 2019 – Present", "déc. 2020 – aujourd'hui") to preserve evidence for review.
+- description: short summary if present in the CV, max 2000 chars. Null if absent.
+- Do NOT include education entries here. Internships in companies count as experiences only if listed under work/professional sections.
+- If you genuinely cannot identify either company OR job_title, do not emit the row.
+
+education
+- One entry per degree, certification, or formal program.
+- Same partial-capture rule: if institution is unclear, emit with null and a needs_review entry. Do not drop useful information.
+- degree_level: copy what the CV says (Master, Bachelor, MBA, BTS, Licence, PhD, Maîtrise, Laurea, Diplom, etc.). No taxonomy mapping.
+- start_year and graduation_year: integers or null.
+
+sectors
+- Infer luxury sectors from companies and job content.
+- Use ONLY these 8 values, exact English spelling: "Fashion", "Jewelry", "Watches", "Beauty", "Hospitality", "Automotive", "Spirits & Wine", "Art & Culture".
+- These are normalization labels in English; the CV may use other terms — translate to the closest match: "joaillerie" -> "Jewelry", "horlogerie" -> "Watches", "parfumerie/cosmétique" -> "Beauty", "hôtellerie" -> "Hospitality", "moda" -> "Fashion", "automobile" -> "Automotive", "vins & spiritueux" -> "Spirits & Wine".
+- If a company is non-luxury (e.g. McDonald's, Accenture), do NOT add a sector for it.
+- Empty array [] is valid if no luxury sectors detected.
+- Do not duplicate. Do not invent sectors outside the 8 listed.
+
+languages
+- One entry per language mentioned in a Languages section.
+- The CV may list languages in any language ("français", "anglais", "italiano", "español"). Preserve the language NAME as it appears in the CV.
+- proficiency: map to ONE of "Native", "Fluent", "Professional", "Conversational", "Basic". The CV may use any vocabulary or framework (CEFR levels, French wording, Italian, Spanish, etc.).
+  - "Mother tongue", "C2", "bilingue", "langue maternelle", "madrelingua", "lengua materna" -> "Native"
+  - "C1", "Advanced", "Fluent", "courant", "fluido" -> "Fluent"
+  - "B2", "Professional working", "professionnel", "professionale" -> "Professional"
+  - "B1", "Intermediate", "Conversational", "intermédiaire", "intermedio" -> "Conversational"
+  - "A1", "A2", "Basic", "Beginner", "Notions", "débutant", "principiante" -> "Basic"
+  - If unmappable or unclear -> null and add a needs_review entry.
+
+availability
+- ALWAYS null. CVs do not state availability.
+
+confidence
+- Float 0.0 to 1.0 per section.
+- 1.0 = section fully extracted with high certainty.
+- 0.5 = partial or ambiguous extraction.
+- 0.0 = section missing or unparseable.
+- "overall" = weighted average of section scores.
+
+needs_review
+- One entry per field that requires human attention.
+- section: "identity" | "experiences" | "education" | "sectors" | "languages"
+- index: position in the array (0 for identity which is single-object)
+- field: the specific field name (e.g. "start_date")
+- reason: short machine-friendly code: "dates_unclear", "company_ambiguous", "missing_required", "garbled_text", "language_proficiency_unmappable", "name_format_unusual"
+- raw_value: the original CV text snippet that triggered the flag, max 200 chars. Null if not applicable.
+- Empty array [] if everything parsed cleanly.
+
+GLOBAL CONSTRAINTS
+- Never include schema_version, parsed_at, source, or other metadata. The server adds these.
+- Do not include unknown top-level fields (no "skills", "achievements", "summary", "linkedin", "tools").
+- If the CV is empty, garbled, or in an unparseable language, return all sections with null/empty arrays and confidence 0.0, with a needs_review entry explaining the issue.
+- Do not refuse. Do not ask questions. Always return a valid JSON object even if extraction is poor.`
+
+// Permissive schema: company/job_title/institution may be null; partial rows allowed.
+// Strip behavior is default Zod (no .strict()) — extra harmless keys are dropped silently.
+const CvParsedDataSchema = z.object({
+  identity: z.object({
+    first_name: z.string().nullable(),
+    last_name: z.string().nullable(),
+    city: z.string().nullable(),
+    country: z.string().nullable(),
+    nationality: z.string().nullable(),
+    phone: z.string().nullable(),
+    email: z.string().nullable(),
+  }),
+  experiences: z.array(z.object({
+    company: z.string().nullable(),
+    job_title: z.string().nullable(),
+    city: z.string().nullable(),
+    country: z.string().nullable(),
+    start_date: z.string().nullable(),
+    end_date: z.string().nullable(),
+    is_current: z.boolean(),
+    description: z.string().max(2000).nullable(),
+    raw_dates_text: z.string().nullable(),
+  })),
+  education: z.array(z.object({
+    institution: z.string().nullable(),
+    degree_level: z.string().nullable(),
+    field_of_study: z.string().nullable(),
+    city: z.string().nullable(),
+    country: z.string().nullable(),
+    start_year: z.number().int().nullable(),
+    graduation_year: z.number().int().nullable(),
+  })),
+  sectors: z.array(z.enum(LOCKED_SECTORS)),
+  languages: z.array(z.object({
+    language: z.string().min(1),
+    proficiency: z.enum(LOCKED_PROFICIENCIES).nullable(),
+  })),
+  availability: z.null(),
+  confidence: z.object({
+    identity: z.number().min(0).max(1),
+    experiences: z.number().min(0).max(1),
+    education: z.number().min(0).max(1),
+    sectors: z.number().min(0).max(1),
+    languages: z.number().min(0).max(1),
+    overall: z.number().min(0).max(1),
+  }),
+  needs_review: z.array(z.object({
+    section: z.enum(['identity', 'experiences', 'education', 'sectors', 'languages']),
+    index: z.number().int().min(0),
+    field: z.string(),
+    reason: z.string(),
+    raw_value: z.string().max(200).nullable(),
+  })),
+})
+// No .strict() — extra harmless keys are silently dropped (default Zod behavior).
+
+function errorResponse(code: string, message: string, status: number) {
+  return NextResponse.json({ error: code, message }, { status })
+}
+
+async function logHistory(payload: {
+  status: 'success' | 'error',
+  member_id: string,
+  text_length: number,
+  tokens_used?: number,
+  cost_usd?: number,
+  error_message?: string,
+}) {
+  try {
+    await supabase.from('luxai_history').insert({
+      type: 'cv_parse',
+      model: PARSER_MODEL,
+      prompt: `[CV parse, member_id=${payload.member_id}, text_length=${payload.text_length}]`,
+      response: {},
+      tokens_used: payload.tokens_used ?? 0,
+      cost_usd: payload.cost_usd ?? 0,
+      status: payload.status,
+      error_message: payload.error_message ?? null,
+    })
+  } catch (err) {
+    console.error('[cv-parse] luxai_history log failed:', err)
+  }
+}
+
+// Normalize cv_url to storage path-only.
+// Legacy rows store full Supabase Storage URLs; new uploads store path-only.
+function normalizeCvStoragePath(cvUrl: string): string {
+  const value = cvUrl.trim()
+  if (!value.startsWith('http://') && !value.startsWith('https://')) {
+    return value
+  }
+  const match = value.match(/\/(?:object\/public|object\/sign|object\/authenticated)\/member-cvs\/(.+?)(?:\?|$)/)
+  return match ? match[1] : value
+}
+
+export async function POST(req: NextRequest) {
+  // Auth
+  const session = await getServerSession(authOptions)
+  const memberId = (session?.user as any)?.memberId
+  if (!memberId) {
+    return errorResponse('M6_NOT_AUTHENTICATED', 'Authentication required', 401)
+  }
+
+  // API key guard
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.error('[cv-parse] ANTHROPIC_API_KEY not configured')
+    return errorResponse('M6_API_KEY_MISSING', 'Parser unavailable', 500)
+  }
+
+  // Read member state
+  const { data: member, error: memberErr } = await supabase
+    .from('members')
+    .select('id, cv_url, cv_parsed_data, cv_parsed_at')
+    .eq('id', memberId)
+    .maybeSingle()
+
+  if (memberErr || !member) {
+    console.error('[cv-parse] member not found or query error:', memberErr)
+    return errorResponse('M6_MEMBER_NOT_FOUND', 'Member record not accessible', 404)
+  }
+
+  if (!member.cv_url) {
+    return errorResponse('M6_NO_CV_UPLOADED', 'No CV uploaded for this member', 400)
+  }
+
+  const cvPath = normalizeCvStoragePath(member.cv_url)
+
+  // Idempotence: short window cache, ONLY if cached parse refers to the SAME cv_url
+  // (a re-upload changes cv_url, in which case we must re-parse)
+  if (member.cv_parsed_at && member.cv_parsed_data) {
+    const ageMs = Date.now() - new Date(member.cv_parsed_at).getTime()
+    const cachedPath =
+      typeof member.cv_parsed_data === 'object' &&
+      member.cv_parsed_data !== null &&
+      'source' in (member.cv_parsed_data as any)
+        ? (member.cv_parsed_data as any).source?.cv_storage_path
+        : null
+    const samePath = typeof cachedPath === 'string' && normalizeCvStoragePath(cachedPath) === cvPath
+    if (ageMs < IDEMPOTENCE_WINDOW_SECONDS * 1000 && samePath) {
+      return NextResponse.json({
+        success: true,
+        cached: true,
+        parsed: member.cv_parsed_data,
+        parsed_at: member.cv_parsed_at,
+      })
+    }
+  }
+
+  // Download CV from Storage (read-only — never modifies cv_url, member_documents, or bucket contents)
+  const { data: fileBlob, error: dlErr } = await supabase.storage
+    .from('member-cvs')
+    .download(cvPath)
+
+  if (dlErr || !fileBlob) {
+    console.error('[cv-parse] CV file download error:', dlErr)
+    return errorResponse('M6_CV_FILE_NOT_FOUND', 'CV file not retrievable from storage', 404)
+  }
+
+  const buffer = Buffer.from(await fileBlob.arrayBuffer())
+
+  // Detect format
+  const lowerPath = cvPath.toLowerCase()
+  const isPdf = lowerPath.endsWith('.pdf')
+  const isDocx = lowerPath.endsWith('.docx')
+  const isDoc = lowerPath.endsWith('.doc') && !isDocx
+
+  if (isDoc) {
+    return errorResponse(
+      'M6_DOC_FORMAT_UNSUPPORTED',
+      'Legacy .doc binary format not supported. Please re-upload as PDF or .docx.',
+      422
+    )
+  }
+
+  if (!isPdf && !isDocx) {
+    return errorResponse(
+      'M6_DOC_FORMAT_UNSUPPORTED',
+      'Unsupported CV format. Please upload PDF or .docx.',
+      422
+    )
+  }
+
+  // Extract text
+  let extractedText = ''
+  let extractionMethod: 'pdf-parse' | 'mammoth' = 'pdf-parse'
+
+  try {
+    if (isPdf) {
+      const pdfParse = ((await import('pdf-parse/lib/pdf-parse.js')) as any).default
+      const data = await pdfParse(buffer)
+      extractedText = (data.text || '').trim()
+      extractionMethod = 'pdf-parse'
+    } else if (isDocx) {
+      const mammoth = await import('mammoth')
+      const result = await mammoth.extractRawText({ buffer })
+      extractedText = (result.value || '').trim()
+      extractionMethod = 'mammoth'
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown'
+    console.error('[cv-parse] text extraction failed:', msg)
+    await logHistory({
+      status: 'error',
+      member_id: memberId,
+      text_length: 0,
+      error_message: `extraction_failed: ${msg}`,
+    })
+    return errorResponse('M6_PARSER_FAILED', 'Could not extract text from CV', 500)
+  }
+
+  extractedText = extractedText.replace(/\s+\n/g, '\n').replace(/\n{3,}/g, '\n\n')
+
+  if (extractedText.length < MIN_CV_TEXT_CHARS) {
+    await logHistory({
+      status: 'error',
+      member_id: memberId,
+      text_length: extractedText.length,
+      error_message: 'cv_text_too_short',
+    })
+    return errorResponse(
+      'M6_CV_TEXT_TOO_SHORT',
+      'We could not read enough text from your CV. Please upload a text-based PDF or .docx (not a scanned image). If your CV is a photo or scan, export it as text first.',
+      422
+    )
+  }
+
+  if (extractedText.length > MAX_CV_TEXT_CHARS) {
+    extractedText = extractedText.slice(0, MAX_CV_TEXT_CHARS)
+  }
+
+  // Anthropic call
+  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+  let response
+  try {
+    response = await anthropic.messages.create({
+      model: PARSER_MODEL,
+      max_tokens: PARSER_MAX_TOKENS,
+      temperature: PARSER_TEMPERATURE,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: extractedText }],
+    })
+  } catch (err: any) {
+    const isTimeout = err?.name === 'TimeoutError' || err?.code === 'ETIMEDOUT'
+    const msg = err instanceof Error ? err.message : 'unknown'
+    console.error('[cv-parse] Anthropic call failed:', msg)
+    await logHistory({
+      status: 'error',
+      member_id: memberId,
+      text_length: extractedText.length,
+      error_message: `anthropic_failed: ${msg}`,
+    })
+    return errorResponse(
+      isTimeout ? 'M6_PARSER_TIMEOUT' : 'M6_PARSER_FAILED',
+      isTimeout ? 'CV parsing timed out' : 'CV parsing failed',
+      isTimeout ? 504 : 500
+    )
+  }
+
+  // Type guard on response content
+  const textBlock = response.content.find((b) => b.type === 'text')
+  if (!textBlock || textBlock.type !== 'text') {
+    await logHistory({
+      status: 'error',
+      member_id: memberId,
+      text_length: extractedText.length,
+      error_message: 'no_text_block_in_response',
+    })
+    return errorResponse('M6_PARSER_FAILED', 'CV parsing returned unusable response', 500)
+  }
+
+  // JSON extraction (strip fences) — explicit failure on malformed JSON
+  let parsed: unknown
+  try {
+    const cleaned = textBlock.text
+      .replace(/^```(?:json)?\s*\n?/i, '')
+      .replace(/\n?```\s*$/i, '')
+      .trim()
+    parsed = JSON.parse(cleaned)
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown'
+    console.error('[cv-parse] JSON.parse failed:', msg)
+    await logHistory({
+      status: 'error',
+      member_id: memberId,
+      text_length: extractedText.length,
+      tokens_used: response.usage.input_tokens + response.usage.output_tokens,
+      error_message: `json_parse_failed: ${msg}`,
+    })
+    return errorResponse('M6_PARSER_FAILED', 'CV parser returned malformed JSON', 500)
+  }
+
+  // Zod validation — explicit failure on schema violation, no degraded payload
+  const validation = CvParsedDataSchema.safeParse(parsed)
+  if (!validation.success) {
+    console.error('[cv-parse] Zod validation failed:', validation.error.flatten())
+    await logHistory({
+      status: 'error',
+      member_id: memberId,
+      text_length: extractedText.length,
+      tokens_used: response.usage.input_tokens + response.usage.output_tokens,
+      error_message: `zod_validation_failed: ${JSON.stringify(validation.error.flatten()).slice(0, 500)}`,
+    })
+    return errorResponse(
+      'M6_PARSER_INVALID_OUTPUT',
+      'CV parser returned an output that did not match the expected schema',
+      500
+    )
+  }
+
+  const validated = validation.data
+
+  // Sanitization
+  // Drop experience rows that have neither company nor job_title (totally empty rows)
+  const filteredExperiences = validated.experiences.filter(
+    (e) => (e.company && e.company.trim()) || (e.job_title && e.job_title.trim())
+  )
+
+  // Sort experiences by start_date desc
+  const sortedExperiences = [...filteredExperiences].sort((a, b) => {
+    const aKey = a.start_date || ''
+    const bKey = b.start_date || ''
+    return bKey.localeCompare(aKey)
+  })
+
+  // Drop education rows that have NO useful field at all.
+  // Keep the row if any of: institution, degree_level, field_of_study, city, country, start_year, graduation_year is present.
+  const filteredEducation = validated.education.filter(
+    (e) =>
+      (e.institution && e.institution.trim()) ||
+      (e.degree_level && e.degree_level.trim()) ||
+      (e.field_of_study && e.field_of_study.trim()) ||
+      (e.city && e.city.trim()) ||
+      (e.country && e.country.trim()) ||
+      e.start_year !== null ||
+      e.graduation_year !== null
+  )
+
+  // Dedup needs_review
+  const seen = new Set<string>()
+  const dedupNeedsReview = validated.needs_review.filter((nr) => {
+    const key = `${nr.section}|${nr.index}|${nr.field}|${nr.reason}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+
+  // Compose final payload
+  const fileName = cvPath.split('/').pop() || ''
+  const fileType: 'pdf' | 'docx' = isPdf ? 'pdf' : 'docx'
+
+  const finalPayload = {
+    schema_version: SCHEMA_VERSION,
+    parsed_at: new Date().toISOString(),
+    source: {
+      file_name: fileName,
+      file_type: fileType,
+      cv_storage_path: cvPath,
+      extraction_method: extractionMethod,
+    },
+    identity: validated.identity,
+    experiences: sortedExperiences,
+    education: filteredEducation,
+    sectors: validated.sectors,
+    languages: validated.languages,
+    availability: null,
+    confidence: validated.confidence,
+    needs_review: dedupNeedsReview,
+  }
+
+  // Storage: write only cv_parsed_data, cv_parsed_at, updated_at
+  // NEVER touches cv_url, member_documents, or member-cvs bucket
+  const { error: updErr } = await supabase
+    .from('members')
+    .update({
+      cv_parsed_data: finalPayload,
+      cv_parsed_at: finalPayload.parsed_at,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', memberId)
+
+  if (updErr) {
+    console.error('[cv-parse] members update failed:', updErr)
+    await logHistory({
+      status: 'error',
+      member_id: memberId,
+      text_length: extractedText.length,
+      tokens_used: response.usage.input_tokens + response.usage.output_tokens,
+      error_message: `db_update_failed: ${updErr.message}`,
+    })
+    return errorResponse('M6_PARSER_FAILED', 'Failed to persist parsed CV data', 500)
+  }
+
+  // Logging success
+  const tokensUsed = response.usage.input_tokens + response.usage.output_tokens
+  const costUsd =
+    response.usage.input_tokens * HAIKU_4_5_INPUT_COST_PER_TOKEN +
+    response.usage.output_tokens * HAIKU_4_5_OUTPUT_COST_PER_TOKEN
+
+  await logHistory({
+    status: 'success',
+    member_id: memberId,
+    text_length: extractedText.length,
+    tokens_used: tokensUsed,
+    cost_usd: costUsd,
+  })
+
+  return NextResponse.json({
+    success: true,
+    cached: false,
+    parsed: finalPayload,
+    parsed_at: finalPayload.parsed_at,
+    needs_review_count: finalPayload.needs_review.length,
+  })
+}
+
+=== I. PROFILUX_MATRIX_V1 DOC ===
+docs/PROFILUX_MATRIX_V1.md
+docs/PROFILUX_MATRIX_V1.md
+-rw-r--r--   1 momo  staff  30158 May  2 00:10 PROFILUX_MATRIX_V1.md
+-rw-r--r--   1 momo  staff   3716 May  6 02:28 PROFILUX_MODEL.md
+
+=== AUDIT COMPLETE ===
