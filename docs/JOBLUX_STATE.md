@@ -144,23 +144,34 @@ Phase 4.A completed 2026-05-05. All seven planned write-enabled screens shipped 
 
 - **369c2e0** `feat(public): migrate /p/[slug] to PublicProjection (Slice 2A)` — Slice 2A of ProfiLux Reload reconciliation. Single-file change (`app/[slug]/page.tsx`, +55/-46). Public surface reconciliation per Matrix v1.1 §9 + §10.1 + §18. (1) Replaced single-table `profilux.*` `.single()` lookup with 3-step resolve chain: `profilux` (share-state lookup by `share_slug + sharing_enabled`) → `members` (by `email` case-insensitive via `.ilike()`) → `resolveProfiLux(member.id, supabase)` → `projectFor(view, 'public')`. All 3 lookups use `.maybeSingle()`; each null path triggers `notFound()` (orphan-row safe). (2) Drop `nationality` and `availability` rendering (Matrix v1 §7.3 V7 mask). (3) Drop dead `AVAILABILITY_LABELS` const. (4) Career history reshape: was `{role, brand, group, from, to, current, location}` (legacy denormalized), now `PublicExperience` (`job_title / start_date / end_date / city / country`). Company line omitted entirely when `null` (Option C, GPT-locked V5 placeholder decision). (5) Renames: `photo_url → avatar_url`, `specialisations → expertise_tags`, `markets → market_knowledge`. (6) `languages.map` shape fix: was `string[]`, now `ResolvedLanguage[]` objects (`l.language`). 5 targeted str_replace edits, TSC clean. Pushed to origin/main, Coolify deploy triggered. Supabase MCP probe pre-flight confirmed `profilux` join key = `email` (no FK to members), 3 rows total all `sharing_enabled=false`. Closes `F-public-slug-stub` from earlier findings list. 3 new findings logged in admin_tasks ledger (orphan-row, reset-link-frozen, public-share-currently-off — all parked under umbrella `88d4bd79-f0d4-4e9c-9125-e00df2699ca6`).
 
+- **ed0c662** `chore: remove orphan app/profile/ProfileClient.tsx` — Phase 3 frontend audit Surface 1 cleanup. Single file delete (-2578 lines). 116KB dead code; `/profile` is a one-line redirect to `/account` since 03dfbd3, no route ever rendered ProfileClient. Pre-flight grep confirmed zero non-self importers. Required as preflight unblock for admin members migration: ProfileClient was the sole out-of-scope consumer importing `WorkExperience` / `EducationRecord` / `MemberLanguage` from `types/member-profile.ts` and using fields slated for tightening (`is_current`, `reason_for_leaving`, `degree_level` as L1-write fields). TSC clean.
+
+- **0bf208c** `feat(admin): migrate /api/admin/members/[id] GET to Matrix v1 admin projection` — Phase 3 frontend audit Surface 4 reconciliation. 3 files (-33/+52 route, -22/+9 types, -3/+3 page). GET handler swaps 4 dormant-table SELECTs (`work_experiences`, `education_records`, `member_languages` per Matrix v1 §9 + `members.*`) for `resolveProfiLux + projectFor(view, 'admin')`. Adapter synthesises stable item ids (`${memberId}-exp-${i}` etc.), derives `is_current` from `end_date == null`, mirrors `degree_level` from `degree` for page compat, derives `full_name` from `first_name + last_name`. `notes` preserved via lightweight overlay SELECT. `member_documents` and `member_ai_reviews` overlays untouched. PATCH handler byte-identical (verified in unified diff). `types/member-profile.ts` tightens `WorkExperience` / `EducationRecord` / `MemberLanguage` to match resolver+adapter output (drops `member_id`, `sort_order`, `reason_for_leaving`, `department`, timestamps from item types). `app/admin/members/[id]/page.tsx` drops dead `w.department` subtitle (work_experiences table dormant, never rendered in prod) and guards `proficiencyStyles[l.proficiency]` against null. **Browser-validated end-to-end in prod on member with parsed L1 data:** Experience tab renders 3 entries (Boutique Leader Hublot / Senior Recruiter JOBLUX / Multi-Units Retail Manager Harrods with full descriptions + dates + city/country), Education tab renders 2 entries (SSBM / Xpro), Languages chips populated (English / French / Spanish), Documents tab unchanged (2 CVs + Primary CV badge), Notes textarea + save button intact, REJECT/Approved status actions visible (PATCH unchanged). Closes the operational gap where every CV-uploaded member showed empty Experience + Languages tabs. TSC clean. Cosmetic observations parked (non-blocking): `start_year` null L1 renders as `? — <year>` on education entries; language chips have no proficiency badge when L1 proficiency is null (ternary fallback works as designed).
+
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
 
-**Slice 2A SHIPPED `369c2e0` — `/p/[slug]` migrated to PublicProjection. Slice 2 technically COMPLETE.**
+**Phase 3 frontend audit IN PROGRESS. Two surfaces shipped this session.**
 
-Slice 2B (reset-link identity source swap) intentionally NOT shipped — STATE DO NOT entry against touching `/api/profilux/reset-link` during Phase 3. Logged as finding `F-profilux-reset-link-frozen` (parked, normal priority, ledger `0e6f3271-1c24-4eb8-9139-bfbc2d1d2cd7`). Resumed during post-Phase-3 sharing UX rebuild.
+Phase 3 audit completed against MATRIX v1.1 §§14–20 across 4 surfaces (`/profile`, business dashboard, ATS, admin members). Findings led to two slices shipped:
 
-Slice 2C (PublicProjection compliance polish, V5/V7 masks) absorbed into Slice 2A. No remaining 2C work.
+- **`ed0c662` Slice A — orphan `ProfileClient.tsx` removed.** Surface 1 verdict honored. Required preflight unblock for admin members slice (sole out-of-scope type consumer).
+- **`0bf208c` Admin members migration — Surface 4 reconciled.** GET handler now uses `resolveProfiLux + projectFor(view, 'admin')`. Experience + Education + Languages tabs source from `cv_parsed_data` L1 passthrough. Browser-validated end-to-end in prod on Mzaour test member: 3 work entries, 2 education entries, 3 languages chips, all rendered for the first time. Documents/Notes/PATCH untouched.
 
-Layer 2 GitHub MCP truth-source workflow now OPERATIONAL and validated in real conditions during this session: doctrine patches landed via committed-truth reads (CLAUDE.md, WORKFLOW_RULES.md, STATE), Slice 2A inspection performed entirely via GitHub MCP without falling back to Claude Code cat reads. Repo truth discipline confirmed in production workflow.
+**Next slice — ATS migration (Phase 3 Surface 3).** Two API routes: `/api/applications` (list) + `/api/applications/[id]` (detail). Audit + smallest-slice analysis already done this session. Estimated blast radius: 2 routes, no projection extension needed (`projectFor(view, 'ats')` carries everything required); only adapter work = `full_name` derivation + `current_employer || maison` fallback.
 
-Phase 4.5 and B reconciliation closed in 2026-05-06 PM session. Doctrine now formally locked. Implementation work resumes per existing one-defect-one-deploy discipline.
+After ATS, remaining Phase 3 surfaces are clean (business dashboard has no MATRIX violations on member data; `/profile` retired). Phase 3 closes once ATS lands.
 
-Open items in priority order:
-1. **Phase 3 frontend audit** — full sweep of candidate/business/insider/admin frontend surfaces against MATRIX v1.1 + MODEL doctrine. Mini P5 covered only `app/dashboard/candidate/profilux/page.tsx`. Need: dashboard candidate page, public `/p/[slug]` page, `/profile` legacy, business dashboard, ATS surfaces. Output: gap map vs MATRIX v1.1 §§14–20.
-2. **Frontend rewrite — passport-with-drawer** — `app/dashboard/candidate/profilux/page.tsx` from 754-line 11-screen tunnel to passport-with-drawer per MATRIX v1.1 §7.6 + §14. API contract underneath survives. Standalone scoped session.
-3. **B39 CV bucket repair execution** — `member-cvs` already private (HTTP 400 confirmed), but 5 broken URLs in `member_documents.file_url` + 5 in `members.cv_url`. Repair plan locked, no code written. Resume with fresh `/ultrareview` first.
-4. **Tier 1 schema** — `notice_period`, `work_authorization`, `salary_history`, `reporting_line`, `budget_responsibility`, `team_size`. Required for matching entry per MATRIX v1.1 §15.2 + §20. PARKED until product trigger.
+**Surfaces NOT in Phase 3 scope (carried forward):**
+- `app/dashboard/candidate/profilux/page.tsx` (754-line 11-screen tunnel) — passport-with-drawer rewrite per MATRIX v1.1 §7.6 + §14, standalone scoped session.
+- B39 CV bucket repair execution (`member-cvs` private; 5 broken URLs in `member_documents.file_url` + 5 in `members.cv_url`). Resume with fresh `/ultrareview`.
+- Tier 1 schema (`notice_period`, `work_authorization`, `salary_history`, `reporting_line`, `budget_responsibility`, `team_size`) — PARKED until product trigger.
+- Slice 2B reset-link identity source swap — STATE DO NOT remains against `/api/profilux/reset-link` during Phase 3, parked under `0e6f3271`.
+
+**Cosmetic observations from this session (non-blocking, not slated):**
+- Education entries with null `start_year` render as `? — <end_year>` on admin members detail. L1 data limitation, not migration. Future polish: hide range when start is null or fallback to `—`.
+- Language chips render without proficiency badge when L1 proficiency is null. Ternary fallback works as designed; UX is graceful but visually muted.
+
+Layer 2 GitHub MCP truth-source workflow continues operational. All repo reads this session declared path + branch + committed-truth caveat. Slice scoping, type-consumer pre-flight, and post-deploy validation all conducted via MCP.
 
 Earlier-session prior context (carried forward):
 - Phase 4.A milestone CLOSED 2026-05-05. All 7 write-enabled screens shipped (3, 4, 6, 7, 8, 9, 10).
@@ -243,7 +254,7 @@ Phase 5 admin polish is NOT next. It remains parked (ledger 35469863). Phase 4 P
 - Phase 4.A.10b SHIPPED 2026-05-04 (commit `2d8f07f`). Route POST snake_case salary fields + range guard live in prod, validated 6 scenarios.
 - Phase 4.A.10c SHIPPED 2026-05-04 (commit `fbcf6c6`). Screen 10 write-enabled, browser + DB validated. F-save-error-body-dropped logged.
 
-**Last updated:** May 7, 2026 (Slice 2A PublicProjection reconciliation shipped — `369c2e0`. Layer 2 GitHub MCP truth-source workflow shipped — `17d5118`. Repo truth discipline now doctrine-locked.)
+**Last updated:** May 7, 2026 (Phase 3 frontend audit IN PROGRESS. Slice A orphan removal shipped — `ed0c662`. Admin members migration shipped — `0bf208c`, browser-validated end-to-end in prod. ATS slice next.)
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
