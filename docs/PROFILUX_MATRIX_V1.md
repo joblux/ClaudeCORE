@@ -4,14 +4,28 @@ Domain contract for the ProfiLux object across JOBLUX. Locks the storage, resolu
 
 This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE wins until reconciled. See §12.
 
-**Status:** locked v1.1 (May 6 reconciliation addendum)
+**Status:** locked v1.2 (May 7 UX promotion addendum)
 **Originally locked:** April 30, 2026
 **v1.1 addendum locked:** May 6, 2026
+**v1.2 addendum locked:** May 7, 2026
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
 
 ## CHANGE LOG
+
+**v1.2 — May 7, 2026 UX promotion addendum**
+
+Promotes four UX MAP items (per `docs/PROFILUX_RELOAD_UX_MAP.md` §13 promotion checklist) from approved-capture status to MATRIX-locked doctrine. No substrate changes; no field changes; no contract changes. UX shell vocabulary only — locks the architecture inside which the passport rewrite will execute.
+
+- **§21** added: View / Edit / Manage triad — three named modes
+- **§22** added: Section catalog — 9 default sections + 8 add-library sections
+- **§23** added: Responsive philosophy — desktop primary, mobile stacking, drawer behavior
+- **§24** added: Component family strategy — section card, drawer, state marker, chip multi-toggle, tri-state Yes/No, identity strip
+
+§§1–20, §7.6.1 EditorView shape, §4.5 write contract, §6 resolver, §7 projection masks, §10 utilities, §13 deferred items — all KEEP unchanged.
+
+§13 deferred items list is partially closed: triad, section catalog, responsive philosophy, and component families are now repo-locked here; their previous "pending MATRIX promotion" labels in the UX map are superseded by §§21–24.
 
 **v1.1 — May 6, 2026 reconciliation addendum**
 
@@ -780,4 +794,176 @@ Do not derive consent from availability without a future explicit Mo decision. C
 
 ---
 
-*End of PROFILUX_MATRIX_V1.md (v1.1 — May 6 reconciliation addendum)*
+## 21. View / Edit / Manage triad
+
+The ProfiLux UX runs on three named modes. The user is always in one and only one.
+
+### 21.1 — View mode (default landing)
+
+The candidate's passport. The default state on `/dashboard/candidate/profilux`. Renders the living ProfiLux as a curated read view with state markers (§14.3) and entry affordances into Edit drawers.
+
+**Belongs in View:** identity strip (§24.6), section cards (§22, §24.1), completeness signal, sidebar readiness breakdown, drawer triggers.
+
+**Does NOT belong in View:** wholesale editing forms, sharing/export controls, admin-only fields, privacy toggles.
+
+### 21.2 — Edit mode (per-section drawer)
+
+Section-scoped, never page-scoped. Triggered from any section card. There is no global edit toggle.
+
+Edit mode honors §4.5 W1/W2/W3 and §14.2 inline/drawer/modal hierarchy. Belongs: drawer content for the active section only, inline editors where the field IS the affordance, validation, save state, dirty tracking, AI-inferred confirm/dismiss (§14.3).
+
+**Does NOT belong in Edit:** sharing controls, maskable toggles, account preferences, destructive actions (those use modals per §14.2).
+
+### 21.3 — Manage mode (configuration scope)
+
+Configuration of how the ProfiLux is exposed and shared, distinct from authoring its content.
+
+Belongs: public URL activation (§18), maskable field toggles (§16), export controls (§19.1), account preferences.
+
+**Does NOT belong in Manage:** authoring of profile content (Edit only).
+
+Manage and the §19 Settings surface refer to the same conceptual surface. Whether they render as one page or as a tab in the passport is an implementation decision deferred to the Settings slice (§13: Settings page).
+
+### 21.4 — Transitions
+
+- **View → Edit:** section-scoped, opens drawer.
+- **Edit → View:** drawer dismiss (saved or cancelled).
+- **View → Manage:** navigation affordance (location TBD per implementation).
+- **Manage → View:** back navigation.
+- **No persistent global edit mode.** The user is never in "edit-everything-at-once" state.
+
+### 21.5 — Mental model
+
+The user is **always in View**. Edit is a transient drawer. Manage is a separate surface. The passport is the home.
+
+---
+
+## 22. Section catalog
+
+The passport renders 9 default sections in fixed order, plus up to 8 opt-in sections from a credibility library.
+
+### 22.1 — Default sections (9, always present, fixed order)
+
+Field assignments mirror §7.6.1 `EditorView` exactly. The grouping into 9 named sections is locked here.
+
+| # | Section | EditorView fields |
+|---|---|---|
+| 1 | Identity | `first_name`, `last_name`, `city`, `country`, `nationality`, `phone`, `headline`, `avatar_url`, `bio`, `linkedin_url` |
+| 2 | Current Position | `job_title`, `current_employer`, `seniority`, `total_years_experience` |
+| 3 | Luxury Fit | `years_in_luxury`, `sectors` (L1), `product_categories`, `expertise_tags` |
+| 4 | Career History | `experiences[]` (L1 passthrough) |
+| 5 | Education & Languages | `university`, `field_of_study`, `graduation_year`, `education[]`, `languages[]` |
+| 6 | Skills & Markets | `key_skills`, `market_knowledge` |
+| 7 | Clienteling | `clienteling_experience`, `clienteling_description` |
+| 8 | Availability & Targets | `availability`, `desired_locations`, `desired_departments`, `desired_contract_types`, `open_to_relocation`, `relocation_preferences` |
+| 9 | Compensation | `desired_salary_min`, `desired_salary_max`, `desired_salary_currency` |
+
+### 22.2 — Add-library sections (8, opt-in, schema PARKED)
+
+These map to §15.3 Tier 2 fields. **Schema does not exist.** Each section requires either a new column or a new relational table plus the corresponding type and projection changes before it can ship.
+
+1. Certifications (structured)
+2. Awards
+3. References
+4. Portfolio
+5. Publications / press features
+6. Memberships
+7. Speaking / events
+8. Volunteer / board roles
+
+Until Tier 2 schema lands, the add-library is doctrine only — the catalog is locked here so the future implementation has a fixed target.
+
+### 22.3 — Ordering rules
+
+- Default 9 are ordered by recruiter/matching priority: identity → current role → fit → history → credentials → execution → clienteling → readiness → comp.
+- Default 9 ordering is **fixed in v1.2**. The user cannot reorder default sections.
+- Add-library 8 are ordered by frequency-of-use (estimated). Final ordering decided when each section ships.
+- The user can show/hide add-library sections individually (mechanism deferred — likely a `visible_sections` flag on `members.*` or a dedicated table; schema decision parked).
+
+### 22.4 — Removable vs permanent
+
+- **Permanent (cannot remove):** all 9 default sections.
+- **Removable (opt-in/out):** all 8 add-library sections.
+- Empty default sections are visible but render an empty state with state markers per §14.3.
+
+### 22.5 — Expansion philosophy
+
+The passport grows by adding sections from the library, not by exploding default sections into more screens. New canonical fields land in a default section (Tier 0/1) or as an add-library section (Tier 2).
+
+---
+
+## 23. Responsive philosophy
+
+### 23.1 — Desktop (primary)
+
+- Identity strip top-fixed.
+- Section cards flow as single-column or two-column grid (decision deferred to implementation slice).
+- Drawer slides from right (recommendation, not locked).
+- Sidebar readiness breakdown visible per §14 + §21.1.
+
+### 23.2 — Mobile
+
+- Identity strip top-fixed.
+- Section cards stack single-column.
+- Drawer occupies full viewport height.
+- Sidebar collapsed into a top-accessible panel or moved into Manage.
+
+### 23.3 — Card stacking
+
+- Default 9 stack first, in §22.1 order.
+- Add-library sections stack after, in user-chosen order or fixed order (decision deferred).
+
+### 23.4 — Drawer behavior on mobile
+
+- Drawer occupies full viewport.
+- Back affordance returns to passport without losing scroll position.
+- Save dismisses drawer; passport reflects new state.
+
+### 23.5 — Information hierarchy on small viewports
+
+- Identity → Current Position → Luxury Fit are the highest-priority mobile hierarchy.
+- Other sections accessible by scroll.
+- Completeness signal always visible.
+
+### 23.6 — Density priorities
+
+- Mobile: collapsed cards by default.
+- Desktop: mixed (collapsed for filled sections, expanded for empty-state sections — recommendation).
+
+---
+
+## 24. Component family strategy
+
+Family-level only. No specific component names locked. Implementation slices choose the names.
+
+### 24.1 — Section card family
+
+Collapsed/expanded card primitive consumed by all 9 default sections (§22.1) and all 8 add-library sections (§22.2) when they ship. Card title = section name. Card body = section content (collapsed summary or expanded fields). Card affordance = drawer trigger (§24.2). Default density per card per §23.6.
+
+### 24.2 — Drawer family
+
+Section editing drawer with consistent open / dismiss / save behavior. One drawer per section. Drawer is overlay, not navigation. Honors §4.5 W1/W2/W3 on POST. Honors §14.2 hierarchy: drawer for rich object editing; inline edit allowed only when the field IS the affordance; modal reserved for destructive actions only.
+
+### 24.3 — State marker family
+
+Visual primitives for the three §14.3 markers: Missing, Review, AI inferred. Subtle visual cues only — gold border/glow per MODEL §4. **Markers MUST NOT block save, MUST NOT prevent matching, MUST NOT escalate into modals or banners, MUST NOT change page layout.** Per §14.3 + §20.4: markers are not admission gates.
+
+### 24.4 — Chip multi-toggle family
+
+Stable pattern from current Phase 4.A screens 4, 7, 9. Reusable across drawers for any multi-select chip group consuming `lib/profilux/vocabulary.ts`.
+
+### 24.5 — Tri-state Yes/No family
+
+Stable pattern from current Phase 4.A screens 8 (clienteling) and 9 (open_to_relocation). Reusable across drawers. Includes the locked clear-on-transition rule: toggling out of `true` clears any conditional textarea (e.g. `clienteling_description`, `relocation_preferences`).
+
+### 24.6 — Identity strip family
+
+Top-fixed presence card for the passport. Renders identity-tier fields (§22.1 row 1) as a header strip. Persistent across scroll (per §23 desktop + mobile).
+
+### 24.7 — What MUST remain centralized (cross-reference)
+
+Per §10 + §10.1: `resolveProfiLux`, `projectFor`, `computeProfileCompleteness`, `computeM6Eligible`, `lib/profilux/vocabulary.ts`. UI families above consume these utilities; they do not duplicate or bypass them.
+
+---
+
+*End of PROFILUX_MATRIX_V1.md (v1.2 — May 7 UX promotion addendum)*
