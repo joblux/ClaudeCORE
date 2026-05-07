@@ -283,5 +283,6 @@ export function projectEditorView(view: ProfiLuxResolved): EditorView {
     },
     // Computed
     profile_completeness: view.profile_completeness ?? 0,
+    cv_identity_suggestions: view.cv_identity_suggestions,
   }
 }

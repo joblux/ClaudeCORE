@@ -19,6 +19,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type {
+  CvIdentitySuggestions,
   CvParsedData,
   CvParsedExperience,
   CvParsedEducation,
@@ -44,6 +45,16 @@ function pickStr(
   if (nonEmptyStr(l2)) return l2 as string
   if (nonEmptyStr(l1)) return l1 as string
   return null
+}
+
+function pickSuggestion(
+  l2: string | null | undefined,
+  l1: string | null | undefined,
+): string | undefined {
+  // S1.5 eligibility: L1 non-empty AND raw L2 null/empty
+  if (nonEmptyStr(l2)) return undefined
+  if (!nonEmptyStr(l1)) return undefined
+  return (l1 as string).trim()
 }
 
 /** Coerce a possibly-null array to a guaranteed array. */
@@ -132,6 +143,16 @@ export async function resolveProfiLux(
       ? row.graduation_year
       : firstEdu?.graduation_year ?? null
 
+  const cv_identity_suggestions: CvIdentitySuggestions = {}
+  const _sug_first_name = pickSuggestion(row.first_name, ident?.first_name)
+  if (_sug_first_name !== undefined) cv_identity_suggestions.first_name = _sug_first_name
+  const _sug_last_name = pickSuggestion(row.last_name, ident?.last_name)
+  if (_sug_last_name !== undefined) cv_identity_suggestions.last_name = _sug_last_name
+  const _sug_city = pickSuggestion(row.city, ident?.city)
+  if (_sug_city !== undefined) cv_identity_suggestions.city = _sug_city
+  const _sug_nationality = pickSuggestion(row.nationality, ident?.nationality)
+  if (_sug_nationality !== undefined) cv_identity_suggestions.nationality = _sug_nationality
+
   const cv_meta: ResolvedCvMeta = {
     cv_url: row.cv_url ?? null,
     cv_parsed_at: row.cv_parsed_at ?? null,
@@ -211,6 +232,7 @@ export async function resolveProfiLux(
     m6_confirmed_at: row.m6_confirmed_at,
     // L1 metadata
     cv_meta,
+    cv_identity_suggestions,
     // Provenance
     created_at: row.created_at,
     updated_at: row.updated_at,

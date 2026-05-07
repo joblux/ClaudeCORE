@@ -218,6 +218,24 @@ export type ResolvedLanguage = {
     | null
 }
 
+/**
+ * Identity prefill suggestions — S1.5.
+ *
+ * Computed in resolveProfiLux pre-Rule-A. A key is present iff:
+ *   L1 cv_parsed_data.identity[key] non-empty (trimmed)
+ *   AND raw members.<key> null/empty (trimmed).
+ * Ineligible keys are omitted entirely (not null).
+ *
+ * Read-only. UI consumes this via EditorView.cv_identity_suggestions.
+ * Does NOT expose raw L2 anywhere in the projection tree.
+ */
+export type CvIdentitySuggestions = {
+  first_name?: string
+  last_name?: string
+  city?: string
+  nationality?: string
+}
+
 export type ResolvedCvMeta = {
   cv_url: string | null
   cv_parsed_at: string | null
@@ -297,6 +315,7 @@ export type ProfiLuxResolved = {
   m6_confirmed_at: string | null
   // L1 metadata (resolver-internal, see §10.1)
   cv_meta: ResolvedCvMeta
+  cv_identity_suggestions: CvIdentitySuggestions
   // Provenance
   created_at?: string
   updated_at?: string
@@ -409,6 +428,7 @@ export type EditorView = {
   cv_meta: EditorCvMeta
   // Computed (read-only)
   profile_completeness: number
+  cv_identity_suggestions: CvIdentitySuggestions
 }
 
 export type EditorProjection = {

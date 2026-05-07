@@ -186,6 +186,15 @@ export default function ProfiluxPage() {
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [parseError, setParseError] = useState<string | null>(null)
   const [needsReviewCount, setNeedsReviewCount] = useState<number | null>(null)
+  const [suggestionSelected, setSuggestionSelected] = useState<{
+    first_name: boolean
+    last_name: boolean
+    city: boolean
+    nationality: boolean
+  }>({ first_name: false, last_name: false, city: false, nationality: false })
+  const [suggestionDismissed, setSuggestionDismissed] = useState(false)
+  const [applying, setApplying] = useState(false)
+  const [applyError, setApplyError] = useState<string | null>(null)
 
   const refetch = async () => {
     const res = await fetch('/api/profilux')
@@ -452,6 +461,33 @@ export default function ProfiluxPage() {
       setSaveError7(String(err))
     } finally {
       setSaving7(false)
+    }
+  }
+
+  async function handleApplySuggestions() {
+    if (!editor) return
+    const sug = editor.cv_identity_suggestions
+    const body: Record<string, unknown> = {}
+    if (suggestionSelected.first_name && sug.first_name !== undefined) body.firstName = sug.first_name
+    if (suggestionSelected.last_name && sug.last_name !== undefined) body.lastName = sug.last_name
+    if (suggestionSelected.city && sug.city !== undefined) body.city = sug.city
+    if (suggestionSelected.nationality && sug.nationality !== undefined) body.nationality = sug.nationality
+    if (Object.keys(body).length === 0) return
+    setApplying(true)
+    setApplyError(null)
+    try {
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      await refetch()
+      setSuggestionSelected({ first_name: false, last_name: false, city: false, nationality: false })
+    } catch (err) {
+      setApplyError(String(err))
+    } finally {
+      setApplying(false)
     }
   }
 
@@ -909,6 +945,71 @@ export default function ProfiluxPage() {
           style={{ display: 'none' }}
         />
       </div>
+      {/* Identity prefill review panel - S1.5 */}
+      {(() => {
+        const sug = editor.cv_identity_suggestions
+        const keys: Array<'first_name' | 'last_name' | 'city' | 'nationality'> = []
+        if (sug.first_name !== undefined) keys.push('first_name')
+        if (sug.last_name !== undefined) keys.push('last_name')
+        if (sug.city !== undefined) keys.push('city')
+        if (sug.nationality !== undefined) keys.push('nationality')
+        if (keys.length === 0 || suggestionDismissed) return null
+        const labels: Record<typeof keys[number], string> = {
+          first_name: 'First name',
+          last_name: 'Last name',
+          city: 'City',
+          nationality: 'Nationality',
+        }
+        const checkedCount = keys.filter(k => suggestionSelected[k]).length
+        return (
+          <div style={{
+            background: '#222',
+            border: '1px solid #2a2a2a',
+            borderRadius: 6,
+            padding: '20px 24px',
+            marginBottom: 24,
+            maxWidth: 900,
+          }}>
+            <div style={{ fontSize: 10, color: '#999', letterSpacing: 0.5, marginBottom: 10, textTransform: 'uppercase' }}>Apply suggestions from your CV</div>
+            <div style={{ fontSize: 13, color: '#ccc', marginBottom: 14 }}>
+              Your CV contains values for fields that are still empty on your ProfiLux. Select what you want to apply.
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '24px 160px 1fr', gap: 8, fontSize: 13, lineHeight: 1.6 }}>
+              {keys.map((k) => (
+                <React.Fragment key={k}>
+                  <input
+                    type="checkbox"
+                    checked={suggestionSelected[k]}
+                    onChange={(ev) => setSuggestionSelected(prev => ({ ...prev, [k]: ev.target.checked }))}
+                    style={{ accentColor: '#a58e28' }}
+                  />
+                  <div style={{ color: '#999' }}>{labels[k]}</div>
+                  <div style={{ color: '#fff' }}>{sug[k]}</div>
+                </React.Fragment>
+              ))}
+            </div>
+            <div style={{ marginTop: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={handleApplySuggestions}
+                disabled={applying || checkedCount === 0}
+                style={(applying || checkedCount === 0) ? saveBtnDis : saveBtn}
+              >
+                {applying ? 'Applying...' : `Apply selected${checkedCount > 0 ? ` (${checkedCount})` : ''}`}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSuggestionDismissed(true)}
+                disabled={applying}
+                style={{ background: 'transparent', border: 'none', color: '#999', textDecoration: 'underline', cursor: applying ? 'default' : 'pointer', padding: 0, fontFamily: 'Inter, sans-serif', fontSize: 13 }}
+              >
+                Dismiss
+              </button>
+              {applyError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{applyError}</span>}
+            </div>
+          </div>
+        )
+      })()}
       {renderStep()}
       <div style={navWrap}>
         <button style={step === 1 ? btnDis : btn} disabled={step === 1} onClick={() => setStep(s => Math.max(1, s - 1))}>← Prev</button>
