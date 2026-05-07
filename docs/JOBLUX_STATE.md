@@ -37,9 +37,9 @@ schema → enums → constraints → routes → UX.
 ## TRUTH SOURCES (locked May 7, 2026)
 
 Hierarchy for any repo read:
-1. GitHub MCP / GitHub connector - committed repo truth from joblux/ClaudeCORE. Preferred default.
-2. Claude Code / local terminal - local truth only: git status, uncommitted changes, unpushed files, tests/builds, execution/writes, deploy/push confirmation.
-3. User paste from Claude Code - fallback when MCP tools do not surface.
+1. GitHub MCP / GitHub connector — committed repo truth from joblux/ClaudeCORE. Preferred default.
+2. Claude Code / local terminal — local truth only: git status, uncommitted changes, unpushed files, tests/builds, execution/writes, deploy/push confirmation.
+3. User paste from Claude Code — fallback when MCP tools do not surface.
 4. Never use uploaded project files, stale memory, old chats, or summaries as repo truth.
 
 Announcement protocol: every repo read must declare path + branch (or commit hash if non-HEAD) + "committed truth, local uncommitted changes invisible".
@@ -52,82 +52,65 @@ This section overrides any prior contradictory instruction in this file.
 
 Execution order. Ledger statuses untouched — this is the mental map, not DB truth.
 
-### LAST SHIPPED (May 7 2026 — ProfiLux Reload S0 docs + S1 CV pipeline COMPLETE)
+### LAST SHIPPED
 
-- **5d8672b** `docs(profilux): MATRIX v1.2 - promote UX MAP triad + sections + responsive + components` — S0 of ProfiLux Reload tunnel rewrite. Pure docs patch (`docs/PROFILUX_MATRIX_V1.md`, +188/-2). Promotes 4 UX MAP items (per `docs/PROFILUX_RELOAD_UX_MAP.md` §13 promotion checklist) from approved-capture status to MATRIX-locked doctrine. New sections: §21 View / Edit / Manage triad (three named modes, never simultaneous), §22 Section catalog (9 default sections fixed + 8 add-library Tier 2 PARKED), §23 Responsive philosophy (desktop primary, mobile stacking, drawer behavior), §24 Component family strategy (section card / drawer / state marker / chip multi-toggle / tri-state Yes/No / identity strip — family-level only, no specific component names locked). CHANGE LOG entry v1.2 added. Status header updated to "locked v1.2 (May 7 UX promotion addendum)". §22.1 Identity row extended with `bio` + `linkedin_url` per GPT micro-correction. §23.5 mobile hierarchy phrasing tightened per GPT micro-correction. Substrate (§§1–20, §7.6.1 EditorView shape, §4.5 write contract, §6 resolver, §7 projection masks, §10 utilities, §13 deferred items) all KEEP unchanged. §13 deferred items list partially closed: triad / section catalog / responsive philosophy / component families now repo-locked here; their previous "pending MATRIX promotion" labels in the UX map are superseded by §§21–24. No code, no schema, no implementation. Workflow note: GitHub MCP `create_or_update_file` returned 403 "Resource not accessible by integration" — write blocked. Fallback: file generated in `/mnt/user-data/outputs/`, downloaded by Mo, committed via Claude Code `cp ~/Downloads/...` pattern. Pattern locked for future large doc edits where MCP write surface is unreliable. Remote SHA `6596b2a8c3a5977dac9af3d8c691634baa61445d`.
+- **38c2100** `feat(profilux): S1.5 inline identity prefill review panel (4 fields, explicit confirm)` — May 7 2026 PM. Path B resolver-side eligibility. New `CvIdentitySuggestions` type on `ProfiLuxResolved` + `EditorView`; computed pre-Rule-A in `resolveProfiLux` from raw `members.*` and `cv_parsed_data.identity` (4 keys: `first_name`, `last_name`, `city`, `nationality`). Inline review panel in `app/dashboard/candidate/profilux/page.tsx` between S1 CV card and `{renderStep()}`. Apply path: explicit checkbox + button → POST `/api/profilux` with camelCase keys (`firstName`, `lastName`, `city`, `nationality`) → resolver re-emits empty suggestions → panel auto-hides. 4 files, +144 lines. TSC + build clean. Contract validation PASS via SQL surrogate (Mason fixture seed/restore). Prod visual validation PASS (Mason L1.nationality="French" seed → panel rendered "Nationality: French" only → restored). No silent writes. L2 sovereignty preserved.
 
-- **b533e31** `feat(profilux): S1 additive CV upload + parse card (no prefill)` — S1 of ProfiLux Reload tunnel rewrite. Single-file change (`app/dashboard/candidate/profilux/page.tsx`, +167/-1). Pure additive. Restores spirit of historical commit `408cd7d` (CV card wiring) adapted to the current 754-line 11-screen tunnel without touching it. **GPT decisions locked pre-implementation:** G1=γ (no identity prefill in this slice — direct POST would violate no-silent-L1-to-L2 invariant; making Screen 1 editable is too large for S1; prefill becomes separate S1.5 slice), G8=above-renderStep full-width (matches existing tunnel `maxWidth: 900` from screens 3/4/6/7/8/9/10 + `grid` const), G2=source CV state exclusively from `editor.cv_meta` already returned by `/api/profilux` GET (drop the `/api/members/me` second fetch from `408cd7d` — single source, no drift). **Edits made:** (1) Add `useRef` to existing top React import line. (2) 5 new state hooks + 1 useRef inside `ProfiluxPage`: `fileInputRef`, `uploading`, `parsing`, `uploadError`, `parseError`, `needsReviewCount`. (3) Top-level `mapParseError(code)` helper outside component, mapping 10 `M6_*` error codes to short user-facing strings + default. (4) 3 handlers between `refetch` and `useEffect`: `handleUploadClick` (clear error + trigger hidden file input), `handleFileSelected` (POST `multipart/form-data` to `/api/members/cv-upload` with field name `cv`, await `refetch()` on success to refresh `editor.cv_meta`, reset `needsReviewCount` to null), `handleParse` (POST to `/api/members/cv-parse` with no body, on success await `refetch()` + set `needsReviewCount` from `data.needs_review_count`, on failure setParseError via mapParseError). (5) Derived values added after `const e = editor`: `cvUrl = e.cv_meta?.cv_url ?? null`, `cvParsedAt = e.cv_meta?.cv_parsed_at ?? null`, `parsedDateLabel`. (6) JSX card inserted immediately before `{renderStep()}`: 3 visual states keyed off `(cvUrl, cvParsedAt)` — cas A "Upload your CV", cas B "CV uploaded. [Replace] / Parse CV", cas C "CV parsed `<date>`. [Replace] / Re-parse" + inline error rendering + "N items to review" line + hidden `<input type=file accept=".pdf,.docx">`. Reuses existing `saveBtn`/`saveBtnDis` styles. Card style matches existing tunnel cards (dark `#222`, border `#2a2a2a`, `maxWidth: 900`). **Doctrine compliance verified:** zero new `fetch('/api/profilux'` calls in diff (the one match in baseline grep is the existing `refetch` GET, unmodified), zero `applyCvPrefill` references (deferred to S1.5 per G1=γ), zero new `case N:` arms in `renderStep()` switch, zero changes to the 7 draft state quartets, zero changes to refetch body / Prev-Next nav / any existing handler. cv-upload route, cv-parse route, profilux route, lib/profilux/types.ts all read-only — not touched. **TSC clean (`npx tsc --noEmit` exit 0). Build clean (`npm run build` ✓ Compiled successfully). Browser+DB validated end-to-end in prod on Alex Mason fixture (`luxuryretailsale@gmail.com`):** card visible above tunnel as "ProfiLux — Identity Screen 1/11" loads, "CV uploaded. Replace" + Parse CV button rendered correctly per cas B, click Parse → "Parsing..." state propagates immediately → ~28s Haiku roundtrip → card transitions to cas C with "CV parsed 5/7/2026" + Re-parse + "7 items to review". DB post-parse: `cv_parsed_at` populated `2026-05-07 21:19:03 UTC`, `cv_parsed_data` populated (3 experiences, 7 needs_review). **L2 sovereignty proof of no silent L1→L2 prefill:** L1 parsed `first_name='Alex', last_name='Mazour', city='NYC'` (a different person/CV file). L2 stayed strictly unchanged: `first_name='Alex', last_name='Mason', city='Paris', country='Andorra', nationality=null, phone='+33...', headline=null, bio=null, job_title=null, current_employer=null`. Zero silent prefill. Zero L2 corruption. The system perfectly isolated L1 (NYC/Mazour) from L2 (Paris/Mason) — exactly the doctrine behavior. `profile_completeness=0` unchanged across the parse (recompute ran W3 but L1 alone doesn't move the score, consistent with backend-only readiness signal). Workflow note: post-S0, GitHub MCP write reliability remained uncertain so S1 also followed the Code-execution pattern (Code applies the patch to local working tree, MCP read verifies remote SHA after push). Remote HEAD `b533e31464e19fcebc8581e3cbff0b944305e0b0` confirmed via GitHub MCP `list_commits` immediately after push.
+- **b533e31** `feat(profilux): S1 additive CV upload + parse card (no prefill)` — May 7 2026 PM. SHIPPED + PROD-VALIDATED. Additive CV upload+parse card above tunnel; 3 visual states keyed off `(cvUrl, cvParsedAt)`. End-to-end pipeline (upload → Haiku parse → `cv_parsed_data` write → UI refresh) prod-validated on Alex Mason fixture. L2 sovereignty proven via Mazour/NYC L1 vs Mason/Paris L2 invariance under parse.
 
-### CURRENT STEP — strict order, no skip, no resequence from broader ledger
+- **5d8672b** `docs(profilux): MATRIX v1.2` — May 7 2026 AM. UX MAP promotion to MATRIX (§§21–24: View/Edit/Manage triad, section catalog, responsive philosophy, component families).
 
-**ProfiLux Reload — S0 docs + S1 CV pipeline COMPLETE (May 7, 2026 PM session).**
+### CURRENT STEP — strict order
 
-S0 (MATRIX v1.2 UX promotion) and S1 (additive CV upload + parse card) both shipped and prod-validated end-to-end in single session. Substrate intact. Tunnel intact. Doctrine intact. L2 sovereignty proven via Mazour/NYC L1 vs Mason/Paris L2 invariance.
+**Next ProfiLux Reload UI slice (not yet scoped).**
 
-**Next strict step — S1.5 planning only.**
+S0 (MATRIX v1.2 doctrine), S1 (additive CV pipeline), S1.5 (identity prefill review panel) all SHIPPED + prod-validated. The substrate is in place: doctrine locked, CV pipeline working, explicit-confirmation prefill mechanism proven for identity.
 
-Identity edit / explicit prefill decision. No code. No silent POST to `/api/profilux` from CV parse. No passport / drawer rewrite yet. Mo approves the planning output before any implementation prompt is drafted for Code.
+Next slice candidates per MATRIX v1.2 §§21–24 + §13 deferred items (no commitment — Mo + GPT scope before any draft):
+- View/Edit/Manage triad scaffold
+- Identity strip extraction from tunnel Screen 1
+- Section card component family
+- Drawer component family
+- Tier 2 add-library scaffolding (schema PARKED — UI shell only feasible)
 
-**S1.5 scope (planning only, do not implement without Mo approval):**
-- Decide identity prefill mechanism: explicit user-confirmed merge UX (review screen with diff + accept/reject per field) versus making Screen 1 write-enabled with prefill suggestions surfaced as inline "Apply from CV?" affordances.
-- Constraint: must respect §5.2 + §17 of MATRIX v1.2 (L1 may suggest/prefill L2 only via explicit user confirmation; no silent writes).
-- Constraint: must align with §22.1 default Identity section (`first_name, last_name, city, country, nationality, phone, headline, avatar_url, bio, linkedin_url`) — but minimum viable S1.5 scope is the 4 fields `408cd7d` originally targeted (`first_name, last_name, city, nationality`).
-- Out of scope for S1.5: passport / drawer cutover (separate later slice), Settings / Manage surface (PARKED per §19/§21.3), Tier 1 schema (PARKED per §15.2), Tier 2 add-library sections (PARKED per §22.2), maskable layer schema (PARKED per §16.4), CV merge state machine API endpoints (PARKED per §17.3 — prefill UI sits on top of existing routes only).
-
-**Guardrails for S1.5 session (locked):**
-- No `cv-parse` route changes. STATE DO NOT explicit, prod-green.
-- No schema migrations.
-- No Tier 1 columns added.
-- No Settings / Manage surface built.
-- No passport cutover.
-- No removal of any of the 11 existing tunnel screens.
-- The §4.5 W1/W2/W3 write contract applies unchanged to any new identity write path.
+Mo + GPT pick the next slice and lock scope before any implementation prompt is drafted.
 
 **Earlier-session prior context (carried forward):**
 
-- Phase 3 frontend audit CLOSED 2026-05-07 (morning session). All 3 active surfaces shipped (`ed0c662` Surface 1 orphan removed + `0bf208c` Surface 4 admin members migration + `2b8f4bf` Surface 3 ATS migration) and prod-validated. Phase 4 ledger row `8f82b3ac` umbrella stays open until tunnel passport rewrite lands. F-ats-detail-subtitle-trailing-at parked as cosmetic, out of scope.
+- Phase 3 frontend audit CLOSED 2026-05-07 AM. All 3 active surfaces shipped (`ed0c662` Surface 1 + `0bf208c` Surface 4 + `2b8f4bf` Surface 3).
 - Phase 4.A milestone CLOSED 2026-05-05. All 7 write-enabled screens shipped (3, 4, 6, 7, 8, 9, 10).
 - Phase 4.B/C/D/E chain closed 2026-05-05 — ProfiLux contract harmonized: `/api/profilux` emits `{surface, view, editor}`, `/api/members/me` emits 8 live fields. `toLegacyProfile` adapter removed.
-- Layer 2 GitHub MCP truth-source workflow operational. All repo reads this session declared path + branch + committed-truth caveat. Slice scoping, type-consumer pre-flight, post-deploy validation, and STATE rotation all conducted via MCP. S0 + S1 both used Code-execution-with-MCP-verification pattern when MCP write surface returned 403.
 
 **Surfaces NOT in current scope (carried forward):**
-- B39 CV bucket repair execution (`member-cvs` private; 5 broken URLs in `member_documents.file_url` + 5 in `members.cv_url`). Resume with fresh `/ultrareview`.
-- Tier 1 schema (`notice_period`, `work_authorization`, `salary_history`, `reporting_line`, `budget_responsibility`, `team_size`) — PARKED until product trigger.
-- Slice 2B reset-link identity source swap — STATE DO NOT remains against `/api/profilux/reset-link`, parked under `0e6f3271`.
-
-**Cosmetic observations from this session (non-blocking, not slated):**
-- None from S0 (docs-only).
-- None from S1 prod validation (UI rendered exactly as expected across all 3 card states; parse roundtrip clean).
-- F-ats-detail-subtitle-trailing-at carried forward from morning session.
+- B39 CV bucket repair execution. Resume with fresh `/ultrareview`.
+- Tier 1 schema — PARKED until product trigger.
+- Slice 2B reset-link identity source swap — STATE DO NOT against `/api/profilux/reset-link`, parked under `0e6f3271`.
 
 **Locked doctrine (May 6, 2026, unchanged):**
 - ProfiLux is a single living professional profile object, owned continuously by the user.
 - Not a wizard. Not submit / pending / review. Not frozen. Not Mo-approved.
-- Mo approval applies to platform access at registration, and to contributions (brand corrections, salaries, insider voices) — never to the ProfiLux itself.
-- Flow: approved user dashboard → Continue ProfiLux (existing CTA on /dashboard/candidate) → fresh CV upload → Haiku parse → populated living ProfiLux document → user edits / owns it continuously.
-- All projections read the same object: self dashboard, ATS view, recruiter view, public share /p/[name], PDF exports, matching layer.
+- Mo approval applies to platform access at registration and to contributions — never to the ProfiLux itself.
+- All projections read the same object: dashboard, ATS, recruiter, public `/p/[name]`, PDF, matching.
 
-**Canonical doctrine doc:** docs/PROFILUX_MODEL.md (committed ecb60a5, May 6 2026).
-**Implementation contract:** docs/PROFILUX_MATRIX_V1.md (v1.2 — May 7 UX promotion addendum, this session, commit `5d8672b`).
-**Umbrella ledger row:** 88d4bd79-f0d4-4e9c-9125-e00df2699ca6 (Recruiting System / high / open).
-**Phase 4 ledger row:** 8f82b3ac-f1ab-4905-8142-658c03edc52e (validated, but stays as anchor for tunnel passport rewrite).
-**Directional prototype (NOT an implementation source):** ~/Desktop/joblux-prototypes/profilux_flow_v3.html.
+**Canonical doctrine doc:** `docs/PROFILUX_MODEL.md` (committed `ecb60a5`, May 6 2026).
+**Implementation contract:** `docs/PROFILUX_MATRIX_V1.md` (v1.2 — May 7, commit `5d8672b`).
+**Umbrella ledger row:** `88d4bd79-f0d4-4e9c-9125-e00df2699ca6` (Recruiting System / high / open).
+**Phase 4 ledger row:** `8f82b3ac-f1ab-4905-8142-658c03edc52e` (validated, anchor for tunnel passport rewrite).
 
 ### DO NOT
 
-- Touch cv-parse route again unless a new bug surfaces (currently green in prod). S1 validation reconfirmed.
-- Implement L1 → L2 silent writes from any code path. S1 ships proof of compliance (Mazour/NYC L1 vs Mason/Paris L2 invariance under parse).
-- Deviate from `docs/PROFILUX_MATRIX_V1.md` (v1.2) without updating the spec first (per its §12.2).
+- Touch cv-parse route again unless a new bug surfaces (currently green in prod).
+- Implement L1 → L2 silent writes from any code path. S1 + S1.5 ship proof of compliance.
+- Deviate from `docs/PROFILUX_MATRIX_V1.md` (v1.2) without updating the spec first (per §12.2).
 - Use Hélène BILLARD as fixture (consent unconfirmed, blocked permanently).
 - Read `members.*` or `cv_parsed_data` directly from any UI surface for ProfiLux fields — go through `projectFor`.
-- Do not treat `profilux` standalone table as fully dormant — it is reclassified as share-state-only (holds `share_slug` + `sharing_enabled` for `/p/[name]`; written by `/api/profilux/reset-link`, read by `app/[slug]/page.tsx`). Full retirement remains a post-v1.1 cleanup, tracked in ledger `6aef236e`.
+- Treat `profilux` standalone table as fully dormant — it is share-state-only (`share_slug` + `sharing_enabled`). Full retirement in ledger `6aef236e`.
 - Touch `/api/profilux/reset-link` — sharing UX rebuild is a separate post-migration concern.
-- Refactor legacy `calculateProfileCompleteness` in `app/api/members/profile/route.ts` — separate commit. Best handled together with `f6508e54` and the eventual tunnel passport rewrite.
-- Fix the dashboard 8-field completeness divergence (`f6508e54`) — flagged-only finding, no fix scheduled.
+- Refactor legacy `calculateProfileCompleteness` in `app/api/members/profile/route.ts` — separate commit, with eventual tunnel passport rewrite.
+- Fix the dashboard 8-field completeness divergence (`f6508e54`) — flagged-only, no fix scheduled.
 - Resequence backlog from broader ledger.
 - Build any product-facing surface (tunnel, editor, dashboard, admin) without first read-only inspecting the live components per the visual guardrail.
 - Drift from the executive-presence guardrail in any copy or microstate.
-- For S1.5 specifically: do NOT add a silent POST to `/api/profilux` from any parse handler. Do NOT add a passport / drawer rewrite into the same slice. Do NOT add a Settings / Manage surface. Do NOT add Tier 1 columns or any schema migration. The slice is identity-only and respects §5.2 + §17 explicit-confirmation doctrine.
 
 ### PARKED (admin_tasks status=parked)
 
@@ -135,44 +118,22 @@ Identity edit / explicit prefill decision. No code. No silent POST to `/api/prof
 - `1e6162ea` — Replace inert RPC `submit_m6_admission` (incompatible with locked Apr-14 11-screen proto)
 - `9b806aa3` — F-luxuryrecruiter — repo-wide purge of legacy domain
 - `6aad3904` — Security review backlog — 37 remaining findings from ultra-review 2026-04-24
-- `8f82b3ac` — Phase 4 premium ProfiLux tunnel + editor rebuild (anchor row, currently `validated`; carries through tunnel passport rewrite)
+- `8f82b3ac` — Phase 4 premium ProfiLux tunnel + editor rebuild (anchor row, validated; carries through tunnel passport rewrite)
 - `35469863` — Phase 5 admin polish (gated on Phase 4)
 
 ### NEW FINDINGS LOGGED (out of immediate scope, surface separately)
 
-- **F-empty-string-vs-null** — Phase 2.2 POST writes "" instead of NULL when form fields are blank. Best handled with Phase 4. Parked. → CLOSED 2026-05-01 by 12e597f + c7cd53a + cleanup SQL.
-- **F-availability-default-drift** — Phase 2.2 POST overwrites availability with form-state default on every Continue. Best handled with Phase 4. Parked. → CLOSED 2026-05-01 by 12e597f + c7cd53a + cleanup SQL.
-- **F-currency-default-applied** — Phase 2.2 POST writes desired_salary_currency=EUR from form-state default. Same root cause as availability drift. Parked. → CLOSED 2026-05-01 by 12e597f + c7cd53a + cleanup SQL.
-- **F-roles-constraint-drift** — `members.role` constraint accepts 5 legacy values still (professional, member, senior, insider_contributor, insider_key_speaker). Cleanup. Parked.
-- **F-registration-role-mismatch** — Suspected drift between intended role at registration and stored role. 30-min audit before public launch. Parked.
+- **F-s15-checkbox-misalignment** *(logged 2026-05-08, parked)* — S1.5 review panel checkbox column slightly offset from field-name/value rows in the 3-column grid (`24px 160px 1fr`). Cosmetic only; logical structure correct; functionality unaffected. Best handled with the next ProfiLux Reload UI slice if it touches identity components, otherwise standalone single-line CSS fix.
+- **F-completeness-triple-system** (`f6508e54`) — flagged-only, no fix scheduled.
+- **F-roles-constraint-drift**, **F-registration-role-mismatch** — pre-launch parked.
+- **F-editor-l1-fallback-education** — known resolver behavior, no fix.
+- **F-ats-detail-subtitle-trailing-at** — cosmetic, parked.
+- **F-save-error-body-dropped** — cross-screen UX fix parked, single-commit candidate.
+- **F-magiclink-delivery**, **F-pdfparse-anthropic-files**, **F-admin_tasks-trigger**, **F-cv_url-format-mixed** — carried.
+- **F-public-slug-stub** — CLOSED 2026-05-07 by `369c2e0`.
+- **F-empty-string-vs-null**, **F-availability-default-drift**, **F-currency-default-applied** — CLOSED 2026-05-01.
 
-- **f6508e54** — F-completeness-triple-system — 3 divergent profile_completeness calculations coexist (dashboard frontend 8-field, members.profile_completeness DB column M6-weighted, legacy `calculateProfileCompleteness` in /api/members/profile/route.ts). Logged, status=open priority=normal. Best handled with STATE C5 + Phase 4.
-
-- **F-editor-l1-fallback-education** — `resolveProfiLux` populates `editor.university` / `editor.field_of_study` / `editor.graduation_year` from `cv_parsed_data.education[0]` when the corresponding L2 columns are NULL. Observed during Phase 4.A.6b validation: Screen 6 inputs render prefilled with CV-parsed values even when DB L2 is NULL. UX consequence: first save promotes L1-derived values into L2 (even without explicit user edit if save is triggered), and clearing L2 fields back to NULL returns the UI to the L1 fallback prefill on next read. Documented as known resolver behavior, not a blocker. No fix scheduled — consistent with v1 design (CV = canonical seed).
-
-- **F-ats-detail-subtitle-trailing-at** *(logged 2026-05-07, parked)* — `app/admin/ats/[id]/page.tsx` ~L498 renders header subtitle as `${member.headline || \`${member.job_title} at ${member.maison}\`.trim() || '—'}` — when `headline` is null and `maison` is null but `job_title` is present, the fallback string evaluates to `"Boutique Leader at "` with a trailing `"at "`. Cosmetic UI bug, pre-existing, not caused by `2b8f4bf`. Best handled in a single commit guarding the `at` join with a maison-presence check.
-
-*Carried forward from prior rotations:*
-
-- **F-luxuryrecruiter** — see parked `9b806aa3`
-- **F-save-error-body-dropped** *(logged 2026-05-04)* — `handleSave3`, `handleSave4`, `handleSave6`, `handleSave8`, `handleSave10` all use `throw new Error(\`HTTP ${res.status}\`)` and drop the API error body. Users see e.g. `Error: HTTP 400` instead of descriptive route messages (e.g. `desired_salary_min cannot exceed desired_salary_max` from Screen 10 range guard). Cross-screen UX fix parked; out of Phase 4.A.10c scope. Best handled in a single dedicated commit that updates all five handleSaveN functions to extract `errBody?.error` from the failed response body before rethrowing.
-- **F-magiclink-delivery** — Magic-link UI works, NextAuth token created, but SES delivery uncertain
-- **F-pdfparse-anthropic-files** — Evaluate Anthropic Files API native PDF input as v2 parser path
-- **F-admin_tasks-trigger** — `done` and `completed_at` derive trigger only fires via PATCH route, not direct UPDATE
-- **F-cv_url-format-mixed** — 5/8 rows full-URL, 3/8 path-only; `normalizeCvStoragePath` handles both
-- **F-public-slug-stub** — `app/[slug]/page.tsx` reads frozen-out `profilux` table; uses `.single()` not `.maybeSingle()`. Park alongside `profilux` table retirement (ledger `6aef236e`). → CLOSED 2026-05-07 by `369c2e0` (Slice 2A migrated to PublicProjection via 3-step resolve chain).
-- **F-members-me-incomplete** — closed by Phase 2.3 (`081f3beb`)
-- **F-profilux-frozen-table-routes** — closed by Phase 2.1 + 2.2 (`0c04c8b9` + `4397dd97`)
-
-### LEDGER NOTE
-
-- ProfiLux Reload S0 + S1 SHIPPED 2026-05-07 PM. MATRIX v1.2 doctrine patch (`5d8672b`) + S1 additive CV pipeline (`b533e31`). Both prod-validated. Phase 4 ledger row `8f82b3ac` stays validated as anchor — does not need DB write this session.
-- Phase 3 frontend audit CLOSED 2026-05-07 AM. All 3 active surfaces shipped (`ed0c662` Surface 1 + `0bf208c` Surface 4 + `2b8f4bf` Surface 3) and prod-validated.
-- Phase 4 spec foundation shipped (Phase 4.A.10a–c, 4.B/C/D/E, MATRIX v1.1 May 6, MATRIX v1.2 May 7).
-- Three findings closed earlier via 12e597f + c7cd53a + cleanup SQL: F-empty-string-vs-null, F-availability-default-drift, F-currency-default-applied (forward-only fix; DB ledger rows remain status=parked).
-- Workflow note: GitHub MCP `create_or_update_file` returned 403 "Resource not accessible by integration" twice this session (S0 doc, MATRIX v1.2). Established Option B as the safe pattern for large doc edits: generate file in `/mnt/user-data/outputs/`, Mo downloads, Code runs `cp ~/Downloads/<file> docs/<file>` + verification (shasum + line count + tail) + commit + push. MCP read remains the primary verification surface post-push.
-
-**Last updated:** May 7, 2026 PM (ProfiLux Reload S0 + S1 SHIPPED + prod-validated. MATRIX v1.2 doctrine patch `5d8672b` + S1 additive CV pipeline `b533e31`. L2 sovereignty proven end-to-end via Mazour/NYC L1 vs Mason/Paris L2 invariance under parse. Next strict step: S1.5 planning only — identity edit / explicit prefill decision, no silent POST, no passport/drawer.)
+**Last updated:** May 7, 2026 PM — S1.5 SHIPPED + prod-validated. Next: ProfiLux Reload next UI slice (not yet scoped).
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
@@ -388,7 +349,7 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 ### Candidate (`/dashboard/candidate`):
 - 4-card next-steps: Profile, Careers, Intelligence, Contribute
 - ProfiLux completion bar (backend-computed readiness signal; not an admission gate)
-- ProfiLux editor at `/dashboard/candidate/profilux` (currently 11-screen tunnel + S1 additive CV upload+parse card above; passport rewrite pending per MODEL)
+- ProfiLux editor at `/dashboard/candidate/profilux` (currently 11-screen tunnel + S1 CV card + S1.5 identity prefill review panel above; passport rewrite pending per MODEL)
 
 ### Business (`/dashboard/business`):
 - Submit brief CTA
@@ -409,11 +370,12 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 ## 12. PROFILUX
 
 - Living object, owned continuously by user (per MODEL May 6, MATRIX v1.2 §2)
-- Current implementation: 11-screen tunnel (Phase 4.A complete) at `/dashboard/candidate/profilux`, with S1 additive CV upload+parse card above the tunnel (commit `b533e31`, May 7). Passport-with-drawer UX rewrite pending (MATRIX v1.2 §7.6 + §§14, 21–24).
+- Current implementation: 11-screen tunnel (Phase 4.A) + S1 CV upload+parse card + S1.5 inline identity prefill review panel (4 fields, explicit confirm) at `/dashboard/candidate/profilux`. Passport-with-drawer UX rewrite pending (MATRIX v1.2 §7.6 + §§14, 21–24).
 - Storage contract: `members.*` flat columns + `cv_parsed_data` jsonb (per MATRIX v1 §3 layer model)
-- Resolver: `lib/profilux/resolveProfiLux` returns `ProfiLuxResolved` (single shape, all surfaces)
-- 6 surface projections via `projectFor`: dashboard / editor / public / admin / ats / client
-- CV pipeline: Haiku 4.5 parser at `/api/members/cv-parse`, schema_v1.0, locked sectors + proficiencies. End-to-end pipeline (upload → parse → cv_parsed_data write → UI refresh) prod-validated May 7 via S1 (`b533e31`). L2 sovereignty proven: parsed L1 (Mazour/NYC) did not silently overwrite L2 (Mason/Paris).
+- Resolver: `lib/profilux/resolveProfiLux` returns `ProfiLuxResolved` (single shape, all surfaces). Now also emits `cv_identity_suggestions` (4-field pre-Rule-A diff for S1.5 prefill UI).
+- 6 surface projections via `projectFor`: dashboard / editor / public / admin / ats / client. `EditorView` carries `cv_identity_suggestions` pass-through.
+- CV pipeline: Haiku 4.5 parser at `/api/members/cv-parse`, schema_v1.0, locked sectors + proficiencies. Prod-validated end-to-end.
+- Identity prefill: explicit-confirmation only (S1.5). L1 → L2 silent writes forbidden across all code paths.
 - `members.profile_completeness` computed via `computeProfileCompleteness` (backend-only readiness signal — not user-facing admission)
 - Two surfaces: ProfiLux (`/dashboard/candidate/profilux`) and `/profile` (legacy, scheduled for retirement)
 
@@ -545,7 +507,7 @@ All tabbed pages use `?tab=` query params. Brands: 5 tabs (~760 sitemap URLs).
 - Account page (`AccountClient_v1.tsx`) — built, not deployed/tested
 - BIMI: DMARC + DNS record + SVG logo
 - Member Directory `/directory` — built but deactivated
-- CV parsing by AI — field `cv_parsed_at` exists, end-to-end pipeline shipped May 7 via S1 (`b533e31`); identity prefill from L1 deferred to S1.5 planning
+- CV parsing by AI — SHIPPED end-to-end (S1 + S1.5). Identity prefill: explicit confirm via S1.5 panel. Other field prefills (experiences, education, languages) deferred.
 
 ---
 
@@ -571,14 +533,14 @@ All tabbed pages use `?tab=` query params. Brands: 5 tabs (~760 sitemap URLs).
 
 ## 24. PROFILUX DOCTRINE — LIVING OBJECT MODEL
 
-**Status:** Locked May 6, 2026. Reaffirmed by MATRIX v1.2 (May 7, commit `5d8672b`). Supersedes prior M6 admission doctrine.
+**Status:** Locked May 6, 2026. Reaffirmed by MATRIX v1.2 (May 7, commit `5d8672b`).
 
 **Canonical doctrine doc:** `docs/PROFILUX_MODEL.md`
 **Implementation contract:** `docs/PROFILUX_MATRIX_V1.md` (v1.2 — May 7 UX promotion addendum)
 
 **Core principle:** ProfiLux is a single living professional profile object, owned continuously by the user. It is not a wizard, not a submission, not a pending object, not approved by Mo, not frozen.
 
-**Mo approval scope (narrow):** platform access at registration + contributions (brand corrections, salary data, insider voices). Never to ProfiLux itself.
+**Mo approval scope (narrow):** platform access at registration + contributions. Never to ProfiLux itself.
 
 **Flow:** approved user dashboard → Continue ProfiLux → fresh CV upload → Haiku parse → populated living document → user edits / owns continuously.
 
@@ -586,22 +548,28 @@ All tabbed pages use `?tab=` query params. Brands: 5 tabs (~760 sitemap URLs).
 
 **Field tier model (per MODEL):**
 - **Tier 0** — seeded at signup: name, email, location
-- **Tier 1** — recruiter-critical (PARKED, schema not yet built): notice period, work authorization, salary history, reporting line, budget responsibility, team size
-- **Tier 2** — credibility enrichment (PARKED, schema not yet built): structured certifications, awards, references, portfolio, publications, memberships
+- **Tier 1** — recruiter-critical (PARKED, schema not yet built)
+- **Tier 2** — credibility enrichment (PARKED, schema not yet built)
 - **Existing Phase 4 fields** — see `lib/profilux/types.ts` `EditorView`
 
 **UX shell (per MATRIX v1.2 §§21–24, repo-locked):**
-- View / Edit / Manage triad (three named modes; user is always in one and only one).
-- Section catalog: 9 default sections (fixed order, permanent) + 8 add-library sections (opt-in, Tier 2 schema PARKED).
-- Responsive: desktop primary (identity strip top-fixed + section card grid), mobile stacking single-column with full-viewport drawers.
-- Component families (family-level only, no specific names locked): section card, drawer, state marker, chip multi-toggle, tri-state Yes/No, identity strip.
+- View / Edit / Manage triad
+- Section catalog: 9 default sections + 8 add-library sections (Tier 2 schema PARKED)
+- Responsive: desktop primary, mobile stacking with full-viewport drawers
+- Component families: section card, drawer, state marker, chip multi-toggle, tri-state Yes/No, identity strip
 
-**Matching entry (replaces M6 admission):** backend-only readiness signal. No user-facing confirm action. No threshold percentage. No "Pending Candidate" state. Computed from Tier 1 core fields when those land + explicit consent (future, not derived from `availability` by default).
+**Identity prefill (S1.5 — May 7, 2026, commit `38c2100`):**
+- Explicit user confirmation only — no silent L1 → L2 writes
+- Resolver computes `cv_identity_suggestions` pre-Rule-A from raw `members.*` and `cv_parsed_data.identity`
+- 4 fields scoped: `first_name`, `last_name`, `city`, `nationality`
+- Eligibility: L1 non-empty AND raw L2 null/empty
+- UI: inline review panel; user selects rows + clicks Apply selected → POST `/api/profilux` with selected fields only
+- Pattern is reusable for future field prefills (experiences, education, languages, etc.)
+
+**Matching entry (replaces M6 admission):** backend-only readiness signal. No user-facing confirm action. No threshold percentage. No "Pending Candidate" state.
 
 **Drift reset phrase:** *"living object, not wizard / not submission / not approval"*
 
 ---
 
-*This document replaces: JOBLUX_MASTER_DOC_v1.docx, JOBLUX_Consolidated_System_v1_1.docx, JOBLUX_CURRENT_STATE_v1_1.docx, JOBLUX_SYSTEM_BLUEPRINT_v1.docx, JOBLUX_Architecture_Blueprint_v2.docx, Claude_build_charter.docx, and all previous context/handoff files.*
-
-*Update this file at the end of every session. Replace in project. One document, always current.*
+*This document replaces all prior context/handoff files. Update this file at the end of every session. One document, always current.*
