@@ -140,9 +140,19 @@ Phase 4.A completed 2026-05-05. All seven planned write-enabled screens shipped 
 
 - **3399269** `fix(dashboard): retire ProfiLux wizard framing` — Slice 1 of ProfiLux Reload reconciliation. Single-file change (`app/dashboard/candidate/page.tsx`, +5/−20). (1) Removed local 8-field `profiluxCompletion` IIFE, replaced with `profilux?.profile_completeness ?? 0` (Matrix v1 §10.1 — single computeProfileCompleteness source). (2) PROFILE card copy: "Complete"/"% done"/"View your Profilux"/"Finish to unlock matching" → "Up to date"/"% complete"/"Continue editing" (no admission language). (3) ProfiLux bar conditional render guard `{profiluxCompletion < 100 && (...)}` removed — bar now persists at 100% (living object, never "done"). (4) Bar copy "Fill in to unlock full matching" → "Your profile is a living document — keep refining it." Per Matrix v1.1 §2 + §20.4 (no threshold percentage, no admission gate). 5 surgical str_replace edits. TSC clean. Pushed to origin/main, Coolify deploy triggered. Read-only Phase 3 audit completed before slice (9 files: dashboard page, profilux tunnel, /api/profilux, /api/members/me, /api/members/cv-parse, lib/profilux/{resolveProfiLux,projectFor,_m6Groups,computeProfileCompleteness,computeM6Eligible}, app/[slug]/page.tsx, /api/profilux/reset-link). Synthesis produced KEEP/MODIFY/REMOVE/UNKNOWN map. Slice 1 = smallest safe first slice from synthesis. Remaining 5 slices parked.
 
+- **17d5118** `docs(workflow): lock GitHub MCP as primary repo truth source` — Layer 2 doctrine patch. 3 docs touched (CLAUDE.md, docs/WORKFLOW_RULES.md, docs/JOBLUX_STATE.md), +25 / -5. CLAUDE.md: extended session-start reading with REPO TRUTH SOURCE PROTOCOL (May 2026) — 4-level hierarchy (GitHub MCP / Claude Code local / paste fallback / never uploaded-stale). docs/WORKFLOW_RULES.md: reordered "Session start order" — GitHub MCP committed reads first, Claude Code local truth only after. docs/JOBLUX_STATE.md: added new section "## TRUTH SOURCES (locked May 7, 2026)" with same 4-level hierarchy + announcement protocol + override clause. No code, no schema, no implementation. Aligns repo doctrine with claude.ai Project instructions (Layer 1 May 7).
+
+- **369c2e0** `feat(public): migrate /p/[slug] to PublicProjection (Slice 2A)` — Slice 2A of ProfiLux Reload reconciliation. Single-file change (`app/[slug]/page.tsx`, +55/-46). Public surface reconciliation per Matrix v1.1 §9 + §10.1 + §18. (1) Replaced single-table `profilux.*` `.single()` lookup with 3-step resolve chain: `profilux` (share-state lookup by `share_slug + sharing_enabled`) → `members` (by `email` case-insensitive via `.ilike()`) → `resolveProfiLux(member.id, supabase)` → `projectFor(view, 'public')`. All 3 lookups use `.maybeSingle()`; each null path triggers `notFound()` (orphan-row safe). (2) Drop `nationality` and `availability` rendering (Matrix v1 §7.3 V7 mask). (3) Drop dead `AVAILABILITY_LABELS` const. (4) Career history reshape: was `{role, brand, group, from, to, current, location}` (legacy denormalized), now `PublicExperience` (`job_title / start_date / end_date / city / country`). Company line omitted entirely when `null` (Option C, GPT-locked V5 placeholder decision). (5) Renames: `photo_url → avatar_url`, `specialisations → expertise_tags`, `markets → market_knowledge`. (6) `languages.map` shape fix: was `string[]`, now `ResolvedLanguage[]` objects (`l.language`). 5 targeted str_replace edits, TSC clean. Pushed to origin/main, Coolify deploy triggered. Supabase MCP probe pre-flight confirmed `profilux` join key = `email` (no FK to members), 3 rows total all `sharing_enabled=false`. Closes `F-public-slug-stub` from earlier findings list. 3 new findings logged in admin_tasks ledger (orphan-row, reset-link-frozen, public-share-currently-off — all parked under umbrella `88d4bd79-f0d4-4e9c-9125-e00df2699ca6`).
+
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
 
-**Phase 3 frontend audit COMPLETE (2026-05-06 night session). Slice 1 of 6 reconciliation slices SHIPPED (commit `3399269`). Remaining 5 slices PARKED — no further implementation approved.**
+**Slice 2A SHIPPED `369c2e0` — `/p/[slug]` migrated to PublicProjection. Slice 2 technically COMPLETE.**
+
+Slice 2B (reset-link identity source swap) intentionally NOT shipped — STATE DO NOT entry against touching `/api/profilux/reset-link` during Phase 3. Logged as finding `F-profilux-reset-link-frozen` (parked, normal priority, ledger `0e6f3271-1c24-4eb8-9139-bfbc2d1d2cd7`). Resumed during post-Phase-3 sharing UX rebuild.
+
+Slice 2C (PublicProjection compliance polish, V5/V7 masks) absorbed into Slice 2A. No remaining 2C work.
+
+Layer 2 GitHub MCP truth-source workflow now OPERATIONAL and validated in real conditions during this session: doctrine patches landed via committed-truth reads (CLAUDE.md, WORKFLOW_RULES.md, STATE), Slice 2A inspection performed entirely via GitHub MCP without falling back to Claude Code cat reads. Repo truth discipline confirmed in production workflow.
 
 Phase 4.5 and B reconciliation closed in 2026-05-06 PM session. Doctrine now formally locked. Implementation work resumes per existing one-defect-one-deploy discipline.
 
@@ -220,7 +230,7 @@ Phase 5 admin polish is NOT next. It remains parked (ledger 35469863). Phase 4 P
 - **F-pdfparse-anthropic-files** — Evaluate Anthropic Files API native PDF input as v2 parser path
 - **F-admin_tasks-trigger** — `done` and `completed_at` derive trigger only fires via PATCH route, not direct UPDATE
 - **F-cv_url-format-mixed** — 5/8 rows full-URL, 3/8 path-only; `normalizeCvStoragePath` handles both
-- **F-public-slug-stub** — `app/[slug]/page.tsx` reads frozen-out `profilux` table; uses `.single()` not `.maybeSingle()`. Park alongside `profilux` table retirement (ledger `6aef236e`).
+- **F-public-slug-stub** — `app/[slug]/page.tsx` reads frozen-out `profilux` table; uses `.single()` not `.maybeSingle()`. Park alongside `profilux` table retirement (ledger `6aef236e`). → CLOSED 2026-05-07 by `369c2e0` (Slice 2A migrated to PublicProjection via 3-step resolve chain).
 - **F-members-me-incomplete** — closed by Phase 2.3 (`081f3beb`)
 - **F-profilux-frozen-table-routes** — closed by Phase 2.1 + 2.2 (`0c04c8b9` + `4397dd97`)
 
@@ -233,7 +243,7 @@ Phase 5 admin polish is NOT next. It remains parked (ledger 35469863). Phase 4 P
 - Phase 4.A.10b SHIPPED 2026-05-04 (commit `2d8f07f`). Route POST snake_case salary fields + range guard live in prod, validated 6 scenarios.
 - Phase 4.A.10c SHIPPED 2026-05-04 (commit `fbcf6c6`). Screen 10 write-enabled, browser + DB validated. F-save-error-body-dropped logged.
 
-**Last updated:** May 6, 2026 (v1.1 reconciliation patch landed — `c3297d3`. Mini P5 audit — `eb295d8`. ProfiLux doctrine formally locked.)
+**Last updated:** May 7, 2026 (Slice 2A PublicProjection reconciliation shipped — `369c2e0`. Layer 2 GitHub MCP truth-source workflow shipped — `17d5118`. Repo truth discipline now doctrine-locked.)
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
