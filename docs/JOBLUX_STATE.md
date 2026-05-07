@@ -148,38 +148,45 @@ Phase 4.A completed 2026-05-05. All seven planned write-enabled screens shipped 
 
 - **0bf208c** `feat(admin): migrate /api/admin/members/[id] GET to Matrix v1 admin projection` — Phase 3 frontend audit Surface 4 reconciliation. 3 files (-33/+52 route, -22/+9 types, -3/+3 page). GET handler swaps 4 dormant-table SELECTs (`work_experiences`, `education_records`, `member_languages` per Matrix v1 §9 + `members.*`) for `resolveProfiLux + projectFor(view, 'admin')`. Adapter synthesises stable item ids (`${memberId}-exp-${i}` etc.), derives `is_current` from `end_date == null`, mirrors `degree_level` from `degree` for page compat, derives `full_name` from `first_name + last_name`. `notes` preserved via lightweight overlay SELECT. `member_documents` and `member_ai_reviews` overlays untouched. PATCH handler byte-identical (verified in unified diff). `types/member-profile.ts` tightens `WorkExperience` / `EducationRecord` / `MemberLanguage` to match resolver+adapter output (drops `member_id`, `sort_order`, `reason_for_leaving`, `department`, timestamps from item types). `app/admin/members/[id]/page.tsx` drops dead `w.department` subtitle (work_experiences table dormant, never rendered in prod) and guards `proficiencyStyles[l.proficiency]` against null. **Browser-validated end-to-end in prod on member with parsed L1 data:** Experience tab renders 3 entries (Boutique Leader Hublot / Senior Recruiter JOBLUX / Multi-Units Retail Manager Harrods with full descriptions + dates + city/country), Education tab renders 2 entries (SSBM / Xpro), Languages chips populated (English / French / Spanish), Documents tab unchanged (2 CVs + Primary CV badge), Notes textarea + save button intact, REJECT/Approved status actions visible (PATCH unchanged). Closes the operational gap where every CV-uploaded member showed empty Experience + Languages tabs. TSC clean. Cosmetic observations parked (non-blocking): `start_year` null L1 renders as `? — <year>` on education entries; language chips have no proficiency badge when L1 proficiency is null (ternary fallback works as designed).
 
+- **2b8f4bf** `feat(ats): migrate /api/applications routes to Matrix v1 ats projection` — Phase 3 frontend audit Surface 3 (final surface) reconciliation. 2 files (+80 / -5). Single-commit migration of both `/api/applications` (list) and `/api/applications/[id]` (detail + PUT). Drop `member:members!member_id(...)` join from `APPLICATION_SELECT` in both routes; resolve member per-row via `resolveProfiLux(member_id, supabase) → projectFor(view, 'ats') → resolveAtsMember adapter`. Adapter projects the 11-field UI contract verbatim: `id, full_name, email, avatar_url, job_title, maison, city, country, headline, seniority, years_in_luxury`. `full_name` derived from `[first_name, last_name].filter(Boolean).join(' ') || null` (NULL-safe). Adapter duplicated across both route files (per Phase 3 scope discipline; not extracted to shared helper). Defensive union narrowing `if (projection.surface !== 'ats') return null` added inside adapter — runtime-unreachable, TS-only, fails closed if `projectFor` dispatch ever changes. GET list response: `{ applications: enriched, total, page, limit }` with each application carrying `.member` from the adapter via `Promise.all`. GET detail response: `{ ...application, member, stage_history, notes }`. PUT response: `{ ...data, member }` — symmetry preserved, no UI break. **N+1 accepted for admin-only ATS list (admin route, low traffic). Promise.all keeps round-trips parallel. Batched fetch + resolve helper parked as post-Phase-3 optimization.** TSC clean. Build clean. **Browser+DB validated end-to-end in prod on Alex Mason application:** `/admin/ats` Board (3 cards), Table view (4 rows, all columns), `/admin/ats/[id]` detail (header + 7-row Candidate Summary + Application Details + 3 buttons), PUT round-trip (rating star → DB `rating=4`; recruiter → DB `assigned_recruiter='Mo (test)'`), hard reload persisted, test data reverted to NULL post-validation.
+
 ### CURRENT STEP — strict order, no skip, no resequence from broader ledger
 
-**Phase 3 frontend audit IN PROGRESS. Two surfaces shipped this session.**
+**Phase 3 frontend audit COMPLETE (May 7, 2026).** All 3 active surfaces shipped and validated end-to-end in prod.
 
-Phase 3 audit completed against MATRIX v1.1 §§14–20 across 4 surfaces (`/profile`, business dashboard, ATS, admin members). Findings led to two slices shipped:
+Phase 3 audit completed against MATRIX v1.1 §§14–20 across 4 surfaces (`/profile`, business dashboard, ATS, admin members). Three slices shipped:
 
-- **`ed0c662` Slice A — orphan `ProfileClient.tsx` removed.** Surface 1 verdict honored. Required preflight unblock for admin members slice (sole out-of-scope type consumer).
-- **`0bf208c` Admin members migration — Surface 4 reconciled.** GET handler now uses `resolveProfiLux + projectFor(view, 'admin')`. Experience + Education + Languages tabs source from `cv_parsed_data` L1 passthrough. Browser-validated end-to-end in prod on Mzaour test member: 3 work entries, 2 education entries, 3 languages chips, all rendered for the first time. Documents/Notes/PATCH untouched.
+- **`ed0c662` Surface 1 — orphan `ProfileClient.tsx` removed.** Verdict honored. Required preflight unblock for admin members slice.
+- **`0bf208c` Surface 4 — admin members migration.** GET handler uses `resolveProfiLux + projectFor(view, 'admin')`. Experience + Education + Languages tabs source from `cv_parsed_data` L1 passthrough. Browser-validated end-to-end on Mzaour test member.
+- **`2b8f4bf` Surface 3 — ATS migration.** Both `/api/applications` routes migrated to `resolveProfiLux + projectFor(view, 'ats') + resolveAtsMember adapter`. UI contract preserved byte-for-byte. PUT round-trip validated. Browser+DB validated end-to-end.
 
-**Next slice — ATS migration (Phase 3 Surface 3).** Two API routes: `/api/applications` (list) + `/api/applications/[id]` (detail). Audit + smallest-slice analysis already done this session. Estimated blast radius: 2 routes, no projection extension needed (`projectFor(view, 'ats')` carries everything required); only adapter work = `full_name` derivation + `current_employer || maison` fallback.
+Surface 2 (business dashboard) had no MATRIX violations on member data — no slice needed. `/profile` retired (Surface 1 cleanup). Phase 3 closed.
 
-After ATS, remaining Phase 3 surfaces are clean (business dashboard has no MATRIX violations on member data; `/profile` retired). Phase 3 closes once ATS lands.
+**Phase 3 closure carries forward:**
+- 3 ATS-related findings (orphan-row, reset-link-frozen, public-share-currently-off) parked under umbrella `88d4bd79-f0d4-4e9c-9125-e00df2699ca6`.
+- N+1 on `/api/applications` GET (admin-only, low traffic) accepted; batched fetch + resolve helper parked as post-Phase-3 optimization. Not yet logged to admin_tasks.
+- F-ats-detail-subtitle-trailing-at logged as cosmetic, out of scope, parked.
 
 **Surfaces NOT in Phase 3 scope (carried forward):**
-- `app/dashboard/candidate/profilux/page.tsx` (754-line 11-screen tunnel) — passport-with-drawer rewrite per MATRIX v1.1 §7.6 + §14, standalone scoped session.
+- `app/dashboard/candidate/profilux/page.tsx` (754-line 11-screen tunnel) — passport-with-drawer rewrite per MATRIX v1.1 §7.6 + §14, standalone scoped session. **This is the next major work.**
 - B39 CV bucket repair execution (`member-cvs` private; 5 broken URLs in `member_documents.file_url` + 5 in `members.cv_url`). Resume with fresh `/ultrareview`.
 - Tier 1 schema (`notice_period`, `work_authorization`, `salary_history`, `reporting_line`, `budget_responsibility`, `team_size`) — PARKED until product trigger.
-- Slice 2B reset-link identity source swap — STATE DO NOT remains against `/api/profilux/reset-link` during Phase 3, parked under `0e6f3271`.
+- Slice 2B reset-link identity source swap — STATE DO NOT remains against `/api/profilux/reset-link`, parked under `0e6f3271`.
 
 **Cosmetic observations from this session (non-blocking, not slated):**
-- Education entries with null `start_year` render as `? — <end_year>` on admin members detail. L1 data limitation, not migration. Future polish: hide range when start is null or fallback to `—`.
-- Language chips render without proficiency badge when L1 proficiency is null. Ternary fallback works as designed; UX is graceful but visually muted.
+- Education entries with null `start_year` render as `? — <end_year>` on admin members detail. L1 data limitation, not migration.
+- Language chips render without proficiency badge when L1 proficiency is null. Ternary fallback works as designed.
+- ATS detail header subtitle renders trailing `"at "` when `maison` is null. Pre-existing UI bug.
 
-Layer 2 GitHub MCP truth-source workflow continues operational. All repo reads this session declared path + branch + committed-truth caveat. Slice scoping, type-consumer pre-flight, and post-deploy validation all conducted via MCP.
+Layer 2 GitHub MCP truth-source workflow operational. All repo reads this session declared path + branch + committed-truth caveat. Slice scoping, type-consumer pre-flight, post-deploy validation, and STATE rotation all conducted via MCP.
 
 Earlier-session prior context (carried forward):
 - Phase 4.A milestone CLOSED 2026-05-05. All 7 write-enabled screens shipped (3, 4, 6, 7, 8, 9, 10).
 - Phase 4.B/C/D/E chain closed 2026-05-05 — ProfiLux contract harmonized: `/api/profilux` emits `{surface, view, editor}`, `/api/members/me` emits 8 live fields. `toLegacyProfile` adapter removed.
 
-**ProfiLux Reload recovery — start from the live /dashboard/candidate Continue button.**
+**Next major work — ProfiLux tunnel passport-with-drawer rewrite.** Substrate intact (`EditorView`, §4.5 write contract, vocabulary, resolver/projector). Phase 4 ledger row `8f82b3ac` is the umbrella. All 6 projection surfaces (dashboard / editor / public / admin / ats / client) now consume via the resolver+projector pipeline.
 
-Phase 5 admin polish is NOT next. It remains parked (ledger 35469863). Phase 4 ProfiLux tunnel + editor rebuild (8f82b3ac) is preserved as substrate but its wizard/tunnel framing is replaced by the canonical model below.
+Phase 5 admin polish remains parked (ledger 35469863).
 
 **Locked doctrine (May 6, 2026):**
 - ProfiLux is a single living professional profile object, owned continuously by the user.
@@ -193,9 +200,10 @@ Phase 5 admin polish is NOT next. It remains parked (ledger 35469863). Phase 4 P
 **Directional prototype (NOT an implementation source):** ~/Desktop/joblux-prototypes/profilux_flow_v3.html.
 
 **Next session opens with planning, not code:**
-1. Decide retirement of inert RPC submit_m6_admission (ledger 1e6162ea) under this model.
-2. Reconcile M6 admission enforcement (ledger 29f95a84) — what survives the no-pending shift, what gets dropped.
-3. Audit the gap between prod (/api/upload-cv, /api/profilux, /dashboard/candidate/profilux) and the Reload model — produce a written delta before any code.
+1. ProfiLux tunnel rewrite scoping — passport-with-drawer per MATRIX v1.1 §7.6 + §14. Substrate-first audit before any code.
+2. Decide retirement of inert RPC submit_m6_admission (ledger 1e6162ea) under this model.
+3. Reconcile M6 admission enforcement (ledger 29f95a84) — what survives the no-pending shift, what gets dropped.
+4. Audit the gap between prod (/api/upload-cv, /api/profilux, /dashboard/candidate/profilux) and the Reload model — produce a written delta before any code.
 ### DO NOT
 
 - Touch cv-parse route again unless a new bug surfaces (currently green in prod).
@@ -233,6 +241,8 @@ Phase 5 admin polish is NOT next. It remains parked (ledger 35469863). Phase 4 P
 
 - **F-editor-l1-fallback-education** — `resolveProfiLux` populates `editor.university` / `editor.field_of_study` / `editor.graduation_year` from `cv_parsed_data.education[0]` when the corresponding L2 columns are NULL. Observed during Phase 4.A.6b validation: Screen 6 inputs render prefilled with CV-parsed values even when DB L2 is NULL. UX consequence: first save promotes L1-derived values into L2 (even without explicit user edit if save is triggered), and clearing L2 fields back to NULL returns the UI to the L1 fallback prefill on next read. Documented as known resolver behavior, not a blocker. No fix scheduled — consistent with v1 design (CV = canonical seed). Logged this session as a documentation-only caveat.
 
+- **F-ats-detail-subtitle-trailing-at** *(logged 2026-05-07, parked)* — `app/admin/ats/[id]/page.tsx` ~L498 renders header subtitle as `${member.headline || \`${member.job_title} at ${member.maison}\`.trim() || '—'}` — when `headline` is null and `maison` is null but `job_title` is present, the fallback string evaluates to `"Boutique Leader at "` with a trailing `"at "`. Cosmetic UI bug, pre-existing, not caused by `2b8f4bf`. Best handled in a single commit guarding the `at` join with a maison-presence check.
+
 *Carried forward from prior rotations:*
 
 - **F-luxuryrecruiter** — see parked `9b806aa3`
@@ -247,14 +257,15 @@ Phase 5 admin polish is NOT next. It remains parked (ledger 35469863). Phase 4 P
 
 ### LEDGER NOTE
 
-- Phase 4 spec foundation shipped. Phase 4 ledger row (`8f82b3ac`) stays open until full editor rebuild lands.
+- Phase 3 frontend audit CLOSED 2026-05-07. All 3 active surfaces shipped (`ed0c662` Surface 1 + `0bf208c` Surface 4 + `2b8f4bf` Surface 3) and prod-validated.
+- Phase 4 spec foundation shipped. Phase 4 ledger row (`8f82b3ac`) stays open until tunnel passport rewrite lands.
 - Vocabulary patch SHIPPED (commit `eb1093a`, 2026-05-04). Canonical file: `lib/profilux/vocabulary.ts`. Editor implementation (ledger `8f82b3ac`) remains open and is now the active CURRENT STEP.
 - Three findings closed earlier in session via 12e597f + c7cd53a + cleanup SQL: F-empty-string-vs-null, F-availability-default-drift, F-currency-default-applied (forward-only fix; DB ledger rows remain status=parked).
 - Phase 4.A.10a SHIPPED 2026-05-04 (commit `a273093`). Currency vocabulary canonical: `PROFILUX_CURRENCY_OPTIONS`.
 - Phase 4.A.10b SHIPPED 2026-05-04 (commit `2d8f07f`). Route POST snake_case salary fields + range guard live in prod, validated 6 scenarios.
 - Phase 4.A.10c SHIPPED 2026-05-04 (commit `fbcf6c6`). Screen 10 write-enabled, browser + DB validated. F-save-error-body-dropped logged.
 
-**Last updated:** May 7, 2026 (Phase 3 frontend audit IN PROGRESS. Slice A orphan removal shipped — `ed0c662`. Admin members migration shipped — `0bf208c`, browser-validated end-to-end in prod. ATS slice next.)
+**Last updated:** May 7, 2026 (Phase 3 frontend audit CLOSED. ATS Surface 3 migration shipped — `2b8f4bf`, browser+DB validated end-to-end in prod. PUT round-trip confirmed. All 3 active Phase 3 surfaces now shipped (`ed0c662` + `0bf208c` + `2b8f4bf`). Next: ProfiLux tunnel passport-with-drawer rewrite.)
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
