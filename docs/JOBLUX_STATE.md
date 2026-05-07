@@ -34,6 +34,18 @@ schema → enums → constraints → routes → UX.
 ## Session start command
 "Read docs/JOBLUX_STATE.md. Ignore conflicting stale sources."
 
+## TRUTH SOURCES (locked May 7, 2026)
+
+Hierarchy for any repo read:
+1. GitHub MCP / GitHub connector - committed repo truth from joblux/ClaudeCORE. Preferred default.
+2. Claude Code / local terminal - local truth only: git status, uncommitted changes, unpushed files, tests/builds, execution/writes, deploy/push confirmation.
+3. User paste from Claude Code - fallback when MCP tools do not surface.
+4. Never use uploaded project files, stale memory, old chats, or summaries as repo truth.
+
+Announcement protocol: every repo read must declare path + branch (or commit hash if non-HEAD) + "committed truth, local uncommitted changes invisible".
+
+This section overrides any prior contradictory instruction in this file.
+
 ---
 
 ## ACTIVE CHAIN

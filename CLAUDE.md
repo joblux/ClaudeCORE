@@ -6,6 +6,14 @@ Required session-start reading, in order:
 1. `docs/JOBLUX_STATE.md` — supreme source of truth. Overrides this file, `docs/WORKFLOW_RULES.md`, skills, memory, and chat history. Read before any scoped task.
 2. `docs/WORKFLOW_RULES.md` — output discipline and session-start procedure.
 
+REPO TRUTH SOURCE PROTOCOL (May 2026):
+1. GitHub MCP / GitHub connector - primary source for committed repo truth (joblux/ClaudeCORE).
+2. Claude Code / local terminal - local truth only: git status, uncommitted changes, unpushed files, tests/builds, execution, deploy confirmation.
+3. User paste from Claude Code - fallback when MCP tools do not surface.
+4. Never use uploaded project files, stale memory, old chats, or summaries as repo truth.
+
+Announce every repo read with path + branch/HEAD/commit when available. State: "committed repo truth; local uncommitted changes are not visible."
+
 Canonical contracts referenced by STATE:
 - `docs/PROFILUX_MATRIX_V1.md` — ProfiLux storage, resolver, and projection contract (§7.6 EditorView, §4.5 L2 write contract).
 

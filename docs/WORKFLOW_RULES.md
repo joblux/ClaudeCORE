@@ -10,11 +10,11 @@ If any rule here conflicts with a skill, this file wins.
 
 ## Session start order
 
-1. Read `docs/JOBLUX_STATE.md` (constitution + ACTIVE CHAIN + CURRENT STEP)
-2. Read `docs/WORKFLOW_RULES.md` (this file)
-3. `git status` + `git log --oneline -5`
-4. Reconcile via Supabase MCP only when work touches DB / ledger / live data
-5. Execute the first unfinished item in CURRENT STEP
+1. GitHub MCP - read docs/JOBLUX_STATE.md @ main HEAD (committed repo truth).
+2. GitHub MCP - read docs/WORKFLOW_RULES.md @ main HEAD.
+3. Claude Code - git status + git log --oneline -5 (local truth: uncommitted, unpushed). Only after MCP committed reads.
+4. Reconcile via Supabase MCP only when work touches DB or admin_tasks ledger.
+5. Execute the first unfinished item from CURRENT STEP.
 
 ---
 
