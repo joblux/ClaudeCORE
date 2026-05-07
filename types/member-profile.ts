@@ -5,43 +5,32 @@
 
 export interface WorkExperience {
   id: string
-  member_id: string
-  job_title: string
-  company: string
+  company: string | null
+  job_title: string | null
   city: string | null
   country: string | null
-  start_date: string
+  start_date: string | null
   end_date: string | null
   is_current: boolean
-  department: string | null
   description: string | null
-  reason_for_leaving: string | null
-  sort_order: number
-  created_at: string
-  updated_at: string
 }
 
 export interface EducationRecord {
   id: string
-  member_id: string
-  institution: string
-  degree_level: string
-  field_of_study: string
-  city: string | null
-  country: string | null
+  institution: string | null
+  degree: string | null
+  degree_level: string | null
+  field_of_study: string | null
   start_year: number | null
   graduation_year: number | null
-  sort_order: number
-  created_at: string
-  updated_at: string
+  city: string | null
+  country: string | null
 }
 
 export interface MemberLanguage {
   id: string
-  member_id: string
   language: string
-  proficiency: 'native' | 'fluent' | 'professional' | 'conversational' | 'basic'
-  created_at: string
+  proficiency: 'native' | 'fluent' | 'professional' | 'conversational' | 'basic' | null
 }
 
 export interface MemberDocument {

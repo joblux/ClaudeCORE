@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { resolveProfiLux } from '@/lib/profilux/resolveProfiLux'
+import { projectFor } from '@/lib/profilux/projectFor'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,37 +31,17 @@ export async function GET(
   }
 
   try {
-    const { data: member, error: memberErr } = await supabaseAdmin
-      .from('members')
-      .select('*')
-      .eq('id', memberId)
-      .maybeSingle()
-
-    if (memberErr) {
-      console.error('Member fetch error:', memberErr)
-      return NextResponse.json({ error: 'Failed to fetch member' }, { status: 500 })
-    }
-
-    if (!member) {
+    const view = await resolveProfiLux(memberId, supabaseAdmin)
+    if (!view) {
       return NextResponse.json({ error: 'Member not found' }, { status: 404 })
     }
 
-    const [workRes, eduRes, langRes, docRes, reviewRes] = await Promise.all([
-      supabaseAdmin
-        .from('work_experiences')
-        .select('*')
-        .eq('member_id', memberId)
-        .order('sort_order', { ascending: true }),
-      supabaseAdmin
-        .from('education_records')
-        .select('*')
-        .eq('member_id', memberId)
-        .order('sort_order', { ascending: true }),
-      supabaseAdmin
-        .from('member_languages')
-        .select('*')
-        .eq('member_id', memberId)
-        .order('created_at', { ascending: true }),
+    const projection = projectFor(view, 'admin')
+    if (projection.surface !== 'admin') {
+      return NextResponse.json({ error: 'Projection mismatch' }, { status: 500 })
+    }
+
+    const [docRes, reviewRes, notesRes] = await Promise.all([
       supabaseAdmin
         .from('member_documents')
         .select('*')
@@ -70,14 +52,55 @@ export async function GET(
         .select('*')
         .eq('member_id', memberId)
         .maybeSingle(),
+      supabaseAdmin
+        .from('members')
+        .select('notes')
+        .eq('id', memberId)
+        .maybeSingle(),
     ])
+
+    const work = projection.view.experiences.map((e, i) => ({
+      id: `${memberId}-exp-${i}`,
+      company: e.company,
+      job_title: e.job_title,
+      city: e.city,
+      country: e.country,
+      start_date: e.start_date,
+      end_date: e.end_date,
+      is_current: e.end_date == null,
+      description: e.description,
+    }))
+
+    const edu = projection.view.education.map((e, i) => ({
+      id: `${memberId}-edu-${i}`,
+      institution: e.institution,
+      degree: e.degree,
+      degree_level: e.degree,
+      field_of_study: e.field_of_study,
+      start_year: e.start_year,
+      graduation_year: e.graduation_year,
+      city: e.city,
+      country: e.country,
+    }))
+
+    const langs = projection.view.languages.map((l, i) => ({
+      id: `${memberId}-lang-${i}`,
+      language: l.language,
+      proficiency: l.proficiency,
+    }))
+
+    const fullName = [projection.view.first_name, projection.view.last_name]
+      .filter(Boolean)
+      .join(' ')
 
     return NextResponse.json({
       member: {
-        ...member,
-        work_experiences: workRes.data ?? [],
-        education_records: eduRes.data ?? [],
-        languages: langRes.data ?? [],
+        ...projection.view,
+        full_name: fullName,
+        notes: (notesRes.data as { notes: string | null } | null)?.notes ?? null,
+        work_experiences: work,
+        education_records: edu,
+        languages: langs,
         documents: docRes.data ?? [],
       },
       aiReview: reviewRes.data ?? null,

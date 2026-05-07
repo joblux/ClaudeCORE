@@ -499,9 +499,9 @@ function ExperienceTab({ member }: { member: MemberProfile }) {
                   {formatMonthYear(w.start_date)} &mdash; {w.is_current ? "Present" : formatMonthYear(w.end_date)}
                 </div>
               </div>
-              {(w.department || w.city || w.country) && (
+              {(w.city || w.country) && (
                 <div className="text-xs text-[#999] mt-1.5">
-                  {[w.department, [w.city, w.country].filter(Boolean).join(", ")].filter(Boolean).join(" \u00B7 ")}
+                  {[w.city, w.country].filter(Boolean).join(", ")}
                 </div>
               )}
               {w.description && (
@@ -576,7 +576,7 @@ function SkillsTab({ member }: { member: MemberProfile }) {
         ) : (
           <div className="flex flex-wrap gap-2.5">
             {languages.map((l) => {
-              const pcls = proficiencyStyles[l.proficiency] ?? proficiencyStyles.basic;
+              const pcls = (l.proficiency ? proficiencyStyles[l.proficiency] : null) ?? proficiencyStyles.basic;
               return (
                 <div
                   key={l.id}
