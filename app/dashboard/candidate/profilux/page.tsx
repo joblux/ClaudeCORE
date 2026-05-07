@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import type { EditorView } from '@/lib/profilux/types'
 import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS } from '@/lib/profilux/vocabulary'
 
@@ -130,6 +130,23 @@ const draftFrom9 = (e: EditorView): Screen9Draft => ({
   relocation_preferences: e.relocation_preferences ?? '',
 })
 
+function mapParseError(code: string | null): string {
+  switch (code) {
+    case 'M6_NO_CV_UPLOADED': return 'Upload a CV first.'
+    case 'M6_DOC_FORMAT_UNSUPPORTED': return 'Use PDF or .docx.'
+    case 'M6_CV_TEXT_TOO_SHORT': return 'We could not read your CV. Try a text-based PDF.'
+    case 'M6_PARSER_TIMEOUT': return 'Parsing timed out. Try again.'
+    case 'M6_PARSER_FAILED':
+    case 'M6_PARSER_INVALID_OUTPUT':
+    case 'M6_API_KEY_MISSING':
+    case 'M6_CV_FILE_NOT_FOUND':
+    case 'M6_MEMBER_NOT_FOUND':
+    case 'M6_NOT_AUTHENTICATED':
+      return 'Parsing failed. Try again.'
+    default: return 'Something went wrong. Try again.'
+  }
+}
+
 export default function ProfiluxPage() {
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -163,6 +180,12 @@ export default function ProfiluxPage() {
   const [saving7, setSaving7] = useState(false)
   const [savedAt7, setSavedAt7] = useState<number | null>(null)
   const [saveError7, setSaveError7] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [parsing, setParsing] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [parseError, setParseError] = useState<string | null>(null)
+  const [needsReviewCount, setNeedsReviewCount] = useState<number | null>(null)
 
   const refetch = async () => {
     const res = await fetch('/api/profilux')
@@ -182,6 +205,53 @@ export default function ProfiluxPage() {
     return e
   }
 
+  async function handleUploadClick() {
+    setUploadError(null)
+    fileInputRef.current?.click()
+  }
+
+  async function handleFileSelected(ev: React.ChangeEvent<HTMLInputElement>) {
+    const file = ev.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setUploadError(null)
+    try {
+      const fd = new FormData()
+      fd.append('cv', file)
+      const res = await fetch('/api/members/cv-upload', { method: 'POST', body: fd })
+      if (!res.ok) {
+        setUploadError('Upload failed. Try again.')
+      } else {
+        await refetch()
+        setNeedsReviewCount(null)
+      }
+    } catch {
+      setUploadError('Upload failed. Try again.')
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  async function handleParse() {
+    setParsing(true)
+    setParseError(null)
+    try {
+      const res = await fetch('/api/members/cv-parse', { method: 'POST' })
+      const data = await res.json().catch(() => ({} as any))
+      if (res.ok && data?.success) {
+        await refetch()
+        setNeedsReviewCount(typeof data?.needs_review_count === 'number' ? data.needs_review_count : null)
+      } else {
+        setParseError(mapParseError(data?.error ?? null))
+      }
+    } catch {
+      setParseError(mapParseError(null))
+    } finally {
+      setParsing(false)
+    }
+  }
+
   useEffect(() => {
     refetch().catch((e) => setError(String(e))).finally(() => setLoading(false))
   }, [])
@@ -191,6 +261,11 @@ export default function ProfiluxPage() {
   if (!editor) return <div style={wrap}>No editor data.</div>
 
   const e = editor
+  const cvUrl = e.cv_meta?.cv_url ?? null
+  const cvParsedAt = e.cv_meta?.cv_parsed_at ?? null
+  const parsedDateLabel = (cvParsedAt && !isNaN(new Date(cvParsedAt).getTime()))
+    ? new Date(cvParsedAt).toLocaleDateString()
+    : 'recently'
 
   async function handleSave() {
     setSaving(true)
@@ -743,6 +818,97 @@ export default function ProfiluxPage() {
     <div style={wrap}>
       <h1 style={h1Style}>ProfiLux — {SCREEN_TITLES[step]}</h1>
       <div style={sub}>Screen {step} / {TOTAL}</div>
+      {/* CV upload + parse card — S1 */}
+      <div style={{
+        background: '#222',
+        border: '1px solid #2a2a2a',
+        borderRadius: 6,
+        padding: '20px 24px',
+        marginBottom: 24,
+        maxWidth: 900,
+      }}>
+        <div style={{ fontSize: 10, color: '#999', letterSpacing: 0.5, marginBottom: 10, textTransform: 'uppercase' }}>CV</div>
+
+        {!cvUrl && (
+          <>
+            <div style={{ fontSize: 13, color: '#ccc', marginBottom: 14 }}>Upload your CV. JOBLUX will parse it for review.</div>
+            <button
+              type="button"
+              onClick={handleUploadClick}
+              disabled={uploading}
+              style={uploading ? saveBtnDis : saveBtn}
+            >
+              {uploading ? 'Uploading...' : 'Upload CV'}
+            </button>
+          </>
+        )}
+
+        {cvUrl && !cvParsedAt && (
+          <>
+            <div style={{ fontSize: 13, color: '#ccc', marginBottom: 14 }}>
+              CV uploaded.{' '}
+              <button
+                type="button"
+                onClick={handleUploadClick}
+                disabled={uploading}
+                style={{ background: 'transparent', border: 'none', color: '#ccc', textDecoration: 'underline', cursor: uploading ? 'default' : 'pointer', padding: 0, fontFamily: 'Inter, sans-serif', fontSize: 13 }}
+              >
+                {uploading ? 'Uploading...' : 'Replace'}
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={handleParse}
+              disabled={parsing}
+              style={parsing ? saveBtnDis : saveBtn}
+            >
+              {parsing ? 'Parsing...' : 'Parse CV'}
+            </button>
+          </>
+        )}
+
+        {cvUrl && cvParsedAt && (
+          <>
+            <div style={{ fontSize: 13, color: '#ccc', marginBottom: 14 }}>
+              CV parsed {parsedDateLabel}.{' '}
+              <button
+                type="button"
+                onClick={handleUploadClick}
+                disabled={uploading}
+                style={{ background: 'transparent', border: 'none', color: '#ccc', textDecoration: 'underline', cursor: uploading ? 'default' : 'pointer', padding: 0, fontFamily: 'Inter, sans-serif', fontSize: 13 }}
+              >
+                {uploading ? 'Uploading...' : 'Replace'}
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={handleParse}
+              disabled={parsing}
+              style={{ background: 'transparent', color: '#fff', border: '1px solid #444', padding: '8px 16px', cursor: parsing ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13, opacity: parsing ? 0.5 : 1 }}
+            >
+              {parsing ? 'Parsing...' : 'Re-parse'}
+            </button>
+          </>
+        )}
+
+        {(parseError || uploadError) && (
+          <div style={{ marginTop: 10, fontSize: 11, color: '#ff6b6b' }}>{parseError || uploadError}</div>
+        )}
+
+        {needsReviewCount !== null && needsReviewCount > 0 && (
+          <div style={{ marginTop: 10, fontSize: 11, color: '#888' }}>
+            {needsReviewCount} {needsReviewCount === 1 ? 'item' : 'items'} to review
+          </div>
+        )}
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.docx"
+          onChange={handleFileSelected}
+          style={{ display: 'none' }}
+        />
+      </div>
       {renderStep()}
       <div style={navWrap}>
         <button style={step === 1 ? btnDis : btn} disabled={step === 1} onClick={() => setStep(s => Math.max(1, s - 1))}>← Prev</button>
