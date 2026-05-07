@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { resolveProfiLux } from '@/lib/profilux/resolveProfiLux'
+import { projectFor } from '@/lib/profilux/projectFor'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,9 +12,37 @@ const supabase = createClient(
 
 const APPLICATION_SELECT = `
   *,
-  member:members!member_id(id, full_name, email, avatar_url, job_title, maison, city, country, headline, seniority, years_in_luxury),
   search_assignment:search_assignments!search_assignment_id(id, title, maison, is_confidential, city, country, reference_number, status)
 `
+
+/**
+ * ATS member adapter — Phase 3 Surface 3.
+ * Wraps applications.member_id through resolveProfiLux + projectFor('ats')
+ * and projects the 11-field shape the ATS UI consumes.
+ * full_name derived from first_name + last_name (NULL-safe).
+ * Returns null when the member row is missing (orphan application).
+ */
+async function resolveAtsMember(memberId: string, supabase: any) {
+  const resolved = await resolveProfiLux(memberId, supabase)
+  if (!resolved) return null
+  const projection = projectFor(resolved, 'ats')
+  if (projection.surface !== 'ats') return null
+  const v = projection.view
+  const fullName = [v.first_name, v.last_name].filter(Boolean).join(' ') || null
+  return {
+    id: v.id,
+    full_name: fullName,
+    email: v.email,
+    avatar_url: v.avatar_url,
+    job_title: v.job_title,
+    maison: v.maison,
+    city: v.city,
+    country: v.country,
+    headline: v.headline,
+    seniority: v.seniority,
+    years_in_luxury: v.years_in_luxury,
+  }
+}
 
 /**
  * GET /api/applications/[id]
@@ -45,6 +75,8 @@ export async function GET(
       return NextResponse.json({ error: error?.message || 'Not found' }, { status: 500 })
     }
 
+    const member = await resolveAtsMember(application.member_id, supabase)
+
     // Fetch stage history (chronological order)
     const { data: stageHistory, error: historyError } = await supabase
       .from('application_stage_history')
@@ -69,6 +101,7 @@ export async function GET(
 
     return NextResponse.json({
       ...application,
+      member,
       stage_history: stageHistory || [],
       notes: notes || [],
     })
@@ -144,7 +177,8 @@ export async function PUT(
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json(data)
+    const member = await resolveAtsMember(data.member_id, supabase)
+    return NextResponse.json({ ...data, member })
   } catch (err) {
     console.error('[PUT /api/applications/[id]] Unexpected error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

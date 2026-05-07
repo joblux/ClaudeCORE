@@ -2,18 +2,49 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { resolveProfiLux } from '@/lib/profilux/resolveProfiLux'
+import { projectFor } from '@/lib/profilux/projectFor'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// Shared select query for applications with joined member and search_assignment data
+// Shared select query for applications with joined search_assignment data.
+// Member fields are resolved per-row via resolveAtsMember (Phase 3 Surface 3).
 const APPLICATION_SELECT = `
   *,
-  member:members!member_id(id, full_name, email, avatar_url, job_title, maison, city, country, headline, seniority, years_in_luxury),
   search_assignment:search_assignments!search_assignment_id(id, title, maison, is_confidential, city, country, reference_number, status)
 `
+
+/**
+ * ATS member adapter — Phase 3 Surface 3.
+ * Wraps applications.member_id through resolveProfiLux + projectFor('ats')
+ * and projects the 11-field shape the ATS UI consumes.
+ * full_name derived from first_name + last_name (NULL-safe).
+ * Returns null when the member row is missing (orphan application).
+ */
+async function resolveAtsMember(memberId: string, supabase: any) {
+  const resolved = await resolveProfiLux(memberId, supabase)
+  if (!resolved) return null
+  const projection = projectFor(resolved, 'ats')
+  if (projection.surface !== 'ats') return null
+  const v = projection.view
+  const fullName = [v.first_name, v.last_name].filter(Boolean).join(' ') || null
+  return {
+    id: v.id,
+    full_name: fullName,
+    email: v.email,
+    avatar_url: v.avatar_url,
+    job_title: v.job_title,
+    maison: v.maison,
+    city: v.city,
+    country: v.country,
+    headline: v.headline,
+    seniority: v.seniority,
+    years_in_luxury: v.years_in_luxury,
+  }
+}
 
 /**
  * GET /api/applications
@@ -88,8 +119,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // N+1 accepted for admin-only ATS list (parked optimization,
+    // post-Phase-3). Promise.all keeps round-trips parallel.
+    const rows = data || []
+    const enriched = await Promise.all(
+      rows.map(async (row) => ({
+        ...row,
+        member: await resolveAtsMember(row.member_id, supabase),
+      }))
+    )
+
     return NextResponse.json({
-      applications: data || [],
+      applications: enriched,
       total: count || 0,
       page,
       limit,
