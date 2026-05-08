@@ -342,6 +342,7 @@ function mapParseError(code: string | null): string {
 export default function ProfiluxPage() {
   const [tab, setTab] = useState<ProfiluxTab>('edit')
   const [drawerDemoOpen, setDrawerDemoOpen] = useState(false)
+  const [currentPositionDrawerOpen, setCurrentPositionDrawerOpen] = useState(false)
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -464,6 +465,10 @@ export default function ProfiluxPage() {
   if (!editor) return <div style={wrap}>No editor data.</div>
 
   const e = editor
+  const seniorityLabel = (value: string | null) => {
+    if (!value) return null
+    return PROFILUX_SENIORITY_OPTIONS.find(o => o.value === value)?.label ?? value
+  }
   const cvUrl = e.cv_meta?.cv_url ?? null
   const cvParsedAt = e.cv_meta?.cv_parsed_at ?? null
   const parsedDateLabel = (cvParsedAt && !isNaN(new Date(cvParsedAt).getTime()))
@@ -1363,6 +1368,66 @@ export default function ProfiluxPage() {
           </SectionCard>
         )
       })()}
+      <SectionCard eyebrow="Current Position">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div />
+          <button
+            type="button"
+            onClick={() => setCurrentPositionDrawerOpen(true)}
+            style={{
+              background: 'transparent',
+              color: '#ccc',
+              border: '1px solid #2a2a2a',
+              padding: '6px 12px',
+              fontSize: 12,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        </div>
+        <div style={grid}>
+          <div style={label}>Job title</div>
+          <div>{e.job_title ?? <NotSet />}</div>
+          <div style={label}>Current employer</div>
+          <div>{e.current_employer ?? <NotSet />}</div>
+          <div style={label}>Seniority</div>
+          <div>{seniorityLabel(e.seniority) ?? <NotSet />}</div>
+          <div style={label}>Years of experience</div>
+          <div>{e.total_years_experience != null ? String(e.total_years_experience) : <NotSet />}</div>
+        </div>
+      </SectionCard>
+      <Drawer
+        open={currentPositionDrawerOpen}
+        title="Current Position"
+        onClose={() => setCurrentPositionDrawerOpen(false)}
+      >
+        <div style={grid}>
+          <div style={label}>Job title</div>
+          <div><input style={input} value={draft.job_title} onChange={(ev) => setDraft({ ...draft, job_title: ev.target.value })} placeholder="e.g. Boutique Director" /></div>
+          <div style={label}>Current employer</div>
+          <div><input style={input} value={draft.current_employer} onChange={(ev) => setDraft({ ...draft, current_employer: ev.target.value })} placeholder="e.g. Hermès" /></div>
+          <div style={label}>Seniority</div>
+          <div>
+            <select style={select} value={draft.seniority} onChange={(ev) => setDraft({ ...draft, seniority: ev.target.value })}>
+              <option value="">— Select seniority —</option>
+              {PROFILUX_SENIORITY_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+          <div style={label}>Years of experience</div>
+          <div><input style={input} type="number" min={0} value={draft.total_years_experience} onChange={(ev) => setDraft({ ...draft, total_years_experience: ev.target.value })} placeholder="e.g. 12" /></div>
+        </div>
+        <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button style={saving ? saveBtnDis : saveBtn} disabled={saving} onClick={handleSave}>
+            {saving ? 'Saving…' : 'Save'}
+          </button>
+          {savedAt && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
+          {saveError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError}</span>}
+        </div>
+      </Drawer>
       {renderStep()}
       <div style={navWrap}>
         <button style={step === 1 ? btnDis : btn} disabled={step === 1} onClick={() => setStep(s => Math.max(1, s - 1))}>← Prev</button>
