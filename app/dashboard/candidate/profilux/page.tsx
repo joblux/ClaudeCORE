@@ -344,6 +344,7 @@ export default function ProfiluxPage() {
   const [drawerDemoOpen, setDrawerDemoOpen] = useState(false)
   const [currentPositionDrawerOpen, setCurrentPositionDrawerOpen] = useState(false)
   const [skillsMarketsDrawerOpen, setSkillsMarketsDrawerOpen] = useState(false)
+  const [compensationDrawerOpen, setCompensationDrawerOpen] = useState(false)
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -1500,6 +1501,62 @@ export default function ProfiluxPage() {
           </button>
           {savedAt7 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
           {saveError7 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError7}</span>}
+        </div>
+      </Drawer>
+      <SectionCard eyebrow="Compensation">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div />
+          <button
+            type="button"
+            onClick={() => setCompensationDrawerOpen(true)}
+            style={{
+              background: 'transparent',
+              color: '#ccc',
+              border: '1px solid #2a2a2a',
+              padding: '6px 12px',
+              fontSize: 12,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        </div>
+        <div style={grid}>
+          <div style={label}>Target compensation (min)</div>
+          <div>{e.desired_salary_min != null ? String(e.desired_salary_min) : <NotSet />}</div>
+          <div style={label}>Target compensation (max)</div>
+          <div>{e.desired_salary_max != null ? String(e.desired_salary_max) : <NotSet />}</div>
+          <div style={label}>Currency</div>
+          <div>{e.desired_salary_currency ?? <NotSet />}</div>
+        </div>
+      </SectionCard>
+      <Drawer
+        open={compensationDrawerOpen}
+        title="Compensation"
+        onClose={() => setCompensationDrawerOpen(false)}
+      >
+        <div style={grid}>
+          <div style={label}>Target compensation (min)</div>
+          <div><input style={input} type="number" min={0} value={draft10?.desired_salary_min ?? ''} onChange={(ev) => setDraft10(d => d && ({ ...d, desired_salary_min: ev.target.value === '' ? null : Number(ev.target.value) }))} placeholder="e.g. 80000" /></div>
+          <div style={label}>Target compensation (max)</div>
+          <div><input style={input} type="number" min={0} value={draft10?.desired_salary_max ?? ''} onChange={(ev) => setDraft10(d => d && ({ ...d, desired_salary_max: ev.target.value === '' ? null : Number(ev.target.value) }))} placeholder="e.g. 120000" /></div>
+          <div style={label}>Currency</div>
+          <div>
+            <select style={input} value={draft10?.desired_salary_currency ?? ''} onChange={(ev) => setDraft10(d => d && ({ ...d, desired_salary_currency: ev.target.value === '' ? null : ev.target.value }))}>
+              <option value="">— Not specified —</option>
+              {PROFILUX_CURRENCY_OPTIONS.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button style={saving10 || !draft10 ? saveBtnDis : saveBtn} disabled={saving10 || !draft10} onClick={handleSave10}>
+            {saving10 ? 'Saving…' : 'Save'}
+          </button>
+          {savedAt10 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
+          {saveError10 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError10}</span>}
         </div>
       </Drawer>
       {renderStep()}
