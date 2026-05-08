@@ -268,6 +268,17 @@ type Screen7Draft = {
   market_knowledge: string[]
 }
 
+type Screen1Draft = {
+  first_name: string
+  last_name: string
+  city: string
+  country: string
+  nationality: string
+  phone: string
+  headline: string
+  bio: string
+}
+
 function draftFrom(e: EditorView): Screen3Draft {
   return {
     job_title: e.job_title ?? '',
@@ -304,6 +315,19 @@ function draftFrom7(e: EditorView): Screen7Draft {
   return {
     key_skills: e.key_skills ?? [],
     market_knowledge: e.market_knowledge ?? [],
+  }
+}
+
+function draftFrom1(e: EditorView): Screen1Draft {
+  return {
+    first_name: e.first_name ?? '',
+    last_name: e.last_name ?? '',
+    city: e.city ?? '',
+    country: e.country ?? '',
+    nationality: e.nationality ?? '',
+    phone: e.phone ?? '',
+    headline: e.headline ?? '',
+    bio: e.bio ?? '',
   }
 }
 
@@ -379,6 +403,14 @@ export default function ProfiluxPage() {
   const [saving7, setSaving7] = useState(false)
   const [savedAt7, setSavedAt7] = useState<number | null>(null)
   const [saveError7, setSaveError7] = useState<string | null>(null)
+  const [identityDrawerOpen, setIdentityDrawerOpen] = useState(false)
+  const [draft1, setDraft1] = useState<Screen1Draft>({
+    first_name: '', last_name: '', city: '', country: '',
+    nationality: '', phone: '', headline: '', bio: '',
+  })
+  const [saving1, setSaving1] = useState(false)
+  const [savedAt1, setSavedAt1] = useState<number | null>(null)
+  const [saveError1, setSaveError1] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [parsing, setParsing] = useState(false)
@@ -409,6 +441,7 @@ export default function ProfiluxPage() {
       setDraft10(draftFrom10(e))
       setDraft9(draftFrom9(e))
       setDraft7(draftFrom7(e))
+      setDraft1(draftFrom1(e))
     }
     return e
   }
@@ -679,6 +712,37 @@ export default function ProfiluxPage() {
       setSaveError7(String(err))
     } finally {
       setSaving7(false)
+    }
+  }
+
+  async function handleSave1() {
+    setSaving1(true)
+    setSaveError1(null)
+    try {
+      // camelCase legacy + snake_case new (S12) - existing contract drift, not S12 scope
+      const body: Record<string, unknown> = {
+        firstName: draft1.first_name,
+        lastName: draft1.last_name,
+        city: draft1.city,
+        country: draft1.country,
+        nationality: draft1.nationality,
+        phone: draft1.phone,
+        headline: draft1.headline,
+        bio: draft1.bio,
+      }
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      await refetch()
+      setSavedAt1(Date.now())
+      setTimeout(() => setSavedAt1((t) => (t && Date.now() - t >= 2000 ? null : t)), 2100)
+    } catch (err) {
+      setSaveError1(String(err))
+    } finally {
+      setSaving1(false)
     }
   }
 
@@ -1387,6 +1451,83 @@ export default function ProfiluxPage() {
           </SectionCard>
         )
       })()}
+      <SectionCard eyebrow="Identity">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div />
+          <button
+            type="button"
+            onClick={() => setIdentityDrawerOpen(true)}
+            style={{
+              background: 'transparent',
+              color: '#ccc',
+              border: '1px solid #2a2a2a',
+              padding: '6px 12px',
+              fontSize: 12,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        </div>
+        <div style={grid}>
+          <div style={label}>First name</div>
+          <div>{e.first_name ?? <NotSet />}</div>
+          <div style={label}>Last name</div>
+          <div>{e.last_name ?? <NotSet />}</div>
+          <div style={label}>City</div>
+          <div>{e.city ?? <NotSet />}</div>
+          <div style={label}>Country</div>
+          <div>{e.country ?? <NotSet />}</div>
+          <div style={label}>Nationality</div>
+          <div>{e.nationality ?? <NotSet />}</div>
+          <div style={label}>Phone</div>
+          <div>{e.phone ?? <NotSet />}</div>
+          <div style={label}>Headline</div>
+          <div>{e.headline ?? <NotSet />}</div>
+          <div style={label}>Bio</div>
+          <div>{e.bio ?? <NotSet />}</div>
+        </div>
+      </SectionCard>
+      <Drawer
+        open={identityDrawerOpen}
+        title="Identity"
+        onClose={() => setIdentityDrawerOpen(false)}
+      >
+        <div style={grid}>
+          <div style={label}>First name</div>
+          <div><input style={input} value={draft1.first_name} onChange={(ev) => setDraft1({ ...draft1, first_name: ev.target.value })} placeholder="e.g. Alex" /></div>
+          <div style={label}>Last name</div>
+          <div><input style={input} value={draft1.last_name} onChange={(ev) => setDraft1({ ...draft1, last_name: ev.target.value })} placeholder="e.g. Mason" /></div>
+          <div style={label}>City</div>
+          <div><input style={input} value={draft1.city} onChange={(ev) => setDraft1({ ...draft1, city: ev.target.value })} placeholder="e.g. London" /></div>
+          <div style={label}>Country</div>
+          <div><input style={input} value={draft1.country} onChange={(ev) => setDraft1({ ...draft1, country: ev.target.value })} placeholder="e.g. United Kingdom" /></div>
+          <div style={label}>Nationality</div>
+          <div><input style={input} value={draft1.nationality} onChange={(ev) => setDraft1({ ...draft1, nationality: ev.target.value })} placeholder="e.g. British" /></div>
+          <div style={label}>Phone</div>
+          <div><input style={input} value={draft1.phone} onChange={(ev) => setDraft1({ ...draft1, phone: ev.target.value })} placeholder="e.g. +44 20 ..." /></div>
+          <div style={label}>Headline</div>
+          <div><input style={input} value={draft1.headline} onChange={(ev) => setDraft1({ ...draft1, headline: ev.target.value })} placeholder="e.g. Senior Boutique Director" /></div>
+          <div style={label}>Bio</div>
+          <div>
+            <textarea
+              style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 80, resize: 'vertical' }}
+              rows={3}
+              value={draft1.bio}
+              onChange={(ev) => setDraft1({ ...draft1, bio: ev.target.value })}
+              placeholder="Short professional bio"
+            />
+          </div>
+        </div>
+        <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button style={saving1 ? saveBtnDis : saveBtn} disabled={saving1} onClick={handleSave1}>
+            {saving1 ? 'Saving…' : 'Save'}
+          </button>
+          {savedAt1 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
+          {saveError1 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError1}</span>}
+        </div>
+      </Drawer>
       <SectionCard eyebrow="Current Position">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div />
