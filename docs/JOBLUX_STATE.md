@@ -54,26 +54,26 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
-- **2fb69c1** `feat(profilux): S5 View tab v0 preview shell (header + Coming soon section cards)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +87/-7). View tab placeholder replaced with v0 shell: header strip (avatar/initials, masked display name `${first_name} ${last_initial}.`, headline if present, `job_title` only — no `current_employer`, location line) plus three `<SectionCard>` placeholders ("About", "Experience", "Skills & expertise") with "Coming soon" copy. Reads ONLY from existing `editor`/`e` scope. NO `projectFor` import, NO `viewResolved` state, NO API change, NO client-side public masking implementation. Display-only name masking (presentation, not security boundary). Public-projection masking remains 100% server-owned via `projectFor` for future `/p/[name]` route. Prod visual validation PASS on Mason fixture (Alex M. · Boutique Leader · Paris, Andorra rendered, NO Hublot leak, NO experiences leak despite 3 real experiences in cv_parsed_data).
+- **c66eca4** `feat(profilux): S6 Drawer primitive + Manage demo trigger (no animation, no integration)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +176/-6). Co-located `Drawer({open, title, onClose, children})` primitive: 480px right-side panel desktop / fullscreen mobile (768px breakpoint via `window.innerWidth` + resize listener), `rgba(0,0,0,0.6)` backdrop desktop only, ESC handler + body-scroll lock via `useEffect`, neutral chrome (#1a1a1a bg + #2a2a2a borders + #fff/#ccc/#999 text), zero new gold use, NO animation/transition/`<style>` tag. Manage tab placeholder replaced with: copy line + "Preview drawer (demo)" neutral button + italic note. Demo `<Drawer>` wired to `drawerDemoOpen` state. Prod visual validation via Chrome extension: open via button → drawer renders right-side 480px ✓; close via X ✓; close via ESC ✓; close via backdrop click ✓. View tab unchanged, Edit tab unchanged, SectionCard primitive unchanged, refetch unchanged. No types/projector/API/schema/handler changes.
 
-- **b7056be** `feat(profilux): S4 View/Edit/Manage triad scaffold (local state, Edit content unchanged)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (+58/-2). Three tabs driven by local `useState<ProfiluxTab>('edit')` — no router, no search params. Active-tab underline `#a58e28` (third + final gold use within page budget). H1 simplified to `ProfiLux`. Edit sub line composed `Screen X / 11 · SCREEN_TITLE`. Prod visual + state preservation validated via Chrome extension: Edit→Next×4→Screen 5/11→View→Edit returns to Screen 5.
+- **2fb69c1** `feat(profilux): S5 View tab v0 preview shell (header + Coming soon section cards)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (+87/-7). View tab placeholder replaced with header strip (avatar/initials, masked display name `${first_name} ${last_initial}.`, headline if present, `job_title` only — no `current_employer`, location line) plus three `<SectionCard>` placeholders ("About", "Experience", "Skills & expertise") with "Coming soon" copy. Reads ONLY from existing `editor`/`e` scope. NO `projectFor` import, NO `viewResolved` state, NO API change, NO client-side public masking. Prod validation PASS on Mason (Alex M. · Boutique Leader · Paris, Andorra rendered, NO Hublot leak, NO experiences leak despite 3 real experiences in cv_parsed_data).
 
-- **2a5623c** `refactor(profilux): S3 co-located SectionCard primitive (zero visual change)` — May 8 2026 AM. SHIPPED + PROD-VALIDATED. Single-file refactor (+39/-33). Co-located `SectionCard({eyebrow?, layout?, children})` primitive. Three migration targets collapsed: S2 strip → `<SectionCard layout="flex">`, S1 CV card → `<SectionCard eyebrow="CV">`, S1.5 panel → `<SectionCard eyebrow="Apply suggestions from your CV">`. Prod visual validation PASS — pixel-identical to pre-refactor.
+- **b7056be** `feat(profilux): S4 View/Edit/Manage triad scaffold (local state, Edit content unchanged)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (+58/-2). Three tabs driven by local `useState<ProfiluxTab>('edit')` — no router, no search params. Active-tab underline `#a58e28` (third + final gold use within page budget). H1 simplified to `ProfiLux`. Edit sub line composed `Screen X / 11 · SCREEN_TITLE`. Prod visual + state preservation validated: Edit→Next×4→Screen 5/11→View→Edit returns to Screen 5.
 
 ### CURRENT STEP — strict order
 
 **Next ProfiLux Reload UI slice (not yet scoped).**
 
-S0 (MATRIX v1.2 doctrine), S1 (CV pipeline), S1.5 (identity prefill review panel), S2 (identity strip), S3 (SectionCard primitive), S4 (View/Edit/Manage triad scaffold), and S5 (View tab v0 preview shell) all SHIPPED + prod-validated. Substrate now: doctrine locked, CV pipeline working, prefill mechanism proven, identity strip in place, shared card chrome unified, top-level triad mental model in place, View tab v0 shell live (placeholder cards, no public-projection consumption client-side).
+S0 (MATRIX v1.2 doctrine), S1 (CV pipeline), S1.5 (identity prefill review panel), S2 (identity strip), S3 (SectionCard primitive), S4 (View/Edit/Manage triad scaffold), S5 (View tab v0 preview shell), and S6 (Drawer primitive + Manage demo trigger) all SHIPPED + prod-validated. Substrate now: doctrine locked, CV pipeline working, prefill mechanism proven, identity strip in place, shared card chrome unified, top-level triad mental model in place, View tab v0 shell live, Drawer primitive ready and demo-validated.
 
 Slice candidates remaining per MATRIX v1.2 §§21–24 + §13 deferred items (no commitment — Mo + GPT scope before any draft):
-- Drawer component family
 - Tier 2 add-library scaffolding (schema PARKED — UI shell only feasible)
-- View tab content fill-in (real preview) — **gated on a server-emitted public projection from `/api/profilux` or a sibling endpoint; do NOT consume `projectFor` client-side**
+- View tab content fill-in (real preview) — **gated on a server-emitted public projection from `/api/profilux` or a sibling endpoint; do NOT consume `projectFor` client-side** (per DO NOT)
 - Manage tab content (sharing, visibility, settings — anchors `/api/profilux/reset-link` rebuild; STATE DO NOT until reset-link unparked)
+- Drawer integration into Edit/passport (per MATRIX v1.2 §22 "one drawer per section") — needs section-form scoping decision (which section first; v1.2 §22.1 ordering favors Identity or Current Position)
 - Future: query-param tab persistence (`?tab=view|edit|manage`) once visual model approved
-- Future: extract `SectionCard` to `components/profilux/` once a 4th call site appears
-- Future: extract S2 inline strip to a reusable `IdentityStrip` component
+- Future: extract `SectionCard`, `Drawer`, identity strip to `components/profilux/` once reused beyond this file
+- Future: drawer animation (slide/fade) — currently instant by design; add when visual polish takes priority
 
 Mo + GPT pick the next slice and lock scope before any implementation prompt is drafted.
 
@@ -136,7 +136,7 @@ Mo + GPT pick the next slice and lock scope before any implementation prompt is 
 - **F-public-slug-stub** — CLOSED 2026-05-07 by `369c2e0`.
 - **F-empty-string-vs-null**, **F-availability-default-drift**, **F-currency-default-applied** — CLOSED 2026-05-01.
 
-**Last updated:** May 8, 2026 PM — S5 View tab v0 preview shell SHIPPED + prod-validated. Next: ProfiLux Reload next UI slice (not yet scoped).
+**Last updated:** May 8, 2026 PM — S6 Drawer primitive + Manage demo trigger SHIPPED + prod-validated (open/close mechanics: X, ESC, backdrop click — all PASS via Chrome extension test). Next: ProfiLux Reload next UI slice (not yet scoped).
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
