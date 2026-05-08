@@ -54,23 +54,23 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
-- **b7056be** `feat(profilux): S4 View/Edit/Manage triad scaffold (local state, Edit content unchanged)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +58/-2). Three tabs: View (placeholder shell, "Public view preview"), Edit (verbatim current content — sub line, S2 strip, CV card, S1.5 panel, renderStep, nav), Manage (placeholder shell, "Sharing, visibility, account settings"). Tab driven by local `useState<ProfiluxTab>('edit')` — no router, no search params, no Suspense. Active-tab underline `#a58e28` (third + final gold use within page budget). H1 simplified to `ProfiLux`. Edit sub line composed `Screen X / 11 · SCREEN_TITLE`. Prod visual + state preservation validated via Chrome extension: Edit→Next×4→Screen 5/11 Career History→View→Edit returns to Screen 5 (state survives tab switches). No types/resolver/projector/API/schema/handler changes.
+- **2fb69c1** `feat(profilux): S5 View tab v0 preview shell (header + Coming soon section cards)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +87/-7). View tab placeholder replaced with v0 shell: header strip (avatar/initials, masked display name `${first_name} ${last_initial}.`, headline if present, `job_title` only — no `current_employer`, location line) plus three `<SectionCard>` placeholders ("About", "Experience", "Skills & expertise") with "Coming soon" copy. Reads ONLY from existing `editor`/`e` scope. NO `projectFor` import, NO `viewResolved` state, NO API change, NO client-side public masking implementation. Display-only name masking (presentation, not security boundary). Public-projection masking remains 100% server-owned via `projectFor` for future `/p/[name]` route. Prod visual validation PASS on Mason fixture (Alex M. · Boutique Leader · Paris, Andorra rendered, NO Hublot leak, NO experiences leak despite 3 real experiences in cv_parsed_data).
 
-- **2a5623c** `refactor(profilux): S3 co-located SectionCard primitive (zero visual change)` — May 8 2026 AM. SHIPPED + PROD-VALIDATED. Single-file refactor (`app/dashboard/candidate/profilux/page.tsx`, +39/-33). Co-located `SectionCard({eyebrow?, layout?, children})` primitive at top of file. Three migration targets collapsed onto one chrome: S2 identity strip → `<SectionCard layout="flex">`, S1 CV card → `<SectionCard eyebrow="CV">`, S1.5 prefill panel → `<SectionCard eyebrow="Apply suggestions from your CV">`. Inline eyebrow `<div>`s deleted at S1 + S1.5 sites. No types/resolver/projector/API/schema/handler changes. Prod visual validation PASS — three cards render pixel-identical to pre-refactor.
+- **b7056be** `feat(profilux): S4 View/Edit/Manage triad scaffold (local state, Edit content unchanged)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (+58/-2). Three tabs driven by local `useState<ProfiluxTab>('edit')` — no router, no search params. Active-tab underline `#a58e28` (third + final gold use within page budget). H1 simplified to `ProfiLux`. Edit sub line composed `Screen X / 11 · SCREEN_TITLE`. Prod visual + state preservation validated via Chrome extension: Edit→Next×4→Screen 5/11→View→Edit returns to Screen 5.
 
-- **af2a86a** `feat(profilux): S2 identity strip above CV card (read-only, additive)` — May 8 2026 AM. SHIPPED + PROD-VALIDATED. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +88 lines). Inline IIFE between subhead and CV card. Renders: avatar (img or initials fallback), name (Playfair 22px), optional headline, position line `${job_title} · ${current_employer}`, location line `${city}, ${country}`, discreet `X% complete` right-aligned. Uses existing EditorView fields only. Tunnel Screen 1 untouched. Read-only. Prod validation PASS on Mason fixture. Strip surfaced f6508e54 completeness divergence more visibly (already-parked).
+- **2a5623c** `refactor(profilux): S3 co-located SectionCard primitive (zero visual change)` — May 8 2026 AM. SHIPPED + PROD-VALIDATED. Single-file refactor (+39/-33). Co-located `SectionCard({eyebrow?, layout?, children})` primitive. Three migration targets collapsed: S2 strip → `<SectionCard layout="flex">`, S1 CV card → `<SectionCard eyebrow="CV">`, S1.5 panel → `<SectionCard eyebrow="Apply suggestions from your CV">`. Prod visual validation PASS — pixel-identical to pre-refactor.
 
 ### CURRENT STEP — strict order
 
 **Next ProfiLux Reload UI slice (not yet scoped).**
 
-S0 (MATRIX v1.2 doctrine), S1 (CV pipeline), S1.5 (identity prefill review panel), S2 (identity strip), S3 (SectionCard primitive), and S4 (View/Edit/Manage triad scaffold) all SHIPPED + prod-validated. Substrate now: doctrine locked, CV pipeline working, prefill mechanism proven, identity strip in place, shared card chrome unified, top-level triad mental model in place with placeholder shells for View and Manage.
+S0 (MATRIX v1.2 doctrine), S1 (CV pipeline), S1.5 (identity prefill review panel), S2 (identity strip), S3 (SectionCard primitive), S4 (View/Edit/Manage triad scaffold), and S5 (View tab v0 preview shell) all SHIPPED + prod-validated. Substrate now: doctrine locked, CV pipeline working, prefill mechanism proven, identity strip in place, shared card chrome unified, top-level triad mental model in place, View tab v0 shell live (placeholder cards, no public-projection consumption client-side).
 
 Slice candidates remaining per MATRIX v1.2 §§21–24 + §13 deferred items (no commitment — Mo + GPT scope before any draft):
 - Drawer component family
 - Tier 2 add-library scaffolding (schema PARKED — UI shell only feasible)
-- View tab content (public preview using existing PublicProjection)
-- Manage tab content (sharing, visibility, settings — anchors `/api/profilux/reset-link` rebuild)
+- View tab content fill-in (real preview) — **gated on a server-emitted public projection from `/api/profilux` or a sibling endpoint; do NOT consume `projectFor` client-side**
+- Manage tab content (sharing, visibility, settings — anchors `/api/profilux/reset-link` rebuild; STATE DO NOT until reset-link unparked)
 - Future: query-param tab persistence (`?tab=view|edit|manage`) once visual model approved
 - Future: extract `SectionCard` to `components/profilux/` once a 4th call site appears
 - Future: extract S2 inline strip to a reusable `IdentityStrip` component
@@ -106,6 +106,7 @@ Mo + GPT pick the next slice and lock scope before any implementation prompt is 
 - Deviate from `docs/PROFILUX_MATRIX_V1.md` (v1.2) without updating the spec first (per §12.2).
 - Use Hélène BILLARD as fixture (consent unconfirmed, blocked permanently).
 - Read `members.*` or `cv_parsed_data` directly from any UI surface for ProfiLux fields — go through `projectFor`.
+- Consume `projectFor` client-side in any candidate UI surface. Public-projection masking is server-owned. Real public preview content requires a server-emitted public projection (new endpoint or `/api/profilux` extension); the View tab v0 shell at `/dashboard/candidate/profilux` is presentation-only and must not be replaced with client-side `projectFor` consumption.
 - Treat `profilux` standalone table as fully dormant — it is share-state-only (`share_slug` + `sharing_enabled`). Full retirement in ledger `6aef236e`.
 - Touch `/api/profilux/reset-link` — sharing UX rebuild is a separate post-migration concern.
 - Refactor legacy `calculateProfileCompleteness` in `app/api/members/profile/route.ts` — separate commit, with eventual tunnel passport rewrite.
@@ -135,7 +136,7 @@ Mo + GPT pick the next slice and lock scope before any implementation prompt is 
 - **F-public-slug-stub** — CLOSED 2026-05-07 by `369c2e0`.
 - **F-empty-string-vs-null**, **F-availability-default-drift**, **F-currency-default-applied** — CLOSED 2026-05-01.
 
-**Last updated:** May 8, 2026 PM — S4 View/Edit/Manage triad scaffold SHIPPED + prod-validated (state preservation confirmed via Chrome extension test). Next: ProfiLux Reload next UI slice (not yet scoped).
+**Last updated:** May 8, 2026 PM — S5 View tab v0 preview shell SHIPPED + prod-validated. Next: ProfiLux Reload next UI slice (not yet scoped).
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
