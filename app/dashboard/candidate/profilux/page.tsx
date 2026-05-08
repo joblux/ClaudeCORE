@@ -343,6 +343,7 @@ export default function ProfiluxPage() {
   const [tab, setTab] = useState<ProfiluxTab>('edit')
   const [drawerDemoOpen, setDrawerDemoOpen] = useState(false)
   const [currentPositionDrawerOpen, setCurrentPositionDrawerOpen] = useState(false)
+  const [skillsMarketsDrawerOpen, setSkillsMarketsDrawerOpen] = useState(false)
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -469,6 +470,8 @@ export default function ProfiluxPage() {
     if (!value) return null
     return PROFILUX_SENIORITY_OPTIONS.find(o => o.value === value)?.label ?? value
   }
+  const skillLabel = (value: string) =>
+    PROFILUX_SKILL_OPTIONS.find(o => o.value === value)?.label ?? value
   const cvUrl = e.cv_meta?.cv_url ?? null
   const cvParsedAt = e.cv_meta?.cv_parsed_at ?? null
   const parsedDateLabel = (cvParsedAt && !isNaN(new Date(cvParsedAt).getTime()))
@@ -1426,6 +1429,77 @@ export default function ProfiluxPage() {
           </button>
           {savedAt && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
           {saveError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError}</span>}
+        </div>
+      </Drawer>
+      <SectionCard eyebrow="Skills & Markets">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div />
+          <button
+            type="button"
+            onClick={() => setSkillsMarketsDrawerOpen(true)}
+            style={{
+              background: 'transparent',
+              color: '#ccc',
+              border: '1px solid #2a2a2a',
+              padding: '6px 12px',
+              fontSize: 12,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        </div>
+        <div style={grid}>
+          <div style={label}>Skills</div>
+          <div>{e.key_skills.length > 0 ? e.key_skills.map(skillLabel).join(', ') : <NoneSel />}</div>
+          <div style={label}>Markets</div>
+          <div>{e.market_knowledge.length > 0
+            ? (typeof PROFILUX_MARKET_OPTIONS[0] === 'string'
+                ? e.market_knowledge.join(', ')
+                : e.market_knowledge.map(v => ((PROFILUX_MARKET_OPTIONS as unknown as Array<{ value: string, label: string }>).find(o => o.value === v)?.label) ?? v).join(', '))
+            : <NoneSel />}</div>
+        </div>
+      </SectionCard>
+      <Drawer
+        open={skillsMarketsDrawerOpen}
+        title="Skills & Markets"
+        onClose={() => setSkillsMarketsDrawerOpen(false)}
+      >
+        <div style={sectionLabel}>Skills</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+          {PROFILUX_SKILL_OPTIONS.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              style={draft7.key_skills.includes(o.value) ? chipActive : chip}
+              onClick={() => setDraft7({ ...draft7, key_skills: draft7.key_skills.includes(o.value) ? draft7.key_skills.filter(v => v !== o.value) : [...draft7.key_skills, o.value] })}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={sectionLabel}>Markets</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+          {PROFILUX_MARKET_OPTIONS.map((o) => (
+            <button
+              key={o}
+              type="button"
+              style={draft7.market_knowledge.includes(o) ? chipActive : chip}
+              onClick={() => setDraft7({ ...draft7, market_knowledge: draft7.market_knowledge.includes(o) ? draft7.market_knowledge.filter(v => v !== o) : [...draft7.market_knowledge, o] })}
+            >
+              {o}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button style={saving7 ? saveBtnDis : saveBtn} disabled={saving7} onClick={handleSave7}>
+            {saving7 ? 'Saving…' : 'Save'}
+          </button>
+          {savedAt7 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
+          {saveError7 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError7}</span>}
         </div>
       </Drawer>
       {renderStep()}
