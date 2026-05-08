@@ -4,6 +4,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import Anthropic from '@anthropic-ai/sdk'
 import { z } from 'zod'
+import { resolveProfiLux, computeProfileCompleteness } from '@/lib/profilux'
+import type { ProfiLuxResolved } from '@/lib/profilux'
 
 export const maxDuration = 60
 
@@ -579,6 +581,30 @@ export async function POST(req: NextRequest) {
     tokens_used: tokensUsed,
     cost_usd: costUsd,
   })
+
+  // Matrix v1 section 4.4: recompute profile_completeness on every
+  // successful cv-parse run. Non-fatal side-effect: resolver/scorer
+  // failures are logged but do not fail the parse response. Mirrors
+  // the recompute pattern in /api/profilux POST, with the distinction
+  // that here the recompute is secondary to the primary parse contract.
+  try {
+    const resolved: ProfiLuxResolved | null = await resolveProfiLux(memberId, supabase)
+    if (resolved) {
+      const score = computeProfileCompleteness(resolved)
+      if (score !== resolved.profile_completeness) {
+        const { error: scoreErr } = await supabase
+          .from('members')
+          .update({ profile_completeness: score })
+          .eq('id', memberId)
+        if (scoreErr) {
+          console.error('[cv-parse] profile_completeness update failed:', scoreErr.message)
+        }
+      }
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown'
+    console.error('[cv-parse] resolveProfiLux failed post-write; completeness not recomputed:', msg)
+  }
 
   return NextResponse.json({
     success: true,
