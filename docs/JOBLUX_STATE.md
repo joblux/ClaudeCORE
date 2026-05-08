@@ -54,24 +54,24 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
-- **38c2100** `feat(profilux): S1.5 inline identity prefill review panel (4 fields, explicit confirm)` — May 7 2026 PM. Path B resolver-side eligibility. New `CvIdentitySuggestions` type on `ProfiLuxResolved` + `EditorView`; computed pre-Rule-A in `resolveProfiLux` from raw `members.*` and `cv_parsed_data.identity` (4 keys: `first_name`, `last_name`, `city`, `nationality`). Inline review panel in `app/dashboard/candidate/profilux/page.tsx` between S1 CV card and `{renderStep()}`. Apply path: explicit checkbox + button → POST `/api/profilux` with camelCase keys (`firstName`, `lastName`, `city`, `nationality`) → resolver re-emits empty suggestions → panel auto-hides. 4 files, +144 lines. TSC + build clean. Contract validation PASS via SQL surrogate (Mason fixture seed/restore). Prod visual validation PASS (Mason L1.nationality="French" seed → panel rendered "Nationality: French" only → restored). No silent writes. L2 sovereignty preserved.
+- **af2a86a** `feat(profilux): S2 identity strip above CV card (read-only, additive)` — May 8 2026 AM. SHIPPED + PROD-VALIDATED. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +88 lines). Inline IIFE between subhead and CV card. Renders: avatar (img or initials fallback), name (Playfair 22px), optional headline, position line `${job_title} · ${current_employer}`, location line `${city}, ${country}`, discreet `X% complete` right-aligned. Uses existing EditorView fields only — no types/resolver/projector/API/schema changes. Tunnel Screen 1 untouched. Read-only, no handlers. Prod visual validation PASS on Mason fixture (avatar + Alex Mason + Boutique Leader · Hublot + Paris, Andorra rendered correctly). Headline absent from strip (Mason headline empty — spec-correct omission). Strip surfaced f6508e54 completeness divergence more visibly (already-parked, not in scope).
 
-- **b533e31** `feat(profilux): S1 additive CV upload + parse card (no prefill)` — May 7 2026 PM. SHIPPED + PROD-VALIDATED. Additive CV upload+parse card above tunnel; 3 visual states keyed off `(cvUrl, cvParsedAt)`. End-to-end pipeline (upload → Haiku parse → `cv_parsed_data` write → UI refresh) prod-validated on Alex Mason fixture. L2 sovereignty proven via Mazour/NYC L1 vs Mason/Paris L2 invariance under parse.
+- **38c2100** `feat(profilux): S1.5 inline identity prefill review panel (4 fields, explicit confirm)` — May 7 2026 PM. Path B resolver-side eligibility. New `CvIdentitySuggestions` type on `ProfiLuxResolved` + `EditorView`; computed pre-Rule-A in `resolveProfiLux` from raw `members.*` and `cv_parsed_data.identity` (4 keys: `first_name`, `last_name`, `city`, `nationality`). Inline review panel between S1 CV card and `{renderStep()}`. Apply path: explicit checkbox + button → POST `/api/profilux` with camelCase keys → resolver re-emits empty suggestions → panel auto-hides. 4 files, +144 lines. TSC + build clean. Contract validation PASS via SQL surrogate. Prod visual validation PASS. No silent writes. L2 sovereignty preserved.
 
-- **5d8672b** `docs(profilux): MATRIX v1.2` — May 7 2026 AM. UX MAP promotion to MATRIX (§§21–24: View/Edit/Manage triad, section catalog, responsive philosophy, component families).
+- **b533e31** `feat(profilux): S1 additive CV upload + parse card (no prefill)` — May 7 2026 PM. SHIPPED + PROD-VALIDATED. Additive CV upload+parse card above tunnel; 3 visual states keyed off `(cvUrl, cvParsedAt)`. End-to-end pipeline prod-validated on Alex Mason fixture. L2 sovereignty proven via Mazour/NYC L1 vs Mason/Paris L2 invariance under parse.
 
 ### CURRENT STEP — strict order
 
 **Next ProfiLux Reload UI slice (not yet scoped).**
 
-S0 (MATRIX v1.2 doctrine), S1 (additive CV pipeline), S1.5 (identity prefill review panel) all SHIPPED + prod-validated. The substrate is in place: doctrine locked, CV pipeline working, explicit-confirmation prefill mechanism proven for identity.
+S0 (MATRIX v1.2 doctrine), S1 (CV pipeline), S1.5 (identity prefill review panel), and S2 (identity strip above CV card) all SHIPPED + prod-validated. Substrate progressing: doctrine locked, CV pipeline working, prefill mechanism proven, identity strip in place above tunnel.
 
-Next slice candidates per MATRIX v1.2 §§21–24 + §13 deferred items (no commitment — Mo + GPT scope before any draft):
+Slice candidates remaining per MATRIX v1.2 §§21–24 + §13 deferred items (no commitment — Mo + GPT scope before any draft):
 - View/Edit/Manage triad scaffold
-- Identity strip extraction from tunnel Screen 1
 - Section card component family
 - Drawer component family
 - Tier 2 add-library scaffolding (schema PARKED — UI shell only feasible)
+- Future: extract S2 inline strip to a reusable `IdentityStrip` component (deferred — visual approval gate already passed; extraction itself is the trigger)
 
 Mo + GPT pick the next slice and lock scope before any implementation prompt is drafted.
 
@@ -133,7 +133,7 @@ Mo + GPT pick the next slice and lock scope before any implementation prompt is 
 - **F-public-slug-stub** — CLOSED 2026-05-07 by `369c2e0`.
 - **F-empty-string-vs-null**, **F-availability-default-drift**, **F-currency-default-applied** — CLOSED 2026-05-01.
 
-**Last updated:** May 7, 2026 PM — S1.5 SHIPPED + prod-validated. Next: ProfiLux Reload next UI slice (not yet scoped).
+**Last updated:** May 8, 2026 AM — S2 identity strip SHIPPED + prod-validated. Next: ProfiLux Reload next UI slice (not yet scoped).
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
