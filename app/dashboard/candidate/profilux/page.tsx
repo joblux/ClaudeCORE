@@ -91,6 +91,139 @@ function SectionCard({ eyebrow, layout = 'block', children }: SectionCardProps) 
   )
 }
 
+type DrawerProps = {
+  open: boolean
+  title: string
+  onClose: () => void
+  children: React.ReactNode
+}
+
+function Drawer({ open, title, onClose, children }: DrawerProps) {
+  const [isMobile, setIsMobile] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  )
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const onResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  useEffect(() => {
+    if (!open) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.key === 'Escape') {
+        ev.preventDefault()
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = prevOverflow
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [open, onClose])
+
+  if (!open) return null
+
+  const overlayStyle: React.CSSProperties = {
+    position: 'fixed',
+    inset: 0,
+    background: 'rgba(0,0,0,0.6)',
+    zIndex: 50,
+  }
+  const panelStyleDesktop: React.CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    width: 480,
+    background: '#1a1a1a',
+    borderLeft: '1px solid #2a2a2a',
+    zIndex: 51,
+    display: 'flex',
+    flexDirection: 'column',
+  }
+  const panelStyleMobile: React.CSSProperties = {
+    position: 'fixed',
+    inset: 0,
+    width: '100%',
+    background: '#1a1a1a',
+    zIndex: 51,
+    display: 'flex',
+    flexDirection: 'column',
+  }
+  const headerStyle: React.CSSProperties = {
+    height: 56,
+    padding: '0 24px',
+    borderBottom: '1px solid #2a2a2a',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flex: '0 0 auto',
+  }
+  const titleStyle: React.CSSProperties = {
+    fontFamily: 'Playfair Display, serif',
+    fontWeight: 400,
+    fontSize: 18,
+    color: '#fff',
+    margin: 0,
+  }
+  const closeBtnStyle: React.CSSProperties = {
+    background: 'transparent',
+    border: 'none',
+    color: '#999',
+    cursor: 'pointer',
+    fontSize: 22,
+    lineHeight: 1,
+    padding: 4,
+    fontFamily: 'Inter, sans-serif',
+  }
+  const bodyStyle: React.CSSProperties = {
+    padding: isMobile ? 20 : 24,
+    overflowY: 'auto',
+    flex: '1 1 auto',
+    color: '#ccc',
+    fontFamily: 'Inter, sans-serif',
+    fontSize: 14,
+    lineHeight: 1.6,
+  }
+
+  return (
+    <>
+      {!isMobile && (
+        <div
+          style={overlayStyle}
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        style={isMobile ? panelStyleMobile : panelStyleDesktop}
+      >
+        <div style={headerStyle}>
+          <h2 style={titleStyle}>{title}</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            style={closeBtnStyle}
+            aria-label="Close drawer"
+          >
+            ×
+          </button>
+        </div>
+        <div style={bodyStyle}>{children}</div>
+      </div>
+    </>
+  )
+}
+
 type Screen3Draft = {
   job_title: string
   current_employer: string
@@ -208,6 +341,7 @@ function mapParseError(code: string | null): string {
 
 export default function ProfiluxPage() {
   const [tab, setTab] = useState<ProfiluxTab>('edit')
+  const [drawerDemoOpen, setDrawerDemoOpen] = useState(false)
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -1239,12 +1373,48 @@ export default function ProfiluxPage() {
       )}
 
       {tab === 'manage' && (
-        <SectionCard>
-          <div style={{ minHeight: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 20px' }}>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', fontStyle: 'italic', marginBottom: 8 }}>Manage</div>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999' }}>Sharing, visibility, and account settings. Coming soon.</div>
-          </div>
-        </SectionCard>
+        <>
+          <SectionCard>
+            <div style={{ padding: '20px' }}>
+              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999', marginBottom: 16 }}>
+                Sharing, visibility, account settings — coming soon.
+              </div>
+              <button
+                type="button"
+                onClick={() => setDrawerDemoOpen(true)}
+                style={{
+                  background: 'transparent',
+                  color: '#ccc',
+                  border: '1px solid #2a2a2a',
+                  padding: '10px 18px',
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: 13,
+                  cursor: 'pointer',
+                }}
+              >
+                Preview drawer (demo)
+              </button>
+              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', fontStyle: 'italic', marginTop: 12 }}>
+                Demo only — drawer wiring for future section editing.
+              </div>
+            </div>
+          </SectionCard>
+          <Drawer
+            open={drawerDemoOpen}
+            title="Drawer demo"
+            onClose={() => setDrawerDemoOpen(false)}
+          >
+            <p style={{ marginTop: 0 }}>
+              This is a demo drawer. It validates the open/close mechanics: ESC key, backdrop click (desktop), and the X button.
+            </p>
+            <p>
+              Future Edit-mode drawers will host per-section forms (per MATRIX v1.2 §22), each scoped to a single section card on the passport.
+            </p>
+            <p style={{ color: '#999', fontSize: 13 }}>
+              No data is persisted from this drawer.
+            </p>
+          </Drawer>
+        </>
       )}
     </div>
   )
