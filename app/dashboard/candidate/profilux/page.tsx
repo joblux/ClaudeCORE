@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import type { EditorView } from '@/lib/profilux/types'
-import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS } from '@/lib/profilux/vocabulary'
+import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS, PROFILUX_SECTOR_OPTIONS } from '@/lib/profilux/vocabulary'
 
 const TOTAL = 11
 const SCREEN_TITLES = [
@@ -367,6 +367,7 @@ export default function ProfiluxPage() {
   const [tab, setTab] = useState<ProfiluxTab>('edit')
   const [drawerDemoOpen, setDrawerDemoOpen] = useState(false)
   const [currentPositionDrawerOpen, setCurrentPositionDrawerOpen] = useState(false)
+  const [luxuryFitDrawerOpen, setLuxuryFitDrawerOpen] = useState(false)
   const [skillsMarketsDrawerOpen, setSkillsMarketsDrawerOpen] = useState(false)
   const [compensationDrawerOpen, setCompensationDrawerOpen] = useState(false)
   const [clientelingDrawerOpen, setClientelingDrawerOpen] = useState(false)
@@ -521,6 +522,12 @@ export default function ProfiluxPage() {
     PROFILUX_DEPARTMENT_OPTIONS.find(o => o.value === value)?.label ?? value
   const contractTypeLabel = (value: string) =>
     PROFILUX_CONTRACT_TYPE_OPTIONS.find(o => o.value === value)?.label ?? value
+  const sectorLabel = (value: string) =>
+    PROFILUX_SECTOR_OPTIONS.find(o => o.value === value)?.label ?? value
+  const productCategoryLabel = (value: string) =>
+    PROFILUX_PRODUCT_CATEGORY_OPTIONS.find(o => o.value === value)?.label ?? value
+  const expertiseTagLabel = (value: string) =>
+    PROFILUX_EXPERTISE_TAG_OPTIONS.find(o => o.value === value)?.label ?? value
   const cvUrl = e.cv_meta?.cv_url ?? null
   const cvParsedAt = e.cv_meta?.cv_parsed_at ?? null
   const parsedDateLabel = (cvParsedAt && !isNaN(new Date(cvParsedAt).getTime()))
@@ -1586,6 +1593,82 @@ export default function ProfiluxPage() {
           </button>
           {savedAt && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
           {saveError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError}</span>}
+        </div>
+      </Drawer>
+      <SectionCard eyebrow="Luxury Fit">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div />
+          <button
+            type="button"
+            onClick={() => setLuxuryFitDrawerOpen(true)}
+            style={{
+              background: 'transparent',
+              color: '#ccc',
+              border: '1px solid #2a2a2a',
+              padding: '6px 12px',
+              fontSize: 12,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        </div>
+        <div style={grid}>
+          <div style={label}>Sectors</div>
+          <div>{e.sectors.length > 0 ? e.sectors.map(sectorLabel).join(', ') : <NoneSel />}</div>
+          <div style={label}>Years in luxury</div>
+          <div>{e.years_in_luxury != null ? String(e.years_in_luxury) : <NotSet />}</div>
+          <div style={label}>Product categories</div>
+          <div>{e.product_categories.length > 0 ? e.product_categories.map(productCategoryLabel).join(', ') : <NoneSel />}</div>
+          <div style={label}>Areas of expertise</div>
+          <div>{e.expertise_tags.length > 0 ? e.expertise_tags.map(expertiseTagLabel).join(', ') : <NoneSel />}</div>
+        </div>
+      </SectionCard>
+      <Drawer
+        open={luxuryFitDrawerOpen}
+        title="Luxury Fit"
+        onClose={() => setLuxuryFitDrawerOpen(false)}
+      >
+        <div style={grid}>
+          <div style={label}>Years in luxury</div>
+          <div><input style={input} type="number" min={0} value={draft4.years_in_luxury} onChange={(ev) => setDraft4({ ...draft4, years_in_luxury: ev.target.value })} placeholder="e.g. 8" /></div>
+        </div>
+
+        <div style={sectionLabel}>Product categories</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+          {PROFILUX_PRODUCT_CATEGORY_OPTIONS.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              style={draft4.product_categories.includes(o.value) ? chipActive : chip}
+              onClick={() => setDraft4({ ...draft4, product_categories: draft4.product_categories.includes(o.value) ? draft4.product_categories.filter(v => v !== o.value) : [...draft4.product_categories, o.value] })}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={sectionLabel}>Areas of expertise</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+          {PROFILUX_EXPERTISE_TAG_OPTIONS.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              style={draft4.expertise_tags.includes(o.value) ? chipActive : chip}
+              onClick={() => setDraft4({ ...draft4, expertise_tags: draft4.expertise_tags.includes(o.value) ? draft4.expertise_tags.filter(v => v !== o.value) : [...draft4.expertise_tags, o.value] })}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button style={saving4 ? saveBtnDis : saveBtn} disabled={saving4} onClick={handleSave4}>
+            {saving4 ? 'Saving…' : 'Save'}
+          </button>
+          {savedAt4 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
+          {saveError4 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError4}</span>}
         </div>
       </Drawer>
       <SectionCard eyebrow="Skills & Markets">
