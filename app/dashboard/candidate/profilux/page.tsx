@@ -18,6 +18,30 @@ const Hint = ({ children }: { children: React.ReactNode }) => <em style={{ color
 const wrap: React.CSSProperties = { padding: 40, background: '#1a1a1a', color: '#fff', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }
 const h1Style: React.CSSProperties = { fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: 28, marginBottom: 8 }
 const sub: React.CSSProperties = { color: '#999', fontSize: 13, marginBottom: 24 }
+const tabBarStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: 28,
+  borderBottom: '1px solid #2a2a2a',
+  maxWidth: 900,
+  marginBottom: 24,
+}
+const tabBtnBase: React.CSSProperties = {
+  background: 'transparent',
+  border: 'none',
+  padding: '10px 0',
+  fontFamily: 'Inter, sans-serif',
+  fontSize: 14,
+  letterSpacing: 0.3,
+  cursor: 'pointer',
+  color: '#999',
+  borderBottom: '2px solid transparent',
+  marginBottom: -1,
+}
+const tabBtnActive: React.CSSProperties = {
+  ...tabBtnBase,
+  color: '#fff',
+  borderBottom: '2px solid #a58e28',
+}
 const grid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '240px 1fr', gap: 12, fontSize: 14, lineHeight: 1.6, maxWidth: 900 }
 const label: React.CSSProperties = { color: '#999' }
 const navWrap: React.CSSProperties = { marginTop: 40, display: 'flex', gap: 12, alignItems: 'center', maxWidth: 900 }
@@ -31,6 +55,8 @@ const saveBtn: React.CSSProperties = { ...btn, background: '#fff', color: '#1a1a
 const saveBtnDis: React.CSSProperties = { ...saveBtn, opacity: 0.5, cursor: 'not-allowed' }
 const chip: React.CSSProperties = { background: 'transparent', color: '#ccc', border: '1px solid #444', padding: '6px 12px', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13, borderRadius: 999 }
 const chipActive: React.CSSProperties = { ...chip, background: 'rgba(165, 142, 40, 0.15)', color: '#fff', borderColor: '#a58e28' }
+
+type ProfiluxTab = 'view' | 'edit' | 'manage'
 
 type SectionCardProps = {
   eyebrow?: string
@@ -181,6 +207,7 @@ function mapParseError(code: string | null): string {
 }
 
 export default function ProfiluxPage() {
+  const [tab, setTab] = useState<ProfiluxTab>('edit')
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -885,8 +912,26 @@ export default function ProfiluxPage() {
 
   return (
     <div style={wrap}>
-      <h1 style={h1Style}>ProfiLux — {SCREEN_TITLES[step]}</h1>
-      <div style={sub}>Screen {step} / {TOTAL}</div>
+      <h1 style={h1Style}>ProfiLux</h1>
+
+      <div style={tabBarStyle}>
+        <button type="button" style={tab === 'view' ? tabBtnActive : tabBtnBase} onClick={() => setTab('view')}>View</button>
+        <button type="button" style={tab === 'edit' ? tabBtnActive : tabBtnBase} onClick={() => setTab('edit')}>Edit</button>
+        <button type="button" style={tab === 'manage' ? tabBtnActive : tabBtnBase} onClick={() => setTab('manage')}>Manage</button>
+      </div>
+
+      {tab === 'view' && (
+        <SectionCard>
+          <div style={{ minHeight: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 20px' }}>
+            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', fontStyle: 'italic', marginBottom: 8 }}>Public view preview</div>
+            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999' }}>What recruiters and employers will see when you share your ProfiLux. Coming soon.</div>
+          </div>
+        </SectionCard>
+      )}
+
+      {tab === 'edit' && (
+        <>
+      <div style={sub}>Screen {step} / {TOTAL} · {SCREEN_TITLES[step]}</div>
       {(() => {
         const fn = e.first_name ?? ''
         const ln = e.last_name ?? ''
@@ -1110,6 +1155,17 @@ export default function ProfiluxPage() {
         <button style={step === TOTAL ? btnDis : btn} disabled={step === TOTAL} onClick={() => setStep(s => Math.min(TOTAL, s + 1))}>Next →</button>
         <span style={{ color: '#666', fontSize: 12, marginLeft: 16 }}>Completeness: {e.profile_completeness}%</span>
       </div>
+        </>
+      )}
+
+      {tab === 'manage' && (
+        <SectionCard>
+          <div style={{ minHeight: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 20px' }}>
+            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', fontStyle: 'italic', marginBottom: 8 }}>Manage</div>
+            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999' }}>Sharing, visibility, and account settings. Coming soon.</div>
+          </div>
+        </SectionCard>
+      )}
     </div>
   )
 }
