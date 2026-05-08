@@ -920,14 +920,94 @@ export default function ProfiluxPage() {
         <button type="button" style={tab === 'manage' ? tabBtnActive : tabBtnBase} onClick={() => setTab('manage')}>Manage</button>
       </div>
 
-      {tab === 'view' && (
-        <SectionCard>
-          <div style={{ minHeight: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 20px' }}>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', fontStyle: 'italic', marginBottom: 8 }}>Public view preview</div>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999' }}>What recruiters and employers will see when you share your ProfiLux. Coming soon.</div>
+      {tab === 'view' && (() => {
+        const fn = e.first_name ?? ''
+        const ln = e.last_name ?? ''
+        const lastInitial = (ln[0] ?? '').toUpperCase()
+        const maskedName = fn && lastInitial
+          ? `${fn} ${lastInitial}.`
+          : fn || ''
+        const initials = `${(fn[0] ?? '').toUpperCase()}${lastInitial}`.trim()
+        const hasAvatar = typeof e.avatar_url === 'string' && e.avatar_url.trim().length > 0
+        const hasHeadline = typeof e.headline === 'string' && e.headline.trim().length > 0
+        const hasJob = typeof e.job_title === 'string' && e.job_title.trim().length > 0
+        const hasCity = typeof e.city === 'string' && e.city.trim().length > 0
+        const hasCountry = typeof e.country === 'string' && e.country.trim().length > 0
+        const locationLine = hasCity && hasCountry
+          ? `${e.city}, ${e.country}`
+          : hasCity ? e.city
+          : hasCountry ? e.country
+          : null
+
+        const placeholderInner = (label: string, sub: string) => (
+          <div style={{ minHeight: 80, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '20px' }}>
+            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', fontStyle: 'italic', marginBottom: 6 }}>{label}</div>
+            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999' }}>{sub}</div>
           </div>
-        </SectionCard>
-      )}
+        )
+
+        return (
+          <>
+            <SectionCard layout="flex">
+              <div style={{ flex: '0 0 auto' }}>
+                {hasAvatar ? (
+                  <img src={e.avatar_url as string} alt="" style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+                ) : (
+                  <div style={{
+                    background: '#333',
+                    color: '#fff',
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: 18,
+                    fontWeight: 500,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '50%',
+                    width: 56,
+                    height: 56,
+                  }}>
+                    {initials.length > 0 ? initials : '—'}
+                  </div>
+                )}
+              </div>
+              <div style={{ flex: '1 1 auto', minWidth: 0 }}>
+                <div style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: 22, color: '#fff', lineHeight: 1.2, marginBottom: 4 }}>
+                  {maskedName.length > 0
+                    ? maskedName
+                    : <em style={{ color: '#666', fontStyle: 'italic', fontFamily: 'Inter, sans-serif', fontSize: 14 }}>Not specified</em>}
+                </div>
+                {hasHeadline && (
+                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.4, marginBottom: 4 }}>
+                    {e.headline}
+                  </div>
+                )}
+                {hasJob && (
+                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999', lineHeight: 1.4, marginBottom: 2 }}>
+                    {e.job_title}
+                  </div>
+                )}
+                {locationLine && (
+                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.4 }}>
+                    {locationLine}
+                  </div>
+                )}
+              </div>
+            </SectionCard>
+
+            <SectionCard eyebrow="About">
+              {placeholderInner('Coming soon', 'A short professional bio that introduces you to recruiters.')}
+            </SectionCard>
+
+            <SectionCard eyebrow="Experience">
+              {placeholderInner('Coming soon', 'Public-safe career history with brand names confidential.')}
+            </SectionCard>
+
+            <SectionCard eyebrow="Skills & expertise">
+              {placeholderInner('Coming soon', 'Skills, expertise tags, sectors, and languages.')}
+            </SectionCard>
+          </>
+        )
+      })()}
 
       {tab === 'edit' && (
         <>
