@@ -345,6 +345,7 @@ export default function ProfiluxPage() {
   const [currentPositionDrawerOpen, setCurrentPositionDrawerOpen] = useState(false)
   const [skillsMarketsDrawerOpen, setSkillsMarketsDrawerOpen] = useState(false)
   const [compensationDrawerOpen, setCompensationDrawerOpen] = useState(false)
+  const [clientelingDrawerOpen, setClientelingDrawerOpen] = useState(false)
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -1557,6 +1558,81 @@ export default function ProfiluxPage() {
           </button>
           {savedAt10 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
           {saveError10 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError10}</span>}
+        </div>
+      </Drawer>
+      <SectionCard eyebrow="Clienteling">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div />
+          <button
+            type="button"
+            onClick={() => setClientelingDrawerOpen(true)}
+            style={{
+              background: 'transparent',
+              color: '#ccc',
+              border: '1px solid #2a2a2a',
+              padding: '6px 12px',
+              fontSize: 12,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        </div>
+        <div style={grid}>
+          <div style={label}>Clienteling experience</div>
+          <div>{e.clienteling_experience === true ? 'Yes' : e.clienteling_experience === false ? 'No' : <NotSet />}</div>
+          <div style={label}>Background description</div>
+          <div>{e.clienteling_experience === true && typeof e.clienteling_description === 'string' && e.clienteling_description.length > 0 ? e.clienteling_description : <NotSet />}</div>
+        </div>
+      </SectionCard>
+      <Drawer
+        open={clientelingDrawerOpen}
+        title="Clienteling"
+        onClose={() => setClientelingDrawerOpen(false)}
+      >
+        <div style={sectionLabel}>Clienteling experience</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+          <button
+            type="button"
+            style={draft8.clienteling_experience === true ? chipActive : chip}
+            onClick={() => setDraft8(prev => prev.clienteling_experience === true
+              ? { clienteling_experience: null, clienteling_description: '' }
+              : { clienteling_experience: true, clienteling_description: prev.clienteling_description })}
+          >
+            Yes
+          </button>
+          <button
+            type="button"
+            style={draft8.clienteling_experience === false ? chipActive : chip}
+            onClick={() => setDraft8(prev => ({
+              clienteling_experience: prev.clienteling_experience === false ? null : false,
+              clienteling_description: '',
+            }))}
+          >
+            No
+          </button>
+        </div>
+
+        {draft8.clienteling_experience === true && (
+          <>
+            <div style={sectionLabel}>Background description</div>
+            <textarea
+              style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 80, resize: 'vertical' }}
+              rows={3}
+              value={draft8.clienteling_description}
+              onChange={(ev) => setDraft8(prev => ({ ...prev, clienteling_description: ev.target.value }))}
+              placeholder="Briefly describe your clienteling experience"
+            />
+          </>
+        )}
+
+        <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button style={saving8 ? saveBtnDis : saveBtn} disabled={saving8} onClick={handleSave8}>
+            {saving8 ? 'Saving…' : 'Save'}
+          </button>
+          {savedAt8 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
+          {saveError8 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError8}</span>}
         </div>
       </Drawer>
       {renderStep()}
