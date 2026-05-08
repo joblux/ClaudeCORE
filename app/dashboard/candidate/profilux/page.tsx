@@ -854,6 +854,94 @@ export default function ProfiluxPage() {
     <div style={wrap}>
       <h1 style={h1Style}>ProfiLux — {SCREEN_TITLES[step]}</h1>
       <div style={sub}>Screen {step} / {TOTAL}</div>
+      {(() => {
+        const fn = e.first_name ?? ''
+        const ln = e.last_name ?? ''
+        const fullName = `${fn} ${ln}`.trim()
+        const initials = `${(fn[0] ?? '').toUpperCase()}${(ln[0] ?? '').toUpperCase()}`.trim()
+        const hasAvatar = typeof e.avatar_url === 'string' && e.avatar_url.trim().length > 0
+        const hasHeadline = typeof e.headline === 'string' && e.headline.trim().length > 0
+        const hasJob = typeof e.job_title === 'string' && e.job_title.trim().length > 0
+        const hasEmp = typeof e.current_employer === 'string' && e.current_employer.trim().length > 0
+        const positionLine = hasJob && hasEmp
+          ? `${e.job_title} · ${e.current_employer}`
+          : hasJob
+            ? e.job_title
+            : hasEmp
+              ? e.current_employer
+              : null
+        const hasCity = typeof e.city === 'string' && e.city.trim().length > 0
+        const hasCountry = typeof e.country === 'string' && e.country.trim().length > 0
+        const locationLine = hasCity && hasCountry
+          ? `${e.city}, ${e.country}`
+          : hasCity
+            ? e.city
+            : hasCountry
+              ? e.country
+              : null
+        return (
+          <div style={{
+            background: '#222',
+            border: '1px solid #2a2a2a',
+            borderRadius: 6,
+            padding: '20px 24px',
+            marginBottom: 24,
+            maxWidth: 900,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 20,
+          }}>
+            <div style={{ flex: '0 0 auto' }}>
+              {hasAvatar ? (
+                <img src={e.avatar_url as string} alt="" style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+              ) : (
+                <div style={{
+                  background: '#333',
+                  color: '#fff',
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: 18,
+                  fontWeight: 500,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '50%',
+                  width: 56,
+                  height: 56,
+                }}>
+                  {initials.length > 0 ? initials : '—'}
+                </div>
+              )}
+            </div>
+            <div style={{ flex: '1 1 auto', minWidth: 0 }}>
+              <div style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: 22, color: '#fff', lineHeight: 1.2, marginBottom: 4 }}>
+                {fullName.length > 0
+                  ? fullName
+                  : <em style={{ color: '#666', fontStyle: 'italic', fontFamily: 'Inter, sans-serif', fontSize: 14 }}>Not specified</em>}
+              </div>
+              {hasHeadline && (
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.4, marginBottom: 4 }}>
+                  {e.headline}
+                </div>
+              )}
+              {positionLine && (
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999', lineHeight: 1.4, marginBottom: 2 }}>
+                  {positionLine}
+                </div>
+              )}
+              {locationLine && (
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.4 }}>
+                  {locationLine}
+                </div>
+              )}
+            </div>
+            <div style={{ flex: '0 0 auto', textAlign: 'right', alignSelf: 'center' }}>
+              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777' }}>
+                {e.profile_completeness ?? 0}% complete
+              </div>
+            </div>
+          </div>
+        )
+      })()}
       {/* CV upload + parse card — S1 */}
       <div style={{
         background: '#222',
