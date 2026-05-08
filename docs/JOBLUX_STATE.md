@@ -21,7 +21,7 @@ schema → enums → constraints → routes → UX.
 - Ledger (`/admin/tasks`) = task tracking only
 - Handoff = session continuity only
 - Skills = prompt formatting behavior only
-- Memory = quick recall only
+- Memory = quick recall only; restructuring or removing memory edits requires explicit Mo approval before write.
 - None of the above may redefine architecture.
 
 ## Canonical objects (only sources of truth in the system)
@@ -527,6 +527,7 @@ All tabbed pages use `?tab=` query params. Brands: 5 tabs (~760 sitemap URLs).
 - One-line copy-paste commands only
 - Uniquely named files every time (never `page.tsx` in Downloads)
 - Claude Code prompts: single copyable lines in code blocks, no placeholders
+- Vercel is not used in JOBLUX prod (TWX only).
 
 ---
 

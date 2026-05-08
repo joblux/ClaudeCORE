@@ -14,6 +14,13 @@ REPO TRUTH SOURCE PROTOCOL (May 2026):
 
 Announce every repo read with path + branch/HEAD/commit when available. State: "committed repo truth; local uncommitted changes are not visible."
 
+## EXECUTION SURFACE BOUNDARY (May 2026)
+
+- Claude AI = planning, connected reads (GitHub MCP / Supabase MCP), browser QA via Chrome MCP, prod validation. Runs these directly. Never relays to Mo as a prompt.
+- Claude Code = local repo execution: patch / test / build / git status / commit / push, deploy confirmation. No committed-file reads via Code (use GitHub MCP).
+- Mo = product authority + approval gate (Propose → Wait → Approve → Execute). Not transport middleware between tools.
+- Prod QA happens only after commit + push + Coolify deploy green. Never on uncommitted local state.
+
 Canonical contracts referenced by STATE:
 - `docs/PROFILUX_MATRIX_V1.md` — ProfiLux storage, resolver, and projection contract (§7.6 EditorView, §4.5 L2 write contract).
 

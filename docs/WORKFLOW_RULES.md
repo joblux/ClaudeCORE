@@ -18,6 +18,15 @@ If any rule here conflicts with a skill, this file wins.
 
 ---
 
+## EXECUTION SURFACE BOUNDARY (May 2026)
+
+- Claude AI = planning, connected reads (GitHub MCP / Supabase MCP), browser QA via Chrome MCP, prod validation. Runs these directly. Never relays to Mo as a prompt.
+- Claude Code = local repo execution: patch / test / build / git status / commit / push, deploy confirmation. No committed-file reads via Code (use GitHub MCP).
+- Mo = product authority + approval gate (Propose → Wait → Approve → Execute). Not transport middleware between tools.
+- Prod QA happens only after commit + push + Coolify deploy green. Never on uncommitted local state.
+
+---
+
 ## Output discipline (default ON)
 
 | Surface | Default | Override |
