@@ -32,6 +32,39 @@ const saveBtnDis: React.CSSProperties = { ...saveBtn, opacity: 0.5, cursor: 'not
 const chip: React.CSSProperties = { background: 'transparent', color: '#ccc', border: '1px solid #444', padding: '6px 12px', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13, borderRadius: 999 }
 const chipActive: React.CSSProperties = { ...chip, background: 'rgba(165, 142, 40, 0.15)', color: '#fff', borderColor: '#a58e28' }
 
+type SectionCardProps = {
+  eyebrow?: string
+  layout?: 'block' | 'flex'
+  children: React.ReactNode
+}
+
+function SectionCard({ eyebrow, layout = 'block', children }: SectionCardProps) {
+  const base: React.CSSProperties = {
+    background: '#222',
+    border: '1px solid #2a2a2a',
+    borderRadius: 6,
+    padding: '20px 24px',
+    marginBottom: 24,
+    maxWidth: 900,
+  }
+  const flexExtras: React.CSSProperties = layout === 'flex'
+    ? { display: 'flex', alignItems: 'center', gap: 20 }
+    : {}
+  const eyebrowStyle: React.CSSProperties = {
+    fontSize: 10,
+    color: '#999',
+    letterSpacing: 0.5,
+    marginBottom: 10,
+    textTransform: 'uppercase',
+  }
+  return (
+    <div style={{ ...base, ...flexExtras }}>
+      {eyebrow && <div style={eyebrowStyle}>{eyebrow}</div>}
+      {children}
+    </div>
+  )
+}
+
 type Screen3Draft = {
   job_title: string
   current_employer: string
@@ -880,17 +913,7 @@ export default function ProfiluxPage() {
               ? e.country
               : null
         return (
-          <div style={{
-            background: '#222',
-            border: '1px solid #2a2a2a',
-            borderRadius: 6,
-            padding: '20px 24px',
-            marginBottom: 24,
-            maxWidth: 900,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 20,
-          }}>
+          <SectionCard layout="flex">
             <div style={{ flex: '0 0 auto' }}>
               {hasAvatar ? (
                 <img src={e.avatar_url as string} alt="" style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
@@ -939,20 +962,11 @@ export default function ProfiluxPage() {
                 {e.profile_completeness ?? 0}% complete
               </div>
             </div>
-          </div>
+          </SectionCard>
         )
       })()}
       {/* CV upload + parse card — S1 */}
-      <div style={{
-        background: '#222',
-        border: '1px solid #2a2a2a',
-        borderRadius: 6,
-        padding: '20px 24px',
-        marginBottom: 24,
-        maxWidth: 900,
-      }}>
-        <div style={{ fontSize: 10, color: '#999', letterSpacing: 0.5, marginBottom: 10, textTransform: 'uppercase' }}>CV</div>
-
+      <SectionCard eyebrow="CV">
         {!cvUrl && (
           <>
             <div style={{ fontSize: 13, color: '#ccc', marginBottom: 14 }}>Upload your CV. JOBLUX will parse it for review.</div>
@@ -1032,7 +1046,7 @@ export default function ProfiluxPage() {
           onChange={handleFileSelected}
           style={{ display: 'none' }}
         />
-      </div>
+      </SectionCard>
       {/* Identity prefill review panel - S1.5 */}
       {(() => {
         const sug = editor.cv_identity_suggestions
@@ -1050,15 +1064,7 @@ export default function ProfiluxPage() {
         }
         const checkedCount = keys.filter(k => suggestionSelected[k]).length
         return (
-          <div style={{
-            background: '#222',
-            border: '1px solid #2a2a2a',
-            borderRadius: 6,
-            padding: '20px 24px',
-            marginBottom: 24,
-            maxWidth: 900,
-          }}>
-            <div style={{ fontSize: 10, color: '#999', letterSpacing: 0.5, marginBottom: 10, textTransform: 'uppercase' }}>Apply suggestions from your CV</div>
+          <SectionCard eyebrow="Apply suggestions from your CV">
             <div style={{ fontSize: 13, color: '#ccc', marginBottom: 14 }}>
               Your CV contains values for fields that are still empty on your ProfiLux. Select what you want to apply.
             </div>
@@ -1095,7 +1101,7 @@ export default function ProfiluxPage() {
               </button>
               {applyError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{applyError}</span>}
             </div>
-          </div>
+          </SectionCard>
         )
       })()}
       {renderStep()}
