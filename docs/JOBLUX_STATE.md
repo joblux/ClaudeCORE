@@ -54,23 +54,24 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **fe528f0** `feat(profilux): S7 Current Position drawer integration (card + drawer above tunnel, screen 3 unchanged)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +65/-0). First real Drawer integration into Edit per MATRIX v1.2 §22 ("one drawer per section"). New `<SectionCard eyebrow="Current Position">` rendered inside the Edit branch above `{renderStep()}`, between S1.5 IIFE and tunnel. Closed-card body is a 4-row read-only summary (`job_title`, `current_employer`, `seniority` resolved via `seniorityLabel` lookup against `PROFILUX_SENIORITY_OPTIONS`, `total_years_experience`). Top-right neutral "Edit" button (transparent / #ccc / 1px solid #2a2a2a / 6px 12px / 12px Inter) opens a sibling `<Drawer>` instance with `currentPositionDrawerOpen` state. Drawer body reuses existing Screen-3 form JSX verbatim (4 inputs: text/text/select/number) bound to existing `draft` / `setDraft` / `handleSave` / `saving` / `savedAt` / `saveError` — NO new state, NO new endpoint, NO new helpers, NO `maxWidth:900` wrapper inside drawer. Screen 3 inside `renderStep()` is untouched (still in tunnel; `step` counter remains `Screen X / 11`); `draft` and `handleSave` now referenced in 2 places, no unused-var warnings. Prod QA via Chrome MCP on Alex Mason fixture: 11/11 PASS — card placement ✓, closed-summary with seniority label ✓, Edit button ✓, drawer open mechanics (right 480px, dark backdrop) ✓, 4 inputs render ✓, save persisted `total_years_experience=15` with green "Saved" indicator ✓, drawer stays open after save ✓, X close ✓, ESC close ✓, backdrop click close ✓, reopen shows saved values ✓, tunnel Screen 3 mirrors drawer-saved value (years=15) confirming shared `draft` single-source-of-truth ✓. Bonus observed: closed-card refetched after save (Years 15 visible behind drawer immediately), `profile_completeness` recompute fired (0% → 49%) confirming Matrix §4.4 / Rule W3 working through drawer save path. Seniority select rendered correctly but round-trip not explicitly exercised (native select dropdown click unreliable via screenshot coords; bound state identical to tunnel save which is prod-proven — low risk). No types/projector/API/schema/handler changes.
+
 - **c66eca4** `feat(profilux): S6 Drawer primitive + Manage demo trigger (no animation, no integration)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +176/-6). Co-located `Drawer({open, title, onClose, children})` primitive: 480px right-side panel desktop / fullscreen mobile (768px breakpoint via `window.innerWidth` + resize listener), `rgba(0,0,0,0.6)` backdrop desktop only, ESC handler + body-scroll lock via `useEffect`, neutral chrome (#1a1a1a bg + #2a2a2a borders + #fff/#ccc/#999 text), zero new gold use, NO animation/transition/`<style>` tag. Manage tab placeholder replaced with: copy line + "Preview drawer (demo)" neutral button + italic note. Demo `<Drawer>` wired to `drawerDemoOpen` state. Prod visual validation via Chrome extension: open via button → drawer renders right-side 480px ✓; close via X ✓; close via ESC ✓; close via backdrop click ✓. View tab unchanged, Edit tab unchanged, SectionCard primitive unchanged, refetch unchanged. No types/projector/API/schema/handler changes.
 
 - **2fb69c1** `feat(profilux): S5 View tab v0 preview shell (header + Coming soon section cards)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (+87/-7). View tab placeholder replaced with header strip (avatar/initials, masked display name `${first_name} ${last_initial}.`, headline if present, `job_title` only — no `current_employer`, location line) plus three `<SectionCard>` placeholders ("About", "Experience", "Skills & expertise") with "Coming soon" copy. Reads ONLY from existing `editor`/`e` scope. NO `projectFor` import, NO `viewResolved` state, NO API change, NO client-side public masking. Prod validation PASS on Mason (Alex M. · Boutique Leader · Paris, Andorra rendered, NO Hublot leak, NO experiences leak despite 3 real experiences in cv_parsed_data).
-
-- **b7056be** `feat(profilux): S4 View/Edit/Manage triad scaffold (local state, Edit content unchanged)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (+58/-2). Three tabs driven by local `useState<ProfiluxTab>('edit')` — no router, no search params. Active-tab underline `#a58e28` (third + final gold use within page budget). H1 simplified to `ProfiLux`. Edit sub line composed `Screen X / 11 · SCREEN_TITLE`. Prod visual + state preservation validated: Edit→Next×4→Screen 5/11→View→Edit returns to Screen 5.
 
 ### CURRENT STEP — strict order
 
 **Next ProfiLux Reload UI slice (not yet scoped).**
 
-S0 (MATRIX v1.2 doctrine), S1 (CV pipeline), S1.5 (identity prefill review panel), S2 (identity strip), S3 (SectionCard primitive), S4 (View/Edit/Manage triad scaffold), S5 (View tab v0 preview shell), and S6 (Drawer primitive + Manage demo trigger) all SHIPPED + prod-validated. Substrate now: doctrine locked, CV pipeline working, prefill mechanism proven, identity strip in place, shared card chrome unified, top-level triad mental model in place, View tab v0 shell live, Drawer primitive ready and demo-validated.
+S0 (MATRIX v1.2 doctrine), S1 (CV pipeline), S1.5 (identity prefill review panel), S2 (identity strip), S3 (SectionCard primitive), S4 (View/Edit/Manage triad scaffold), S5 (View tab v0 preview shell), S6 (Drawer primitive + Manage demo trigger), and S7 (Current Position drawer integration — first real per-section drawer) all SHIPPED + prod-validated. Substrate now: doctrine locked, CV pipeline working, prefill mechanism proven, identity strip in place, shared card chrome unified, top-level triad mental model in place, View tab v0 shell live, Drawer primitive demo-validated, AND first real per-section drawer (Current Position) live with full read-summary + edit-drawer + save round-trip + tunnel mirroring proven.
 
 Slice candidates remaining per MATRIX v1.2 §§21–24 + §13 deferred items (no commitment — Mo + GPT scope before any draft):
 - Tier 2 add-library scaffolding (schema PARKED — UI shell only feasible)
 - View tab content fill-in (real preview) — **gated on a server-emitted public projection from `/api/profilux` or a sibling endpoint; do NOT consume `projectFor` client-side** (per DO NOT)
 - Manage tab content (sharing, visibility, settings — anchors `/api/profilux/reset-link` rebuild; STATE DO NOT until reset-link unparked)
-- Drawer integration into Edit/passport (per MATRIX v1.2 §22 "one drawer per section") — needs section-form scoping decision (which section first; v1.2 §22.1 ordering favors Identity or Current Position)
+- Next per-section drawer integration (Skills & Markets recommended — reuses existing chip-multi-toggle handlers, low regression risk; OR Education & Languages; OR Compensation). Identity drawer remains gated on coordination decision with S1.5 prefill panel + Edit-tab identity strip (3 write surfaces over the same column subset — needs explicit design call before draft).
+- Future: lift remaining 10 tunnel screens into per-section drawers (S8–S?), step counter retire, `step` state retire
 - Future: query-param tab persistence (`?tab=view|edit|manage`) once visual model approved
 - Future: extract `SectionCard`, `Drawer`, identity strip to `components/profilux/` once reused beyond this file
 - Future: drawer animation (slide/fade) — currently instant by design; add when visual polish takes priority
@@ -114,6 +115,8 @@ Mo + GPT pick the next slice and lock scope before any implementation prompt is 
 - Resequence backlog from broader ledger.
 - Build any product-facing surface (tunnel, editor, dashboard, admin) without first read-only inspecting the live components per the visual guardrail.
 - Drift from the executive-presence guardrail in any copy or microstate.
+- Build an Identity-section drawer without first deciding how it coexists with the S1.5 prefill panel and the Edit-tab identity strip. Three potential write surfaces over the same column subset (`first_name`, `last_name`, `city`, `nationality`) require an explicit coordination decision before any draft.
+- Delete or remap tunnel `renderStep()` cases for sections that have an active drawer integration (e.g. Screen 3 / Current Position post-S7). Tunnel + drawer coexist deliberately; lift only happens in a dedicated future slice once all 9 default sections have drawers shipped.
 
 ### PARKED (admin_tasks status=parked)
 
@@ -136,7 +139,7 @@ Mo + GPT pick the next slice and lock scope before any implementation prompt is 
 - **F-public-slug-stub** — CLOSED 2026-05-07 by `369c2e0`.
 - **F-empty-string-vs-null**, **F-availability-default-drift**, **F-currency-default-applied** — CLOSED 2026-05-01.
 
-**Last updated:** May 8, 2026 PM — S6 Drawer primitive + Manage demo trigger SHIPPED + prod-validated (open/close mechanics: X, ESC, backdrop click — all PASS via Chrome extension test). Next: ProfiLux Reload next UI slice (not yet scoped).
+**Last updated:** May 8, 2026 PM — S7 Current Position drawer integration SHIPPED + prod-validated (11/11 checks PASS via Chrome MCP on Alex Mason: card render, closed summary with seniority label, Edit button, drawer mechanics X/ESC/backdrop, save persisted years=15 with green Saved, drawer stays open, reopen persists, tunnel Screen 3 mirrors saved value, profile_completeness recompute 0%→49% observed). First real per-section drawer landed; Screen 3 in tunnel intact. Next: ProfiLux Reload next UI slice (not yet scoped).
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
@@ -352,7 +355,7 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 ### Candidate (`/dashboard/candidate`):
 - 4-card next-steps: Profile, Careers, Intelligence, Contribute
 - ProfiLux completion bar (backend-computed readiness signal; not an admission gate)
-- ProfiLux editor at `/dashboard/candidate/profilux` (currently 11-screen tunnel + S1 CV card + S1.5 identity prefill review panel above; passport rewrite pending per MODEL)
+- ProfiLux editor at `/dashboard/candidate/profilux` (currently 11-screen tunnel + S1 CV card + S1.5 identity prefill review panel + S7 Current Position SectionCard + Drawer above the tunnel; passport rewrite progressing slice-by-slice per MODEL)
 
 ### Business (`/dashboard/business`):
 - Submit brief CTA
@@ -373,7 +376,7 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 ## 12. PROFILUX
 
 - Living object, owned continuously by user (per MODEL May 6, MATRIX v1.2 §2)
-- Current implementation: 11-screen tunnel (Phase 4.A) + S1 CV upload+parse card + S1.5 inline identity prefill review panel (4 fields, explicit confirm) at `/dashboard/candidate/profilux`. Passport-with-drawer UX rewrite pending (MATRIX v1.2 §7.6 + §§14, 21–24).
+- Current implementation: 11-screen tunnel (Phase 4.A) + S1 CV upload+parse card + S1.5 inline identity prefill review panel + S7 Current Position SectionCard with Drawer at `/dashboard/candidate/profilux`. Passport-with-drawer UX rewrite progressing slice-by-slice (MATRIX v1.2 §7.6 + §§14, 21–24); first real per-section drawer (Current Position) live, 8 default sections + Identity coexistence pending.
 - Storage contract: `members.*` flat columns + `cv_parsed_data` jsonb (per MATRIX v1 §3 layer model)
 - Resolver: `lib/profilux/resolveProfiLux` returns `ProfiLuxResolved` (single shape, all surfaces). Now also emits `cv_identity_suggestions` (4-field pre-Rule-A diff for S1.5 prefill UI).
 - 6 surface projections via `projectFor`: dashboard / editor / public / admin / ats / client. `EditorView` carries `cv_identity_suggestions` pass-through.
