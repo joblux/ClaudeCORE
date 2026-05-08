@@ -346,6 +346,7 @@ export default function ProfiluxPage() {
   const [skillsMarketsDrawerOpen, setSkillsMarketsDrawerOpen] = useState(false)
   const [compensationDrawerOpen, setCompensationDrawerOpen] = useState(false)
   const [clientelingDrawerOpen, setClientelingDrawerOpen] = useState(false)
+  const [availabilityTargetsDrawerOpen, setAvailabilityTargetsDrawerOpen] = useState(false)
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -474,6 +475,19 @@ export default function ProfiluxPage() {
   }
   const skillLabel = (value: string) =>
     PROFILUX_SKILL_OPTIONS.find(o => o.value === value)?.label ?? value
+  const availabilityLabel = (value: Screen9Draft['availability']) => {
+    switch (value) {
+      case 'active': return 'Actively looking'
+      case 'open': return 'Open to opportunities'
+      case 'passive': return 'Passively exploring'
+      case 'unavailable': return 'Not available'
+      default: return null
+    }
+  }
+  const departmentLabel = (value: string) =>
+    PROFILUX_DEPARTMENT_OPTIONS.find(o => o.value === value)?.label ?? value
+  const contractTypeLabel = (value: string) =>
+    PROFILUX_CONTRACT_TYPE_OPTIONS.find(o => o.value === value)?.label ?? value
   const cvUrl = e.cv_meta?.cv_url ?? null
   const cvParsedAt = e.cv_meta?.cv_parsed_at ?? null
   const parsedDateLabel = (cvParsedAt && !isNaN(new Date(cvParsedAt).getTime()))
@@ -1633,6 +1647,145 @@ export default function ProfiluxPage() {
           </button>
           {savedAt8 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
           {saveError8 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError8}</span>}
+        </div>
+      </Drawer>
+      <SectionCard eyebrow="Availability & Targets">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div />
+          <button
+            type="button"
+            onClick={() => setAvailabilityTargetsDrawerOpen(true)}
+            style={{
+              background: 'transparent',
+              color: '#ccc',
+              border: '1px solid #2a2a2a',
+              padding: '6px 12px',
+              fontSize: 12,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        </div>
+        <div style={grid}>
+          <div style={label}>Availability</div>
+          <div>{availabilityLabel(e.availability) ?? <NotSet />}</div>
+          <div style={label}>Desired locations</div>
+          <div>{e.desired_locations.length > 0 ? e.desired_locations.join(', ') : <NoneSel />}</div>
+          <div style={label}>Desired departments</div>
+          <div>{e.desired_departments.length > 0 ? e.desired_departments.map(departmentLabel).join(', ') : <NoneSel />}</div>
+          <div style={label}>Desired contract types</div>
+          <div>{e.desired_contract_types.length > 0 ? e.desired_contract_types.map(contractTypeLabel).join(', ') : <NoneSel />}</div>
+          <div style={label}>Open to relocation</div>
+          <div>{e.open_to_relocation === true ? 'Yes' : e.open_to_relocation === false ? 'No' : <NotSet />}</div>
+          <div style={label}>Relocation preferences</div>
+          <div>{e.open_to_relocation === true && typeof e.relocation_preferences === 'string' && e.relocation_preferences.length > 0 ? e.relocation_preferences : <NotSet />}</div>
+        </div>
+      </SectionCard>
+      <Drawer
+        open={availabilityTargetsDrawerOpen}
+        title="Availability & Targets"
+        onClose={() => setAvailabilityTargetsDrawerOpen(false)}
+      >
+        <div style={grid}>
+          <div style={label}>Availability</div>
+          <div>
+            <select style={select} value={draft9.availability ?? ''} onChange={(ev) => setDraft9({ ...draft9, availability: ev.target.value === '' ? null : ev.target.value as Screen9Draft['availability'] })}>
+              <option value="">— Not specified —</option>
+              <option value="active">Actively looking</option>
+              <option value="open">Open to opportunities</option>
+              <option value="passive">Passively exploring</option>
+              <option value="unavailable">Not available</option>
+            </select>
+          </div>
+        </div>
+
+        <div style={sectionLabel}>Target locations</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+          {PROFILUX_LOCATION_OPTIONS.map((o) => (
+            <button
+              key={o}
+              type="button"
+              style={draft9.desired_locations.includes(o) ? chipActive : chip}
+              onClick={() => setDraft9({ ...draft9, desired_locations: draft9.desired_locations.includes(o) ? draft9.desired_locations.filter(v => v !== o) : [...draft9.desired_locations, o] })}
+            >
+              {o}
+            </button>
+          ))}
+        </div>
+
+        <div style={sectionLabel}>Target departments</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+          {PROFILUX_DEPARTMENT_OPTIONS.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              style={draft9.desired_departments.includes(o.value) ? chipActive : chip}
+              onClick={() => setDraft9({ ...draft9, desired_departments: draft9.desired_departments.includes(o.value) ? draft9.desired_departments.filter(v => v !== o.value) : [...draft9.desired_departments, o.value] })}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={sectionLabel}>Contract types</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+          {PROFILUX_CONTRACT_TYPE_OPTIONS.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              style={draft9.desired_contract_types.includes(o.value) ? chipActive : chip}
+              onClick={() => setDraft9({ ...draft9, desired_contract_types: draft9.desired_contract_types.includes(o.value) ? draft9.desired_contract_types.filter(v => v !== o.value) : [...draft9.desired_contract_types, o.value] })}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={sectionLabel}>Open to relocation</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+          <button
+            type="button"
+            style={draft9.open_to_relocation === true ? chipActive : chip}
+            onClick={() => setDraft9(prev => prev.open_to_relocation === true
+              ? { ...prev, open_to_relocation: null, relocation_preferences: '' }
+              : { ...prev, open_to_relocation: true })}
+          >
+            Yes
+          </button>
+          <button
+            type="button"
+            style={draft9.open_to_relocation === false ? chipActive : chip}
+            onClick={() => setDraft9(prev => ({
+              ...prev,
+              open_to_relocation: prev.open_to_relocation === false ? null : false,
+              relocation_preferences: '',
+            }))}
+          >
+            No
+          </button>
+        </div>
+
+        {draft9.open_to_relocation === true && (
+          <>
+            <div style={sectionLabel}>Relocation preferences</div>
+            <textarea
+              style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 80, resize: 'vertical' }}
+              rows={3}
+              value={draft9.relocation_preferences}
+              onChange={(ev) => setDraft9(prev => ({ ...prev, relocation_preferences: ev.target.value }))}
+              placeholder="e.g. EU only, willing to relocate within 3 months"
+            />
+          </>
+        )}
+
+        <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button style={saving9 ? saveBtnDis : saveBtn} disabled={saving9} onClick={handleSave9}>
+            {saving9 ? 'Saving…' : 'Save'}
+          </button>
+          {savedAt9 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
+          {saveError9 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError9}</span>}
         </div>
       </Drawer>
       {renderStep()}
