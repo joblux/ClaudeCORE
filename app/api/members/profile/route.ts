@@ -22,42 +22,6 @@ const ALLOWED_FIELDS = [
 ]
 
 /**
- * Calculate profile completeness score (0-100) based on filled fields and related records.
- */
-async function calculateProfileCompleteness(memberId: string, memberData: Record<string, unknown>): Promise<number> {
-  let score = 0
-
-  // Flat field checks
-  if (memberData.headline) score += 10
-  if (memberData.bio) score += 10
-  if (memberData.job_title) score += 5
-  if (memberData.city && memberData.country) score += 5
-  if (memberData.phone) score += 5
-  if (memberData.linkedin_url) score += 5
-  if (memberData.avatar_url) score += 5
-  if (memberData.availability && memberData.availability !== 'not_actively_looking') score += 5
-
-  // key_skills with at least 3 items
-  const skills = memberData.key_skills
-  if (Array.isArray(skills) && skills.length >= 3) score += 5
-
-  // Related record counts
-  const [workExp, edu, lang, cv] = await Promise.all([
-    supabase.from('work_experiences').select('id', { count: 'exact', head: true }).eq('member_id', memberId),
-    supabase.from('education_records').select('id', { count: 'exact', head: true }).eq('member_id', memberId),
-    supabase.from('member_languages').select('id', { count: 'exact', head: true }).eq('member_id', memberId),
-    supabase.from('member_documents').select('id', { count: 'exact', head: true }).eq('member_id', memberId).eq('document_type', 'cv'),
-  ])
-
-  if ((workExp.count ?? 0) >= 1) score += 15
-  if ((edu.count ?? 0) >= 1) score += 10
-  if ((lang.count ?? 0) >= 1) score += 5
-  if ((cv.count ?? 0) >= 1) score += 15
-
-  return score
-}
-
-/**
  * GET /api/members/profile
  * Returns the full member profile with related records.
  * Optional ?email= param for admin to view other profiles.
@@ -172,26 +136,7 @@ async function handleProfileUpdate(req: NextRequest) {
       return NextResponse.json({ error: updateError.message }, { status: 500 })
     }
 
-    // Fetch the updated member to recalculate completeness
-    const { data: updatedMember, error: fetchError } = await supabase
-      .from('members')
-      .select('*')
-      .eq('email', targetEmail)
-      .single()
-
-    if (fetchError || !updatedMember) {
-      return NextResponse.json({ error: 'Failed to fetch updated member' }, { status: 500 })
-    }
-
-    // Recalculate and save profile completeness
-    const profileCompleteness = await calculateProfileCompleteness(updatedMember.id, updatedMember)
-
-    await supabase
-      .from('members')
-      .update({ profile_completeness: profileCompleteness })
-      .eq('id', updatedMember.id)
-
-    return NextResponse.json({ success: true, profile_completeness: profileCompleteness })
+    return NextResponse.json({ success: true })
   } catch (err) {
     console.error('Profile update error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
