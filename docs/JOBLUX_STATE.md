@@ -54,24 +54,24 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
-- **af2a86a** `feat(profilux): S2 identity strip above CV card (read-only, additive)` — May 8 2026 AM. SHIPPED + PROD-VALIDATED. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +88 lines). Inline IIFE between subhead and CV card. Renders: avatar (img or initials fallback), name (Playfair 22px), optional headline, position line `${job_title} · ${current_employer}`, location line `${city}, ${country}`, discreet `X% complete` right-aligned. Uses existing EditorView fields only — no types/resolver/projector/API/schema changes. Tunnel Screen 1 untouched. Read-only, no handlers. Prod visual validation PASS on Mason fixture (avatar + Alex Mason + Boutique Leader · Hublot + Paris, Andorra rendered correctly). Headline absent from strip (Mason headline empty — spec-correct omission). Strip surfaced f6508e54 completeness divergence more visibly (already-parked, not in scope).
+- **2a5623c** `refactor(profilux): S3 co-located SectionCard primitive (zero visual change)` — May 8 2026 AM. SHIPPED + PROD-VALIDATED. Single-file refactor (`app/dashboard/candidate/profilux/page.tsx`, +39/-33). Co-located `SectionCard({eyebrow?, layout?, children})` primitive at top of file (above ProfiluxPage). Three migration targets collapsed onto one chrome: S2 identity strip → `<SectionCard layout="flex">`, S1 CV card → `<SectionCard eyebrow="CV">`, S1.5 prefill panel → `<SectionCard eyebrow="Apply suggestions from your CV">`. Inline eyebrow `<div>`s deleted at S1 + S1.5 sites (eyebrow now rendered by the primitive). No types/resolver/projector/API/schema/handler changes. No new file (deferred extraction; visual gate passed). Prod visual validation PASS on Mason fixture — three cards render pixel-identical to pre-refactor.
 
-- **38c2100** `feat(profilux): S1.5 inline identity prefill review panel (4 fields, explicit confirm)` — May 7 2026 PM. Path B resolver-side eligibility. New `CvIdentitySuggestions` type on `ProfiLuxResolved` + `EditorView`; computed pre-Rule-A in `resolveProfiLux` from raw `members.*` and `cv_parsed_data.identity` (4 keys: `first_name`, `last_name`, `city`, `nationality`). Inline review panel between S1 CV card and `{renderStep()}`. Apply path: explicit checkbox + button → POST `/api/profilux` with camelCase keys → resolver re-emits empty suggestions → panel auto-hides. 4 files, +144 lines. TSC + build clean. Contract validation PASS via SQL surrogate. Prod visual validation PASS. No silent writes. L2 sovereignty preserved.
+- **af2a86a** `feat(profilux): S2 identity strip above CV card (read-only, additive)` — May 8 2026 AM. SHIPPED + PROD-VALIDATED. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +88 lines). Inline IIFE between subhead and CV card. Renders: avatar (img or initials fallback), name (Playfair 22px), optional headline, position line `${job_title} · ${current_employer}`, location line `${city}, ${country}`, discreet `X% complete` right-aligned. Uses existing EditorView fields only. Tunnel Screen 1 untouched. Read-only. Prod validation PASS on Mason fixture. Strip surfaced f6508e54 completeness divergence more visibly (already-parked).
 
-- **b533e31** `feat(profilux): S1 additive CV upload + parse card (no prefill)` — May 7 2026 PM. SHIPPED + PROD-VALIDATED. Additive CV upload+parse card above tunnel; 3 visual states keyed off `(cvUrl, cvParsedAt)`. End-to-end pipeline prod-validated on Alex Mason fixture. L2 sovereignty proven via Mazour/NYC L1 vs Mason/Paris L2 invariance under parse.
+- **38c2100** `feat(profilux): S1.5 inline identity prefill review panel (4 fields, explicit confirm)` — May 7 2026 PM. Path B resolver-side eligibility. New `CvIdentitySuggestions` type on `ProfiLuxResolved` + `EditorView`; computed pre-Rule-A in `resolveProfiLux` from raw `members.*` and `cv_parsed_data.identity` (4 keys). Inline review panel between S1 CV card and `{renderStep()}`. Apply path: explicit checkbox + button → POST `/api/profilux` with camelCase keys → resolver re-emits empty suggestions → panel auto-hides. 4 files, +144 lines. Contract validation PASS via SQL surrogate. Prod visual validation PASS. No silent writes. L2 sovereignty preserved.
 
 ### CURRENT STEP — strict order
 
 **Next ProfiLux Reload UI slice (not yet scoped).**
 
-S0 (MATRIX v1.2 doctrine), S1 (CV pipeline), S1.5 (identity prefill review panel), and S2 (identity strip above CV card) all SHIPPED + prod-validated. Substrate progressing: doctrine locked, CV pipeline working, prefill mechanism proven, identity strip in place above tunnel.
+S0 (MATRIX v1.2 doctrine), S1 (CV pipeline), S1.5 (identity prefill review panel), S2 (identity strip above CV card), and S3 (co-located SectionCard primitive) all SHIPPED + prod-validated. Substrate progressing: doctrine locked, CV pipeline working, prefill mechanism proven, identity strip in place, shared card chrome unified at three sites via `SectionCard`.
 
 Slice candidates remaining per MATRIX v1.2 §§21–24 + §13 deferred items (no commitment — Mo + GPT scope before any draft):
 - View/Edit/Manage triad scaffold
-- Section card component family
 - Drawer component family
 - Tier 2 add-library scaffolding (schema PARKED — UI shell only feasible)
-- Future: extract S2 inline strip to a reusable `IdentityStrip` component (deferred — visual approval gate already passed; extraction itself is the trigger)
+- Future: extract `SectionCard` to `components/profilux/` once a 4th call site appears (premature now)
+- Future: extract S2 inline strip to a reusable `IdentityStrip` component (deferred — visual gate already passed; extraction trigger still pending)
 
 Mo + GPT pick the next slice and lock scope before any implementation prompt is drafted.
 
@@ -133,7 +133,7 @@ Mo + GPT pick the next slice and lock scope before any implementation prompt is 
 - **F-public-slug-stub** — CLOSED 2026-05-07 by `369c2e0`.
 - **F-empty-string-vs-null**, **F-availability-default-drift**, **F-currency-default-applied** — CLOSED 2026-05-01.
 
-**Last updated:** May 8, 2026 AM — S2 identity strip SHIPPED + prod-validated. Next: ProfiLux Reload next UI slice (not yet scoped).
+**Last updated:** May 8, 2026 AM — S3 SectionCard primitive SHIPPED + prod-validated. Next: ProfiLux Reload next UI slice (not yet scoped).
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
