@@ -54,24 +54,26 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
-- **2a5623c** `refactor(profilux): S3 co-located SectionCard primitive (zero visual change)` — May 8 2026 AM. SHIPPED + PROD-VALIDATED. Single-file refactor (`app/dashboard/candidate/profilux/page.tsx`, +39/-33). Co-located `SectionCard({eyebrow?, layout?, children})` primitive at top of file (above ProfiluxPage). Three migration targets collapsed onto one chrome: S2 identity strip → `<SectionCard layout="flex">`, S1 CV card → `<SectionCard eyebrow="CV">`, S1.5 prefill panel → `<SectionCard eyebrow="Apply suggestions from your CV">`. Inline eyebrow `<div>`s deleted at S1 + S1.5 sites (eyebrow now rendered by the primitive). No types/resolver/projector/API/schema/handler changes. No new file (deferred extraction; visual gate passed). Prod visual validation PASS on Mason fixture — three cards render pixel-identical to pre-refactor.
+- **b7056be** `feat(profilux): S4 View/Edit/Manage triad scaffold (local state, Edit content unchanged)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +58/-2). Three tabs: View (placeholder shell, "Public view preview"), Edit (verbatim current content — sub line, S2 strip, CV card, S1.5 panel, renderStep, nav), Manage (placeholder shell, "Sharing, visibility, account settings"). Tab driven by local `useState<ProfiluxTab>('edit')` — no router, no search params, no Suspense. Active-tab underline `#a58e28` (third + final gold use within page budget). H1 simplified to `ProfiLux`. Edit sub line composed `Screen X / 11 · SCREEN_TITLE`. Prod visual + state preservation validated via Chrome extension: Edit→Next×4→Screen 5/11 Career History→View→Edit returns to Screen 5 (state survives tab switches). No types/resolver/projector/API/schema/handler changes.
+
+- **2a5623c** `refactor(profilux): S3 co-located SectionCard primitive (zero visual change)` — May 8 2026 AM. SHIPPED + PROD-VALIDATED. Single-file refactor (`app/dashboard/candidate/profilux/page.tsx`, +39/-33). Co-located `SectionCard({eyebrow?, layout?, children})` primitive at top of file. Three migration targets collapsed onto one chrome: S2 identity strip → `<SectionCard layout="flex">`, S1 CV card → `<SectionCard eyebrow="CV">`, S1.5 prefill panel → `<SectionCard eyebrow="Apply suggestions from your CV">`. Inline eyebrow `<div>`s deleted at S1 + S1.5 sites. No types/resolver/projector/API/schema/handler changes. Prod visual validation PASS — three cards render pixel-identical to pre-refactor.
 
 - **af2a86a** `feat(profilux): S2 identity strip above CV card (read-only, additive)` — May 8 2026 AM. SHIPPED + PROD-VALIDATED. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +88 lines). Inline IIFE between subhead and CV card. Renders: avatar (img or initials fallback), name (Playfair 22px), optional headline, position line `${job_title} · ${current_employer}`, location line `${city}, ${country}`, discreet `X% complete` right-aligned. Uses existing EditorView fields only. Tunnel Screen 1 untouched. Read-only. Prod validation PASS on Mason fixture. Strip surfaced f6508e54 completeness divergence more visibly (already-parked).
-
-- **38c2100** `feat(profilux): S1.5 inline identity prefill review panel (4 fields, explicit confirm)` — May 7 2026 PM. Path B resolver-side eligibility. New `CvIdentitySuggestions` type on `ProfiLuxResolved` + `EditorView`; computed pre-Rule-A in `resolveProfiLux` from raw `members.*` and `cv_parsed_data.identity` (4 keys). Inline review panel between S1 CV card and `{renderStep()}`. Apply path: explicit checkbox + button → POST `/api/profilux` with camelCase keys → resolver re-emits empty suggestions → panel auto-hides. 4 files, +144 lines. Contract validation PASS via SQL surrogate. Prod visual validation PASS. No silent writes. L2 sovereignty preserved.
 
 ### CURRENT STEP — strict order
 
 **Next ProfiLux Reload UI slice (not yet scoped).**
 
-S0 (MATRIX v1.2 doctrine), S1 (CV pipeline), S1.5 (identity prefill review panel), S2 (identity strip above CV card), and S3 (co-located SectionCard primitive) all SHIPPED + prod-validated. Substrate progressing: doctrine locked, CV pipeline working, prefill mechanism proven, identity strip in place, shared card chrome unified at three sites via `SectionCard`.
+S0 (MATRIX v1.2 doctrine), S1 (CV pipeline), S1.5 (identity prefill review panel), S2 (identity strip), S3 (SectionCard primitive), and S4 (View/Edit/Manage triad scaffold) all SHIPPED + prod-validated. Substrate now: doctrine locked, CV pipeline working, prefill mechanism proven, identity strip in place, shared card chrome unified, top-level triad mental model in place with placeholder shells for View and Manage.
 
 Slice candidates remaining per MATRIX v1.2 §§21–24 + §13 deferred items (no commitment — Mo + GPT scope before any draft):
-- View/Edit/Manage triad scaffold
 - Drawer component family
 - Tier 2 add-library scaffolding (schema PARKED — UI shell only feasible)
-- Future: extract `SectionCard` to `components/profilux/` once a 4th call site appears (premature now)
-- Future: extract S2 inline strip to a reusable `IdentityStrip` component (deferred — visual gate already passed; extraction trigger still pending)
+- View tab content (public preview using existing PublicProjection)
+- Manage tab content (sharing, visibility, settings — anchors `/api/profilux/reset-link` rebuild)
+- Future: query-param tab persistence (`?tab=view|edit|manage`) once visual model approved
+- Future: extract `SectionCard` to `components/profilux/` once a 4th call site appears
+- Future: extract S2 inline strip to a reusable `IdentityStrip` component
 
 Mo + GPT pick the next slice and lock scope before any implementation prompt is drafted.
 
@@ -79,7 +81,7 @@ Mo + GPT pick the next slice and lock scope before any implementation prompt is 
 
 - Phase 3 frontend audit CLOSED 2026-05-07 AM. All 3 active surfaces shipped (`ed0c662` Surface 1 + `0bf208c` Surface 4 + `2b8f4bf` Surface 3).
 - Phase 4.A milestone CLOSED 2026-05-05. All 7 write-enabled screens shipped (3, 4, 6, 7, 8, 9, 10).
-- Phase 4.B/C/D/E chain closed 2026-05-05 — ProfiLux contract harmonized: `/api/profilux` emits `{surface, view, editor}`, `/api/members/me` emits 8 live fields. `toLegacyProfile` adapter removed.
+- Phase 4.B/C/D/E chain closed 2026-05-05 — ProfiLux contract harmonized.
 
 **Surfaces NOT in current scope (carried forward):**
 - B39 CV bucket repair execution. Resume with fresh `/ultrareview`.
@@ -133,7 +135,7 @@ Mo + GPT pick the next slice and lock scope before any implementation prompt is 
 - **F-public-slug-stub** — CLOSED 2026-05-07 by `369c2e0`.
 - **F-empty-string-vs-null**, **F-availability-default-drift**, **F-currency-default-applied** — CLOSED 2026-05-01.
 
-**Last updated:** May 8, 2026 AM — S3 SectionCard primitive SHIPPED + prod-validated. Next: ProfiLux Reload next UI slice (not yet scoped).
+**Last updated:** May 8, 2026 PM — S4 View/Edit/Manage triad scaffold SHIPPED + prod-validated (state preservation confirmed via Chrome extension test). Next: ProfiLux Reload next UI slice (not yet scoped).
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
