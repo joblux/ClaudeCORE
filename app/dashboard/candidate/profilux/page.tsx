@@ -1168,12 +1168,74 @@ export default function ProfiluxPage() {
           : hasCountry ? e.country
           : null
 
-        const placeholderInner = (label: string, sub: string) => (
-          <div style={{ minHeight: 80, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '20px' }}>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', fontStyle: 'italic', marginBottom: 6 }}>{label}</div>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999' }}>{sub}</div>
-          </div>
-        )
+        const tagLineParts: string[] = []
+        const seniorityText = seniorityLabel(e.seniority)
+        if (seniorityText) tagLineParts.push(seniorityText)
+        if (typeof e.total_years_experience === 'number') {
+          tagLineParts.push(`${e.total_years_experience} years experience`)
+        }
+        if (typeof e.years_in_luxury === 'number') {
+          tagLineParts.push(`${e.years_in_luxury} years in luxury`)
+        }
+        const tagLine = tagLineParts.length > 0 ? tagLineParts.join(' · ') : null
+
+        const viewChipStyle: React.CSSProperties = {
+          display: 'inline-block',
+          background: 'rgba(255,255,255,0.04)',
+          color: '#ccc',
+          border: '1px solid #2a2a2a',
+          padding: '5px 11px',
+          borderRadius: 999,
+          fontFamily: 'Inter, sans-serif',
+          fontSize: 12,
+          lineHeight: 1.4,
+        }
+
+        const bioText = (typeof e.bio === 'string' && e.bio.trim().length > 0) ? e.bio : null
+        const experiences = Array.isArray(e.experiences) ? e.experiences : []
+
+        type SubSection = { heading: string; items: Array<{ key: string; label: string }> }
+        const subSections: SubSection[] = []
+        if (Array.isArray(e.sectors) && e.sectors.length > 0) {
+          subSections.push({
+            heading: 'Sectors',
+            items: e.sectors.map((v, i) => ({ key: `sec-${i}-${v}`, label: sectorLabel(v) })),
+          })
+        }
+        if (Array.isArray(e.product_categories) && e.product_categories.length > 0) {
+          subSections.push({
+            heading: 'Product categories',
+            items: e.product_categories.map((v, i) => ({ key: `pc-${i}-${v}`, label: productCategoryLabel(v) })),
+          })
+        }
+        if (Array.isArray(e.expertise_tags) && e.expertise_tags.length > 0) {
+          subSections.push({
+            heading: 'Areas of expertise',
+            items: e.expertise_tags.map((v, i) => ({ key: `et-${i}-${v}`, label: expertiseTagLabel(v) })),
+          })
+        }
+        if (Array.isArray(e.key_skills) && e.key_skills.length > 0) {
+          subSections.push({
+            heading: 'Skills',
+            items: e.key_skills.map((v, i) => ({ key: `sk-${i}-${v}`, label: skillLabel(v) })),
+          })
+        }
+        if (Array.isArray(e.market_knowledge) && e.market_knowledge.length > 0) {
+          subSections.push({
+            heading: 'Markets',
+            items: e.market_knowledge.map((v, i) => ({ key: `mk-${i}-${v}`, label: v })),
+          })
+        }
+        if (Array.isArray(e.languages) && e.languages.length > 0) {
+          subSections.push({
+            heading: 'Languages',
+            items: e.languages.map((lang, i) => ({
+              key: `lg-${i}-${lang.language}`,
+              label: lang.proficiency ? `${lang.language} (${lang.proficiency})` : lang.language,
+            })),
+          })
+        }
+        const hasAnyExpertise = subSections.length > 0
 
         return (
           <>
@@ -1220,20 +1282,102 @@ export default function ProfiluxPage() {
                     {locationLine}
                   </div>
                 )}
+                {tagLine && (
+                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#888', lineHeight: 1.4, marginTop: 4 }}>
+                    {tagLine}
+                  </div>
+                )}
               </div>
             </SectionCard>
 
-            <SectionCard eyebrow="About">
-              {placeholderInner('Coming soon', 'A short professional bio that introduces you to recruiters.')}
-            </SectionCard>
+            {bioText && (
+              <SectionCard eyebrow="About">
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#ccc', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                  {bioText}
+                </div>
+              </SectionCard>
+            )}
 
-            <SectionCard eyebrow="Experience">
-              {placeholderInner('Coming soon', 'Public-safe career history with brand names confidential.')}
-            </SectionCard>
+            {experiences.length > 0 && (() => {
+              const rows = experiences.map((exp) => {
+                const hasJobT = typeof exp.job_title === 'string' && exp.job_title.trim().length > 0
+                const hasCo = typeof exp.company === 'string' && exp.company.trim().length > 0
+                if (!hasJobT && !hasCo) return null
+                const titleLine =
+                  hasJobT && hasCo ? `${exp.job_title} at ${exp.company}`
+                  : hasJobT ? exp.job_title!
+                  : exp.company!
 
-            <SectionCard eyebrow="Skills & expertise">
-              {placeholderInner('Coming soon', 'Skills, expertise tags, sectors, and languages.')}
-            </SectionCard>
+                const xCity = typeof exp.city === 'string' && exp.city.trim().length > 0 ? exp.city : null
+                const xCountry = typeof exp.country === 'string' && exp.country.trim().length > 0 ? exp.country : null
+                const expLocation = xCity && xCountry ? `${xCity}, ${xCountry}` : (xCity ?? xCountry)
+
+                const hasStart = typeof exp.start_date === 'string' && exp.start_date.trim().length > 0
+                const hasEnd = typeof exp.end_date === 'string' && exp.end_date.trim().length > 0
+                const dateRange =
+                  hasStart && hasEnd ? `${exp.start_date} — ${exp.end_date}`
+                  : hasStart ? `${exp.start_date} — Present`
+                  : hasEnd ? exp.end_date!
+                  : null
+
+                const locationDateLine =
+                  expLocation && dateRange ? `${expLocation} · ${dateRange}`
+                  : expLocation ?? dateRange
+
+                const description = typeof exp.description === 'string' && exp.description.trim().length > 0 ? exp.description : null
+
+                return { titleLine, locationDateLine, description }
+              }).filter((r): r is { titleLine: string; locationDateLine: string | null; description: string | null } => r !== null)
+
+              if (rows.length === 0) return null
+              return (
+                <SectionCard eyebrow="Experience">
+                  {rows.map((r, i) => {
+                    const isLast = i === rows.length - 1
+                    const rowStyle: React.CSSProperties = isLast
+                      ? { marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }
+                      : { marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #2a2a2a' }
+                    return (
+                      <div key={i} style={rowStyle}>
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#fff', lineHeight: 1.4, marginBottom: 4 }}>
+                          {r.titleLine}
+                        </div>
+                        {r.locationDateLine && (
+                          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.4, marginBottom: 6 }}>
+                            {r.locationDateLine}
+                          </div>
+                        )}
+                        {r.description && (
+                          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                            {r.description}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </SectionCard>
+              )
+            })()}
+
+            {hasAnyExpertise && (
+              <SectionCard eyebrow="Skills & expertise">
+                {subSections.map((sub, idx) => {
+                  const isLast = idx === subSections.length - 1
+                  return (
+                    <div key={sub.heading} style={{ marginBottom: isLast ? 0 : 16 }}>
+                      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
+                        {sub.heading}
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {sub.items.map((it) => (
+                          <span key={it.key} style={viewChipStyle}>{it.label}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </SectionCard>
+            )}
           </>
         )
       })()}
