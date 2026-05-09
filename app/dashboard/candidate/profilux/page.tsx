@@ -365,7 +365,14 @@ function mapParseError(code: string | null): string {
 
 export default function ProfiluxPage() {
   const [tab, setTab] = useState<ProfiluxTab>('edit')
-  const [drawerDemoOpen, setDrawerDemoOpen] = useState(false)
+  const [shareStatus, setShareStatus] = useState<{
+    share_slug: string | null
+    sharing_enabled: boolean
+    public_url: string | null
+    can_share: boolean
+  } | null>(null)
+  const [shareStatusError, setShareStatusError] = useState<string | null>(null)
+  const [shareStatusLoading, setShareStatusLoading] = useState(false)
   const [currentPositionDrawerOpen, setCurrentPositionDrawerOpen] = useState(false)
   const [luxuryFitDrawerOpen, setLuxuryFitDrawerOpen] = useState(false)
   const [skillsMarketsDrawerOpen, setSkillsMarketsDrawerOpen] = useState(false)
@@ -497,6 +504,34 @@ export default function ProfiluxPage() {
   useEffect(() => {
     refetch().catch((e) => setError(String(e))).finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (tab !== 'manage') return
+    let cancelled = false
+    setShareStatusLoading(true)
+    setShareStatusError(null)
+    fetch('/api/profilux/share')
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data = await res.json()
+        if (cancelled) return
+        setShareStatus({
+          share_slug: data.share_slug ?? null,
+          sharing_enabled: data.sharing_enabled === true,
+          public_url: data.public_url ?? null,
+          can_share: data.can_share === true,
+        })
+      })
+      .catch((err) => {
+        if (cancelled) return
+        setShareStatusError(String(err))
+      })
+      .finally(() => {
+        if (cancelled) return
+        setShareStatusLoading(false)
+      })
+    return () => { cancelled = true }
+  }, [tab])
 
   if (loading) return <div style={wrap}>Loading…</div>
   if (error) return <div style={{ ...wrap, color: '#ff6b6b' }}>Error: {error}</div>
@@ -2166,48 +2201,68 @@ export default function ProfiluxPage() {
       )}
 
       {tab === 'manage' && (
-        <>
-          <SectionCard>
-            <div style={{ padding: '20px' }}>
-              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999', marginBottom: 16 }}>
-                Sharing, visibility, account settings — coming soon.
-              </div>
-              <button
-                type="button"
-                onClick={() => setDrawerDemoOpen(true)}
-                style={{
-                  background: 'transparent',
-                  color: '#ccc',
-                  border: '1px solid #2a2a2a',
-                  padding: '10px 18px',
-                  fontFamily: 'Inter, sans-serif',
-                  fontSize: 13,
-                  cursor: 'pointer',
-                }}
-              >
-                Preview drawer (demo)
-              </button>
-              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', fontStyle: 'italic', marginTop: 12 }}>
-                Demo only — drawer wiring for future section editing.
-              </div>
+        <SectionCard eyebrow="Visibility & sharing">
+          {shareStatusLoading && (
+            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999' }}>
+              Loading…
             </div>
-          </SectionCard>
-          <Drawer
-            open={drawerDemoOpen}
-            title="Drawer demo"
-            onClose={() => setDrawerDemoOpen(false)}
-          >
-            <p style={{ marginTop: 0 }}>
-              This is a demo drawer. It validates the open/close mechanics: ESC key, backdrop click (desktop), and the X button.
-            </p>
-            <p>
-              Future Edit-mode drawers will host per-section forms (per MATRIX v1.2 §22), each scoped to a single section card on the passport.
-            </p>
-            <p style={{ color: '#999', fontSize: 13 }}>
-              No data is persisted from this drawer.
-            </p>
-          </Drawer>
-        </>
+          )}
+          {!shareStatusLoading && shareStatusError && (
+            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ff6b6b' }}>
+              Could not load sharing status.
+            </div>
+          )}
+          {!shareStatusLoading && !shareStatusError && shareStatus && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    background: shareStatus.sharing_enabled ? '#1D9E75' : '#555',
+                    display: 'inline-block',
+                  }}
+                />
+                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#fff' }}>
+                  {shareStatus.sharing_enabled ? 'Public link active' : 'Private — public link off'}
+                </span>
+              </div>
+              {shareStatus.public_url ? (
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+                    Share URL
+                  </div>
+                  <div style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: 13,
+                    color: shareStatus.sharing_enabled ? '#ccc' : '#777',
+                    wordBreak: 'break-all',
+                    background: '#1a1a1a',
+                    border: '1px solid #2a2a2a',
+                    padding: '10px 12px',
+                    borderRadius: 4,
+                  }}>
+                    {shareStatus.public_url}
+                  </div>
+                  {!shareStatus.sharing_enabled && (
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', fontStyle: 'italic', marginTop: 8 }}>
+                      Link is reserved but not active. Sharing controls coming soon.
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999' }}>
+                  No public link reserved yet.
+                </div>
+              )}
+              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', fontStyle: 'italic', marginTop: 14 }}>
+                Visibility controls and account settings coming soon.
+              </div>
+            </>
+          )}
+        </SectionCard>
       )}
     </div>
   )
