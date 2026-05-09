@@ -148,3 +148,9 @@ vite.config.ts.timestamp-*
 deploy-1774116875308-8e772495-e4dc-4030-b6e4-0eb4488349c8.zip
 .DS_Store
 *.zip
+
+# Bridge V1 (transient)
+.bridge/PAUSE
+.bridge/runs/
+.bridge/hooks.log
+.bridge/worktrees/
