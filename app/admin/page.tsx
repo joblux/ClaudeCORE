@@ -25,6 +25,11 @@ type Member = {
   approved_at: string | null;
   last_login: string | null;
   profile_completeness: number | null;
+  // F-2-2 — non-ProfiLux business metadata; surfaced via LIST SELECT in
+  // app/api/admin/members/route.ts. Stays OFF ProfiLuxResolved/MemberRow
+  // by design (mirrors F-2 Option γ doctrine).
+  company_name: string | null;
+  org_type: string | null;
 };
 
 type AIReview = {
@@ -422,7 +427,18 @@ function AdminPageContent() {
                           )}
                         </div>
                         <div className="text-xs text-[#999] truncate">
-                          {[m.city, m.country].filter(Boolean).join(", ") || "\u2014"} &middot; {m.profile_completeness ?? 0}% complete
+                          {m.role === 'business'
+                            ? (
+                                // F-2-2 — business subtitle: company_name · org_type
+                                // Fallback: company_name || org_type || city/country || "—"
+                                [m.company_name, m.org_type].filter(Boolean).join(" \u00b7 ")
+                                  || [m.city, m.country].filter(Boolean).join(", ")
+                                  || "\u2014"
+                              )
+                            : (
+                                <>{[m.city, m.country].filter(Boolean).join(", ") || "\u2014"} &middot; {m.profile_completeness ?? 0}% complete</>
+                              )
+                          }
                         </div>
                       </div>
                     </div>
