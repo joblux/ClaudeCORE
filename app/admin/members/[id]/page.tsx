@@ -320,8 +320,8 @@ export default function MemberProfilePage() {
               {displayName(member)}
             </h1>
             <div className="text-sm text-[#999] mt-0.5">{member.email}</div>
-            {member.role === 'business' && (member as any).company_name && (
-              <div className="text-[13px] text-[#888] mt-0.5">{(member as any).company_name}</div>
+            {member.role === 'business' && member.company_name && (
+              <div className="text-[13px] text-[#888] mt-0.5">{member.company_name}</div>
             )}
             {member.headline && (
               <div className="text-sm text-[#444] mt-1">{member.headline}</div>
@@ -440,8 +440,8 @@ function OverviewTab({ member }: { member: AdminMemberDetail }) {
           <SectionLabel>Company Information</SectionLabel>
           <div className="bg-white border border-[#e8e8e8] rounded-lg p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-10">
-              <InfoRow label="Company Name" value={(member as any).company_name} />
-              <InfoRow label="Organisation Type" value={(member as any).org_type} />
+              <InfoRow label="Company Name" value={member.company_name} />
+              <InfoRow label="Organisation Type" value={member.org_type} />
               <InfoRow label="Contact Title" value={member.job_title} />
             </div>
           </div>

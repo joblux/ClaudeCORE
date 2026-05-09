@@ -42,7 +42,9 @@ export async function GET(
       return NextResponse.json({ error: 'Projection mismatch' }, { status: 500 })
     }
 
-    const [docRes, reviewRes, notesRes] = await Promise.all([
+    // F-2 Option γ — non-ProfiLux member metadata via second targeted SELECT.
+    // Mirrors /api/members/me R6-A pattern. Stays OFF ProfiLuxResolved.
+    const [docRes, reviewRes, notesRes, metaRes] = await Promise.all([
       supabaseAdmin
         .from('member_documents')
         .select('*')
@@ -56,6 +58,11 @@ export async function GET(
       supabaseAdmin
         .from('members')
         .select('notes')
+        .eq('id', memberId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from('members')
+        .select('company_name, org_type')
         .eq('id', memberId)
         .maybeSingle(),
     ])
@@ -94,10 +101,14 @@ export async function GET(
       .filter(Boolean)
       .join(' ')
 
+    const meta = metaRes.data as { company_name: string | null; org_type: string | null } | null
+
     const member: AdminMemberDetail = {
       ...projection.view,
       full_name: fullName,
       notes: (notesRes.data as { notes: string | null } | null)?.notes ?? null,
+      company_name: meta?.company_name ?? null,
+      org_type: meta?.org_type ?? null,
       work_experiences: work,
       education_records: edu,
       languages: langs,

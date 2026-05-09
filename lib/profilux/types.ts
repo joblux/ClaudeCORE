@@ -617,6 +617,11 @@ export type AdminMemberDocument = {
 export type AdminMemberDetail = Omit<ProfiLuxResolved, 'languages'> & {
   full_name: string
   notes: string | null
+  // F-2 Option γ — non-ProfiLux member metadata via second targeted SELECT in
+  // app/api/admin/members/[id]/route.ts. Mirrors /api/members/me R6-A pattern.
+  // Stays OFF ProfiLuxResolved/MemberRow/resolver/projectFor by design.
+  company_name: string | null
+  org_type: string | null
   work_experiences: AdminWorkExperience[]
   education_records: AdminEducationRecord[]
   languages: AdminLanguage[]
