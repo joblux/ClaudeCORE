@@ -32,7 +32,12 @@ export type {
   ResolvedExperience,
   ResolvedLanguage,
   // Surface + projections
+  AdminEducationRecord,
+  AdminLanguage,
+  AdminMemberDetail,
+  AdminMemberDocument,
   AdminProjection,
+  AdminWorkExperience,
   AtsProjection,
   ClientProjection,
   DashboardProjection,

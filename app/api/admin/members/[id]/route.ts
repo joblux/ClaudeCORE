@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { resolveProfiLux } from '@/lib/profilux/resolveProfiLux'
 import { projectFor } from '@/lib/profilux/projectFor'
+import type { AdminMemberDetail } from '@/lib/profilux'
 
 export const dynamic = 'force-dynamic'
 
@@ -93,16 +94,18 @@ export async function GET(
       .filter(Boolean)
       .join(' ')
 
+    const member: AdminMemberDetail = {
+      ...projection.view,
+      full_name: fullName,
+      notes: (notesRes.data as { notes: string | null } | null)?.notes ?? null,
+      work_experiences: work,
+      education_records: edu,
+      languages: langs,
+      documents: (docRes.data ?? []) as AdminMemberDetail['documents'],
+    }
+
     return NextResponse.json({
-      member: {
-        ...projection.view,
-        full_name: fullName,
-        notes: (notesRes.data as { notes: string | null } | null)?.notes ?? null,
-        work_experiences: work,
-        education_records: edu,
-        languages: langs,
-        documents: docRes.data ?? [],
-      },
+      member,
       aiReview: reviewRes.data ?? null,
     })
   } catch (err) {

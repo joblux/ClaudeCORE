@@ -4,12 +4,12 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useRequireAdmin } from "@/lib/auth-hooks";
 import type {
-  MemberProfile,
-  WorkExperience,
-  EducationRecord,
-  MemberLanguage,
-  MemberDocument,
-} from "@/types/member-profile";
+  AdminMemberDetail,
+  AdminWorkExperience,
+  AdminEducationRecord,
+  AdminLanguage,
+  AdminMemberDocument,
+} from "@/lib/profilux";
 
 type Tab = "overview" | "experience" | "skills" | "documents" | "preferences" | "notes" | "ai_review";
 
@@ -52,11 +52,11 @@ function formatFileSize(bytes: number | null): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function displayName(m: MemberProfile): string {
+function displayName(m: AdminMemberDetail): string {
   return m.full_name || [m.first_name, m.last_name].filter(Boolean).join(" ") || m.email;
 }
 
-function getInitials(m: MemberProfile): string {
+function getInitials(m: AdminMemberDetail): string {
   const name = m.full_name || [m.first_name, m.last_name].filter(Boolean).join(" ");
   if (name) return name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
   return m.email[0].toUpperCase();
@@ -123,7 +123,7 @@ export default function MemberProfilePage() {
   const params = useParams();
   const memberId = params.id as string;
 
-  const [member, setMember] = useState<MemberProfile | null>(null);
+  const [member, setMember] = useState<AdminMemberDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("overview");
@@ -147,12 +147,12 @@ export default function MemberProfilePage() {
       }
 
       const data = await res.json();
-      const profile: MemberProfile = {
+      const profile: AdminMemberDetail = {
         ...data.member,
-        work_experiences: (data.member.work_experiences as WorkExperience[]) ?? [],
-        education_records: (data.member.education_records as EducationRecord[]) ?? [],
-        languages: (data.member.languages as MemberLanguage[]) ?? [],
-        documents: (data.member.documents as MemberDocument[]) ?? [],
+        work_experiences: (data.member.work_experiences as AdminWorkExperience[]) ?? [],
+        education_records: (data.member.education_records as AdminEducationRecord[]) ?? [],
+        languages: (data.member.languages as AdminLanguage[]) ?? [],
+        documents: (data.member.documents as AdminMemberDocument[]) ?? [],
       };
 
       setMember(profile);
@@ -400,7 +400,7 @@ export default function MemberProfilePage() {
 // Tab: Overview
 // ---------------------------------------------------------------------------
 
-function OverviewTab({ member }: { member: MemberProfile }) {
+function OverviewTab({ member }: { member: AdminMemberDetail }) {
   return (
     <>
       <SectionLabel>Personal Information</SectionLabel>
@@ -475,7 +475,7 @@ function OverviewTab({ member }: { member: MemberProfile }) {
 // Tab: Experience
 // ---------------------------------------------------------------------------
 
-function ExperienceTab({ member }: { member: MemberProfile }) {
+function ExperienceTab({ member }: { member: AdminMemberDetail }) {
   const work = member.work_experiences ?? [];
   const education = member.education_records ?? [];
 
@@ -556,7 +556,7 @@ function ExperienceTab({ member }: { member: MemberProfile }) {
 // Tab: Skills
 // ---------------------------------------------------------------------------
 
-function SkillsTab({ member }: { member: MemberProfile }) {
+function SkillsTab({ member }: { member: AdminMemberDetail }) {
   const languages = member.languages ?? [];
 
   const proficiencyStyles: Record<string, string> = {
@@ -688,7 +688,7 @@ function SkillsTab({ member }: { member: MemberProfile }) {
 // Tab: Documents
 // ---------------------------------------------------------------------------
 
-function DocumentsTab({ member }: { member: MemberProfile }) {
+function DocumentsTab({ member }: { member: AdminMemberDetail }) {
   const docs = member.documents ?? [];
 
   const typeStyles: Record<string, string> = {
@@ -778,7 +778,7 @@ function DocumentsTab({ member }: { member: MemberProfile }) {
 // Tab: Preferences
 // ---------------------------------------------------------------------------
 
-function PreferencesTab({ member }: { member: MemberProfile }) {
+function PreferencesTab({ member }: { member: AdminMemberDetail }) {
   const salaryRange =
     member.desired_salary_min != null || member.desired_salary_max != null
       ? `${member.desired_salary_currency ?? "USD"} ${member.desired_salary_min?.toLocaleString() ?? "?"} \u2014 ${member.desired_salary_max?.toLocaleString() ?? "?"}`

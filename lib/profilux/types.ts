@@ -546,3 +546,79 @@ export type ProjectedView =
   | ClientProjection
   | AdminProjection
   | AtsProjection
+
+// =============================================================================
+// AdminMemberDetail — Phase F-1 admin-detail adapter
+// =============================================================================
+//
+// Adapter shape consumed by app/admin/members/[id]/page.tsx via the route at
+// app/api/admin/members/[id]/route.ts. The route enriches AdminProjection['view']
+// (= ProfiLuxResolved) with synthesized arrays (work_experiences,
+// education_records, languages with stable IDs and is_current derivation) +
+// member_documents from its own table + admin notes + full_name.
+//
+// This is the ONE place where ProfiLuxResolved is extended for an admin client
+// surface. Other admin/recruiting surfaces should consume ProfiLuxResolved or
+// projectFor() directly. Do NOT extend AdminMemberDetail for other surfaces —
+// create a sibling adapter type instead.
+//
+// (member as any).company_name + (member as any).org_type casts in the client
+// page are intentionally preserved for F-2 (business member type reconciliation).
+
+export type AdminWorkExperience = {
+  id: string
+  company: string | null
+  job_title: string | null
+  city: string | null
+  country: string | null
+  start_date: string | null
+  end_date: string | null
+  is_current: boolean
+  description: string | null
+}
+
+export type AdminEducationRecord = {
+  id: string
+  institution: string | null
+  degree: string | null
+  degree_level: string | null
+  field_of_study: string | null
+  start_year: number | null
+  graduation_year: number | null
+  city: string | null
+  country: string | null
+}
+
+export type AdminLanguage = {
+  id: string
+  language: string
+  proficiency:
+    | 'native'
+    | 'fluent'
+    | 'professional'
+    | 'conversational'
+    | 'basic'
+    | null
+}
+
+export type AdminMemberDocument = {
+  id: string
+  member_id: string
+  document_type: 'cv' | 'cover_letter' | 'portfolio' | 'certificate' | 'reference' | 'other'
+  file_name: string
+  file_url: string
+  file_size: number | null
+  mime_type: string | null
+  label: string | null
+  is_primary: boolean
+  uploaded_at: string
+}
+
+export type AdminMemberDetail = Omit<ProfiLuxResolved, 'languages'> & {
+  full_name: string
+  notes: string | null
+  work_experiences: AdminWorkExperience[]
+  education_records: AdminEducationRecord[]
+  languages: AdminLanguage[]
+  documents: AdminMemberDocument[]
+}
