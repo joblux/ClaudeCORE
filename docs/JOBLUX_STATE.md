@@ -54,86 +54,63 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
-- **ea63abe** `feat(profilux): S11 Availability & Targets drawer integration (card + drawer above tunnel, screen 9 unchanged)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +153/-0). Densest composition slice yet — zero new control patterns, dense reuse of all 4 proven families (select / chip-multi-toggle ×3 / form-input persistence / tri-state Yes/No + conditional textarea). New `<SectionCard eyebrow="Availability & Targets">` rendered inside the Edit branch above `{renderStep()}`, immediately after the Clienteling card+drawer block. Closed-card body: stable 6-row layout always present (no collapsing, no smart formatting, no badges/pills/truncation per locked S11 doctrine) — `availability` via co-located `availabilityLabel` helper (4 hardcoded enum→human labels matching tunnel `<option>` text); `desired_locations` raw `.join(', ')` since `PROFILUX_LOCATION_OPTIONS` is `string[]`; `desired_departments` mapped through `departmentLabel` helper, then joined; `desired_contract_types` mapped through `contractTypeLabel` helper, then joined; `open_to_relocation` rendered as literal "Yes" / "No" / `<NotSet />`; `relocation_preferences` ALWAYS-PRESENT row (S10 stable-layout doctrine) rendered raw only when `open_to_relocation === true && length > 0`, otherwise `<NotSet />`. Split fallback marker doctrine: `<NoneSel />` for the 3 array rows, `<NotSet />` for the 3 scalar/text rows. Top-right neutral Edit button identical to S7/S8/S9/S10. Drawer body reuses Screen-9 JSX verbatim bound to existing `draft9` / `setDraft9` / `handleSave9` / `saving9` / `savedAt9` / `saveError9` — NO new state, NO new endpoint, NO new save-handler logic, NO maxWidth:900 wrapper inside drawer. Three co-located label helpers (`availabilityLabel`, `departmentLabel`, `contractTypeLabel`) added next to existing `seniorityLabel`/`skillLabel`; no broader helpers introduced. Screen 9 inside `renderStep()` untouched. Prod QA via Chrome MCP on Alex Mason fixture: 13/13 PASS (tailored checklist, not forced 11/11) — card placement ✓, eyebrow + Edit button parity ✓, 6-row stable closed-card layout ✓, split fallback rendering on initial load ✓, drawer chrome 480px right + backdrop + Playfair title + X ✓, availability select with 5 options ✓, target locations 15 chips + toggle ✓, target departments 20 chips label-mapped ✓, contract types 6 chips label-mapped ✓, Yes/No tri-state + conditional textarea reveal ✓, save round-trip Paris+London / Retail / Permanent / Yes / EU-only-text → all 6 closed-card rows refetched correctly with human labels (NOT raw enums) ✓, drawer reopen persistence intact ✓, tunnel Screen 9 mirror via `draft9` single-source-of-truth ✓ (X close + ESC close + backdrop click all verified). **Bonus observation: `profile_completeness` MOVED from 49% → 66% on save** — first slice in S7-S11 to move completeness. Useful datapoint for `f6508e54`: Availability & Targets fields appear counted by one completeness system while all S7/S8/S9/S10 saved fields were not. Adds evidence to the parked triple-system divergence; NOT a new finding, NOT a regression. No types/projector/API/schema/handler changes.
+- **c84bc39** `feat(profilux-view): fill View tab cards from existing EditorView (living document slice)` — May 9 2026. SHIPPED + PROD-VALIDATED 8/8. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +161/-17). Replaces three "Coming-soon" placeholders in the candidate ProfiLux View tab with content driven entirely from existing `editor` state (`EditorView`). Doctrine-locked semantics: View tab = candidate's private living professional document; Edit tab = enrichment/data capture surface. Real company names shown (no anonymization — public/client projection out of scope until sharing ships). Empty sections hide entirely; no completion/readiness language anywhere on View. Chips rendered as plain styled `<span>` elements, never buttons. Header card gets a fourth muted secondary line below location listing seniority / total years experience / years in luxury joined by ' · ' (rendered only when at least one is set; explicitly excludes job_title which appears one line above). About card renders bio with whitespace-preserved paragraphs, hidden if bio empty. Experience card renders real-name career history from `e.experiences[]` (cv_parsed_data L1 passthrough): each row shows `<job_title> at <company>`, location · date range, and description, with last row borderless. Skills & expertise card renders 6 stacked sub-sections (Sectors, Product categories, Areas of expertise, Skills, Markets, Languages); each sub-section hidden if its array is empty; whole card hidden if all are empty. Languages bundled inside Skills & expertise per locked decision. Inline `placeholderInner` helper removed. `viewChipStyle` constant declared INSIDE the view branch IIFE, not at module scope. NO API changes, NO state hooks, NO new fetches, NO touch to Edit tab cards/drawers/tunnel/Manage. Prod QA via Chrome MCP on Alex Mason fixture: 8/8 PASS — header tag line shows `15 years experience · 12 years in luxury` (Alex `seniority=null` → 2-item version, no job_title duplication) ✓; About card displays bio prose ✓; Experience card shows real names Hublot/JOBLUX.COM/Harrods across 3 rows with location+date ranges and descriptions ✓; Skills & expertise displays Sectors (Watches, Fashion), Product categories (Watches), Areas of expertise (Team Leadership), Skills (CRM Systems), Markets (Western Europe), Languages (English, French, Spanish) ✓; no completion language anywhere ✓; chips static (no hover, no cursor) ✓; Edit tab regression confirmed (full name "Alex Mason" + 83% complete + Screen 1/11 tunnel + CV/Re-parse + IDENTITY card + Edit drawer all intact) ✓; DB invariant — Alex `profile_completeness=83` unchanged via Supabase MCP ✓. ProfiLux now feels like a real living professional document on candidate side.
 
-- **8955880** `feat(profilux): S10 Clienteling drawer integration (card + drawer above tunnel, screen 8 unchanged)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +76/-0). First slice to prove tri-state Yes/No + conditional textarea pattern inside a drawer. New `<SectionCard eyebrow="Clienteling">` rendered inside the Edit branch above `{renderStep()}`, immediately after the Compensation card+drawer block. Closed-card body: 2-row read-only summary always present (stable layout) — `clienteling_experience` rendered as literal "Yes" / "No" / `<NotSet />`; `clienteling_description` rendered raw when experience===true AND description non-empty, otherwise `<NotSet />`. Top-right neutral Edit button identical to S7/S8/S9 styling. Drawer body reuses Screen-8 JSX verbatim (Yes/No tri-state chips with reset logic + conditional textarea reveal when experience===true) bound to existing `draft8` / `setDraft8` / `handleSave8` / `saving8` / `savedAt8` / `saveError8` — NO new state, NO new endpoint, NO new helpers, NO maxWidth:900 wrapper inside drawer. Textarea style preserved verbatim including maxWidth:600 (no harm at 480px drawer width). Tri-state toggle reset logic preserved verbatim (Yes second-click resets to {null, ''}, No always clears description). Screen 8 inside `renderStep()` untouched (`case 8:` chip + textarea blocks intact). Prod QA via Chrome MCP on Alex Mason fixture: 11/11 PASS — card render placement after Compensation ✓, closed-card 2-row layout always present ✓, literal "No" rendering on initial false-state load ✓, Edit button styling matches S7/S8/S9 ✓, drawer open mechanics (480px right + dark backdrop + Playfair "Clienteling" title + X) ✓, drawer body shows Yes/No tri-state with No active reflecting current state + no textarea (correctly hidden) + Save ✓, click Yes → tri-state toggles + textarea conditionally reveals + drawer body reflows cleanly ✓, type description "Built and managed VIP client portfolio at Hublot Paris flagship over 8 years." + Save → button transitions Saving... → completed (Saved indicator auto-fades after ~2s timeout) ✓, drawer stays open after save ✓, closed-card refetched showing literal "Yes" + raw description text ✓, X close ✓, ESC close ✓, backdrop click close ✓, reopen shows persisted Yes-active + textarea content ✓, tunnel Screen 8 mirrors drawer-saved state (Yes chip gold-tinted + textarea visible + description text) confirming shared `draft8` single-source-of-truth ✓. Bonus observation: `profile_completeness` did NOT increment from 49% on this save — manifestation of existing parked finding `f6508e54` extends to tri-state + textarea writes, NOT a new finding. No types/projector/API/schema/handler changes.
+- **6d820f7** `fix(cv-parse): recompute profile_completeness after L1 write (D2)` — May 9 2026. SHIPPED + PROD-VALIDATED 4/4. Single-file fix (`app/api/members/cv-parse/route.ts`, +26/-0). Closes Matrix v1 §4.4 violation: `/api/members/cv-parse` wrote `cv_parsed_data` + `cv_parsed_at` but did NOT recompute `profile_completeness`. After CV parse, `cv_parsed_data.experiences[]` and `sectors[]` can satisfy G3/G4 group predicates, but the canonical scorer never ran — score stayed stale until a manual drawer save via `/api/profilux`. Fix: after the primary `cv_parsed_data` UPDATE and success `logHistory`, resolve the post-write member view via `resolveProfiLux(memberId, supabase)`, recompute via `computeProfileCompleteness(view)`, and persist the score if it moved. Mirrors the canonical pattern in `/api/profilux` POST. Three contract decisions (locked by GPT): (1) recompute is a SECONDARY consistency side-effect — resolver/scorer failures are NON-FATAL (logged via `console.error`, parse response stays success); (2) NO second `updated_at` bump on the score-only UPDATE (primary already bumped, score is derived state); (3) cached early-return path SKIPS recompute (no L1 change → no score delta). Idempotency guard `if (score !== resolved.profile_completeness)` avoids unnecessary writes. Prod QA via Chrome MCP + Supabase MCP on Alex Mason fixture: re-parse triggered POST 200 OK (Anthropic call ~15s), DB shows fresh `cv_parsed_at = 22:17:56.402` and `updated_at = 22:17:56.484` (80ms delta = single primary UPDATE, no second bump as designed), `profile_completeness = 83` preserved (idempotency guard worked — same predicates → same score → no score-only UPDATE issued), `needs_review_count = 7` returned correctly. No console errors. Response shape unchanged.
 
-- **410f036** `feat(profilux): S9 Compensation drawer integration (card + drawer above tunnel, screen 10 unchanged)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +57/-0). Mirror of S7 form-input pattern applied to Screen 10 (Compensation). New `<SectionCard eyebrow="Compensation">` rendered inside the Edit branch above `{renderStep()}`, immediately after the Skills & Markets card+drawer block. Closed-card body: 3-row read-only summary (`desired_salary_min`, `desired_salary_max`, `desired_salary_currency`) rendered raw via `String(...)` for numbers and direct read for currency, with `<NotSet />` italic "Not specified" fallback per row. No range formatting, no thousand separators, no invented presentation. Top-right neutral Edit button identical to S7/S8 styling. Drawer body reuses Screen-10 form JSX verbatim bound to existing `draft10` / `setDraft10` / `handleSave10` / `saving10` / `savedAt10` / `saveError10` — NO new state, NO new endpoint, NO new helpers, NO maxWidth:900 wrapper inside drawer. Save disable logic preserved: `saving10 || !draft10`. Screen 10 inside `renderStep()` untouched (`case 10:` form intact). Prod QA via Chrome MCP on Alex Mason fixture: 11/11 PASS — card render placement after Skills & Markets ✓, closed-summary 3 "Not specified" empty rows ✓, Edit button styling matches S7/S8 ✓, drawer open mechanics (480px right + dark backdrop + Playfair "Compensation" title + X) ✓, drawer body shows 3 form fields (min number / max number / currency select) + Save ✓, populate min=80000 + max=120000 + currency=EUR + Save → green Saved indicator ✓, drawer stays open after save ✓, closed-card refetched showing raw "80000" / "120000" / "EUR" with no formatting (per locked decision) ✓, X close ✓, ESC close ✓, backdrop click close ✓, reopen shows persisted values ✓, tunnel Screen 10 mirrors drawer-saved values (80000/120000/EUR in form inputs) confirming shared `draft10` single-source-of-truth ✓. Bonus observation: `profile_completeness` did NOT increment from 49% on this save — manifestation of existing parked finding `f6508e54` (completeness divergence) extending beyond chip arrays to `members.*` flat-column writes, NOT a new finding. No types/projector/API/schema/handler changes.
+- **392c947** `fix(members-profile): remove legacy profile_completeness recompute (D3 option beta)` — May 9 2026. SHIPPED + PROD-VALIDATED 5/5. Single-file fix (`app/api/members/profile/route.ts`, +1/-56). Closes the triple-system completeness drift on the legacy route. D3 reachability sweep confirmed `/api/members/profile` has exactly two live callers: business dashboard Settings `saveProfile()` helper (mutating PUT for `{first_name, last_name}` or `{country, city, phone}`) and `/members/pending` 10s GET status polling. Legacy in-route `calculateProfileCompleteness` was overwriting `members.profile_completeness` with a divergent flat-field scoring on every business Settings save. Per GPT decision (Option β): the route should NOT touch `profile_completeness` at all — it is identity/location/account writer for business members, not a ProfiLux/matching-readiness writer; forcing canonical M6 onto business users would be semantically weird since business members can't satisfy G2/G3/G4/G5/G6 by design. Fix: deleted the in-file `calculateProfileCompleteness` async helper (~30 lines, not exported, no external callers per sweep), removed post-update re-fetch + recompute + second UPDATE, dropped `profile_completeness` from PUT/POST response body (only caller reads `data.error`, never the score field). Preserved GET handler, ALLOWED_FIELDS whitelist, partial-body filter, member field UPDATE. Prod QA via Chrome MCP on Mo's business fixture (mzaourm@gmail.com / Hublot): account holder Edit→save 200 OK; account holder revert save 200 OK confirmed via network capture; company info phone-clear save 200 OK; **definitive DB proof — pre-fix legacy scorer would have written 15 → 10 after phone clear (loss of phone +5pt); actual DB shows `profile_completeness = 15` UNCHANGED → legacy recompute path is dead** ✓; GET still returns full member envelope (pending polling preserved) ✓; Alex Mason candidate `profile_completeness = 83` preserved (canonical write path unaffected) ✓.
 
-- **ebbb64f** `feat(profilux): S8 Skills & Markets drawer integration (card + drawer above tunnel, screen 7 unchanged)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +74/-0). Mirror of S7 pattern applied to chip-multi-toggle control family. New `<SectionCard eyebrow="Skills & Markets">` rendered inside the Edit branch above `{renderStep()}`, immediately after the Current Position card+drawer block. Closed-card body: 2-row read-only summary (`key_skills` mapped through `PROFILUX_SKILL_OPTIONS` via co-located `skillLabel(value)` helper returning label || value; `market_knowledge` rendered raw since `PROFILUX_MARKET_OPTIONS` is `string[]`). Top-right neutral Edit button identical to S7 styling. Drawer body reuses Screen-7 chip JSX verbatim bound to existing `draft7` / `setDraft7` / `handleSave7` / `saving7` / `savedAt7` / `saveError7` — NO new state, NO new endpoint, NO new helpers, NO maxWidth:900 wrapper inside drawer. Screen 7 inside `renderStep()` untouched (`case 7:` chip blocks intact). Prod QA via Chrome MCP on Alex Mason fixture: 11/11 PASS — card render placement after Current Position ✓, closed-summary "None selected" empty state on both rows ✓, Edit button styling matches Current Position ✓, drawer open mechanics (480px right + dark backdrop + Playfair "Skills & Markets" title + X) ✓, drawer body shows 22 skill chips + 13 market chips + Save ✓, chip toggle (CRM Systems + Western Europe) + Save → green Saved indicator ✓, drawer stays open after save ✓, closed-card refetched showing human label "CRM Systems" + raw "Western Europe" ✓, X close ✓, ESC close ✓, backdrop click close ✓, reopen shows persisted gold-tinted active state ✓, tunnel Screen 7 mirrors drawer-saved chip selections confirming shared `draft7` single-source-of-truth ✓. Confirmed at runtime: `PROFILUX_MARKET_OPTIONS` is `string[]` not `{value,label}[]` — closed-card raw rendering correct. Bonus observation: `profile_completeness` did NOT increment from 49% on this save — manifestation of existing parked finding `f6508e54` (completeness divergence), NOT a new finding. No types/projector/API/schema/handler changes.
+- **c7217d3** `feat(profilux): S13 Luxury Fit drawer integration (card + drawer above tunnel, screen 4 unchanged)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED 25/25. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +84/-1). Mirror of S8 chip-multi-toggle drawer pattern applied to Luxury Fit (Screen 4 in tunnel). New `<SectionCard eyebrow="Luxury Fit">` rendered inside the Edit branch between Current Position card+drawer and Skills & Markets card+drawer (restoring MATRIX §22.1 ordering locally). Closed-card body: 4-row read-only summary — `sectors` (read-only L1 passthrough, `member_sectors` table NOT activated; mapped via co-located `sectorLabel`), `years_in_luxury` (raw number or NotSet), `product_categories` (mapped via co-located `productCategoryLabel`), `expertise_tags` (mapped via co-located `expertiseTagLabel`). Drawer body OMITS sectors row (Tier 1 schema parked), reuses Screen-4 quartet verbatim (`draft4` / `setDraft4` / `handleSave4` / `saving4` / `savedAt4` / `saveError4`) — only new state hook is `luxuryFitDrawerOpen`. Three new co-located label helpers (`sectorLabel`, `productCategoryLabel`, `expertiseTagLabel`). Save round-trip on Alex Mason: years_in_luxury=12 / product_category=Watches / expertise_tag=Team Leadership → all 4 closed-card rows refetched correctly with human labels. **`profile_completeness` MOVED 66 → 83** on this save (G3 Luxury fit predicate fired: years_in_luxury ∧ ≥1 sector ∧ ≥1 product_category ∨ ≥1 expertise_tag now satisfied) — second post-S11 datapoint that strengthens the matching-readiness reading of canonical scorer.
+
+- **c6618f7** `feat(profilux): S12 Identity drawer integration (card + drawer above tunnel)` — May 8 2026 PM. SHIPPED + PROD-VALIDATED 21/21. Single-file slice (`app/dashboard/candidate/profilux/page.tsx`, +141/-0; minor `/api/profilux` POST handler delta to accept `country` + `phone` snake_case keys). Mirror of S7 form-input drawer pattern applied to 8-field Identity section. New `<SectionCard eyebrow="Identity">` rendered inside the Edit branch between S1.5 prefill panel and Current Position card+drawer. Coordination doctrine: S1.5 prefill panel untouched (purely additive coexistence); Edit-tab identity strip in Edit header card untouched; tunnel Screen 1 untouched (read-only summary kept); drawer omits `cv_identity_suggestions` (only S1.5 owns prefill apply). Closed-card body: 8-row read-only summary (first_name, last_name, city, country, nationality, phone, headline, bio) with last-write-wins refetch reconciling 4 surfaces (sidebar / S1.5 / IDENTITY card / tunnel Screen 1). camelCase legacy + snake_case new write contract drift documented inline (firstName/lastName legacy preserved; country/phone added snake_case in S12 scope). Prod QA via Chrome MCP: all 4 surfaces converge via single `refetch()` fan-out after save. Completeness stayed 66% (G1 was already satisfied — datapoint, no regression).
 
 ### CURRENT STEP — strict order
 
-**Next ProfiLux Reload UI slice = S12 (not yet scoped). S0–S11 shipped + prod-validated.**
+**Slice catalog (Mo + GPT pick next; no commitment):**
 
-S0 (MATRIX v1.2 doctrine), S1 (CV pipeline), S1.5 (identity prefill review panel), S2 (identity strip), S3 (SectionCard primitive), S4 (View/Edit/Manage triad scaffold), S5 (View tab v0 shell), S6 (Drawer primitive), S7 (Current Position — form-input drawer pattern proven), S8 (Skills & Markets — chip-multi-toggle drawer pattern proven), S9 (Compensation — second form-input drawer, S7 pattern reaffirmed), S10 (Clienteling — tri-state Yes/No + conditional textarea drawer pattern proven), and S11 (Availability & Targets — densest composition slice, all 4 control families proven inside drawer chrome) all SHIPPED + prod-validated. Substrate now: doctrine locked, CV pipeline working, prefill mechanism proven, identity strip in place, shared card chrome unified, top-level triad mental model in place, View tab v0 shell live, Drawer primitive demo-validated, AND 5 real per-section drawers (Current Position, Skills & Markets, Compensation, Clienteling, Availability & Targets) live with full read-summary + edit-drawer + save round-trip + tunnel mirroring proven. Remaining hard problems are multi-record editing (Education / Career History), Identity coordination, View/Manage maturity, and public projection convergence.
+A. **Manage tab reconciliation** — sharing/visibility framing + account settings consolidation. Can be scoped narrowly (preview/visibility chrome only) without touching `/api/profilux/reset-link` (still parked under `0e6f3271`). Or, if Mo unparks reset-link, do the full sharing UX. Doctrinally next given the View tab now feels like a real document.
 
-Slice candidates remaining per MATRIX v1.2 §§21–24 + §13 deferred items (no commitment — Mo + GPT scope before any draft):
-- Multi-record drawer pattern — Education or Career History (Screen 5 / Screen 6). New control family: list of records with add/edit/delete per record. Higher complexity than single-record drawers.
-- Identity drawer — gated on coordination decision with S1.5 prefill panel + Edit-tab identity strip. Three potential write surfaces over `first_name`/`last_name`/`city`/`nationality` require an explicit design call before draft.
-- Tier 2 add-library scaffolding (schema PARKED — UI shell only feasible).
-- View tab content fill-in (real preview) — gated on a server-emitted public projection from `/api/profilux` or a sibling endpoint; do NOT consume `projectFor` client-side (per DO NOT).
-- Manage tab content (sharing, visibility, settings — anchors `/api/profilux/reset-link` rebuild; STATE DO NOT until reset-link unparked).
-- Future: lift remaining tunnel screens into per-section drawers, step counter retire, `step` state retire.
-- Future: query-param tab persistence (`?tab=view|edit|manage`) once visual model approved.
-- Future: extract `SectionCard`, `Drawer`, identity strip to `components/profilux/` once reused beyond this file.
-- Future: drawer animation (slide/fade) — currently instant by design; add when visual polish takes priority.
+B. **Identity micro-additions** — `linkedin_url`, `date_of_birth` (+ `avatar_url` if upload pipeline lands first). Smallest possible enrichment slice; mirrors S12 form-input drawer pattern. No new doctrine.
 
-Mo + GPT pick the next slice and lock scope before any implementation prompt is drafted.
+C. **Recruiter/admin projection refinement** — first surface to consume `client` projection from `projectFor`. Either an admin member detail enrichment, a recruiter-facing share preview, or a stub `/p/[slug]` server-emitted public projection endpoint. Higher-effort; opens the public projection convergence work.
 
-**Earlier-session prior context (carried forward):**
+D. **Multi-record collection migration** — Education / Career History / Languages / sectors collection migrations. Parked under `1609e494`. Largest scope; precedent slices required first.
 
-- Phase 3 frontend audit CLOSED 2026-05-07 AM. All 3 active surfaces shipped (`ed0c662` Surface 1 + `0bf208c` Surface 4 + `2b8f4bf` Surface 3).
-- Phase 4.A milestone CLOSED 2026-05-05. All 7 write-enabled screens shipped (3, 4, 6, 7, 8, 9, 10).
-- Phase 4.B/C/D/E chain closed 2026-05-05 — ProfiLux contract harmonized.
-
-**Surfaces NOT in current scope (carried forward):**
-- B39 CV bucket repair execution. Resume with fresh `/ultrareview`.
-- Tier 1 schema — PARKED until product trigger.
-- Slice 2B reset-link identity source swap — STATE DO NOT against `/api/profilux/reset-link`, parked under `0e6f3271`.
-
-**Locked doctrine (May 6, 2026, unchanged):**
-- ProfiLux is a single living professional profile object, owned continuously by the user.
-- Not a wizard. Not submit / pending / review. Not frozen. Not Mo-approved.
-- Mo approval applies to platform access at registration and to contributions — never to the ProfiLux itself.
-- All projections read the same object: dashboard, ATS, recruiter, public `/p/[name]`, PDF, matching.
-
-**Canonical doctrine doc:** `docs/PROFILUX_MODEL.md` (committed `ecb60a5`, May 6 2026).
-**Implementation contract:** `docs/PROFILUX_MATRIX_V1.md` (v1.2 — May 7, commit `5d8672b`).
-**Umbrella ledger row:** `88d4bd79-f0d4-4e9c-9125-e00df2699ca6` (Recruiting System / high / open).
-**Phase 4 ledger row:** `8f82b3ac-f1ab-4905-8142-658c03edc52e` (validated, anchor for tunnel passport rewrite).
+**Recommended order: A → B → C → D.** A and B are no-doctrine, low-risk slices that keep ProfiLux feeling alive section-by-section. C is the natural pivot once enough sections are populated. D is post-launch shape.
 
 ### DO NOT
 
-- Touch cv-parse route again unless a new bug surfaces (currently green in prod).
+- Touch `/api/members/cv-parse` again unless a new bug surfaces. D2 fix (canonical recompute via resolver + scorer with non-fatal failure handling) is shipped at `6d820f7`.
+- Touch `/api/members/profile` again unless a new bug surfaces. D3 Option β (legacy `calculateProfileCompleteness` removed; route is now identity/location writer only, not a completeness writer) is shipped at `392c947`.
 - Implement L1 → L2 silent writes from any code path. S1 + S1.5 ship proof of compliance.
 - Deviate from `docs/PROFILUX_MATRIX_V1.md` (v1.2) without updating the spec first (per §12.2).
 - Use Hélène BILLARD as fixture (consent unconfirmed, blocked permanently).
-- Read `members.*` or `cv_parsed_data` directly from any UI surface for ProfiLux fields — go through `projectFor`.
-- Consume `projectFor` client-side in any candidate UI surface. Public-projection masking is server-owned. Real public preview content requires a server-emitted public projection (new endpoint or `/api/profilux` extension); the View tab v0 shell at `/dashboard/candidate/profilux` is presentation-only and must not be replaced with client-side `projectFor` consumption.
+- Read `members.*` or `cv_parsed_data` directly from any UI surface for ProfiLux fields — go through `projectFor` / resolver / EditorView.
+- Consume `projectFor` client-side in any candidate UI surface. Public-projection masking is server-owned. The View tab at `/dashboard/candidate/profilux` is the candidate's PRIVATE living document surface (real names, real data); it does NOT consume the `public` or `client` projection. Real public preview content for `/p/[slug]` requires a separate server-emitted projection endpoint.
+- Reintroduce completion/readiness language on the View tab. View = living document, not score. Edit tab keeps the internal "% complete" footer as a maintenance signal only.
 - Treat `profilux` standalone table as fully dormant — it is share-state-only (`share_slug` + `sharing_enabled`). Full retirement in ledger `6aef236e`.
 - Touch `/api/profilux/reset-link` — sharing UX rebuild is a separate post-migration concern.
-- Refactor legacy `calculateProfileCompleteness` in `app/api/members/profile/route.ts` — separate commit, with eventual tunnel passport rewrite.
-- Fix the dashboard 8-field completeness divergence (`f6508e54`) — flagged-only, no fix scheduled.
-- Resequence backlog from broader ledger.
 - Build any product-facing surface (tunnel, editor, dashboard, admin) without first read-only inspecting the live components per the visual guardrail.
 - Drift from the executive-presence guardrail in any copy or microstate.
-- Build an Identity-section drawer without first deciding how it coexists with the S1.5 prefill panel and the Edit-tab identity strip. Three potential write surfaces over the same column subset (`first_name`, `last_name`, `city`, `nationality`) require an explicit coordination decision before any draft.
-- Delete or remap tunnel `renderStep()` cases for sections that have an active drawer integration (Screen 3 / Current Position post-S7, Screen 7 / Skills & Markets post-S8, Screen 10 / Compensation post-S9, Screen 8 / Clienteling post-S10, Screen 9 / Availability & Targets post-S11). Tunnel + drawer coexist deliberately; lift only happens in a dedicated future slice once all default sections have drawers shipped.
+- Delete or remap tunnel `renderStep()` cases for sections that have an active drawer integration (Screen 1 / Identity post-S12, Screen 3 / Current Position post-S7, Screen 4 / Luxury Fit post-S13, Screen 7 / Skills & Markets post-S8, Screen 8 / Clienteling post-S10, Screen 9 / Availability & Targets post-S11, Screen 10 / Compensation post-S9). Tunnel + drawer coexist deliberately; lift only happens in a dedicated future slice once all default sections have drawers shipped.
+- Touch `/api/profilux` POST recompute or the canonical M6 scorer in `lib/profilux/computeProfileCompleteness` / `lib/profilux/_m6Groups`. The doctrine fork on what `profile_completeness` semantically represents is parked observation-only under `f6508e54`; no fix scheduled. The implementation drift is fully resolved.
+- Drift back toward "wizard / completion / onboarding" framing for ProfiLux. Locked doctrine: living professional document. View tab = private living document surface. Edit tab = enrichment/data capture surface. `profile_completeness` is an internal canonical M6 / Profile Progress signal, not a user-facing score.
 
 ### PARKED (admin_tasks status=parked)
 
 - `2847ac29` — Audit + migrate Anthropic model IDs across repo before Sonnet 4 retirement (deadline Jun 15 2026)
 - `1e6162ea` — Replace inert RPC `submit_m6_admission` (incompatible with locked Apr-14 11-screen proto)
 - `9b806aa3` — F-luxuryrecruiter — repo-wide purge of legacy domain
-- `6aad3904` — Security review backlog — 37 remaining findings from ultra-review 2026-04-24
+- `6aad3904` — Security review backlog — 37 remaining findings from ultra-review 2026-04-24 (B19 next critical: role escalation via set-tier; B39 containment shipped, repair plan locked but not yet coded)
 - `8f82b3ac` — Phase 4 premium ProfiLux tunnel + editor rebuild (anchor row, validated; carries through tunnel passport rewrite)
 - `35469863` — Phase 5 admin polish (gated on Phase 4)
+- `0e6f3271` — Slice 2B reset-link identity source swap (gates Manage tab full sharing UX)
+- `1609e494` — Relational L2 collection migration family — Education, Career History, Languages, sectors collection migrations. Precedent slices required first.
 
 ### NEW FINDINGS LOGGED (out of immediate scope, surface separately)
 
+- **F-completeness-triple-system** (`f6508e54`) — open, observation-only, no fix scheduled. RESOLVED at the implementation level after D2 + D3: the canonical M6 scorer in `lib/profilux/computeProfileCompleteness` is now the single source of truth, with two canonical recompute trigger sites (`/api/profilux` POST + `/api/members/cv-parse` POST). Legacy `calculateProfileCompleteness` deleted. The remaining open question is doctrinal, not technical: what does `profile_completeness` semantically represent? Three forks (matching readiness coverage / holistic richness / multidimensional split). GPT framing locked: current scorer is "matching readiness coverage disguised as a percentage" — internally coherent, label slightly misleading. v2 architecture sketched (3-dimensional: PROFILE RICHNESS / MATCHING READINESS / VISIBILITY-TRUST) but explicitly post-launch. Not user-facing on View tab anymore — see View slice doctrine. Implementation parity confirmed by 3 datapoints in S7-S13 (S11 Availability moved 49→66 / S13 Luxury Fit moved 66→83 / others inert by design).
 - **F-s15-checkbox-misalignment** *(logged 2026-05-08, parked)* — S1.5 review panel checkbox column slightly offset from field-name/value rows in the 3-column grid (`24px 160px 1fr`). Cosmetic only; logical structure correct; functionality unaffected. Best handled with the next ProfiLux Reload UI slice if it touches identity components, otherwise standalone single-line CSS fix.
-- **F-completeness-triple-system** (`f6508e54`) — flagged-only, no fix scheduled. Datapoint added 2026-05-08 PM: S11 save (Availability & Targets fields) MOVED completeness 49% → 66%, while S7/S8/S9/S10 saves did NOT move it. Confirms divergent counting between the 3 systems — Availability/Targets fields tracked by one system that the others bypass. Strengthens triple-system finding; not a regression.
 - **F-roles-constraint-drift**, **F-registration-role-mismatch** — pre-launch parked.
 - **F-editor-l1-fallback-education** — known resolver behavior, no fix.
 - **F-ats-detail-subtitle-trailing-at** — cosmetic, parked.
@@ -142,7 +119,7 @@ Mo + GPT pick the next slice and lock scope before any implementation prompt is 
 - **F-public-slug-stub** — CLOSED 2026-05-07 by `369c2e0`.
 - **F-empty-string-vs-null**, **F-availability-default-drift**, **F-currency-default-applied** — CLOSED 2026-05-01.
 
-**Last updated:** May 8, 2026 PM — S11 Availability & Targets drawer integration SHIPPED + prod-validated 13/13 via Chrome MCP on Alex Mason. Densest drawer composition slice yet (all 4 control families reused inside one drawer; +153 LOC). Screen 9 in tunnel intact. **`profile_completeness` MOVED 49% → 66%** on this save — first S7-S11 slice to do so; useful datapoint for `f6508e54` (Availability/Targets counted by one completeness system, prior drawer fields not). 5 real per-section drawers shipped. Next: S12 — not yet scoped. Remaining hard problems: multi-record editing (Education / Career History), Identity coordination, View/Manage maturity, public projection convergence.
+**Last updated:** May 9, 2026 — End of session. Five slices shipped this session (S12 Identity drawer at `c6618f7` 21/21, S13 Luxury Fit drawer at `c7217d3` 25/25, D3 legacy completeness scorer removed at `392c947` 5/5, D2 cv-parse canonical recompute at `6d820f7` 4/4, View tab enrichment at `c84bc39` 8/8). Triple-system completeness drift fully resolved at the implementation level — canonical M6 scorer is single writer; two canonical recompute trigger sites (`/api/profilux` POST + `/api/members/cv-parse` POST); legacy scorer deleted. ProfiLux doctrine locked: living professional document, not wizard/completion funnel. View tab = private living document surface (real names, real data, no completion language, empty sections hide). Edit tab = enrichment/data capture surface. `profile_completeness` is now an internal canonical M6 / Profile Progress signal, not a user-facing score. HEAD `c84bc39`. Next recommended slice: A (Manage tab reconciliation, narrow scope).
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
@@ -177,8 +154,8 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 
 ## 3. THREE-BRAIN WORKFLOW
 
-- **Claude Opus (this instance):** DB verification, audit, guardrails, architecture decisions, prompt quality control
-- **GPT:** Strategy, content design, risk detection
+- **Claude Opus (this instance):** DB verification, audit, guardrails, architecture decisions, prompt quality control, prod QA via Chrome MCP + Supabase MCP after Mo signals Coolify green
+- **GPT:** Strategy, content design, risk detection, doctrine guardrail, slice direction approval
 - **Claude Code:** Execution — receives prompts from Mo, pushes via SSH to Coolify
 - **Mo:** Copy-pastes between tools, makes all final calls
 
@@ -217,7 +194,7 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 
 ---
 
-## 6. DATABASE STATE (verified Apr 13, 2026)
+## 6. DATABASE STATE (verified Apr 13, 2026; deltas live)
 
 | Table | Count | Status |
 |---|---|---|
@@ -357,14 +334,15 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 
 ### Candidate (`/dashboard/candidate`):
 - 4-card next-steps: Profile, Careers, Intelligence, Contribute
-- ProfiLux completion bar (backend-computed readiness signal; not an admission gate)
-- ProfiLux editor at `/dashboard/candidate/profilux` (currently 11-screen tunnel + S1 CV card + S1.5 identity prefill review panel + S7 Current Position SectionCard + Drawer above the tunnel; passport rewrite progressing slice-by-slice per MODEL)
+- Reads `profile_completeness` from `/api/profilux` GET (single source of truth, canonical M6)
+- ProfiLux editor at `/dashboard/candidate/profilux`: View / Edit / Manage triad. View = candidate's private living professional document (real names, no completion language, empty sections hide). Edit = enrichment/data capture surface (S1.5 prefill panel + 7 per-section drawers + 11-screen tunnel coexisting). Manage = sharing/visibility/account (placeholder, gated on reset-link unparking).
 
 ### Business (`/dashboard/business`):
 - Submit brief CTA
 - Request status view
 - "How it works" 4-step process
 - Nav: Dashboard, Recruiting, Intelligence, Account
+- Settings tab: Account holder Edit + Company info Edit (writes via `/api/members/profile` PUT, no longer touches `profile_completeness` post-D3 fix at `392c947`)
 
 ### Insider (`/dashboard/insider`):
 - Role framing block (Trusted Contributor)
@@ -378,15 +356,26 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 
 ## 12. PROFILUX
 
-- Living object, owned continuously by user (per MODEL May 6, MATRIX v1.2 §2)
-- Current implementation: 11-screen tunnel (Phase 4.A) + S1 CV upload+parse card + S1.5 inline identity prefill review panel + S7 Current Position SectionCard with Drawer at `/dashboard/candidate/profilux`. Passport-with-drawer UX rewrite progressing slice-by-slice (MATRIX v1.2 §7.6 + §§14, 21–24); first real per-section drawer (Current Position) live, 8 default sections + Identity coexistence pending.
-- Storage contract: `members.*` flat columns + `cv_parsed_data` jsonb (per MATRIX v1 §3 layer model)
-- Resolver: `lib/profilux/resolveProfiLux` returns `ProfiLuxResolved` (single shape, all surfaces). Now also emits `cv_identity_suggestions` (4-field pre-Rule-A diff for S1.5 prefill UI).
+- Living professional document, owned continuously by user (per MODEL May 6, MATRIX v1.2 §2). NOT a wizard, NOT a profile completion system, NOT a static CV builder, NOT a rigid ATS onboarding funnel.
+- Doctrine locked May 9, 2026: continuously refined, adaptable, reusable externally, discreet, flexible across industries/geographies, designed around modern nonlinear careers.
+- Surface separation:
+  - **View tab** = candidate's PRIVATE living professional document surface (real names, real data, no completion language, empty sections hide entirely). Header card + About + Experience + Skills & expertise (with Languages bundled).
+  - **Edit tab** = enrichment/data capture surface. S1.5 prefill panel + CV upload/parse card + 7 per-section drawers (Identity, Current Position, Luxury Fit, Skills & Markets, Compensation, Clienteling, Availability & Targets) + 11-screen tunnel coexisting (legacy, scheduled for retirement post all-default-sections-have-drawers).
+  - **Manage tab** = sharing/visibility/account (placeholder; gated on `/api/profilux/reset-link` unparking).
+- Storage contract: `members.*` flat columns + `cv_parsed_data` jsonb (per MATRIX v1 §3 layer model). Relational L2 collection tables (work_experiences, education_records, member_languages, member_sectors) currently DORMANT — parked under `1609e494`.
+- Resolver: `lib/profilux/resolveProfiLux` returns `ProfiLuxResolved` (single shape, all surfaces). Emits `cv_identity_suggestions` (4-field pre-Rule-A diff for S1.5 prefill UI).
 - 6 surface projections via `projectFor`: dashboard / editor / public / admin / ats / client. `EditorView` carries `cv_identity_suggestions` pass-through.
-- CV pipeline: Haiku 4.5 parser at `/api/members/cv-parse`, schema_v1.0, locked sectors + proficiencies. Prod-validated end-to-end.
+- CV pipeline: Haiku 4.5 parser at `/api/members/cv-parse`, schema_v1.0, locked sectors + proficiencies. Prod-validated end-to-end. Canonical recompute fires post-write per Matrix §4.4 (D2 fix at `6d820f7`).
 - Identity prefill: explicit-confirmation only (S1.5). L1 → L2 silent writes forbidden across all code paths.
-- `members.profile_completeness` computed via `computeProfileCompleteness` (backend-only readiness signal — not user-facing admission)
-- Two surfaces: ProfiLux (`/dashboard/candidate/profilux`) and `/profile` (legacy, scheduled for retirement)
+- `members.profile_completeness` computed via `lib/profilux/computeProfileCompleteness` (canonical M6 binary group scorer: G1 Identity 17 / G2 Position 17 / G3 Luxury 17 / G4 Experience 16 / G5 Availability 17 / G6 CV 16). Internal-only signal, NOT a user-facing score on View tab. Two canonical recompute trigger sites: `/api/profilux` POST (drawer/tunnel saves) + `/api/members/cv-parse` POST (CV parse). Legacy `calculateProfileCompleteness` deleted at D3 (`392c947`).
+- Doctrine fork on what `profile_completeness` semantically represents (matching readiness coverage / holistic richness / multidimensional split) PARKED observation-only under `f6508e54`. Current scorer is "matching readiness coverage disguised as a percentage" per GPT framing — internally coherent.
+
+### Hard launch boundaries (locked May 9, 2026)
+- No proactive AI / copilot layers
+- No multidimensional readiness engines
+- No autonomous guidance
+- No advanced projection systems
+- No reopening of architecture debates
 
 ---
 
@@ -433,6 +422,7 @@ Every horizontal band must wrap in `max-width:1200px` + `margin:0 auto` + `paddi
 - "Company" (never "Luxury Employer")
 - American English throughout
 - "Express interest" = "apply"
+- ProfiLux View tab: NEVER "Profile X% complete", "Not specified", "None selected", "Coming soon" — those belong to Edit tab only.
 
 ---
 
@@ -516,7 +506,7 @@ All tabbed pages use `?tab=` query params. Brands: 5 tabs (~760 sitemap URLs).
 - Account page (`AccountClient_v1.tsx`) — built, not deployed/tested
 - BIMI: DMARC + DNS record + SVG logo
 - Member Directory `/directory` — built but deactivated
-- CV parsing by AI — SHIPPED end-to-end (S1 + S1.5). Identity prefill: explicit confirm via S1.5 panel. Other field prefills (experiences, education, languages) deferred.
+- CV parsing by AI — SHIPPED end-to-end (S1 + S1.5 + D2 canonical recompute). Identity prefill: explicit confirm via S1.5 panel. Other field prefills (experiences, education, languages) deferred.
 
 ---
 
@@ -541,20 +531,27 @@ All tabbed pages use `?tab=` query params. Brands: 5 tabs (~760 sitemap URLs).
 
 ---
 
-## 24. PROFILUX DOCTRINE — LIVING OBJECT MODEL
+## 24. PROFILUX DOCTRINE — LIVING DOCUMENT MODEL
 
-**Status:** Locked May 6, 2026. Reaffirmed by MATRIX v1.2 (May 7, commit `5d8672b`).
+**Status:** Locked May 6, 2026. Reaffirmed by MATRIX v1.2 (May 7, commit `5d8672b`). Doctrine lock reinforced May 9, 2026 post-D2/D3/View slice closure.
 
 **Canonical doctrine doc:** `docs/PROFILUX_MODEL.md`
 **Implementation contract:** `docs/PROFILUX_MATRIX_V1.md` (v1.2 — May 7 UX promotion addendum)
 
-**Core principle:** ProfiLux is a single living professional profile object, owned continuously by the user. It is not a wizard, not a submission, not a pending object, not approved by Mo, not frozen.
+**Core principle:** ProfiLux is a single living professional document, owned continuously by the user. It is not a wizard, not a submission, not a pending object, not approved by Mo, not frozen, not a profile completion system, not a static CV builder, not a rigid ATS onboarding funnel.
+
+**ProfiLux IS:** continuously refined, adaptable, reusable externally, discreet, flexible across industries/geographies, designed around modern nonlinear careers.
 
 **Mo approval scope (narrow):** platform access at registration + contributions. Never to ProfiLux itself.
 
 **Flow:** approved user dashboard → Continue ProfiLux → fresh CV upload → Haiku parse → populated living document → user edits / owns continuously.
 
 **All projections read the same object:** self dashboard, ATS, recruiter view, public share `/p/[name]`, PDF exports, matching layer.
+
+**Surface separation (locked May 9, 2026):**
+- **View tab** = candidate's PRIVATE living professional document surface. Real names, real data. No completion language. Empty sections hide. No fake interactivity. Header / About / Experience / Skills & expertise (Languages bundled).
+- **Edit tab** = enrichment/data capture surface. S1.5 prefill panel + CV card + 7 per-section drawers + 11-screen tunnel.
+- **Manage tab** = sharing/visibility/account. Placeholder; gated on reset-link unparking.
 
 **Field tier model (per MODEL):**
 - **Tier 0** — seeded at signup: name, email, location
@@ -578,7 +575,21 @@ All tabbed pages use `?tab=` query params. Brands: 5 tabs (~760 sitemap URLs).
 
 **Matching entry (replaces M6 admission):** backend-only readiness signal. No user-facing confirm action. No threshold percentage. No "Pending Candidate" state.
 
-**Drift reset phrase:** *"living object, not wizard / not submission / not approval"*
+**`profile_completeness` semantics (locked May 9, 2026):**
+- Internal canonical M6 / Profile Progress signal, NOT a user-facing score on View tab.
+- Single canonical writer: `lib/profilux/computeProfileCompleteness` (binary group scorer over G1–G6).
+- Two canonical recompute trigger sites: `/api/profilux` POST (drawer/tunnel saves) + `/api/members/cv-parse` POST (CV parse).
+- Legacy `calculateProfileCompleteness` deleted (D3 at `392c947`).
+- Doctrine fork on semantic meaning (matching readiness coverage / holistic richness / multidimensional split) parked observation-only under `f6508e54`. v2 architecture (3-dimensional split) is post-launch.
+
+**Hard launch boundaries (locked May 9, 2026):**
+- No proactive AI / copilot layers
+- No multidimensional readiness engines
+- No autonomous guidance
+- No advanced projection systems
+- No reopening of architecture debates
+
+**Drift reset phrase:** *"living document, not wizard / not submission / not approval / not completion funnel"*
 
 ---
 
