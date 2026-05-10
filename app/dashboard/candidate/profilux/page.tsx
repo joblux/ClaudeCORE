@@ -279,6 +279,29 @@ type Screen1Draft = {
   bio: string
 }
 
+type ExperienceDraft = {
+  id?: string
+  job_title: string
+  company: string
+  city: string
+  country: string
+  start_date: string
+  end_date: string
+  is_current: boolean
+  description: string
+}
+
+const emptyExperienceDraft = (): ExperienceDraft => ({
+  job_title: '',
+  company: '',
+  city: '',
+  country: '',
+  start_date: '',
+  end_date: '',
+  is_current: false,
+  description: '',
+})
+
 function draftFrom(e: EditorView): Screen3Draft {
   return {
     job_title: e.job_title ?? '',
@@ -416,6 +439,12 @@ export default function ProfiluxPage() {
   const [savedAt7, setSavedAt7] = useState<number | null>(null)
   const [saveError7, setSaveError7] = useState<string | null>(null)
   const [identityDrawerOpen, setIdentityDrawerOpen] = useState(false)
+  const [careerHistoryDrawerOpen, setCareerHistoryDrawerOpen] = useState(false)
+  const [experienceFormOpen, setExperienceFormOpen] = useState(false)
+  const [experienceDraft, setExperienceDraft] = useState<ExperienceDraft>(emptyExperienceDraft())
+  const [experienceSaving, setExperienceSaving] = useState(false)
+  const [experienceError, setExperienceError] = useState<string | null>(null)
+  const [experienceDeleting, setExperienceDeleting] = useState<string | null>(null)
   const [draft1, setDraft1] = useState<Screen1Draft>({
     first_name: '', last_name: '', city: '', country: '',
     nationality: '', phone: '', headline: '', bio: '',
@@ -847,6 +876,105 @@ export default function ProfiluxPage() {
       setSaveError1(String(err))
     } finally {
       setSaving1(false)
+    }
+  }
+
+  function startNewExperience() {
+    setExperienceDraft(emptyExperienceDraft())
+    setExperienceError(null)
+    setExperienceFormOpen(true)
+  }
+
+  function startEditExperience(exp: { id?: string; job_title: string | null; company: string | null; city: string | null; country: string | null; start_date: string | null; end_date: string | null; is_current?: boolean; description: string | null }) {
+    if (!exp.id) return
+    setExperienceDraft({
+      id: exp.id,
+      job_title: exp.job_title ?? '',
+      company: exp.company ?? '',
+      city: exp.city ?? '',
+      country: exp.country ?? '',
+      start_date: exp.start_date ?? '',
+      end_date: exp.end_date ?? '',
+      is_current: exp.is_current === true,
+      description: exp.description ?? '',
+    })
+    setExperienceError(null)
+    setExperienceFormOpen(true)
+  }
+
+  function cancelExperienceEdit() {
+    setExperienceDraft(emptyExperienceDraft())
+    setExperienceError(null)
+    setExperienceFormOpen(false)
+  }
+
+  async function handleSaveExperience() {
+    const jt = experienceDraft.job_title.trim()
+    const co = experienceDraft.company.trim()
+    const sd = experienceDraft.start_date.trim()
+    if (jt === '' || co === '' || sd === '') {
+      setExperienceError('Job title, company, and start date are required.')
+      return
+    }
+    setExperienceSaving(true)
+    setExperienceError(null)
+    try {
+      const isUpdate = experienceDraft.id !== undefined
+      const payload: Record<string, unknown> = {
+        job_title: jt,
+        company: co,
+        city: experienceDraft.city.trim() || null,
+        country: experienceDraft.country.trim() || null,
+        start_date: sd,
+        end_date: experienceDraft.is_current ? null : (experienceDraft.end_date.trim() || null),
+        is_current: experienceDraft.is_current,
+        description: experienceDraft.description.trim() || null,
+      }
+      if (isUpdate) payload.id = experienceDraft.id
+
+      const res = await fetch('/api/profilux/experiences', {
+        method: isUpdate ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any))
+        setExperienceError(typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+      setExperienceDraft(emptyExperienceDraft())
+      setExperienceFormOpen(false)
+    } catch (err) {
+      setExperienceError(String(err))
+    } finally {
+      setExperienceSaving(false)
+    }
+  }
+
+  async function handleDeleteExperience(id: string) {
+    setExperienceDeleting(id)
+    setExperienceError(null)
+    try {
+      const res = await fetch('/api/profilux/experiences', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any))
+        setExperienceError(typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+      if (experienceDraft.id === id) {
+        setExperienceDraft(emptyExperienceDraft())
+        setExperienceFormOpen(false)
+      }
+    } catch (err) {
+      setExperienceError(String(err))
+    } finally {
+      setExperienceDeleting(null)
     }
   }
 
@@ -1911,6 +2039,156 @@ export default function ProfiluxPage() {
           {savedAt4 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
           {saveError4 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError4}</span>}
         </div>
+      </Drawer>
+      <SectionCard eyebrow="Career History">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div />
+          <button
+            type="button"
+            onClick={() => { setCareerHistoryDrawerOpen(true); cancelExperienceEdit() }}
+            style={{
+              background: 'transparent',
+              color: '#ccc',
+              border: '1px solid #2a2a2a',
+              padding: '6px 12px',
+              fontSize: 12,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        </div>
+        {e.experiences.length === 0 ? (
+          <NoneSel />
+        ) : (
+          <div>
+            {e.experiences.map((exp, i) => (
+              <div key={exp.id ?? i} style={card}>
+                <div><strong>{exp.company ?? 'Unknown'}</strong> — {exp.job_title ?? 'Role not specified'}</div>
+                <div style={{ color: '#999', marginTop: 4 }}>
+                  {exp.city ?? '—'}, {exp.country ?? '—'} · {exp.start_date ?? '—'} → {exp.is_current ? 'Present' : (exp.end_date ?? '—')}
+                </div>
+                {exp.description && <div style={{ color: '#ccc', marginTop: 8 }}>{exp.description}</div>}
+              </div>
+            ))}
+          </div>
+        )}
+      </SectionCard>
+      <Drawer
+        open={careerHistoryDrawerOpen}
+        title="Career History"
+        onClose={() => { setCareerHistoryDrawerOpen(false); cancelExperienceEdit() }}
+      >
+        {experienceFormOpen ? (
+          <>
+            <div style={grid}>
+              <div style={label}>Job title *</div>
+              <div><input style={input} value={experienceDraft.job_title} onChange={(ev) => setExperienceDraft({ ...experienceDraft, job_title: ev.target.value })} placeholder="e.g. Boutique Director" /></div>
+              <div style={label}>Company *</div>
+              <div><input style={input} value={experienceDraft.company} onChange={(ev) => setExperienceDraft({ ...experienceDraft, company: ev.target.value })} placeholder="e.g. Hermès" /></div>
+              <div style={label}>City</div>
+              <div><input style={input} value={experienceDraft.city} onChange={(ev) => setExperienceDraft({ ...experienceDraft, city: ev.target.value })} placeholder="e.g. Paris" /></div>
+              <div style={label}>Country</div>
+              <div><input style={input} value={experienceDraft.country} onChange={(ev) => setExperienceDraft({ ...experienceDraft, country: ev.target.value })} placeholder="e.g. France" /></div>
+              <div style={label}>Start date *</div>
+              <div><input style={input} type="date" value={experienceDraft.start_date} onChange={(ev) => setExperienceDraft({ ...experienceDraft, start_date: ev.target.value })} /></div>
+              <div style={label}>Currently here</div>
+              <div>
+                <input
+                  type="checkbox"
+                  checked={experienceDraft.is_current}
+                  onChange={(ev) => setExperienceDraft({ ...experienceDraft, is_current: ev.target.checked, end_date: ev.target.checked ? '' : experienceDraft.end_date })}
+                  style={{ accentColor: '#a58e28' }}
+                />
+              </div>
+              <div style={label}>End date</div>
+              <div>
+                <input
+                  style={experienceDraft.is_current ? { ...input, opacity: 0.4, cursor: 'not-allowed' } : input}
+                  type="date"
+                  disabled={experienceDraft.is_current}
+                  value={experienceDraft.end_date}
+                  onChange={(ev) => setExperienceDraft({ ...experienceDraft, end_date: ev.target.value })}
+                />
+              </div>
+              <div style={label}>Description</div>
+              <div>
+                <textarea
+                  style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 80, resize: 'vertical' }}
+                  rows={3}
+                  value={experienceDraft.description}
+                  onChange={(ev) => setExperienceDraft({ ...experienceDraft, description: ev.target.value })}
+                  placeholder="Optional brief description"
+                />
+              </div>
+            </div>
+            <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+              <button style={experienceSaving ? saveBtnDis : saveBtn} disabled={experienceSaving} onClick={handleSaveExperience}>
+                {experienceSaving ? 'Saving…' : (experienceDraft.id ? 'Save changes' : 'Add experience')}
+              </button>
+              <button
+                type="button"
+                onClick={cancelExperienceEdit}
+                disabled={experienceSaving}
+                style={btn}
+              >
+                Cancel
+              </button>
+              {experienceError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{experienceError}</span>}
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ marginBottom: 16 }}>
+              <button type="button" onClick={startNewExperience} style={saveBtn}>
+                Add experience
+              </button>
+            </div>
+            {e.experiences.length === 0 ? (
+              <div style={{ color: '#999', fontSize: 13 }}>No experiences yet. Click Add experience to start.</div>
+            ) : (
+              <div>
+                {e.experiences.map((exp, i) => {
+                  const editable = typeof exp.id === 'string'
+                  return (
+                    <div key={exp.id ?? i} style={{ ...card, position: 'relative' }}>
+                      <div><strong>{exp.company ?? 'Unknown'}</strong> — {exp.job_title ?? 'Role not specified'}</div>
+                      <div style={{ color: '#999', marginTop: 4, fontSize: 12 }}>
+                        {exp.city ?? '—'}, {exp.country ?? '—'} · {exp.start_date ?? '—'} → {exp.is_current ? 'Present' : (exp.end_date ?? '—')}
+                      </div>
+                      {exp.description && <div style={{ color: '#ccc', marginTop: 8, fontSize: 12 }}>{exp.description}</div>}
+                      {editable ? (
+                        <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
+                          <button
+                            type="button"
+                            onClick={() => startEditExperience(exp)}
+                            style={{ background: 'transparent', color: '#ccc', border: '1px solid #2a2a2a', padding: '4px 10px', fontSize: 11, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            disabled={experienceDeleting === exp.id}
+                            onClick={() => exp.id && handleDeleteExperience(exp.id)}
+                            style={{ background: 'transparent', color: '#ff6b6b', border: '1px solid #2a2a2a', padding: '4px 10px', fontSize: 11, cursor: experienceDeleting === exp.id ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif', opacity: experienceDeleting === exp.id ? 0.5 : 1 }}
+                          >
+                            {experienceDeleting === exp.id ? 'Deleting…' : 'Delete'}
+                          </button>
+                        </div>
+                      ) : (
+                        <div style={{ marginTop: 10, fontSize: 11, color: '#777', fontStyle: 'italic' }}>
+                          Parsed from your CV. Add as a passport entry to edit.
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            {experienceError && <div style={{ marginTop: 16, color: '#ff6b6b', fontSize: 13 }}>{experienceError}</div>}
+          </>
+        )}
       </Drawer>
       <SectionCard eyebrow="Education & Languages">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>

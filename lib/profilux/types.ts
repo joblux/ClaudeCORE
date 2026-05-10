@@ -188,12 +188,14 @@ export type MemberRow = {
 // (single source of truth). M6 group G6 reads cv_meta.cv_url.
 
 export type ResolvedExperience = {
+  id?: string
   company: string | null
   job_title: string | null
   city: string | null
   country: string | null
   start_date: string | null
   end_date: string | null
+  is_current?: boolean
   description: string | null
 }
 

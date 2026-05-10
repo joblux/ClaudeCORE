@@ -115,6 +115,29 @@ export async function resolveProfiLux(
   if (!data) return null
 
   const row = data as MemberRow
+
+  // A2.3-β: relational L2 for experiences. If rows exist, they win over L1.
+  const { data: weRows } = await supabase
+    .from('work_experiences')
+    .select('id, job_title, company, city, country, start_date, end_date, is_current, description')
+    .eq('member_id', memberId)
+    .order('start_date', { ascending: false, nullsFirst: false })
+
+  const relationalExperiences: ResolvedExperience[] | null =
+    Array.isArray(weRows) && weRows.length > 0
+      ? weRows.map((r) => ({
+          id: r.id,
+          company: r.company ?? null,
+          job_title: r.job_title ?? null,
+          city: r.city ?? null,
+          country: r.country ?? null,
+          start_date: r.start_date ?? null,
+          end_date: r.end_date ?? null,
+          is_current: r.is_current === true,
+          description: r.description ?? null,
+        }))
+      : null
+
   const cv: CvParsedData | null = row.cv_parsed_data ?? null
   const ident = cv?.identity
 
@@ -216,7 +239,7 @@ export async function resolveProfiLux(
     // L1 passthroughs
     sectors: arr(cv?.sectors),
     languages: mapLanguages(cv?.languages),
-    experiences: mapExperiences(cv?.experiences),
+    experiences: relationalExperiences ?? mapExperiences(cv?.experiences),
     education: mapEducation(cv?.education),
     // System
     role: row.role,
