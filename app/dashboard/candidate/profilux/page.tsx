@@ -1420,55 +1420,37 @@ export default function ProfiluxPage() {
           fontSize: 12,
           lineHeight: 1.4,
         }
+        const chipRow: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 8 }
 
-        const bioText = (typeof e.bio === 'string' && e.bio.trim().length > 0) ? e.bio : null
         const experiences = Array.isArray(e.experiences) ? e.experiences : []
-
-        type SubSection = { heading: string; items: Array<{ key: string; label: string }> }
-        const subSections: SubSection[] = []
-        if (Array.isArray(e.sectors) && e.sectors.length > 0) {
-          subSections.push({
-            heading: 'Sectors',
-            items: e.sectors.map((v, i) => ({ key: `sec-${i}-${v}`, label: sectorLabel(v) })),
-          })
-        }
-        if (Array.isArray(e.product_categories) && e.product_categories.length > 0) {
-          subSections.push({
-            heading: 'Product categories',
-            items: e.product_categories.map((v, i) => ({ key: `pc-${i}-${v}`, label: productCategoryLabel(v) })),
-          })
-        }
-        if (Array.isArray(e.expertise_tags) && e.expertise_tags.length > 0) {
-          subSections.push({
-            heading: 'Areas of expertise',
-            items: e.expertise_tags.map((v, i) => ({ key: `et-${i}-${v}`, label: expertiseTagLabel(v) })),
-          })
-        }
-        if (Array.isArray(e.key_skills) && e.key_skills.length > 0) {
-          subSections.push({
-            heading: 'Skills',
-            items: e.key_skills.map((v, i) => ({ key: `sk-${i}-${v}`, label: skillLabel(v) })),
-          })
-        }
-        if (Array.isArray(e.market_knowledge) && e.market_knowledge.length > 0) {
-          subSections.push({
-            heading: 'Markets',
-            items: e.market_knowledge.map((v, i) => ({ key: `mk-${i}-${v}`, label: v })),
-          })
-        }
-        if (Array.isArray(e.languages) && e.languages.length > 0) {
-          subSections.push({
-            heading: 'Languages',
-            items: e.languages.map((lang, i) => ({
-              key: `lg-${i}-${lang.language}`,
-              label: lang.proficiency ? `${lang.language} (${lang.proficiency})` : lang.language,
-            })),
-          })
-        }
-        const hasAnyExpertise = subSections.length > 0
+        const expRows = experiences.map((exp) => {
+          const hasJobT = typeof exp.job_title === 'string' && exp.job_title.trim().length > 0
+          const hasCo = typeof exp.company === 'string' && exp.company.trim().length > 0
+          if (!hasJobT && !hasCo) return null
+          const titleLine =
+            hasJobT && hasCo ? `${exp.job_title} at ${exp.company}`
+            : hasJobT ? exp.job_title!
+            : exp.company!
+          const xCity = typeof exp.city === 'string' && exp.city.trim().length > 0 ? exp.city : null
+          const xCountry = typeof exp.country === 'string' && exp.country.trim().length > 0 ? exp.country : null
+          const expLocation = xCity && xCountry ? `${xCity}, ${xCountry}` : (xCity ?? xCountry)
+          const hasStart = typeof exp.start_date === 'string' && exp.start_date.trim().length > 0
+          const hasEnd = typeof exp.end_date === 'string' && exp.end_date.trim().length > 0
+          const dateRange =
+            hasStart && hasEnd ? `${exp.start_date} — ${exp.end_date}`
+            : hasStart ? `${exp.start_date} — Present`
+            : hasEnd ? exp.end_date!
+            : null
+          const locationDateLine =
+            expLocation && dateRange ? `${expLocation} · ${dateRange}`
+            : expLocation ?? dateRange
+          const description = typeof exp.description === 'string' && exp.description.trim().length > 0 ? exp.description : null
+          return { titleLine, locationDateLine, description }
+        }).filter((r): r is { titleLine: string; locationDateLine: string | null; description: string | null } => r !== null)
 
         return (
           <>
+            {/* Identity strip — §24.6 (unchanged) */}
             <SectionCard layout="flex">
               <div style={{ flex: '0 0 auto' }}>
                 {hasAvatar ? (
@@ -1520,94 +1502,180 @@ export default function ProfiluxPage() {
               </div>
             </SectionCard>
 
-            {bioText && (
-              <SectionCard eyebrow="About">
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#ccc', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-                  {bioText}
+            {/* §22.1 row 1 — Identity */}
+            <SectionCard eyebrow="Identity">
+              <div style={grid}>
+                <div style={label}>First name</div><div>{e.first_name ?? <NotSet />}</div>
+                <div style={label}>Last name</div><div>{e.last_name ?? <NotSet />}</div>
+                <div style={label}>City</div><div>{e.city ?? <NotSet />}</div>
+                <div style={label}>Country</div><div>{e.country ?? <NotSet />}</div>
+                <div style={label}>Nationality</div><div>{e.nationality ?? <NotSet />}</div>
+                <div style={label}>Phone</div><div>{e.phone ?? <NotSet />}</div>
+                <div style={label}>Headline</div><div>{e.headline ?? <NotSet />}</div>
+                <div style={label}>Bio</div><div>{(typeof e.bio === 'string' && e.bio.trim().length > 0) ? <span style={{ whiteSpace: 'pre-wrap' }}>{e.bio}</span> : <NotSet />}</div>
+              </div>
+            </SectionCard>
+
+            {/* §22.1 row 2 — Current Position */}
+            <SectionCard eyebrow="Current Position">
+              <div style={grid}>
+                <div style={label}>Job title</div><div>{e.job_title ?? <NotSet />}</div>
+                <div style={label}>Current employer</div><div>{e.current_employer ?? <NotSet />}</div>
+                <div style={label}>Seniority</div><div>{seniorityLabel(e.seniority) ?? <NotSet />}</div>
+                <div style={label}>Years of experience</div><div>{e.total_years_experience != null ? String(e.total_years_experience) : <NotSet />}</div>
+              </div>
+            </SectionCard>
+
+            {/* §22.1 row 3 — Luxury Fit */}
+            <SectionCard eyebrow="Luxury Fit">
+              <div style={grid}>
+                <div style={label}>Years in luxury</div><div>{e.years_in_luxury != null ? String(e.years_in_luxury) : <NotSet />}</div>
+              </div>
+              <div style={sectionLabel}>Sectors</div>
+              {e.sectors.length > 0 ? (
+                <div style={{ ...chipRow, marginTop: 8 }}>
+                  {e.sectors.map((v, i) => <span key={`sec-${i}-${v}`} style={viewChipStyle}>{sectorLabel(v)}</span>)}
                 </div>
-              </SectionCard>
-            )}
+              ) : <div style={{ marginTop: 8 }}><NoneSel /></div>}
+              <div style={sectionLabel}>Product categories</div>
+              {e.product_categories.length > 0 ? (
+                <div style={{ ...chipRow, marginTop: 8 }}>
+                  {e.product_categories.map((v, i) => <span key={`pc-${i}-${v}`} style={viewChipStyle}>{productCategoryLabel(v)}</span>)}
+                </div>
+              ) : <div style={{ marginTop: 8 }}><NoneSel /></div>}
+              <div style={sectionLabel}>Areas of expertise</div>
+              {e.expertise_tags.length > 0 ? (
+                <div style={{ ...chipRow, marginTop: 8 }}>
+                  {e.expertise_tags.map((v, i) => <span key={`et-${i}-${v}`} style={viewChipStyle}>{expertiseTagLabel(v)}</span>)}
+                </div>
+              ) : <div style={{ marginTop: 8 }}><NoneSel /></div>}
+            </SectionCard>
 
-            {experiences.length > 0 && (() => {
-              const rows = experiences.map((exp) => {
-                const hasJobT = typeof exp.job_title === 'string' && exp.job_title.trim().length > 0
-                const hasCo = typeof exp.company === 'string' && exp.company.trim().length > 0
-                if (!hasJobT && !hasCo) return null
-                const titleLine =
-                  hasJobT && hasCo ? `${exp.job_title} at ${exp.company}`
-                  : hasJobT ? exp.job_title!
-                  : exp.company!
-
-                const xCity = typeof exp.city === 'string' && exp.city.trim().length > 0 ? exp.city : null
-                const xCountry = typeof exp.country === 'string' && exp.country.trim().length > 0 ? exp.country : null
-                const expLocation = xCity && xCountry ? `${xCity}, ${xCountry}` : (xCity ?? xCountry)
-
-                const hasStart = typeof exp.start_date === 'string' && exp.start_date.trim().length > 0
-                const hasEnd = typeof exp.end_date === 'string' && exp.end_date.trim().length > 0
-                const dateRange =
-                  hasStart && hasEnd ? `${exp.start_date} — ${exp.end_date}`
-                  : hasStart ? `${exp.start_date} — Present`
-                  : hasEnd ? exp.end_date!
-                  : null
-
-                const locationDateLine =
-                  expLocation && dateRange ? `${expLocation} · ${dateRange}`
-                  : expLocation ?? dateRange
-
-                const description = typeof exp.description === 'string' && exp.description.trim().length > 0 ? exp.description : null
-
-                return { titleLine, locationDateLine, description }
-              }).filter((r): r is { titleLine: string; locationDateLine: string | null; description: string | null } => r !== null)
-
-              if (rows.length === 0) return null
-              return (
-                <SectionCard eyebrow="Experience">
-                  {rows.map((r, i) => {
-                    const isLast = i === rows.length - 1
-                    const rowStyle: React.CSSProperties = isLast
-                      ? { marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }
-                      : { marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #2a2a2a' }
-                    return (
-                      <div key={i} style={rowStyle}>
-                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#fff', lineHeight: 1.4, marginBottom: 4 }}>
-                          {r.titleLine}
-                        </div>
-                        {r.locationDateLine && (
-                          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.4, marginBottom: 6 }}>
-                            {r.locationDateLine}
-                          </div>
-                        )}
-                        {r.description && (
-                          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-                            {r.description}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </SectionCard>
-              )
-            })()}
-
-            {hasAnyExpertise && (
-              <SectionCard eyebrow="Skills & expertise">
-                {subSections.map((sub, idx) => {
-                  const isLast = idx === subSections.length - 1
+            {/* §22.1 row 4 — Career History */}
+            <SectionCard eyebrow="Career History">
+              {expRows.length === 0 ? (
+                <NoneSel />
+              ) : (
+                expRows.map((r, i) => {
+                  const isLast = i === expRows.length - 1
+                  const rowStyle: React.CSSProperties = isLast
+                    ? { marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }
+                    : { marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #2a2a2a' }
                   return (
-                    <div key={sub.heading} style={{ marginBottom: isLast ? 0 : 16 }}>
-                      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
-                        {sub.heading}
-                      </div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                        {sub.items.map((it) => (
-                          <span key={it.key} style={viewChipStyle}>{it.label}</span>
-                        ))}
-                      </div>
+                    <div key={i} style={rowStyle}>
+                      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#fff', lineHeight: 1.4, marginBottom: 4 }}>{r.titleLine}</div>
+                      {r.locationDateLine && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.4, marginBottom: 6 }}>{r.locationDateLine}</div>
+                      )}
+                      {r.description && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{r.description}</div>
+                      )}
                     </div>
                   )
-                })}
-              </SectionCard>
-            )}
+                })
+              )}
+            </SectionCard>
+
+            {/* §22.1 row 5 — Education & Languages */}
+            <SectionCard eyebrow="Education & Languages">
+              <div style={grid}>
+                <div style={label}>University</div><div>{e.university ?? <NotSet />}</div>
+                <div style={label}>Field of study</div><div>{e.field_of_study ?? <NotSet />}</div>
+                <div style={label}>Graduation year</div><div>{e.graduation_year != null ? String(e.graduation_year) : <NotSet />}</div>
+              </div>
+              <div style={sectionLabel}>Education</div>
+              {e.education.length === 0 ? (
+                <div style={{ marginTop: 8 }}><NoneSel /></div>
+              ) : (
+                <div style={{ marginTop: 8 }}>
+                  {e.education.map((ed, i) => (
+                    <div key={i} style={{ ...card, fontSize: 12 }}>
+                      <div><strong>{ed.institution ?? 'Unknown'}</strong></div>
+                      <div style={{ color: '#999', marginTop: 4 }}>{ed.degree ?? '—'} · {ed.field_of_study ?? '—'} · {ed.graduation_year ?? '—'}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div style={sectionLabel}>Languages</div>
+              {e.languages.length === 0 ? (
+                <div style={{ marginTop: 8 }}><NoneSel /></div>
+              ) : (
+                <div style={{ ...chipRow, marginTop: 8 }}>
+                  {e.languages.map((l, i) => (
+                    <span key={`lg-${i}-${l.language}`} style={viewChipStyle}>
+                      {l.proficiency ? `${l.language} (${l.proficiency})` : l.language}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </SectionCard>
+
+            {/* §22.1 row 6 — Skills & Markets */}
+            <SectionCard eyebrow="Skills & Markets">
+              <div style={sectionLabel}>Skills</div>
+              {e.key_skills.length > 0 ? (
+                <div style={{ ...chipRow, marginTop: 8 }}>
+                  {e.key_skills.map((v, i) => <span key={`sk-${i}-${v}`} style={viewChipStyle}>{skillLabel(v)}</span>)}
+                </div>
+              ) : <div style={{ marginTop: 8 }}><NoneSel /></div>}
+              <div style={sectionLabel}>Markets</div>
+              {e.market_knowledge.length > 0 ? (
+                <div style={{ ...chipRow, marginTop: 8 }}>
+                  {e.market_knowledge.map((v, i) => <span key={`mk-${i}-${v}`} style={viewChipStyle}>{v}</span>)}
+                </div>
+              ) : <div style={{ marginTop: 8 }}><NoneSel /></div>}
+            </SectionCard>
+
+            {/* §22.1 row 7 — Clienteling */}
+            <SectionCard eyebrow="Clienteling">
+              <div style={grid}>
+                <div style={label}>Clienteling experience</div>
+                <div>{e.clienteling_experience === true ? 'Yes' : e.clienteling_experience === false ? 'No' : <NotSet />}</div>
+                <div style={label}>Background description</div>
+                <div>{e.clienteling_experience === true && typeof e.clienteling_description === 'string' && e.clienteling_description.length > 0 ? e.clienteling_description : <NotSet />}</div>
+              </div>
+            </SectionCard>
+
+            {/* §22.1 row 8 — Availability & Targets */}
+            <SectionCard eyebrow="Availability & Targets">
+              <div style={grid}>
+                <div style={label}>Availability</div>
+                <div>{availabilityLabel(e.availability) ?? <NotSet />}</div>
+              </div>
+              <div style={sectionLabel}>Desired locations</div>
+              {e.desired_locations.length > 0 ? (
+                <div style={{ ...chipRow, marginTop: 8 }}>
+                  {e.desired_locations.map((v, i) => <span key={`dl-${i}-${v}`} style={viewChipStyle}>{v}</span>)}
+                </div>
+              ) : <div style={{ marginTop: 8 }}><NoneSel /></div>}
+              <div style={sectionLabel}>Desired departments</div>
+              {e.desired_departments.length > 0 ? (
+                <div style={{ ...chipRow, marginTop: 8 }}>
+                  {e.desired_departments.map((v, i) => <span key={`dd-${i}-${v}`} style={viewChipStyle}>{departmentLabel(v)}</span>)}
+                </div>
+              ) : <div style={{ marginTop: 8 }}><NoneSel /></div>}
+              <div style={sectionLabel}>Desired contract types</div>
+              {e.desired_contract_types.length > 0 ? (
+                <div style={{ ...chipRow, marginTop: 8 }}>
+                  {e.desired_contract_types.map((v, i) => <span key={`dc-${i}-${v}`} style={viewChipStyle}>{contractTypeLabel(v)}</span>)}
+                </div>
+              ) : <div style={{ marginTop: 8 }}><NoneSel /></div>}
+              <div style={grid}>
+                <div style={label}>Open to relocation</div>
+                <div>{e.open_to_relocation === true ? 'Yes' : e.open_to_relocation === false ? 'No' : <NotSet />}</div>
+                <div style={label}>Relocation preferences</div>
+                <div>{e.open_to_relocation === true && typeof e.relocation_preferences === 'string' && e.relocation_preferences.length > 0 ? e.relocation_preferences : <NotSet />}</div>
+              </div>
+            </SectionCard>
+
+            {/* §22.1 row 9 — Compensation */}
+            <SectionCard eyebrow="Compensation">
+              <div style={grid}>
+                <div style={label}>Target compensation (min)</div><div>{e.desired_salary_min != null ? String(e.desired_salary_min) : <NotSet />}</div>
+                <div style={label}>Target compensation (max)</div><div>{e.desired_salary_max != null ? String(e.desired_salary_max) : <NotSet />}</div>
+                <div style={label}>Currency</div><div>{e.desired_salary_currency ?? <NotSet />}</div>
+              </div>
+            </SectionCard>
           </>
         )
       })()}
