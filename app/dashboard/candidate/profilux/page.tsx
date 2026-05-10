@@ -120,6 +120,69 @@ function SectionCard({ eyebrow, layout = 'block', children }: SectionCardProps) 
   )
 }
 
+// A2.8 — View tab collapse/expand wrapper.
+// Wraps a SectionCard with a clickable header row + chevron. Used ONLY on
+// the 9 §22.1 View tab cards in pass 2. Edit + Manage tabs untouched.
+// No persistence (refresh resets to doctrine default per Mo's lock).
+// Doctrine: MATRIX §23.6 — filled-collapsed, empty-expanded. Density choice
+// decided per-card by the caller via the `collapsed` prop.
+type CollapsibleSectionCardProps = {
+  eyebrow: string
+  collapsed: boolean
+  onToggle: () => void
+  children: React.ReactNode
+}
+
+function CollapsibleSectionCard({ eyebrow, collapsed, onToggle, children }: CollapsibleSectionCardProps) {
+  const cardBase: React.CSSProperties = {
+    background: '#222',
+    border: '1px solid #2a2a2a',
+    borderRadius: 6,
+    padding: '20px 24px',
+    marginBottom: 24,
+    maxWidth: 900,
+  }
+  const headerStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    cursor: 'pointer',
+    userSelect: 'none',
+    marginBottom: collapsed ? 0 : 10,
+  }
+  const eyebrowStyle: React.CSSProperties = {
+    fontSize: 10,
+    color: '#999',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  }
+  const chevronStyle: React.CSSProperties = {
+    fontFamily: 'Inter, sans-serif',
+    fontSize: 12,
+    color: '#999',
+    lineHeight: 1,
+    transform: collapsed ? 'rotate(0deg)' : 'rotate(90deg)',
+    transition: 'transform 160ms ease-out',
+    display: 'inline-block',
+  }
+  return (
+    <div style={cardBase}>
+      <div
+        role="button"
+        aria-expanded={!collapsed}
+        tabIndex={0}
+        onClick={onToggle}
+        onKeyDown={(ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); onToggle() } }}
+        style={headerStyle}
+      >
+        <div style={eyebrowStyle}>{eyebrow}</div>
+        <span aria-hidden="true" style={chevronStyle}>›</span>
+      </div>
+      {!collapsed && <div>{children}</div>}
+    </div>
+  )
+}
+
 type DrawerProps = {
   open: boolean
   title: string
@@ -417,6 +480,31 @@ function mapParseError(code: string | null): string {
 
 export default function ProfiluxPage() {
   const [tab, setTab] = useState<ProfiluxTab>('edit')
+  // A2.8 — View tab per-card collapse state. Keys mirror the 9 §22.1
+  // sections. undefined = "use doctrine default for this card";
+  // true/false = "user choice". No persistence: refresh resets (Mo lock).
+  type ViewCollapseKey =
+    | 'identity'
+    | 'current_position'
+    | 'luxury_fit'
+    | 'career_history'
+    | 'education_languages'
+    | 'skills_markets'
+    | 'clienteling'
+    | 'availability'
+    | 'compensation'
+  const [viewCollapse, setViewCollapse] = useState<Partial<Record<ViewCollapseKey, boolean>>>({})
+  const toggleViewCollapse = (key: ViewCollapseKey, doctrineDefault: boolean) => {
+    setViewCollapse(prev => {
+      const current = prev[key]
+      const effective = current === undefined ? doctrineDefault : current
+      return { ...prev, [key]: !effective }
+    })
+  }
+  const isCardCollapsed = (key: ViewCollapseKey, doctrineDefault: boolean) => {
+    const v = viewCollapse[key]
+    return v === undefined ? doctrineDefault : v
+  }
   const [shareStatus, setShareStatus] = useState<{
     share_slug: string | null
     sharing_enabled: boolean
@@ -1619,7 +1707,22 @@ export default function ProfiluxPage() {
             </SectionCard>
 
             {/* §22.1 row 1 — Identity */}
-            <SectionCard eyebrow="Identity">
+            {(() => {
+              const filled =
+                (typeof e.first_name === 'string' && e.first_name.trim().length > 0) ||
+                (typeof e.last_name === 'string' && e.last_name.trim().length > 0) ||
+                (typeof e.city === 'string' && e.city.trim().length > 0) ||
+                (typeof e.country === 'string' && e.country.trim().length > 0) ||
+                (typeof e.nationality === 'string' && e.nationality.trim().length > 0) ||
+                (typeof e.phone === 'string' && e.phone.trim().length > 0) ||
+                (typeof e.headline === 'string' && e.headline.trim().length > 0) ||
+                (typeof e.bio === 'string' && e.bio.trim().length > 0)
+              return (
+            <CollapsibleSectionCard
+              eyebrow="Identity"
+              collapsed={isCardCollapsed('identity', filled)}
+              onToggle={() => toggleViewCollapse('identity', filled)}
+            >
               <div style={grid}>
                 <div style={label}>First name</div><div>{reviewFor('first_name')}</div>
                 <div style={label}>Last name</div><div>{reviewFor('last_name')}</div>
@@ -1630,20 +1733,46 @@ export default function ProfiluxPage() {
                 <div style={label}>Headline</div><div>{missingIfEmptyStr(e.headline)}</div>
                 <div style={label}>Bio</div><div>{(typeof e.bio === 'string' && e.bio.trim().length > 0) ? <span style={{ whiteSpace: 'pre-wrap' }}>{e.bio}</span> : <Marker kind="missing" />}</div>
               </div>
-            </SectionCard>
+            </CollapsibleSectionCard>
+              )
+            })()}
 
             {/* §22.1 row 2 — Current Position */}
-            <SectionCard eyebrow="Current Position">
+            {(() => {
+              const filled =
+                (typeof e.job_title === 'string' && e.job_title.trim().length > 0) ||
+                (typeof e.current_employer === 'string' && e.current_employer.trim().length > 0) ||
+                (typeof e.seniority === 'string' && e.seniority.trim().length > 0) ||
+                typeof e.total_years_experience === 'number'
+              return (
+            <CollapsibleSectionCard
+              eyebrow="Current Position"
+              collapsed={isCardCollapsed('current_position', filled)}
+              onToggle={() => toggleViewCollapse('current_position', filled)}
+            >
               <div style={grid}>
                 <div style={label}>Job title</div><div>{missingIfEmptyStr(e.job_title)}</div>
                 <div style={label}>Current employer</div><div>{missingIfEmptyStr(e.current_employer)}</div>
                 <div style={label}>Seniority</div><div>{seniorityLabel(e.seniority) ?? <Marker kind="missing" />}</div>
                 <div style={label}>Years of experience</div><div>{missingIfEmptyNum(e.total_years_experience)}</div>
               </div>
-            </SectionCard>
+            </CollapsibleSectionCard>
+              )
+            })()}
 
             {/* §22.1 row 3 — Luxury Fit */}
-            <SectionCard eyebrow="Luxury Fit">
+            {(() => {
+              const filled =
+                typeof e.years_in_luxury === 'number' ||
+                (Array.isArray(e.sectors) && e.sectors.length > 0) ||
+                (Array.isArray(e.product_categories) && e.product_categories.length > 0) ||
+                (Array.isArray(e.expertise_tags) && e.expertise_tags.length > 0)
+              return (
+            <CollapsibleSectionCard
+              eyebrow="Luxury Fit"
+              collapsed={isCardCollapsed('luxury_fit', filled)}
+              onToggle={() => toggleViewCollapse('luxury_fit', filled)}
+            >
               <div style={grid}>
                 <div style={label}>Years in luxury</div><div>{missingIfEmptyNum(e.years_in_luxury)}</div>
               </div>
@@ -1665,10 +1794,19 @@ export default function ProfiluxPage() {
                   {e.expertise_tags.map((v, i) => <span key={`et-${i}-${v}`} style={viewChipStyle}>{expertiseTagLabel(v)}</span>)}
                 </div>
               ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
-            </SectionCard>
+            </CollapsibleSectionCard>
+              )
+            })()}
 
             {/* §22.1 row 4 — Career History */}
-            <SectionCard eyebrow="Career History">
+            {(() => {
+              const filled = expRows.length > 0
+              return (
+            <CollapsibleSectionCard
+              eyebrow="Career History"
+              collapsed={isCardCollapsed('career_history', filled)}
+              onToggle={() => toggleViewCollapse('career_history', filled)}
+            >
               {expRows.length === 0 ? (
                 <Marker kind="missing" />
               ) : (
@@ -1690,10 +1828,24 @@ export default function ProfiluxPage() {
                   )
                 })
               )}
-            </SectionCard>
+            </CollapsibleSectionCard>
+              )
+            })()}
 
             {/* §22.1 row 5 — Education & Languages */}
-            <SectionCard eyebrow="Education & Languages">
+            {(() => {
+              const filled =
+                (typeof e.university === 'string' && e.university.trim().length > 0) ||
+                (typeof e.field_of_study === 'string' && e.field_of_study.trim().length > 0) ||
+                typeof e.graduation_year === 'number' ||
+                (Array.isArray(e.education) && e.education.length > 0) ||
+                (Array.isArray(e.languages) && e.languages.length > 0)
+              return (
+            <CollapsibleSectionCard
+              eyebrow="Education & Languages"
+              collapsed={isCardCollapsed('education_languages', filled)}
+              onToggle={() => toggleViewCollapse('education_languages', filled)}
+            >
               <div style={grid}>
                 <div style={label}>University</div><div>{missingIfEmptyStr(e.university)}</div>
                 <div style={label}>Field of study</div><div>{missingIfEmptyStr(e.field_of_study)}</div>
@@ -1724,10 +1876,21 @@ export default function ProfiluxPage() {
                   ))}
                 </div>
               )}
-            </SectionCard>
+            </CollapsibleSectionCard>
+              )
+            })()}
 
             {/* §22.1 row 6 — Skills & Markets */}
-            <SectionCard eyebrow="Skills & Markets">
+            {(() => {
+              const filled =
+                (Array.isArray(e.key_skills) && e.key_skills.length > 0) ||
+                (Array.isArray(e.market_knowledge) && e.market_knowledge.length > 0)
+              return (
+            <CollapsibleSectionCard
+              eyebrow="Skills & Markets"
+              collapsed={isCardCollapsed('skills_markets', filled)}
+              onToggle={() => toggleViewCollapse('skills_markets', filled)}
+            >
               <div style={sectionLabel}>Skills</div>
               {e.key_skills.length > 0 ? (
                 <div style={{ ...chipRow, marginTop: 8 }}>
@@ -1740,20 +1903,48 @@ export default function ProfiluxPage() {
                   {e.market_knowledge.map((v, i) => <span key={`mk-${i}-${v}`} style={viewChipStyle}>{v}</span>)}
                 </div>
               ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
-            </SectionCard>
+            </CollapsibleSectionCard>
+              )
+            })()}
 
             {/* §22.1 row 7 — Clienteling */}
-            <SectionCard eyebrow="Clienteling">
+            {(() => {
+              const filled =
+                e.clienteling_experience === true ||
+                e.clienteling_experience === false ||
+                (typeof e.clienteling_description === 'string' && e.clienteling_description.trim().length > 0)
+              return (
+            <CollapsibleSectionCard
+              eyebrow="Clienteling"
+              collapsed={isCardCollapsed('clienteling', filled)}
+              onToggle={() => toggleViewCollapse('clienteling', filled)}
+            >
               <div style={grid}>
                 <div style={label}>Clienteling experience</div>
                 <div>{e.clienteling_experience === true ? 'Yes' : e.clienteling_experience === false ? 'No' : <Marker kind="missing" />}</div>
                 <div style={label}>Background description</div>
                 <div>{e.clienteling_experience === true && typeof e.clienteling_description === 'string' && e.clienteling_description.length > 0 ? e.clienteling_description : <Marker kind="missing" />}</div>
               </div>
-            </SectionCard>
+            </CollapsibleSectionCard>
+              )
+            })()}
 
             {/* §22.1 row 8 — Availability & Targets */}
-            <SectionCard eyebrow="Availability & Targets">
+            {(() => {
+              const filled =
+                (typeof e.availability === 'string' && e.availability.trim().length > 0) ||
+                (Array.isArray(e.desired_locations) && e.desired_locations.length > 0) ||
+                (Array.isArray(e.desired_departments) && e.desired_departments.length > 0) ||
+                (Array.isArray(e.desired_contract_types) && e.desired_contract_types.length > 0) ||
+                e.open_to_relocation === true ||
+                e.open_to_relocation === false ||
+                (typeof e.relocation_preferences === 'string' && e.relocation_preferences.trim().length > 0)
+              return (
+            <CollapsibleSectionCard
+              eyebrow="Availability & Targets"
+              collapsed={isCardCollapsed('availability', filled)}
+              onToggle={() => toggleViewCollapse('availability', filled)}
+            >
               <div style={grid}>
                 <div style={label}>Availability</div>
                 <div>{availabilityLabel(e.availability) ?? <Marker kind="missing" />}</div>
@@ -1782,16 +1973,30 @@ export default function ProfiluxPage() {
                 <div style={label}>Relocation preferences</div>
                 <div>{e.open_to_relocation === true && typeof e.relocation_preferences === 'string' && e.relocation_preferences.length > 0 ? e.relocation_preferences : <Marker kind="missing" />}</div>
               </div>
-            </SectionCard>
+            </CollapsibleSectionCard>
+              )
+            })()}
 
             {/* §22.1 row 9 — Compensation */}
-            <SectionCard eyebrow="Compensation">
+            {(() => {
+              const filled =
+                typeof e.desired_salary_min === 'number' ||
+                typeof e.desired_salary_max === 'number' ||
+                (typeof e.desired_salary_currency === 'string' && e.desired_salary_currency.trim().length > 0)
+              return (
+            <CollapsibleSectionCard
+              eyebrow="Compensation"
+              collapsed={isCardCollapsed('compensation', filled)}
+              onToggle={() => toggleViewCollapse('compensation', filled)}
+            >
               <div style={grid}>
                 <div style={label}>Target compensation (min)</div><div>{missingIfEmptyNum(e.desired_salary_min)}</div>
                 <div style={label}>Target compensation (max)</div><div>{missingIfEmptyNum(e.desired_salary_max)}</div>
                 <div style={label}>Currency</div><div>{missingIfEmptyStr(e.desired_salary_currency)}</div>
               </div>
-            </SectionCard>
+            </CollapsibleSectionCard>
+              )
+            })()}
           </>
         )
       })()}
