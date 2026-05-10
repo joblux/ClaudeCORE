@@ -51,6 +51,7 @@ function toLegacyMember(view: ProfiLuxResolved, meta: MemberMeta) {
     org_type: meta.org_type,
     country: view.country,
     city: view.city,
+    phone: view.phone,
     status: view.status,
   }
 }

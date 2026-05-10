@@ -854,7 +854,7 @@ export default function BusinessDashboard() {
                         </span>
                       </div>
                       <div style={{ fontSize: 11, color: '#777', marginTop: 12, fontFamily: 'Inter, sans-serif', lineHeight: 1.5 }}>
-                        To update company details, contact{' '}
+                        To update company name or organisation type, contact{' '}
                         <a href="mailto:info@joblux.com" style={{ color: '#a58e28', textDecoration: 'none' }}>info@joblux.com</a>.
                       </div>
                     </>
