@@ -24,7 +24,7 @@ export async function POST() {
   }
 
   const { data: profile } = await supabase
-    .from('profilux')
+    .from('members')
     .select('first_name, last_name')
     .eq('email', session.user.email)
     .single()
