@@ -76,9 +76,8 @@ Seeking Role: ${member.seeking_role || 'N/A'}
 Speciality: ${member.speciality || 'N/A'}
 Firm: ${member.consulting_firm || 'N/A'}
 Expertise Tags: ${(member.expertise_tags || []).join(', ') || 'N/A'}
-Company Email: ${member.company_email || 'N/A'}
-Company Website: ${member.company_website || 'N/A'}
-Company Size: ${member.company_size || 'N/A'}
+Company Name: ${member.company_name || 'N/A'}
+Org Type: ${member.org_type || 'N/A'}
 
 Respond ONLY with valid JSON, no markdown, no preamble:
 {"confidence": "high" | "medium" | "low", "reasoning": "1-2 sentence explanation", "recommendation": "approve" | "review"}
