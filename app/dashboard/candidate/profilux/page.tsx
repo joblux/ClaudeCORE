@@ -1977,26 +1977,6 @@ export default function ProfiluxPage() {
               )
             })()}
 
-            {/* §22.1 row 9 — Compensation */}
-            {(() => {
-              const filled =
-                typeof e.desired_salary_min === 'number' ||
-                typeof e.desired_salary_max === 'number' ||
-                (typeof e.desired_salary_currency === 'string' && e.desired_salary_currency.trim().length > 0)
-              return (
-            <CollapsibleSectionCard
-              eyebrow="Compensation"
-              collapsed={isCardCollapsed('compensation', filled)}
-              onToggle={() => toggleViewCollapse('compensation', filled)}
-            >
-              <div style={grid}>
-                <div style={label}>Target compensation (min)</div><div>{missingIfEmptyNum(e.desired_salary_min)}</div>
-                <div style={label}>Target compensation (max)</div><div>{missingIfEmptyNum(e.desired_salary_max)}</div>
-                <div style={label}>Currency</div><div>{missingIfEmptyStr(e.desired_salary_currency)}</div>
-              </div>
-            </CollapsibleSectionCard>
-              )
-            })()}
           </>
         )
       })()}
