@@ -54,6 +54,10 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **c585c57** `fix(business): clarify Company information is read-only + remove dead Sector row` — May 10 2026. SHIPPED + COOLIFY-GREEN. F-2-3 Fork 2 UX clarification. 1 file, +4/-5. Adds muted support-note "To update company details, contact info@joblux.com" under read-only Company info card on /dashboard/business Settings tab. Removes dead Sector row (both companyRows array + edit-mode display block) — members.sector does not exist as a column; row always rendered "—". Doctrine: company identity fields (company_name, org_type) stay non-self-editable; changes go through support channel. /api/members/profile ALLOWED_FIELDS deliberately unchanged. Static verification only (build green, no Chrome MCP behavioral probe per Mo option-(a) decision pattern). Coolify deploy of c585c57: git_only by design pending F-runtime-build-sha-not-exposed.
+
+- **92bc106** `fix(auth): restrict set-tier self-service allowlist to professional tiers` — May 10 2026. SHIPPED + COOLIFY-GREEN. B19-followup hardening. 1 file, +1/-1. VALID_TIERS in app/api/members/set-tier/route.ts trimmed from 5 → 3: ['rising', 'pro', 'executive']. Removes 'business' and 'insider' from self-service allowlist. Closes residual first-call self-escalation surface left by original B19 idempotency-only guard at tier_selected || registration_completed. Preserves: existing tier_selected || registration_completed guard, /select-profile flow (PROFILES literal sends rising/pro/executive only), /join applyPendingTier path, /join/employer separate path via /api/members/employer-signup. Static verification only (build green, no Chrome MCP behavioral probe). Coolify deploy 03m52s, status Success. Ledger row d7d15dfe (B19-followup, status=closed). Original B19 row 28839019 (status=validated) untouched. Exploit-chain mechanics preserved in git history + ultra-review report.
+
 - **e4fdf46** `refactor(admin): F-2-2 surface company_name + org_type to admin members LIST` — May 10 2026. SHIPPED + PROD-VALIDATED 8/8. 2 files, +18/-2. SELECT widening + role-branched subtitle (`company_name · org_type` for business; professionals unchanged).
 
 - **b982f53** `refactor(admin): F-2 Option gamma surface company_name + org_type to AdminMemberDetail` — May 10 2026. SHIPPED + PROD-VALIDATED 7/7. 3 files, +21/-5. Closes F-2 admin DETAIL via second targeted SELECT (mirrors `/api/members/me` R6-A pattern). Casts removed from `app/admin/members/[id]/page.tsx`.
@@ -68,19 +72,23 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-**Slice catalog (Mo + GPT pick next; no commitment):**
+**Active session pivot (2026-05-10):** Closing product session. Next session is workflow-infrastructure (Bridge V2 planning), separate dedicated conversation. Trigger phrase: *"Open JOBLUX workflow infrastructure session — Bridge V2"*. Mix doctrine: do NOT bundle Bridge V2 work into product slices.
 
-A. **Manage tab reconciliation** — A1 narrow shipped (read-only Visibility & sharing panel at `a829033`). Remaining sub-options:
-   - **A2** — full Manage with reset-link rebuild + sharing toggle UX. Requires unparking `0e6f3271` (reset-link parked). New endpoints needed: `POST /api/profilux/share` (toggle `sharing_enabled`), rebuild `POST /api/profilux/reset-link` to source identity from `members.*` via resolver. Materially larger; touches 3 routes.
-   - **A3** — account settings consolidation in Manage tab (separate from sharing).
+**Slice catalog (Mo + GPT pick next on product session resume; no commitment):**
 
-B. **Identity micro-additions** — `linkedin_url`, `date_of_birth` (+ `avatar_url` if upload pipeline lands first). Smallest possible enrichment slice; mirrors S12 form-input drawer pattern. No new doctrine. **GPT-recommended next slice post-Manage v0.**
+A. **Manage tab reconciliation** — A2 (full sharing UX with toggle + reset-link unparking under 0e6f3271). Larger.
 
-C. **Recruiter/admin projection refinement** — first surface to consume `client` projection from `projectFor`. Either an admin member detail enrichment, a recruiter-facing share preview, or a stub `/p/[slug]` server-emitted public projection endpoint. Higher-effort; opens the public projection convergence work.
+B. **Identity micro-additions** — CANCELLED 2026-05-10. Doctrine lock added: "no LinkedIn in ProfiLux, no LinkedIn dependency on JOBLUX." Existing dormant linkedin_url in MemberRow / ProfiLuxResolved / EditorView stays dormant. date_of_birth alone has no consumer surface (V7 hides from public + client; View tab doesn't show it; matching/scoring doesn't use it). Future identity slices must respect LinkedIn lock.
 
-D. **Multi-record collection migration** — Education / Career History / Languages / sectors collection migrations. Parked under `1609e494`. Largest scope; precedent slices required first.
+C. **Recruiter/admin projection refinement** — first surface to consume `client` projection from projectFor. Higher-effort; opens public projection convergence work.
 
-**Recommended order: B → A2 → C → D.** B is the smallest no-doctrine enrichment. A2 unparks reset-link when sharing UX is ready. C pivots to public projection convergence. D is post-launch shape.
+D. **Multi-record collection migration** — Education / Career History / Languages / sectors. Parked under 1609e494. Largest scope.
+
+E. **Security follow-ups (post B19-followup):** B1 (15 unauthed admin routes), B3 (~17 unauthed LuxAI routes), B15 (admin upload-images), B18 (wikilux generate/translate/images), B23 (contribution approval rollback), B16 (CV upload MIME whitelist). All from 2026-04-24 ultra-review, parked under 6aad3904. Each is a candidate small hardening slice in the B19-followup pattern.
+
+F. **Launch checklist items:** F-2-4 dead schema cleanup (company_email/company_website/company_size — pure DDL drop; 0/12 rows populated, safe), b7590e0d (logged-in audit), 8651a836 (Resend/magic-link), 7becdb12 (compliance pack), 6f57a924 (private-layer noindex), 04c65c54 (hardcoded numbers).
+
+**Recommended product order on resume: F-2-4 → E (small B-series follow-ups in batches) → A2 → C → D.** F-2-4 is trivial DDL; B-series are small hardening slices in the proven B19-followup shape; A2 unparks reset-link; C pivots to public projection convergence; D is post-launch.
 
 ### DO NOT
 
@@ -112,6 +120,9 @@ D. **Multi-record collection migration** — Education / Career History / Langua
 - Touch `app/admin/members/[id]/page.tsx` unless `C-B-2` (admin share-preview) ships or `F-2` (business member type reconciliation) opens. F-1a closure at `3edf6ac` is doctrine-locked; further edits drift the boundary.
 - Implement any client-projection-consuming surface (`C-B-2` admin share-preview, `C-B-3` public client-facing page) before the client-template visual style is locked by Mo + GPT. No preview code, no scaffolding, no stubs ahead of the visual lock.
 - Reintroduce parallel client type systems for admin surfaces. The pattern was killed by F-1a at `3edf6ac` (`types/member-profile.ts` deleted, `AdminMemberDetail` formalized in `lib/profilux/types.ts`). Future client-shaped types live in `lib/profilux/types.ts` only.
+- Touch `/api/members/profile` ALLOWED_FIELDS to add `company_name` or `org_type`. F-2-3 Fork 2 doctrine lock (2026-05-10): company identity fields stay non-self-editable.
+- Activate dormant `linkedin_url` in any UX or write path. LinkedIn doctrine lock (2026-05-10): no LinkedIn in ProfiLux, no LinkedIn dependency on JOBLUX. Applies to UI, write-path, display, prompt copy.
+- Mix Bridge V2 / workflow infrastructure work into product feature sessions. Trigger phrase for infra: *"Open JOBLUX workflow infrastructure session — Bridge V2"*.
 
 ### PARKED (admin_tasks status=parked)
 
@@ -147,8 +158,10 @@ D. **Multi-record collection migration** — Education / Career History / Langua
 - **F-magiclink-delivery**, **F-pdfparse-anthropic-files**, **F-admin_tasks-trigger**, **F-cv_url-format-mixed** — carried.
 - **F-public-slug-stub** — CLOSED 2026-05-07 by `369c2e0`.
 - **F-empty-string-vs-null**, **F-availability-default-drift**, **F-currency-default-applied** — CLOSED 2026-05-01.
+- **F-public-support-email-convention-drift** *(NEW 2026-05-10, observation_only)* — F-2-3 introduced `info@joblux.com` as the employer-facing support contact in /dashboard/business Settings card. Existing public convention is `alex@joblux.com` (only other public surface: /terms/business line 111). New surfaces must consciously pick one. If `info@joblux.com` becomes durable convention for in-product support, harden in STATE §15 design system + retroactively align /terms/business. Otherwise, retroactively align F-2-3 copy to alex@. No fix scheduled; flag at next public-copy decision point.
+- **F-runtime-build-sha-not-exposed** carried — both today's deploys (92bc106, c585c57) verified `git_only`, no real drift verification. Remains the highest-leverage infra unblock for Bridge V2.
 
-**Last updated:** May 10, 2026 — Two slices shipped. F-2 admin visibility slice closed: detail (`b982f53`) + list (`e4fdf46`). F-2-3 and F-2-4 remain parked. HEAD `e4fdf46`. Next slice undecided — Mo + GPT pick from B / B19 / F-2-3 / A2.
+**Last updated:** May 10, 2026 (b) — Two slices shipped in close sequence: B19-followup security hardening (92bc106) + F-2-3 business Company info UX clarification (c585c57). Ledger rows closed: d7d15dfe, 91286357. LinkedIn doctrine lock added. F-2-3 Fork 2 doctrine lock added (company identity non-self-editable). HEAD c585c57. Session closed; next session is Bridge V2 workflow infrastructure (separate conversation).
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
