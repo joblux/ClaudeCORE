@@ -20,6 +20,30 @@ const NotSet = () => <em style={{ color: '#666' }}>Not specified</em>
 const NoneSel = () => <em style={{ color: '#666' }}>None selected</em>
 const Hint = ({ children }: { children: React.ReactNode }) => <em style={{ color: '#888' }}>{children}</em>
 
+// A2.6 — State marker family (MATRIX §24.3, §14.3).
+// View tab only. Replaces inline <NotSet /> / <NoneSel /> on View cards.
+// Edit tab keeps NotSet/NoneSel verbatim.
+type MarkerKind = 'missing' | 'review'
+const Marker = ({ kind }: { kind: MarkerKind }) => {
+  if (kind === 'review') {
+    return (
+      <span style={{
+        display: 'inline-block',
+        background: 'rgba(165, 142, 40, 0.15)',
+        color: '#a58e28',
+        padding: '2px 8px',
+        borderRadius: 999,
+        fontSize: 11,
+        fontFamily: 'Inter, sans-serif',
+        letterSpacing: 0.3,
+      }}>Review</span>
+    )
+  }
+  return (
+    <em style={{ color: '#777', fontSize: 13, fontStyle: 'italic' }}>Missing</em>
+  )
+}
+
 const wrap: React.CSSProperties = { padding: 40, background: '#1a1a1a', color: '#fff', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }
 const h1Style: React.CSSProperties = { fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: 28, marginBottom: 8 }
 const sub: React.CSSProperties = { color: '#999', fontSize: 13, marginBottom: 24 }
@@ -1409,6 +1433,21 @@ export default function ProfiluxPage() {
         }
         const tagLine = tagLineParts.length > 0 ? tagLineParts.join(' · ') : null
 
+        // A2.6 — Marker compute (client-side only, MATRIX §24.3).
+        // Review marker shown ONLY when L2 is empty AND cv_identity_suggestions
+        // has a value for that key. All other empty fields render Missing.
+        const sug = e.cv_identity_suggestions
+        const reviewFor = (key: 'first_name' | 'last_name' | 'city' | 'nationality') => {
+          const v = e[key]
+          if (typeof v === 'string' && v.trim().length > 0) return v
+          if (sug[key] === undefined) return <Marker kind="missing" />
+          return <Marker kind="review" />
+        }
+        const missingIfEmptyStr = (v: string | null | undefined) =>
+          (typeof v === 'string' && v.trim().length > 0) ? v : <Marker kind="missing" />
+        const missingIfEmptyNum = (v: number | null | undefined) =>
+          (typeof v === 'number') ? String(v) : <Marker kind="missing" />
+
         const viewChipStyle: React.CSSProperties = {
           display: 'inline-block',
           background: 'rgba(255,255,255,0.04)',
@@ -1505,56 +1544,56 @@ export default function ProfiluxPage() {
             {/* §22.1 row 1 — Identity */}
             <SectionCard eyebrow="Identity">
               <div style={grid}>
-                <div style={label}>First name</div><div>{e.first_name ?? <NotSet />}</div>
-                <div style={label}>Last name</div><div>{e.last_name ?? <NotSet />}</div>
-                <div style={label}>City</div><div>{e.city ?? <NotSet />}</div>
-                <div style={label}>Country</div><div>{e.country ?? <NotSet />}</div>
-                <div style={label}>Nationality</div><div>{e.nationality ?? <NotSet />}</div>
-                <div style={label}>Phone</div><div>{e.phone ?? <NotSet />}</div>
-                <div style={label}>Headline</div><div>{e.headline ?? <NotSet />}</div>
-                <div style={label}>Bio</div><div>{(typeof e.bio === 'string' && e.bio.trim().length > 0) ? <span style={{ whiteSpace: 'pre-wrap' }}>{e.bio}</span> : <NotSet />}</div>
+                <div style={label}>First name</div><div>{reviewFor('first_name')}</div>
+                <div style={label}>Last name</div><div>{reviewFor('last_name')}</div>
+                <div style={label}>City</div><div>{reviewFor('city')}</div>
+                <div style={label}>Country</div><div>{missingIfEmptyStr(e.country)}</div>
+                <div style={label}>Nationality</div><div>{reviewFor('nationality')}</div>
+                <div style={label}>Phone</div><div>{missingIfEmptyStr(e.phone)}</div>
+                <div style={label}>Headline</div><div>{missingIfEmptyStr(e.headline)}</div>
+                <div style={label}>Bio</div><div>{(typeof e.bio === 'string' && e.bio.trim().length > 0) ? <span style={{ whiteSpace: 'pre-wrap' }}>{e.bio}</span> : <Marker kind="missing" />}</div>
               </div>
             </SectionCard>
 
             {/* §22.1 row 2 — Current Position */}
             <SectionCard eyebrow="Current Position">
               <div style={grid}>
-                <div style={label}>Job title</div><div>{e.job_title ?? <NotSet />}</div>
-                <div style={label}>Current employer</div><div>{e.current_employer ?? <NotSet />}</div>
-                <div style={label}>Seniority</div><div>{seniorityLabel(e.seniority) ?? <NotSet />}</div>
-                <div style={label}>Years of experience</div><div>{e.total_years_experience != null ? String(e.total_years_experience) : <NotSet />}</div>
+                <div style={label}>Job title</div><div>{missingIfEmptyStr(e.job_title)}</div>
+                <div style={label}>Current employer</div><div>{missingIfEmptyStr(e.current_employer)}</div>
+                <div style={label}>Seniority</div><div>{seniorityLabel(e.seniority) ?? <Marker kind="missing" />}</div>
+                <div style={label}>Years of experience</div><div>{missingIfEmptyNum(e.total_years_experience)}</div>
               </div>
             </SectionCard>
 
             {/* §22.1 row 3 — Luxury Fit */}
             <SectionCard eyebrow="Luxury Fit">
               <div style={grid}>
-                <div style={label}>Years in luxury</div><div>{e.years_in_luxury != null ? String(e.years_in_luxury) : <NotSet />}</div>
+                <div style={label}>Years in luxury</div><div>{missingIfEmptyNum(e.years_in_luxury)}</div>
               </div>
               <div style={sectionLabel}>Sectors</div>
               {e.sectors.length > 0 ? (
                 <div style={{ ...chipRow, marginTop: 8 }}>
                   {e.sectors.map((v, i) => <span key={`sec-${i}-${v}`} style={viewChipStyle}>{sectorLabel(v)}</span>)}
                 </div>
-              ) : <div style={{ marginTop: 8 }}><NoneSel /></div>}
+              ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
               <div style={sectionLabel}>Product categories</div>
               {e.product_categories.length > 0 ? (
                 <div style={{ ...chipRow, marginTop: 8 }}>
                   {e.product_categories.map((v, i) => <span key={`pc-${i}-${v}`} style={viewChipStyle}>{productCategoryLabel(v)}</span>)}
                 </div>
-              ) : <div style={{ marginTop: 8 }}><NoneSel /></div>}
+              ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
               <div style={sectionLabel}>Areas of expertise</div>
               {e.expertise_tags.length > 0 ? (
                 <div style={{ ...chipRow, marginTop: 8 }}>
                   {e.expertise_tags.map((v, i) => <span key={`et-${i}-${v}`} style={viewChipStyle}>{expertiseTagLabel(v)}</span>)}
                 </div>
-              ) : <div style={{ marginTop: 8 }}><NoneSel /></div>}
+              ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
             </SectionCard>
 
             {/* §22.1 row 4 — Career History */}
             <SectionCard eyebrow="Career History">
               {expRows.length === 0 ? (
-                <NoneSel />
+                <Marker kind="missing" />
               ) : (
                 expRows.map((r, i) => {
                   const isLast = i === expRows.length - 1
@@ -1579,13 +1618,13 @@ export default function ProfiluxPage() {
             {/* §22.1 row 5 — Education & Languages */}
             <SectionCard eyebrow="Education & Languages">
               <div style={grid}>
-                <div style={label}>University</div><div>{e.university ?? <NotSet />}</div>
-                <div style={label}>Field of study</div><div>{e.field_of_study ?? <NotSet />}</div>
-                <div style={label}>Graduation year</div><div>{e.graduation_year != null ? String(e.graduation_year) : <NotSet />}</div>
+                <div style={label}>University</div><div>{missingIfEmptyStr(e.university)}</div>
+                <div style={label}>Field of study</div><div>{missingIfEmptyStr(e.field_of_study)}</div>
+                <div style={label}>Graduation year</div><div>{missingIfEmptyNum(e.graduation_year)}</div>
               </div>
               <div style={sectionLabel}>Education</div>
               {e.education.length === 0 ? (
-                <div style={{ marginTop: 8 }}><NoneSel /></div>
+                <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>
               ) : (
                 <div style={{ marginTop: 8 }}>
                   {e.education.map((ed, i) => (
@@ -1598,7 +1637,7 @@ export default function ProfiluxPage() {
               )}
               <div style={sectionLabel}>Languages</div>
               {e.languages.length === 0 ? (
-                <div style={{ marginTop: 8 }}><NoneSel /></div>
+                <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>
               ) : (
                 <div style={{ ...chipRow, marginTop: 8 }}>
                   {e.languages.map((l, i) => (
@@ -1617,22 +1656,22 @@ export default function ProfiluxPage() {
                 <div style={{ ...chipRow, marginTop: 8 }}>
                   {e.key_skills.map((v, i) => <span key={`sk-${i}-${v}`} style={viewChipStyle}>{skillLabel(v)}</span>)}
                 </div>
-              ) : <div style={{ marginTop: 8 }}><NoneSel /></div>}
+              ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
               <div style={sectionLabel}>Markets</div>
               {e.market_knowledge.length > 0 ? (
                 <div style={{ ...chipRow, marginTop: 8 }}>
                   {e.market_knowledge.map((v, i) => <span key={`mk-${i}-${v}`} style={viewChipStyle}>{v}</span>)}
                 </div>
-              ) : <div style={{ marginTop: 8 }}><NoneSel /></div>}
+              ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
             </SectionCard>
 
             {/* §22.1 row 7 — Clienteling */}
             <SectionCard eyebrow="Clienteling">
               <div style={grid}>
                 <div style={label}>Clienteling experience</div>
-                <div>{e.clienteling_experience === true ? 'Yes' : e.clienteling_experience === false ? 'No' : <NotSet />}</div>
+                <div>{e.clienteling_experience === true ? 'Yes' : e.clienteling_experience === false ? 'No' : <Marker kind="missing" />}</div>
                 <div style={label}>Background description</div>
-                <div>{e.clienteling_experience === true && typeof e.clienteling_description === 'string' && e.clienteling_description.length > 0 ? e.clienteling_description : <NotSet />}</div>
+                <div>{e.clienteling_experience === true && typeof e.clienteling_description === 'string' && e.clienteling_description.length > 0 ? e.clienteling_description : <Marker kind="missing" />}</div>
               </div>
             </SectionCard>
 
@@ -1640,40 +1679,40 @@ export default function ProfiluxPage() {
             <SectionCard eyebrow="Availability & Targets">
               <div style={grid}>
                 <div style={label}>Availability</div>
-                <div>{availabilityLabel(e.availability) ?? <NotSet />}</div>
+                <div>{availabilityLabel(e.availability) ?? <Marker kind="missing" />}</div>
               </div>
               <div style={sectionLabel}>Desired locations</div>
               {e.desired_locations.length > 0 ? (
                 <div style={{ ...chipRow, marginTop: 8 }}>
                   {e.desired_locations.map((v, i) => <span key={`dl-${i}-${v}`} style={viewChipStyle}>{v}</span>)}
                 </div>
-              ) : <div style={{ marginTop: 8 }}><NoneSel /></div>}
+              ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
               <div style={sectionLabel}>Desired departments</div>
               {e.desired_departments.length > 0 ? (
                 <div style={{ ...chipRow, marginTop: 8 }}>
                   {e.desired_departments.map((v, i) => <span key={`dd-${i}-${v}`} style={viewChipStyle}>{departmentLabel(v)}</span>)}
                 </div>
-              ) : <div style={{ marginTop: 8 }}><NoneSel /></div>}
+              ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
               <div style={sectionLabel}>Desired contract types</div>
               {e.desired_contract_types.length > 0 ? (
                 <div style={{ ...chipRow, marginTop: 8 }}>
                   {e.desired_contract_types.map((v, i) => <span key={`dc-${i}-${v}`} style={viewChipStyle}>{contractTypeLabel(v)}</span>)}
                 </div>
-              ) : <div style={{ marginTop: 8 }}><NoneSel /></div>}
+              ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
               <div style={grid}>
                 <div style={label}>Open to relocation</div>
-                <div>{e.open_to_relocation === true ? 'Yes' : e.open_to_relocation === false ? 'No' : <NotSet />}</div>
+                <div>{e.open_to_relocation === true ? 'Yes' : e.open_to_relocation === false ? 'No' : <Marker kind="missing" />}</div>
                 <div style={label}>Relocation preferences</div>
-                <div>{e.open_to_relocation === true && typeof e.relocation_preferences === 'string' && e.relocation_preferences.length > 0 ? e.relocation_preferences : <NotSet />}</div>
+                <div>{e.open_to_relocation === true && typeof e.relocation_preferences === 'string' && e.relocation_preferences.length > 0 ? e.relocation_preferences : <Marker kind="missing" />}</div>
               </div>
             </SectionCard>
 
             {/* §22.1 row 9 — Compensation */}
             <SectionCard eyebrow="Compensation">
               <div style={grid}>
-                <div style={label}>Target compensation (min)</div><div>{e.desired_salary_min != null ? String(e.desired_salary_min) : <NotSet />}</div>
-                <div style={label}>Target compensation (max)</div><div>{e.desired_salary_max != null ? String(e.desired_salary_max) : <NotSet />}</div>
-                <div style={label}>Currency</div><div>{e.desired_salary_currency ?? <NotSet />}</div>
+                <div style={label}>Target compensation (min)</div><div>{missingIfEmptyNum(e.desired_salary_min)}</div>
+                <div style={label}>Target compensation (max)</div><div>{missingIfEmptyNum(e.desired_salary_max)}</div>
+                <div style={label}>Currency</div><div>{missingIfEmptyStr(e.desired_salary_currency)}</div>
               </div>
             </SectionCard>
           </>
