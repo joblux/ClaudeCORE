@@ -5,6 +5,11 @@ import type { EditorView } from '@/lib/profilux/types'
 import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS, PROFILUX_SECTOR_OPTIONS } from '@/lib/profilux/vocabulary'
 
 const TOTAL = 11
+
+// A2.4: gate the 11-screen tunnel out of the visible Edit experience.
+// renderStep, navWrap, SCREEN_TITLES, step state are all preserved — only
+// the render is gated. Flip to true to revive.
+const TUNNEL_VISIBLE = false
 const SCREEN_TITLES = [
   '', 'Identity', 'Headline', 'Current Position', 'Luxury Fit',
   'Career History', 'Education & Languages', 'Skills & Markets',
@@ -1609,7 +1614,7 @@ export default function ProfiluxPage() {
 
       {tab === 'edit' && (
         <>
-      <div style={sub}>Screen {step} / {TOTAL} · {SCREEN_TITLES[step]}</div>
+      {TUNNEL_VISIBLE && <div style={sub}>Screen {step} / {TOTAL} · {SCREEN_TITLES[step]}</div>}
       {(() => {
         const fn = e.first_name ?? ''
         const ln = e.last_name ?? ''
@@ -2246,6 +2251,37 @@ export default function ProfiluxPage() {
           {savedAt6 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
           {saveError6 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError6}</span>}
         </div>
+        <div style={sectionLabel}>Education (parsed from your CV)</div>
+        {e.education.length === 0 ? (
+          <div style={{ color: '#999', fontSize: 13, marginTop: 8 }}>No education records parsed yet.</div>
+        ) : (
+          <div style={{ marginTop: 8 }}>
+            {e.education.map((ed, i) => (
+              <div key={i} style={{ ...card, fontSize: 12 }}>
+                <div><strong>{ed.institution ?? 'Unknown'}</strong></div>
+                <div style={{ color: '#999', marginTop: 4 }}>{ed.degree ?? '—'} · {ed.field_of_study ?? '—'} · {ed.graduation_year ?? '—'}</div>
+              </div>
+            ))}
+            <div style={{ marginTop: 4, fontSize: 11, color: '#777', fontStyle: 'italic' }}>
+              Parsed from your CV. Editing CV-parsed records is not yet supported.
+            </div>
+          </div>
+        )}
+        <div style={sectionLabel}>Languages (parsed from your CV)</div>
+        {e.languages.length === 0 ? (
+          <div style={{ color: '#999', fontSize: 13, marginTop: 8 }}>No languages parsed yet.</div>
+        ) : (
+          <div style={{ marginTop: 8 }}>
+            {e.languages.map((l, i) => (
+              <div key={i} style={{ ...card, fontSize: 12 }}>
+                {l.language} — {l.proficiency ?? <em style={{ color: '#666' }}>level not specified</em>}
+              </div>
+            ))}
+            <div style={{ marginTop: 4, fontSize: 11, color: '#777', fontStyle: 'italic' }}>
+              Parsed from your CV. Editing CV-parsed records is not yet supported.
+            </div>
+          </div>
+        )}
       </Drawer>
       <SectionCard eyebrow="Skills & Markets">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -2588,12 +2624,16 @@ export default function ProfiluxPage() {
           {saveError9 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError9}</span>}
         </div>
       </Drawer>
-      {renderStep()}
-      <div style={navWrap}>
-        <button style={step === 1 ? btnDis : btn} disabled={step === 1} onClick={() => setStep(s => Math.max(1, s - 1))}>← Prev</button>
-        <button style={step === TOTAL ? btnDis : btn} disabled={step === TOTAL} onClick={() => setStep(s => Math.min(TOTAL, s + 1))}>Next →</button>
-        <span style={{ color: '#666', fontSize: 12, marginLeft: 16 }}>Completeness: {e.profile_completeness}%</span>
-      </div>
+      {TUNNEL_VISIBLE && (
+        <>
+          {renderStep()}
+          <div style={navWrap}>
+            <button style={step === 1 ? btnDis : btn} disabled={step === 1} onClick={() => setStep(s => Math.max(1, s - 1))}>← Prev</button>
+            <button style={step === TOTAL ? btnDis : btn} disabled={step === TOTAL} onClick={() => setStep(s => Math.min(TOTAL, s + 1))}>Next →</button>
+            <span style={{ color: '#666', fontSize: 12, marginLeft: 16 }}>Completeness: {e.profile_completeness}%</span>
+          </div>
+        </>
+      )}
         </>
       )}
 
