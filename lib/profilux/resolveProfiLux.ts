@@ -239,7 +239,8 @@ export async function resolveProfiLux(
     // L1 passthroughs
     sectors: arr(cv?.sectors),
     languages: mapLanguages(cv?.languages),
-    experiences: relationalExperiences ?? mapExperiences(cv?.experiences),
+    // A2.3-β.2: L2 + L1 (no replace, no dedup)
+    experiences: [...(relationalExperiences ?? []), ...mapExperiences(cv?.experiences)],
     education: mapEducation(cv?.education),
     // System
     role: row.role,
