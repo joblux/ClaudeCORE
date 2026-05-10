@@ -2322,6 +2322,9 @@ export default function ProfiluxPage() {
                 <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
                   Sharing
                 </div>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#888', fontStyle: 'italic', marginBottom: 12, lineHeight: 1.5 }}>
+                  Private link for direct outreach. Never indexed by search engines.
+                </div>
                 {shareStatus.share_slug ? (
                   <>
                     <button
