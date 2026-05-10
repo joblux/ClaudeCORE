@@ -56,3 +56,77 @@ export async function GET() {
     can_share,
   })
 }
+
+// =============================================================================
+// POST /api/profilux/share — toggle sharing_enabled on legacy profilux row
+//
+// Body: { sharing_enabled: boolean }
+//
+// Writes ONLY profilux.sharing_enabled.
+// Does NOT touch share_slug (slug lifecycle is owned by /api/profilux/reset-link).
+// Does NOT touch identity / profile fields.
+// Does NOT create the row — if no profilux row exists for this email,
+// returns 400 (user must reserve a slug first via reset-link).
+//
+// Unauthenticated → 401.
+// No row → 400 with code 'NO_PROFILUX_ROW'.
+// No slug on row → 400 with code 'NO_SLUG_RESERVED'
+// (cannot enable sharing without a slug to share).
+//
+// Returns: { sharing_enabled: boolean }
+// =============================================================================
+
+export async function POST(req: Request) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  let body: unknown
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
+
+  const next = (body as { sharing_enabled?: unknown })?.sharing_enabled
+  if (typeof next !== 'boolean') {
+    return NextResponse.json({ error: 'sharing_enabled must be boolean' }, { status: 400 })
+  }
+
+  const { data: existing, error: readErr } = await supabase
+    .from('profilux')
+    .select('share_slug, sharing_enabled')
+    .eq('email', session.user.email)
+    .maybeSingle()
+
+  if (readErr) {
+    return NextResponse.json({ error: readErr.message }, { status: 500 })
+  }
+
+  if (!existing) {
+    return NextResponse.json(
+      { error: 'No profilux row. Reserve a public link first.', code: 'NO_PROFILUX_ROW' },
+      { status: 400 },
+    )
+  }
+
+  if (next === true && !existing.share_slug) {
+    return NextResponse.json(
+      { error: 'Reserve a public link first to enable sharing.', code: 'NO_SLUG_RESERVED' },
+      { status: 400 },
+    )
+  }
+
+  const { error: updateErr } = await supabase
+    .from('profilux')
+    .update({ sharing_enabled: next })
+    .eq('email', session.user.email)
+
+  if (updateErr) {
+    return NextResponse.json({ error: updateErr.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ sharing_enabled: next })
+}
+

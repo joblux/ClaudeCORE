@@ -373,6 +373,8 @@ export default function ProfiluxPage() {
   } | null>(null)
   const [shareStatusError, setShareStatusError] = useState<string | null>(null)
   const [shareStatusLoading, setShareStatusLoading] = useState(false)
+  const [sharingToggleSaving, setSharingToggleSaving] = useState(false)
+  const [sharingToggleError, setSharingToggleError] = useState<string | null>(null)
   const [currentPositionDrawerOpen, setCurrentPositionDrawerOpen] = useState(false)
   const [luxuryFitDrawerOpen, setLuxuryFitDrawerOpen] = useState(false)
   const [skillsMarketsDrawerOpen, setSkillsMarketsDrawerOpen] = useState(false)
@@ -568,6 +570,37 @@ export default function ProfiluxPage() {
   const parsedDateLabel = (cvParsedAt && !isNaN(new Date(cvParsedAt).getTime()))
     ? new Date(cvParsedAt).toLocaleDateString()
     : 'recently'
+
+  async function handleToggleSharing(next: boolean) {
+    if (!shareStatus) return
+    setSharingToggleSaving(true)
+    setSharingToggleError(null)
+    try {
+      const res = await fetch('/api/profilux/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sharing_enabled: next }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any))
+        setSharingToggleError(typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
+        return
+      }
+      const refetch = await fetch('/api/profilux/share')
+      if (!refetch.ok) throw new Error(`HTTP ${refetch.status}`)
+      const fresh = await refetch.json()
+      setShareStatus({
+        share_slug: fresh.share_slug ?? null,
+        sharing_enabled: fresh.sharing_enabled === true,
+        public_url: fresh.public_url ?? null,
+        can_share: fresh.can_share === true,
+      })
+    } catch (err) {
+      setSharingToggleError(String(err))
+    } finally {
+      setSharingToggleSaving(false)
+    }
+  }
 
   async function handleSave() {
     setSaving(true)
@@ -2257,6 +2290,62 @@ export default function ProfiluxPage() {
                   No public link reserved yet.
                 </div>
               )}
+              <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #2a2a2a' }}>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
+                  Sharing
+                </div>
+                {shareStatus.share_slug ? (
+                  <>
+                    <button
+                      type="button"
+                      disabled={sharingToggleSaving}
+                      onClick={() => handleToggleSharing(!shareStatus.sharing_enabled)}
+                      style={{
+                        background: shareStatus.sharing_enabled ? '#fff' : 'transparent',
+                        color: shareStatus.sharing_enabled ? '#1a1a1a' : '#fff',
+                        border: shareStatus.sharing_enabled ? '1px solid #fff' : '1px solid #444',
+                        padding: '8px 16px',
+                        cursor: sharingToggleSaving ? 'not-allowed' : 'pointer',
+                        fontFamily: 'Inter, sans-serif',
+                        fontSize: 13,
+                        opacity: sharingToggleSaving ? 0.5 : 1,
+                      }}
+                    >
+                      {sharingToggleSaving
+                        ? 'Saving…'
+                        : shareStatus.sharing_enabled
+                          ? 'Disable sharing'
+                          : 'Enable sharing'}
+                    </button>
+                    {sharingToggleError && (
+                      <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#ff6b6b' }}>
+                        {sharingToggleError}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      disabled
+                      style={{
+                        background: 'transparent',
+                        color: '#555',
+                        border: '1px solid #2a2a2a',
+                        padding: '8px 16px',
+                        cursor: 'not-allowed',
+                        fontFamily: 'Inter, sans-serif',
+                        fontSize: 13,
+                      }}
+                    >
+                      Enable sharing
+                    </button>
+                    <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999' }}>
+                      Reserve a public link first to enable sharing.
+                    </div>
+                  </>
+                )}
+              </div>
               <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', fontStyle: 'italic', marginTop: 14 }}>
                 Visibility controls and account settings coming soon.
               </div>
