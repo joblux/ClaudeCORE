@@ -2094,13 +2094,21 @@ export default function ProfiluxPage() {
               <div style={label}>Start date *</div>
               <div><input style={input} type="date" value={experienceDraft.start_date} onChange={(ev) => setExperienceDraft({ ...experienceDraft, start_date: ev.target.value })} /></div>
               <div style={label}>Currently here</div>
-              <div>
-                <input
-                  type="checkbox"
-                  checked={experienceDraft.is_current}
-                  onChange={(ev) => setExperienceDraft({ ...experienceDraft, is_current: ev.target.checked, end_date: ev.target.checked ? '' : experienceDraft.end_date })}
-                  style={{ accentColor: '#a58e28' }}
-                />
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <button
+                  type="button"
+                  style={experienceDraft.is_current === true ? chipActive : chip}
+                  onClick={() => setExperienceDraft({ ...experienceDraft, is_current: true, end_date: '' })}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  style={experienceDraft.is_current === false ? chipActive : chip}
+                  onClick={() => setExperienceDraft({ ...experienceDraft, is_current: false })}
+                >
+                  No
+                </button>
               </div>
               <div style={label}>End date</div>
               <div>
