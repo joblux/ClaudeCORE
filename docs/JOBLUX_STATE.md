@@ -81,29 +81,29 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-**Active session state (2026-05-10 PM):** ProfiLux Reload Building Mode steps 1–4 SHIPPED end-to-end across 11 commits (`17bf47a` → `b9a91ca`). Manage tab full sharing UX shipped (A2.1 + A2.2 α/β/β.1/β.2). Edit tab gained Education & Languages drawer (A2.3-α) + Career History editable relational drawer (A2.3-β + β.1 chip + β.2 resolver). Edit tab tunnel hidden behind `TUNNEL_VISIBLE=false` flag (A2.4) with L1 edu/lang preserved inside E&L drawer. View tab rewritten to 9-card §22.1 passport structure, Chrome MCP prod-validated (A2.5).
+**V12 reconciliation execution — start with V12-violation-1 fix.**
 
-**Next session entry — strict default:** **A2.6 state markers (§24.3)** OR **A2.7 completeness signal + sidebar readiness (§21.1)** — Mo picks at session open. Do NOT default to bug cleanup, security follow-ups, or workflow infrastructure unless Mo explicitly chooses it.
+Last session (2026-05-10/11 PM) shipped 5 ProfiLux Building Mode commits (A2.6 → A2.8) then pivoted to V12 freeze protocol after drift detection. V12 is now anchored as first-class doctrine: `docs/PROFILUX_V12_LOCK.md` + `docs/prototypes/profilux_journey_v12.html` + STATE §25 + MATRIX §22.1 pointer.
 
-**Slice catalog (Mo + GPT pick next; no commitment):**
+**Hard entry instruction for next session:**
 
-A. **A2.6 state markers** — Missing / Review / AI inferred visual primitives per MATRIX §24.3. Needs MODEL §4 readiness breakdown surfaced first. Closes G9 from A2.5 gap analysis.
+> Read `docs/JOBLUX_STATE.md` §25 and `docs/PROFILUX_V12_LOCK.md` before any ProfiLux work. Start with V12-violation-1: remove Compensation from View only.
 
-B. **A2.7 completeness signal + sidebar readiness** — Surface `computeProfileCompleteness` in View tab via completeness signal (§21.1) + sidebar readiness breakdown. Closes G10, G11.
+**Sequencing locked:**
 
-C. **A2.8 collapse/expand density** — Per §23.6 mixed-density desktop (collapsed filled / expanded empty). Closes G12.
+1. **V12-violation-1** (ledger `99d30880`, high, parked) — remove Compensation SectionCard from View IIFE in `app/dashboard/candidate/profilux/page.tsx`. Single-file change. Schema unaffected. Edit tab Compensation drawer stays. ~5 min execution.
 
-D. **Identity micro-additions** — CANCELLED 2026-05-10. LinkedIn lock holds.
+2. **V12-divergence-1..4 decisions** (ledger `034bf165`, `99b61c19`, `28303edd`, `3e8d6de2`, all normal, parked) — Mo + GPT decisions on section composition: Education/Languages split, Expertise unified vs split, Maisons section, Clienteling position. No code without decision first.
 
-E. **Recruiter/admin projection refinement** — first surface to consume `client` projection from projectFor. Higher-effort.
+3. **V12-divergence-5..7 sequencing** (ledger `d243fc13`, `720da3aa`, `eb186be2`, all normal, parked) — roadmap sequencing for Add Section library, Manage maskable controls, CV merge modal. Schema dependencies acknowledged.
 
-F. **Remaining L2 collection migrations** — Education + Languages + sectors (Career History migrated at A2.3-β). Parked under `1609e494` for non-experiences scope.
+**Out of scope until V12 reconciliation complete:**
 
-G. **Security follow-ups (post B19-followup):** B1 (15 unauthed admin routes), B3 (~17 unauthed LuxAI routes), B15 (admin upload-images), B18 (wikilux generate/translate/images), B23 (contribution approval rollback), B16 ✓ shipped. Parked under `6aad3904`.
+- Any other ProfiLux surface evolution
+- Any new slice that doesn't address a V12 row
+- Backlog items unrelated to V12 reconciliation
 
-H. **Launch checklist items:** `b7590e0d`, `8651a836`, `7becdb12`, `6f57a924`, `04c65c54`.
-
-**Recommended next-session sequence: A2.6 → A2.7 → A2.8**, then re-evaluate. State markers + completeness signal complete the View-tab doctrine convergence; collapse/expand polishes density.
+**Handoff doc:** `docs/HANDOFF_2026-05-10b.md` (committed in this session close).
 
 ### DO NOT
 
