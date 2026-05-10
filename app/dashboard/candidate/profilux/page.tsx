@@ -1546,6 +1546,31 @@ export default function ProfiluxPage() {
               </div>
             </SectionCard>
 
+            {/* A2.7-A — Profile completeness bar.
+                Doctrine: profile_completeness semantic fork parked (f6508e54).
+                Copy: "Profile completeness X%" — neutral, does not commit to
+                matching-readiness vs holistic-richness fork.
+                Fill: neutral (#ccc), not gold — preserves §15 gold budget cap. */}
+            <SectionCard eyebrow="Profile completeness">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc' }}>
+                  Profile completeness
+                </span>
+                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#fff', fontVariantNumeric: 'tabular-nums' }}>
+                  {e.profile_completeness ?? 0}%
+                </span>
+              </div>
+              <div style={{ height: 6, background: '#2a2a2a', borderRadius: 999, overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%',
+                  width: `${Math.max(0, Math.min(100, e.profile_completeness ?? 0))}%`,
+                  background: '#ccc',
+                  borderRadius: 999,
+                  transition: 'width 240ms ease-out',
+                }} />
+              </div>
+            </SectionCard>
+
             {/* §22.1 row 1 — Identity */}
             <SectionCard eyebrow="Identity">
               <div style={grid}>
