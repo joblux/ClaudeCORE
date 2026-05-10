@@ -51,8 +51,10 @@ export async function POST() {
 
   await supabase
     .from('profilux')
-    .update({ share_slug: slug })
-    .eq('email', session.user.email)
+    .upsert(
+      { email: session.user.email, share_slug: slug },
+      { onConflict: 'email' }
+    )
 
   return NextResponse.json({ slug })
 }

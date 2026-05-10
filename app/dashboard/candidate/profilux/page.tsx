@@ -375,6 +375,8 @@ export default function ProfiluxPage() {
   const [shareStatusLoading, setShareStatusLoading] = useState(false)
   const [sharingToggleSaving, setSharingToggleSaving] = useState(false)
   const [sharingToggleError, setSharingToggleError] = useState<string | null>(null)
+  const [reserving, setReserving] = useState(false)
+  const [reserveError, setReserveError] = useState<string | null>(null)
   const [currentPositionDrawerOpen, setCurrentPositionDrawerOpen] = useState(false)
   const [luxuryFitDrawerOpen, setLuxuryFitDrawerOpen] = useState(false)
   const [skillsMarketsDrawerOpen, setSkillsMarketsDrawerOpen] = useState(false)
@@ -570,6 +572,32 @@ export default function ProfiluxPage() {
   const parsedDateLabel = (cvParsedAt && !isNaN(new Date(cvParsedAt).getTime()))
     ? new Date(cvParsedAt).toLocaleDateString()
     : 'recently'
+
+  async function handleReserveLink() {
+    setReserving(true)
+    setReserveError(null)
+    try {
+      const res = await fetch('/api/profilux/reset-link', { method: 'POST' })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any))
+        setReserveError(typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
+        return
+      }
+      const refetch = await fetch('/api/profilux/share')
+      if (!refetch.ok) throw new Error(`HTTP ${refetch.status}`)
+      const fresh = await refetch.json()
+      setShareStatus({
+        share_slug: fresh.share_slug ?? null,
+        sharing_enabled: fresh.sharing_enabled === true,
+        public_url: fresh.public_url ?? null,
+        can_share: fresh.can_share === true,
+      })
+    } catch (err) {
+      setReserveError(String(err))
+    } finally {
+      setReserving(false)
+    }
+  }
 
   async function handleToggleSharing(next: boolean) {
     if (!shareStatus) return
@@ -2327,22 +2355,26 @@ export default function ProfiluxPage() {
                   <>
                     <button
                       type="button"
-                      disabled
+                      disabled={reserving}
+                      onClick={handleReserveLink}
                       style={{
                         background: 'transparent',
-                        color: '#555',
-                        border: '1px solid #2a2a2a',
+                        color: '#fff',
+                        border: '1px solid #444',
                         padding: '8px 16px',
-                        cursor: 'not-allowed',
+                        cursor: reserving ? 'not-allowed' : 'pointer',
                         fontFamily: 'Inter, sans-serif',
                         fontSize: 13,
+                        opacity: reserving ? 0.5 : 1,
                       }}
                     >
-                      Enable sharing
+                      {reserving ? 'Reserving…' : 'Reserve public link'}
                     </button>
-                    <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999' }}>
-                      Reserve a public link first to enable sharing.
-                    </div>
+                    {reserveError && (
+                      <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#ff6b6b' }}>
+                        {reserveError}
+                      </div>
+                    )}
                   </>
                 )}
               </div>
