@@ -13,6 +13,12 @@ const supabase = createClient(
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 
+const ALLOWED_MIME_TYPES = new Set([
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+])
+
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   const memberId = (session?.user as any)?.memberId
@@ -31,6 +37,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unsupported file type. Please upload a PDF or Word document.' }, { status: 400 })
     }
 
+    // Validate MIME type (B16 hardening — must match declared extension intent)
+    if (!ALLOWED_MIME_TYPES.has(file.type)) {
+      return NextResponse.json({ error: 'Unsupported file type. Please upload a PDF or Word document.' }, { status: 400 })
+    }
+
     // Validate file size
     const buffer = Buffer.from(await file.arrayBuffer())
     if (buffer.length > MAX_FILE_SIZE) {
@@ -45,7 +56,7 @@ export async function POST(req: NextRequest) {
     const { data, error } = await supabase.storage
       .from('member-cvs')
       .upload(path, buffer, {
-        contentType: file.type || 'application/octet-stream',
+        contentType: file.type,
         upsert: false,
       })
 
