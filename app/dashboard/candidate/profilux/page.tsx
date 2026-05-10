@@ -1571,6 +1571,53 @@ export default function ProfiluxPage() {
               </div>
             </SectionCard>
 
+            {/* A2.7-B — Readiness card.
+                Surfaces M6 group truth from server (e.m6_groups). 6 rows, no
+                mismatch disclaimer per Mo (silent on 6-vs-9 cards). Stacked
+                placement only — no sidebar / two-column layout in this slice. */}
+            <SectionCard eyebrow="Readiness">
+              {(() => {
+                const g = e.m6_groups
+                const rows: Array<{ key: keyof typeof g; label: string }> = [
+                  { key: 'G1', label: 'Identity' },
+                  { key: 'G2', label: 'Position' },
+                  { key: 'G3', label: 'Luxury relevance' },
+                  { key: 'G4', label: 'Experience' },
+                  { key: 'G5', label: 'Availability' },
+                  { key: 'G6', label: 'CV' },
+                ]
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {rows.map((r) => {
+                      const on = g[r.key] === true
+                      return (
+                        <div key={r.key} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <span
+                            aria-hidden="true"
+                            style={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              background: on ? '#1D9E75' : '#555',
+                              display: 'inline-block',
+                              flex: '0 0 auto',
+                            }}
+                          />
+                          <span style={{
+                            fontFamily: 'Inter, sans-serif',
+                            fontSize: 13,
+                            color: on ? '#ccc' : '#777',
+                          }}>
+                            {r.label}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              })()}
+            </SectionCard>
+
             {/* §22.1 row 1 — Identity */}
             <SectionCard eyebrow="Identity">
               <div style={grid}>

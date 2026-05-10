@@ -431,6 +431,17 @@ export type EditorView = {
   // Computed (read-only)
   profile_completeness: number
   cv_identity_suggestions: CvIdentitySuggestions
+  // A2.7-B — Per-group readiness booleans, server-computed via computeM6Groups.
+  // Surfaces M6 readiness on View tab Readiness card. Authoritative source;
+  // do not re-derive client-side.
+  m6_groups: {
+    G1: boolean
+    G2: boolean
+    G3: boolean
+    G4: boolean
+    G5: boolean
+    G6: boolean
+  }
 }
 
 export type EditorProjection = {
