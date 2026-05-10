@@ -15,6 +15,8 @@ V12 is the **strategic working-loop baseline** for the ProfiLux candidate ecosys
 **Repo storage:** `docs/prototypes/profilux_journey_v12.html` (committed in Action 0-bis).
 **Mo's local copy:** `/Users/momo/Downloads/profilux_journey_v12.html`
 
+**Hash note:** repo copy SHA256 = `4c7d29e6125121a4eb70d7e2e49e06e11d243ad9d1d2d8b2be8d794c3bdb3920` (committed as `ed9e206`). Original May 6 MCP memory reference hash = `efbe5ae8d5c6c049409deb7eb3f90945da6aaeee1604eb62d634912fb843a856`. Mismatch logged 2026-05-11. Repo copy is operationally identical (same working-loop content); byte-level drift between May 6 source and current Downloads source likely due to viewer normalization or transit reformat. **Repo copy at commit `ed9e206` is the authoritative operational baseline going forward.**
+
 V12 is the binding structural reference for the entire candidate-facing ProfiLux surface. It supersedes the April-locked `profilux-journey.html` (11-screen tunnel) which is doctrinally retired per `PROFILUX_MODEL.md` §9 and `PROFILUX_MATRIX_V1.md` §7.6.2 (RETIRED v1.1).
 
 **Critical lesson logged (2026-05-10 PM):** Earlier interpretations treating V12 as "obsolete tunnel doctrine" or "directional only" are **INVALIDATED**. V12 was always the locked working-loop baseline. Drift happened because V12 was not anchored in repo truth — only in MCP memory and on Mo's Desktop. This doc is the remediation.
@@ -207,7 +209,7 @@ When V12, STATE, MATRIX, MODEL conflict:
 1. **STATE wins** by `PROFILUX_MATRIX_V1.md` §12.1 ("On conflict, STATE wins").
 2. STATE must reconcile to V12 when divergence is detected — V12 is the locked baseline. STATE drift away from V12 without explicit Mo + GPT decision is a doctrine breach.
 3. MATRIX / MODEL inherit from V12 structurally. Where MATRIX §22.1 lists 9 sections that diverge from V12 9 defaults, MATRIX is the drift candidate, not V12.
-4. **2026-05-10 PM lesson logged:** V12 was not referenced in STATE / MATRIX / MODEL. Process failure. This doc is the remediation. STATE patch in a separate commit MUST add a V12 reference (Action 1 of the freeze protocol).
+4. **2026-05-10 PM lesson logged:** V12 was mentioned in MATRIX §14.4 only as a parenthetical principle ("locked v12 prototype principle, May 6"), never as an anchored doctrine reference. STATE and MODEL did not reference V12 at all. The parenthetical was too weak to prevent drift. This doc is the remediation. STATE §25 (added in the same commit as this correction) anchors V12 as a first-class doctrine reference.
 
 ---
 

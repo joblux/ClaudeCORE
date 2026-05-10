@@ -663,6 +663,29 @@ All tabbed pages use `?tab=` query params. Brands: 5 tabs (~760 sitemap URLs).
 
 **Drift reset phrase:** *"living document, not wizard / not submission / not approval / not completion funnel"*
 
+## 25. V12 BASELINE LOCK
+
+**Status:** V12 baseline locked May 6, 2026 — re-anchored May 10, 2026 PM after drift detection.
+
+**Doctrine doc:** `docs/PROFILUX_V12_LOCK.md`
+**Prototype artifact:** `docs/prototypes/profilux_journey_v12.html`
+**Lock anchored by commits:** `be6ecaf` (`PROFILUX_V12_LOCK.md`) and `ed9e206` (`docs/prototypes/profilux_journey_v12.html`)
+
+V12 is the strategic working-loop baseline for the entire ProfiLux candidate surface. It locks three modes (View / Edit / Manage), six scenes, 9 default sections in fixed order, 8 opt-in library sections, and behavioral rules per `PROFILUX_V12_LOCK.md` §2. Visual posture is binding per §3; implementation polish is open per §4.
+
+**Authority:** V12_LOCK is subordinate to this STATE document per `PROFILUX_V12_LOCK.md` §7. On conflict, STATE wins until reconciled. STATE must reconcile to V12 when drift is detected — V12 is the locked structural baseline.
+
+### DO NOT (V12 enforcement)
+
+- **DO NOT** touch `app/dashboard/candidate/profilux/page.tsx` View / Edit / Manage tabs without a V12 cross-check per `PROFILUX_V12_LOCK.md` §8.
+- **DO NOT** treat V12 as stale tunnel doctrine — that interpretation was **invalidated 2026-05-10 PM**. V12 is the locked baseline. The April-locked `profilux-journey.html` 11-screen tunnel is what is doctrinally retired (per `PROFILUX_MATRIX_V1.md` §7.6.2), not V12.
+- **DO NOT** free-evolve passport surface composition without reconciliation per `PROFILUX_V12_LOCK.md` §6.1. The 4 currently-flagged section divergences (Education/Languages split, Expertise unification, Maisons section, Clienteling position) require Mo + GPT decisions before further surface work.
+- **DO NOT** ship structural drift from V12 §2 hard locks without an explicit Mo + GPT reconciliation decision recorded in `PROFILUX_V12_LOCK.md`.
+
+### Pending fix (deferred per Mo freeze 2026-05-10 PM)
+
+- **V12-violation-1:** Compensation card rendered in View tab (`app/dashboard/candidate/profilux/page.tsx` §22.1 row 9). Direct contradiction of V12 §2.5 hardest lock ("Compensation NEVER in View mode"). Fix scope: remove Compensation SectionCard from View IIFE only. Schema unaffected. Edit tab Compensation drawer stays. Deferred to a future session per Mo's 2026-05-10 PM freeze decision; tracked in ledger as `V12-violation-1`.
+
 ---
 
 *This document replaces all prior context/handoff files. Update this file at the end of every session. One document, always current.*

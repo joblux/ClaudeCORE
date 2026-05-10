@@ -844,6 +844,8 @@ The passport renders 9 default sections in fixed order, plus up to 8 opt-in sect
 
 ### 22.1 — Default sections (9, always present, fixed order)
 
+**Reconciliation status (2026-05-10 PM):** Live composition diverges from the V12 baseline. See `docs/PROFILUX_V12_LOCK.md` §6.1 for the divergence catalog and reconciliation decisions. MATRIX §22.1 is the drift candidate; V12 is the anchor.
+
 Field assignments mirror §7.6.1 `EditorView` exactly. The grouping into 9 named sections is locked here.
 
 | # | Section | EditorView fields |
