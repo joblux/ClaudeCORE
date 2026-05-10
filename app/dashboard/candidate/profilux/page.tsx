@@ -1438,10 +1438,15 @@ export default function ProfiluxPage() {
         // has a value for that key. All other empty fields render Missing.
         const sug = e.cv_identity_suggestions
         const reviewFor = (key: 'first_name' | 'last_name' | 'city' | 'nationality') => {
+          // A2.6.1 — Check suggestion presence FIRST. sug[key] is computed
+          // pre-Rule-A in the resolver and is the only honest signal of
+          // "L2 was empty AND L1 had a value". e[key] reads post-Rule-A
+          // and contains L1 fallback when L2 is null — using it here would
+          // falsely treat L1 fallback as a real L2 value.
+          if (sug[key] !== undefined) return <Marker kind="review" />
           const v = e[key]
           if (typeof v === 'string' && v.trim().length > 0) return v
-          if (sug[key] === undefined) return <Marker kind="missing" />
-          return <Marker kind="review" />
+          return <Marker kind="missing" />
         }
         const missingIfEmptyStr = (v: string | null | undefined) =>
           (typeof v === 'string' && v.trim().length > 0) ? v : <Marker kind="missing" />
