@@ -423,6 +423,7 @@ export default function ProfiluxPage() {
   const [saving1, setSaving1] = useState(false)
   const [savedAt1, setSavedAt1] = useState<number | null>(null)
   const [saveError1, setSaveError1] = useState<string | null>(null)
+  const [educationLanguagesDrawerOpen, setEducationLanguagesDrawerOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [parsing, setParsing] = useState(false)
@@ -1909,6 +1910,55 @@ export default function ProfiluxPage() {
           </button>
           {savedAt4 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
           {saveError4 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError4}</span>}
+        </div>
+      </Drawer>
+      <SectionCard eyebrow="Education & Languages">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div />
+          <button
+            type="button"
+            onClick={() => setEducationLanguagesDrawerOpen(true)}
+            style={{
+              background: 'transparent',
+              color: '#ccc',
+              border: '1px solid #2a2a2a',
+              padding: '6px 12px',
+              fontSize: 12,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        </div>
+        <div style={grid}>
+          <div style={label}>University</div>
+          <div>{e.university ?? <NotSet />}</div>
+          <div style={label}>Field of study</div>
+          <div>{e.field_of_study ?? <NotSet />}</div>
+          <div style={label}>Graduation year</div>
+          <div>{e.graduation_year != null ? String(e.graduation_year) : <NotSet />}</div>
+        </div>
+      </SectionCard>
+      <Drawer
+        open={educationLanguagesDrawerOpen}
+        title="Education & Languages"
+        onClose={() => setEducationLanguagesDrawerOpen(false)}
+      >
+        <div style={grid}>
+          <div style={label}>University</div>
+          <div><input style={input} value={draft6.university} onChange={(ev) => setDraft6({ ...draft6, university: ev.target.value })} placeholder="e.g. Swiss School of Business" /></div>
+          <div style={label}>Field of study</div>
+          <div><input style={input} value={draft6.field_of_study} onChange={(ev) => setDraft6({ ...draft6, field_of_study: ev.target.value })} placeholder="e.g. Business Administration" /></div>
+          <div style={label}>Graduation year</div>
+          <div><input style={input} type="number" min={0} value={draft6.graduation_year} onChange={(ev) => setDraft6({ ...draft6, graduation_year: ev.target.value })} placeholder="e.g. 2018" /></div>
+        </div>
+        <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button style={saving6 ? saveBtnDis : saveBtn} disabled={saving6} onClick={handleSave6}>
+            {saving6 ? 'Saving…' : 'Save'}
+          </button>
+          {savedAt6 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
+          {saveError6 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError6}</span>}
         </div>
       </Drawer>
       <SectionCard eyebrow="Skills & Markets">
