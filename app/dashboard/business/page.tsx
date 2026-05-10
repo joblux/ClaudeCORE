@@ -762,7 +762,6 @@ export default function BusinessDashboard() {
             const companyRows = [
               { label: 'Company', value: member?.company_name || '—' },
               { label: 'Organisation type', value: member?.org_type || '—' },
-              { label: 'Sector', value: (member as any)?.sector || '—' },
               { label: 'Country', value: member?.country || '—' },
               { label: 'City', value: member?.city || '—' },
               { label: 'Phone', value: (member as any)?.phone || '—' },
@@ -854,6 +853,10 @@ export default function BusinessDashboard() {
                           {isApproved ? 'Approved' : (member?.status || '—')}
                         </span>
                       </div>
+                      <div style={{ fontSize: 11, color: '#777', marginTop: 12, fontFamily: 'Inter, sans-serif', lineHeight: 1.5 }}>
+                        To update company details, contact{' '}
+                        <a href="mailto:info@joblux.com" style={{ color: '#a58e28', textDecoration: 'none' }}>info@joblux.com</a>.
+                      </div>
                     </>
                   ) : (
                     <>
@@ -864,10 +867,6 @@ export default function BusinessDashboard() {
                       <div style={acRow}>
                         <span style={acL}>Organisation type</span>
                         <span style={acV}>{member?.org_type || '—'}</span>
-                      </div>
-                      <div style={acRow}>
-                        <span style={acL}>Sector</span>
-                        <span style={acV}>{(member as any)?.sector || '—'}</span>
                       </div>
                       <div style={acRow}>
                         <span style={acL}>Country</span>
