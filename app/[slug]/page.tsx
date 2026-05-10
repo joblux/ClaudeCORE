@@ -9,6 +9,8 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   robots: { index: false, follow: false },
 }
@@ -50,13 +52,6 @@ export default async function PublicProfilePage({ params }: Props) {
       <meta name="robots" content="noindex, nofollow" />
       <div style={{ background: '#0f0f0f', minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: '#fff' }}>
 
-        {/* HEADER */}
-        <div style={{ background: '#0a0a0a', borderBottom: '0.5px solid #1e1e1e', padding: '0 40px' }}>
-          <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <img src="/joblux-header.png" alt="JOBLUX" style={{ height: '22px' }} />
-            <span style={{ fontSize: '10px', color: '#888', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Profilux</span>
-          </div>
-        </div>
 
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 40px 80px' }}>
 

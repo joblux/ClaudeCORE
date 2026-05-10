@@ -2381,9 +2381,6 @@ export default function ProfiluxPage() {
                   </>
                 )}
               </div>
-              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', fontStyle: 'italic', marginTop: 14 }}>
-                Visibility controls and account settings coming soon.
-              </div>
             </>
           )}
         </SectionCard>
