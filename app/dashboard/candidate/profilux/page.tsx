@@ -1596,26 +1596,21 @@ export default function ProfiluxPage() {
           const hasJobT = typeof exp.job_title === 'string' && exp.job_title.trim().length > 0
           const hasCo = typeof exp.company === 'string' && exp.company.trim().length > 0
           if (!hasJobT && !hasCo) return null
-          const titleLine =
-            hasJobT && hasCo ? `${exp.job_title} at ${exp.company}`
-            : hasJobT ? exp.job_title!
-            : exp.company!
+          const role = hasJobT ? exp.job_title! : null
+          const company = hasCo ? exp.company! : null
           const xCity = typeof exp.city === 'string' && exp.city.trim().length > 0 ? exp.city : null
           const xCountry = typeof exp.country === 'string' && exp.country.trim().length > 0 ? exp.country : null
-          const expLocation = xCity && xCountry ? `${xCity}, ${xCountry}` : (xCity ?? xCountry)
+          const location = xCity && xCountry ? `${xCity}, ${xCountry}` : (xCity ?? xCountry)
           const hasStart = typeof exp.start_date === 'string' && exp.start_date.trim().length > 0
           const hasEnd = typeof exp.end_date === 'string' && exp.end_date.trim().length > 0
-          const dateRange =
+          const period =
             hasStart && hasEnd ? `${exp.start_date} — ${exp.end_date}`
             : hasStart ? `${exp.start_date} — Present`
             : hasEnd ? exp.end_date!
             : null
-          const locationDateLine =
-            expLocation && dateRange ? `${expLocation} · ${dateRange}`
-            : expLocation ?? dateRange
           const description = typeof exp.description === 'string' && exp.description.trim().length > 0 ? exp.description : null
-          return { titleLine, locationDateLine, description }
-        }).filter((r): r is { titleLine: string; locationDateLine: string | null; description: string | null } => r !== null)
+          return { role, company, location, period, description }
+        }).filter((r): r is { role: string | null; company: string | null; location: string | null; period: string | null; description: string | null } => r !== null)
 
         return (
           <>
@@ -1665,7 +1660,7 @@ export default function ProfiluxPage() {
                 <button
                   type="button"
                   onClick={() => setTab('edit')}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: 'transparent', border: 'none', padding: '10px 0', color: '#ccc', fontFamily: 'Inter, sans-serif', fontSize: 13, cursor: 'pointer', textAlign: 'left' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: 'transparent', border: 'none', borderBottom: '0.5px solid rgba(255,255,255,0.03)', padding: '9px 0', color: '#ccc', fontFamily: 'Inter, sans-serif', fontSize: 13, cursor: 'pointer', textAlign: 'left' }}
                 >
                   <span>Edit ProfiLux</span>
                   <span aria-hidden="true" style={{ color: '#777' }}>→</span>
@@ -1673,7 +1668,7 @@ export default function ProfiluxPage() {
                 <button
                   type="button"
                   onClick={() => setTab('manage')}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: 'transparent', border: 'none', padding: '10px 0', color: '#ccc', fontFamily: 'Inter, sans-serif', fontSize: 13, cursor: 'pointer', textAlign: 'left' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: 'transparent', border: 'none', borderBottom: '0.5px solid rgba(255,255,255,0.03)', padding: '9px 0', color: '#ccc', fontFamily: 'Inter, sans-serif', fontSize: 13, cursor: 'pointer', textAlign: 'left' }}
                 >
                   <span>Manage &amp; share</span>
                   <span aria-hidden="true" style={{ color: '#777' }}>→</span>
@@ -1681,7 +1676,7 @@ export default function ProfiluxPage() {
                 <div
                   role="link"
                   aria-disabled="true"
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 0', color: '#ccc', fontFamily: 'Inter, sans-serif', fontSize: 13, opacity: 0.4, cursor: 'default', userSelect: 'none' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '9px 0', color: '#ccc', fontFamily: 'Inter, sans-serif', fontSize: 13, opacity: 0.4, cursor: 'default', userSelect: 'none' }}
                 >
                   <span>Download PDF</span>
                   <span aria-hidden="true" style={{ color: '#777' }}>→</span>
@@ -1700,12 +1695,50 @@ export default function ProfiluxPage() {
               if (!filled) return null
               return (
             <ViewZone title="Current Position">
-              <div style={grid}>
-                <div style={label}>Job title</div><div>{missingIfEmptyStr(e.job_title)}</div>
-                <div style={label}>Current employer</div><div>{missingIfEmptyStr(e.current_employer)}</div>
-                <div style={label}>Seniority</div><div>{seniorityLabel(e.seniority) ?? <Marker kind="missing" />}</div>
-                <div style={label}>Years of experience</div><div>{missingIfEmptyNum(e.total_years_experience)}</div>
-              </div>
+              {(() => {
+                const emp = typeof e.current_employer === 'string' && e.current_employer.trim().length > 0 ? e.current_employer : null
+                const empInitial = emp ? emp[0].toUpperCase() : ''
+                const role = typeof e.job_title === 'string' && e.job_title.trim().length > 0 ? e.job_title : null
+                const seniority = seniorityLabel(e.seniority)
+                const years = typeof e.total_years_experience === 'number' ? e.total_years_experience : null
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
+                      border: '1px solid rgba(165,142,40,0.2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      fontFamily: 'Playfair Display, serif',
+                      fontStyle: 'italic',
+                      fontSize: 16,
+                      color: '#a58e28',
+                    }}>
+                      {empInitial}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      {role && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, color: '#fff', fontWeight: 500, lineHeight: 1.3, marginBottom: 2 }}>{role}</div>
+                      )}
+                      {emp && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.4, marginBottom: 2 }}>{emp}</div>
+                      )}
+                      {seniority && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.4 }}>{seniority}</div>
+                      )}
+                    </div>
+                    {years !== null && (
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, color: '#fff', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{years}</div>
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 9.5, color: '#777', textTransform: 'uppercase', letterSpacing: 1, marginTop: 2 }}>Yrs experience</div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
             </ViewZone>
               )
             })()}
@@ -1781,27 +1814,32 @@ export default function ProfiluxPage() {
               if (!filled) return null
               return (
             <ViewZone title="Career History">
-              {expRows.length === 0 ? (
-                <Marker kind="missing" />
-              ) : (
-                expRows.map((r, i) => {
-                  const isLast = i === expRows.length - 1
-                  const rowStyle: React.CSSProperties = isLast
-                    ? { marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }
-                    : { marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #2a2a2a' }
-                  return (
-                    <div key={i} style={rowStyle}>
-                      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, color: '#fff', fontWeight: 500, lineHeight: 1.4, marginBottom: 4 }}>{r.titleLine}</div>
-                      {r.locationDateLine && (
-                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.4, marginBottom: 6 }}>{r.locationDateLine}</div>
+              {expRows.map((r, i) => {
+                const isLast = i === expRows.length - 1
+                const rowStyle: React.CSSProperties = isLast
+                  ? { display: 'grid', gridTemplateColumns: '108px 1fr', gap: 16, marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }
+                  : { display: 'grid', gridTemplateColumns: '108px 1fr', gap: 16, marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #2a2a2a' }
+                return (
+                  <div key={i} style={rowStyle}>
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#8e8e8e', letterSpacing: 0.3, fontVariantNumeric: 'tabular-nums', lineHeight: 1.4 }}>
+                      {r.period ?? ''}
+                    </div>
+                    <div>
+                      {r.role && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#fff', fontWeight: 500, lineHeight: 1.4, marginBottom: 2 }}>{r.role}</div>
+                      )}
+                      {(r.company || r.location) && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.4, marginBottom: 6 }}>
+                          {r.company && r.location ? `${r.company} · ${r.location}` : (r.company ?? r.location)}
+                        </div>
                       )}
                       {r.description && (
-                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{r.description}</div>
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#8e8e8e', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{r.description}</div>
                       )}
                     </div>
-                  )
-                })
-              )}
+                  </div>
+                )
+              })}
             </ViewZone>
               )
             })()}
@@ -1822,32 +1860,36 @@ export default function ProfiluxPage() {
 
             {/* §22.1 row 6 — Education */}
             {(() => {
-              const filled =
-                (typeof e.university === 'string' && e.university.trim().length > 0) ||
-                (typeof e.field_of_study === 'string' && e.field_of_study.trim().length > 0) ||
-                typeof e.graduation_year === 'number' ||
-                (Array.isArray(e.education) && e.education.length > 0)
+              const filled = Array.isArray(e.education) && e.education.length > 0
               if (!filled) return null
               return (
             <ViewZone title="Education">
-              <div style={grid}>
-                <div style={label}>University</div><div>{missingIfEmptyStr(e.university)}</div>
-                <div style={label}>Field of study</div><div>{missingIfEmptyStr(e.field_of_study)}</div>
-                <div style={label}>Graduation year</div><div>{missingIfEmptyNum(e.graduation_year)}</div>
-              </div>
-              {e.education.length > 0 && (
-                <>
-                  <div style={sectionLabel}>Education history</div>
-                  <div style={{ marginTop: 8 }}>
-                    {e.education.map((ed, i) => (
-                      <div key={i} style={{ ...card, fontSize: 12 }}>
-                        <div><strong>{ed.institution ?? 'Unknown'}</strong></div>
-                        <div style={{ color: '#999', marginTop: 4 }}>{ed.degree ?? '—'} · {ed.field_of_study ?? '—'} · {ed.graduation_year ?? '—'}</div>
-                      </div>
-                    ))}
+              {e.education.map((ed, i) => {
+                const isLast = i === e.education.length - 1
+                const rowStyle: React.CSSProperties = isLast
+                  ? { display: 'grid', gridTemplateColumns: '108px 1fr', gap: 16, marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }
+                  : { display: 'grid', gridTemplateColumns: '108px 1fr', gap: 16, marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #2a2a2a' }
+                const primary = (typeof ed.degree === 'string' && ed.degree.trim().length > 0)
+                  ? ed.degree
+                  : (typeof ed.field_of_study === 'string' && ed.field_of_study.trim().length > 0)
+                    ? ed.field_of_study
+                    : null
+                return (
+                  <div key={i} style={rowStyle}>
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#8e8e8e', letterSpacing: 0.3, fontVariantNumeric: 'tabular-nums', lineHeight: 1.4 }}>
+                      {ed.graduation_year ?? ''}
+                    </div>
+                    <div>
+                      {primary && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#fff', fontWeight: 500, lineHeight: 1.4, marginBottom: 2 }}>{primary}</div>
+                      )}
+                      {ed.institution && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.4 }}>{ed.institution}</div>
+                      )}
+                    </div>
                   </div>
-                </>
-              )}
+                )
+              })}
             </ViewZone>
               )
             })()}
