@@ -488,7 +488,8 @@ export default function ProfiluxPage() {
     | 'current_position'
     | 'luxury_fit'
     | 'career_history'
-    | 'education_languages'
+    | 'education'
+    | 'languages'
     | 'skills_markets'
     | 'clienteling'
     | 'availability'
@@ -1832,26 +1833,25 @@ export default function ProfiluxPage() {
               )
             })()}
 
-            {/* §22.1 row 5 — Education & Languages */}
+            {/* §22.1 row 5 — Education */}
             {(() => {
               const filled =
                 (typeof e.university === 'string' && e.university.trim().length > 0) ||
                 (typeof e.field_of_study === 'string' && e.field_of_study.trim().length > 0) ||
                 typeof e.graduation_year === 'number' ||
-                (Array.isArray(e.education) && e.education.length > 0) ||
-                (Array.isArray(e.languages) && e.languages.length > 0)
+                (Array.isArray(e.education) && e.education.length > 0)
               return (
             <CollapsibleSectionCard
-              eyebrow="Education & Languages"
-              collapsed={isCardCollapsed('education_languages', filled)}
-              onToggle={() => toggleViewCollapse('education_languages', filled)}
+              eyebrow="Education"
+              collapsed={isCardCollapsed('education', filled)}
+              onToggle={() => toggleViewCollapse('education', filled)}
             >
               <div style={grid}>
                 <div style={label}>University</div><div>{missingIfEmptyStr(e.university)}</div>
                 <div style={label}>Field of study</div><div>{missingIfEmptyStr(e.field_of_study)}</div>
                 <div style={label}>Graduation year</div><div>{missingIfEmptyNum(e.graduation_year)}</div>
               </div>
-              <div style={sectionLabel}>Education</div>
+              <div style={sectionLabel}>Education history</div>
               {e.education.length === 0 ? (
                 <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>
               ) : (
@@ -1864,7 +1864,19 @@ export default function ProfiluxPage() {
                   ))}
                 </div>
               )}
-              <div style={sectionLabel}>Languages</div>
+            </CollapsibleSectionCard>
+              )
+            })()}
+
+            {/* §22.1 row 6 — Languages */}
+            {(() => {
+              const filled = Array.isArray(e.languages) && e.languages.length > 0
+              return (
+            <CollapsibleSectionCard
+              eyebrow="Languages"
+              collapsed={isCardCollapsed('languages', filled)}
+              onToggle={() => toggleViewCollapse('languages', filled)}
+            >
               {e.languages.length === 0 ? (
                 <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>
               ) : (
