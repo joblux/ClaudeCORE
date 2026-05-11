@@ -486,11 +486,10 @@ export default function ProfiluxPage() {
   type ViewCollapseKey =
     | 'identity'
     | 'current_position'
-    | 'luxury_fit'
+    | 'expertise'
     | 'career_history'
     | 'education'
     | 'languages'
-    | 'skills_markets'
     | 'clienteling'
     | 'availability'
     | 'compensation'
@@ -1761,40 +1760,100 @@ export default function ProfiluxPage() {
               )
             })()}
 
-            {/* §22.1 row 3 — Luxury Fit */}
+            {/* §22.1 row 3 — Expertise (merged: Luxury Fit + Skills & Markets per V12-divergence-2) */}
             {(() => {
               const filled =
                 typeof e.years_in_luxury === 'number' ||
                 (Array.isArray(e.sectors) && e.sectors.length > 0) ||
                 (Array.isArray(e.product_categories) && e.product_categories.length > 0) ||
-                (Array.isArray(e.expertise_tags) && e.expertise_tags.length > 0)
+                (Array.isArray(e.expertise_tags) && e.expertise_tags.length > 0) ||
+                (Array.isArray(e.key_skills) && e.key_skills.length > 0) ||
+                (Array.isArray(e.market_knowledge) && e.market_knowledge.length > 0)
               return (
             <CollapsibleSectionCard
-              eyebrow="Luxury Fit"
-              collapsed={isCardCollapsed('luxury_fit', filled)}
-              onToggle={() => toggleViewCollapse('luxury_fit', filled)}
+              eyebrow="Expertise"
+              collapsed={isCardCollapsed('expertise', filled)}
+              onToggle={() => toggleViewCollapse('expertise', filled)}
             >
               <div style={grid}>
-                <div style={label}>Years in luxury</div><div>{missingIfEmptyNum(e.years_in_luxury)}</div>
+                <div style={label}>Years in luxury</div>
+                <div>{missingIfEmptyNum(e.years_in_luxury)}</div>
               </div>
+
               <div style={sectionLabel}>Sectors</div>
               {e.sectors.length > 0 ? (
                 <div style={{ ...chipRow, marginTop: 8 }}>
-                  {e.sectors.map((v, i) => <span key={`sec-${i}-${v}`} style={viewChipStyle}>{sectorLabel(v)}</span>)}
+                  {e.sectors.map((v, i) => (
+                    <span key={`sec-${i}-${v}`} style={viewChipStyle}>
+                      {sectorLabel(v)}
+                    </span>
+                  ))}
                 </div>
-              ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
+              ) : (
+                <div style={{ marginTop: 8 }}>
+                  <Marker kind="missing" />
+                </div>
+              )}
+
               <div style={sectionLabel}>Product categories</div>
               {e.product_categories.length > 0 ? (
                 <div style={{ ...chipRow, marginTop: 8 }}>
-                  {e.product_categories.map((v, i) => <span key={`pc-${i}-${v}`} style={viewChipStyle}>{productCategoryLabel(v)}</span>)}
+                  {e.product_categories.map((v, i) => (
+                    <span key={`pc-${i}-${v}`} style={viewChipStyle}>
+                      {productCategoryLabel(v)}
+                    </span>
+                  ))}
                 </div>
-              ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
+              ) : (
+                <div style={{ marginTop: 8 }}>
+                  <Marker kind="missing" />
+                </div>
+              )}
+
               <div style={sectionLabel}>Areas of expertise</div>
               {e.expertise_tags.length > 0 ? (
                 <div style={{ ...chipRow, marginTop: 8 }}>
-                  {e.expertise_tags.map((v, i) => <span key={`et-${i}-${v}`} style={viewChipStyle}>{expertiseTagLabel(v)}</span>)}
+                  {e.expertise_tags.map((v, i) => (
+                    <span key={`et-${i}-${v}`} style={viewChipStyle}>
+                      {expertiseTagLabel(v)}
+                    </span>
+                  ))}
                 </div>
-              ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
+              ) : (
+                <div style={{ marginTop: 8 }}>
+                  <Marker kind="missing" />
+                </div>
+              )}
+
+              <div style={sectionLabel}>Skills</div>
+              {e.key_skills.length > 0 ? (
+                <div style={{ ...chipRow, marginTop: 8 }}>
+                  {e.key_skills.map((v, i) => (
+                    <span key={`sk-${i}-${v}`} style={viewChipStyle}>
+                      {skillLabel(v)}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ marginTop: 8 }}>
+                  <Marker kind="missing" />
+                </div>
+              )}
+
+              <div style={sectionLabel}>Markets</div>
+              {e.market_knowledge.length > 0 ? (
+                <div style={{ ...chipRow, marginTop: 8 }}>
+                  {e.market_knowledge.map((v, i) => (
+                    <span key={`mk-${i}-${v}`} style={viewChipStyle}>
+                      {v}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ marginTop: 8 }}>
+                  <Marker kind="missing" />
+                </div>
+              )}
             </CollapsibleSectionCard>
               )
             })()}
@@ -1888,33 +1947,6 @@ export default function ProfiluxPage() {
                   ))}
                 </div>
               )}
-            </CollapsibleSectionCard>
-              )
-            })()}
-
-            {/* §22.1 row 6 — Skills & Markets */}
-            {(() => {
-              const filled =
-                (Array.isArray(e.key_skills) && e.key_skills.length > 0) ||
-                (Array.isArray(e.market_knowledge) && e.market_knowledge.length > 0)
-              return (
-            <CollapsibleSectionCard
-              eyebrow="Skills & Markets"
-              collapsed={isCardCollapsed('skills_markets', filled)}
-              onToggle={() => toggleViewCollapse('skills_markets', filled)}
-            >
-              <div style={sectionLabel}>Skills</div>
-              {e.key_skills.length > 0 ? (
-                <div style={{ ...chipRow, marginTop: 8 }}>
-                  {e.key_skills.map((v, i) => <span key={`sk-${i}-${v}`} style={viewChipStyle}>{skillLabel(v)}</span>)}
-                </div>
-              ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
-              <div style={sectionLabel}>Markets</div>
-              {e.market_knowledge.length > 0 ? (
-                <div style={{ ...chipRow, marginTop: 8 }}>
-                  {e.market_knowledge.map((v, i) => <span key={`mk-${i}-${v}`} style={viewChipStyle}>{v}</span>)}
-                </div>
-              ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
             </CollapsibleSectionCard>
               )
             })()}
