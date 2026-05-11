@@ -51,8 +51,8 @@ Any code that violates a structural lock is treated as a defect, regardless of h
 | 1 | Identity | Identity | aligned |
 | 2 | Current role | Current Position | aligned (label drift only) |
 | 3 | Career path | Career History | aligned (label drift only) |
-| 4 | Education | Education (View pending) — combined Edit drawer temporarily | decision locked: split View per V12; code commit pending; Edit drawer combined pending L2 languages migration (ledger 1609e494) |
-| 5 | Languages | Languages (View pending) — combined Edit drawer temporarily | decision locked: split View per V12; code commit pending; Edit drawer combined pending L2 languages migration (ledger 1609e494) |
+| 4 | Education | Education (View) — combined Edit drawer temporarily | shipped 1ac1f80: View split per V12; Edit drawer combined pending L2 languages migration (ledger 1609e494) |
+| 5 | Languages | Languages (View) — combined Edit drawer temporarily | shipped 1ac1f80: View split per V12; Edit drawer combined pending L2 languages migration (ledger 1609e494) |
 | 6 | Expertise (sectors + tags) | Luxury Fit + Skills & Markets | divergent — V12 unifies, prod splits across 2 cards |
 | 7 | Compensation (current + target) | Compensation | VIOLATION — see §5 |
 | 8 | Availability | Availability & Targets | aligned (label drift only) |
@@ -193,11 +193,13 @@ These are NOT hard violations. They are evolutions that may or may not be intent
 **Resolution log:**
 
 - 2026-05-11 — V12-divergence-1 (ledger 034bf165) — Education + Languages:
-  View decision locked — split into 2 cards per V12 baseline. Code commit
-  pending. Edit tab keeps one combined "Education & Languages" drawer
-  temporarily; will split when L2 languages substrate ships (ledger
-  1609e494). MATRIX §22.1 updated in same doctrine commit. A follow-up
-  doc patch will flip "pending" to "shipped <SHA>" after code lands.
+  RESOLVED A-lite. View split into 2 cards per V12 baseline.
+  Doctrine commit 5ae3bc2, code commit 1ac1f80, prod QA passed via
+  Chrome MCP (9-card V12 order verified, Compensation absent from View,
+  Edit drawer combined retained). Edit tab keeps one combined
+  "Education & Languages" drawer temporarily; will split when L2
+  languages substrate ships (ledger 1609e494). MATRIX §22.1 reflects
+  the new row 5 (Education) + row 6 (Languages) composition.
 
 ### 6.2 — Missing structural features
 
