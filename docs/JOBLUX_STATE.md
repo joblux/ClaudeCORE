@@ -54,6 +54,8 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **0a643ec** `fix(profilux): reconcile V12 layout frame with STATE §15` — May 11 2026 (PM late). SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. Ledger `9155bd8e` closed. ProfiLux page frame now STATE §15 verbatim: centered 1200px frame, 28px gutters, all three tabs aligned as one editorial column. Drawer behavior unchanged. Parked finding logged: `ab6982db` (`F-profilux-drawer-inline-maxwidth-deadcap`, low, future cleanup only). Path C governance lesson preserved: discovered drift does not silently expand ratified scope.
+
 - **bc7e966 + e2f8053 + c0c5a76** `feat(profilux): V12-divergence-3 — Maisons View card at row 5` — May 11 2026 (PM). SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. V12-divergence-3 (ledger 28303edd) resolution: View renders a new Maisons SectionCard at row 5 between Career History (row 4) and Education (row 6) per V12 baseline. Sourced from `members.brands_worked_with` (L2 text[] already on ProfiLuxResolved; resolver unchanged). Read-only in View; no Edit drawer this slice; manual editing deferred pending maison taxonomy / normalization review. Empty behavior: card hides entirely, consistent with View doctrine on hide-when-empty for collections. Doctrine commit `bc7e966` updated V12_LOCK §2.3 row 9 + §6.1 resolution log table row + Edit drawer note, and MATRIX §22.1 (Maisons inserted as row 5; rows 5-9 renumbered to 6-10; total grows from 9 to 10 conceptual rows). Code commit `e2f8053` (3 files, +26/-1, additive only): `EditorView.brands_worked_with: string[]` in Luxury fit block; `projectEditorView` adds `brands_worked_with: view.brands_worked_with`; `ViewCollapseKey` union adds `'maisons'` between `'career_history'` and `'education'`; new CollapsibleSectionCard IIFE between Career History and Education with hide-when-empty early return, reusing `viewChipStyle` + `chipRow` + `isCardCollapsed` + `toggleViewCollapse`. Closure commit `c0c5a76` flipped V12_LOCK §2.3 row 9 from "decision locked / code commit pending" to "shipped e2f8053" and §6.1 resolution log entry from RESOLVED to SHIPPED with doctrine + code SHAs + QA pass + parked observation. Prod QA via Chrome MCP on joblux.com/dashboard/candidate/profilux View tab: filled-state fixture (`['Hermès','Cartier','Richemont']` seeded on `luxuryretailsale@gmail.com`) rendered Maisons card at row 5 with 3 chips verbatim; empty-state (post-revert, `brands_worked_with=NULL`) hid card entirely with Career History flowing directly into Education. Fixture seeded and reverted; original NULL value restored. Total visible View cards: 9 filled, 8 empty (within doctrine bounds; Maisons hide-when-empty is the explicit exception per MATRIX §22.4). Compensation absent from View (V12-violation-1 fix `66f8cf3` holds). Edit tab UNTOUCHED. Substrate / schema / write-path / public/admin/client/ATS projections UNCHANGED. Ledger row `28303edd` closed 2026-05-11 PM. Two new parked findings logged separately as admin_tasks rows: `12745f9d-b8c5-4fbe-a478-2a81378c96e1` (F-view-identity-mask-leak — candidate View identity strip renders last name as initial via `maskedName` const in `app/dashboard/candidate/profilux/page.tsx`; likely V1 public-projection masking pattern leaking into candidate self-view; pre-existing, low priority, future scope) and `9155bd8e-64c3-442d-8bf8-6afd3986137f` (V12-divergence-page-layout-drift — ProfiLux frame does not match V12 spatial baseline; live page is left-aligned + capped at 900px + ~40% dead right canvas; V12 prototype shows centered ~1100-1200px content column with balanced gutters; violates V12_LOCK §3.1 centering + STATE §15 max-width:1200 rule; high priority, V12 reconciliation queue, sequenced BEFORE V12-divergence-4).
 
 - **b2a7824 + b975cb6 + e690ce2** `feat(profilux): V12-divergence-2 — merge Luxury Fit + Skills & Markets into Expertise View card (C.2)` — May 11 2026 (AM). SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. V12-divergence-2 (ledger 99b61c19) resolution C.2: View tab renders one unified Expertise SectionCard merging the two prior cards per V12 baseline (V12 prototype state engine line 5194). Sub-row order preserves JOBLUX luxury relevance: Years in luxury → Sectors → Product categories → Areas of expertise → Skills → Markets. Doctrine commit `e690ce2` updated V12_LOCK §2.3 row 6, MATRIX §22.1 (row 3 Luxury Fit + row 7 Skills & Markets merged into new row 3 Expertise; rows 8-10 renumbered to 7-9), and consolidated Edit drawer note covering both divergence-1 and divergence-2. Code commit `b2a7824` (single file): ViewCollapseKey rename `'luxury_fit'`→`'expertise'`, remove `'skills_markets'`; View row 3 + row 6 IIFEs merged into single Expertise IIFE; filled detection ORs across all 6 buckets. Closure commit `b975cb6` flipped V12_LOCK §2.3 row 6 from "pending" to "shipped b2a7824". Edit tab UNTOUCHED — both `Luxury Fit` and `Skills & Markets` SectionCards + drawers retained; Edit split kept intentional pending taxonomy review (NOT substrate-blocked; distinct from divergence-1's L2 migration gate). Prod QA via Chrome MCP: View 8 cards in V12 order with Expertise as the third card; standalone Luxury Fit + Skills & Markets cards absent from View; Compensation absent from View (V12-violation-1 fix holds); Expertise card expands to show all 6 sub-rows in locked order. Ledger row `99b61c19` closed.
@@ -89,65 +91,20 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-**V12 reconciliation execution — start with V12-divergence-page-layout-drift (spatial baseline).**
+**V12 reconciliation execution — start with V12-divergence-4 Clienteling position (decision-only artifact).**
 
-Session 2026-05-11 PM shipped 3 commits closing V12-divergence-3 Maisons
-(`bc7e966` doctrine + `e2f8053` code + `c0c5a76` closure). Ledger `28303edd`
-closed. Maisons now renders as default View card at row 5 between Career
-History and Education when populated, hides entirely when empty. Prod QA
-via Chrome MCP passed both filled and empty states.
+V12-divergence-page-layout-drift (`9155bd8e`) is now SHIPPED and CLOSED at `0a643ec`.
 
-Two parked findings logged during session close:
-- `12745f9d-b8c5-4fbe-a478-2a81378c96e1` — F-view-identity-mask-leak (low, frontend, pre-existing, future scope).
-- `9155bd8e-64c3-442d-8bf8-6afd3986137f` — V12-divergence-page-layout-drift (high, profilux, V12 reconciliation queue, sequenced FIRST before any other divergence).
+Next queue item:
 
-Phase 1 V12 reconciliation status: V12-violation-1, V12-divergence-1,
-V12-divergence-2, V12-divergence-3 SHIPPED. V12-divergence-page-layout-drift
-(NEW) opens the queue. V12-divergence-4..7 remain parked, sequenced after
-spatial drift is reconciled.
+1. **V12-divergence-4** (`3e8d6de2`) — Clienteling position decision-only artifact.
+2. **V12-divergence-5..7 sequencing** (`d243fc13`, `720da3aa`, `eb186be2`).
 
-**Hard entry instruction for next session:**
+Parked findings:
+- `12745f9d` — F-view-identity-mask-leak
+- `ab6982db` — F-profilux-drawer-inline-maxwidth-deadcap
 
-> Read `docs/JOBLUX_STATE.md` §25 + §15 (layout rule) and `docs/PROFILUX_V12_LOCK.md`
-> §3.1 (binding visual qualities) before any ProfiLux work. Start with
-> V12-divergence-page-layout-drift — decision-only artifact first
-> (same pattern as divergence-1/2/3).
-
-**Sequencing locked:**
-
-1. **V12-divergence-page-layout-drift** (ledger `9155bd8e`, high, parked) —
-   Live `/dashboard/candidate/profilux` page container violates V12 spatial
-   baseline. V12 shows centered ~1100-1200px column with balanced left/right
-   gutters; live prod is left-aligned, capped at `maxWidth:900` on
-   SectionCard/grid/tabBar, leaves ~40% dead right canvas on desktop. Violates
-   V12_LOCK §3.1 (centering) + STATE §15 (max-width:1200 + margin:0 auto +
-   padding:0 28px). NOT redesign — pure reconciliation. Decision-only artifact
-   first with 4 ratifiable decisions: (a) target frame width, (b) card width
-   inside frame, (c) scope (page only vs broader audit), (d) tabs affected
-   (all three share `wrap` const — single-place fix). No layout code without
-   decision matrix approval. Sequenced BEFORE divergence-4 because every
-   downstream V12 reconciliation slice shipped while spatial drift exists
-   ships into a non-V12-shaped frame.
-
-2. **V12-divergence-4** (ledger `3e8d6de2`, normal, parked) — Clienteling
-   position. V12 has no Clienteling among the 9 defaults. Prod renders
-   Clienteling as View row 8 (post-divergence-3 Maisons inserted at row 5).
-   Decision needed: keep as default, move to library opt-in, or drop from
-   View. No code without decision. Sequenced AFTER spatial drift.
-
-3. **V12-divergence-5..7 sequencing** (ledgers `d243fc13`, `720da3aa`,
-   `eb186be2`) — Add Section library trigger, Manage tab maskable controls,
-   CV merge re-upload modal. Sequencing decision only.
-
-**Out of scope until V12 reconciliation complete:**
-
-- Any other ProfiLux surface evolution
-- Any new slice that doesn't address a V12 row
-- Backlog items unrelated to V12 reconciliation
-- ViewCollapseKey `'compensation'` member cleanup (deferred — separate slice)
-- F-view-identity-mask-leak repair (parked `12745f9d`, future scope)
-
-**Handoff doc:** `docs/HANDOFF_2026-05-11-PM.md`
+**Handoff doc:** `docs/HANDOFF_2026-05-11-PM-late.md`
 
 ### DO NOT
 
@@ -225,7 +182,7 @@ spatial drift is reconciled.
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 11, 2026 (PM close) — V12 reconciliation phase 1 SHIPPED across 10 commits (`66f8cf3` → `c0c5a76`). V12-violation-1, V12-divergence-1, V12-divergence-2, V12-divergence-3 all closed end-to-end with prod QA via Chrome MCP. Maisons now renders as default View card at row 5 (filled) or hides entirely (empty). Two parked findings logged this close: `12745f9d` (F-view-identity-mask-leak, low) and `9155bd8e` (V12-divergence-page-layout-drift, high — V12 reconciliation queue). Spatial drift sequenced FIRST in next-session queue; V12-divergence-4 Clienteling moved AFTER. Work HEAD before close `c0c5a76`; close commit follows. Next session opens with V12-divergence-page-layout-drift — decision-only first.
+**Last updated:** May 11, 2026 (PM late close) — V12-divergence-page-layout-drift SHIPPED at `0a643ec`. Ledger `9155bd8e` closed. Parked finding `ab6982db` logged. Next queue item: V12-divergence-4 Clienteling position.
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
