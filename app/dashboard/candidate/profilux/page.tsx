@@ -44,14 +44,14 @@ const Marker = ({ kind }: { kind: MarkerKind }) => {
   )
 }
 
-const wrap: React.CSSProperties = { padding: 40, background: '#1a1a1a', color: '#fff', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }
+const wrap: React.CSSProperties = { maxWidth: 1200, margin: '0 auto', padding: '0 28px', background: '#1a1a1a', color: '#fff', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }
 const h1Style: React.CSSProperties = { fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: 28, marginBottom: 8 }
 const sub: React.CSSProperties = { color: '#999', fontSize: 13, marginBottom: 24 }
 const tabBarStyle: React.CSSProperties = {
   display: 'flex',
   gap: 28,
   borderBottom: '1px solid #2a2a2a',
-  maxWidth: 900,
+
   marginBottom: 24,
 }
 const tabBtnBase: React.CSSProperties = {
@@ -71,9 +71,9 @@ const tabBtnActive: React.CSSProperties = {
   color: '#fff',
   borderBottom: '2px solid #a58e28',
 }
-const grid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '240px 1fr', gap: 12, fontSize: 14, lineHeight: 1.6, maxWidth: 900 }
+const grid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '240px 1fr', gap: 12, fontSize: 14, lineHeight: 1.6 }
 const label: React.CSSProperties = { color: '#999' }
-const navWrap: React.CSSProperties = { marginTop: 40, display: 'flex', gap: 12, alignItems: 'center', maxWidth: 900 }
+const navWrap: React.CSSProperties = { marginTop: 40, display: 'flex', gap: 12, alignItems: 'center' }
 const btn: React.CSSProperties = { background: 'transparent', color: '#fff', border: '1px solid #333', padding: '8px 16px', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13 }
 const btnDis: React.CSSProperties = { ...btn, color: '#555', borderColor: '#222', cursor: 'not-allowed' }
 const card: React.CSSProperties = { border: '1px solid #2a2a2a', padding: 16, marginBottom: 8, fontSize: 13 }
@@ -100,7 +100,6 @@ function SectionCard({ eyebrow, layout = 'block', children }: SectionCardProps) 
     borderRadius: 6,
     padding: '20px 24px',
     marginBottom: 24,
-    maxWidth: 900,
   }
   const flexExtras: React.CSSProperties = layout === 'flex'
     ? { display: 'flex', alignItems: 'center', gap: 20 }
@@ -140,7 +139,6 @@ function CollapsibleSectionCard({ eyebrow, collapsed, onToggle, children }: Coll
     borderRadius: 6,
     padding: '20px 24px',
     marginBottom: 24,
-    maxWidth: 900,
   }
   const headerStyle: React.CSSProperties = {
     display: 'flex',
