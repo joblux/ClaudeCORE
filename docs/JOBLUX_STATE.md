@@ -91,14 +91,21 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-**V12 reconciliation execution — start with V12-divergence-4 Clienteling position (decision-only artifact).**
+**ProfiLux Convergence Mode (locked 2026-05-11). See WORKFLOW_RULES.md for full operating doctrine.**
 
-V12-divergence-page-layout-drift (`9155bd8e`) is now SHIPPED and CLOSED at `0a643ec`.
+V12-divergence-4 (`3e8d6de2`) Phase 1 shipped at `868ccd9` (Clienteling removed from View). Final disposition deferred pending Skills / Luxury Fit / full ProfiLux review. Ledger remains open.
 
-Next queue item:
+V12-divergence-5 (`d243fc13`) Phase 1 visual shell shipped at `e9fe284` (Add Section trigger + EXTEND DOSSIER drawer with 8 disabled library rows). Functional add behavior pending. Ledger remains open.
 
-1. **V12-divergence-4** (`3e8d6de2`) — Clienteling position decision-only artifact.
-2. **V12-divergence-5..7 sequencing** (`d243fc13`, `720da3aa`, `eb186be2`).
+Next session opens with: **"Open JOBLUX session — convergence mode"**
+
+Priority order (locked):
+
+1. View shell convergence
+2. Manage shell convergence
+3. CV Merge shell (greenfield)
+4. Edit shell refinement
+5. Behavioral refinements / divergence cleanup
 
 Parked findings:
 - `12745f9d` — F-view-identity-mask-leak
@@ -182,7 +189,7 @@ Parked findings:
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 11, 2026 (PM late close) — V12-divergence-page-layout-drift SHIPPED at `0a643ec`. Ledger `9155bd8e` closed. Parked finding `ab6982db` logged. Next queue item: V12-divergence-4 Clienteling position.
+**Last updated:** May 11, 2026 (PM, post-late) — V12-divergence-4 Phase 1 shipped at `868ccd9` and V12-divergence-5 Phase 1 visual shell shipped at `e9fe284`. Both ledgers remain open (functional/final-disposition work deferred). **ProfiLux Convergence Mode locked** — see WORKFLOW_RULES.md. Next session: convergence-mode start, View shell first.
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---

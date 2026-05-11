@@ -27,6 +27,55 @@ If any rule here conflicts with a skill, this file wins.
 
 ---
 
+## PROFILUX CONVERGENCE MODE (locked 2026-05-11)
+
+For all visual work on ProfiLux surfaces (View / Edit / Manage / CV Merge):
+
+- The locked HTML prototype at `docs/prototypes/profilux_journey_v12.html` is the product spec.
+- Specs and docs (V12_LOCK, MATRIX, MODEL) are guardrails, not the primary visual authority.
+- Live `/dashboard/candidate/profilux` is the lagging implementation.
+- For visual ProfiLux work, ALWAYS read/open the locked HTML prototype BEFORE reasoning from MATRIX / V12_LOCK / STATE.
+
+### Workflow loop
+
+1. Open locked HTML prototype.
+2. Open live surface.
+3. Compare visually.
+4. Identify highest-impact shell gap.
+5. Ship one convergence slice.
+6. Repeat.
+
+### Priority order
+
+1. View shell
+2. Manage shell
+3. CV Merge shell
+4. Edit shell refinement
+5. Behavioral refinements / divergence cleanup
+
+### Bans
+
+- No ontology / philosophy / object-identity pass unless Mo explicitly asks.
+- No field-level debates when the prototype answers visually.
+- No doctrine-first interpretation when the HTML answers the same question.
+- No heavy ledger / doc prose around tiny visual changes.
+- No treating V12 as a documentation artifact. Treat it as the product to reproduce.
+
+### Convergence-mode session opening
+
+Trigger phrase: **"Open JOBLUX session — convergence mode"**
+
+Opening sequence:
+
+1. GitHub MCP — read `docs/JOBLUX_STATE.md` @ main HEAD.
+2. GitHub MCP — read `docs/WORKFLOW_RULES.md` @ main HEAD.
+3. GitHub MCP — read/open `docs/prototypes/profilux_journey_v12.html` @ main HEAD.
+4. GitHub MCP — `list_commits perPage=8` (drift check).
+5. Chrome MCP — open live `/dashboard/candidate/profilux`.
+6. Start with View shell comparison. Declare highest-impact gap. Propose slice.
+
+---
+
 ## Output discipline (default ON)
 
 | Surface | Default | Override |
