@@ -854,11 +854,12 @@ Field assignments mirror §7.6.1 `EditorView` exactly. The grouping into 9 named
 | 2 | Current Position | `job_title`, `current_employer`, `seniority`, `total_years_experience` |
 | 3 | Expertise | `years_in_luxury`, `sectors` (L1), `product_categories`, `expertise_tags`, `key_skills`, `market_knowledge` |
 | 4 | Career History | `experiences[]` (L1 passthrough) |
-| 5 | Education | `university`, `field_of_study`, `graduation_year`, `education[]` |
-| 6 | Languages | `languages[]` |
-| 7 | Clienteling | `clienteling_experience`, `clienteling_description` |
-| 8 | Availability & Targets | `availability`, `desired_locations`, `desired_departments`, `desired_contract_types`, `open_to_relocation`, `relocation_preferences` |
-| 9 | Compensation | `desired_salary_min`, `desired_salary_max`, `desired_salary_currency` |
+| 5 | Maisons | `brands_worked_with` |
+| 6 | Education | `university`, `field_of_study`, `graduation_year`, `education[]` |
+| 7 | Languages | `languages[]` |
+| 8 | Clienteling | `clienteling_experience`, `clienteling_description` |
+| 9 | Availability & Targets | `availability`, `desired_locations`, `desired_departments`, `desired_contract_types`, `open_to_relocation`, `relocation_preferences` |
+| 10 | Compensation | `desired_salary_min`, `desired_salary_max`, `desired_salary_currency` |
 
 **Edit drawer notes (2026-05-11):**
 
@@ -884,8 +885,22 @@ Field assignments mirror §7.6.1 `EditorView` exactly. The grouping into 9 named
   split for these two sections is parked pending L2 languages substrate
   migration (ledger 1609e494).
 
-View doctrine matches V12 for both divergences. Edit doctrine catches up
-on row 3 when taxonomy review concludes; on rows 5+6 when L2 lands.
+- **Row 5 (Maisons) — no Edit drawer this slice.** View renders a Maisons
+  card sourced from `members.brands_worked_with`. Card is read-only in
+  View. No Edit drawer is added by V12-divergence-3 (ledger 28303edd).
+  Manual editing is deferred pending maison taxonomy / normalization
+  review (controlled vocabulary, dedup, group-aware grouping — out of
+  scope this slice). Empty behavior: hide entirely when
+  `brands_worked_with` is empty, consistent with View doctrine on
+  hide-when-empty for collections. Future library coexistence
+  (V12-divergence-5, ledger d243fc13) remains allowed and is not blocked
+  by this slice.
+
+View doctrine now matches V12 for the resolved divergences: row 3
+Expertise, row 5 Maisons, and rows 6/7 Education + Languages. Edit
+doctrine catches up on row 3 when taxonomy review concludes; on rows
+6+7 when L2 languages substrate ships (ledger 1609e494); on row 5 when
+maison taxonomy / normalization review concludes.
 
 ### 22.2 — Add-library sections (8, opt-in, schema PARKED)
 
@@ -904,8 +919,9 @@ Until Tier 2 schema lands, the add-library is doctrine only — the catalog is l
 
 ### 22.3 — Ordering rules
 
-- Default 9 are ordered by recruiter/matching priority: identity → current role → fit → history → credentials → execution → clienteling → readiness → comp.
-- Default 9 ordering is **fixed in v1.2**. The user cannot reorder default sections.
+- Default catalog contains 10 conceptual rows (§22.1). Visible View cards = 9. Compensation (row 10) is Edit-only / Manage-sensitive per V12-violation-1 (commit 66f8cf3) and never renders as a View card regardless of share state.
+- Default rows are ordered by recruiter/matching priority: identity → current role → fit → history → maison lineage → credentials → execution → clienteling → readiness → comp.
+- Default ordering is **fixed**. The user cannot reorder default sections.
 - Add-library 8 are ordered by frequency-of-use (estimated). Final ordering decided when each section ships.
 - The user can show/hide add-library sections individually (mechanism deferred — likely a `visible_sections` flag on `members.*` or a dedicated table; schema decision parked).
 

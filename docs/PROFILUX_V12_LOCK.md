@@ -56,7 +56,7 @@ Any code that violates a structural lock is treated as a defect, regardless of h
 | 6 | Expertise (sectors + tags) | Expertise (View — unified) — Edit kept split temporarily | shipped b2a7824: View unified per V12 (one Expertise card, 6 sub-rows preserving luxury relevance order); Edit kept split pending taxonomy review |
 | 7 | Compensation (current + target) | Compensation | VIOLATION — see §5 |
 | 8 | Availability | Availability & Targets | aligned (label drift only) |
-| 9 | Maisons (brands_worked_with) | (absent) | MISSING — V12 lists Maisons as a default section |
+| 9 | Maisons (brands_worked_with) | (absent) | decision locked: render as default View card at row 5 between Career History and Education; code commit pending; sourced from members.brands_worked_with; read-only in View this slice; no Edit drawer this slice; manual editing deferred pending maison taxonomy / normalization review |
 
 Live prod also renders **Clienteling** as a View card. V12 does not list Clienteling among the 9 defaults. **Status: divergent — needs reconciliation decision.**
 
@@ -187,7 +187,7 @@ These are NOT hard violations. They are evolutions that may or may not be intent
 |---|---|---|
 | Education separate / Languages separate | Education & Languages combined into one card | Decide: split per V12, OR keep combined and update V12 doctrine |
 | Expertise unified (sectors + tags) | Luxury Fit (sectors/product_categories/expertise) + Skills & Markets (key_skills/market_knowledge) — 2 cards | Decide: unify per V12, OR keep split and update V12 doctrine |
-| Maisons (brands_worked_with) as standalone section | absent from View | Decide: add Maisons section, OR drop from V12 if brands_worked_with usage is recruiter-only |
+| Maisons (brands_worked_with) as standalone section | absent from View | RESOLVED — render as default View card row 5 between Career History and Education; sourced from members.brands_worked_with; read-only in View this slice; no Edit drawer this slice; manual editing deferred pending maison taxonomy / normalization review |
 | Clienteling absent from V12 9-default | rendered as View §22.1 row 7 | Decide: keep (V12 expansion), OR move to library (opt-in), OR drop from View |
 
 **Resolution log:**
@@ -216,6 +216,23 @@ These are NOT hard violations. They are evolutions that may or may not be intent
   intentional, pending taxonomy review (NOT substrate-blocked; distinct
   from divergence-1's L2-migration gate). MATRIX §22.1 reflects the new
   unified row 3 (Expertise) composition.
+
+- 2026-05-11 — V12-divergence-3 (ledger 28303edd) — Maisons section:
+  RESOLVED — render as default View card. Maisons becomes row 5 in
+  MATRIX §22.1, sitting between Career History (row 4) and Education
+  (row 6). Sourced from members.brands_worked_with. Read-only in View
+  this slice; no Edit drawer this slice; manual editing deferred
+  pending maison taxonomy / normalization review. Empty behavior:
+  hide entirely, consistent with View doctrine on hide-when-empty for
+  collections. Future library coexistence remains allowed later under
+  V12-divergence-5 (ledger d243fc13). Doctrine clarification logged:
+  Career History = chronological role history; Maisons = condensed
+  luxury lineage signal; the two are not redundant. Card count
+  reconciliation: MATRIX §22.1 grows to 10 conceptual rows; visible
+  View cards = 9. Compensation stays Edit-only per V12-violation-1
+  fix 66f8cf3. Doctrine commit pending; code commit pending; ledger
+  28303edd flips to closed when code ships and prod QA passes via
+  Chrome MCP.
 
 ### 6.2 — Missing structural features
 
