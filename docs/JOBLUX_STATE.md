@@ -54,6 +54,16 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **9dabff1** `feat(profilux-view): reorder zones to match V12 prototype sequence` — May 11 2026 (PM late-late). SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. Pure JSX block reorder inside the View IIFE of `app/dashboard/candidate/profilux/page.tsx`. New zone order: Current Position → Career History → Education → Languages → Expertise → Availability & Targets → Maisons (matches V12 prototype scene 3 v7). No styling, data, copy, or logic changes. 1 file, +79/-79.
+
+- **0d7dfe8** `feat(profilux-view): final V12 convergence pass` — May 11 2026 (PM late-late). SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. Career History + Education rendered as 108px / 1fr timelines (period column tabular nums #8e8e8e, body role white 14/500, company/location gold #a58e28, description #8e8e8e). Current Position swapped from k/v grid to 3-column layout: 40×40 gold-bordered avatar circle (`rgba(165,142,40,0.2)` border, Playfair italic initial #a58e28) + text block (role white 15/500, company gold, seniority #999) + meta block (`total_years_experience` Playfair 22 white tabular + `Yrs experience` uppercase 9.5 #777 label). Spine action rows: `padding: 9px 0` + `borderBottom: 0.5px solid rgba(255,255,255,0.03)` on Edit ProfiLux + Manage & share; Download PDF padding only, no divider. expRows refactored from titleLine/locationDateLine to role/company/location/period/description shape. Education k/v trio (University/Field/Graduation year) removed from View; Education filled now requires `e.education.length > 0`. 1 file, +101/-59.
+
+- **8c8ee99** `feat(profilux-view): V12 polish pass — chrome + taxonomy + spine accents` — May 11 2026 (PM late-late). SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. ViewZone restored card chrome: `background:#222`, `border:1px solid #2a2a2a`, `borderRadius:14`, `padding:'24px 26px'`, `marginBottom:18`; title reverted to Inter eyebrow style — `fontSize:10.5, fontWeight:600, color:'#8e8e8e', letterSpacing:1.8, textTransform:'uppercase'`, `paddingBottom:14, marginBottom:18, borderBottom:'0.5px solid #2a2a2a'`. Spine sub-role: Playfair italic 13.5 #a58e28. Status dot: 7×7 with `boxShadow:'0 0 0 4px rgba(29,158,117,0.15)'` green halo. Taxonomy chip rows (Expertise / Maisons / Availability) converted to dot-separated text — Maisons gold (#a58e28), others #ccc. Languages: chips → mini rows (flex column gap 6, proficiency in #999 8px-margin span). Sub-row Missing placeholders removed (hide-when-empty); top key/value grid Markers preserved. Unused `viewChipStyle` + `chipRow` consts removed. 1 file, +99/-135.
+
+- **62ca2fb** `feat(profilux-view): V12 body pass — open dossier zones` — May 11 2026 (PM late-late). SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. Replaced 8 CollapsibleSectionCard wrappers with new `ViewZone` component (Playfair title + hairline, no toggle, no collapse state). Identity zone deleted from right field — spine now sole identity surface in View; Phone/Headline/Bio become Edit-only as locked side effect. Added `if (!filled) return null` to 6 of 7 remaining zones (Maisons keeps existing `brands.length===0` early-return). Career History role title bumped (fontSize:15, fontWeight:500). `CollapsibleSectionCard` component declaration preserved; `viewCollapse` state + `toggleViewCollapse` + `isCardCollapsed` + `ViewCollapseKey` type retained (TS noise allowed; future cleanup separate slice). 1 file, +43/-74.
+
+- **c062764** `feat(profilux-view): add V12 two-column View shell` — May 11 2026 (PM late-late). SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. View tab IIFE rewrapped in two-column flex container (`flexDirection: isMobile ? 'column' : 'row'`, gap 32, `alignItems:'flex-start'`). LEFT SPINE (`<aside>` width 300 desktop / 100% mobile, `flexShrink:0`): masked name (Playfair 26 #fff), sub-role (job_title · current_employer), location, hairline, availability status (green dot + label + "Visible to JOBLUX matching only" caption — renders only when `availabilityLabel` returns non-null), hairline, three action links (Edit ProfiLux + Manage & share → `setTab(...)`, Download PDF as `role="link" aria-disabled="true"`, dimmed, no handler). RIGHT FIELD: 8 section cards moved in verbatim. Profile Completeness card + Readiness card REMOVED from View entirely. New `isMobile` state hook + resize listener added to main component. Identity strip removed from View; preserved in Edit tab. `lib/profilux/computeProfileCompleteness` and all callers untouched. 1 file, +73/-115.
+
 - **0a643ec** `fix(profilux): reconcile V12 layout frame with STATE §15` — May 11 2026 (PM late). SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. Ledger `9155bd8e` closed. ProfiLux page frame now STATE §15 verbatim: centered 1200px frame, 28px gutters, all three tabs aligned as one editorial column. Drawer behavior unchanged. Parked finding logged: `ab6982db` (`F-profilux-drawer-inline-maxwidth-deadcap`, low, future cleanup only). Path C governance lesson preserved: discovered drift does not silently expand ratified scope.
 
 - **bc7e966 + e2f8053 + c0c5a76** `feat(profilux): V12-divergence-3 — Maisons View card at row 5` — May 11 2026 (PM). SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. V12-divergence-3 (ledger 28303edd) resolution: View renders a new Maisons SectionCard at row 5 between Career History (row 4) and Education (row 6) per V12 baseline. Sourced from `members.brands_worked_with` (L2 text[] already on ProfiLuxResolved; resolver unchanged). Read-only in View; no Edit drawer this slice; manual editing deferred pending maison taxonomy / normalization review. Empty behavior: card hides entirely, consistent with View doctrine on hide-when-empty for collections. Doctrine commit `bc7e966` updated V12_LOCK §2.3 row 9 + §6.1 resolution log table row + Edit drawer note, and MATRIX §22.1 (Maisons inserted as row 5; rows 5-9 renumbered to 6-10; total grows from 9 to 10 conceptual rows). Code commit `e2f8053` (3 files, +26/-1, additive only): `EditorView.brands_worked_with: string[]` in Luxury fit block; `projectEditorView` adds `brands_worked_with: view.brands_worked_with`; `ViewCollapseKey` union adds `'maisons'` between `'career_history'` and `'education'`; new CollapsibleSectionCard IIFE between Career History and Education with hide-when-empty early return, reusing `viewChipStyle` + `chipRow` + `isCardCollapsed` + `toggleViewCollapse`. Closure commit `c0c5a76` flipped V12_LOCK §2.3 row 9 from "decision locked / code commit pending" to "shipped e2f8053" and §6.1 resolution log entry from RESOLVED to SHIPPED with doctrine + code SHAs + QA pass + parked observation. Prod QA via Chrome MCP on joblux.com/dashboard/candidate/profilux View tab: filled-state fixture (`['Hermès','Cartier','Richemont']` seeded on `luxuryretailsale@gmail.com`) rendered Maisons card at row 5 with 3 chips verbatim; empty-state (post-revert, `brands_worked_with=NULL`) hid card entirely with Career History flowing directly into Education. Fixture seeded and reverted; original NULL value restored. Total visible View cards: 9 filled, 8 empty (within doctrine bounds; Maisons hide-when-empty is the explicit exception per MATRIX §22.4). Compensation absent from View (V12-violation-1 fix `66f8cf3` holds). Edit tab UNTOUCHED. Substrate / schema / write-path / public/admin/client/ATS projections UNCHANGED. Ledger row `28303edd` closed 2026-05-11 PM. Two new parked findings logged separately as admin_tasks rows: `12745f9d-b8c5-4fbe-a478-2a81378c96e1` (F-view-identity-mask-leak — candidate View identity strip renders last name as initial via `maskedName` const in `app/dashboard/candidate/profilux/page.tsx`; likely V1 public-projection masking pattern leaking into candidate self-view; pre-existing, low priority, future scope) and `9155bd8e-64c3-442d-8bf8-6afd3986137f` (V12-divergence-page-layout-drift — ProfiLux frame does not match V12 spatial baseline; live page is left-aligned + capped at 900px + ~40% dead right canvas; V12 prototype shows centered ~1100-1200px content column with balanced gutters; violates V12_LOCK §3.1 centering + STATE §15 max-width:1200 rule; high priority, V12 reconciliation queue, sequenced BEFORE V12-divergence-4).
@@ -91,27 +101,41 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-**ProfiLux Convergence Mode (locked 2026-05-11). See WORKFLOW_RULES.md for full operating doctrine.**
+**ProfiLux Convergence Mode continues. View is structurally complete and converged to V12 prototype scene 3 v7 (5-commit page-level pass on 2026-05-11 PM late-late).**
 
-V12-divergence-4 (`3e8d6de2`) Phase 1 shipped at `868ccd9` (Clienteling removed from View). Final disposition deferred pending Skills / Luxury Fit / full ProfiLux review. Ledger remains open.
+Next session choice at open:
 
-V12-divergence-5 (`d243fc13`) Phase 1 visual shell shipped at `e9fe284` (Add Section trigger + EXTEND DOSSIER drawer with 8 disabled library rows). Functional add behavior pending. Ledger remains open.
+- **(a) View copy-label finalization** — single-file copy slice: `CURRENT POSITION` → `CURRENT ROLE`, `CAREER HISTORY` → `CAREER PATH`, `AVAILABILITY & TARGETS` → `AVAILABILITY`, `availabilityLabel('open')` → `Quietly considering`.
+- **(b) Manage shell start** — Priority 2 in the convergence queue.
+
+Mo decides at session open.
 
 Next session opens with: **"Open JOBLUX session — convergence mode"**
 
 Priority order (locked):
 
-1. View shell convergence
+1. View shell convergence — STRUCTURALLY COMPLETE; copy-label finalization pending (option a above)
 2. Manage shell convergence
 3. CV Merge shell (greenfield)
 4. Edit shell refinement
 5. Behavioral refinements / divergence cleanup
 
+Open ledgers (untouched this session):
+- `3e8d6de2` V12-divergence-4 — Phase 1 done (Clienteling removed). Final disposition deferred pending Skills / Luxury Fit / full ProfiLux review.
+- `d243fc13` V12-divergence-5 — Phase 1 visual shell done. Functional add behavior pending.
+
+Other observed divergences (deferred, not addressed):
+- Career History since-date / duration display not yet rendered.
+- Language proficiency data shape mismatch (live free-string vs prototype structured).
+- Expertise taxonomy mismatch (live 5 sub-rows vs prototype trimmed subset).
+- Availability one-line prototype vs richer live (Desired locations/departments/contract types + relocation).
+- Walkthrough sidebar present in prototype scene 3 not yet in live.
+
 Parked findings:
 - `12745f9d` — F-view-identity-mask-leak
 - `ab6982db` — F-profilux-drawer-inline-maxwidth-deadcap
 
-**Handoff doc:** `docs/HANDOFF_2026-05-11-PM-late.md`
+**Handoff doc:** `docs/HANDOFF_2026-05-11-PM-late-late.md`
 
 ### DO NOT
 
@@ -148,7 +172,13 @@ Parked findings:
 - Mix Bridge V2 / workflow infrastructure work into product feature sessions. Trigger phrase for infra: *"Open JOBLUX workflow infrastructure session — Bridge V2"*.
 - Touch `lib/profilux/resolveProfiLux.ts` experiences merge logic. A2.3-β.2 locks the contract: L2 editable rows + L1 parsed CV rows simultaneously visible, no dedup, no silent L1→L2 promotion. Future Education/Languages relational migrations follow the same pattern.
 - Reintroduce the 11-screen tunnel as the primary Edit surface. A2.4 retirement is doctrine-locked. `TUNNEL_VISIBLE=false` flag preserves the code for diagnostics only; revival would require an explicit doctrine reversal slice.
-- Touch the 9-card View tab structure (A2.5) order or composition without first updating MATRIX §22.1. Section order is fixed at: Identity, Current Position, Luxury Fit, Career History, Education & Languages, Skills & Markets, Clienteling, Availability & Targets, Compensation.
+- Touch the 9-card View tab structure (A2.5) order or composition without first updating MATRIX §22.1. Section order is fixed at: Identity, Current Position, Luxury Fit, Career History, Education & Languages, Skills & Markets, Clienteling, Availability & Targets, Compensation. *(Note: superseded for the View tab by the V12 convergence pass of 2026-05-11 PM late-late — View now renders 7 ViewZones in V12 order: Current Position, Career History, Education, Languages, Expertise, Availability & Targets, Maisons. MATRIX §22.1 update pending.)*
+- Use Claude AI as the sole visual eye. Visual validation requires Mo + GPT against the locked prototype. Claude AI is code manager / executor coordinator; never visual judge.
+- Send multi-hundred-line prompts to Claude Code. Page-level passes with crisp scope beat micro-slices; tight prompts beat sprawling ones.
+- Execute autonomous GitHub MCP writes. Writes through Claude Code only, after explicit Mo approval (Propose → Wait → Approve → Execute).
+- Reorder View zones away from the V12 sequence locked at `9dabff1` (Current Position → Career History → Education → Languages → Expertise → Availability & Targets → Maisons). Reordering requires an explicit doctrine reversal slice.
+- Change the locked Career History timeline rendering from `0d7dfe8` (108px / 1fr grid, period column tabular nums #8e8e8e, body role white 14/500, company/location gold #a58e28, description #8e8e8e). Same lock applies to the Education timeline.
+- Inject `<style>` tags, hover rules, `data-hover` / `data-spine-action` attributes, or any new style mechanism into the View tab without an explicit, scoped slice approval.
 
 ### PARKED (admin_tasks status=parked)
 
@@ -189,7 +219,7 @@ Parked findings:
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 11, 2026 (PM, post-late) — V12-divergence-4 Phase 1 shipped at `868ccd9` and V12-divergence-5 Phase 1 visual shell shipped at `e9fe284`. Both ledgers remain open (functional/final-disposition work deferred). **ProfiLux Convergence Mode locked** — see WORKFLOW_RULES.md. Next session: convergence-mode start, View shell first.
+**Last updated:** May 11, 2026 (PM late-late) — View structurally converged to V12 prototype scene 3 v7 in a 5-commit page-level pass (`c062764` → `62ca2fb` → `8c8ee99` → `0d7dfe8` → `9dabff1`). All five SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. Single source-modified file across the session: `app/dashboard/candidate/profilux/page.tsx`. View shell convergence (Priority 1) is structurally complete; copy-label finalization pending. Manage shell convergence (Priority 2) ready to start. **ProfiLux Convergence Mode continues** — see WORKFLOW_RULES.md.
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
