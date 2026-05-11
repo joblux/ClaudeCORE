@@ -852,24 +852,40 @@ Field assignments mirror §7.6.1 `EditorView` exactly. The grouping into 9 named
 |---|---|---|
 | 1 | Identity | `first_name`, `last_name`, `city`, `country`, `nationality`, `phone`, `headline`, `avatar_url`, `bio`, `linkedin_url` |
 | 2 | Current Position | `job_title`, `current_employer`, `seniority`, `total_years_experience` |
-| 3 | Luxury Fit | `years_in_luxury`, `sectors` (L1), `product_categories`, `expertise_tags` |
+| 3 | Expertise | `years_in_luxury`, `sectors` (L1), `product_categories`, `expertise_tags`, `key_skills`, `market_knowledge` |
 | 4 | Career History | `experiences[]` (L1 passthrough) |
 | 5 | Education | `university`, `field_of_study`, `graduation_year`, `education[]` |
 | 6 | Languages | `languages[]` |
-| 7 | Skills & Markets | `key_skills`, `market_knowledge` |
-| 8 | Clienteling | `clienteling_experience`, `clienteling_description` |
-| 9 | Availability & Targets | `availability`, `desired_locations`, `desired_departments`, `desired_contract_types`, `open_to_relocation`, `relocation_preferences` |
-| 10 | Compensation | `desired_salary_min`, `desired_salary_max`, `desired_salary_currency` |
+| 7 | Clienteling | `clienteling_experience`, `clienteling_description` |
+| 8 | Availability & Targets | `availability`, `desired_locations`, `desired_departments`, `desired_contract_types`, `open_to_relocation`, `relocation_preferences` |
+| 9 | Compensation | `desired_salary_min`, `desired_salary_max`, `desired_salary_currency` |
 
-**Edit drawer note (2026-05-11):** Education and Languages render as 2
-distinct cards in View per V12 baseline. The Edit tab keeps ONE combined
-"Education & Languages" drawer temporarily — clicking Edit on the Edit-tab
-combined SectionCard opens the drawer for `university`, `field_of_study`,
-and `graduation_year`. Languages remain L1 read-only inside the drawer
-with the existing "Editing CV-parsed records is not yet supported" banner.
-Edit drawer split is parked pending L2 languages substrate migration
-(ledger 1609e494). View doctrine matches V12; Edit doctrine catches up
-when L2 lands.
+**Edit drawer notes (2026-05-11):**
+
+- **Row 3 (Expertise) — Edit kept split.** Education and Languages style
+  of single-row merge does NOT apply here. View renders one unified
+  Expertise card with 6 sub-rows in order: Years in luxury → Sectors →
+  Product categories → Areas of expertise → Skills → Markets. "Years in
+  luxury" and "Sectors" sit visibly above the skill/market chips to
+  preserve JOBLUX luxury relevance. The Edit tab keeps the existing two
+  SectionCards ("Luxury Fit" with `luxuryFitDrawerOpen` drawer; "Skills &
+  Markets" with `skillsMarketsDrawerOpen` drawer) and their two POST
+  shapes UNCHANGED. Edit split is intentional pending taxonomy review —
+  this is a UX-density decision, NOT a substrate gate. Distinct from row
+  5 + row 6 where Edit is blocked by ledger 1609e494.
+
+- **Rows 5 + 6 (Education + Languages) — Edit kept combined.** View
+  renders 2 distinct cards per V12 baseline. The Edit tab keeps ONE
+  combined "Education & Languages" SectionCard + drawer (`educationLanguagesDrawerOpen`).
+  Clicking Edit on the combined SectionCard opens a drawer covering
+  `university`, `field_of_study`, and `graduation_year`. Languages
+  remain L1 read-only inside the drawer with the existing
+  "Editing CV-parsed records is not yet supported" banner. Edit drawer
+  split for these two sections is parked pending L2 languages substrate
+  migration (ledger 1609e494).
+
+View doctrine matches V12 for both divergences. Edit doctrine catches up
+on row 3 when taxonomy review concludes; on rows 5+6 when L2 lands.
 
 ### 22.2 — Add-library sections (8, opt-in, schema PARKED)
 

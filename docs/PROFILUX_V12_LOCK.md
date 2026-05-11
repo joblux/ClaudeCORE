@@ -53,7 +53,7 @@ Any code that violates a structural lock is treated as a defect, regardless of h
 | 3 | Career path | Career History | aligned (label drift only) |
 | 4 | Education | Education (View) — combined Edit drawer temporarily | shipped 1ac1f80: View split per V12; Edit drawer combined pending L2 languages migration (ledger 1609e494) |
 | 5 | Languages | Languages (View) — combined Edit drawer temporarily | shipped 1ac1f80: View split per V12; Edit drawer combined pending L2 languages migration (ledger 1609e494) |
-| 6 | Expertise (sectors + tags) | Luxury Fit + Skills & Markets | divergent — V12 unifies, prod splits across 2 cards |
+| 6 | Expertise (sectors + tags) | Expertise (View pending — unified) — Edit kept split temporarily | decision locked: unify View per V12 (one Expertise card, 6 sub-rows preserving luxury relevance order); code commit pending; Edit kept split pending taxonomy review |
 | 7 | Compensation (current + target) | Compensation | VIOLATION — see §5 |
 | 8 | Availability | Availability & Targets | aligned (label drift only) |
 | 9 | Maisons (brands_worked_with) | (absent) | MISSING — V12 lists Maisons as a default section |
@@ -200,6 +200,20 @@ These are NOT hard violations. They are evolutions that may or may not be intent
   "Education & Languages" drawer temporarily; will split when L2
   languages substrate ships (ledger 1609e494). MATRIX §22.1 reflects
   the new row 5 (Education) + row 6 (Languages) composition.
+
+- 2026-05-11 — V12-divergence-2 (ledger 99b61c19) — Expertise unified vs split:
+  View decision locked — unify Luxury Fit + Skills & Markets into a single
+  "Expertise" card per V12 baseline (V12 prototype state engine line 5194).
+  Code commit pending. The unified card preserves prod's wider 6-bucket
+  taxonomy in this order: Years in luxury → Sectors → Product categories
+  → Areas of expertise → Skills → Markets. "Years in luxury" and "Sectors"
+  stay visibly above the skill/market chips to preserve JOBLUX-specific
+  luxury relevance while honoring V12's single-card structure. Edit tab
+  keeps the two existing SectionCards (Luxury Fit + Skills & Markets) and
+  their two drawers — split is intentional, pending taxonomy review
+  (NOT substrate-blocked; distinct from divergence-1's L2-migration gate).
+  MATRIX §22.1 updated in same doctrine commit. Follow-up doc patch will
+  flip "pending" to "shipped <SHA>" after code lands.
 
 ### 6.2 — Missing structural features
 
