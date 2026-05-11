@@ -181,6 +181,28 @@ function CollapsibleSectionCard({ eyebrow, collapsed, onToggle, children }: Coll
   )
 }
 
+type ViewZoneProps = { title: string; children: React.ReactNode }
+
+function ViewZone({ title, children }: ViewZoneProps) {
+  const wrap: React.CSSProperties = { marginBottom: 32 }
+  const titleStyle: React.CSSProperties = {
+    fontFamily: 'Playfair Display, serif',
+    fontWeight: 400,
+    fontSize: 18,
+    color: '#fff',
+    margin: 0,
+    paddingBottom: 10,
+    marginBottom: 16,
+    borderBottom: '1px solid #2a2a2a',
+  }
+  return (
+    <div style={wrap}>
+      <h3 style={titleStyle}>{title}</h3>
+      {children}
+    </div>
+  )
+}
+
 type DrawerProps = {
   open: boolean
   title: string
@@ -1673,37 +1695,6 @@ export default function ProfiluxPage() {
 
               {/* RIGHT FIELD — 8 section cards (verbatim) */}
               <div style={{ flex: 1, minWidth: 0, width: isMobile ? '100%' : 'auto' }}>
-            {/* §22.1 row 1 — Identity */}
-            {(() => {
-              const filled =
-                (typeof e.first_name === 'string' && e.first_name.trim().length > 0) ||
-                (typeof e.last_name === 'string' && e.last_name.trim().length > 0) ||
-                (typeof e.city === 'string' && e.city.trim().length > 0) ||
-                (typeof e.country === 'string' && e.country.trim().length > 0) ||
-                (typeof e.nationality === 'string' && e.nationality.trim().length > 0) ||
-                (typeof e.phone === 'string' && e.phone.trim().length > 0) ||
-                (typeof e.headline === 'string' && e.headline.trim().length > 0) ||
-                (typeof e.bio === 'string' && e.bio.trim().length > 0)
-              return (
-            <CollapsibleSectionCard
-              eyebrow="Identity"
-              collapsed={isCardCollapsed('identity', filled)}
-              onToggle={() => toggleViewCollapse('identity', filled)}
-            >
-              <div style={grid}>
-                <div style={label}>First name</div><div>{reviewFor('first_name')}</div>
-                <div style={label}>Last name</div><div>{reviewFor('last_name')}</div>
-                <div style={label}>City</div><div>{reviewFor('city')}</div>
-                <div style={label}>Country</div><div>{missingIfEmptyStr(e.country)}</div>
-                <div style={label}>Nationality</div><div>{reviewFor('nationality')}</div>
-                <div style={label}>Phone</div><div>{missingIfEmptyStr(e.phone)}</div>
-                <div style={label}>Headline</div><div>{missingIfEmptyStr(e.headline)}</div>
-                <div style={label}>Bio</div><div>{(typeof e.bio === 'string' && e.bio.trim().length > 0) ? <span style={{ whiteSpace: 'pre-wrap' }}>{e.bio}</span> : <Marker kind="missing" />}</div>
-              </div>
-            </CollapsibleSectionCard>
-              )
-            })()}
-
             {/* §22.1 row 2 — Current Position */}
             {(() => {
               const filled =
@@ -1711,19 +1702,16 @@ export default function ProfiluxPage() {
                 (typeof e.current_employer === 'string' && e.current_employer.trim().length > 0) ||
                 (typeof e.seniority === 'string' && e.seniority.trim().length > 0) ||
                 typeof e.total_years_experience === 'number'
+              if (!filled) return null
               return (
-            <CollapsibleSectionCard
-              eyebrow="Current Position"
-              collapsed={isCardCollapsed('current_position', filled)}
-              onToggle={() => toggleViewCollapse('current_position', filled)}
-            >
+            <ViewZone title="Current Position">
               <div style={grid}>
                 <div style={label}>Job title</div><div>{missingIfEmptyStr(e.job_title)}</div>
                 <div style={label}>Current employer</div><div>{missingIfEmptyStr(e.current_employer)}</div>
                 <div style={label}>Seniority</div><div>{seniorityLabel(e.seniority) ?? <Marker kind="missing" />}</div>
                 <div style={label}>Years of experience</div><div>{missingIfEmptyNum(e.total_years_experience)}</div>
               </div>
-            </CollapsibleSectionCard>
+            </ViewZone>
               )
             })()}
 
@@ -1736,12 +1724,9 @@ export default function ProfiluxPage() {
                 (Array.isArray(e.expertise_tags) && e.expertise_tags.length > 0) ||
                 (Array.isArray(e.key_skills) && e.key_skills.length > 0) ||
                 (Array.isArray(e.market_knowledge) && e.market_knowledge.length > 0)
+              if (!filled) return null
               return (
-            <CollapsibleSectionCard
-              eyebrow="Expertise"
-              collapsed={isCardCollapsed('expertise', filled)}
-              onToggle={() => toggleViewCollapse('expertise', filled)}
-            >
+            <ViewZone title="Expertise">
               <div style={grid}>
                 <div style={label}>Years in luxury</div>
                 <div>{missingIfEmptyNum(e.years_in_luxury)}</div>
@@ -1821,19 +1806,16 @@ export default function ProfiluxPage() {
                   <Marker kind="missing" />
                 </div>
               )}
-            </CollapsibleSectionCard>
+            </ViewZone>
               )
             })()}
 
             {/* §22.1 row 4 — Career History */}
             {(() => {
               const filled = expRows.length > 0
+              if (!filled) return null
               return (
-            <CollapsibleSectionCard
-              eyebrow="Career History"
-              collapsed={isCardCollapsed('career_history', filled)}
-              onToggle={() => toggleViewCollapse('career_history', filled)}
-            >
+            <ViewZone title="Career History">
               {expRows.length === 0 ? (
                 <Marker kind="missing" />
               ) : (
@@ -1844,7 +1826,7 @@ export default function ProfiluxPage() {
                     : { marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #2a2a2a' }
                   return (
                     <div key={i} style={rowStyle}>
-                      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#fff', lineHeight: 1.4, marginBottom: 4 }}>{r.titleLine}</div>
+                      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, color: '#fff', fontWeight: 500, lineHeight: 1.4, marginBottom: 4 }}>{r.titleLine}</div>
                       {r.locationDateLine && (
                         <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.4, marginBottom: 6 }}>{r.locationDateLine}</div>
                       )}
@@ -1855,7 +1837,7 @@ export default function ProfiluxPage() {
                   )
                 })
               )}
-            </CollapsibleSectionCard>
+            </ViewZone>
               )
             })()}
 
@@ -1865,11 +1847,7 @@ export default function ProfiluxPage() {
               if (brands.length === 0) return null
               const filled = true
               return (
-            <CollapsibleSectionCard
-              eyebrow="Maisons"
-              collapsed={isCardCollapsed('maisons', filled)}
-              onToggle={() => toggleViewCollapse('maisons', filled)}
-            >
+            <ViewZone title="Maisons">
               <div style={{ ...chipRow, marginTop: 8 }}>
                 {brands.map((v, i) => (
                   <span key={`ma-${i}-${v}`} style={viewChipStyle}>
@@ -1877,7 +1855,7 @@ export default function ProfiluxPage() {
                   </span>
                 ))}
               </div>
-            </CollapsibleSectionCard>
+            </ViewZone>
               )
             })()}
 
@@ -1888,12 +1866,9 @@ export default function ProfiluxPage() {
                 (typeof e.field_of_study === 'string' && e.field_of_study.trim().length > 0) ||
                 typeof e.graduation_year === 'number' ||
                 (Array.isArray(e.education) && e.education.length > 0)
+              if (!filled) return null
               return (
-            <CollapsibleSectionCard
-              eyebrow="Education"
-              collapsed={isCardCollapsed('education', filled)}
-              onToggle={() => toggleViewCollapse('education', filled)}
-            >
+            <ViewZone title="Education">
               <div style={grid}>
                 <div style={label}>University</div><div>{missingIfEmptyStr(e.university)}</div>
                 <div style={label}>Field of study</div><div>{missingIfEmptyStr(e.field_of_study)}</div>
@@ -1912,19 +1887,16 @@ export default function ProfiluxPage() {
                   ))}
                 </div>
               )}
-            </CollapsibleSectionCard>
+            </ViewZone>
               )
             })()}
 
             {/* §22.1 row 6 — Languages */}
             {(() => {
               const filled = Array.isArray(e.languages) && e.languages.length > 0
+              if (!filled) return null
               return (
-            <CollapsibleSectionCard
-              eyebrow="Languages"
-              collapsed={isCardCollapsed('languages', filled)}
-              onToggle={() => toggleViewCollapse('languages', filled)}
-            >
+            <ViewZone title="Languages">
               {e.languages.length === 0 ? (
                 <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>
               ) : (
@@ -1936,7 +1908,7 @@ export default function ProfiluxPage() {
                   ))}
                 </div>
               )}
-            </CollapsibleSectionCard>
+            </ViewZone>
               )
             })()}
 
@@ -1950,12 +1922,9 @@ export default function ProfiluxPage() {
                 e.open_to_relocation === true ||
                 e.open_to_relocation === false ||
                 (typeof e.relocation_preferences === 'string' && e.relocation_preferences.trim().length > 0)
+              if (!filled) return null
               return (
-            <CollapsibleSectionCard
-              eyebrow="Availability & Targets"
-              collapsed={isCardCollapsed('availability', filled)}
-              onToggle={() => toggleViewCollapse('availability', filled)}
-            >
+            <ViewZone title="Availability & Targets">
               <div style={grid}>
                 <div style={label}>Availability</div>
                 <div>{availabilityLabel(e.availability) ?? <Marker kind="missing" />}</div>
@@ -1984,7 +1953,7 @@ export default function ProfiluxPage() {
                 <div style={label}>Relocation preferences</div>
                 <div>{e.open_to_relocation === true && typeof e.relocation_preferences === 'string' && e.relocation_preferences.length > 0 ? e.relocation_preferences : <Marker kind="missing" />}</div>
               </div>
-            </CollapsibleSectionCard>
+            </ViewZone>
               )
             })()}
               </div>
