@@ -184,16 +184,24 @@ function CollapsibleSectionCard({ eyebrow, collapsed, onToggle, children }: Coll
 type ViewZoneProps = { title: string; children: React.ReactNode }
 
 function ViewZone({ title, children }: ViewZoneProps) {
-  const wrap: React.CSSProperties = { marginBottom: 32 }
+  const wrap: React.CSSProperties = {
+    background: '#222',
+    border: '1px solid #2a2a2a',
+    borderRadius: 14,
+    padding: '24px 26px',
+    marginBottom: 18,
+  }
   const titleStyle: React.CSSProperties = {
-    fontFamily: 'Playfair Display, serif',
-    fontWeight: 400,
-    fontSize: 18,
-    color: '#fff',
+    fontFamily: 'Inter, sans-serif',
+    fontWeight: 600,
+    fontSize: 10.5,
+    color: '#8e8e8e',
+    textTransform: 'uppercase',
+    letterSpacing: 1.8,
     margin: 0,
-    paddingBottom: 10,
-    marginBottom: 16,
-    borderBottom: '1px solid #2a2a2a',
+    paddingBottom: 14,
+    marginBottom: 18,
+    borderBottom: '0.5px solid #2a2a2a',
   }
   return (
     <div style={wrap}>
@@ -1583,19 +1591,6 @@ export default function ProfiluxPage() {
         const missingIfEmptyNum = (v: number | null | undefined) =>
           (typeof v === 'number') ? String(v) : <Marker kind="missing" />
 
-        const viewChipStyle: React.CSSProperties = {
-          display: 'inline-block',
-          background: 'rgba(255,255,255,0.04)',
-          color: '#ccc',
-          border: '1px solid #2a2a2a',
-          padding: '5px 11px',
-          borderRadius: 999,
-          fontFamily: 'Inter, sans-serif',
-          fontSize: 12,
-          lineHeight: 1.4,
-        }
-        const chipRow: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 8 }
-
         const experiences = Array.isArray(e.experiences) ? e.experiences : []
         const expRows = experiences.map((exp) => {
           const hasJobT = typeof exp.job_title === 'string' && exp.job_title.trim().length > 0
@@ -1640,7 +1635,7 @@ export default function ProfiluxPage() {
                     : hasJob ? e.job_title
                     : null
                   return subRole ? (
-                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.4, marginBottom: 4 }}>
+                    <div style={{ fontFamily: 'Playfair Display, serif', fontStyle: 'italic', fontSize: 13.5, color: '#a58e28', lineHeight: 1.4, marginBottom: 4 }}>
                       {subRole}
                     </div>
                   ) : null
@@ -1657,7 +1652,7 @@ export default function ProfiluxPage() {
                   return (
                     <div style={{ marginBottom: 16 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                        <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: '50%', background: '#1D9E75', display: 'inline-block', flex: '0 0 auto' }} />
+                        <span aria-hidden="true" style={{ width: 7, height: 7, borderRadius: '50%', background: '#1D9E75', boxShadow: '0 0 0 4px rgba(29,158,117,0.15)', display: 'inline-block', flex: '0 0 auto' }} />
                         <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc' }}>{label}</span>
                       </div>
                       <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', lineHeight: 1.4 }}>
@@ -1732,79 +1727,49 @@ export default function ProfiluxPage() {
                 <div>{missingIfEmptyNum(e.years_in_luxury)}</div>
               </div>
 
-              <div style={sectionLabel}>Sectors</div>
-              {e.sectors.length > 0 ? (
-                <div style={{ ...chipRow, marginTop: 8 }}>
-                  {e.sectors.map((v, i) => (
-                    <span key={`sec-${i}-${v}`} style={viewChipStyle}>
-                      {sectorLabel(v)}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ marginTop: 8 }}>
-                  <Marker kind="missing" />
-                </div>
+              {e.sectors.length > 0 && (
+                <>
+                  <div style={sectionLabel}>Sectors</div>
+                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>
+                    {e.sectors.map(v => sectorLabel(v)).join(' · ')}
+                  </div>
+                </>
               )}
 
-              <div style={sectionLabel}>Product categories</div>
-              {e.product_categories.length > 0 ? (
-                <div style={{ ...chipRow, marginTop: 8 }}>
-                  {e.product_categories.map((v, i) => (
-                    <span key={`pc-${i}-${v}`} style={viewChipStyle}>
-                      {productCategoryLabel(v)}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ marginTop: 8 }}>
-                  <Marker kind="missing" />
-                </div>
+              {e.product_categories.length > 0 && (
+                <>
+                  <div style={sectionLabel}>Product categories</div>
+                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>
+                    {e.product_categories.map(v => productCategoryLabel(v)).join(' · ')}
+                  </div>
+                </>
               )}
 
-              <div style={sectionLabel}>Areas of expertise</div>
-              {e.expertise_tags.length > 0 ? (
-                <div style={{ ...chipRow, marginTop: 8 }}>
-                  {e.expertise_tags.map((v, i) => (
-                    <span key={`et-${i}-${v}`} style={viewChipStyle}>
-                      {expertiseTagLabel(v)}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ marginTop: 8 }}>
-                  <Marker kind="missing" />
-                </div>
+              {e.expertise_tags.length > 0 && (
+                <>
+                  <div style={sectionLabel}>Areas of expertise</div>
+                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>
+                    {e.expertise_tags.map(v => expertiseTagLabel(v)).join(' · ')}
+                  </div>
+                </>
               )}
 
-              <div style={sectionLabel}>Skills</div>
-              {e.key_skills.length > 0 ? (
-                <div style={{ ...chipRow, marginTop: 8 }}>
-                  {e.key_skills.map((v, i) => (
-                    <span key={`sk-${i}-${v}`} style={viewChipStyle}>
-                      {skillLabel(v)}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ marginTop: 8 }}>
-                  <Marker kind="missing" />
-                </div>
+              {e.key_skills.length > 0 && (
+                <>
+                  <div style={sectionLabel}>Skills</div>
+                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>
+                    {e.key_skills.map(v => skillLabel(v)).join(' · ')}
+                  </div>
+                </>
               )}
 
-              <div style={sectionLabel}>Markets</div>
-              {e.market_knowledge.length > 0 ? (
-                <div style={{ ...chipRow, marginTop: 8 }}>
-                  {e.market_knowledge.map((v, i) => (
-                    <span key={`mk-${i}-${v}`} style={viewChipStyle}>
-                      {v}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ marginTop: 8 }}>
-                  <Marker kind="missing" />
-                </div>
+              {e.market_knowledge.length > 0 && (
+                <>
+                  <div style={sectionLabel}>Markets</div>
+                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>
+                    {e.market_knowledge.join(' · ')}
+                  </div>
+                </>
               )}
             </ViewZone>
               )
@@ -1848,12 +1813,8 @@ export default function ProfiluxPage() {
               const filled = true
               return (
             <ViewZone title="Maisons">
-              <div style={{ ...chipRow, marginTop: 8 }}>
-                {brands.map((v, i) => (
-                  <span key={`ma-${i}-${v}`} style={viewChipStyle}>
-                    {v}
-                  </span>
-                ))}
+              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.5 }}>
+                {brands.join(' · ')}
               </div>
             </ViewZone>
               )
@@ -1874,18 +1835,18 @@ export default function ProfiluxPage() {
                 <div style={label}>Field of study</div><div>{missingIfEmptyStr(e.field_of_study)}</div>
                 <div style={label}>Graduation year</div><div>{missingIfEmptyNum(e.graduation_year)}</div>
               </div>
-              <div style={sectionLabel}>Education history</div>
-              {e.education.length === 0 ? (
-                <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>
-              ) : (
-                <div style={{ marginTop: 8 }}>
-                  {e.education.map((ed, i) => (
-                    <div key={i} style={{ ...card, fontSize: 12 }}>
-                      <div><strong>{ed.institution ?? 'Unknown'}</strong></div>
-                      <div style={{ color: '#999', marginTop: 4 }}>{ed.degree ?? '—'} · {ed.field_of_study ?? '—'} · {ed.graduation_year ?? '—'}</div>
-                    </div>
-                  ))}
-                </div>
+              {e.education.length > 0 && (
+                <>
+                  <div style={sectionLabel}>Education history</div>
+                  <div style={{ marginTop: 8 }}>
+                    {e.education.map((ed, i) => (
+                      <div key={i} style={{ ...card, fontSize: 12 }}>
+                        <div><strong>{ed.institution ?? 'Unknown'}</strong></div>
+                        <div style={{ color: '#999', marginTop: 4 }}>{ed.degree ?? '—'} · {ed.field_of_study ?? '—'} · {ed.graduation_year ?? '—'}</div>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
             </ViewZone>
               )
@@ -1897,17 +1858,14 @@ export default function ProfiluxPage() {
               if (!filled) return null
               return (
             <ViewZone title="Languages">
-              {e.languages.length === 0 ? (
-                <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>
-              ) : (
-                <div style={{ ...chipRow, marginTop: 8 }}>
-                  {e.languages.map((l, i) => (
-                    <span key={`lg-${i}-${l.language}`} style={viewChipStyle}>
-                      {l.proficiency ? `${l.language} (${l.proficiency})` : l.language}
-                    </span>
-                  ))}
-                </div>
-              )}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {e.languages.map((l, i) => (
+                  <div key={`lg-${i}-${l.language}`} style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.4 }}>
+                    <span>{l.language}</span>
+                    {l.proficiency && <span style={{ color: '#999', marginLeft: 8 }}>{l.proficiency}</span>}
+                  </div>
+                ))}
+              </div>
             </ViewZone>
               )
             })()}
@@ -1929,24 +1887,30 @@ export default function ProfiluxPage() {
                 <div style={label}>Availability</div>
                 <div>{availabilityLabel(e.availability) ?? <Marker kind="missing" />}</div>
               </div>
-              <div style={sectionLabel}>Desired locations</div>
-              {e.desired_locations.length > 0 ? (
-                <div style={{ ...chipRow, marginTop: 8 }}>
-                  {e.desired_locations.map((v, i) => <span key={`dl-${i}-${v}`} style={viewChipStyle}>{v}</span>)}
-                </div>
-              ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
-              <div style={sectionLabel}>Desired departments</div>
-              {e.desired_departments.length > 0 ? (
-                <div style={{ ...chipRow, marginTop: 8 }}>
-                  {e.desired_departments.map((v, i) => <span key={`dd-${i}-${v}`} style={viewChipStyle}>{departmentLabel(v)}</span>)}
-                </div>
-              ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
-              <div style={sectionLabel}>Desired contract types</div>
-              {e.desired_contract_types.length > 0 ? (
-                <div style={{ ...chipRow, marginTop: 8 }}>
-                  {e.desired_contract_types.map((v, i) => <span key={`dc-${i}-${v}`} style={viewChipStyle}>{contractTypeLabel(v)}</span>)}
-                </div>
-              ) : <div style={{ marginTop: 8 }}><Marker kind="missing" /></div>}
+              {e.desired_locations.length > 0 && (
+                <>
+                  <div style={sectionLabel}>Desired locations</div>
+                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>
+                    {e.desired_locations.join(' · ')}
+                  </div>
+                </>
+              )}
+              {e.desired_departments.length > 0 && (
+                <>
+                  <div style={sectionLabel}>Desired departments</div>
+                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>
+                    {e.desired_departments.map(v => departmentLabel(v)).join(' · ')}
+                  </div>
+                </>
+              )}
+              {e.desired_contract_types.length > 0 && (
+                <>
+                  <div style={sectionLabel}>Desired contract types</div>
+                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>
+                    {e.desired_contract_types.map(v => contractTypeLabel(v)).join(' · ')}
+                  </div>
+                </>
+              )}
               <div style={grid}>
                 <div style={label}>Open to relocation</div>
                 <div>{e.open_to_relocation === true ? 'Yes' : e.open_to_relocation === false ? 'No' : <Marker kind="missing" />}</div>
