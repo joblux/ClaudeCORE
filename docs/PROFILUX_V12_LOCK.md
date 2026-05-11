@@ -51,8 +51,8 @@ Any code that violates a structural lock is treated as a defect, regardless of h
 | 1 | Identity | Identity | aligned |
 | 2 | Current role | Current Position | aligned (label drift only) |
 | 3 | Career path | Career History | aligned (label drift only) |
-| 4 | Education | Education & Languages (combined) | divergent — V12 splits Education from Languages |
-| 5 | Languages | (combined with Education) | divergent |
+| 4 | Education | Education (View pending) — combined Edit drawer temporarily | decision locked: split View per V12; code commit pending; Edit drawer combined pending L2 languages migration (ledger 1609e494) |
+| 5 | Languages | Languages (View pending) — combined Edit drawer temporarily | decision locked: split View per V12; code commit pending; Edit drawer combined pending L2 languages migration (ledger 1609e494) |
 | 6 | Expertise (sectors + tags) | Luxury Fit + Skills & Markets | divergent — V12 unifies, prod splits across 2 cards |
 | 7 | Compensation (current + target) | Compensation | VIOLATION — see §5 |
 | 8 | Availability | Availability & Targets | aligned (label drift only) |
@@ -189,6 +189,15 @@ These are NOT hard violations. They are evolutions that may or may not be intent
 | Expertise unified (sectors + tags) | Luxury Fit (sectors/product_categories/expertise) + Skills & Markets (key_skills/market_knowledge) — 2 cards | Decide: unify per V12, OR keep split and update V12 doctrine |
 | Maisons (brands_worked_with) as standalone section | absent from View | Decide: add Maisons section, OR drop from V12 if brands_worked_with usage is recruiter-only |
 | Clienteling absent from V12 9-default | rendered as View §22.1 row 7 | Decide: keep (V12 expansion), OR move to library (opt-in), OR drop from View |
+
+**Resolution log:**
+
+- 2026-05-11 — V12-divergence-1 (ledger 034bf165) — Education + Languages:
+  View decision locked — split into 2 cards per V12 baseline. Code commit
+  pending. Edit tab keeps one combined "Education & Languages" drawer
+  temporarily; will split when L2 languages substrate ships (ledger
+  1609e494). MATRIX §22.1 updated in same doctrine commit. A follow-up
+  doc patch will flip "pending" to "shipped <SHA>" after code lands.
 
 ### 6.2 — Missing structural features
 

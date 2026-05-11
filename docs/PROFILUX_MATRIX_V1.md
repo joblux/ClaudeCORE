@@ -854,11 +854,22 @@ Field assignments mirror §7.6.1 `EditorView` exactly. The grouping into 9 named
 | 2 | Current Position | `job_title`, `current_employer`, `seniority`, `total_years_experience` |
 | 3 | Luxury Fit | `years_in_luxury`, `sectors` (L1), `product_categories`, `expertise_tags` |
 | 4 | Career History | `experiences[]` (L1 passthrough) |
-| 5 | Education & Languages | `university`, `field_of_study`, `graduation_year`, `education[]`, `languages[]` |
-| 6 | Skills & Markets | `key_skills`, `market_knowledge` |
-| 7 | Clienteling | `clienteling_experience`, `clienteling_description` |
-| 8 | Availability & Targets | `availability`, `desired_locations`, `desired_departments`, `desired_contract_types`, `open_to_relocation`, `relocation_preferences` |
-| 9 | Compensation | `desired_salary_min`, `desired_salary_max`, `desired_salary_currency` |
+| 5 | Education | `university`, `field_of_study`, `graduation_year`, `education[]` |
+| 6 | Languages | `languages[]` |
+| 7 | Skills & Markets | `key_skills`, `market_knowledge` |
+| 8 | Clienteling | `clienteling_experience`, `clienteling_description` |
+| 9 | Availability & Targets | `availability`, `desired_locations`, `desired_departments`, `desired_contract_types`, `open_to_relocation`, `relocation_preferences` |
+| 10 | Compensation | `desired_salary_min`, `desired_salary_max`, `desired_salary_currency` |
+
+**Edit drawer note (2026-05-11):** Education and Languages render as 2
+distinct cards in View per V12 baseline. The Edit tab keeps ONE combined
+"Education & Languages" drawer temporarily — clicking Edit on the Edit-tab
+combined SectionCard opens the drawer for `university`, `field_of_study`,
+and `graduation_year`. Languages remain L1 read-only inside the drawer
+with the existing "Editing CV-parsed records is not yet supported" banner.
+Edit drawer split is parked pending L2 languages substrate migration
+(ledger 1609e494). View doctrine matches V12; Edit doctrine catches up
+when L2 lands.
 
 ### 22.2 — Add-library sections (8, opt-in, schema PARKED)
 
