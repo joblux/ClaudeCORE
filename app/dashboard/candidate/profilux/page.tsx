@@ -392,6 +392,17 @@ const emptyExperienceDraft = (): ExperienceDraft => ({
   description: '',
 })
 
+const ADD_SECTION_LIBRARY: ReadonlyArray<{ key: string; label: string }> = [
+  { key: 'awards', label: 'Awards' },
+  { key: 'certifications', label: 'Certifications' },
+  { key: 'portfolio', label: 'Portfolio' },
+  { key: 'projects', label: 'Projects' },
+  { key: 'memberships', label: 'Memberships' },
+  { key: 'press_features', label: 'Press & features' },
+  { key: 'references', label: 'References' },
+  { key: 'internships', label: 'Internships' },
+]
+
 function draftFrom(e: EditorView): Screen3Draft {
   return {
     job_title: e.job_title ?? '',
@@ -555,6 +566,7 @@ export default function ProfiluxPage() {
   const [savedAt7, setSavedAt7] = useState<number | null>(null)
   const [saveError7, setSaveError7] = useState<string | null>(null)
   const [identityDrawerOpen, setIdentityDrawerOpen] = useState(false)
+  const [addSectionDrawerOpen, setAddSectionDrawerOpen] = useState(false)
   const [careerHistoryDrawerOpen, setCareerHistoryDrawerOpen] = useState(false)
   const [experienceFormOpen, setExperienceFormOpen] = useState(false)
   const [experienceDraft, setExperienceDraft] = useState<ExperienceDraft>(emptyExperienceDraft())
@@ -2105,6 +2117,32 @@ export default function ProfiluxPage() {
           </SectionCard>
         )
       })()}
+      {/* V12-divergence-5: Add Section trigger row, top-right of dossier area */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 14, padding: '0 4px' }}>
+        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: 2, color: '#999', textTransform: 'uppercase' }}>
+          Your dossier
+        </div>
+        <button
+          type="button"
+          onClick={() => setAddSectionDrawerOpen(true)}
+          style={{
+            background: 'transparent',
+            border: '1px dashed #2a2a2a',
+            color: '#999',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 12,
+            padding: '9px 18px',
+            borderRadius: 8,
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            letterSpacing: 0.3,
+          }}
+        >
+          <span style={{ color: '#a58e28', fontWeight: 600 }}>+</span> Add section
+        </button>
+      </div>
       {/* CV upload + parse card — S1 */}
       <SectionCard eyebrow="CV">
         {!cvUrl && (
@@ -3034,6 +3072,47 @@ export default function ProfiluxPage() {
           </button>
           {savedAt9 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
           {saveError9 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError9}</span>}
+        </div>
+      </Drawer>
+      {/* V12-divergence-5: EXTEND DOSSIER drawer — 8 library sections, B3 disabled */}
+      <Drawer
+        open={addSectionDrawerOpen}
+        title=""
+        onClose={() => setAddSectionDrawerOpen(false)}
+      >
+        <div style={{ fontSize: 10, letterSpacing: 1.8, color: '#a58e28', textTransform: 'uppercase', fontWeight: 600, marginBottom: 6 }}>
+          EXTEND DOSSIER
+        </div>
+        <p style={{ fontSize: 12.5, color: '#999', lineHeight: 1.55, margin: '0 0 22px 0' }}>
+          Add a section to reflect more of your career. Sections you don&apos;t add never appear in your View, share, or export.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {ADD_SECTION_LIBRARY.map((item) => (
+            <div
+              key={item.key}
+              aria-disabled="true"
+              style={{
+                background: 'rgba(255,255,255,0.015)',
+                border: '0.5px solid #2a2a2a',
+                color: '#ccc',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: 13,
+                padding: '14px 16px',
+                borderRadius: 8,
+                textAlign: 'left',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 12,
+                opacity: 0.4,
+                pointerEvents: 'none',
+                userSelect: 'none',
+              }}
+            >
+              <span>{item.label}</span>
+              <span style={{ color: '#777', fontSize: 16, fontWeight: 400 }}>+</span>
+            </div>
+          ))}
         </div>
       </Drawer>
       {TUNNEL_VISIBLE && (
