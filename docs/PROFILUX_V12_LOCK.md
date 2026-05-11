@@ -56,7 +56,7 @@ Any code that violates a structural lock is treated as a defect, regardless of h
 | 6 | Expertise (sectors + tags) | Expertise (View — unified) — Edit kept split temporarily | shipped b2a7824: View unified per V12 (one Expertise card, 6 sub-rows preserving luxury relevance order); Edit kept split pending taxonomy review |
 | 7 | Compensation (current + target) | Compensation | VIOLATION — see §5 |
 | 8 | Availability | Availability & Targets | aligned (label drift only) |
-| 9 | Maisons (brands_worked_with) | (absent) | decision locked: render as default View card at row 5 between Career History and Education; code commit pending; sourced from members.brands_worked_with; read-only in View this slice; no Edit drawer this slice; manual editing deferred pending maison taxonomy / normalization review |
+| 9 | Maisons (brands_worked_with) | Maisons (View row 5) — no Edit drawer | shipped e2f8053: View renders Maisons card at row 5 between Career History and Education; sourced from members.brands_worked_with; read-only in View this slice; no Edit drawer this slice; manual editing deferred pending maison taxonomy / normalization review |
 
 Live prod also renders **Clienteling** as a View card. V12 does not list Clienteling among the 9 defaults. **Status: divergent — needs reconciliation decision.**
 
@@ -218,21 +218,24 @@ These are NOT hard violations. They are evolutions that may or may not be intent
   unified row 3 (Expertise) composition.
 
 - 2026-05-11 — V12-divergence-3 (ledger 28303edd) — Maisons section:
-  RESOLVED — render as default View card. Maisons becomes row 5 in
-  MATRIX §22.1, sitting between Career History (row 4) and Education
-  (row 6). Sourced from members.brands_worked_with. Read-only in View
-  this slice; no Edit drawer this slice; manual editing deferred
-  pending maison taxonomy / normalization review. Empty behavior:
-  hide entirely, consistent with View doctrine on hide-when-empty for
-  collections. Future library coexistence remains allowed later under
-  V12-divergence-5 (ledger d243fc13). Doctrine clarification logged:
-  Career History = chronological role history; Maisons = condensed
-  luxury lineage signal; the two are not redundant. Card count
-  reconciliation: MATRIX §22.1 grows to 10 conceptual rows; visible
-  View cards = 9. Compensation stays Edit-only per V12-violation-1
-  fix 66f8cf3. Doctrine commit pending; code commit pending; ledger
-  28303edd flips to closed when code ships and prod QA passes via
-  Chrome MCP.
+  SHIPPED — default View card. Maisons is row 5 in MATRIX §22.1, sitting
+  between Career History (row 4) and Education (row 6). Sourced from
+  members.brands_worked_with. Read-only in View this slice; no Edit
+  drawer this slice; manual editing deferred pending maison taxonomy /
+  normalization review. Empty behavior: hide entirely, consistent with
+  View doctrine on hide-when-empty for collections. Future library
+  coexistence remains allowed later under V12-divergence-5 (ledger
+  d243fc13). Doctrine clarification locked: Career History =
+  chronological role history; Maisons = condensed luxury lineage signal;
+  the two are not redundant. Card count reconciliation: MATRIX §22.1
+  contains 10 conceptual rows; visible View cards = 9 with Maisons
+  filled, 8 with Maisons hidden. Compensation stays Edit-only per
+  V12-violation-1 fix 66f8cf3. Doctrine commit bc7e966; code commit
+  e2f8053; prod QA passed via Chrome MCP on joblux.com. QA fixture was
+  seeded on luxuryretailsale@gmail.com and reverted to original NULL.
+  Ledger 28303edd closed 2026-05-11 PM. Parked observation:
+  F-view-identity-mask-leak — candidate View identity strip shows last
+  name as initial; pre-existing, not caused by this slice, future scope.
 
 ### 6.2 — Missing structural features
 
