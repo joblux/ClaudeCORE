@@ -1972,28 +1972,6 @@ export default function ProfiluxPage() {
               )
             })()}
 
-            {/* §22.1 row 7 — Clienteling */}
-            {(() => {
-              const filled =
-                e.clienteling_experience === true ||
-                e.clienteling_experience === false ||
-                (typeof e.clienteling_description === 'string' && e.clienteling_description.trim().length > 0)
-              return (
-            <CollapsibleSectionCard
-              eyebrow="Clienteling"
-              collapsed={isCardCollapsed('clienteling', filled)}
-              onToggle={() => toggleViewCollapse('clienteling', filled)}
-            >
-              <div style={grid}>
-                <div style={label}>Clienteling experience</div>
-                <div>{e.clienteling_experience === true ? 'Yes' : e.clienteling_experience === false ? 'No' : <Marker kind="missing" />}</div>
-                <div style={label}>Background description</div>
-                <div>{e.clienteling_experience === true && typeof e.clienteling_description === 'string' && e.clienteling_description.length > 0 ? e.clienteling_description : <Marker kind="missing" />}</div>
-              </div>
-            </CollapsibleSectionCard>
-              )
-            })()}
-
             {/* §22.1 row 8 — Availability & Targets */}
             {(() => {
               const filled =
