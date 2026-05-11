@@ -488,6 +488,7 @@ export default function ProfiluxPage() {
     | 'current_position'
     | 'expertise'
     | 'career_history'
+    | 'maisons'
     | 'education'
     | 'languages'
     | 'clienteling'
@@ -1892,7 +1893,29 @@ export default function ProfiluxPage() {
               )
             })()}
 
-            {/* §22.1 row 5 — Education */}
+            {/* §22.1 row 5 — Maisons (V12-divergence-3 ledger 28303edd) */}
+            {(() => {
+              const brands = Array.isArray(e.brands_worked_with) ? e.brands_worked_with : []
+              if (brands.length === 0) return null
+              const filled = true
+              return (
+            <CollapsibleSectionCard
+              eyebrow="Maisons"
+              collapsed={isCardCollapsed('maisons', filled)}
+              onToggle={() => toggleViewCollapse('maisons', filled)}
+            >
+              <div style={{ ...chipRow, marginTop: 8 }}>
+                {brands.map((v, i) => (
+                  <span key={`ma-${i}-${v}`} style={viewChipStyle}>
+                    {v}
+                  </span>
+                ))}
+              </div>
+            </CollapsibleSectionCard>
+              )
+            })()}
+
+            {/* §22.1 row 6 — Education */}
             {(() => {
               const filled =
                 (typeof e.university === 'string' && e.university.trim().length > 0) ||
