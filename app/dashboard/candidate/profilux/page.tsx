@@ -489,6 +489,15 @@ function mapParseError(code: string | null): string {
 
 export default function ProfiluxPage() {
   const [tab, setTab] = useState<ProfiluxTab>('edit')
+  const [isMobile, setIsMobile] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  )
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const onResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
   // A2.8 — View tab per-card collapse state. Keys mirror the 9 §22.1
   // sections. undefined = "use doctrine default for this card";
   // true/false = "user choice". No persistence: refresh resets (Mo lock).
@@ -1593,130 +1602,77 @@ export default function ProfiluxPage() {
 
         return (
           <>
-            {/* Identity strip — §24.6 (unchanged) */}
-            <SectionCard layout="flex">
-              <div style={{ flex: '0 0 auto' }}>
-                {hasAvatar ? (
-                  <img src={e.avatar_url as string} alt="" style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
-                ) : (
-                  <div style={{
-                    background: '#333',
-                    color: '#fff',
-                    fontFamily: 'Inter, sans-serif',
-                    fontSize: 18,
-                    fontWeight: 500,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '50%',
-                    width: 56,
-                    height: 56,
-                  }}>
-                    {initials.length > 0 ? initials : '—'}
-                  </div>
-                )}
-              </div>
-              <div style={{ flex: '1 1 auto', minWidth: 0 }}>
-                <div style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: 22, color: '#fff', lineHeight: 1.2, marginBottom: 4 }}>
+            {/* V12 convergence — two-column View layout (left spine + right field) */}
+            <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 32, alignItems: 'flex-start' }}>
+              {/* LEFT SPINE */}
+              <aside style={{ width: isMobile ? '100%' : 300, flexShrink: 0 }}>
+                <div style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: 26, color: '#fff', lineHeight: 1.2, marginBottom: 6 }}>
                   {maskedName.length > 0
                     ? maskedName
                     : <em style={{ color: '#666', fontStyle: 'italic', fontFamily: 'Inter, sans-serif', fontSize: 14 }}>Not specified</em>}
                 </div>
-                {hasHeadline && (
-                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.4, marginBottom: 4 }}>
-                    {e.headline}
-                  </div>
-                )}
-                {hasJob && (
-                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999', lineHeight: 1.4, marginBottom: 2 }}>
-                    {e.job_title}
-                  </div>
-                )}
+                {(() => {
+                  const hasEmp = typeof e.current_employer === 'string' && e.current_employer.trim().length > 0
+                  const subRole = hasJob && hasEmp
+                    ? `${e.job_title} · ${e.current_employer}`
+                    : hasJob ? e.job_title
+                    : null
+                  return subRole ? (
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.4, marginBottom: 4 }}>
+                      {subRole}
+                    </div>
+                  ) : null
+                })()}
                 {locationLine && (
-                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.4 }}>
+                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.4, marginBottom: 16 }}>
                     {locationLine}
                   </div>
                 )}
-                {tagLine && (
-                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#888', lineHeight: 1.4, marginTop: 4 }}>
-                    {tagLine}
-                  </div>
-                )}
-              </div>
-            </SectionCard>
+                <div style={{ borderTop: '1px solid #2a2a2a', marginBottom: 16 }} />
+                {(() => {
+                  const label = availabilityLabel(e.availability)
+                  if (label === null) return null
+                  return (
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                        <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: '50%', background: '#1D9E75', display: 'inline-block', flex: '0 0 auto' }} />
+                        <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc' }}>{label}</span>
+                      </div>
+                      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', lineHeight: 1.4 }}>
+                        Visible to JOBLUX matching only
+                      </div>
+                    </div>
+                  )
+                })()}
+                <div style={{ borderTop: '1px solid #2a2a2a', marginBottom: 12 }} />
+                <button
+                  type="button"
+                  onClick={() => setTab('edit')}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: 'transparent', border: 'none', padding: '10px 0', color: '#ccc', fontFamily: 'Inter, sans-serif', fontSize: 13, cursor: 'pointer', textAlign: 'left' }}
+                >
+                  <span>Edit ProfiLux</span>
+                  <span aria-hidden="true" style={{ color: '#777' }}>→</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTab('manage')}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: 'transparent', border: 'none', padding: '10px 0', color: '#ccc', fontFamily: 'Inter, sans-serif', fontSize: 13, cursor: 'pointer', textAlign: 'left' }}
+                >
+                  <span>Manage &amp; share</span>
+                  <span aria-hidden="true" style={{ color: '#777' }}>→</span>
+                </button>
+                <div
+                  role="link"
+                  aria-disabled="true"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 0', color: '#ccc', fontFamily: 'Inter, sans-serif', fontSize: 13, opacity: 0.4, cursor: 'default', userSelect: 'none' }}
+                >
+                  <span>Download PDF</span>
+                  <span aria-hidden="true" style={{ color: '#777' }}>→</span>
+                </div>
+              </aside>
 
-            {/* A2.7-A — Profile completeness bar.
-                Doctrine: profile_completeness semantic fork parked (f6508e54).
-                Copy: "Profile completeness X%" — neutral, does not commit to
-                matching-readiness vs holistic-richness fork.
-                Fill: neutral (#ccc), not gold — preserves §15 gold budget cap. */}
-            <SectionCard eyebrow="Profile completeness">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc' }}>
-                  Profile completeness
-                </span>
-                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#fff', fontVariantNumeric: 'tabular-nums' }}>
-                  {e.profile_completeness ?? 0}%
-                </span>
-              </div>
-              <div style={{ height: 6, background: '#2a2a2a', borderRadius: 999, overflow: 'hidden' }}>
-                <div style={{
-                  height: '100%',
-                  width: `${Math.max(0, Math.min(100, e.profile_completeness ?? 0))}%`,
-                  background: '#ccc',
-                  borderRadius: 999,
-                  transition: 'width 240ms ease-out',
-                }} />
-              </div>
-            </SectionCard>
-
-            {/* A2.7-B — Readiness card.
-                Surfaces M6 group truth from server (e.m6_groups). 6 rows, no
-                mismatch disclaimer per Mo (silent on 6-vs-9 cards). Stacked
-                placement only — no sidebar / two-column layout in this slice. */}
-            <SectionCard eyebrow="Readiness">
-              {(() => {
-                const g = e.m6_groups
-                const rows: Array<{ key: keyof typeof g; label: string }> = [
-                  { key: 'G1', label: 'Identity' },
-                  { key: 'G2', label: 'Position' },
-                  { key: 'G3', label: 'Luxury relevance' },
-                  { key: 'G4', label: 'Experience' },
-                  { key: 'G5', label: 'Availability' },
-                  { key: 'G6', label: 'CV' },
-                ]
-                return (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {rows.map((r) => {
-                      const on = g[r.key] === true
-                      return (
-                        <div key={r.key} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                          <span
-                            aria-hidden="true"
-                            style={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: '50%',
-                              background: on ? '#1D9E75' : '#555',
-                              display: 'inline-block',
-                              flex: '0 0 auto',
-                            }}
-                          />
-                          <span style={{
-                            fontFamily: 'Inter, sans-serif',
-                            fontSize: 13,
-                            color: on ? '#ccc' : '#777',
-                          }}>
-                            {r.label}
-                          </span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )
-              })()}
-            </SectionCard>
-
+              {/* RIGHT FIELD — 8 section cards (verbatim) */}
+              <div style={{ flex: 1, minWidth: 0, width: isMobile ? '100%' : 'auto' }}>
             {/* §22.1 row 1 — Identity */}
             {(() => {
               const filled =
@@ -2031,6 +1987,8 @@ export default function ProfiluxPage() {
             </CollapsibleSectionCard>
               )
             })()}
+              </div>
+            </div>
 
           </>
         )
