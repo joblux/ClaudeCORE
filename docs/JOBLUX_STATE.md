@@ -54,6 +54,12 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **b2a7824 + b975cb6 + e690ce2** `feat(profilux): V12-divergence-2 — merge Luxury Fit + Skills & Markets into Expertise View card (C.2)` — May 11 2026 (AM). SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. V12-divergence-2 (ledger 99b61c19) resolution C.2: View tab renders one unified Expertise SectionCard merging the two prior cards per V12 baseline (V12 prototype state engine line 5194). Sub-row order preserves JOBLUX luxury relevance: Years in luxury → Sectors → Product categories → Areas of expertise → Skills → Markets. Doctrine commit `e690ce2` updated V12_LOCK §2.3 row 6, MATRIX §22.1 (row 3 Luxury Fit + row 7 Skills & Markets merged into new row 3 Expertise; rows 8-10 renumbered to 7-9), and consolidated Edit drawer note covering both divergence-1 and divergence-2. Code commit `b2a7824` (single file): ViewCollapseKey rename `'luxury_fit'`→`'expertise'`, remove `'skills_markets'`; View row 3 + row 6 IIFEs merged into single Expertise IIFE; filled detection ORs across all 6 buckets. Closure commit `b975cb6` flipped V12_LOCK §2.3 row 6 from "pending" to "shipped b2a7824". Edit tab UNTOUCHED — both `Luxury Fit` and `Skills & Markets` SectionCards + drawers retained; Edit split kept intentional pending taxonomy review (NOT substrate-blocked; distinct from divergence-1's L2 migration gate). Prod QA via Chrome MCP: View 8 cards in V12 order with Expertise as the third card; standalone Luxury Fit + Skills & Markets cards absent from View; Compensation absent from View (V12-violation-1 fix holds); Expertise card expands to show all 6 sub-rows in locked order. Ledger row `99b61c19` closed.
+
+- **1ac1f80 + b2fc4ff + 5ae3bc2** `feat(profilux): V12-divergence-1 — split Education + Languages into separate View cards (A-lite)` — May 11 2026 (AM). SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. V12-divergence-1 (ledger 034bf165) resolution A-lite: View splits into 2 cards per V12 baseline; Edit drawer remains combined temporarily pending L2 languages substrate migration (ledger 1609e494). Doctrine commit `5ae3bc2` updated V12_LOCK §2.3 rows 4+5 + §6.1 resolution log, and MATRIX §22.1 (row 5 split into row 5 Education + row 6 Languages; rows 6-9 renumbered to 7-10; new Edit drawer note added). Code commit `1ac1f80` (single file): ViewCollapseKey rename `'education_languages'`→`'education'` and add `'languages'`; View row 5 IIFE split into two IIFEs (Education shows university/field_of_study/graduation_year + L1 `education[]` history; Languages shows L1 `languages[]` as chips or Missing). Closure commit `b2fc4ff` flipped V12_LOCK §2.3 rows 4+5 wording from "pending" to "shipped 1ac1f80". Edit tab UNTOUCHED — combined `Education & Languages` SectionCard + drawer retained. Prod QA via Chrome MCP: View 9 cards in V12 order with Education and Languages as separate cards; combined card absent; Compensation absent. Ledger row `034bf165` closed.
+
+- **66f8cf3** `fix(profilux-view): remove Compensation from View per V12 lock` — May 10 2026 (PM, 23:33 UTC). SHIPPED + COOLIFY-GREEN. V12-violation-1 (ledger 99d30880) closed: removed Compensation SectionCard from the View IIFE in `app/dashboard/candidate/profilux/page.tsx`. Direct contradiction of V12 §2.5 hardest lock ("Compensation NEVER in View mode") resolved at implementation level. Edit tab Compensation drawer retained. Ledger row `99d30880` closed (pre-session).
+
 - **b9a91ca** `feat(profilux-view): A2.5 rewrite View tab as 9-card passport per MATRIX §22.1` — May 10 2026 (PM). SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. Building Mode step 4 — Reload View tab cutover from the 4-thematic-card legacy structure (Identity strip + About + Experience + Skills & expertise) to the locked §22.1 9-section catalog. Single file, +195/-127 net, additive only inside the View IIFE — Edit tab, Manage tab, backend, schema, resolver all UNCHANGED. Identity strip (§24.6) preserved exactly. Cards rendered in fixed §22.1 order: Identity, Current Position, Luxury Fit, Career History, Education & Languages, Skills & Markets, Clienteling, Availability & Targets, Compensation. All cards read-only, reuse existing `SectionCard`/`NotSet`/`NoneSel`/`viewChipStyle`/`grid`/`label`/`sectionLabel`/`card` primitives, vocabulary lookups via existing `seniorityLabel`/`availabilityLabel`/`departmentLabel`/`contractTypeLabel`/`sectorLabel`/`productCategoryLabel`/`expertiseTagLabel`/`skillLabel` helpers. No new visual language invented. **Prod QA via Chrome MCP**: 9 eyebrows enumerated in correct order (Identity → Compensation), Identity strip rendered above cards, NotSet helper active on empty Seniority field. **Closes gaps G1–G8** from A2.5 scoping (Current Position, Luxury Fit, Education, Clienteling, Availability, Compensation now standalone cards; Skills/Markets split from Sectors/Luxury Fit). **Deferred to follow-ups**: A2.6 state markers (G9 — §24.3), A2.7 completeness signal + sidebar readiness (G10/G11), A2.8 collapse/expand density (G12 — §23.6). Ledger row `bbff688e`. STATE Reload doctrine §22 now matches live View tab implementation 1:1.
 
 - **565be03** `feat(profilux-edit): A2.4 hide 11-screen tunnel + add L1 edu/lang to drawer` — May 10 2026 (PM). SHIPPED + COOLIFY-GREEN + DOM-DUMP-VALIDATED. Building Mode step 3 — tunnel retirement. **Closes G-15**. Tunnel render gated behind `const TUNNEL_VISIBLE = false` near `TOTAL` constant; `renderStep` function, `step` state, draft hooks, `SCREEN_TITLES`, `TOTAL`, navWrap, eyebrow line — all preserved in code for revival (flip flag to true). Pre-gate, added L1 read-only `education[]` + `languages[]` display inside Education & Languages drawer body so parsed CV records remain visible in Edit even after tunnel hide. Both render with italic note: "Parsed from your CV. Editing CV-parsed records is not yet supported." 4 patches: (1) `TUNNEL_VISIBLE` const near `TOTAL`, (2) L1 edu+lang blocks inside E&L drawer after Save block before `</Drawer>`, (3) eyebrow line gated, (4) tunnel render block + navWrap gated. **Doctrine (UX MAP §10.1, §10.4)**: tunnel doctrinally retired but code preserved; L1 sectors[] still surfaces only on tunnel screen 4 (not affected — Luxury Fit drawer covers L2 product_categories + expertise_tags; sectors[] stays L1 passthrough on View tab); screen 11 "Confirm" admission UX retired per §10.4 (matching entry replaces M6). View tab + Manage tab UNCHANGED. Backend, schema UNCHANGED. 1 file, +47/-7. Ledger row `23812c4a`.
@@ -81,29 +87,48 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-**V12 reconciliation execution — start with V12-violation-1 fix.**
+**V12 reconciliation execution — continue with V12-divergence-3 (Maisons).**
 
-Last session (2026-05-10/11 PM) shipped 5 ProfiLux Building Mode commits (A2.6 → A2.8) then pivoted to V12 freeze protocol after drift detection. V12 is now anchored as first-class doctrine: `docs/PROFILUX_V12_LOCK.md` + `docs/prototypes/profilux_journey_v12.html` + STATE §25 + MATRIX §22.1 pointer.
+Session 2026-05-11 AM shipped 7 commits closing V12-violation-1 (`66f8cf3`,
+from prior session evening), V12-divergence-1 (`5ae3bc2` + `1ac1f80` + `b2fc4ff`),
+and V12-divergence-2 (`e690ce2` + `b2a7824` + `b975cb6`). All three closed
+with prod QA via Chrome MCP. Compensation is out of View. Education and
+Languages are two distinct View cards. Luxury Fit and Skills & Markets are
+merged into a single Expertise View card. Edit tab UNTOUCHED across all
+slices — combined Education & Languages drawer remains pending ledger
+`1609e494`; Expertise Edit kept split pending taxonomy review.
 
 **Hard entry instruction for next session:**
 
-> Read `docs/JOBLUX_STATE.md` §25 and `docs/PROFILUX_V12_LOCK.md` before any ProfiLux work. Start with V12-violation-1: remove Compensation from View only.
+> Read `docs/JOBLUX_STATE.md` §25 and `docs/PROFILUX_V12_LOCK.md` before any
+> ProfiLux work. Start with V12-divergence-3 (Maisons section) — decision-only
+> artifact first (same pattern as divergence-1/2).
 
 **Sequencing locked:**
 
-1. **V12-violation-1** (ledger `99d30880`, high, parked) — remove Compensation SectionCard from View IIFE in `app/dashboard/candidate/profilux/page.tsx`. Single-file change. Schema unaffected. Edit tab Compensation drawer stays. ~5 min execution.
+1. **V12-divergence-3** (ledger `28303edd`, normal, parked) — Maisons section.
+   V12 prototype line 5215 has `id: 'maisons', type: 'maisons', title: 'Maisons',
+   data: { houses: [...] }`. Prod has no Maisons View card; data lives at
+   `members.brands_worked_with` (text[]). Decision needed: render in View,
+   keep absent, or move to library section. No code without decision.
 
-2. **V12-divergence-1..4 decisions** (ledger `034bf165`, `99b61c19`, `28303edd`, `3e8d6de2`, all normal, parked) — Mo + GPT decisions on section composition: Education/Languages split, Expertise unified vs split, Maisons section, Clienteling position. No code without decision first.
+2. **V12-divergence-4** (ledger `3e8d6de2`, normal, parked) — Clienteling
+   position. V12 has no Clienteling among the 9 defaults. Prod renders
+   Clienteling as View row 7. Decision needed: keep as default, move to
+   library opt-in, or drop from View. No code without decision.
 
-3. **V12-divergence-5..7 sequencing** (ledger `d243fc13`, `720da3aa`, `eb186be2`, all normal, parked) — roadmap sequencing for Add Section library, Manage maskable controls, CV merge modal. Schema dependencies acknowledged.
+3. **V12-divergence-5..7 sequencing** (ledgers `d243fc13`, `720da3aa`,
+   `eb186be2`) — Add Section library trigger, Manage tab maskable controls,
+   CV merge re-upload modal. Sequencing decision only.
 
 **Out of scope until V12 reconciliation complete:**
 
 - Any other ProfiLux surface evolution
 - Any new slice that doesn't address a V12 row
 - Backlog items unrelated to V12 reconciliation
+- ViewCollapseKey `'compensation'` member cleanup (deferred — separate slice)
 
-**Handoff doc:** `docs/HANDOFF_2026-05-10b.md` (committed in this session close).
+**Handoff doc:** `docs/HANDOFF_2026-05-11.md`
 
 ### DO NOT
 
@@ -181,7 +206,7 @@ Last session (2026-05-10/11 PM) shipped 5 ProfiLux Building Mode commits (A2.6 �
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 10, 2026 (PM close) — ProfiLux Reload Building Mode steps 1–4 SHIPPED end-to-end across 11 commits (`17bf47a` → `b9a91ca`). Manage tab full sharing UX (A2.1 + A2.2 α/β/β.1/β.2). Edit tab: Education & Languages drawer (A2.3-α), Career History editable relational drawer (A2.3-β + β.1 + β.2), tunnel hidden (A2.4). View tab: 9-card §22.1 passport, Chrome MCP prod-validated (A2.5). HEAD `b9a91ca`. Next session opens with A2.6 state markers OR A2.7 completeness/sidebar — Mo picks; not bug cleanup unless explicitly chosen.
+**Last updated:** May 11, 2026 (AM close) — V12 reconciliation phase 1 SHIPPED end-to-end across 7 commits (`66f8cf3` → `b975cb6`). V12-violation-1 closed: Compensation removed from View. V12-divergence-1 closed (A-lite): View split into Education + Languages cards; Edit drawer remains combined pending L2 languages migration. V12-divergence-2 closed (C.2): Luxury Fit + Skills & Markets merged into unified Expertise View card; Edit kept split pending taxonomy review. All three Chrome MCP prod-validated. Work HEAD before close `b975cb6`; close commit follows. Next session opens with V12-divergence-3 (Maisons) — decision-only first.
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
@@ -681,10 +706,6 @@ V12 is the strategic working-loop baseline for the entire ProfiLux candidate sur
 - **DO NOT** treat V12 as stale tunnel doctrine — that interpretation was **invalidated 2026-05-10 PM**. V12 is the locked baseline. The April-locked `profilux-journey.html` 11-screen tunnel is what is doctrinally retired (per `PROFILUX_MATRIX_V1.md` §7.6.2), not V12.
 - **DO NOT** free-evolve passport surface composition without reconciliation per `PROFILUX_V12_LOCK.md` §6.1. The 4 currently-flagged section divergences (Education/Languages split, Expertise unification, Maisons section, Clienteling position) require Mo + GPT decisions before further surface work.
 - **DO NOT** ship structural drift from V12 §2 hard locks without an explicit Mo + GPT reconciliation decision recorded in `PROFILUX_V12_LOCK.md`.
-
-### Pending fix (deferred per Mo freeze 2026-05-10 PM)
-
-- **V12-violation-1:** Compensation card rendered in View tab (`app/dashboard/candidate/profilux/page.tsx` §22.1 row 9). Direct contradiction of V12 §2.5 hardest lock ("Compensation NEVER in View mode"). Fix scope: remove Compensation SectionCard from View IIFE only. Schema unaffected. Edit tab Compensation drawer stays. Deferred to a future session per Mo's 2026-05-10 PM freeze decision; tracked in ledger as `V12-violation-1`.
 
 ---
 
