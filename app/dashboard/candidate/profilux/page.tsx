@@ -1743,6 +1743,96 @@ export default function ProfiluxPage() {
               )
             })()}
 
+            {/* §22.1 row 4 — Career History */}
+            {(() => {
+              const filled = expRows.length > 0
+              if (!filled) return null
+              return (
+            <ViewZone title="Career History">
+              {expRows.map((r, i) => {
+                const isLast = i === expRows.length - 1
+                const rowStyle: React.CSSProperties = isLast
+                  ? { display: 'grid', gridTemplateColumns: '108px 1fr', gap: 16, marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }
+                  : { display: 'grid', gridTemplateColumns: '108px 1fr', gap: 16, marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #2a2a2a' }
+                return (
+                  <div key={i} style={rowStyle}>
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#8e8e8e', letterSpacing: 0.3, fontVariantNumeric: 'tabular-nums', lineHeight: 1.4 }}>
+                      {r.period ?? ''}
+                    </div>
+                    <div>
+                      {r.role && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#fff', fontWeight: 500, lineHeight: 1.4, marginBottom: 2 }}>{r.role}</div>
+                      )}
+                      {(r.company || r.location) && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.4, marginBottom: 6 }}>
+                          {r.company && r.location ? `${r.company} · ${r.location}` : (r.company ?? r.location)}
+                        </div>
+                      )}
+                      {r.description && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#8e8e8e', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{r.description}</div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </ViewZone>
+              )
+            })()}
+
+            {/* §22.1 row 6 — Education */}
+            {(() => {
+              const filled = Array.isArray(e.education) && e.education.length > 0
+              if (!filled) return null
+              return (
+            <ViewZone title="Education">
+              {e.education.map((ed, i) => {
+                const isLast = i === e.education.length - 1
+                const rowStyle: React.CSSProperties = isLast
+                  ? { display: 'grid', gridTemplateColumns: '108px 1fr', gap: 16, marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }
+                  : { display: 'grid', gridTemplateColumns: '108px 1fr', gap: 16, marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #2a2a2a' }
+                const primary = (typeof ed.degree === 'string' && ed.degree.trim().length > 0)
+                  ? ed.degree
+                  : (typeof ed.field_of_study === 'string' && ed.field_of_study.trim().length > 0)
+                    ? ed.field_of_study
+                    : null
+                return (
+                  <div key={i} style={rowStyle}>
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#8e8e8e', letterSpacing: 0.3, fontVariantNumeric: 'tabular-nums', lineHeight: 1.4 }}>
+                      {ed.graduation_year ?? ''}
+                    </div>
+                    <div>
+                      {primary && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#fff', fontWeight: 500, lineHeight: 1.4, marginBottom: 2 }}>{primary}</div>
+                      )}
+                      {ed.institution && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.4 }}>{ed.institution}</div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </ViewZone>
+              )
+            })()}
+
+            {/* §22.1 row 6 — Languages */}
+            {(() => {
+              const filled = Array.isArray(e.languages) && e.languages.length > 0
+              if (!filled) return null
+              return (
+            <ViewZone title="Languages">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {e.languages.map((l, i) => (
+                  <div key={`lg-${i}-${l.language}`} style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.4 }}>
+                    <span>{l.language}</span>
+                    {l.proficiency && <span style={{ color: '#999', marginLeft: 8 }}>{l.proficiency}</span>}
+                  </div>
+                ))}
+              </div>
+            </ViewZone>
+              )
+            })()}
+
             {/* §22.1 row 3 — Expertise (merged: Luxury Fit + Skills & Markets per V12-divergence-2) */}
             {(() => {
               const filled =
@@ -1808,110 +1898,6 @@ export default function ProfiluxPage() {
               )
             })()}
 
-            {/* §22.1 row 4 — Career History */}
-            {(() => {
-              const filled = expRows.length > 0
-              if (!filled) return null
-              return (
-            <ViewZone title="Career History">
-              {expRows.map((r, i) => {
-                const isLast = i === expRows.length - 1
-                const rowStyle: React.CSSProperties = isLast
-                  ? { display: 'grid', gridTemplateColumns: '108px 1fr', gap: 16, marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }
-                  : { display: 'grid', gridTemplateColumns: '108px 1fr', gap: 16, marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #2a2a2a' }
-                return (
-                  <div key={i} style={rowStyle}>
-                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#8e8e8e', letterSpacing: 0.3, fontVariantNumeric: 'tabular-nums', lineHeight: 1.4 }}>
-                      {r.period ?? ''}
-                    </div>
-                    <div>
-                      {r.role && (
-                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#fff', fontWeight: 500, lineHeight: 1.4, marginBottom: 2 }}>{r.role}</div>
-                      )}
-                      {(r.company || r.location) && (
-                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.4, marginBottom: 6 }}>
-                          {r.company && r.location ? `${r.company} · ${r.location}` : (r.company ?? r.location)}
-                        </div>
-                      )}
-                      {r.description && (
-                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#8e8e8e', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{r.description}</div>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </ViewZone>
-              )
-            })()}
-
-            {/* §22.1 row 5 — Maisons (V12-divergence-3 ledger 28303edd) */}
-            {(() => {
-              const brands = Array.isArray(e.brands_worked_with) ? e.brands_worked_with : []
-              if (brands.length === 0) return null
-              const filled = true
-              return (
-            <ViewZone title="Maisons">
-              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.5 }}>
-                {brands.join(' · ')}
-              </div>
-            </ViewZone>
-              )
-            })()}
-
-            {/* §22.1 row 6 — Education */}
-            {(() => {
-              const filled = Array.isArray(e.education) && e.education.length > 0
-              if (!filled) return null
-              return (
-            <ViewZone title="Education">
-              {e.education.map((ed, i) => {
-                const isLast = i === e.education.length - 1
-                const rowStyle: React.CSSProperties = isLast
-                  ? { display: 'grid', gridTemplateColumns: '108px 1fr', gap: 16, marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }
-                  : { display: 'grid', gridTemplateColumns: '108px 1fr', gap: 16, marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #2a2a2a' }
-                const primary = (typeof ed.degree === 'string' && ed.degree.trim().length > 0)
-                  ? ed.degree
-                  : (typeof ed.field_of_study === 'string' && ed.field_of_study.trim().length > 0)
-                    ? ed.field_of_study
-                    : null
-                return (
-                  <div key={i} style={rowStyle}>
-                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#8e8e8e', letterSpacing: 0.3, fontVariantNumeric: 'tabular-nums', lineHeight: 1.4 }}>
-                      {ed.graduation_year ?? ''}
-                    </div>
-                    <div>
-                      {primary && (
-                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#fff', fontWeight: 500, lineHeight: 1.4, marginBottom: 2 }}>{primary}</div>
-                      )}
-                      {ed.institution && (
-                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.4 }}>{ed.institution}</div>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </ViewZone>
-              )
-            })()}
-
-            {/* §22.1 row 6 — Languages */}
-            {(() => {
-              const filled = Array.isArray(e.languages) && e.languages.length > 0
-              if (!filled) return null
-              return (
-            <ViewZone title="Languages">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {e.languages.map((l, i) => (
-                  <div key={`lg-${i}-${l.language}`} style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.4 }}>
-                    <span>{l.language}</span>
-                    {l.proficiency && <span style={{ color: '#999', marginLeft: 8 }}>{l.proficiency}</span>}
-                  </div>
-                ))}
-              </div>
-            </ViewZone>
-              )
-            })()}
-
             {/* §22.1 row 8 — Availability & Targets */}
             {(() => {
               const filled =
@@ -1958,6 +1944,20 @@ export default function ProfiluxPage() {
                 <div>{e.open_to_relocation === true ? 'Yes' : e.open_to_relocation === false ? 'No' : <Marker kind="missing" />}</div>
                 <div style={label}>Relocation preferences</div>
                 <div>{e.open_to_relocation === true && typeof e.relocation_preferences === 'string' && e.relocation_preferences.length > 0 ? e.relocation_preferences : <Marker kind="missing" />}</div>
+              </div>
+            </ViewZone>
+              )
+            })()}
+
+            {/* §22.1 row 5 — Maisons (V12-divergence-3 ledger 28303edd) */}
+            {(() => {
+              const brands = Array.isArray(e.brands_worked_with) ? e.brands_worked_with : []
+              if (brands.length === 0) return null
+              const filled = true
+              return (
+            <ViewZone title="Maisons">
+              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.5 }}>
+                {brands.join(' · ')}
               </div>
             </ViewZone>
               )
