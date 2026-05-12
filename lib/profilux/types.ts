@@ -40,7 +40,19 @@ export type CvParsedExperience = {
 
 export type CvParsedEducation = {
   institution: string | null
+  /**
+   * Legacy field kept for backward compatibility with consumers that
+   * predate degree_level reconciliation (S-B.1A). Live cv-parse zod and
+   * SYSTEM_PROMPT write `degree_level` only — `degree` is always undefined
+   * in production payloads. Do not remove without a separate cleanup slice.
+   */
   degree: string | null
+  /**
+   * Live field written by /api/members/cv-parse zod schema (since launch).
+   * Reconciled into this duplicated type in S-B.1A to align lib/profilux
+   * with the actual production payload shape.
+   */
+  degree_level: string | null
   field_of_study: string | null
   start_year: number | null
   graduation_year: number | null
@@ -270,8 +282,25 @@ export type ResolvedExperience = {
 }
 
 export type ResolvedEducation = {
+  /**
+   * Present on L2 rows (education_records.id), absent on L1 passthrough
+   * rows (cv_parsed_data.education entries). Mirrors ResolvedExperience.id
+   * semantics. UI uses presence/absence to gate edit/delete affordances.
+   */
+  id?: string
   institution: string | null
+  /**
+   * Legacy field kept for backward compatibility (admin route reads it).
+   * Always null in production today — live CV parser writes degree_level,
+   * not degree. Slated for removal in a future type-drift cleanup slice.
+   */
   degree: string | null
+  /**
+   * Real degree string from L2 (education_records.degree_level) when
+   * present, or from L1 (cv_parsed_data.education[].degree_level) on
+   * passthrough rows. Added in S-B.1A.
+   */
+  degree_level: string | null
   field_of_study: string | null
   start_year: number | null
   graduation_year: number | null

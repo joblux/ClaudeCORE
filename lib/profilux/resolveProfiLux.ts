@@ -114,7 +114,10 @@ function mapEducation(
 ): ResolvedEducation[] {
   return arr(l1).map((e) => ({
     institution: e.institution ?? null,
+    // Legacy field — always null from live L1 payloads (parser writes degree_level).
     degree: e.degree ?? null,
+    // S-B.1A — real value, sourced from live L1 degree_level.
+    degree_level: e.degree_level ?? null,
     field_of_study: e.field_of_study ?? null,
     start_year: e.start_year ?? null,
     graduation_year: e.graduation_year ?? null,
@@ -168,6 +171,33 @@ export async function resolveProfiLux(
           end_date: r.end_date ?? null,
           is_current: r.is_current === true,
           description: r.description ?? null,
+        }))
+      : null
+
+  // S-B.1A: relational L2 for education. If rows exist, they appear FIRST
+  // in view.education; L1 cv_parsed_data.education rows follow (no dedup,
+  // no replace — mirrors experiences pattern from 351421f).
+  // Sort: sort_order ASC (user-controlled), then graduation_year DESC NULLS LAST.
+  const { data: erRows } = await supabase
+    .from('education_records')
+    .select('id, institution, degree_level, field_of_study, city, country, start_year, graduation_year, sort_order')
+    .eq('member_id', memberId)
+    .order('sort_order', { ascending: true })
+    .order('graduation_year', { ascending: false, nullsFirst: false })
+
+  const relationalEducation: ResolvedEducation[] | null =
+    Array.isArray(erRows) && erRows.length > 0
+      ? erRows.map((r) => ({
+          id: r.id,
+          institution: r.institution ?? null,
+          // L2 has no `degree` column — null by contract.
+          degree: null,
+          degree_level: r.degree_level ?? null,
+          field_of_study: r.field_of_study ?? null,
+          start_year: r.start_year ?? null,
+          graduation_year: r.graduation_year ?? null,
+          city: r.city ?? null,
+          country: r.country ?? null,
         }))
       : null
 
@@ -275,7 +305,8 @@ export async function resolveProfiLux(
     languages: mapLanguages(cv?.languages),
     // A2.3-β.2: L2 + L1 (no replace, no dedup)
     experiences: [...(relationalExperiences ?? []), ...mapExperiences(cv?.experiences)],
-    education: mapEducation(cv?.education),
+    // S-B.1A: L2 first + L1 second (no replace, no dedup).
+    education: [...(relationalEducation ?? []), ...mapEducation(cv?.education)],
     // System
     role: row.role,
     status: row.status,
