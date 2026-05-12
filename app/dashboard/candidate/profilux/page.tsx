@@ -748,7 +748,7 @@ export default function ProfiluxPage() {
   const availabilityLabel = (value: Screen9Draft['availability']) => {
     switch (value) {
       case 'active': return 'Actively looking'
-      case 'open': return 'Open to opportunities'
+      case 'open': return 'Quietly considering'
       case 'passive': return 'Passively exploring'
       case 'unavailable': return 'Not available'
       default: return null
@@ -1398,7 +1398,7 @@ export default function ProfiluxPage() {
               <select style={select} value={draft9.availability ?? ''} onChange={(ev) => setDraft9({ ...draft9, availability: ev.target.value === '' ? null : ev.target.value as Screen9Draft['availability'] })}>
                 <option value="">— Not specified —</option>
                 <option value="active">Actively looking</option>
-                <option value="open">Open to opportunities</option>
+                <option value="open">Quietly considering</option>
                 <option value="passive">Passively exploring</option>
                 <option value="unavailable">Not available</option>
               </select>
@@ -1694,7 +1694,7 @@ export default function ProfiluxPage() {
                 typeof e.total_years_experience === 'number'
               if (!filled) return null
               return (
-            <ViewZone title="Current Position">
+            <ViewZone title="Current Role">
               {(() => {
                 const emp = typeof e.current_employer === 'string' && e.current_employer.trim().length > 0 ? e.current_employer : null
                 const empInitial = emp ? emp[0].toUpperCase() : ''
@@ -1748,7 +1748,7 @@ export default function ProfiluxPage() {
               const filled = expRows.length > 0
               if (!filled) return null
               return (
-            <ViewZone title="Career History">
+            <ViewZone title="Career Path">
               {expRows.map((r, i) => {
                 const isLast = i === expRows.length - 1
                 const rowStyle: React.CSSProperties = isLast
@@ -1910,7 +1910,7 @@ export default function ProfiluxPage() {
                 (typeof e.relocation_preferences === 'string' && e.relocation_preferences.trim().length > 0)
               if (!filled) return null
               return (
-            <ViewZone title="Availability & Targets">
+            <ViewZone title="Availability">
               <div style={grid}>
                 <div style={label}>Availability</div>
                 <div>{availabilityLabel(e.availability) ?? <Marker kind="missing" />}</div>
@@ -2913,7 +2913,7 @@ export default function ProfiluxPage() {
             <select style={select} value={draft9.availability ?? ''} onChange={(ev) => setDraft9({ ...draft9, availability: ev.target.value === '' ? null : ev.target.value as Screen9Draft['availability'] })}>
               <option value="">— Not specified —</option>
               <option value="active">Actively looking</option>
-              <option value="open">Open to opportunities</option>
+              <option value="open">Quietly considering</option>
               <option value="passive">Passively exploring</option>
               <option value="unavailable">Not available</option>
             </select>
