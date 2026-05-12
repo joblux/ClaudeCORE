@@ -2240,7 +2240,7 @@ export default function ProfiluxPage() {
         return (
           <SectionCard eyebrow="Apply suggestions from your CV">
             <div style={{ fontSize: 13, color: '#ccc', marginBottom: 14 }}>
-              Your CV contains values for fields that are still empty on your ProfiLux. Select what you want to apply.
+              Your CV contains values that differ from your ProfiLux. Review each and apply or dismiss.
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '24px 160px 1fr auto', gap: 8, fontSize: 13, lineHeight: 1.6, alignItems: 'center' }}>
               {keys.map((k) => (
@@ -2253,7 +2253,23 @@ export default function ProfiluxPage() {
                     style={{ accentColor: '#a58e28' }}
                   />
                   <div style={{ color: '#999' }}>{labels[k]}</div>
-                  <div style={{ color: '#fff' }}>{sug[k]}</div>
+                  <div style={{ color: '#fff' }}>
+                    {(() => {
+                      const l1 = sug[k] as string
+                      const l2Raw = editor[k]
+                      const l2Str = typeof l2Raw === 'string' ? l2Raw : ''
+                      const l1Norm = l1.trim().toLowerCase()
+                      const l2Norm = l2Str.trim().toLowerCase()
+                      const l2WasEmpty = l2Norm === '' || l2Norm === l1Norm
+                      return (
+                        <>
+                          <span style={{ color: l2WasEmpty ? '#666' : '#999' }}>{l2WasEmpty ? '(none)' : l2Str}</span>
+                          <span style={{ color: '#666', margin: '0 8px' }}>→</span>
+                          <span style={{ color: '#fff' }}>{l1}</span>
+                        </>
+                      )
+                    })()}
+                  </div>
                   <button
                     type="button"
                     onClick={() => sug[k] !== undefined && handleDismissSuggestion(k, sug[k] as string)}
