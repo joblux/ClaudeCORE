@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
+import { unstable_noStore as noStore } from 'next/cache'
 import { resolveProfiLux } from '@/lib/profilux/resolveProfiLux'
 import { projectFor } from '@/lib/profilux/projectFor'
 import type { PublicProjection } from '@/lib/profilux/types'
@@ -20,6 +21,11 @@ interface Props {
 }
 
 export default async function PublicProfilePage({ params }: Props) {
+  // Opt out of Next's fetch/route cache so the sharing_enabled gate is
+  // re-evaluated on every request. Without this, a stale cached render
+  // can keep an unshared profile reachable even after the toggle flips off.
+  noStore()
+
   // 1. profilux table = share-state lookup only (Matrix v1.1 §9 + §18.2)
   // Public profile access is gated by profilux.sharing_enabled = true.
   // Do not remove the sharing_enabled filter without security review.
