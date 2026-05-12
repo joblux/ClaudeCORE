@@ -1533,21 +1533,55 @@ export default function ProfiluxPage() {
 
   return (
     <div style={wrap}>
-      <h1 style={h1Style}>ProfiLux</h1>
+      {tab === 'view' ? (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '20px 0 16px', marginBottom: 24, borderBottom: '1px solid #2a2a2a' }}>
+          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999', letterSpacing: 0.2 }}>
+            ← Dashboard · ProfiLux
+          </div>
+          <div role="tablist" style={{ display: 'inline-flex', background: '#222', border: '1px solid #2a2a2a', borderRadius: 8, padding: 3 }}>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={true}
+              onClick={() => setTab('view')}
+              style={{ background: '#1a1a1a', color: '#fff', border: 'none', padding: '5px 12px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
+            >View</button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={false}
+              onClick={() => setTab('edit')}
+              style={{ background: 'transparent', color: '#999', border: 'none', padding: '5px 12px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
+            >Edit</button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={false}
+              onClick={() => setTab('manage')}
+              style={{ background: 'transparent', color: '#999', border: 'none', padding: '5px 12px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
+            >Manage</button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <h1 style={h1Style}>ProfiLux</h1>
 
-      <div style={tabBarStyle}>
-        <button type="button" style={tab === 'view' ? tabBtnActive : tabBtnBase} onClick={() => setTab('view')}>View</button>
-        <button type="button" style={tab === 'edit' ? tabBtnActive : tabBtnBase} onClick={() => setTab('edit')}>Edit</button>
-        <button type="button" style={tab === 'manage' ? tabBtnActive : tabBtnBase} onClick={() => setTab('manage')}>Manage</button>
-      </div>
+          <div style={tabBarStyle}>
+            <button type="button" style={tabBtnBase} onClick={() => setTab('view')}>View</button>
+            <button type="button" style={tab === 'edit' ? tabBtnActive : tabBtnBase} onClick={() => setTab('edit')}>Edit</button>
+            <button type="button" style={tab === 'manage' ? tabBtnActive : tabBtnBase} onClick={() => setTab('manage')}>Manage</button>
+          </div>
+        </>
+      )}
 
       {tab === 'view' && (() => {
         const fn = e.first_name ?? ''
         const ln = e.last_name ?? ''
         const lastInitial = (ln[0] ?? '').toUpperCase()
-        const maskedName = fn && lastInitial
-          ? `${fn} ${lastInitial}.`
-          : fn || ''
+        const fullName = [e.first_name, e.last_name]
+          .filter(Boolean)
+          .join(' ')
+          .trim()
         const initials = `${(fn[0] ?? '').toUpperCase()}${lastInitial}`.trim()
         const hasAvatar = typeof e.avatar_url === 'string' && e.avatar_url.trim().length > 0
         const hasHeadline = typeof e.headline === 'string' && e.headline.trim().length > 0
@@ -1619,8 +1653,8 @@ export default function ProfiluxPage() {
               {/* LEFT SPINE */}
               <aside style={{ width: isMobile ? '100%' : 300, flexShrink: 0 }}>
                 <div style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: 26, color: '#fff', lineHeight: 1.2, marginBottom: 6 }}>
-                  {maskedName.length > 0
-                    ? maskedName
+                  {fullName.length > 0
+                    ? fullName
                     : <em style={{ color: '#666', fontStyle: 'italic', fontFamily: 'Inter, sans-serif', fontSize: 14 }}>Not specified</em>}
                 </div>
                 {(() => {
