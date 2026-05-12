@@ -54,6 +54,20 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **d8e6d30** `feat(profilux): C1 slice 1B.5 — honest panel copy + L2 display on suggestion rows` — May 12 2026. SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. **Closes C1 slice 1 family (S-A identity).** Panel intro corrected from "fields that are still empty" (false post-1B.2 collision detection) to "Your CV contains values that differ from your ProfiLux. Review each and apply or dismiss." Row value cell renders arrow form `<L2 or (none)> → <L1>` via Option β UI inference: if `editor[k]` resolves to the same string as `sug[k]` case-insensitive, L2 was empty (Rule-A fallback) → render `(none)`; otherwise `editor[k]` is the real L2. By construction `pickSuggestion` never fires when L1 === L2, so `X → X` is impossible. Pure UI change. 1 file, +18/-2. Live: collision rows render `Mason → Mazour` / `Paris → New York`; empty-L2 case renders `(none) → French`.
+
+- **664f293** `feat(profilux): C1 slice 1B.4 — dismiss action + per-row Dismiss UI` — May 12 2026. SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. Extends `/api/profilux/suggestions` to accept `{ action: 'dismiss', field, value }`. Dismiss writes `resolution_state.identity.<field> = { status: 'dismissed', value, at }` only; L2 column untouched. Atomic single-row UPDATE. `profile_completeness` recompute kept (no-op for dismiss; cheap safety). UI: kills global Dismiss link, adds per-row Dismiss button beside each suggestion value (muted, small, underlined). Renames `applying`/`applyError` → `actioning`/`actionError` (single source for both apply/dismiss in-flight). Panel-wide disable while any action in flight. Button label `Working...` covers both. 2 files, +73/-34. Live: K3 (per-row) holds; K4 re-suggest holds via L1 "Mazouri" drift test.
+
+- **97695ed** `feat(profilux): C1 slice 1B.3 — atomic apply endpoint + UI repoint` — May 12 2026. SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. New `POST /api/profilux/suggestions` accepting `{ action: 'apply', field, value }`. Identity fields only (`first_name`, `last_name`, `city`, `nationality`). Path A read-modify-write jsonb: SELECT `cv_parsed_data` → merge `resolution_state.identity.<field>` in JS → single members UPDATE writing L2 column + jsonb together (atomic at row level). Per K2 atomicity, any failure errors the whole request. Recomputes `profile_completeness` post-write. Race tradeoff documented: concurrent applies on different fields by same member could lose one resolution_state entry (last write wins); acceptable for single-user identity flow. Repoints `handleApplySuggestions` to sequential per-field loop (W1). On any field failure, loop stops, refetch fires, error surfaces to user. 2 files, NEW route 176 lines + page.tsx +21/-12.
+
+- **5497dff** `feat(profilux): C1 slice 1B.1 + 1B.2 — resolution_state plumbing + resolver suppression` — May 12 2026. SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. 1B.1: adds `CvParsedDataResolutionItem` + `CvParsedDataResolutionState` types; appends optional `resolution_state` field to `CvParsedData` TS type and `CvParsedDataSchema` zod. Parser preserves the key on re-parse; never writes it. 1B.2: adds `pickSuggestionWithState` helper. Threads `cv?.resolution_state?.identity` through the 4 identity call sites. Suppression rule: if `state.value === current L1` (case-insensitive trim) AND `status in {applied, dismissed}` → suppress; else fire. Re-suggests when L1 changes (K4). Zero behavior change vs slice 1A — nothing writes `resolution_state` until slice 1B.3.
+
+- **edd37f9** `feat(profilux): C1 slice 1A — identity collision detection in resolver predicate` — May 12 2026. SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. Extends `pickSuggestion` eligibility from `L1 non-empty AND L2 empty` to `L1 non-empty AND (L2 empty OR normalized L1 !== normalized L2)`. Case-insensitive diff (lowercased + trimmed). Existing 4 call sites (`first_name`, `last_name`, `city`, `nationality`) inherit collision detection automatically. 1 file, +12/-3.
+
+- **a36866c0** `feat(profilux): strip global chrome on public slug routes + redesign hold page` — May 12 2026. SHIPPED + COOLIFY-GREEN + MO-APPROVED. C5 follow-up. `components/layout/LayoutShell.tsx` extends existing skip-chrome pattern (escape/admin/holding) with deny-list of 38 known root segments — any single-segment path NOT in the list = public ProfiLux slug → strip global Header/Footer. `app/[slug]/not-found.tsx` rewritten as true standalone full-viewport hold page with bottom-anchored JOBLUX sign-off block. Copy locked: **"This profile is unavailable."** Accepted scope tradeoff: active public profile also loses global chrome. Replaces `2596d8c0`.
+
+- **2596d8c0** `feat(profilux): add disabled-profile hold page` — May 12 2026. SHIPPED + COOLIFY-GREEN. C5 follow-up (initial; chrome strip added in `a36866c0`).
+
 - **81e3bbd** `fix(profilux): noStore on public profile gate` — May 12 2026. SHIPPED + COOLIFY-GREEN (live Phase A re-verification PENDING). C5 part 2. `unstable_noStore` from `next/cache` called at top of `PublicProfilePage` before any Supabase query, forces live DB read every request. Existing `dynamic='force-dynamic'` retained. Gate query shape (`.eq('share_slug', params.slug).eq('sharing_enabled', true)`) unchanged. Closes the page-level gate caching defect that 69b9d0a alone could not (root cause was per-fetch caching of Supabase queries despite `force-dynamic` on the route). 1 file, +6/0.
 
 - **69b9d0a** `fix(profilux): hide inactive public share URL` — May 12 2026. SHIPPED + COOLIFY-GREEN. C5 part 1. `/api/profilux/share` GET handler returns `public_url: null` when `sharing_enabled=false`, even if `share_slug` exists. `share_slug` still returned in response so Manage can show reserved-but-disabled state. `can_share` semantics unchanged. Access gate at `app/[slug]/page.tsx` unchanged in this commit; security-critical comment added above the gate query. 2 files, +8/-1.
@@ -115,45 +129,51 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-**Contract Closure Mode active.** C5 partially closed in code via `69b9d0a` + `81e3bbd`. Live Phase A verification after `81e3bbd` pending.
+**Contract Closure Mode active.** C5 + C4 + C1 slice S-A all closed this session.
 
 **Next session opens with:** `"Open JOBLUX session — contract closure mode"`
 
-**Strict step order:**
+**Strict step order for next session:**
 
-1. Run C5 Phase A re-verification (toggle dance on `alex-mason`, confirm gate blocks live).
-2. If pass, close C5 officially (flip ledger `ba8ca121` to closed with live-verified note).
-3. Build disabled/private profile hold page. Copy locked: **"This profile is unavailable."** (`app/[slug]/not-found.tsx`, single file, ~30 lines, no slug-enumeration leak.)
-4. Run C4 read-only audit (maskable field / privacy schema: jsonb shape, projection integration points in `projectFor.ts`, projection floor semantics).
-5. No V12 UI convergence until contract blockers are clarified.
+1. **C1 S-B Education scalars — read-first audit.** Identity fields lived on `members.*` as 4 flat scalars and used the canonical `pickSuggestion` predicate. Education has the same shape on `members.*` (`university`, `field_of_study`, `graduation_year`) BUT `cv_parsed_data.education` is likely a collection (array of records), not a flat trio. The read-first audit must establish: (a) exact L1 shape in `cv_parsed_data.education`, (b) `EditorView` field types for the trio, (c) whether `pickSuggestion` call sites generalize cleanly to the trio, (d) any divergence from the S-A pattern that would require new architecture.
+2. **If S-B is true flat trio:** clone S-A pattern with field-name swap. Same 1A → 1B.1 → 1B.2 → 1B.3 → 1B.4 → 1B.5 slice ladder.
+3. **If S-B exposes a collection requirement:** stop, open new architecture decision for collection-shaped resolution_state, do not extend S-A pattern silently.
+4. After S-B closes: **S-C Experiences full collection** (requires `351421f` doctrine compatibility check). Then **S-D Sectors** (gated on `1609e494` parking decision).
+5. After C1 family complete: continue locked closure order **C2/C3/C8 → C6 → C7**.
 
 **Contract closure order locked (May 12, 2026):** C5 → C4 → C1 → C2/C3/C8 → C6 → C7.
 
+**C5 status:** CLOSED live-verified.
+**C4 status:** Read-only audit COMPLETED. Q2 answered (CV merge staging architecture lock). Q1/Q3/Q4 parked in `docs/HANDOFF_2026-05-12.md` for C7 design phase.
+**C1 status:** Architecture locked (D1–D6 + K1–K6). Slice S-A (identity) fully closed via 7 commits this session. Re-suggestion suppression honors applied + dismissed status per K4. L1 → L2 silent writes remain forbidden across all code paths.
+
 **Foundational contract inventory (see HANDOFF_2026-05-12 §3 for full table):**
-- C1 CV merge staging/diff/apply — OPEN
+- C1 CV merge staging/diff/apply — **S-A CLOSED**, S-B/S-C/S-D PENDING
 - C2 section visibility persistence — OPEN
 - C3 library/add-section persistence — OPEN
-- C4 maskable field/privacy schema — OPEN
-- C5 public share gate — PARTIALLY CLOSED, live verification pending
+- C4 maskable field/privacy schema — **AUDITED + CLOSED with parked Q1/Q3/Q4**
+- C5 public share gate — **CLOSED live-verified**
 - C6 PDF/export — OPEN (depends on C2 + C4)
-- C7 manage projection/preferences — OPEN
+- C7 manage projection/preferences — OPEN (gated on Q1 per-field masking decision)
 - C8 section ordering persistence — OPEN
 
-**Strategic pivot logged:** V12 UI convergence paused after CV Merge / Manage / sharing work exposed foundational contract gaps. Continuing UI-first creates zigzag/drift/fabrication risk. Workflow now contract-first.
+**Strategic pivot logged:** V12 UI convergence paused. Contract-first mode continues until C1 family + C2/C3/C8 closed.
 
-**Two new ledger rows logged this session (open):**
-- `98219ae5` — V12-divergence-8: public profile `/[slug]` legacy layout vs converged View doctrine.
-- `818ccf6b` — Public profile not-found polish.
-
-**Ledger reopened with honest truth:**
-- `ba8ca121` — F-public-slug-gate-leak — open, partially closed pending live verification.
-
-ProfiLux Convergence Mode is paused. UI convergence resumes only after C5–C8 foundational blockers are clarified.
+**Ledger this session:**
+- `ba8ca121` — F-public-slug-gate-leak — **CLOSED** live-verified.
+- `818ccf6b` — Public profile not-found polish — **CLOSED** via `a36866c0`.
+- `98219ae5` — V12-divergence-8: public profile `/[slug]` legacy layout vs converged View doctrine. **STAYS OPEN.** Separate slice from hold page work.
 
 **Handoff doc:** `docs/HANDOFF_2026-05-12.md`
 
 ### DO NOT
 
+- Touch `app/api/profilux/suggestions/route.ts` outside of new slices in the C1 family. Endpoint contract is locked: `{ action: 'apply' | 'dismiss', field: <identity_key>, value: string }`. New actions/fields/response shapes require explicit Mo approval.
+- Reintroduce a global "Dismiss all" button to the S1.5 panel. K3 contract = per-row dismiss only.
+- Touch `components/layout/LayoutShell.tsx` skip-chrome deny-list without confirming the candidate single-segment path is or is not a public ProfiLux slug.
+- Change the arrow form rendering `<L2 or (none)> → <L1>` to use `Currently:` / `CV says:` dual labels without an explicit slice. Option β (UI inference) is locked.
+- Let `editor[k] === sug[k]` reasoning leak into the resolver. The inference lives in `app/dashboard/candidate/profilux/page.tsx` only.
+- Write to `cv_parsed_data.resolution_state` from any code path other than `/api/profilux/suggestions`. The CV parser preserves the key on re-parse but never writes it.
 - Touch `app/api/profilux/share/route.ts` again unless sharing UX evolves. A1 refined fix (read-only visibility status, isolated from EditorView/resolver/projectFor) is shipped at `a829033`.
 - Add `share_slug` or `sharing_enabled` to `EditorView` or any `lib/profilux/*` projection. Legacy `profilux` table stays isolated. Share state is read via dedicated endpoint only.
 - Touch `/api/members/cv-parse` again unless a new bug surfaces. D2 fix shipped at `6d820f7`.
@@ -234,7 +254,7 @@ ProfiLux Convergence Mode is paused. UI convergence resumes only after C5–C8 f
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 12, 2026 — C5 contract closure session. View copy labels + scene header finalized (6d283bb + 1c01841). CV Merge Scene 1 shipped + rebuilt + tightened (22931b7 → 0ebc850 → b400717). C5 closed in code via 2-slice fix (69b9d0a hide-inactive-public-URL + 81e3bbd noStore-on-gate); live Phase A verification against 81e3bbd PENDING. Strategic pivot logged: V12 UI convergence paused → contract-first mode. Foundational contract inventory C1–C8 opened. Closure order locked: C5 → C4 → C1 → C2/C3/C8 → C6 → C7.
+**Last updated:** May 12, 2026 (Opus session) — C5 closed live-verified + hold page shipped + C4 audit completed + C1 architecture locked + C1 slice S-A (identity) fully closed via 7 commits (2596d8c0, a36866c0, edd37f9, 5497dff, 97695ed, 664f293, d8e6d30). Next session opens at C1 S-B Education scalars.
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
