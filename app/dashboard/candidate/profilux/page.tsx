@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import type { EditorView } from '@/lib/profilux/types'
 import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS, PROFILUX_SECTOR_OPTIONS } from '@/lib/profilux/vocabulary'
 
@@ -2130,14 +2131,12 @@ export default function ProfiluxPage() {
           <>
             <div style={{ fontSize: 13, color: '#ccc', marginBottom: 14 }}>
               CV uploaded.{' '}
-              <button
-                type="button"
-                onClick={handleUploadClick}
-                disabled={uploading}
-                style={{ background: 'transparent', border: 'none', color: '#ccc', textDecoration: 'underline', cursor: uploading ? 'default' : 'pointer', padding: 0, fontFamily: 'Inter, sans-serif', fontSize: 13 }}
+              <Link
+                href="/dashboard/candidate/profilux/cv-merge"
+                style={{ color: '#ccc', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13 }}
               >
-                {uploading ? 'Uploading...' : 'Replace'}
-              </button>
+                Replace
+              </Link>
             </div>
             <button
               type="button"
@@ -2154,14 +2153,12 @@ export default function ProfiluxPage() {
           <>
             <div style={{ fontSize: 13, color: '#ccc', marginBottom: 14 }}>
               CV parsed {parsedDateLabel}.{' '}
-              <button
-                type="button"
-                onClick={handleUploadClick}
-                disabled={uploading}
-                style={{ background: 'transparent', border: 'none', color: '#ccc', textDecoration: 'underline', cursor: uploading ? 'default' : 'pointer', padding: 0, fontFamily: 'Inter, sans-serif', fontSize: 13 }}
+              <Link
+                href="/dashboard/candidate/profilux/cv-merge"
+                style={{ color: '#ccc', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13 }}
               >
-                {uploading ? 'Uploading...' : 'Replace'}
-              </button>
+                Replace
+              </Link>
             </div>
             <button
               type="button"
