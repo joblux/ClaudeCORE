@@ -286,6 +286,7 @@ export function projectEditorView(view: ProfiLuxResolved): EditorView {
     // Computed
     profile_completeness: view.profile_completeness ?? 0,
     cv_identity_suggestions: view.cv_identity_suggestions,
+    cv_education_suggestions: view.cv_education_suggestions,
     // A2.7-B — server-authoritative M6 group truth, same predicates as scorer
     m6_groups: computeM6Groups(view),
   }

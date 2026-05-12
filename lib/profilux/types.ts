@@ -337,6 +337,35 @@ export type CvIdentitySuggestions = {
   nationality?: string
 }
 
+/**
+ * Education prefill suggestions — C1 slice S-B.1B.1.
+ *
+ * Collection-shaped sibling to CvIdentitySuggestions. Computed in
+ * resolveProfiLux from cv_parsed_data.education[] rows, with suppression
+ * via cv_parsed_data.resolution_state.education[<signature>] (S-B.0 type).
+ *
+ * Eligibility: an L1 row appears here iff its computed signature is NOT
+ * present in resolution_state.education with status 'applied' or
+ * 'dismissed'. Hash-only re-fire rule: if L1 changes (institution,
+ * field_of_study, or graduation_year), the new hash misses
+ * resolution_state and the suggestion fires again.
+ *
+ * Read-only. UI consumes via EditorView.cv_education_suggestions.
+ * The signature field is the apply/dismiss endpoint contract (S-B.1B.3+).
+ */
+export type CvEducationSuggestion = {
+  signature: string
+  institution: string | null
+  degree_level: string | null
+  field_of_study: string | null
+  graduation_year: number | null
+  city: string | null
+  country: string | null
+  start_year: number | null
+}
+
+export type CvEducationSuggestions = CvEducationSuggestion[]
+
 export type ResolvedCvMeta = {
   cv_url: string | null
   cv_parsed_at: string | null
@@ -417,6 +446,7 @@ export type ProfiLuxResolved = {
   // L1 metadata (resolver-internal, see §10.1)
   cv_meta: ResolvedCvMeta
   cv_identity_suggestions: CvIdentitySuggestions
+  cv_education_suggestions: CvEducationSuggestions
   // Provenance
   created_at?: string
   updated_at?: string
@@ -531,6 +561,7 @@ export type EditorView = {
   // Computed (read-only)
   profile_completeness: number
   cv_identity_suggestions: CvIdentitySuggestions
+  cv_education_suggestions: CvEducationSuggestions
   // A2.7-B — Per-group readiness booleans, server-computed via computeM6Groups.
   // Surfaces M6 readiness on View tab Readiness card. Authoritative source;
   // do not re-derive client-side.

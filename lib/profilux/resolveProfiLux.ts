@@ -18,7 +18,10 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { computeEducationSignature } from './educationSignature'
 import type {
+  CvEducationSuggestion,
+  CvEducationSuggestions,
   CvIdentitySuggestions,
   CvParsedData,
   CvParsedDataResolutionItem,
@@ -240,6 +243,34 @@ export async function resolveProfiLux(
   const _sug_nationality = pickSuggestionWithState(row.nationality, ident?.nationality, _rstate?.nationality)
   if (_sug_nationality !== undefined) cv_identity_suggestions.nationality = _sug_nationality
 
+  // S-B.1B.1 — Education suggestions. Hash each L1 row; suppress if the
+  // hash is recorded in resolution_state.education with applied|dismissed.
+  // Hash-only re-fire: change in institution / field_of_study /
+  // graduation_year produces a new hash and the suggestion fires again.
+  // Read-only; never writes resolution_state.
+  const _edu_resolution = cv?.resolution_state?.education ?? {}
+  const cv_education_suggestions: CvEducationSuggestions = arr(cv?.education)
+    .map<CvEducationSuggestion | null>((eduRow) => {
+      const signature = computeEducationSignature({
+        institution: eduRow.institution ?? null,
+        field_of_study: eduRow.field_of_study ?? null,
+        graduation_year: eduRow.graduation_year ?? null,
+      })
+      const resolution = _edu_resolution[signature]
+      if (resolution && (resolution.status === 'applied' || resolution.status === 'dismissed')) return null
+      return {
+        signature,
+        institution: eduRow.institution ?? null,
+        degree_level: eduRow.degree_level ?? null,
+        field_of_study: eduRow.field_of_study ?? null,
+        graduation_year: eduRow.graduation_year ?? null,
+        city: eduRow.city ?? null,
+        country: eduRow.country ?? null,
+        start_year: eduRow.start_year ?? null,
+      }
+    })
+    .filter((s): s is CvEducationSuggestion => s !== null)
+
   const cv_meta: ResolvedCvMeta = {
     cv_url: row.cv_url ?? null,
     cv_parsed_at: row.cv_parsed_at ?? null,
@@ -322,6 +353,7 @@ export async function resolveProfiLux(
     // L1 metadata
     cv_meta,
     cv_identity_suggestions,
+    cv_education_suggestions,
     // Provenance
     created_at: row.created_at,
     updated_at: row.updated_at,

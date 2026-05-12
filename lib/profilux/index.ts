@@ -13,11 +13,15 @@ export { resolveProfiLux } from './resolveProfiLux'
 export { computeM6Eligible } from './computeM6Eligible'
 export { computeProfileCompleteness } from './computeProfileCompleteness'
 export { projectFor } from './projectFor'
+export { computeEducationSignature } from './educationSignature'
+export type { EducationSignatureInput } from './educationSignature'
 
 export type {
   // L1
   CvParsedConfidence,
   CvParsedData,
+  CvEducationSuggestion,
+  CvEducationSuggestions,
   CvParsedEducation,
   CvParsedExperience,
   CvParsedIdentity,
