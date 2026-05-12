@@ -46,7 +46,12 @@ export async function GET() {
   const share_slug: string | null = data?.share_slug ?? null
   const sharing_enabled: boolean = data?.sharing_enabled === true
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXTAUTH_URL || 'https://joblux.com'
-  const public_url: string | null = share_slug ? `${siteUrl.replace(/\/$/, '')}/${share_slug}` : null
+  // public_url reflects active reachability: only emit a URL when the slug is
+  // BOTH reserved AND sharing is enabled. share_slug is still returned so the
+  // UI can show the reserved-but-disabled state without claiming a live link.
+  const public_url: string | null = sharing_enabled && share_slug
+    ? `${siteUrl.replace(/\/$/, '')}/${share_slug}`
+    : null
   const can_share: boolean = share_slug !== null
 
   return NextResponse.json({

@@ -21,6 +21,8 @@ interface Props {
 
 export default async function PublicProfilePage({ params }: Props) {
   // 1. profilux table = share-state lookup only (Matrix v1.1 §9 + §18.2)
+  // Public profile access is gated by profilux.sharing_enabled = true.
+  // Do not remove the sharing_enabled filter without security review.
   const { data: shareState } = await supabase
     .from('profilux')
     .select('email')
