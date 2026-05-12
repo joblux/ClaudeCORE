@@ -109,6 +109,47 @@ export type CvParsedDataResolutionState = {
     city?: CvParsedDataResolutionItem
     nationality?: CvParsedDataResolutionItem
   }
+  /**
+   * education — C1 slice S-B foundation.
+   *
+   * Per-row apply/dismiss tracking for cv_parsed_data.education entries.
+   * Key = content-hash signature over (institution|field_of_study|graduation_year),
+   * lowercased + trimmed, sha256, 64 hex chars. Hash function lives outside this type.
+   *
+   * status:
+   *   - 'applied'   → user accepted the L1 row; education_records INSERT succeeded; l2_id set
+   *   - 'dismissed' → user rejected the L1 row; no L2 write; l2_id is null
+   *
+   * l1_snapshot captures the exact L1 row at resolution time for debugging and future
+   * undo paths. l2_id links to education_records.id when applied; null otherwise.
+   *
+   * Resolver re-fires suggestion if hash of current L1 row no longer matches any stored
+   * key (institution/field_of_study/graduation_year changed on re-parse).
+   *
+   * Written by /api/profilux/suggestions/education only (slice S-B.1+, not in S-B.0).
+   * Never written by /api/members/cv-parse (parser preserves but does not touch).
+   */
+  education?: Record<string, CvParsedDataResolutionEducationItem>
+}
+
+/**
+ * resolution_state.education entry — C1 slice S-B foundation.
+ *
+ * Sibling to CvParsedDataResolutionItem (identity). Different shape:
+ * collection-shaped resolution requires a snapshot of the L1 row and a link
+ * to the resulting L2 row.
+ */
+export type CvParsedDataResolutionEducationItem = {
+  status: 'applied' | 'dismissed'
+  signature: string
+  l1_snapshot: {
+    institution: string | null
+    degree_level: string | null
+    field_of_study: string | null
+    graduation_year: number | null
+  }
+  l2_id: string | null
+  at: string
 }
 
 export type CvParsedData = {
