@@ -1149,25 +1149,34 @@ export default function ProfiluxPage() {
   async function handleApplySuggestions() {
     if (!editor) return
     const sug = editor.cv_identity_suggestions
-    const body: Record<string, unknown> = {}
-    if (suggestionSelected.first_name && sug.first_name !== undefined) body.firstName = sug.first_name
-    if (suggestionSelected.last_name && sug.last_name !== undefined) body.lastName = sug.last_name
-    if (suggestionSelected.city && sug.city !== undefined) body.city = sug.city
-    if (suggestionSelected.nationality && sug.nationality !== undefined) body.nationality = sug.nationality
-    if (Object.keys(body).length === 0) return
+    // C1 slice 1B.3: per-field sequential applies via /api/profilux/suggestions.
+    // Each call is atomic at the DB row level (L2 column + resolution_state).
+    // On any field failure, stop the loop, refetch, surface error.
+    const queue: Array<{ field: 'first_name' | 'last_name' | 'city' | 'nationality'; value: string }> = []
+    if (suggestionSelected.first_name && sug.first_name !== undefined) queue.push({ field: 'first_name', value: sug.first_name })
+    if (suggestionSelected.last_name && sug.last_name !== undefined) queue.push({ field: 'last_name', value: sug.last_name })
+    if (suggestionSelected.city && sug.city !== undefined) queue.push({ field: 'city', value: sug.city })
+    if (suggestionSelected.nationality && sug.nationality !== undefined) queue.push({ field: 'nationality', value: sug.nationality })
+    if (queue.length === 0) return
     setApplying(true)
     setApplyError(null)
     try {
-      const res = await fetch('/api/profilux', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      for (const item of queue) {
+        const res = await fetch('/api/profilux/suggestions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'apply', field: item.field, value: item.value }),
+        })
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({} as any))
+          throw new Error(typeof data?.error === 'string' ? `${item.field}: ${data.error}` : `${item.field}: HTTP ${res.status}`)
+        }
+      }
       await refetch()
       setSuggestionSelected({ first_name: false, last_name: false, city: false, nationality: false })
     } catch (err) {
       setApplyError(String(err))
+      await refetch().catch(() => {})
     } finally {
       setApplying(false)
     }
