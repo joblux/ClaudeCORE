@@ -633,9 +633,8 @@ export default function ProfiluxPage() {
     city: boolean
     nationality: boolean
   }>({ first_name: false, last_name: false, city: false, nationality: false })
-  const [suggestionDismissed, setSuggestionDismissed] = useState(false)
-  const [applying, setApplying] = useState(false)
-  const [applyError, setApplyError] = useState<string | null>(null)
+  const [actioning, setActioning] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   const refetch = async () => {
     const res = await fetch('/api/profilux')
@@ -1158,8 +1157,8 @@ export default function ProfiluxPage() {
     if (suggestionSelected.city && sug.city !== undefined) queue.push({ field: 'city', value: sug.city })
     if (suggestionSelected.nationality && sug.nationality !== undefined) queue.push({ field: 'nationality', value: sug.nationality })
     if (queue.length === 0) return
-    setApplying(true)
-    setApplyError(null)
+    setActioning(true)
+    setActionError(null)
     try {
       for (const item of queue) {
         const res = await fetch('/api/profilux/suggestions', {
@@ -1175,10 +1174,34 @@ export default function ProfiluxPage() {
       await refetch()
       setSuggestionSelected({ first_name: false, last_name: false, city: false, nationality: false })
     } catch (err) {
-      setApplyError(String(err))
+      setActionError(String(err))
       await refetch().catch(() => {})
     } finally {
-      setApplying(false)
+      setActioning(false)
+    }
+  }
+
+  // C1 slice 1B.4 — per-row dismiss. Single POST, no L2 write server-side.
+  async function handleDismissSuggestion(field: 'first_name' | 'last_name' | 'city' | 'nationality', value: string) {
+    setActioning(true)
+    setActionError(null)
+    try {
+      const res = await fetch('/api/profilux/suggestions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'dismiss', field, value }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any))
+        throw new Error(typeof data?.error === 'string' ? `${field}: ${data.error}` : `${field}: HTTP ${res.status}`)
+      }
+      await refetch()
+      setSuggestionSelected(prev => ({ ...prev, [field]: false }))
+    } catch (err) {
+      setActionError(String(err))
+      await refetch().catch(() => {})
+    } finally {
+      setActioning(false)
     }
   }
 
@@ -2206,7 +2229,7 @@ export default function ProfiluxPage() {
         if (sug.last_name !== undefined) keys.push('last_name')
         if (sug.city !== undefined) keys.push('city')
         if (sug.nationality !== undefined) keys.push('nationality')
-        if (keys.length === 0 || suggestionDismissed) return null
+        if (keys.length === 0) return null
         const labels: Record<typeof keys[number], string> = {
           first_name: 'First name',
           last_name: 'Last name',
@@ -2219,17 +2242,35 @@ export default function ProfiluxPage() {
             <div style={{ fontSize: 13, color: '#ccc', marginBottom: 14 }}>
               Your CV contains values for fields that are still empty on your ProfiLux. Select what you want to apply.
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '24px 160px 1fr', gap: 8, fontSize: 13, lineHeight: 1.6 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '24px 160px 1fr auto', gap: 8, fontSize: 13, lineHeight: 1.6, alignItems: 'center' }}>
               {keys.map((k) => (
                 <React.Fragment key={k}>
                   <input
                     type="checkbox"
                     checked={suggestionSelected[k]}
                     onChange={(ev) => setSuggestionSelected(prev => ({ ...prev, [k]: ev.target.checked }))}
+                    disabled={actioning}
                     style={{ accentColor: '#a58e28' }}
                   />
                   <div style={{ color: '#999' }}>{labels[k]}</div>
                   <div style={{ color: '#fff' }}>{sug[k]}</div>
+                  <button
+                    type="button"
+                    onClick={() => sug[k] !== undefined && handleDismissSuggestion(k, sug[k] as string)}
+                    disabled={actioning}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#777',
+                      fontFamily: 'Inter, sans-serif',
+                      fontSize: 12,
+                      padding: '2px 6px',
+                      cursor: actioning ? 'default' : 'pointer',
+                      textDecoration: 'underline',
+                    }}
+                  >
+                    Dismiss
+                  </button>
                 </React.Fragment>
               ))}
             </div>
@@ -2237,20 +2278,12 @@ export default function ProfiluxPage() {
               <button
                 type="button"
                 onClick={handleApplySuggestions}
-                disabled={applying || checkedCount === 0}
-                style={(applying || checkedCount === 0) ? saveBtnDis : saveBtn}
+                disabled={actioning || checkedCount === 0}
+                style={(actioning || checkedCount === 0) ? saveBtnDis : saveBtn}
               >
-                {applying ? 'Applying...' : `Apply selected${checkedCount > 0 ? ` (${checkedCount})` : ''}`}
+                {actioning ? 'Working...' : `Apply selected${checkedCount > 0 ? ` (${checkedCount})` : ''}`}
               </button>
-              <button
-                type="button"
-                onClick={() => setSuggestionDismissed(true)}
-                disabled={applying}
-                style={{ background: 'transparent', border: 'none', color: '#999', textDecoration: 'underline', cursor: applying ? 'default' : 'pointer', padding: 0, fontFamily: 'Inter, sans-serif', fontSize: 13 }}
-              >
-                Dismiss
-              </button>
-              {applyError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{applyError}</span>}
+              {actionError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{actionError}</span>}
             </div>
           </SectionCard>
         )

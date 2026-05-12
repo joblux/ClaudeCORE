@@ -24,7 +24,7 @@ const supabase = createClient(
 //
 // Body: { action: 'apply', field: 'first_name' | 'last_name' | 'city' | 'nationality', value: string }
 //
-// Apply contract (K2 atomic):
+// Apply contract (K2 atomic) — and dismiss contract (1B.4):
 //   - Writes L2 identity column AND cv_parsed_data.resolution_state.identity.<field>
 //     in a single members UPDATE (atomic at row level).
 //   - If either write fails, the whole request errors.
@@ -37,15 +37,17 @@ const supabase = createClient(
 //     Acceptable for single-user identity flow. RPC with jsonb_set is the
 //     upgrade path if strictness needed.
 //
-// Dismiss action: not implemented in this slice (1B.4).
+// Dismiss action (1B.4): writes ONLY resolution_state (no L2 column write).
 // Out of scope: education, experiences, sectors, languages.
 // =============================================================================
 
 const ALLOWED_FIELDS = new Set(['first_name', 'last_name', 'city', 'nationality'])
 
-type ApplyBody = {
-  action: 'apply'
-  field: 'first_name' | 'last_name' | 'city' | 'nationality'
+type IdentityField = 'first_name' | 'last_name' | 'city' | 'nationality'
+
+type ActionBody = {
+  action: 'apply' | 'dismiss'
+  field: IdentityField
   value: string
 }
 
@@ -72,7 +74,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Validate body shape
-  if (body?.action !== 'apply') {
+  if (body?.action !== 'apply' && body?.action !== 'dismiss') {
     return NextResponse.json({ error: 'Invalid or unsupported action' }, { status: 400 })
   }
   if (typeof body?.field !== 'string' || !ALLOWED_FIELDS.has(body.field)) {
@@ -86,8 +88,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Value cannot be empty' }, { status: 400 })
   }
 
-  const apply: ApplyBody = {
-    action: 'apply',
+  const action: ActionBody = {
+    action: body.action,
     field: body.field,
     value: trimmedValue,
   }
@@ -111,8 +113,8 @@ export async function POST(req: NextRequest) {
   const currentResolution = currentCv.resolution_state ?? {}
   const currentIdentity = currentResolution.identity ?? {}
   const newItem: CvParsedDataResolutionItem = {
-    status: 'applied',
-    value: apply.value,
+    status: action.action === 'apply' ? 'applied' : 'dismissed',
+    value: action.value,
     at: new Date().toISOString(),
   }
   const mergedCv = {
@@ -121,16 +123,20 @@ export async function POST(req: NextRequest) {
       ...currentResolution,
       identity: {
         ...currentIdentity,
-        [apply.field]: newItem,
+        [action.field]: newItem,
       },
     },
   }
 
-  // Single atomic UPDATE: L2 column + cv_parsed_data jsonb in one row write.
+  // Single atomic UPDATE.
+  // apply  → writes L2 column + cv_parsed_data jsonb in one row write.
+  // dismiss → writes cv_parsed_data jsonb only; L2 column untouched.
   const updatePayload: Record<string, unknown> = {
-    [apply.field]: apply.value,
     cv_parsed_data: mergedCv,
     updated_at: new Date().toISOString(),
+  }
+  if (action.action === 'apply') {
+    updatePayload[action.field] = action.value
   }
 
   const { error: updateErr } = await supabase
