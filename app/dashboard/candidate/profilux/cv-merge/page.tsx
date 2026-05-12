@@ -52,19 +52,12 @@ const pillBase: React.CSSProperties = {
   cursor: 'default',
 }
 
-const layoutGrid: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'minmax(0,1fr) 220px',
-  gap: 56,
-  alignItems: 'start',
-}
-
 const headerRow: React.CSSProperties = {
   display: 'flex',
   alignItems: 'flex-start',
   justifyContent: 'space-between',
-  gap: 24,
-  marginBottom: 28,
+  gap: 32,
+  paddingBottom: 24,
 }
 
 const eyebrow: React.CSSProperties = {
@@ -90,32 +83,48 @@ const lede: React.CSSProperties = {
   fontSize: 14,
   color: '#ccc',
   lineHeight: 1.6,
-  maxWidth: 620,
+  maxWidth: 540,
   margin: 0,
 }
 
 const cancelLink: React.CSSProperties = {
   fontFamily: 'Inter, sans-serif',
   fontSize: 13,
-  color: '#999',
+  color: '#ccc',
   textDecoration: 'none',
+  background: 'transparent',
+  border: '1px solid #333',
+  padding: '8px 16px',
+  borderRadius: 6,
   flexShrink: 0,
-  paddingTop: 4,
+  display: 'inline-block',
+}
+
+const hairline: React.CSSProperties = {
+  borderTop: '0.5px solid #2a2a2a',
+  marginBottom: 28,
 }
 
 const dropZone: React.CSSProperties = {
-  border: '1.5px dashed rgba(165, 142, 40, 0.45)',
-  borderRadius: 12,
-  padding: '72px 24px',
+  border: '1.5px dashed rgba(165, 142, 40, 0.35)',
+  borderRadius: 16,
+  padding: '48px 32px',
   textAlign: 'center',
-  background: 'rgba(165, 142, 40, 0.03)',
-  marginBottom: 16,
+  background: 'rgba(165, 142, 40, 0.025)',
+  width: '100%',
 }
 
-const arrowStyle: React.CSSProperties = {
-  fontSize: 30,
-  color: '#a58e28',
+const arrowRing: React.CSSProperties = {
+  width: 48,
+  height: 48,
+  borderRadius: '50%',
+  border: '1px solid rgba(165, 142, 40, 0.5)',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   marginBottom: 18,
+  color: '#a58e28',
+  fontSize: 18,
   lineHeight: 1,
 }
 
@@ -131,7 +140,7 @@ const uploadHint: React.CSSProperties = {
   fontFamily: 'Inter, sans-serif',
   fontSize: 13,
   color: '#999',
-  marginBottom: 28,
+  marginBottom: 24,
 }
 
 const chooseBtn: React.CSSProperties = {
@@ -150,60 +159,15 @@ const selectedLine: React.CSSProperties = {
   fontFamily: 'Inter, sans-serif',
   fontSize: 12,
   color: '#ccc',
+  marginTop: 18,
+}
+
+const lastUploadLine: React.CSSProperties = {
+  fontFamily: 'Inter, sans-serif',
+  fontSize: 11.5,
+  color: '#777',
   marginTop: 20,
 }
-
-const metaLine: React.CSSProperties = {
-  fontFamily: 'Inter, sans-serif',
-  fontSize: 12,
-  color: '#777',
-  marginTop: 8,
-}
-
-const railWrap: React.CSSProperties = {
-  borderLeft: '1px solid #2a2a2a',
-  paddingLeft: 24,
-  userSelect: 'none',
-}
-
-const railTitle: React.CSSProperties = {
-  fontFamily: 'Inter, sans-serif',
-  fontSize: 10,
-  color: '#777',
-  letterSpacing: 1.6,
-  textTransform: 'uppercase',
-  marginBottom: 18,
-}
-
-const railList: React.CSSProperties = {
-  listStyle: 'none',
-  margin: 0,
-  padding: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 12,
-}
-
-const railItem: React.CSSProperties = {
-  fontFamily: 'Inter, sans-serif',
-  fontSize: 12,
-  color: '#666',
-  letterSpacing: 0.4,
-}
-
-const railItemActive: React.CSSProperties = {
-  ...railItem,
-  color: '#a58e28',
-}
-
-const walkthroughSteps: { label: string; active?: boolean }[] = [
-  { label: '1 · DASHBOARD' },
-  { label: '2 · EDIT' },
-  { label: '3 · VIEW' },
-  { label: '4 · MANAGE' },
-  { label: '5 · RETURN' },
-  { label: '6 · CV MERGE', active: true },
-]
 
 export default function CvMergePage() {
   const [filename, setFilename] = useState<string | null>(null)
@@ -231,51 +195,37 @@ export default function CvMergePage() {
         </div>
       </div>
 
-      <div style={layoutGrid}>
+      <div style={headerRow}>
         <div>
-          <div style={headerRow}>
-            <div>
-              <div style={eyebrow}>CV RE-UPLOAD</div>
-              <h1 style={titleStyle}>Review changes before they’re applied</h1>
-              <p style={lede}>
-                Your existing ProfiLux is never silently overwritten. Choose which detected changes to merge, field by field.
-              </p>
-            </div>
-            <Link href="/dashboard/candidate/profilux" style={cancelLink}>Cancel</Link>
-          </div>
-
-          <div style={dropZone}>
-            <div style={arrowStyle} aria-hidden="true">↑</div>
-            <div style={uploadHeadline}>Upload your latest CV</div>
-            <div style={uploadHint}>PDF, DOC or DOCX · Up to 10 MB</div>
-            <button type="button" style={chooseBtn} onClick={openPicker}>
-              Choose file
-            </button>
-            <input
-              ref={inputRef}
-              type="file"
-              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              style={{ display: 'none' }}
-              onChange={onFileChange}
-            />
-            {filename && (
-              <div style={selectedLine}>Selected: {filename}</div>
-            )}
-          </div>
-
-          <div style={metaLine}>Last upload: —</div>
+          <div style={eyebrow}>CV RE-UPLOAD</div>
+          <h1 style={titleStyle}>Review changes before they’re applied</h1>
+          <p style={lede}>
+            Your existing ProfiLux is never silently overwritten. Choose which detected changes to merge, field by field.
+          </p>
         </div>
+        <Link href="/dashboard/candidate/profilux" style={cancelLink}>Cancel</Link>
+      </div>
 
-        <aside style={railWrap}>
-          <div style={railTitle}>Walkthrough</div>
-          <ul style={railList}>
-            {walkthroughSteps.map((s) => (
-              <li key={s.label} style={s.active ? railItemActive : railItem}>
-                {s.label}
-              </li>
-            ))}
-          </ul>
-        </aside>
+      <div style={hairline} />
+
+      <div style={dropZone}>
+        <div style={arrowRing} aria-hidden="true">↑</div>
+        <div style={uploadHeadline}>Upload your latest CV</div>
+        <div style={uploadHint}>PDF, DOC or DOCX · Up to 10 MB</div>
+        <button type="button" style={chooseBtn} onClick={openPicker}>
+          Choose file
+        </button>
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          style={{ display: 'none' }}
+          onChange={onFileChange}
+        />
+        {filename && (
+          <div style={selectedLine}>Selected: {filename}</div>
+        )}
+        <div style={lastUploadLine}>Last upload: —</div>
       </div>
     </div>
   )
