@@ -54,6 +54,20 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **81e3bbd** `fix(profilux): noStore on public profile gate` — May 12 2026. SHIPPED + COOLIFY-GREEN (live Phase A re-verification PENDING). C5 part 2. `unstable_noStore` from `next/cache` called at top of `PublicProfilePage` before any Supabase query, forces live DB read every request. Existing `dynamic='force-dynamic'` retained. Gate query shape (`.eq('share_slug', params.slug).eq('sharing_enabled', true)`) unchanged. Closes the page-level gate caching defect that 69b9d0a alone could not (root cause was per-fetch caching of Supabase queries despite `force-dynamic` on the route). 1 file, +6/0.
+
+- **69b9d0a** `fix(profilux): hide inactive public share URL` — May 12 2026. SHIPPED + COOLIFY-GREEN. C5 part 1. `/api/profilux/share` GET handler returns `public_url: null` when `sharing_enabled=false`, even if `share_slug` exists. `share_slug` still returned in response so Manage can show reserved-but-disabled state. `can_share` semantics unchanged. Access gate at `app/[slug]/page.tsx` unchanged in this commit; security-critical comment added above the gate query. 2 files, +8/-1.
+
+- **b400717** `fix(profilux): remove CV merge prototype rail and tighten scene` — May 12 2026. SHIPPED + COOLIFY-GREEN + MO-APPROVED. CV Merge Scene 1 final tighten after rebuild. Removed prototype rail; tightened scene composition.
+
+- **0ebc850** `feat(profilux): rebuild CV merge scene toward V12 prototype` — May 12 2026. SHIPPED. CV Merge Scene 1 rebuild toward V12 prototype. Later partially tightened by b400717.
+
+- **22931b7** `feat(profilux): add CV merge scene shell` — May 12 2026. SHIPPED. CV Merge Scene 1 shell.
+
+- **1c01841** `fix(profilux-view): complete V12 scene header and full spine name` — May 12 2026. SHIPPED + MO-APPROVED. View scene header restructure with fullName spine.
+
+- **6d283bb** `fix(profilux-view): align V12 copy labels` — May 12 2026. SHIPPED + MO-APPROVED. View copy-label finalization: `CURRENT POSITION` → `CURRENT ROLE`, `CAREER HISTORY` → `CAREER PATH`, `AVAILABILITY & TARGETS` → `AVAILABILITY`, `availabilityLabel('open')` → `Quietly considering`.
+
 - **9dabff1** `feat(profilux-view): reorder zones to match V12 prototype sequence` — May 11 2026 (PM late-late). SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. Pure JSX block reorder inside the View IIFE of `app/dashboard/candidate/profilux/page.tsx`. New zone order: Current Position → Career History → Education → Languages → Expertise → Availability & Targets → Maisons (matches V12 prototype scene 3 v7). No styling, data, copy, or logic changes. 1 file, +79/-79.
 
 - **0d7dfe8** `feat(profilux-view): final V12 convergence pass` — May 11 2026 (PM late-late). SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. Career History + Education rendered as 108px / 1fr timelines (period column tabular nums #8e8e8e, body role white 14/500, company/location gold #a58e28, description #8e8e8e). Current Position swapped from k/v grid to 3-column layout: 40×40 gold-bordered avatar circle (`rgba(165,142,40,0.2)` border, Playfair italic initial #a58e28) + text block (role white 15/500, company gold, seniority #999) + meta block (`total_years_experience` Playfair 22 white tabular + `Yrs experience` uppercase 9.5 #777 label). Spine action rows: `padding: 9px 0` + `borderBottom: 0.5px solid rgba(255,255,255,0.03)` on Edit ProfiLux + Manage & share; Download PDF padding only, no divider. expRows refactored from titleLine/locationDateLine to role/company/location/period/description shape. Education k/v trio (University/Field/Graduation year) removed from View; Education filled now requires `e.education.length > 0`. 1 file, +101/-59.
@@ -101,41 +115,42 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-**ProfiLux Convergence Mode continues. View is structurally complete and converged to V12 prototype scene 3 v7 (5-commit page-level pass on 2026-05-11 PM late-late).**
+**Contract Closure Mode active.** C5 partially closed in code via `69b9d0a` + `81e3bbd`. Live Phase A verification after `81e3bbd` pending.
 
-Next session choice at open:
+**Next session opens with:** `"Open JOBLUX session — contract closure mode"`
 
-- **(a) View copy-label finalization** — single-file copy slice: `CURRENT POSITION` → `CURRENT ROLE`, `CAREER HISTORY` → `CAREER PATH`, `AVAILABILITY & TARGETS` → `AVAILABILITY`, `availabilityLabel('open')` → `Quietly considering`.
-- **(b) Manage shell start** — Priority 2 in the convergence queue.
+**Strict step order:**
 
-Mo decides at session open.
+1. Run C5 Phase A re-verification (toggle dance on `alex-mason`, confirm gate blocks live).
+2. If pass, close C5 officially (flip ledger `ba8ca121` to closed with live-verified note).
+3. Build disabled/private profile hold page. Copy locked: **"This profile is unavailable."** (`app/[slug]/not-found.tsx`, single file, ~30 lines, no slug-enumeration leak.)
+4. Run C4 read-only audit (maskable field / privacy schema: jsonb shape, projection integration points in `projectFor.ts`, projection floor semantics).
+5. No V12 UI convergence until contract blockers are clarified.
 
-Next session opens with: **"Open JOBLUX session — convergence mode"**
+**Contract closure order locked (May 12, 2026):** C5 → C4 → C1 → C2/C3/C8 → C6 → C7.
 
-Priority order (locked):
+**Foundational contract inventory (see HANDOFF_2026-05-12 §3 for full table):**
+- C1 CV merge staging/diff/apply — OPEN
+- C2 section visibility persistence — OPEN
+- C3 library/add-section persistence — OPEN
+- C4 maskable field/privacy schema — OPEN
+- C5 public share gate — PARTIALLY CLOSED, live verification pending
+- C6 PDF/export — OPEN (depends on C2 + C4)
+- C7 manage projection/preferences — OPEN
+- C8 section ordering persistence — OPEN
 
-1. View shell convergence — STRUCTURALLY COMPLETE; copy-label finalization pending (option a above)
-2. Manage shell convergence
-3. CV Merge shell (greenfield)
-4. Edit shell refinement
-5. Behavioral refinements / divergence cleanup
+**Strategic pivot logged:** V12 UI convergence paused after CV Merge / Manage / sharing work exposed foundational contract gaps. Continuing UI-first creates zigzag/drift/fabrication risk. Workflow now contract-first.
 
-Open ledgers (untouched this session):
-- `3e8d6de2` V12-divergence-4 — Phase 1 done (Clienteling removed). Final disposition deferred pending Skills / Luxury Fit / full ProfiLux review.
-- `d243fc13` V12-divergence-5 — Phase 1 visual shell done. Functional add behavior pending.
+**Two new ledger rows logged this session (open):**
+- `98219ae5` — V12-divergence-8: public profile `/[slug]` legacy layout vs converged View doctrine.
+- `818ccf6b` — Public profile not-found polish.
 
-Other observed divergences (deferred, not addressed):
-- Career History since-date / duration display not yet rendered.
-- Language proficiency data shape mismatch (live free-string vs prototype structured).
-- Expertise taxonomy mismatch (live 5 sub-rows vs prototype trimmed subset).
-- Availability one-line prototype vs richer live (Desired locations/departments/contract types + relocation).
-- Walkthrough sidebar present in prototype scene 3 not yet in live.
+**Ledger reopened with honest truth:**
+- `ba8ca121` — F-public-slug-gate-leak — open, partially closed pending live verification.
 
-Parked findings:
-- `12745f9d` — F-view-identity-mask-leak
-- `ab6982db` — F-profilux-drawer-inline-maxwidth-deadcap
+ProfiLux Convergence Mode is paused. UI convergence resumes only after C5–C8 foundational blockers are clarified.
 
-**Handoff doc:** `docs/HANDOFF_2026-05-11-PM-late-late.md`
+**Handoff doc:** `docs/HANDOFF_2026-05-12.md`
 
 ### DO NOT
 
@@ -219,7 +234,7 @@ Parked findings:
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 11, 2026 (PM late-late) — View structurally converged to V12 prototype scene 3 v7 in a 5-commit page-level pass (`c062764` → `62ca2fb` → `8c8ee99` → `0d7dfe8` → `9dabff1`). All five SHIPPED + COOLIFY-GREEN + CHROME-MCP-VALIDATED. Single source-modified file across the session: `app/dashboard/candidate/profilux/page.tsx`. View shell convergence (Priority 1) is structurally complete; copy-label finalization pending. Manage shell convergence (Priority 2) ready to start. **ProfiLux Convergence Mode continues** — see WORKFLOW_RULES.md.
+**Last updated:** May 12, 2026 — C5 contract closure session. View copy labels + scene header finalized (6d283bb + 1c01841). CV Merge Scene 1 shipped + rebuilt + tightened (22931b7 → 0ebc850 → b400717). C5 closed in code via 2-slice fix (69b9d0a hide-inactive-public-URL + 81e3bbd noStore-on-gate); live Phase A verification against 81e3bbd PENDING. Strategic pivot logged: V12 UI convergence paused → contract-first mode. Foundational contract inventory C1–C8 opened. Closure order locked: C5 → C4 → C1 → C2/C3/C8 → C6 → C7.
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
