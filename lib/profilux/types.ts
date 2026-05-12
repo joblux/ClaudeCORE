@@ -83,6 +83,34 @@ export type CvParsedIdentity = {
   nationality: string | null
 }
 
+/**
+ * resolution_state — C1 slice 1B.
+ *
+ * Tracks per-field user decisions on cv_identity_suggestions:
+ *   - "applied"   → user accepted the L1 value and wrote it to L2
+ *   - "dismissed" → user rejected the L1 value, no L2 write
+ *
+ * Resolver uses this to suppress repeated suggestions for the same L1 value.
+ * If L1 changes (new CV parse), the value mismatch re-fires the suggestion.
+ *
+ * Written by /api/profilux/suggestions only (slice 1B.3+).
+ * Never written by /api/members/cv-parse (parser preserves but does not touch).
+ */
+export type CvParsedDataResolutionItem = {
+  status: 'applied' | 'dismissed'
+  value: string
+  at: string
+}
+
+export type CvParsedDataResolutionState = {
+  identity?: {
+    first_name?: CvParsedDataResolutionItem
+    last_name?: CvParsedDataResolutionItem
+    city?: CvParsedDataResolutionItem
+    nationality?: CvParsedDataResolutionItem
+  }
+}
+
 export type CvParsedData = {
   identity: CvParsedIdentity
   experiences: CvParsedExperience[]
@@ -95,6 +123,7 @@ export type CvParsedData = {
   parsed_at?: string
   schema_version?: string
   source?: Record<string, unknown>
+  resolution_state?: CvParsedDataResolutionState
 }
 
 // =============================================================================

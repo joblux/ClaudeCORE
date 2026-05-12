@@ -228,6 +228,7 @@ const CvParsedDataSchema = z.object({
     reason: z.string(),
     raw_value: z.string().max(200).nullable(),
   })),
+  resolution_state: z.any().optional(),
 })
 // No .strict() — extra harmless keys are silently dropped (default Zod behavior).
 

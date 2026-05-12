@@ -21,6 +21,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type {
   CvIdentitySuggestions,
   CvParsedData,
+  CvParsedDataResolutionItem,
   CvParsedExperience,
   CvParsedEducation,
   CvParsedLanguage,
@@ -52,11 +53,7 @@ function pickSuggestion(
   l1: string | null | undefined,
 ): string | undefined {
   // C1 slice 1A eligibility: L1 non-empty AND (L2 empty OR normalized L1 !== normalized L2)
-  // - Empty-L2 case preserves S1.5 behavior (L2 null/empty → suggest L1).
-  // - Collision case (L2 non-empty, L1 non-empty, values differ when lowercased + trimmed)
-  //   also surfaces as a suggestion. Existing S1.5 UI renders these without modification.
-  // - Case-insensitive diff: "Alex" vs "alex" does NOT trigger; "Alex" vs "Alexander" DOES.
-  // - resolution_state tracking deferred to slice 1B.
+  // Case-insensitive diff: "Alex" vs "alex" does NOT trigger; "Alex" vs "Alexander" DOES.
   if (!nonEmptyStr(l1)) return undefined
   const l1Trim = (l1 as string).trim()
   if (!nonEmptyStr(l2)) return l1Trim
@@ -64,6 +61,33 @@ function pickSuggestion(
   const l1Norm = l1Trim.toLowerCase()
   if (l2Norm === l1Norm) return undefined
   return l1Trim
+}
+
+/**
+ * C1 slice 1B.2 — pickSuggestion with resolution_state suppression.
+ *
+ * Suppression: if state exists AND state.value === current L1 (case-insensitive
+ * + trimmed) AND state.status is 'applied' or 'dismissed' → return undefined.
+ *
+ * If L1 has changed since the resolution was recorded (state.value mismatch),
+ * the suggestion re-fires — handles re-parse with a new value (K4).
+ *
+ * Plumbing-only in 1B.2: nothing writes resolution_state until slice 1B.3.
+ * Behavior is identical to 1A in production until the suggestions endpoint ships.
+ */
+function pickSuggestionWithState(
+  l2: string | null | undefined,
+  l1: string | null | undefined,
+  state: CvParsedDataResolutionItem | undefined,
+): string | undefined {
+  const base = pickSuggestion(l2, l1)
+  if (base === undefined) return undefined
+  if (state === undefined) return base
+  if (state.status !== 'applied' && state.status !== 'dismissed') return base
+  const storedNorm = (state.value ?? '').trim().toLowerCase()
+  const currentNorm = base.toLowerCase()
+  if (storedNorm === currentNorm) return undefined
+  return base
 }
 
 /** Coerce a possibly-null array to a guaranteed array. */
@@ -176,13 +200,14 @@ export async function resolveProfiLux(
       : firstEdu?.graduation_year ?? null
 
   const cv_identity_suggestions: CvIdentitySuggestions = {}
-  const _sug_first_name = pickSuggestion(row.first_name, ident?.first_name)
+  const _rstate = cv?.resolution_state?.identity
+  const _sug_first_name = pickSuggestionWithState(row.first_name, ident?.first_name, _rstate?.first_name)
   if (_sug_first_name !== undefined) cv_identity_suggestions.first_name = _sug_first_name
-  const _sug_last_name = pickSuggestion(row.last_name, ident?.last_name)
+  const _sug_last_name = pickSuggestionWithState(row.last_name, ident?.last_name, _rstate?.last_name)
   if (_sug_last_name !== undefined) cv_identity_suggestions.last_name = _sug_last_name
-  const _sug_city = pickSuggestion(row.city, ident?.city)
+  const _sug_city = pickSuggestionWithState(row.city, ident?.city, _rstate?.city)
   if (_sug_city !== undefined) cv_identity_suggestions.city = _sug_city
-  const _sug_nationality = pickSuggestion(row.nationality, ident?.nationality)
+  const _sug_nationality = pickSuggestionWithState(row.nationality, ident?.nationality, _rstate?.nationality)
   if (_sug_nationality !== undefined) cv_identity_suggestions.nationality = _sug_nationality
 
   const cv_meta: ResolvedCvMeta = {
