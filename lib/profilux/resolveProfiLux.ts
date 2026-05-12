@@ -51,10 +51,19 @@ function pickSuggestion(
   l2: string | null | undefined,
   l1: string | null | undefined,
 ): string | undefined {
-  // S1.5 eligibility: L1 non-empty AND raw L2 null/empty
-  if (nonEmptyStr(l2)) return undefined
+  // C1 slice 1A eligibility: L1 non-empty AND (L2 empty OR normalized L1 !== normalized L2)
+  // - Empty-L2 case preserves S1.5 behavior (L2 null/empty → suggest L1).
+  // - Collision case (L2 non-empty, L1 non-empty, values differ when lowercased + trimmed)
+  //   also surfaces as a suggestion. Existing S1.5 UI renders these without modification.
+  // - Case-insensitive diff: "Alex" vs "alex" does NOT trigger; "Alex" vs "Alexander" DOES.
+  // - resolution_state tracking deferred to slice 1B.
   if (!nonEmptyStr(l1)) return undefined
-  return (l1 as string).trim()
+  const l1Trim = (l1 as string).trim()
+  if (!nonEmptyStr(l2)) return l1Trim
+  const l2Norm = (l2 as string).trim().toLowerCase()
+  const l1Norm = l1Trim.toLowerCase()
+  if (l2Norm === l1Norm) return undefined
+  return l1Trim
 }
 
 /** Coerce a possibly-null array to a guaranteed array. */
