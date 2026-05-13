@@ -251,6 +251,10 @@ export async function resolveProfiLux(
   const _edu_resolution = cv?.resolution_state?.education ?? {}
   const cv_education_suggestions: CvEducationSuggestions = arr(cv?.education)
     .map<CvEducationSuggestion | null>((eduRow) => {
+      // Skip L1 rows that cannot be applied (education_records.institution
+      // is NOT NULL). Resolver-side filter mirrors endpoint-side defense
+      // (S-B.1B.2). Hash is not computed for filtered rows.
+      if (!nonEmptyStr(eduRow.institution)) return null
       const signature = computeEducationSignature({
         institution: eduRow.institution ?? null,
         field_of_study: eduRow.field_of_study ?? null,
