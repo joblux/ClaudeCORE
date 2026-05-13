@@ -22,9 +22,9 @@ const supabase = createClient(
 )
 
 // =============================================================================
-// POST /api/profilux/suggestions/education — C1 slice S-B.1B.2
+// POST /api/profilux/suggestions/education — C1 slices S-B.1B.2 + S-B.1B.3
 //
-// Body: { action: 'apply', signature: <64-char lowercase hex> }
+// Body: { action: 'apply' | 'dismiss', signature: <64-char lowercase hex> }
 //
 // Apply contract:
 //   - Resolves member by session email.
@@ -37,6 +37,19 @@ const supabase = createClient(
 //     null/empty institution (cannot be inserted into education_records).
 //   - INSERTs a new education_records row, then writes
 //     resolution_state.education[signature] with the inserted id.
+//   - Recomputes profile_completeness against post-write state.
+//
+// Dismiss contract (S-B.1B.3):
+//   - Resolves member by session email.
+//   - Recomputes signatures over L1 education[]; rejects 409 SIGNATURE_STALE
+//     if no current L1 row matches.
+//   - Rejects 409 (already-applied) if resolution_state.education[signature]
+//     already exists with status='applied' (cannot dismiss an L2-backed row;
+//     user must delete the education_records row via Edit instead).
+//   - Writes resolution_state.education[signature] with status='dismissed',
+//     l2_id=null, l1_snapshot, at. No education_records touch.
+//   - Idempotent: dismiss-after-dismiss overwrites the existing entry (200).
+//   - Institution null/empty is permitted on dismiss (no L2 write to gate).
 //   - Recomputes profile_completeness against post-write state.
 //
 // SIGNATURE CONTRACT (Option γ, locked):
@@ -72,8 +85,7 @@ const supabase = createClient(
 // view.experiences only. Recompute is a no-op for this slice; kept to
 // preserve the invariant should a future M6 group add education weighting.
 //
-// Out of scope: dismiss (S-B.1B.3), experiences, sectors, languages, trio
-// retirement, UI consumer.
+// Out of scope: experiences, sectors, languages, trio retirement, UI consumer.
 // =============================================================================
 
 const SIGNATURE_REGEX = /^[a-f0-9]{64}$/
@@ -100,7 +112,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  if (body?.action !== 'apply') {
+  if (body?.action !== 'apply' && body?.action !== 'dismiss') {
     return NextResponse.json(
       { error: 'Invalid or unsupported action' },
       { status: 400 }
@@ -155,6 +167,88 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  // ===== Dismiss branch (S-B.1B.3) =====
+  // No L2 write; pure resolution_state update. Institution null/empty is
+  // permitted on dismiss (no education_records insert to gate).
+  if (body.action === 'dismiss') {
+    const currentResolutionD = currentCv.resolution_state ?? {}
+    const currentEducationResolutionD = currentResolutionD.education ?? {}
+    const existing = currentEducationResolutionD[signature]
+    if (existing && existing.status === 'applied') {
+      return NextResponse.json(
+        { error: 'Suggestion already applied; cannot dismiss', code: 'ALREADY_APPLIED' },
+        { status: 409 }
+      )
+    }
+
+    const dismissedItem: CvParsedDataResolutionEducationItem = {
+      status: 'dismissed',
+      signature,
+      l1_snapshot: {
+        institution: matchedRow.institution ?? null,
+        degree_level: matchedRow.degree_level ?? null,
+        field_of_study: matchedRow.field_of_study ?? null,
+        graduation_year: matchedRow.graduation_year ?? null,
+      },
+      l2_id: null,
+      at: new Date().toISOString(),
+    }
+    const mergedCvD = {
+      ...currentCv,
+      resolution_state: {
+        ...currentResolutionD,
+        education: {
+          ...currentEducationResolutionD,
+          [signature]: dismissedItem,
+        },
+      },
+    }
+
+    const { error: updateErrD } = await supabase
+      .from('members')
+      .update({
+        cv_parsed_data: mergedCvD,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', member.id)
+
+    if (updateErrD) {
+      return NextResponse.json({ error: updateErrD.message }, { status: 500 })
+    }
+
+    let resolvedD: ProfiLuxResolved | null
+    try {
+      resolvedD = await resolveProfiLux(member.id, supabase)
+    } catch (e: any) {
+      return NextResponse.json(
+        { error: e?.message ?? 'resolveProfiLux failed' },
+        { status: 500 }
+      )
+    }
+    if (!resolvedD) {
+      return NextResponse.json({ error: 'Member not found post-write' }, { status: 500 })
+    }
+
+    const scoreD = computeProfileCompleteness(resolvedD)
+    if (scoreD !== resolvedD.profile_completeness) {
+      const { error: scoreErrD } = await supabase
+        .from('members')
+        .update({
+          profile_completeness: scoreD,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', member.id)
+
+      if (scoreErrD) {
+        return NextResponse.json({ error: scoreErrD.message }, { status: 500 })
+      }
+      resolvedD = { ...resolvedD, profile_completeness: scoreD }
+    }
+
+    return NextResponse.json(buildEditorResponse(resolvedD))
+  }
+
+  // ===== Apply branch (S-B.1B.2) =====
   // Defense-in-depth: education_records.institution is NOT NULL.
   const institutionTrimmed = (matchedRow.institution ?? '').trim()
   if (institutionTrimmed === '') {
