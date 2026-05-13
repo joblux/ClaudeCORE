@@ -54,6 +54,8 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **26c35466** `refactor(profilux): S-C.0 — sync CvParsedExperience with live zod + pass is_current through resolver` — May 13 2026 (PM late). SHIPPED + COOLIFY-GREEN. Foundation alignment slice for S-C Experiences family. 2 files, +8/-0. `lib/profilux/types.ts`: `CvParsedExperience.is_current: boolean` (non-null, matches live cv-parse zod since launch). `lib/profilux/resolveProfiLux.ts`: `mapExperiences()` now passes `is_current ?? false` through to `ResolvedExperience` (was previously dropped on L1 passthrough; L2 path already carried it via A2.3-β). `raw_dates_text` parsed but intentionally NOT lifted to `ResolvedExperience` (no UI consumer; future 1-line lift slice when needed). Doctrine cross-check: `351421f` additive merge contract intact; `c6c7c77` write path unchanged; no schema touch; no projection touch; no UI consumer in this slice. Live behavior delta: L1 passthrough experience rows now correctly carry `is_current` to all surfaces consuming `ProfiLuxResolved.experiences`.
+
 - **s_b_2c_drop_members_trio_education_columns** (Supabase migration, no commit SHA) — S-B.2C DDL drop — May 13 2026 (PM). SHIPPED + DDL-APPLIED + LIVE-VERIFIED. Three columns dropped from `members`: `university`, `field_of_study`, `graduation_year`. `education_records` row `a6cc5cea` intact. Post-drop Edit + View verification passed. `education_records` is now the sole education truth surface.
 
 - **baeca3c** `refactor(profilux): C1 slice S-B.2B — retire members.{university,field_of_study,graduation_year} trio from all code paths` — May 13 2026 (PM). SHIPPED + COOLIFY-GREEN + LIVE-VERIFIED. Subtractive only. Resolver L1-fallback bridge deleted. Trio removed from types, resolver, projectFor, `/api/profilux`, and candidate page. Education & Languages legacy card retired; read-only Languages card preserved.
@@ -147,23 +149,21 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-**Contract Closure Mode active. C1 Education subgraph FULLY CLOSED.** S-B Education is closed end-to-end: backend, UI, backfill, code retirement, and DDL drop. `education_records` is now the sole education truth surface. `members.{university,field_of_study,graduation_year}` is dropped. Languages remain visible on Edit as a read-only card until a dedicated L2 language slice.
+**Contract Closure Mode active. C1 Education subgraph FULLY CLOSED.** S-C Experiences audit-first complete; foundation slice S-C.0 (`26c35466`) shipped. No mandatory implementation work remains for S-C in the current audit scope — gaps G-C-1..4 logged as observations under F-S-C-1..4.
 
-**Next session opens with:** `"Open JOBLUX session — S-C audit-first"`
+**Next step:** S-C closure decision + S-D evaluation.
 
-**Strict step order for next session:**
+**Strict step order:**
 
-1. **S-C Experiences extended fields — audit-first** (ledger `610f9404`). READ-ONLY. Re-audit doctrine compatibility vs `351421f`; map `work_experiences` L2 and `cv_parsed_data.experiences[]` L1; identify parsed fields not yet stored in L2. No implementation drafting.
-2. **S-D Sectors collection** — gated on `1609e494` parking decision.
+1. **S-C closure decision** (ledger `610f9404`) — confirm close vs extend. Current Mo preference: close, with G-C-1..4 parked.
+2. **S-D Sectors collection** — re-evaluate `1609e494` parking decision before any work begins.
 3. **C2/C3/C8** — section visibility / library / ordering persistence.
 4. Then continue locked order: **C6 → C7**.
 
-**C1 status:** S-A identity CLOSED · S-B Education CLOSED · S-C Experiences PENDING audit-first · S-D Sectors PARKED.
+**C1 status:** S-A identity CLOSED · S-B Education CLOSED · S-C Experiences audit-first COMPLETE + S-C.0 shipped, closure pending · S-D Sectors PARKED.
 
-**Ledger this session:**
-- `6dc1e5d4` — S-B.1B.4 UI panel — CLOSED.
-- `5503e29d` — F-editor-l1-fallback-education — CLOSED.
-- `610f9404` — S-C Experiences extended fields audit-first — OPEN.
+**Ledger this rotation:**
+- `610f9404` — S-C Experiences audit-first — OPEN (closure decision pending).
 - `1609e494` — Relational L2 collection migration — STILL PARKED for non-Education collections.
 
 **Handoff doc:** `docs/HANDOFF_2026-05-13-PM.md`
@@ -240,6 +240,10 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 ### NEW FINDINGS LOGGED (out of immediate scope, surface separately)
 
 - **F-stale-schema-artifacts** *(NEW 2026-05-10e, observation_only)* — Discovered during F-2-4 reference scan. Two repo files describe a dead pre-migration `profiles` table that does NOT reflect the live `members` schema: (a) `supabase-schema.sql` (line 56 references `company_size` on `profiles`, not `members`; entire file describes the legacy WordPress→Next migration era schema with `profiles` + `job_mandates` + `articles` + `applications` + `employer_briefs` + `subscribers`); (b) `types/database.ts` (line 126 types `company_size` on `Profile` interface; entire file types `profiles` / `job_mandates` / `articles` / `subscribers`, none of which match the live `members` / `wikilux_content` / `signals` / etc. schema). Both contradict STATE §6 ("DB is single source of truth everywhere"). Disposition options at next schema-touching slice: (1) DELETE both files (cleanest — they describe nothing real and risk misleading future schema work), (2) replace with stub README pointing to `supabase/migrations/`, (3) leave alone (status quo, accept noise). No fix scheduled; flag at next schema-touching slice. Out of F-2-4 scope per Mo instruction; logged separate.
+- **F-S-C-1** *(NEW 2026-05-13 PM late, observation_only)* — `cv_parsed_data.experiences[].raw_dates_text` is parsed by Haiku zod but never lifted to `ResolvedExperience` (resolver `mapExperiences` drops it). No UI consumer today. Future lift = 1 line in `mapExperiences` + 1 field on `ResolvedExperience`. No fix scheduled.
+- **F-S-C-2** *(NEW 2026-05-13 PM late, observation_only)* — `work_experiences.department` column exists in L2 but is not parsed by Haiku (`CvParsedExperience` has no `department`) and not written by `/api/profilux/experiences`. Dormant L2-only column. Decision needed before any per-role department UX ships; current `members.department` is singleton and the two would conflict.
+- **F-S-C-3** *(NEW 2026-05-13 PM late, observation_only)* — `work_experiences.reason_for_leaving` column exists in L2 but is not parsed, not written, and not surfaced. Fully dormant L2-only. Candidate for either DDL drop or future enrichment slice.
+- **F-S-C-4** *(NEW 2026-05-13 PM late, observation_only)* — `work_experiences.sort_order` defaults to 0 on every insert; the `/api/profilux/experiences` route never writes a non-default value. Resolver orders by `start_date DESC NULLS LAST` only. If candidate-driven reorder UX ever ships, this column awakens; until then, every L2 row collides at `sort_order=0`.
 - **F-github-mcp-write-scope-blocked** *(2026-05-09b status: BYPASSED — Code now owns the V1 write path; OAuth scope question moot for V1/V1.1 needs.)* (logged 2026-05-09, observation-only, parked for Bridge/Away Mode V1) — Workaround attempt during `/joblux-close` v0 to bypass `F-close-skill-artifact-friction` via direct GitHub MCP `push_files` failed with 403 "Resource not accessible by integration". GitHub MCP integration in Claude AI is read-only; write APIs (push_files, create_or_update_file, delete_file) blocked at OAuth scope. Means: no direct-to-main commit from Claude AI sandbox without Mo's local Git/SSH. Park scope: future Bridge/Away Mode V1 must either (a) request elevated GitHub MCP write scope, (b) use Claude Code as the artifact bridge (heredoc prompt embeds content, Claude Code writes locally + commits + pushes via SSH), or (c) build a dedicated artifact-handoff endpoint.
 - **F-close-skill-artifact-friction** *(2026-05-09b status: PRESUMED_RESOLVED_PENDING_OBSERVATION — Bridge V1.1 first real-use close = the 2026-05-09b close itself; outcome assessed on next session open.)* (logged 2026-05-09, observation-only, parked for Bridge/Away Mode V1) — `/joblux-close` v0 is PARTIALLY validated. Skill successfully produced: close card, STATE draft, HANDOFF draft, Claude Code commit prompt. Skill did NOT solve closing friction because artifacts were created in Claude AI sandbox paths (`/mnt/user-data/outputs/`), not directly in Mo's local repo at `/Users/momo/Documents/GitHub/ClaudeCORE/docs/`. Workaround applied this close: heredoc-embedded full content in a single Claude Code prompt — Mo pastes once, Claude Code writes both files locally, commits, pushes. Bridge/Away Mode V1 priority: artifact handoff bridge OR safe local file transfer pattern OR local execution of close skill inside Claude Code environment. Goal: eliminate manual download/move/share of STATE + HANDOFF files AND eliminate the heredoc-embed pattern (large prompt size).
 - **F-coolify-failed-deploy-orphan** *(2026-05-09b status: STILL PARKED — deploy truth still soft (`git_only`); resolution gated on `F-runtime-build-sha-not-exposed`.)* (logged 2026-05-09, observation-only, parked for Bridge/Away Mode V1) — Coolify deploy of `cc0f954` (STATE V3 rotation, docs-only) failed at 12:56–12:57 UTC with no apparent cause. Bypassed by successful deploy of `e43c2fc` (skills) at 13:12 UTC and `a829033` (Manage v0) at 13:40 UTC. No retry needed when later commits supersede content. Park scope: future Bridge/Away Mode deploy reconciliation logic must distinguish between failed-but-superseded vs failed-and-current-HEAD.
@@ -261,7 +265,7 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 13, 2026 PM (corrective rotation) — C1 Education subgraph FULLY CLOSED via S-B.1B.4 UI, S-B.2A backfill, S-B.2B code retirement, and S-B.2C DDL drop. `education_records` is sole education truth; trio dropped from `members`. Next session opens at S-C Experiences audit-first (ledger `610f9404`).
+**Last updated:** May 13, 2026 PM late (S-C audit reconciliation) — S-C Experiences audit-first complete; S-C.0 (`26c35466`) absorbed into LAST SHIPPED; F-S-C-1..4 logged. Closure decision for `610f9404` pending next step.
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
