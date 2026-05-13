@@ -151,19 +151,18 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 **Contract Closure Mode active. C1 Education subgraph FULLY CLOSED.** S-C Experiences audit-first complete; foundation slice S-C.0 (`26c35466`) shipped. No mandatory implementation work remains for S-C in the current audit scope — gaps G-C-1..4 logged as observations under F-S-C-1..4.
 
-**Next step:** S-C closure decision + S-D evaluation.
+**Next step:** S-D evaluation / `1609e494` parking decision.
 
 **Strict step order:**
 
-1. **S-C closure decision** (ledger `610f9404`) — confirm close vs extend. Current Mo preference: close, with G-C-1..4 parked.
-2. **S-D Sectors collection** — re-evaluate `1609e494` parking decision before any work begins.
-3. **C2/C3/C8** — section visibility / library / ordering persistence.
-4. Then continue locked order: **C6 → C7**.
+1. **S-D Sectors evaluation** — re-evaluate `1609e494` parking decision before any work begins.
+2. **C2/C3/C8** — section visibility / library / ordering persistence.
+3. Then continue locked order: **C6 → C7**.
 
-**C1 status:** S-A identity CLOSED · S-B Education CLOSED · S-C Experiences audit-first COMPLETE + S-C.0 shipped, closure pending · S-D Sectors PARKED.
+**C1 status:** S-A identity CLOSED · S-B Education CLOSED · S-C Experiences CLOSED (audit-first + S-C.0) · S-D Sectors PARKED.
 
 **Ledger this rotation:**
-- `610f9404` — S-C Experiences audit-first — OPEN (closure decision pending).
+- `610f9404` — S-C Experiences audit-first — CLOSED 2026-05-13 15:10 UTC (closed post-S-C.0 `26c35466`; reconciled into STATE this rotation).
 - `1609e494` — Relational L2 collection migration — STILL PARKED for non-Education collections.
 
 **Handoff doc:** `docs/HANDOFF_2026-05-13-PM.md`
@@ -265,7 +264,7 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 13, 2026 PM late (S-C audit reconciliation) — S-C Experiences audit-first complete; S-C.0 (`26c35466`) absorbed into LAST SHIPPED; F-S-C-1..4 logged. Closure decision for `610f9404` pending next step.
+**Last updated:** May 13, 2026 PM late (S-C audit reconciliation) — S-C Experiences audit-first complete; S-C.0 (`26c35466`) absorbed into LAST SHIPPED; F-S-C-1..4 logged. Ledger `610f9404` already CLOSED at 15:10 UTC post-S-C.0; STATE reconciled. Next step: S-D evaluation / `1609e494` parking decision.
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
