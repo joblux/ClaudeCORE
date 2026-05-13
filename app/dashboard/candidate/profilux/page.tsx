@@ -635,6 +635,9 @@ export default function ProfiluxPage() {
   }>({ first_name: false, last_name: false, city: false, nationality: false })
   const [actioning, setActioning] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
+  // S-B.1B.4 — per-row in-flight state for education suggestions panel.
+  // Reuses actionError for failures; no education-specific error hook.
+  const [educationActioningSig, setEducationActioningSig] = useState<string | null>(null)
 
   const refetch = async () => {
     const res = await fetch('/api/profilux')
@@ -1202,6 +1205,62 @@ export default function ProfiluxPage() {
       await refetch().catch(() => {})
     } finally {
       setActioning(false)
+    }
+  }
+
+  // S-B.1B.4 — per-row apply for cv_education_suggestions.
+  async function handleApplyEducationSuggestion(signature: string) {
+    setEducationActioningSig(signature)
+    setActionError(null)
+    try {
+      const res = await fetch('/api/profilux/suggestions/education', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'apply', signature }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any))
+        const code = typeof data?.code === 'string' ? data.code : null
+        const msg =
+          code === 'SIGNATURE_STALE' ? 'This suggestion no longer matches your CV. Refresh.'
+          : code === 'INSTITUTION_REQUIRED' ? 'This entry is missing an institution and cannot be added.'
+          : (typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
+        throw new Error(msg)
+      }
+      await refetch()
+    } catch (err) {
+      setActionError(String(err instanceof Error ? err.message : err))
+      await refetch().catch(() => {})
+    } finally {
+      setEducationActioningSig(null)
+    }
+  }
+
+  // S-B.1B.4 — per-row dismiss for cv_education_suggestions.
+  async function handleDismissEducationSuggestion(signature: string) {
+    setEducationActioningSig(signature)
+    setActionError(null)
+    try {
+      const res = await fetch('/api/profilux/suggestions/education', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'dismiss', signature }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any))
+        const code = typeof data?.code === 'string' ? data.code : null
+        const msg =
+          code === 'SIGNATURE_STALE' ? 'This suggestion no longer matches your CV. Refresh.'
+          : code === 'ALREADY_APPLIED' ? 'This entry is already in your ProfiLux.'
+          : (typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
+        throw new Error(msg)
+      }
+      await refetch()
+    } catch (err) {
+      setActionError(String(err instanceof Error ? err.message : err))
+      await refetch().catch(() => {})
+    } finally {
+      setEducationActioningSig(null)
     }
   }
 
@@ -2301,6 +2360,94 @@ export default function ProfiluxPage() {
               </button>
               {actionError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{actionError}</span>}
             </div>
+          </SectionCard>
+        )
+      })()}
+      {/* S-B.1B.4 — Education suggestions panel (collection-shaped) */}
+      {(() => {
+        const eduSugs = Array.isArray(editor.cv_education_suggestions) ? editor.cv_education_suggestions : []
+        if (eduSugs.length === 0) return null
+        return (
+          <SectionCard eyebrow="Add education from your CV">
+            <div style={{ fontSize: 13, color: '#ccc', marginBottom: 14 }}>
+              Your CV includes education entries that are not yet in your ProfiLux.
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {eduSugs.map((row) => {
+                const sig = row.signature
+                const inFlight = educationActioningSig === sig
+                const anyInFlight = educationActioningSig !== null
+
+                const title =
+                  typeof row.institution === 'string' && row.institution.trim().length > 0
+                    ? row.institution
+                    : 'Untitled institution'
+
+                const secondaryParts: string[] = []
+                if (typeof row.degree_level === 'string' && row.degree_level.trim().length > 0) secondaryParts.push(row.degree_level)
+                if (typeof row.field_of_study === 'string' && row.field_of_study.trim().length > 0) secondaryParts.push(row.field_of_study)
+                if (typeof row.graduation_year === 'number') secondaryParts.push(String(row.graduation_year))
+                const secondaryLine = secondaryParts.join(' · ')
+
+                const locParts: string[] = []
+                if (typeof row.city === 'string' && row.city.trim().length > 0) locParts.push(row.city)
+                if (typeof row.country === 'string' && row.country.trim().length > 0) locParts.push(row.country)
+                const locStr = locParts.join(', ')
+
+                const tertiaryParts: string[] = []
+                if (locStr.length > 0) tertiaryParts.push(locStr)
+                if (typeof row.start_year === 'number') tertiaryParts.push(String(row.start_year))
+                const tertiaryLine = tertiaryParts.join(' · ')
+
+                return (
+                  <div key={sig} style={{ borderBottom: '1px solid #2a2a2a', paddingBottom: 14 }}>
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 500, color: '#fff', lineHeight: 1.4, marginBottom: 4 }}>
+                      {title}
+                    </div>
+                    {secondaryLine.length > 0 && (
+                      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5, marginBottom: 2 }}>
+                        {secondaryLine}
+                      </div>
+                    )}
+                    {tertiaryLine.length > 0 && (
+                      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.5, marginBottom: 10 }}>
+                        {tertiaryLine}
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
+                      <button
+                        type="button"
+                        onClick={() => handleApplyEducationSuggestion(sig)}
+                        disabled={anyInFlight}
+                        style={anyInFlight ? saveBtnDis : saveBtn}
+                      >
+                        {inFlight ? 'Working…' : 'Add to ProfiLux'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDismissEducationSuggestion(sig)}
+                        disabled={anyInFlight}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#777',
+                          fontFamily: 'Inter, sans-serif',
+                          fontSize: 12,
+                          padding: '2px 6px',
+                          cursor: anyInFlight ? 'default' : 'pointer',
+                          textDecoration: 'underline',
+                        }}
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            {actionError && (
+              <div style={{ marginTop: 12, color: '#ff6b6b', fontSize: 13 }}>{actionError}</div>
+            )}
           </SectionCard>
         )
       })()}
