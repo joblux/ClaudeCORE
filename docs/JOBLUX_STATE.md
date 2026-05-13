@@ -54,6 +54,14 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **s_b_2c_drop_members_trio_education_columns** (Supabase migration, no commit SHA) — S-B.2C DDL drop — May 13 2026 (PM). SHIPPED + DDL-APPLIED + LIVE-VERIFIED. Three columns dropped from `members`: `university`, `field_of_study`, `graduation_year`. `education_records` row `a6cc5cea` intact. Post-drop Edit + View verification passed. `education_records` is now the sole education truth surface.
+
+- **baeca3c** `refactor(profilux): C1 slice S-B.2B — retire members.{university,field_of_study,graduation_year} trio from all code paths` — May 13 2026 (PM). SHIPPED + COOLIFY-GREEN + LIVE-VERIFIED. Subtractive only. Resolver L1-fallback bridge deleted. Trio removed from types, resolver, projectFor, `/api/profilux`, and candidate page. Education & Languages legacy card retired; read-only Languages card preserved.
+
+- **S-B.2A backfill** (Supabase INSERT, no commit SHA) — May 13 2026 (PM). SHIPPED + DB-VERIFIED. Backfilled `education_records` from the single live trio row: `mzaourmohammed@gmail.com` / SSBM / Business Administration / 2005. Captured `l2_id = a6cc5cea-15a4-455b-bf71-43d8f139d000`.
+
+- **4d2cf7f** `feat(profilux): C1 slice S-B.1B.4 — cv_education_suggestions UI panel on Edit tab` — May 13 2026 (PM). SHIPPED + COOLIFY-GREEN + CAPTURED-ID-VALIDATED. First user-visible Education loop: parse → propose → apply/dismiss → render → re-fire. Panel mounted on Edit tab; per-row Add to ProfiLux / Dismiss; no new primitive family.
+
 - **ed1da55** `feat(profilux): C1 slice S-B.1B.3 — dismiss action on /api/profilux/suggestions/education` — May 13 2026 (AM). SHIPPED + COOLIFY-GREEN. Adds dismiss branch to the existing education suggestions endpoint via action union ('apply' | 'dismiss'). Same file, inline branch, no helper extraction (A3 lock). Status guard: rejects 409 ALREADY_APPLIED if `resolution_state.education[signature].status` is already 'applied' (D3 lock — undo of L2-backed row belongs to a future record-management slice). Idempotent: dismiss-after-dismissed overwrites the entry (D2 lock, mirrors S-A identity dismiss tolerance). Writes `resolution_state.education[signature]` with status='dismissed', l2_id=null, full l1_snapshot (A1 lock — type uniformity with apply path), at=now. Skips institution validation entirely — resolver-side filter (S-B.1B.2) prevents null-institution signatures from reaching the client. No `education_records` touch. Single members UPDATE only — no race window unlike apply. Recomputes profile_completeness post-write (A2 lock, no-op today, cheap safety mirror). Local 'D' suffix on dismiss-branch variables (mergedCvD / resolvedD / scoreD / updateErrD / scoreErrD) to avoid shadowing apply-branch consts. 1 file, +99/-5.
 
 - **0799143** `feat(profilux): C1 slice S-B.1B.2 — POST /api/profilux/suggestions/education apply path` — May 13 2026 (AM). SHIPPED + COOLIFY-GREEN (deploy 03m55s, 07:46-07:50 UTC). New endpoint `app/api/profilux/suggestions/education/route.ts` (267 lines). Body `{ action: 'apply', signature: <64-hex> }`. Server resolves member by session email, recomputes signatures over current `cv_parsed_data.education[]` via computeEducationSignature, finds the matching L1 row, rejects 409 SIGNATURE_STALE if no match (L1 changed since client saw the suggestion). Defense-in-depth: rejects 400 INSTITUTION_REQUIRED if matched L1 row has null/empty institution (`education_records.institution` is NOT NULL per S-B.0 DDL). INSERTs `education_records` (member_id, institution, degree_level, field_of_study, city, country, start_year, graduation_year — sort_order omitted, DB default 0), reads returned id, merges `cv_parsed_data.resolution_state.education[signature]` with status='applied', l1_snapshot, l2_id, at, and UPDATEs `members.cv_parsed_data`. Recomputes profile_completeness post-write (no-op today — M6 scorer has no group reading view.education; G3 reads sectors/product_categories/expertise_tags/years_in_luxury, G4 reads view.experiences only; kept as cheap safety). Mirrors S-A identity endpoint auth + member resolve + jsonb merge + recompute patterns verbatim. Option α race window locked (sequential, no RPC, three failure modes documented in route header: orphan L2 row possible on UPDATE failure after INSERT — accepted v1 single-user flow, future RPC hardening path noted). Option γ signature contract locked (client sends signature only; server is single source of L1 truth). Resolver edit (`lib/profilux/resolveProfiLux.ts`, +4/-0): null/empty institution L1 rows now filtered from cv_education_suggestions before hash computation — resolver-side filter mirrors endpoint-side INSTITUTION_REQUIRED defense. 2 files, +271/-0.
@@ -139,42 +147,26 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-**Contract Closure Mode active. INFLECTION POINT reached.** S-B education backend substrate is complete end-to-end via 5 commits across two sessions (`e6bbca0` S-B.0 foundation, `ea9a997` S-B.1A resolver merge, `7e96360` S-B.1B.1 hash predicate, `0799143` S-B.1B.2 apply, `ed1da55` S-B.1B.3 dismiss). What remains for the Education subgraph is presentation + interaction. Next slice flips ProfiLux Education from "infrastructure" to "product".
+**Contract Closure Mode active. C1 Education subgraph FULLY CLOSED.** S-B Education is closed end-to-end: backend, UI, backfill, code retirement, and DDL drop. `education_records` is now the sole education truth surface. `members.{university,field_of_study,graduation_year}` is dropped. Languages remain visible on Edit as a read-only card until a dedicated L2 language slice.
 
-**Next session opens with:** `"Open JOBLUX session — contract closure mode"`
+**Next session opens with:** `"Open JOBLUX session — S-C audit-first"`
 
 **Strict step order for next session:**
 
-1. **S-B.1B.4 — EditorView.cv_education_suggestions UI panel on Edit tab.** AUDIT-FIRST. Five questions pre-locked (panel mount, precedent reuse, row shape, handlers, validation cleanup). Q1/Q2/Q4/Q5 defaults locked by Mo. Q3 (row shape) has Mo's product instinct logged ("Add to ProfiLux" semantic + no arrow + institution title + sober microcopy) but needs explicit GPT validation before drafting the implementation prompt. Validation strategy uses captured-id cleanup pattern (no DB-noise residue post-test). Ledger row `6dc1e5d4`.
-2. **S-B.2 — trio retirement decision (Option A/B/C).** Foundation card §5 locked this as a separate slice AFTER `education_records` apply/dismiss path is live AND exercised via UI panel. Do not bundle.
-3. After S-B closes: **S-C Experiences full collection** (re-audit doctrine compatibility vs `351421f`). Then **S-D Sectors** (gated on `1609e494` parking decision).
-4. After C1 family complete: continue locked closure order **C2/C3/C8 → C6 → C7**.
+1. **S-C Experiences extended fields — audit-first** (ledger `610f9404`). READ-ONLY. Re-audit doctrine compatibility vs `351421f`; map `work_experiences` L2 and `cv_parsed_data.experiences[]` L1; identify parsed fields not yet stored in L2. No implementation drafting.
+2. **S-D Sectors collection** — gated on `1609e494` parking decision.
+3. **C2/C3/C8** — section visibility / library / ordering persistence.
+4. Then continue locked order: **C6 → C7**.
 
-**Contract closure order locked (May 12, 2026 — unchanged):** C5 → C4 → C1 → C2/C3/C8 → C6 → C7.
-
-**C5 status:** CLOSED live-verified.
-**C4 status:** Read-only audit COMPLETED. Q2 answered. Q1/Q3/Q4 parked in `docs/HANDOFF_2026-05-12.md` for C7 design phase.
-**C1 status:** S-A identity CLOSED · S-B foundation + reads + apply + dismiss CLOSED · S-B UI PENDING (S-B.1B.4 next) · S-C / S-D PENDING.
-
-**Foundational contract inventory (S-B status now updated):**
-- C1 CV merge staging/diff/apply — S-A CLOSED, S-B backend substrate CLOSED, S-B UI PENDING, S-C/S-D PENDING
-- C2 section visibility persistence — OPEN
-- C3 library/add-section persistence — OPEN
-- C4 maskable field/privacy schema — AUDITED + CLOSED with parked Q1/Q3/Q4
-- C5 public share gate — CLOSED live-verified
-- C6 PDF/export — OPEN (depends on C2 + C4)
-- C7 manage projection/preferences — OPEN (gated on Q1 per-field masking decision)
-- C8 section ordering persistence — OPEN
-
-**Strategic pivot still active:** V12 UI convergence paused. Contract-first mode continues. S-B.1B.4 is the first surface-side slice in this entire C1 family — handle with audit-first discipline.
+**C1 status:** S-A identity CLOSED · S-B Education CLOSED · S-C Experiences PENDING audit-first · S-D Sectors PARKED.
 
 **Ledger this session:**
-- `8ab6d913` — S-B.1B.2 endpoint slice — CLOSED 2026-05-13 (single closure covers both `0799143` + `ed1da55`).
-- `6dc1e5d4` — S-B.1B.4 UI panel — OPEN (inflection point).
-- `1609e494` — Relational L2 collection migration — STILL PARKED. Education read+write paths now both live; remaining collections (experiences extended fields, languages, sectors) still parked.
+- `6dc1e5d4` — S-B.1B.4 UI panel — CLOSED.
+- `5503e29d` — F-editor-l1-fallback-education — CLOSED.
+- `610f9404` — S-C Experiences extended fields audit-first — OPEN.
+- `1609e494` — Relational L2 collection migration — STILL PARKED for non-Education collections.
 
-**Handoff doc:** `docs/HANDOFF_2026-05-13-AM.md`
-
+**Handoff doc:** `docs/HANDOFF_2026-05-13-PM.md`
 
 ### DO NOT
 
@@ -226,6 +218,9 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 - Inject `<style>` tags, hover rules, `data-hover` / `data-spine-action` attributes, or any new style mechanism into the View tab without an explicit, scoped slice approval.
 - Do not invent a new component primitive family for the cv_education_suggestions panel. Mirror S-A identity panel primitives + in-flight state pattern. Row shape (collection vs flat) is the only legitimate divergence and must be GPT-validated before code.
 - Do not use timestamp-window cleanup for collection-write validation (S-B.1B.4 onward). Use captured-id pattern: before_count → apply → capture L2 row id → verify resolution_state.l2_id match → DELETE by exact id → surgical resolution_state removal → verify baseline + UI re-fire. Mo lock 2026-05-13.
+- Do not reintroduce `members.university`, `members.field_of_study`, or `members.graduation_year` in any form.
+- Do not delete the read-only Languages SectionCard from the Edit tab until a dedicated L2 language slice ships.
+- Do not revive the combined Education & Languages SectionCard + Drawer pattern.
 
 ### PARKED (admin_tasks status=parked)
 
@@ -266,7 +261,7 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 13, 2026 AM (Opus session, single pass) — C1 slice S-B education backend substrate fully closed via 2 commits (`0799143` S-B.1B.2 apply, `ed1da55` S-B.1B.3 dismiss). Endpoint contract complete: action union apply | dismiss, signature-only body, SIGNATURE_STALE / INSTITUTION_REQUIRED / ALREADY_APPLIED error codes. Inflection point reached. Next session opens at S-B.1B.4 UI panel audit-first.
+**Last updated:** May 13, 2026 PM (corrective rotation) — C1 Education subgraph FULLY CLOSED via S-B.1B.4 UI, S-B.2A backfill, S-B.2B code retirement, and S-B.2C DDL drop. `education_records` is sole education truth; trio dropped from `members`. Next session opens at S-C Experiences audit-first (ledger `610f9404`).
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
@@ -509,7 +504,7 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
   - **View tab** = candidate's PRIVATE living professional document surface (real names, real data, no completion language, empty sections hide entirely).
   - **Edit tab** = enrichment/data capture surface. S1.5 prefill panel + CV upload/parse card + 7 per-section drawers (Identity, Current Position, Luxury Fit, Skills & Markets, Compensation, Clienteling, Availability & Targets) + 11-screen tunnel coexisting.
   - **Manage tab** = read-only Visibility & sharing status panel (v0 shipped at `a829033`). Reads `/api/profilux/share` (legacy `profilux.share_slug` + `sharing_enabled` only). No toggle, no reset, no copy. Future sharing toggle UX gated on `0e6f3271` (reset-link) unparking.
-- Storage contract: `members.*` flat columns + `cv_parsed_data` jsonb. Relational L2 collection tables: `education_records` partially ACTIVE read-side as of S-B.1A/1B.1 (resolver merges + suggestions predicate; write path still parked pending S-B.1B.2). `work_experiences` ACTIVE read+write since `c6c7c77`. `member_languages`, `member_sectors` still DORMANT — all remaining collection migrations parked under `1609e494`.
+- Storage contract: `members.*` flat columns + `cv_parsed_data` jsonb. Relational L2 collection tables: `education_records` ACTIVE end-to-end and now the sole education truth surface. `work_experiences` ACTIVE read+write since `c6c7c77`. `member_languages`, `member_sectors` still DORMANT — remaining collection migrations parked under `1609e494`. `members.{university,field_of_study,graduation_year}` trio DROPPED 2026-05-13 PM via migration `s_b_2c_drop_members_trio_education_columns`.
 - Resolver: `lib/profilux/resolveProfiLux` returns `ProfiLuxResolved` (single shape, all surfaces). Emits `cv_identity_suggestions`.
 - 6 surface projections via `projectFor`: dashboard / editor / public / admin / ats / client.
 - Share state isolation: legacy `profilux` table (`share_slug` + `sharing_enabled` only) stays OUT of `EditorView`, resolver, and `projectFor`. Read via dedicated `GET /api/profilux/share` endpoint only.
@@ -704,6 +699,8 @@ All tabbed pages use `?tab=` query params. Brands: 5 tabs (~760 sitemap URLs).
 - **View tab** = candidate's PRIVATE living professional document surface. Real names, real data. No completion language. Empty sections hide. No fake interactivity. Header / About / Experience / Skills & expertise (Languages bundled).
 - **Edit tab** = enrichment/data capture surface. S1.5 prefill panel + CV card + 7 per-section drawers + 11-screen tunnel.
 - **Manage tab** = read-only Visibility & sharing status panel (v0 at `a829033`). Reads `/api/profilux/share`. No toggle, no reset, no copy. Future sharing toggle UX gated on `0e6f3271` reset-link unpark.
+- **Education truth surface lock (May 13, 2026 PM):** `education_records` is the sole education truth surface across DB, resolver, types, projections, and UI. No trio resurrection on `members.*`.
+- **Languages preservation lock (May 13, 2026 PM):** Edit tab Languages is a read-only SectionCard rendering L1 parsed languages inline until a dedicated L2 language collection slice ships.
 
 **Share state isolation contract (locked May 9, 2026):**
 - Legacy `profilux` table (`share_slug` + `sharing_enabled` only) stays OUT of `EditorView`, resolver, and `projectFor`.
