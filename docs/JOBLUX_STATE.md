@@ -155,9 +155,8 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 **Strict step order:**
 
-1. **S-D Sectors evaluation** — re-evaluate `1609e494` parking decision before any work begins.
-2. **C2/C3/C8** — section visibility / library / ordering persistence.
-3. Then continue locked order: **C6 → C7**.
+1. **C2/C3/C8** — section visibility / library / ordering persistence. *(S-D Sectors evaluated 2026-05-13 PM late: keep `1609e494` PARKED. L1 sectors render correctly today; `member_sectors` table dormant and empty. Unpark requires Mo + GPT scope lock on rank semantics, add/remove/reorder UX, L1/L2 merge contract, and M6/G3 readiness implications.)*
+2. Then continue locked order: **C6 → C7**.
 
 **C1 status:** S-A identity CLOSED · S-B Education CLOSED · S-C Experiences CLOSED (audit-first + S-C.0) · S-D Sectors PARKED.
 
