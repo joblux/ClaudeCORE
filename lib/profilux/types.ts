@@ -35,7 +35,9 @@ export type CvParsedExperience = {
   country: string | null
   start_date: string | null
   end_date: string | null
+  is_current: boolean
   description: string | null
+  raw_dates_text: string | null
 }
 
 export type CvParsedEducation = {

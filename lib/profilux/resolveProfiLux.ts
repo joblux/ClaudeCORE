@@ -108,6 +108,12 @@ function mapExperiences(
     country: e.country ?? null,
     start_date: e.start_date ?? null,
     end_date: e.end_date ?? null,
+    // S-C.0: pass is_current through from L1. Defensive `?? false` mirrors
+    // resolver's existing defensive style and tolerates stale cv_parsed_data
+    // that predates the boolean-NN zod enforcement. raw_dates_text is parsed
+    // but intentionally NOT lifted to ResolvedExperience (no UI consumer
+    // exists; future lift is a 1-line slice when needed).
+    is_current: e.is_current ?? false,
     description: e.description ?? null,
   }))
 }
