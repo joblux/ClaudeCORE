@@ -363,12 +363,6 @@ type Screen8Draft = {
   clienteling_description: string
 }
 
-type Screen6Draft = {
-  university: string
-  field_of_study: string
-  graduation_year: string
-}
-
 type Screen10Draft = {
   desired_salary_min: number | null
   desired_salary_max: number | null
@@ -455,14 +449,6 @@ function draftFrom8(e: EditorView): Screen8Draft {
   return {
     clienteling_experience: e.clienteling_experience,
     clienteling_description: e.clienteling_description ?? '',
-  }
-}
-
-function draftFrom6(e: EditorView): Screen6Draft {
-  return {
-    university: e.university ?? '',
-    field_of_study: e.field_of_study ?? '',
-    graduation_year: e.graduation_year == null ? '' : String(e.graduation_year),
   }
 }
 
@@ -589,10 +575,6 @@ export default function ProfiluxPage() {
   const [saving8, setSaving8] = useState(false)
   const [savedAt8, setSavedAt8] = useState<number | null>(null)
   const [saveError8, setSaveError8] = useState<string | null>(null)
-  const [draft6, setDraft6] = useState<Screen6Draft>({ university: '', field_of_study: '', graduation_year: '' })
-  const [saving6, setSaving6] = useState(false)
-  const [savedAt6, setSavedAt6] = useState<number | null>(null)
-  const [saveError6, setSaveError6] = useState<string | null>(null)
   const [draft10, setDraft10] = useState<Screen10Draft | null>(null)
   const [saving10, setSaving10] = useState(false)
   const [savedAt10, setSavedAt10] = useState<number | null>(null)
@@ -620,7 +602,6 @@ export default function ProfiluxPage() {
   const [saving1, setSaving1] = useState(false)
   const [savedAt1, setSavedAt1] = useState<number | null>(null)
   const [saveError1, setSaveError1] = useState<string | null>(null)
-  const [educationLanguagesDrawerOpen, setEducationLanguagesDrawerOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [parsing, setParsing] = useState(false)
@@ -649,7 +630,6 @@ export default function ProfiluxPage() {
       setDraft(draftFrom(e))
       setDraft4(draftFrom4(e))
       setDraft8(draftFrom8(e))
-      setDraft6(draftFrom6(e))
       setDraft10(draftFrom10(e))
       setDraft9(draftFrom9(e))
       setDraft7(draftFrom7(e))
@@ -908,33 +888,6 @@ export default function ProfiluxPage() {
       setSaveError8(String(err))
     } finally {
       setSaving8(false)
-    }
-  }
-
-  async function handleSave6() {
-    setSaving6(true)
-    setSaveError6(null)
-    try {
-      const yearRaw = draft6.graduation_year.trim()
-      const yearNum = yearRaw === '' ? null : Number(yearRaw)
-      const body: Record<string, unknown> = {
-        university: draft6.university,
-        field_of_study: draft6.field_of_study,
-        graduation_year: yearNum != null && Number.isFinite(yearNum) && yearNum >= 0 ? yearNum : null,
-      }
-      const res = await fetch('/api/profilux', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      await refetch()
-      setSavedAt6(Date.now())
-      setTimeout(() => setSavedAt6((t) => (t && Date.now() - t >= 2000 ? null : t)), 2100)
-    } catch (err) {
-      setSaveError6(String(err))
-    } finally {
-      setSaving6(false)
     }
   }
 
@@ -1366,21 +1319,6 @@ export default function ProfiluxPage() {
       )
       case 6: return (
         <div style={{ maxWidth: 900 }}>
-          <div style={grid}>
-            <div style={label}>University</div>
-            <div><input style={input} value={draft6.university} onChange={(ev) => setDraft6({ ...draft6, university: ev.target.value })} placeholder="e.g. Swiss School of Business" /></div>
-            <div style={label}>Field of study</div>
-            <div><input style={input} value={draft6.field_of_study} onChange={(ev) => setDraft6({ ...draft6, field_of_study: ev.target.value })} placeholder="e.g. Business Administration" /></div>
-            <div style={label}>Graduation year</div>
-            <div><input style={input} type="number" min={0} value={draft6.graduation_year} onChange={(ev) => setDraft6({ ...draft6, graduation_year: ev.target.value })} placeholder="e.g. 2018" /></div>
-          </div>
-          <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
-            <button style={saving6 ? saveBtnDis : saveBtn} disabled={saving6} onClick={handleSave6}>
-              {saving6 ? 'Saving…' : 'Save'}
-            </button>
-            {savedAt6 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
-            {saveError6 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError6}</span>}
-          </div>
           <div style={sectionLabel}>Education</div>
           {e.education.length === 0 && <NoneSel />}
           {e.education.map((ed, i) => (
@@ -2822,86 +2760,19 @@ export default function ProfiluxPage() {
           </>
         )}
       </Drawer>
-      <SectionCard eyebrow="Education & Languages">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div />
-          <button
-            type="button"
-            onClick={() => setEducationLanguagesDrawerOpen(true)}
-            style={{
-              background: 'transparent',
-              color: '#ccc',
-              border: '1px solid #2a2a2a',
-              padding: '6px 12px',
-              fontSize: 12,
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
-            Edit
-          </button>
-        </div>
-        <div style={grid}>
-          <div style={label}>University</div>
-          <div>{e.university ?? <NotSet />}</div>
-          <div style={label}>Field of study</div>
-          <div>{e.field_of_study ?? <NotSet />}</div>
-          <div style={label}>Graduation year</div>
-          <div>{e.graduation_year != null ? String(e.graduation_year) : <NotSet />}</div>
-        </div>
-      </SectionCard>
-      <Drawer
-        open={educationLanguagesDrawerOpen}
-        title="Education & Languages"
-        onClose={() => setEducationLanguagesDrawerOpen(false)}
-      >
-        <div style={grid}>
-          <div style={label}>University</div>
-          <div><input style={input} value={draft6.university} onChange={(ev) => setDraft6({ ...draft6, university: ev.target.value })} placeholder="e.g. Swiss School of Business" /></div>
-          <div style={label}>Field of study</div>
-          <div><input style={input} value={draft6.field_of_study} onChange={(ev) => setDraft6({ ...draft6, field_of_study: ev.target.value })} placeholder="e.g. Business Administration" /></div>
-          <div style={label}>Graduation year</div>
-          <div><input style={input} type="number" min={0} value={draft6.graduation_year} onChange={(ev) => setDraft6({ ...draft6, graduation_year: ev.target.value })} placeholder="e.g. 2018" /></div>
-        </div>
-        <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
-          <button style={saving6 ? saveBtnDis : saveBtn} disabled={saving6} onClick={handleSave6}>
-            {saving6 ? 'Saving…' : 'Save'}
-          </button>
-          {savedAt6 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
-          {saveError6 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError6}</span>}
-        </div>
-        <div style={sectionLabel}>Education (parsed from your CV)</div>
-        {e.education.length === 0 ? (
-          <div style={{ color: '#999', fontSize: 13, marginTop: 8 }}>No education records parsed yet.</div>
-        ) : (
-          <div style={{ marginTop: 8 }}>
-            {e.education.map((ed, i) => (
-              <div key={i} style={{ ...card, fontSize: 12 }}>
-                <div><strong>{ed.institution ?? 'Unknown'}</strong></div>
-                <div style={{ color: '#999', marginTop: 4 }}>{ed.degree ?? '—'} · {ed.field_of_study ?? '—'} · {ed.graduation_year ?? '—'}</div>
-              </div>
-            ))}
-            <div style={{ marginTop: 4, fontSize: 11, color: '#777', fontStyle: 'italic' }}>
-              Parsed from your CV. Editing CV-parsed records is not yet supported.
-            </div>
-          </div>
-        )}
-        <div style={sectionLabel}>Languages (parsed from your CV)</div>
+      <SectionCard eyebrow="Languages">
         {e.languages.length === 0 ? (
-          <div style={{ color: '#999', fontSize: 13, marginTop: 8 }}>No languages parsed yet.</div>
+          <NoneSel />
         ) : (
-          <div style={{ marginTop: 8 }}>
+          <div>
             {e.languages.map((l, i) => (
               <div key={i} style={{ ...card, fontSize: 12 }}>
                 {l.language} — {l.proficiency ?? <em style={{ color: '#666' }}>level not specified</em>}
               </div>
             ))}
-            <div style={{ marginTop: 4, fontSize: 11, color: '#777', fontStyle: 'italic' }}>
-              Parsed from your CV. Editing CV-parsed records is not yet supported.
-            </div>
           </div>
         )}
-      </Drawer>
+      </SectionCard>
       <SectionCard eyebrow="Skills & Markets">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div />

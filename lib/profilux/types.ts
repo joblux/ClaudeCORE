@@ -234,10 +234,6 @@ export type MemberRow = {
   desired_locations: string[] | null
   desired_contract_types: string[] | null
   desired_departments: string[] | null
-  // Education flat (L2)
-  university: string | null
-  field_of_study: string | null
-  graduation_year: number | null
   // System / read-only
   role: string // member_role enum, NOT NULL, default 'professional'
   status: string // member_status enum, NOT NULL, default 'pending'
@@ -422,10 +418,6 @@ export type ProfiLuxResolved = {
   desired_locations: string[]
   desired_contract_types: string[]
   desired_departments: string[]
-  // Education flat
-  university: string | null
-  field_of_study: string | null
-  graduation_year: number | null
   // L1 passthroughs (no L2 store v1, §6.4)
   sectors: string[]
   languages: ResolvedLanguage[]
@@ -531,9 +523,6 @@ export type EditorView = {
   // Experience + education (L1)
   experiences: ResolvedExperience[]
   education: ResolvedEducation[]
-  university: string | null
-  field_of_study: string | null
-  graduation_year: number | null
   // Availability + targets (Readiness — NOT M6 admission)
   availability: EditorAvailability
   desired_locations: string[]
@@ -625,9 +614,6 @@ export type PublicProjection = {
   sectors: string[]
   languages: ResolvedLanguage[]
   experiences: PublicExperience[] // anonymized
-  // Education (graduation_year hidden V7)
-  university: string | null
-  field_of_study: string | null
 }
 
 // --- Client share projection (V2 V3 V4 V5 V7 V8) ----------------------------
@@ -665,9 +651,6 @@ export type ClientProjection = {
   sectors: string[]
   languages: ResolvedLanguage[]
   experiences: ResolvedExperience[] // V5: full
-  // Education
-  university: string | null
-  field_of_study: string | null
 }
 
 // --- Admin projection (full + L1 raw) ---------------------------------------

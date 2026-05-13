@@ -220,18 +220,6 @@ export async function resolveProfiLux(
   const job_title = pickStr(row.job_title, recent?.job_title)
   const current_employer = pickStr(row.current_employer, recent?.company)
 
-  // Education flat from first L1 record when L2 NULL
-  const firstEdu = arr<CvParsedEducation>(cv?.education)[0]
-  const university = pickStr(row.university ?? null, firstEdu?.institution)
-  const field_of_study = pickStr(
-    row.field_of_study ?? null,
-    firstEdu?.field_of_study,
-  )
-  const graduation_year =
-    row.graduation_year !== null && row.graduation_year !== undefined
-      ? row.graduation_year
-      : firstEdu?.graduation_year ?? null
-
   const cv_identity_suggestions: CvIdentitySuggestions = {}
   const _rstate = cv?.resolution_state?.identity
   const _sug_first_name = pickSuggestionWithState(row.first_name, ident?.first_name, _rstate?.first_name)
@@ -331,10 +319,6 @@ export async function resolveProfiLux(
     desired_locations: arr(row.desired_locations),
     desired_contract_types: arr(row.desired_contract_types),
     desired_departments: arr(row.desired_departments),
-    // Education flat
-    university,
-    field_of_study,
-    graduation_year,
     // L1 passthroughs
     sectors: arr(cv?.sectors),
     languages: mapLanguages(cv?.languages),

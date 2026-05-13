@@ -133,9 +133,6 @@ export function projectFor(
         sectors: view.sectors,
         languages: view.languages,
         experiences: anonymizeExperiences(view.experiences), // V5
-        // V7: graduation_year hidden — not included
-        university: view.university,
-        field_of_study: view.field_of_study,
       }
       return pub
     }
@@ -172,9 +169,6 @@ export function projectFor(
         sectors: view.sectors,
         languages: view.languages,
         experiences: view.experiences, // V5: full
-        university: view.university,
-        field_of_study: view.field_of_study,
-        // V7: graduation_year hidden
       }
       return client
     }
@@ -252,9 +246,6 @@ export function projectEditorView(view: ProfiLuxResolved): EditorView {
     // Experience + education
     experiences: view.experiences,
     education: view.education,
-    university: view.university,
-    field_of_study: view.field_of_study,
-    graduation_year: view.graduation_year,
     // Availability + targets
     availability: normalizeEditorAvailability(view.availability),
     desired_locations: view.desired_locations,
