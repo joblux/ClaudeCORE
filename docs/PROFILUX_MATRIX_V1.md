@@ -14,6 +14,15 @@ This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE w
 
 ## CHANGE LOG
 
+**v1.5 — May 14, 2026 Manage + matching doctrine reconciliation addendum**
+
+Reconciles two doctrinal gaps surfaced by C7 audit. No substrate change. No new infrastructure. No code, no schema, no UI. Doctrine text only.
+
+- **§19** Settings doctrine: new **§19.4 "Live state"** subsection appended. Reconciles MATRIX with the live Manage tab CRUD (reserve / regenerate slug + enable / disable sharing toggle) shipped against `/api/profilux/share` + `/api/profilux/reset-link`. §19.3 PARKED status preserved for the broader Settings page rebuild; §19.4 carves out the sharing-control subset as live.
+- **§20** Matching entry doctrine: new **§20.x "Provisional posture"** subsection appended (extends §20.5). Locks the separation between `availability` (candidate self-description) and matching consent (explicit toggle, §20 PARKED). Documents the provisional status of the View tab "Visible to JOBLUX matching only" caption and the conditions under which it must change.
+
+§§1–18, §19A, §§21–24 — all KEEP unchanged.
+
 **v1.4 — May 14, 2026 Export doctrine lock addendum**
 
 Locks the product doctrine for ProfiLux export based on 7 answers from Mo (May 14 2026). No substrate change. No new infrastructure. No library decision. Doctrine text only. Future helper / projection implementation deferred.
@@ -794,6 +803,33 @@ The current `/profile` (light) surface — slated for retirement once Settings s
 
 PARKED. Greenfield page.
 
+### 19.4 — Live state (locked May 14 2026, supersedes §19.3 for sharing controls only)
+
+Settings page proper remains PARKED (greenfield, §19.3). However, the Manage tab inside the candidate ProfiLux page (`/dashboard/candidate/profilux`, `tab === 'manage'`) is live and operationally hosts a subset of the controls described in §19.1:
+
+| Control | Status | Route | DB write |
+|---|---|---|---|
+| Reserve / regenerate public slug | LIVE | `POST /api/profilux/reset-link` | `profilux.share_slug` (upsert) |
+| Enable / disable sharing toggle | LIVE | `POST /api/profilux/share` | `profilux.sharing_enabled` |
+| Sharing status read | LIVE | `GET /api/profilux/share` | none (read-only) |
+| Public URL ON/OFF | LIVE (alias of "enable / disable sharing") | — | — |
+| Maskable field toggles (§16) | PARKED | — | none |
+| Candidate self-export trigger (§19A) | PARKED | — | none |
+| Account preferences (notifications, contact) | PARKED | — | none |
+
+**Doctrinal anchors:**
+- `profilux` table remains the sole sharing-state surface (no `members.sharing_*` columns).
+- Sharing controls sit outside the projection contract (§7) because they manage share-state metadata, not profile field projection.
+- Reset-link mints `share_slug` from `members.{first_name, last_name}` lowercased + dash-joined (real-identity slug; no vanity picker in v1).
+- Edit / Reserve path stays under candidate authority — no admin override is in scope.
+
+**Out of scope of this live state:**
+- Per-field maskable toggles (§16 PARKED).
+- Candidate self-export (§19A PARKED).
+- Profile visibility levels other than `team_only` (current default; `members.profile_visibility` column is orphan, not consumed).
+- Slug vanity / pseudonym picker.
+- `share_slug` `UNIQUE` constraint posture (not verified by C7; tracked as drift noise, not a doctrine item here).
+
 ---
 
 ## 19A. Export doctrine (locked May 14 2026)
@@ -894,6 +930,26 @@ There is no "X% complete" admission gate. There is no "Confirm my ProfiLux" butt
 ### 20.5 — Consent field (future)
 
 Do not derive consent from availability without a future explicit Mo decision. Consent is a NEW dedicated field. Column name and DB type are deferred. Schema decision part of Tier 1 work.
+
+### 20.x — Provisional posture (locked May 14 2026)
+
+This subsection extends §20.5 with the live-UI and recruiter-surface guards. §20.5 locks that consent is not derived from `availability`; §20.x locks what happens to existing UI and surfaces in the meantime.
+
+Until the matching-entry score wiring ships (§20 PARKED, Tier 1 schema dependency per §13), no recruiter, ATS, or matching surface may consume `members.availability` as a consent signal. The `availability` field expresses willingness to engage with opportunities in general; it is NOT a consent gate for matching exposure.
+
+**Locked separations:**
+- `availability` = candidate self-description, not consent. `availability` accepts legacy / normalized values that currently resolve into `active` / `open` / `passive` / `unavailable` UI states.
+- Matching consent (§20.5) = explicit user toggle, NOT yet implemented, NOT derived from `availability`.
+- Recruiter / ATS / matching consumers MUST wait for the explicit consent toggle before treating any availability state as opt-in to matching.
+
+**Provisional UI wording:**
+The View tab LEFT SPINE today renders *"Visible to JOBLUX matching only"* next to the availability indicator. This wording is PROVISIONAL. It coherently holds today only because (a) no recruiter-facing surface consumes `availability`, and (b) `projectFor('public')` correctly V7-hides availability from public web view. If a recruiter / ATS / matching consumer ships before the explicit consent toggle, the wording must either change (drop the matching claim) or the matching surface must be gated behind the §20.5 consent toggle.
+
+**Out of scope of this provisional lock:**
+- No schema change for a consent column.
+- No UI removal of the "Visible to JOBLUX matching only" caption.
+- No new column on `members.*` for matching consent.
+- §20 PARKED status preserved.
 
 ---
 
