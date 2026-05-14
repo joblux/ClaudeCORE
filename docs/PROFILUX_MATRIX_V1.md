@@ -14,6 +14,17 @@ This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE w
 
 ## CHANGE LOG
 
+**v1.6 — May 14, 2026 ProfiLux doctrine decisions lock**
+
+Locks 6 Mo doctrine decisions on section visibility, maskable layer, Add Section library, Internships exception, Projects canonicalization, and ordering posture. No substrate. No code. No schema. No new infrastructure. Doctrine text only.
+
+- **§16** Maskable layer: locked field set rewritten — 6 fields exactly (`phone`, `email`, `current_employer`, salary fields, `availability`, `references`). No additions without explicit Mo + GPT reopen.
+- **§16A** New sibling subsection — Section visibility doctrine. Candidate can hide whole sections from Public + PDF projections only; internal/admin/recruiter projections remain complete. Default = show all. Substrate parked.
+- **§22.2** Add-library reconciliation table rewritten: doctrine list and UI list collapsed into one canonical 8-item set. `Internships` kept as STATE §1 kill-word surface-specific exception (Emerging users). `Projects` canonicalized to `Strategic Initiatives` with locked meaning. `Press & features` label kept. `Publications /` prefix dropped. `Speaking / events` and `Volunteer / board roles` dropped from doctrine. All 8 should eventually exist; substrate parked per §15.3.
+- **§22.3** Ordering doctrine update: candidate section reorder forbidden by doctrine; JOBLUX-controlled fixed order; candidate-facing ordering persistence layer NOT required. Canonical section ID prerequisite carried forward (now needed for section-hide write path, not for reorder).
+
+§§1–15, §17–§21, §23–§24 — all KEEP unchanged.
+
 **v1.5 — May 14, 2026 Manage + matching doctrine reconciliation addendum**
 
 Reconciles two doctrinal gaps surfaced by C7 audit. No substrate change. No new infrastructure. No code, no schema, no UI. Doctrine text only.
@@ -716,27 +727,84 @@ All other fields covered by `EditorView` (§7.6.1): expertise_tags, key_skills, 
 
 ### 16.1 — What it is
 
-Per-field user-controllable visibility flags. The candidate decides which fields appear in public/client share projections, beyond the deterministic surface masks of §7.3.
+Per-field user-controllable visibility flags. The candidate decides which sensitive fields appear in public/client share projections, beyond the deterministic surface masks of §7.3.
 
-### 16.2 — Maskable fields (per MODEL §5)
+### 16.2 — Maskable field set (locked v1.6, May 14 2026)
 
-- `current_employer`
-- `desired_salary_min`, `desired_salary_max`, `desired_salary_currency`
-- `availability`
+The maskable set is locked at exactly 6 fields:
+
 - `phone`
-- references (Tier 2)
+- `email`
+- `current_employer`
+- salary fields (`desired_salary_min`, `desired_salary_max`, `desired_salary_currency`)
+- `availability`
+- `references` (Tier 2, substrate parked per §15.3)
+
+No additions to this set without an explicit Mo + GPT doctrine reopen. Future fields that arrive in Tier 1 / Tier 2 are NOT automatically maskable.
 
 ### 16.3 — Distinct from §7 surface masks
 
 §7.3 masks are deterministic per surface (e.g. `phone` always hidden in `public` and `client`). §16 maskable flags are user-controlled and additive — they can hide fields that §7.3 would otherwise show.
 
-### 16.4 — Status
+### 16.4 — Distinct from §16A section visibility
 
-Schema and projection changes PARKED. Doctrine only.
+§16 is field-level. §16A is section-level. The two layers compose: a section may be visible while specific fields inside it are masked, or vice versa. Both honor the same Public + PDF projection scope.
 
-### 16.5 — Future projection contract
+### 16.5 — Status
+
+Doctrine locked (6-field set + projection scope). Schema parked. Projection wiring parked.
+
+### 16.6 — Future projection contract
 
 When schema lands, `public` and `client` projections will honor maskable flags by replacing the masked field with `null` before serialization. Resolver and EditorView remain unchanged (the maskable flag is a projection-time concern, not a storage-time one).
+
+---
+
+## 16A. Section visibility doctrine
+
+### 16A.1 — What it is
+
+Candidate-controlled section-level hide. The candidate decides which entire sections appear in their externally-shared ProfiLux, beyond the per-field maskable layer of §16.
+
+### 16A.2 — Projection scope (locked v1.6)
+
+Section hide affects EXACTLY these projections:
+
+- `public` (`/p/[slug]`)
+- PDF exports (per §19A; consumer not yet built)
+
+Section hide MUST NOT affect:
+
+- `dashboard` (candidate's own view)
+- `editor` (candidate's own edit surface)
+- `admin` (admin review surface)
+- `ats` (recruiter operational view)
+- `client` share (recruiter-curated artifact)
+
+Internal/admin/recruiter truth remains complete regardless of candidate hide choices. The candidate cannot hide content from JOBLUX itself or from recruiters; they can only hide content from outbound public sharing.
+
+### 16A.3 — Default state
+
+Default = show all sections. Hide is opt-in per section. New members carry zero hidden sections.
+
+### 16A.4 — Scope: removable vs permanent sections
+
+Per §22.4, default sections cannot be REMOVED. Section hide is distinct: a default section stays in the catalog and continues to render on internal/admin/recruiter projections; it is only suppressed on Public + PDF. Library sections (§22.2) follow the same hide rule once activated.
+
+### 16A.5 — Distinct from §16 field-level mask
+
+§16 hides individual fields; §16A hides entire sections. They compose. A candidate may:
+- hide a whole section from Public (§16A) while leaving its fields visible elsewhere
+- show a section while masking specific fields inside it (§16)
+- combine both
+
+### 16A.6 — Status
+
+Doctrine locked (projection scope + default + composition rule). Schema parked (forward dependency on §22.3 canonical section identifier). Projection wiring parked.
+
+### 16A.7 — Future projection contract
+
+When schema lands, `public` and PDF projections will receive the candidate's hidden-section list at projection time and suppress the matching section blocks before serialization. Resolver and EditorView remain unchanged (section hide is a projection-time concern, not a storage-time one).
 
 ---
 
@@ -1040,36 +1108,30 @@ Field assignments mirror §7.6.1 `EditorView` exactly. Grouping is locked here. 
 
 - **Row 4 (Education) — no standalone Edit SectionCard.** View renders an Education ViewZone over `education_records` (L2) + L1 passthrough. Edit affordance is the S-B `cv_education_suggestions` panel only; manual L2 row Edit/Delete on Edit tab is not yet wired (asymmetric vs Career History, which has full L2 CRUD via `/api/profilux/experiences`).
 
-### 22.2 — Add-library sections (DOCTRINE vs LIVE — drift surfaced, parked)
+### 22.2 — Add-library sections (canonical 8, locked v1.6)
 
-The passport surfaces an "Add section" affordance opening an `EXTEND DOSSIER` drawer. The drawer renders 8 library entries. Substrate for any library section is PARKED — Tier 2 schema (per §15.3) is not yet built; the UI renders all entries inert.
+The passport surfaces an "Add section" affordance opening an `EXTEND DOSSIER` drawer. The drawer renders 8 canonical library entries. Substrate for any library section is PARKED — Tier 2 schema (per §15.3) is not yet built; the UI renders all entries inert.
 
 **Inert state (live):** every library row renders with `aria-disabled="true"`, `pointerEvents: 'none'`, `opacity: 0.4`, `userSelect: 'none'`. No click handler. No state hook. No API. No DB row. The drawer is a visual placeholder until Tier 2 schema lands.
 
-**Drift status:** the doctrine list (this section) and the live `ADD_SECTION_LIBRARY` array (in `app/dashboard/candidate/profilux/page.tsx`) are NOT in sync. Reconciliation is parked and is part of the add-library activation slice, not this one.
+**Canonical 8 (locked):**
 
-| MATRIX doctrine (v1.2) | LIVE `ADD_SECTION_LIBRARY` (current UI) | Drift |
-|---|---|---|
-| Certifications (structured) | Certifications (`certifications`) | name match; substrate mismatch — flat `members.certifications: string[]` exists today; "structured" form parked |
-| Awards | Awards (`awards`) | match; no substrate |
-| References | References (`references`) | match; no substrate |
-| Portfolio | Portfolio (`portfolio`) | match; no substrate |
-| Publications / press features | Press & features (`press_features`) | **label drift** |
-| Memberships | Memberships (`memberships`) | match; no substrate |
-| Speaking / events | (not in UI) | **missing from UI** |
-| Volunteer / board roles | (not in UI) | **missing from UI** |
-| (not in doctrine) | Projects (`projects`) | **extra in UI** |
-| (not in doctrine) | Internships (`internships`) | **extra in UI; conflicts with STATE §1 kill-word list (`internships`)** |
+| # | Canonical label | Key | Notes |
+|---|---|---|---|
+| 1 | Awards | `awards` | No substrate today. |
+| 2 | Certifications | `certifications` | `members.certifications` exists as flat `text[]`; structured form requires Tier 2 substrate. |
+| 3 | Portfolio | `portfolio` | No substrate today. |
+| 4 | Strategic Initiatives | `strategic_initiatives` | Renamed from `Projects` (v1.6 canonicalization). Locked meaning: important launches, transformations, missions, entrepreneurial efforts, or notable initiatives with measurable impact. Avoids generic / startup ambiguity; works for employed, freelance, founder, and emerging profiles; no overlap with Awards. |
+| 5 | Memberships | `memberships` | No substrate today. |
+| 6 | Press & features | `press_features` | Label kept (drops `Publications /` prefix from prior doctrine). |
+| 7 | References | `references` | Also in §16 maskable set; substrate decisions must align. |
+| 8 | Internships | `internships` | KEPT — explicit surface-specific exception to STATE §1 kill-word doctrine. Rationale: Emerging-user (`rising` tier) early-career representation. Documented as exception, not doctrine reversal. Kill-word doctrine elsewhere on the platform unchanged. |
 
-**Decision posture (locked 2026-05-14):**
+**Dropped from prior doctrine list:** `Speaking / events`, `Volunteer / board roles`. Not part of the canonical 8. Reopening either requires explicit Mo + GPT decision.
 
-- The above table is the canonical drift inventory. Doctrine list and UI list are BOTH preserved here side-by-side. Neither list is promoted to canonical.
-- Reconciliation deferred to a dedicated add-library activation slice, which will resolve:
-  1. Canonical 8-item set (doctrine vs UI vs new).
-  2. Per-section Tier 2 substrate (column vs relational table).
-  3. STATE §1 kill-word reconciliation for `Internships`.
-  4. `Publications / press features` vs `Press & features` label pick.
-- Until that slice ships, the live UI library remains inert and the drift remains documented here.
+**Doctrine intent:** all 8 should eventually exist. The library is not aspirational drift; it is the locked end-state. Activation per section gated on Tier 2 substrate decisions.
+
+**Substrate posture (forward dependency):** each library section requires either a new column on `members.*` or a relational table. The shape decision is per-section (column vs jsonb vs dedicated table), echoing the `1609e494` L2 collection pattern. Substrate decisions parked.
 
 ### 22.3 — Ordering rules (live truth + persistence status)
 
@@ -1093,11 +1155,15 @@ Section order is recomputed every render from JSX file position only.
 
 **Row-level `sort_order` (substrate adjacency).** The only `sort_order` column anywhere in the ProfiLux stack is `education_records.sort_order`. The resolver reads it (`ORDER BY sort_order ASC, graduation_year DESC NULLS LAST`); the apply path (`/api/profilux/suggestions/education`) never writes a non-default value (every row collides at 0). This is ROW-level ordering inside the Education collection, NOT section-level ordering. Flagged as observation `F-S-C-4`.
 
-**Default-section reorder posture.** Default sections cannot be reordered by the user. View order is locked at the V12 sequence (`9dabff1`). Reordering View sections requires an explicit doctrine reversal slice per `JOBLUX_STATE.md` DO NOT block.
+**Default-section reorder posture (locked v1.6).** Candidate section reorder is forbidden by doctrine. Section order is JOBLUX-controlled and fixed at the V12 sequence (`9dabff1`). Reopening requires an explicit Mo + GPT doctrine reversal slice.
 
-**Add-library reorder posture.** Add-library sections are inert per §22.2; ordering decision is deferred to the add-library activation slice.
+**Add-library reorder posture (locked v1.6).** Add-library sections appear in their canonical §22.2 order. No user reorder.
 
-**Prerequisites for any future reorder UX.** A future section-reorder implementation must, BEFORE writing code, resolve all of:
+**Candidate-facing ordering persistence (locked v1.6).** Section ordering persistence layer is NOT required for candidate-facing reorder. C8 prerequisites (persistence substrate, scope, per-surface contract) collapse for candidate-controlled order — there is no candidate-controlled order.
+
+**Remaining forward dependency.** A canonical section identifier system (prerequisite 1 below) IS still required, but now scoped to §16A section-hide write path (which sections did the candidate hide?) and §22.2 library activation write path (which sections did the candidate add?). NOT for reorder.
+
+**Prerequisites for any future reorder UX (DOCTRINE-LOCKED OUT).** A future section-reorder implementation would require:
 
 1. **Canonical section identifier system.** Today the system has 5 parallel naming surfaces for section identity: MATRIX §22.1 names, `ViewCollapseKey` union (with 3 orphan keys per audit C2), `ADD_SECTION_LIBRARY` keys, parser `CvParsedNeedsReviewItem.section` enum, and parser `CvParsedConfidence` keys. None is canonical. None is shared across resolver / projector / UI.
 2. **Persistence substrate decision.** Column on `members.*` vs dedicated `member_section_layout` table. Choice has follow-on implications: column = simpler, single row write; table = enables future per-section metadata and joins, but introduces another L2 collection (echoes parked `1609e494`).

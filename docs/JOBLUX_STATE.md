@@ -165,7 +165,7 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 **Audits closed this rotation (parked):**
 - **S-D Sectors** (2026-05-13 PM late): keep `1609e494` PARKED. L1 sectors render correctly; `member_sectors` table dormant and empty. Unpark requires Mo + GPT scope lock on rank semantics, add/remove/reorder UX, L1/L2 merge contract, and M6/G3 readiness implications.
-- **C2/C3/C8** (2026-05-14 PM): keep PARKED. C2 overlaps still-parked §16 maskable layer. C3 has unresolved `ADD_SECTION_LIBRARY` doctrine drift + no Tier 2 substrate. C8 requires canonical section ID system + persistence substrate decision before implementation. 11 gating decisions (3 + 4 + 4) documented in audit card; none resolved. No code, no schema. Ledger row `d243fc13` reclassified (label only) to reflect live truth: Add Section trigger + inert drawer are physically present; activation is what's missing.
+- **C2/C3/C8** (2026-05-14 PM): kept PARKED in audit closure; doctrine layer subsequently advanced same day via MATRIX v1.6 (Mo decisions, May 14 PM). C2 visibility direction locked (§16A: candidate hides whole sections from Public + PDF only); C3 library canonicalized to 8 items (§22.2; `Strategic Initiatives` replaces `Projects`; `Internships` kept as surface exception); C8 candidate-facing reorder doctrinally closed (§22.3: fixed JOBLUX-controlled order). Substrate (Tier 2 schema, canonical section identifier, maskable schema) still PARKED. Ledger `d243fc13` label unchanged (activation still requires substrate).
 
 **C1 status:** S-A identity CLOSED · S-B Education CLOSED · S-C Experiences CLOSED (audit-first + S-C.0) · S-D Sectors PARKED · C2/C3/C8 PARKED.
 
@@ -229,6 +229,7 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 - Do not delete the read-only Languages SectionCard from the Edit tab until a dedicated L2 language slice ships.
 - Do not revive the combined Education & Languages SectionCard + Drawer pattern.
 - Treat the View tab "Download PDF" affordance as a live export feature. It is a doctrinally misplaced VISUAL PLACEHOLDER per `docs/PROFILUX_MATRIX_V1.md` §19A.2. Any export feature ships from Manage / Settings, consumes a private full ProfiLux snapshot generated from the canonical ProfiLux resolution pipeline, and never serves a public-facing PDF (public sharing stays web-first via `/p/[slug]`). Recruiter / client PDFs are PARKED on `C-B-2` / `C-B-3`.
+- Treat the `Internships` entry in `ADD_SECTION_LIBRARY` as an intentional surface-specific exception per `docs/PROFILUX_MATRIX_V1.md` §22.2 (locked v1.6, May 14 2026): Emerging-user early-career representation. Do not propose its removal on STATE §1 kill-word grounds. Kill-word doctrine elsewhere on the platform unchanged.
 - Do not treat `members.availability` as a consent signal in any recruiter, ATS, matching, or third-party-facing surface. Matching consent is locked as a separate explicit toggle per `docs/PROFILUX_MATRIX_V1.md` §20 / §20.x. The View tab caption "Visible to JOBLUX matching only" is PROVISIONAL and coherent only while no recruiter / matching consumer reads `availability`. Any recruiter, ATS, or matching surface that wants to read availability must either ship behind an explicit MATRIX §20 consent toggle, or the matching claim must be removed from the caption first.
 
 ### PARKED (admin_tasks status=parked)
@@ -543,6 +544,8 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 - Storage contract: `members.*` flat columns + `cv_parsed_data` jsonb. Relational L2 collection tables: `education_records` ACTIVE end-to-end and now the sole education truth surface. `work_experiences` ACTIVE read+write since `c6c7c77`. `member_languages`, `member_sectors` still DORMANT — remaining collection migrations parked under `1609e494`. `members.{university,field_of_study,graduation_year}` trio DROPPED 2026-05-13 PM via migration `s_b_2c_drop_members_trio_education_columns`.
 - Resolver: `lib/profilux/resolveProfiLux` returns `ProfiLuxResolved` (single shape, all surfaces). Emits `cv_identity_suggestions`.
 - 6 surface projections via `projectFor`: dashboard / editor / public / admin / ats / client.
+- Maskable layer (§16, doctrine locked v1.6): 6 fields — `phone`, `email`, `current_employer`, salary, `availability`, `references`. Schema parked.
+- Section visibility (§16A, doctrine locked v1.6): candidate can hide whole sections from `public` + PDF only; internal/admin/recruiter projections complete. Schema parked.
 - Share state isolation: legacy `profilux` table (`share_slug` + `sharing_enabled` only) stays OUT of `EditorView`, resolver, and `projectFor`. Read via dedicated `GET /api/profilux/share` endpoint only.
 - CV pipeline: Haiku 4.5 parser at `/api/members/cv-parse`, schema_v1.0, locked sectors + proficiencies. Canonical recompute fires post-write per Matrix §4.4 (D2 fix at `6d820f7`).
 - Identity prefill: explicit-confirmation only (S1.5). L1 → L2 silent writes forbidden across all code paths.
