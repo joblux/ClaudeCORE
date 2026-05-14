@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 const wrap: React.CSSProperties = {
   maxWidth: 1200,
@@ -162,24 +163,52 @@ const selectedLine: React.CSSProperties = {
   marginTop: 18,
 }
 
-const lastUploadLine: React.CSSProperties = {
-  fontFamily: 'Inter, sans-serif',
-  fontSize: 11.5,
-  color: '#777',
-  marginTop: 20,
-}
-
 export default function CvMergePage() {
+  const router = useRouter()
   const [filename, setFilename] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [parsing, setParsing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   function openPicker() {
+    if (uploading || parsing) return
     inputRef.current?.click()
   }
 
-  function onFileChange(ev: React.ChangeEvent<HTMLInputElement>) {
+  async function onFileChange(ev: React.ChangeEvent<HTMLInputElement>) {
     const f = ev.target.files?.[0]
-    if (f) setFilename(f.name)
+    if (!f) return
+    setFilename(f.name)
+    setError(null)
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('cv', f)
+      const upRes = await fetch('/api/members/cv-upload', { method: 'POST', body: fd })
+      if (!upRes.ok) {
+        setError('Upload failed. Try again.')
+        setUploading(false)
+        return
+      }
+      setUploading(false)
+      setParsing(true)
+      const parseRes = await fetch('/api/members/cv-parse', { method: 'POST' })
+      const parseData = await parseRes.json().catch(() => ({} as any))
+      if (!parseRes.ok || !parseData?.success) {
+        setError('CV uploaded, but parsing failed. Return to ProfiLux and try parsing again.')
+        setParsing(false)
+        return
+      }
+      setParsing(false)
+      router.push('/dashboard/candidate/profilux')
+    } catch {
+      setError('Upload failed. Try again.')
+      setUploading(false)
+      setParsing(false)
+    } finally {
+      if (ev.target) ev.target.value = ''
+    }
   }
 
   return (
@@ -198,9 +227,9 @@ export default function CvMergePage() {
       <div style={headerRow}>
         <div>
           <div style={eyebrow}>CV RE-UPLOAD</div>
-          <h1 style={titleStyle}>Review changes before they’re applied</h1>
+          <h1 style={titleStyle}>Re-upload your CV</h1>
           <p style={lede}>
-            Your existing ProfiLux is never silently overwritten. Choose which detected changes to merge, field by field.
+            Your CV will be re-parsed and your ProfiLux refreshed.
           </p>
         </div>
         <Link href="/dashboard/candidate/profilux" style={cancelLink}>Cancel</Link>
@@ -212,8 +241,13 @@ export default function CvMergePage() {
         <div style={arrowRing} aria-hidden="true">↑</div>
         <div style={uploadHeadline}>Upload your latest CV</div>
         <div style={uploadHint}>PDF, DOC or DOCX · Up to 10 MB</div>
-        <button type="button" style={chooseBtn} onClick={openPicker}>
-          Choose file
+        <button
+          type="button"
+          style={{ ...chooseBtn, opacity: uploading || parsing ? 0.6 : 1, cursor: uploading || parsing ? 'not-allowed' : 'pointer' }}
+          onClick={openPicker}
+          disabled={uploading || parsing}
+        >
+          {uploading ? 'Uploading…' : parsing ? 'Parsing…' : 'Choose file'}
         </button>
         <input
           ref={inputRef}
@@ -225,7 +259,9 @@ export default function CvMergePage() {
         {filename && (
           <div style={selectedLine}>Selected: {filename}</div>
         )}
-        <div style={lastUploadLine}>Last upload: —</div>
+        {error && (
+          <div style={{ marginTop: 18, fontSize: 12, color: '#ff6b6b' }}>{error}</div>
+        )}
       </div>
     </div>
   )
