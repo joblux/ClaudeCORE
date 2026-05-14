@@ -169,7 +169,22 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 **ProfiLux Reload — MLV track active.** C-chain CLOSED (see prior rotation). MLV-1 (CV parse drop-off) CLOSED 2026-05-14 PM via Phase 1 (`31f6bae`) + Phase 1.5 (`1c206ae`). Both first-upload and Replace re-upload paths now auto-fire `/api/members/cv-parse` end-to-end. Live validated on `mzaourmohammed@gmail.com` (atlas.pdf, 17:08 UTC). Historic stuck CV rows (7 members) parked as observation `fa105cc6`; natural manual recovery path exists via Edit-tab Parse CV button.
 
-**Next step:** Mo selects between MLV-2 (Education manual CRUD drawer) or MLV-3/4/5 (UI cleanup bundle: remove View Download PDF placeholder, drop matching consent caption, hide/label Add Section inert library).
+**Next step:** Return to V12 ProfiLux journey closure. V12 (`docs/PROFILUX_V12_LOCK.md` + `docs/prototypes/profilux_journey_v12.html`) is the visual + product north star. Backend is touched only when the V12 journey requires it.
+
+Launch-blocking subset (must ship before real users):
+1. **Education manual Add/Edit/Delete drawer** — without this, users whose CV doesn't parse education cleanly are stuck. Backend: new `/api/profilux/education` route mirroring `/api/profilux/experiences`. UI: new Edit-tab drawer mirroring Career History drawer pattern (commit `c6c7c77`).
+2. **Delete 3 lying UI elements**: View tab "Download PDF" placeholder (no handler), View tab "Visible to JOBLUX matching only" caption (no matching consumer exists), Edit tab "+ Add Section" trigger + EXTEND DOSSIER inert drawer (no Tier 2 substrate).
+
+Acceptable post-launch (V12 deltas that DO NOT block launch):
+- Per-field maskable toggles in Manage (§16 substrate parked)
+- Per-section hide toggles in Manage (§16A substrate parked)
+- Add Section library activation (Tier 2 substrate parked per §15.3)
+- Tier 1 fields: notice_period, work_authorization, salary_history, reporting_line, budget_responsibility, team_size (schema parked per §15.2)
+- CV merge diff modal (Phase 1.5 shipped re-upload as page; V12 §2.2 scene 6 spec is a modal with diff — diff UX deferred)
+- Public `/[slug]` V12 spine rebuild (legacy layout acceptable v1; ledger `98219ae5`)
+- Languages L2 CRUD (L1 read-only acceptable; ledger `1609e494`)
+
+Next session opens with a V12 journey delta card filtering all V12 scenes against launch-blocking lens. First concrete slice is named in that card. No doctrine work. No admin cleanup. No new backend substrate unless the V12 journey requires it.
 
 **Strict step order:** No strict step queued post-C-chain. The locked execution chain (C1 → C5 → C2/C3/C8 → C6 → C7) has completed evaluation. Next track requires Mo direction; no auto-derived next step.
 
@@ -291,7 +306,7 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 14, 2026 PM late (MLV-1 CV parse drop-off CLOSED) — Phase 1 (`31f6bae`) + Phase 1.5 (`1c206ae`) shipped; live-validated on Mo's account. C-chain previously CLOSED at `d590afc`. v1.6 ProfiLux doctrine locked at `a244b5f`. Ambiguity rule locked at `0f3d1ea`. C2/C3/C8 audit-first closed at `61eb4da`. Ledger `0e6f3271` finalized; `d243fc13` reclassified; `fa105cc6` ADD (parked, observation). Next step: Mo selects MLV-2 (Education CRUD) vs MLV-3/4/5 (UI cleanup bundle).
+**Last updated:** May 14, 2026 PM late (MLV-1 CV parse drop-off CLOSED + next-step repositioned to V12 journey closure) — Phase 1 (`31f6bae`) + Phase 1.5 (`1c206ae`) shipped; live-validated on Mo's account. C-chain previously CLOSED at `d590afc`. v1.6 ProfiLux doctrine locked at `a244b5f`. Ambiguity rule locked at `0f3d1ea`. C2/C3/C8 audit-first closed at `61eb4da`. Ledger `0e6f3271` finalized; `d243fc13` reclassified; `fa105cc6` ADD (parked, observation). Next step REPOSITIONED: V12 ProfiLux journey closure as the main lane (not abstract MLV menu). Launch-blocking subset = Education drawer + delete 3 lying UI elements. Everything else parked or deferred.
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
