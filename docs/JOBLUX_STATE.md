@@ -320,6 +320,8 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 
 **Execution control rule:** Never execute without Mo's approval. Sequence: Propose → Wait → Mo approves → Execute. No chaining. No scope expansion.
 
+**Ambiguity rule:** When a doctrinal, product, substrate, UX, or scope question arises mid-task, stop. State the exact unknown in one sentence. Ask Mo one direct question. Wait. Do NOT invent parallel paths, fallback tracks, or adjacent next steps that were not requested. Do NOT pivot domains (e.g. ProfiLux → admin → hardening) without explicit Mo approval. Do NOT manufacture decisions through assumption chaining. If a decision is required to continue safely, ask instead of inferring.
+
 ---
 
 ## 4. PLATFORM ARCHITECTURE
