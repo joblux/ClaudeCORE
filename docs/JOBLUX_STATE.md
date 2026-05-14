@@ -372,6 +372,23 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 - `article_status` enum: `draft, review, published, archived, submitted, revision_requested, rejected`
 - `content_queue` check constraints: `content_type` ∈ {signal/event/article/research_report/voice_card/salary_benchmark/brand_profile}
 - Admin pattern: always `SUPABASE_SERVICE_ROLE_KEY`, always `.maybeSingle()` never `.single()`
+- **Future migration GRANT lock (Supabase Data API change, effective Oct 30 2026):** JOBLUX uses Supabase Data API via `supabase-js` / PostgREST. Existing tables retain current grants — no urgent runtime issue. Every future `CREATE TABLE public.*` migration MUST include explicit `GRANT` statements. RLS + policies remain mandatory. `anon` access must be an explicit, conscious decision — never automatic — and used only when the table is intentionally public-readable. Canonical template:
+
+```sql
+  CREATE TABLE public.new_table ( ... );
+
+  -- Required for Supabase Data API access after the Supabase grant behavior change.
+  GRANT SELECT, INSERT, UPDATE, DELETE ON public.new_table TO authenticated;
+  GRANT SELECT, INSERT, UPDATE, DELETE ON public.new_table TO service_role;
+
+  -- Only if intentionally public-readable:
+  -- GRANT SELECT ON public.new_table TO anon;
+
+  ALTER TABLE public.new_table ENABLE ROW LEVEL SECURITY;
+  -- + explicit policies
+```
+
+  Tracking row: admin_task `e1701dda-111c-43d3-97cd-3a01aff96bd1` (parked, low, security). Do not migrate existing tables. Doctrine + tracking only.
 
 ---
 
