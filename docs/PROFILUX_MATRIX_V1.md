@@ -14,6 +14,19 @@ This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE w
 
 ## CHANGE LOG
 
+**v1.3 — May 14, 2026 Section truth reconciliation addendum**
+
+Reconciles MATRIX with live View / Edit / Public composition after the V12 convergence pass (commit `9dabff1`, May 11 2026) and the S-B education subgraph closure (commit `baeca3c` + migration `s_b_2c_drop_members_trio_education_columns`, May 13 2026). No substrate change. No new sections. No reordering of live UI. Doctrine text only.
+
+- **§6.4** Field mapping table: trio mapping retired; `education_records` is the sole education truth surface.
+- **§7.6.1** EditorView shape: `university`, `field_of_study`, `graduation_year` removed; education collection sourced from `education_records` (L2) + `cv_parsed_data.education[]` (L1 passthrough).
+- **§15.4** Existing Phase 4 fields: trio removed from inline field list.
+- **§22.1** Default sections table rewritten to match live View order: Identity (LEFT SPINE) + 7 ViewZones in V12 sequence. Compensation marked Edit-only. Clienteling marked Edit-only currently. "Live UI label" column added to surface View ↔ Edit ↔ MATRIX label drift.
+- **§22.2** Add-library reconciliation block: DOCTRINE list vs LIVE `ADD_SECTION_LIBRARY` array surfaced side-by-side; drift parked, not resolved.
+- **§22.3** Ordering rules: explicit status block added documenting JSX-only ordering, per-surface ordering divergence, no persistence layer, ephemeral collapse state, and prerequisites for any future reorder UX.
+
+§§1–21, §24 component family strategy, §4.5 write contract, §6 resolver, §7 projection masks, §10 utilities — all KEEP unchanged.
+
 **v1.2 — May 7, 2026 UX promotion addendum**
 
 Promotes four UX MAP items (per `docs/PROFILUX_RELOAD_UX_MAP.md` §13 promotion checklist) from approved-capture status to MATRIX-locked doctrine. No substrate changes; no field changes; no contract changes. UX shell vocabulary only — locks the architecture inside which the passport rewrite will execute.
@@ -279,7 +292,7 @@ L1 fills NULL gaps. L2 always wins when populated. L1 never auto-writes to L2.
 | `experiences[0].job_title` | `job_title` | most recent role only |
 | `sectors[]` | (no flat L2) | passthrough from L1 in v1 (relational table empty) |
 | `languages[]` | (no flat L2) | passthrough from L1 in v1 (relational table empty) |
-| `education[]` | `university`, `field_of_study`, `graduation_year` | first record mappable to flat columns |
+| `education[]` | `education_records` (L2 collection) | `members` flat trio (`university`, `field_of_study`, `graduation_year`) retired at S-B.2C (DDL migration `s_b_2c_drop_members_trio_education_columns`, May 13 2026). `education_records` is now the sole education truth surface. L1 `cv_parsed_data.education[]` is preserved as a passthrough source for the resolver's additive merge contract (S-B.1A) and as the source for `cv_education_suggestions` (S-B.1B). |
 
 Sectors/languages live in `cv_parsed_data` only in v1. The relational tables `member_sectors` and `member_languages` are out of scope (§9). When the editor for these is built, a corresponding L2 store decision is required (likely via §13).
 
@@ -384,12 +397,13 @@ interface EditorView {
   product_categories: string[]
   expertise_tags: string[]
 
-  // Experience + education (L1)
+  // Experience + education
+  // education[] merges L2 (education_records) FIRST + L1 (cv_parsed_data.education[]) SECOND,
+  // additive, no dedup, per S-B.1A. The legacy flat trio
+  // (university / field_of_study / graduation_year) was dropped at S-B.2C
+  // (DDL migration s_b_2c_drop_members_trio_education_columns, May 13 2026).
   experiences: ResolvedExperience[]
   education: ResolvedEducation[]
-  university: string | null
-  field_of_study: string | null
-  graduation_year: number | null
 
   // Availability + targets (Readiness — NOT admission)
   availability: 'active' | 'open' | 'passive' | 'unavailable' | null
@@ -670,7 +684,7 @@ Each Tier 2 section requires either a new column or a new relational table, plus
 
 ### 15.4 — Existing Phase 4 fields
 
-All other fields covered by `EditorView` (§7.6.1): expertise_tags, key_skills, market_knowledge, desired_locations, desired_departments, desired_contract_types, seniority, total_years_experience, years_in_luxury, desired_salary_min/max/currency, education (L1 passthrough), languages (L1 passthrough), product_categories, clienteling_experience, clienteling_description, headline, bio, university, field_of_study, graduation_year, etc.
+All other fields covered by `EditorView` (§7.6.1): expertise_tags, key_skills, market_knowledge, desired_locations, desired_departments, desired_contract_types, seniority, total_years_experience, years_in_luxury, desired_salary_min/max/currency, education (L2 collection `education_records` + L1 passthrough `cv_parsed_data.education[]`), languages (L1 passthrough), product_categories, clienteling_experience, clienteling_description, headline, bio, etc. The legacy `members.{university, field_of_study, graduation_year}` flat trio is retired (S-B.2C, May 13 2026).
 
 ---
 
@@ -842,88 +856,109 @@ The user is **always in View**. Edit is a transient drawer. Manage is a separate
 
 The passport renders 9 default sections in fixed order, plus up to 8 opt-in sections from a credibility library.
 
-### 22.1 — Default sections (9, always present, fixed order)
+### 22.1 — Default sections (live composition, post-V12 + post-S-B.2C)
 
-**Reconciliation status (2026-05-10 PM):** Live composition diverges from the V12 baseline. See `docs/PROFILUX_V12_LOCK.md` §6.1 for the divergence catalog and reconciliation decisions. MATRIX §22.1 is the drift candidate; V12 is the anchor.
+**Reconciliation status (2026-05-14):** §22.1 is rewritten to match the live V12 View composition locked at commit `9dabff1` (May 11 2026) and the S-B education truth surface locked at commit `baeca3c` + migration `s_b_2c_drop_members_trio_education_columns` (May 13 2026). The "9 default sections" framing from v1.2 is reconciled below as: **Identity (rendered as LEFT SPINE, not as a ViewZone) + 7 ordered ViewZones on View + 2 Edit-only sections (Compensation, Clienteling)**. View renders 7 ViewZones; Edit renders 12 SectionCards (including 2 suggestion panels and 1 CV card that are operational, not doctrine sections). Public renders a fixed independent set of bands per `app/[slug]/page.tsx`.
 
-Field assignments mirror §7.6.1 `EditorView` exactly. The grouping into 9 named sections is locked here.
+Field assignments mirror §7.6.1 `EditorView` exactly. Grouping is locked here. **Per-surface ordering may diverge** (see §22.3); the table below reflects the View ordering and surfaces label drift across View, Edit, and MATRIX.
 
-| # | Section | EditorView fields |
+| # | MATRIX name | View live label | Edit live label | EditorView fields | View surface | Edit surface |
+|---|---|---|---|---|---|---|
+| 1 | Identity | (LEFT SPINE — not a ViewZone) | Identity | first_name, last_name, city, country, nationality, phone, headline, avatar_url, bio | LEFT SPINE | SectionCard + drawer |
+| 2 | Current Position | Current Role | Current Position | job_title, current_employer, seniority, total_years_experience | ViewZone | SectionCard + drawer |
+| 3 | Career History | Career Path | Career History | experiences[] (L2 `work_experiences` + L1 passthrough `cv_parsed_data.experiences[]`) | ViewZone | SectionCard + drawer |
+| 4 | Education | Education | (no standalone Edit SectionCard) | education[] (L2 `education_records` + L1 passthrough `cv_parsed_data.education[]`) | ViewZone | Edit affordance is the S-B `cv_education_suggestions` panel only |
+| 5 | Languages | Languages | Languages (read-only) | languages[] (L1 passthrough) | ViewZone | SectionCard, read-only until L2 language slice (ledger `1609e494`) |
+| 6 | Expertise | Expertise | (split into 2 cards) | years_in_luxury, sectors, product_categories, expertise_tags, key_skills, market_knowledge | ViewZone (merged) | Edit splits into `Luxury Fit` + `Skills & Markets` SectionCards. Edit split intentional pending taxonomy review; NOT substrate-blocked. |
+| 7 | Availability & Targets | Availability | Availability & Targets | availability, desired_locations, desired_departments, desired_contract_types, open_to_relocation, relocation_preferences | ViewZone | SectionCard + drawer |
+| 8 | Maisons | Maisons | (no Edit SectionCard) | brands_worked_with | ViewZone, hide-when-empty | Edit-side authoring deferred pending maison taxonomy / normalization review |
+| — | Clienteling | (Edit-only — no View ViewZone) | Clienteling | clienteling_experience, clienteling_description | absent | SectionCard + drawer |
+| — | Compensation | (Edit-only — V12-violation-1 lock at `66f8cf3`) | Compensation | desired_salary_min, desired_salary_max, desired_salary_currency | absent | SectionCard + drawer |
+
+**Lock anchors:**
+- View order locked at commit `9dabff1` (V12 convergence pass).
+- Compensation never in View — V12-violation-1 (commit `66f8cf3`).
+- Clienteling not currently in View — live truth as of May 14 2026; no doctrine commitment to add.
+- Identity is structurally separate from the ordered section catalog on View (LEFT SPINE).
+- Education truth surface = `education_records` (S-B.2C).
+- Languages remains L1 read-only on Edit until a dedicated L2 collection slice ships (parked under `1609e494`).
+- `linkedin_url` is intentionally omitted from the Identity row per the LinkedIn doctrine lock (`docs/JOBLUX_STATE.md` DO NOT block, 2026-05-10): no LinkedIn in ProfiLux, no LinkedIn dependency on JOBLUX, applies to UI, write-path, display, prompt copy.
+
+**Edit drawer notes (preserved from v1.2):**
+
+- **Row 6 (Expertise) — Edit kept split.** View renders one unified Expertise card with 6 sub-rows in order: Years in luxury → Sectors → Product categories → Areas of expertise → Skills → Markets. Edit keeps two SectionCards (`Luxury Fit`, `Skills & Markets`) and two POST shapes UNCHANGED. Edit split is a UX-density decision, NOT a substrate gate.
+
+- **Row 5 (Languages) — Edit kept read-only.** View renders a Languages ViewZone. Edit renders a read-only Languages SectionCard inline. Edit drawer for Languages is parked pending L2 languages substrate migration (ledger `1609e494`).
+
+- **Row 8 (Maisons) — no Edit drawer.** View renders a Maisons ViewZone sourced from `members.brands_worked_with`. Edit-side authoring deferred pending maison taxonomy / normalization review (controlled vocabulary, dedup, group-aware grouping — out of scope this slice). Empty behavior: hide entirely when `brands_worked_with` is empty.
+
+- **Row 4 (Education) — no standalone Edit SectionCard.** View renders an Education ViewZone over `education_records` (L2) + L1 passthrough. Edit affordance is the S-B `cv_education_suggestions` panel only; manual L2 row Edit/Delete on Edit tab is not yet wired (asymmetric vs Career History, which has full L2 CRUD via `/api/profilux/experiences`).
+
+### 22.2 — Add-library sections (DOCTRINE vs LIVE — drift surfaced, parked)
+
+The passport surfaces an "Add section" affordance opening an `EXTEND DOSSIER` drawer. The drawer renders 8 library entries. Substrate for any library section is PARKED — Tier 2 schema (per §15.3) is not yet built; the UI renders all entries inert.
+
+**Inert state (live):** every library row renders with `aria-disabled="true"`, `pointerEvents: 'none'`, `opacity: 0.4`, `userSelect: 'none'`. No click handler. No state hook. No API. No DB row. The drawer is a visual placeholder until Tier 2 schema lands.
+
+**Drift status:** the doctrine list (this section) and the live `ADD_SECTION_LIBRARY` array (in `app/dashboard/candidate/profilux/page.tsx`) are NOT in sync. Reconciliation is parked and is part of the add-library activation slice, not this one.
+
+| MATRIX doctrine (v1.2) | LIVE `ADD_SECTION_LIBRARY` (current UI) | Drift |
 |---|---|---|
-| 1 | Identity | `first_name`, `last_name`, `city`, `country`, `nationality`, `phone`, `headline`, `avatar_url`, `bio`, `linkedin_url` |
-| 2 | Current Position | `job_title`, `current_employer`, `seniority`, `total_years_experience` |
-| 3 | Expertise | `years_in_luxury`, `sectors` (L1), `product_categories`, `expertise_tags`, `key_skills`, `market_knowledge` |
-| 4 | Career History | `experiences[]` (L1 passthrough) |
-| 5 | Maisons | `brands_worked_with` |
-| 6 | Education | `university`, `field_of_study`, `graduation_year`, `education[]` |
-| 7 | Languages | `languages[]` |
-| 8 | Clienteling | `clienteling_experience`, `clienteling_description` |
-| 9 | Availability & Targets | `availability`, `desired_locations`, `desired_departments`, `desired_contract_types`, `open_to_relocation`, `relocation_preferences` |
-| 10 | Compensation | `desired_salary_min`, `desired_salary_max`, `desired_salary_currency` |
+| Certifications (structured) | Certifications (`certifications`) | name match; substrate mismatch — flat `members.certifications: string[]` exists today; "structured" form parked |
+| Awards | Awards (`awards`) | match; no substrate |
+| References | References (`references`) | match; no substrate |
+| Portfolio | Portfolio (`portfolio`) | match; no substrate |
+| Publications / press features | Press & features (`press_features`) | **label drift** |
+| Memberships | Memberships (`memberships`) | match; no substrate |
+| Speaking / events | (not in UI) | **missing from UI** |
+| Volunteer / board roles | (not in UI) | **missing from UI** |
+| (not in doctrine) | Projects (`projects`) | **extra in UI** |
+| (not in doctrine) | Internships (`internships`) | **extra in UI; conflicts with STATE §1 kill-word list (`internships`)** |
 
-**Edit drawer notes (2026-05-11):**
+**Decision posture (locked 2026-05-14):**
 
-- **Row 3 (Expertise) — Edit kept split.** Education and Languages style
-  of single-row merge does NOT apply here. View renders one unified
-  Expertise card with 6 sub-rows in order: Years in luxury → Sectors →
-  Product categories → Areas of expertise → Skills → Markets. "Years in
-  luxury" and "Sectors" sit visibly above the skill/market chips to
-  preserve JOBLUX luxury relevance. The Edit tab keeps the existing two
-  SectionCards ("Luxury Fit" with `luxuryFitDrawerOpen` drawer; "Skills &
-  Markets" with `skillsMarketsDrawerOpen` drawer) and their two POST
-  shapes UNCHANGED. Edit split is intentional pending taxonomy review —
-  this is a UX-density decision, NOT a substrate gate. Distinct from row
-  5 + row 6 where Edit is blocked by ledger 1609e494.
+- The above table is the canonical drift inventory. Doctrine list and UI list are BOTH preserved here side-by-side. Neither list is promoted to canonical.
+- Reconciliation deferred to a dedicated add-library activation slice, which will resolve:
+  1. Canonical 8-item set (doctrine vs UI vs new).
+  2. Per-section Tier 2 substrate (column vs relational table).
+  3. STATE §1 kill-word reconciliation for `Internships`.
+  4. `Publications / press features` vs `Press & features` label pick.
+- Until that slice ships, the live UI library remains inert and the drift remains documented here.
 
-- **Rows 5 + 6 (Education + Languages) — Edit kept combined.** View
-  renders 2 distinct cards per V12 baseline. The Edit tab keeps ONE
-  combined "Education & Languages" SectionCard + drawer (`educationLanguagesDrawerOpen`).
-  Clicking Edit on the combined SectionCard opens a drawer covering
-  `university`, `field_of_study`, and `graduation_year`. Languages
-  remain L1 read-only inside the drawer with the existing
-  "Editing CV-parsed records is not yet supported" banner. Edit drawer
-  split for these two sections is parked pending L2 languages substrate
-  migration (ledger 1609e494).
+### 22.3 — Ordering rules (live truth + persistence status)
 
-- **Row 5 (Maisons) — no Edit drawer this slice.** View renders a Maisons
-  card sourced from `members.brands_worked_with`. Card is read-only in
-  View. No Edit drawer is added by V12-divergence-3 (ledger 28303edd).
-  Manual editing is deferred pending maison taxonomy / normalization
-  review (controlled vocabulary, dedup, group-aware grouping — out of
-  scope this slice). Empty behavior: hide entirely when
-  `brands_worked_with` is empty, consistent with View doctrine on
-  hide-when-empty for collections. Future library coexistence
-  (V12-divergence-5, ledger d243fc13) remains allowed and is not blocked
-  by this slice.
+**Ordering source (live).** Section render order on every surface is hardcoded JSX position in the source files:
 
-View doctrine now matches V12 for the resolved divergences: row 3
-Expertise, row 5 Maisons, and rows 6/7 Education + Languages. Edit
-doctrine catches up on row 3 when taxonomy review concludes; on rows
-6+7 when L2 languages substrate ships (ledger 1609e494); on row 5 when
-maison taxonomy / normalization review concludes.
+- **View tab:** order locked at V12 prototype sequence, commit `9dabff1` (May 11 2026). 7 ViewZones in fixed sequence (Current Role → Career Path → Education → Languages → Expertise → Availability → Maisons). Identity renders separately as the LEFT SPINE.
+- **Edit tab:** JSX order in `app/dashboard/candidate/profilux/page.tsx`. NO doctrine anchor for Edit order — Edit ordering is implicit.
+- **Public `/[slug]`:** JSX order in `app/[slug]/page.tsx`. Independent of View. NO doctrine anchor for Public order.
 
-### 22.2 — Add-library sections (8, opt-in, schema PARKED)
+**Persistence status (live).** No section ordering persistence layer exists anywhere in the system:
 
-These map to §15.3 Tier 2 fields. **Schema does not exist.** Each section requires either a new column or a new relational table plus the corresponding type and projection changes before it can ship.
+- No `members.section_order` column. No `members.visible_sections` column.
+- No dedicated `member_section_layout` table.
+- No share / cookie / URL parameter encodes section order.
+- No `localStorage` / `sessionStorage` reference in the candidate ProfiLux page.
+- No React state hook stores section order.
 
-1. Certifications (structured)
-2. Awards
-3. References
-4. Portfolio
-5. Publications / press features
-6. Memberships
-7. Speaking / events
-8. Volunteer / board roles
+Section order is recomputed every render from JSX file position only.
 
-Until Tier 2 schema lands, the add-library is doctrine only — the catalog is locked here so the future implementation has a fixed target.
+**Collapse state (related but not ordering).** A per-card collapse boolean (`viewCollapse`) exists in the View tab as in-memory React state. It is explicitly EPHEMERAL per Mo lock (A2.8 collapse pass): refresh resets to doctrine default. It is NOT a persistence precedent for any future ordering layer.
 
-### 22.3 — Ordering rules
+**Row-level `sort_order` (substrate adjacency).** The only `sort_order` column anywhere in the ProfiLux stack is `education_records.sort_order`. The resolver reads it (`ORDER BY sort_order ASC, graduation_year DESC NULLS LAST`); the apply path (`/api/profilux/suggestions/education`) never writes a non-default value (every row collides at 0). This is ROW-level ordering inside the Education collection, NOT section-level ordering. Flagged as observation `F-S-C-4`.
 
-- Default catalog contains 10 conceptual rows (§22.1). Visible View cards = 9. Compensation (row 10) is Edit-only / Manage-sensitive per V12-violation-1 (commit 66f8cf3) and never renders as a View card regardless of share state.
-- Default rows are ordered by recruiter/matching priority: identity → current role → fit → history → maison lineage → credentials → execution → clienteling → readiness → comp.
-- Default ordering is **fixed**. The user cannot reorder default sections.
-- Add-library 8 are ordered by frequency-of-use (estimated). Final ordering decided when each section ships.
-- The user can show/hide add-library sections individually (mechanism deferred — likely a `visible_sections` flag on `members.*` or a dedicated table; schema decision parked).
+**Default-section reorder posture.** Default sections cannot be reordered by the user. View order is locked at the V12 sequence (`9dabff1`). Reordering View sections requires an explicit doctrine reversal slice per `JOBLUX_STATE.md` DO NOT block.
+
+**Add-library reorder posture.** Add-library sections are inert per §22.2; ordering decision is deferred to the add-library activation slice.
+
+**Prerequisites for any future reorder UX.** A future section-reorder implementation must, BEFORE writing code, resolve all of:
+
+1. **Canonical section identifier system.** Today the system has 5 parallel naming surfaces for section identity: MATRIX §22.1 names, `ViewCollapseKey` union (with 3 orphan keys per audit C2), `ADD_SECTION_LIBRARY` keys, parser `CvParsedNeedsReviewItem.section` enum, and parser `CvParsedConfidence` keys. None is canonical. None is shared across resolver / projector / UI.
+2. **Persistence substrate decision.** Column on `members.*` vs dedicated `member_section_layout` table. Choice has follow-on implications: column = simpler, single row write; table = enables future per-section metadata and joins, but introduces another L2 collection (echoes parked `1609e494`).
+3. **Scope decision.** Add-library reorder only, vs default-section reorder too. Default-section reorder requires the explicit doctrine reversal slice noted above.
+4. **Per-surface contract.** Whether user-chosen order propagates from View to Edit and to Public; how Public masking (V1/V3/V4/V5/V7) interacts with user-chosen order.
+
+None of these are resolved as of v1.3. Any reorder slice opens with these decisions first.
 
 ### 22.4 — Removable vs permanent
 
