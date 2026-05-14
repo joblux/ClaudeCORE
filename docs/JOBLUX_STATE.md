@@ -155,13 +155,16 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-**Contract Closure Mode active. C1 Education subgraph FULLY CLOSED.** S-C Experiences audit-first complete; foundation slice S-C.0 (`26c35466`) shipped. C2/C3/C8 audit-first complete and KEPT PARKED.
+**Contract Closure Mode COMPLETE.** C-chain converged across 2026-05-12 → 2026-05-14. Subgraphs closed or PARKED with substrate gates documented:
+- C1 (S-A identity / S-B Education / S-C Experiences / S-D Sectors) — CLOSED or PARKED.
+- C2 / C3 / C8 — audit-first complete, kept PARKED, doctrine layer advanced via MATRIX v1.6 (May 14 PM).
+- C5 (public profile gate) — SHIPPED May 12.
+- C6.1 (export doctrine MATRIX §19A) + C7.1 (Manage live CRUD + matching consent split MATRIX §19.4 + §20.x) — SHIPPED May 14.
+- C6 / C7 remaining scope evaluation (May 14 PM) — nothing actionable. C6 fully PARKED on substrate / product decisions (PDF library, render template, resume-route extinction, View placeholder removal, C-B-2/3 recruiter+client PDFs). C7 PARKED on substrate (Manage v1 broader rebuild, matching consent toggle, slug vanity, `members.profile_visibility` orphan); ledger row `0e6f3271` finalized this rotation (data hygiene only, status unchanged).
 
-**Next step:** C6 / C7 remaining scope evaluation.
+**Next step:** Not yet scoped. Awaiting Mo direction.
 
-**Strict step order:**
-
-1. **C6 / C7 remaining scope** — evaluate whether anything beyond the C6.1 (`c7d65ad`, export doctrine, MATRIX §19A) and C7.1 (`081fc49`, Manage + matching consent, MATRIX §19.4 + §20.x) doctrine locks is actionable, or whether the locked order naturally exits Contract Closure Mode.
+**Strict step order:** No strict step queued post-C-chain. The locked execution chain (C1 → C5 → C2/C3/C8 → C6 → C7) has completed evaluation. Next track requires Mo direction; no auto-derived next step.
 
 **Audits closed this rotation (parked):**
 - **S-D Sectors** (2026-05-13 PM late): keep `1609e494` PARKED. L1 sectors render correctly; `member_sectors` table dormant and empty. Unpark requires Mo + GPT scope lock on rank semantics, add/remove/reorder UX, L1/L2 merge contract, and M6/G3 readiness implications.
