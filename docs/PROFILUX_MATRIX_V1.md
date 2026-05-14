@@ -14,6 +14,17 @@ This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE w
 
 ## CHANGE LOG
 
+**v1.4 — May 14, 2026 Export doctrine lock addendum**
+
+Locks the product doctrine for ProfiLux export based on 7 answers from Mo (May 14 2026). No substrate change. No new infrastructure. No library decision. Doctrine text only. Future helper / projection implementation deferred.
+
+- **§13** Deferred items table updated: PDF library, ProfiLux render template, `/api/resume/[slug]` retirement ("resume extinction reconciliation"), View "Download PDF" placeholder removal — all cross-referenced to §19A.
+- **§19** Settings doctrine: §19.1 wording corrected on PDF mention; new **§19A "Export doctrine"** subsection appended.
+- **§19A** locks the 7 doctrinal answers (what is a CV, what is exported, projection per surface, public PDF status, recruiter/client PDF status, candidate self-export, uploaded original CV status) + surface placement (export belongs in Manage / Settings, NOT View) + explicit C6.1 out-of-scope list.
+- **§22.1** Lock anchors: 1-line cross-ref note added, clarifying that the View "Download PDF" affordance is governed by §19A, not §22.
+
+§§1–12, §§14–18, §§20–24 — all KEEP unchanged.
+
 **v1.3 — May 14, 2026 Section truth reconciliation addendum**
 
 Reconciles MATRIX with live View / Edit / Public composition after the V12 convergence pass (commit `9dabff1`, May 11 2026) and the S-B education subgraph closure (commit `baeca3c` + migration `s_b_2c_drop_members_trio_education_columns`, May 13 2026). No substrate change. No new sections. No reordering of live UI. Doctrine text only.
@@ -603,8 +614,8 @@ The following items are intentionally out of v1.1. Each is a known future ticket
 | Maskable layer schema | Per-field user-controllable visibility flags (see §16) | When public/client share UX is built out |
 | Maskable projection changes | `public` and `client` projections honor maskable flags | Together with maskable layer schema |
 | CV merge state machine | Diff endpoint, accept/reject API, merge audit (see §17) | When CV re-upload UX is built |
-| Settings page | Public URL toggle, maskable toggles, export, prefs (see §19) | When `/dashboard/candidate/profilux` editor rewrites to passport |
-| Public URL activation UI | `/p/[name]` ON/OFF toggle (see §18) | Together with Settings page |
+| Settings page | Public URL toggle, maskable toggles, candidate self-export trigger, prefs (see §19, §19A) | When `/dashboard/candidate/profilux` editor rewrites to passport |
+| Public URL activation UI | `/p/[name]` ON/OFF toggle (see §18). Web-first; no public PDF (see §19A Q4). | Together with Settings page |
 | Salary history schema | Multi-row vs single column decision | With Tier 1 schema |
 | Phase 4 L2 array rebuild | Round-trip storage for sectors/languages/experiences/education/markets/specialisations via L2 (currently L1-only passthrough, see §6.4) | Open ledger `8f82b3ac` |
 | Relational L2 migration | Move sectors, languages, experiences, education to dedicated child tables | When the editor needs multi-row editing for those entities |
@@ -615,6 +626,10 @@ The following items are intentionally out of v1.1. Each is a known future ticket
 | Anthropic Files API native PDF | Replace pdf-parse with native PDF input to Haiku | Per F-pdfparse-anthropic-files in STATE |
 | Matching-entry consent field | Explicit user toggle, NOT derived from `availability` (see §20) | When matching entry §20 is wired |
 | Matching-entry score wiring | Computed signal triggering (1) + (2) of §8.1 | When Tier 1 schema lands |
+| PDF library + render template | Selection of PDF generator (none in deps today) + template for the ProfiLux private snapshot (see §19A Q2). Doctrine locked at §19A; infra deferred. | When candidate self-export ships |
+| Resume extinction reconciliation | Retire `/api/resume/[slug]` route + retire planned `members.resume_*` columns + retire `resume_slug` slug space. All identified as fossil from a prior "Resume product" direction (see §19A.3). | After §19A doctrine lands; not in C6.1 |
+| `profilux` ghost-table cleanup | The standalone `profilux` table contains 17 legacy columns beyond `share_slug` + `sharing_enabled`. Tracked at ledger `6aef236e`. Doctrine drift vs §9; substrate cleanup deferred. | Together with Manage tab A2 sharing UX rebuild |
+| View "Download PDF" placeholder removal | The LEFT SPINE row in `app/dashboard/candidate/profilux/page.tsx` is doctrinally misplaced per §19A.2. Cleanup deferred until Manage-side export control ships. | When candidate self-export ships in Manage / Settings |
 
 ---
 
@@ -766,9 +781,9 @@ Move `share_slug` + `sharing_enabled` to `members.*` to retire the `profilux` st
 ### 19.1 — What it is
 
 A dedicated Settings page where the candidate manages:
-- Public URL ON/OFF toggle (§18)
+- Public URL ON/OFF toggle (§18). Web-first; no public PDF (see §19A Q4).
 - Maskable field toggles (§16)
-- Export controls (download PDF, share PDF)
+- Candidate self-export trigger — private full ProfiLux snapshot (see §19A Q2). No public-facing PDF.
 - Account preferences (notifications, contact, etc.)
 
 ### 19.2 — Replaces
@@ -778,6 +793,80 @@ The current `/profile` (light) surface — slated for retirement once Settings s
 ### 19.3 — Status
 
 PARKED. Greenfield page.
+
+---
+
+## 19A. Export doctrine (locked May 14 2026)
+
+ProfiLux is a living object (§2). Export = a private snapshot taken from that object at a moment in time. This section locks **what is exported, to whom, from which projection**. Implementation infra (library, template, render pipeline) is deferred and is NOT in scope of the doctrine lock.
+
+### 19A.1 — The 7 doctrinal answers
+
+**Q1 — What is "a CV" in JOBLUX now?**
+
+Two distinct artifacts coexist by design:
+
+- **(a) Uploaded original CV** — archive / input file owned by the `member-cvs` Storage bucket. Immutable, candidate-authored. Used for parse and admin review only. Not the future JOBLUX-rendered export.
+- **(b) ProfiLux-rendered export** — generated private snapshot from the living ProfiLux object. NOT yet built.
+
+These are not interchangeable. Neither replaces the other.
+
+**Q2 — What is exported?**
+
+A private snapshot of the candidate's living ProfiLux object, generated from the canonical ProfiLux resolution pipeline. Exact implementation projection / helper deferred.
+
+**Q3 — Which projection per export type?**
+
+Locked mapping (product doctrine; implementation projection / helper deferred):
+
+| Export type | Doctrine |
+|---|---|
+| Candidate self-export | Private full ProfiLux snapshot, generated from the canonical ProfiLux resolution pipeline. Exact implementation projection / helper deferred. |
+| Recruiter export | PARKED. Gated on `C-B-2` (admin share-preview). No code today. |
+| Client share export | PARKED. Gated on `C-B-3` (public client-facing `/p/[slug]` consumer). No code today. |
+| Public export | DOES NOT EXIST as a concept. Public sharing remains web-first via `/p/[slug]` HTML render. No public PDF. |
+
+**Q4 — Does public PDF exist as a concept?**
+
+No. Web-first only. `/p/[slug]` is the public surface. The public surface is HTML rendering, not export.
+
+**Q5 — Does recruiter / client PDF exist?**
+
+No. Deferred. Gated on `C-B-2` (admin share-preview) and `C-B-3` (public client-facing `/p/[slug]` consumer). Both PARKED per `JOBLUX_STATE.md`.
+
+**Q6 — Does candidate self-export differ from public export?**
+
+Question moot: no public export exists. Candidate self-export is private full ProfiLux. Public web view (`/p/[slug]`) is public-surface masked per the projection doctrine (§7), but this is web rendering, not export.
+
+**Q7 — Is uploaded original CV still canonical, or replaced by ProfiLux render?**
+
+Coexistent. Uploaded original = archive / input, immutable. ProfiLux render = future-generated private snapshot from the living object. Neither replaces the other.
+
+### 19A.2 — Surface placement
+
+The "Download PDF" affordance belongs in **Manage / Settings** (§19), **NOT** in View.
+
+The visual placeholder currently rendered in the LEFT SPINE of the View tab at `app/dashboard/candidate/profilux/page.tsx` is doctrinally MISPLACED. Cleanup of the View placeholder is NOT in scope of this slice and will be addressed when the Manage-side export control ships (§13 deferred item: View "Download PDF" placeholder removal).
+
+### 19A.3 — Out of scope of this doctrine lock
+
+C6.1 is doctrine lock only. The following are deferred:
+
+- No PDF library decision.
+- No render template.
+- No `/api/resume/[slug]` retirement (resume extinction reconciliation is a future slice, not C6.1).
+- No `profilux` ghost-table cleanup (tracked at ledger `6aef236e`).
+- No View "Download PDF" placeholder removal.
+- No B39 closure dependency work.
+
+### 19A.4 — Cross-references
+
+- §2 ProfiLux is a living object
+- §7 Projection contract by surface
+- §10 Implementation utilities (`resolveProfiLux`, `projectFor`)
+- §13 Deferred items (PDF library, resume extinction, `profilux` retire, View placeholder)
+- §19 Settings doctrine
+- §22 Section catalog (View is not the export host)
 
 ---
 
@@ -883,6 +972,7 @@ Field assignments mirror §7.6.1 `EditorView` exactly. Grouping is locked here. 
 - Education truth surface = `education_records` (S-B.2C).
 - Languages remains L1 read-only on Edit until a dedicated L2 collection slice ships (parked under `1609e494`).
 - `linkedin_url` is intentionally omitted from the Identity row per the LinkedIn doctrine lock (`docs/JOBLUX_STATE.md` DO NOT block, 2026-05-10): no LinkedIn in ProfiLux, no LinkedIn dependency on JOBLUX, applies to UI, write-path, display, prompt copy.
+- The LEFT SPINE "Download PDF" affordance is governed by §19A "Export doctrine" (not §22). It is doctrinally misplaced and parked for cleanup per §19A.2.
 
 **Edit drawer notes (preserved from v1.2):**
 
