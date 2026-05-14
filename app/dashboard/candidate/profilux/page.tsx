@@ -648,6 +648,7 @@ export default function ProfiluxPage() {
     if (!file) return
     setUploading(true)
     setUploadError(null)
+    setParseError(null)
     try {
       const fd = new FormData()
       fd.append('cv', file)
@@ -657,6 +658,28 @@ export default function ProfiluxPage() {
       } else {
         await refetch()
         setNeedsReviewCount(null)
+
+        // MLV-1 Phase 1: auto-fire parse immediately after successful upload.
+        // Prevents the silent drop-off where uploads landed but parse was
+        // never invoked. Failures surface as parseError; the manual
+        // "Parse CV" button remains available as a retry fallback.
+        setParsing(true)
+        try {
+          const parseRes = await fetch('/api/members/cv-parse', { method: 'POST' })
+          const parseData = await parseRes.json().catch(() => ({} as any))
+          if (parseRes.ok && parseData?.success) {
+            await refetch()
+            setNeedsReviewCount(
+              typeof parseData?.needs_review_count === 'number' ? parseData.needs_review_count : null
+            )
+          } else {
+            setParseError(mapParseError(parseData?.error ?? null))
+          }
+        } catch {
+          setParseError(mapParseError(null))
+        } finally {
+          setParsing(false)
+        }
       }
     } catch {
       setUploadError('Upload failed. Try again.')
