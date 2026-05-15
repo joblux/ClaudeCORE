@@ -173,27 +173,26 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-**V12 journey closure track COMPLETE.** All V12 journey delta card findings now closed:
-- V12-JC-1 (CV parse drop-off) CLOSED 2026-05-14 PM via Phase 1 (`31f6bae`) + Phase 1.5 (`1c206ae`).
+**Lane: V12 Product / Prototype Fidelity (ACTIVE — not complete).**
+
+V12 launch-blocking functional subset is closed:
+- V12-JC-1 (CV parse drop-off) CLOSED 2026-05-14 PM via `31f6bae` + `1c206ae`.
 - V12-JC-2 (3 lying UI elements) CLOSED 2026-05-15 via `d0e0a7e`.
-- V12-JC-3 (Education manual Add/Edit/Delete drawer) CLOSED 2026-05-15 via `31e9813` (route) + `4bf64be` (UI), live QA 6/6 PASS on Alex via Chrome MCP.
+- V12-JC-3 (Education manual CRUD) CLOSED 2026-05-15 via `31e9813` + `4bf64be`.
 
-C-chain was previously closed at `d590afc` (separate track, not part of the V12 journey delta card).
+**V12 Product / Prototype Fidelity is NOT closed.** ProfiLux does not yet visually match the locked V12 prototypes. The functional subset closure was a milestone, not the lane's end.
 
-V12 §2.5 HARD LOCK (no placeholders, no dead controls) enforced across ProfiLux candidate surface. Education manual CRUD path now exists end-to-end. Candidates with un-parseable CV education can self-recover via the Education drawer; L1+L2 additive merge (`ea9a997`) preserves CV-parsed rows alongside manually added ones.
+**Rule (locked 2026-05-15):**
+- Continue V12 until ProfiLux resembles the locked prototypes (`docs/PROFILUX_V12_LOCK.md` §3 visual posture, `docs/prototypes/profilux_journey_v12.html`).
+- Backend only if a validated UI piece needs it. Not the reverse.
+- Next work resumes prototype fidelity, NOT a fresh audit cycle.
 
-**Naming convention lock (2026-05-15):**
-- Lane: V12 journey closure (singular, doctrinal).
-- Slice IDs (implementation labels): V12-JC-1, V12-JC-2, V12-JC-3.
-- `MLV-x` retired as a strategy label. Where it appears in committed STATE/HANDOFF text from prior rotations, it stays as historical record. No new artifact uses it.
+**Naming convention lock (2026-05-15, retained):**
+- Lane: V12 Product / Prototype Fidelity (doctrinal).
+- Slice IDs: V12-JC-N for journey-closure subset (complete); V12-PF-N for prototype-fidelity slices going forward.
+- `MLV-x` retired as a strategy label.
 
-**Next step:** REQUIRES MO DIRECTION. No strict step queued post-V12-journey-closure. Three candidate next tracks surfaced for Mo + GPT to choose from:
-
-1. **Pre-launch checklist execution** — work through the residual launch-blocking items in §19 (article detail 404s, event detail 404s, AI salary records cleanup, hardcoded numbers pass, dashboards audit). Ledger has dedicated rows for each. Largest-leverage path to actually launching joblux.com.
-
-2. **Pre-launch SEO + global strategy** — dedicated session per ledger `8fe4dccf` (high priority, open). Covers on-site SEO, 301 redirects, NEXTAUTH_URL switch, meta/OG/canonical alignment, GA4 + Search Console, sitemap audit. Required before any traffic acquisition.
-
-3. **Public `/[slug]` V12 spine rebuild** — ledger `98219ae5` (normal priority, open). Closes V12-divergence-8: the public profile route still renders legacy layout instead of converging on the View tab spine+ViewZone composition. Same-document mental model for internal View and public `/[slug]`. Not launch-blocking (legacy layout acceptable v1).
+**Next step:** Resume prototype fidelity from known live-vs-prototype divergences already inventoried in STATE + V12_LOCK. First slice TBD next message.
 
 Acceptable post-launch (V12 deltas that DO NOT block launch):
 - Per-field maskable toggles in Manage (§16 substrate parked)
@@ -203,9 +202,7 @@ Acceptable post-launch (V12 deltas that DO NOT block launch):
 - CV merge diff modal (Phase 1.5 shipped re-upload as page; V12 §2.2 scene 6 spec is a modal with diff)
 - Languages L2 CRUD (L1 read-only acceptable; ledger `1609e494`)
 
-Next session opens with Mo's selection from the three candidate tracks above (or an alternative). No doctrine work without explicit Mo direction. No silent track choice.
-
-**Strict step order:** None queued. Awaiting Mo direction on next track.
+**Strict step order:** Resume V12 prototype fidelity. First execution slice surfaced from known divergences next message.
 
 **Audits closed this rotation (parked):**
 - **S-D Sectors** (2026-05-13 PM late): keep `1609e494` PARKED. L1 sectors render correctly; `member_sectors` table dormant and empty. Unpark requires Mo + GPT scope lock on rank semantics, add/remove/reorder UX, L1/L2 merge contract, and M6/G3 readiness implications.
@@ -325,7 +322,7 @@ Next session opens with Mo's selection from the three candidate tracks above (or
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 15, 2026 (V12 journey closure track COMPLETE — V12-JC-3 Education manual CRUD shipped end-to-end). V12-JC-3.0 foundation route `31e9813` (`/api/profilux/education`, 228 lines, mirror of `/api/profilux/experiences`). V12-JC-3.1 UI drawer `4bf64be` (Education SectionCard + Drawer between Career History and Languages in `app/dashboard/candidate/profilux/page.tsx`, +247/-0, mirror of Career History drawer block). Live QA 6/6 PASS on Alex (`mzaourmohammed@gmail.com`) via Chrome MCP: Add/Edit/Delete L2 row + L1 fallback render verified. Naming convention locked 2026-05-15: lane = V12 journey closure; slice IDs = V12-JC-N; MLV-x retired as strategy label (historical text in prior rotations preserved). All V12 journey delta card findings now closed: V12-JC-1, V12-JC-2, V12-JC-3. C-chain was previously closed at `d590afc`. Next track REQUIRES MO DIRECTION (three candidates surfaced in CURRENT STEP: pre-launch checklist, pre-launch SEO session, or public `/[slug]` V12 spine rebuild).
+**Last updated:** May 15, 2026 (V12 framing correction — Mo doctrinal pass). V12 launch-blocking functional subset (V12-JC-1, JC-2, JC-3) CLOSED. V12 Product / Prototype Fidelity lane REMAINS ACTIVE — V12 is NOT complete. Rule locked: continue V12 until ProfiLux visually matches locked prototypes; backend only if a validated UI piece needs it. Slice ID convention extended: V12-JC-N (closure subset, complete) + V12-PF-N (fidelity, going forward). MLV-x retired (historical text preserved in prior rotations). Next work resumes prototype fidelity, NOT a fresh audit cycle. First execution slice surfaced next message from known live-vs-prototype divergences already inventoried in STATE + V12_LOCK.
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
