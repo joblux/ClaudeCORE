@@ -1800,12 +1800,21 @@ export default function ProfiluxPage() {
           const xCity = typeof exp.city === 'string' && exp.city.trim().length > 0 ? exp.city : null
           const xCountry = typeof exp.country === 'string' && exp.country.trim().length > 0 ? exp.country : null
           const location = xCity && xCountry ? `${xCity}, ${xCountry}` : (xCity ?? xCountry)
-          const hasStart = typeof exp.start_date === 'string' && exp.start_date.trim().length > 0
-          const hasEnd = typeof exp.end_date === 'string' && exp.end_date.trim().length > 0
+          const yearOf = (d: string | null | undefined): string | null => {
+            if (typeof d !== 'string') return null
+            const t = d.trim()
+            if (t.length === 0) return null
+            const m = t.match(/^(\d{4})/)
+            return m ? m[1] : null
+          }
+          const startY = yearOf(exp.start_date)
+          const endY = yearOf(exp.end_date)
+          const isCurrent = exp.is_current === true
           const period =
-            hasStart && hasEnd ? `${exp.start_date} — ${exp.end_date}`
-            : hasStart ? `${exp.start_date} — Present`
-            : hasEnd ? exp.end_date!
+            startY && isCurrent ? `${startY}–present`
+            : startY && endY ? `${startY}–${endY}`
+            : startY ? `${startY}–present`
+            : endY ? endY
             : null
           const description = typeof exp.description === 'string' && exp.description.trim().length > 0 ? exp.description : null
           return { role, company, location, period, description }
@@ -1824,15 +1833,21 @@ export default function ProfiluxPage() {
                 </div>
                 {(() => {
                   const hasEmp = typeof e.current_employer === 'string' && e.current_employer.trim().length > 0
-                  const subRole = hasJob && hasEmp
-                    ? `${e.job_title} · ${e.current_employer}`
-                    : hasJob ? e.job_title
-                    : null
-                  return subRole ? (
-                    <div style={{ fontFamily: 'Playfair Display, serif', fontStyle: 'italic', fontSize: 13.5, color: '#a58e28', lineHeight: 1.4, marginBottom: 4 }}>
-                      {subRole}
-                    </div>
-                  ) : null
+                  if (!hasJob && !hasEmp) return null
+                  return (
+                    <>
+                      {hasJob && (
+                        <div style={{ fontFamily: 'Playfair Display, serif', fontStyle: 'italic', fontSize: 13.5, color: '#a58e28', lineHeight: 1.4 }}>
+                          {e.job_title}
+                        </div>
+                      )}
+                      {hasEmp && (
+                        <div style={{ fontFamily: 'Playfair Display, serif', fontStyle: 'italic', fontSize: 13.5, color: '#a58e28', lineHeight: 1.4, marginBottom: 4 }}>
+                          {e.current_employer}
+                        </div>
+                      )}
+                    </>
+                  )
                 })()}
                 {locationLine && (
                   <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.4, marginBottom: 16 }}>
@@ -1887,8 +1902,22 @@ export default function ProfiluxPage() {
                 const emp = typeof e.current_employer === 'string' && e.current_employer.trim().length > 0 ? e.current_employer : null
                 const empInitial = emp ? emp[0].toUpperCase() : ''
                 const role = typeof e.job_title === 'string' && e.job_title.trim().length > 0 ? e.job_title : null
-                const seniority = seniorityLabel(e.seniority)
-                const years = typeof e.total_years_experience === 'number' ? e.total_years_experience : null
+                const currentExp = Array.isArray(e.experiences)
+                  ? e.experiences.find(x => x.is_current === true && typeof x.start_date === 'string' && x.start_date.trim().length > 0)
+                  : null
+                const sinceLine = (() => {
+                  if (!currentExp || typeof currentExp.start_date !== 'string') return null
+                  const sd = currentExp.start_date.trim()
+                  if (sd.length === 0) return null
+                  // Format YYYY-MM-DD or YYYY-MM -> "Month YYYY"
+                  const m = sd.match(/^(\d{4})-(\d{2})/)
+                  if (m) {
+                    const months = ['January','February','March','April','May','June','July','August','September','October','November','December']
+                    const monthIdx = parseInt(m[2], 10) - 1
+                    if (monthIdx >= 0 && monthIdx < 12) return `Since ${months[monthIdx]} ${m[1]}`
+                  }
+                  return `Since ${sd}`
+                })()
                 return (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                     <div style={{
@@ -1914,16 +1943,10 @@ export default function ProfiluxPage() {
                       {emp && (
                         <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.4, marginBottom: 2 }}>{emp}</div>
                       )}
-                      {seniority && (
-                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.4 }}>{seniority}</div>
+                      {sinceLine && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.4 }}>{sinceLine}</div>
                       )}
                     </div>
-                    {years !== null && (
-                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                        <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, color: '#fff', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{years}</div>
-                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 9.5, color: '#777', textTransform: 'uppercase', letterSpacing: 1, marginTop: 2 }}>Yrs experience</div>
-                      </div>
-                    )}
                   </div>
                 )
               })()}
@@ -1983,17 +2006,28 @@ export default function ProfiluxPage() {
                   : (typeof ed.field_of_study === 'string' && ed.field_of_study.trim().length > 0)
                     ? ed.field_of_study
                     : null
+                const hasSY = typeof ed.start_year === 'number'
+                const hasGY = typeof ed.graduation_year === 'number'
+                const periodText =
+                  hasSY && hasGY ? `${ed.start_year}–${ed.graduation_year}`
+                  : hasGY ? String(ed.graduation_year)
+                  : hasSY ? String(ed.start_year)
+                  : ''
+                const edCity = typeof ed.city === 'string' && ed.city.trim().length > 0 ? ed.city : null
+                const instLine = ed.institution
+                  ? (edCity ? `${ed.institution} · ${edCity}` : ed.institution)
+                  : null
                 return (
                   <div key={i} style={rowStyle}>
                     <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#8e8e8e', letterSpacing: 0.3, fontVariantNumeric: 'tabular-nums', lineHeight: 1.4 }}>
-                      {ed.graduation_year ?? ''}
+                      {periodText}
                     </div>
                     <div>
                       {primary && (
                         <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#fff', fontWeight: 500, lineHeight: 1.4, marginBottom: 2 }}>{primary}</div>
                       )}
-                      {ed.institution && (
-                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.4 }}>{ed.institution}</div>
+                      {instLine && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.4 }}>{instLine}</div>
                       )}
                     </div>
                   </div>
@@ -2088,50 +2122,17 @@ export default function ProfiluxPage() {
 
             {/* §22.1 row 8 — Availability & Targets */}
             {(() => {
-              const filled =
-                (typeof e.availability === 'string' && e.availability.trim().length > 0) ||
-                (Array.isArray(e.desired_locations) && e.desired_locations.length > 0) ||
-                (Array.isArray(e.desired_departments) && e.desired_departments.length > 0) ||
-                (Array.isArray(e.desired_contract_types) && e.desired_contract_types.length > 0) ||
-                e.open_to_relocation === true ||
-                e.open_to_relocation === false ||
-                (typeof e.relocation_preferences === 'string' && e.relocation_preferences.trim().length > 0)
+              const filled = typeof e.availability === 'string' && e.availability.trim().length > 0
               if (!filled) return null
               return (
             <ViewZone title="Availability">
-              <div style={grid}>
-                <div style={label}>Availability</div>
-                <div>{availabilityLabel(e.availability) ?? <Marker kind="missing" />}</div>
-              </div>
-              {e.desired_locations.length > 0 && (
-                <>
-                  <div style={sectionLabel}>Desired locations</div>
-                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>
-                    {e.desired_locations.join(' · ')}
-                  </div>
-                </>
-              )}
-              {e.desired_departments.length > 0 && (
-                <>
-                  <div style={sectionLabel}>Desired departments</div>
-                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>
-                    {e.desired_departments.map(v => departmentLabel(v)).join(' · ')}
-                  </div>
-                </>
-              )}
-              {e.desired_contract_types.length > 0 && (
-                <>
-                  <div style={sectionLabel}>Desired contract types</div>
-                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>
-                    {e.desired_contract_types.map(v => contractTypeLabel(v)).join(' · ')}
-                  </div>
-                </>
-              )}
-              <div style={grid}>
-                <div style={label}>Open to relocation</div>
-                <div>{e.open_to_relocation === true ? 'Yes' : e.open_to_relocation === false ? 'No' : <Marker kind="missing" />}</div>
-                <div style={label}>Relocation preferences</div>
-                <div>{e.open_to_relocation === true && typeof e.relocation_preferences === 'string' && e.relocation_preferences.length > 0 ? e.relocation_preferences : <Marker kind="missing" />}</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>
+                  Open to opportunities
+                </div>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.5, textAlign: 'right' }}>
+                  {availabilityLabel(e.availability) ?? <Marker kind="missing" />}
+                </div>
               </div>
             </ViewZone>
               )
