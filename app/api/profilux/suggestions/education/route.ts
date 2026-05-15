@@ -58,26 +58,11 @@ const supabase = createClient(
 //   via computeEducationSignature (sha256 over institution|field_of_study|
 //   graduation_year, lowercased + trimmed). No client-supplied payload.
 //
-// RACE WINDOW (Option α, v1):
-// Two writes, two tables, no transaction:
-//   1. INSERT into education_records (returns id)
-//   2. UPDATE members.cv_parsed_data.resolution_state.education[signature]
-//      with status='applied', l2_id=<inserted id>, l1_snapshot, at
-//
-// Failure modes:
-//   (a) INSERT fails → no L2 row, no resolution_state update → user sees
-//       error, can retry. Clean state.
-//   (b) INSERT succeeds, UPDATE fails → orphan education_records row +
-//       no resolution_state entry. On next render, suggestion re-fires (hash
-//       not in resolution_state). User re-applies → second education_records
-//       row inserted. Result: duplicate L2 rows.
-//   (c) INSERT succeeds, response crash before UPDATE → same as (b).
-//
-// Acceptable for v1: single-user flow, low concurrency, manual cleanup
-// possible via admin UI. If duplicate L2 rows appear in production, harden
-// via RPC (apply_education_suggestion(member_id, signature)) in a later
-// S-B slice. Detection signal: orphan = education_records row whose
-// member's resolution_state.education has no matching l2_id pointing back.
+// Idempotency enforced by uniq_education_records_member_signature; signature-
+// correct lookup-first + ON CONFLICT fallback prevents duplicate inserts and
+// wrong-row matches. resolution_state UPDATE can still fail after the L2 row
+// is created — the next apply call signature-matches the existing row and
+// reuses its id (no second INSERT).
 //
 // profile_completeness recompute: kept as cheap safety. Today's M6 scorer
 // (lib/profilux/_m6Groups.ts) has NO group reading view.education — G3 reads
@@ -258,37 +243,74 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // STEP 1 (race window): INSERT education_records.
-  const { data: insertedRows, error: insertErr } = await supabase
+  // STEP 1: signature-correct lookup first. If an L2 row with the same
+  // signature already exists for this member, reuse its id. Otherwise insert;
+  // race-resolve via re-fetch on unique-constraint conflict.
+  const { data: candidates, error: candErr } = await supabase
     .from('education_records')
-    .insert({
-      member_id: member.id,
-      institution: institutionTrimmed,
-      degree_level: matchedRow.degree_level ?? null,
-      field_of_study: matchedRow.field_of_study ?? null,
-      city: matchedRow.city ?? null,
-      country: matchedRow.country ?? null,
-      start_year: matchedRow.start_year ?? null,
-      graduation_year: matchedRow.graduation_year ?? null,
-    })
-    .select('id')
-    .single()
+    .select('id, institution, field_of_study, graduation_year')
+    .eq('member_id', member.id)
 
-  if (insertErr) {
-    return NextResponse.json({ error: insertErr.message }, { status: 500 })
-  }
-  if (!insertedRows?.id) {
-    return NextResponse.json(
-      { error: 'INSERT returned no id' },
-      { status: 500 }
-    )
+  if (candErr) {
+    return NextResponse.json({ error: candErr.message }, { status: 500 })
   }
 
-  const l2Id: string = insertedRows.id
+  let l2Id: string | null = null
+  const existingMatch = (candidates ?? []).find((r) =>
+    computeEducationSignature({
+      institution: r.institution,
+      field_of_study: r.field_of_study,
+      graduation_year: r.graduation_year,
+    }) === signature,
+  )
 
-  // STEP 2 (race window): merge resolution_state.education[signature] and UPDATE.
-  // If this fails after the INSERT succeeded, we have an orphan L2 row —
-  // documented and accepted for v1 per Option α.
+  if (existingMatch) {
+    l2Id = existingMatch.id
+  } else {
+    const { data: inserted, error: insertErr } = await supabase
+      .from('education_records')
+      .insert({
+        member_id: member.id,
+        institution: institutionTrimmed,
+        degree_level: matchedRow.degree_level ?? null,
+        field_of_study: matchedRow.field_of_study ?? null,
+        city: matchedRow.city ?? null,
+        country: matchedRow.country ?? null,
+        start_year: matchedRow.start_year ?? null,
+        graduation_year: matchedRow.graduation_year ?? null,
+      })
+      .select('id')
+      .maybeSingle()
+
+    if (insertErr) {
+      // Race: another request inserted between our lookup and insert. Re-fetch
+      // and signature-match again.
+      const { data: raced } = await supabase
+        .from('education_records')
+        .select('id, institution, field_of_study, graduation_year')
+        .eq('member_id', member.id)
+
+      const racedMatch = (raced ?? []).find((r) =>
+        computeEducationSignature({
+          institution: r.institution,
+          field_of_study: r.field_of_study,
+          graduation_year: r.graduation_year,
+        }) === signature,
+      )
+      if (!racedMatch) {
+        return NextResponse.json({ error: insertErr.message }, { status: 500 })
+      }
+      l2Id = racedMatch.id
+    } else if (!inserted) {
+      return NextResponse.json({ error: 'INSERT returned no row' }, { status: 500 })
+    } else {
+      l2Id = inserted.id
+    }
+  }
+
+  // STEP 2: merge resolution_state.education[signature] and UPDATE. If this
+  // fails the L2 row is left behind, but the next apply call signature-matches
+  // it and reuses its id (no duplicate insert) — see header comment.
   const currentResolution = currentCv.resolution_state ?? {}
   const currentEducationResolution = currentResolution.education ?? {}
   const newItem: CvParsedDataResolutionEducationItem = {
@@ -323,7 +345,7 @@ export async function POST(req: NextRequest) {
     .eq('id', member.id)
 
   if (updateErr) {
-    // Orphan L2 row left behind. Documented v1 race window.
+    // L2 row exists; next apply reuses it via signature match. See header.
     return NextResponse.json({ error: updateErr.message }, { status: 500 })
   }
 
