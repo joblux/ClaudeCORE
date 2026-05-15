@@ -210,6 +210,37 @@ export async function resolveProfiLux(
         }))
       : null
 
+  // PF-2 P-A: relational L2 for languages. If rows exist, they appear FIRST
+  // in view.languages; L1 cv_parsed_data.languages follow (no dedup, no
+  // replace — mirrors experiences/education pattern).
+  const { data: mlRows } = await supabase
+    .from('member_languages')
+    .select('id, language, proficiency')
+    .eq('member_id', memberId)
+    .order('created_at', { ascending: true })
+
+  const relationalLanguages: ResolvedLanguage[] | null =
+    Array.isArray(mlRows) && mlRows.length > 0
+      ? mlRows.map((r) => ({
+          language: r.language,
+          proficiency: (r.proficiency as ResolvedLanguage['proficiency']) ?? null,
+        }))
+      : null
+
+  // PF-2 P-A: relational L2 for sectors. Rank-ordered. L2 REPLACES L1 entirely
+  // when L2 present (unlike languages/experiences which concatenate). Rationale:
+  // rank semantics make merge ambiguous; user-curated L2 is canonical when set.
+  const { data: msRows } = await supabase
+    .from('member_sectors')
+    .select('sector, rank')
+    .eq('member_id', memberId)
+    .order('rank', { ascending: true })
+
+  const relationalSectors: string[] | null =
+    Array.isArray(msRows) && msRows.length > 0
+      ? msRows.map((r) => r.sector).filter((s): s is string => !!s)
+      : null
+
   const cv: CvParsedData | null = row.cv_parsed_data ?? null
   const ident = cv?.identity
 
@@ -325,9 +356,9 @@ export async function resolveProfiLux(
     desired_locations: arr(row.desired_locations),
     desired_contract_types: arr(row.desired_contract_types),
     desired_departments: arr(row.desired_departments),
-    // L1 passthroughs
-    sectors: arr(cv?.sectors),
-    languages: mapLanguages(cv?.languages),
+    // L1 passthroughs (now with L2 merge per PF-2 P-A)
+    sectors: relationalSectors ?? arr(cv?.sectors),
+    languages: [...(relationalLanguages ?? []), ...mapLanguages(cv?.languages)],
     // A2.3-β.2: L2 + L1 (no replace, no dedup)
     experiences: [...(relationalExperiences ?? []), ...mapExperiences(cv?.experiences)],
     // S-B.1A: L2 first + L1 second (no replace, no dedup).

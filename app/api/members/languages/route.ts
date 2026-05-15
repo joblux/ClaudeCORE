@@ -8,21 +8,36 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-/**
- * GET /api/members/languages
- * List all languages for the authenticated member.
- */
+// =============================================================================
+// /api/members/languages — member_languages CRUD for the session user
+// Gates by session.user.email + resolveMemberId (mirrors profilux/experiences).
+// proficiency is NOT NULL in the DB schema — both POST and PUT require it.
+// =============================================================================
+
+async function resolveMemberId(email: string): Promise<string | null> {
+  const { data } = await supabase
+    .from('members')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle()
+  return data?.id ?? null
+}
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.memberId) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const memberId = await resolveMemberId(session.user.email)
+    if (!memberId) {
+      return NextResponse.json({ error: 'Member not found' }, { status: 404 })
     }
 
     const { data, error } = await supabase
       .from('member_languages')
       .select('*')
-      .eq('member_id', session.user.memberId)
+      .eq('member_id', memberId)
       .order('created_at', { ascending: true })
 
     if (error) {
@@ -37,43 +52,54 @@ export async function GET() {
   }
 }
 
-/**
- * POST /api/members/languages
- * Add a language for the authenticated member.
- * Prevents duplicates (same language for the same member).
- */
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.memberId) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const memberId = await resolveMemberId(session.user.email)
+    if (!memberId) {
+      return NextResponse.json({ error: 'Member not found' }, { status: 404 })
     }
 
     const body = await req.json()
-    const { language, proficiency } = body
+    const language = typeof body?.language === 'string' ? body.language.trim() : ''
+    const proficiency = typeof body?.proficiency === 'string' ? body.proficiency.trim() : ''
 
-    if (!language?.trim()) {
-      return NextResponse.json({ error: 'language is required' }, { status: 400 })
+    if (!language) {
+      return NextResponse.json(
+        { error: 'language is required', code: 'MISSING_REQUIRED' },
+        { status: 400 },
+      )
+    }
+    if (!proficiency) {
+      return NextResponse.json(
+        { error: 'proficiency is required', code: 'MISSING_REQUIRED' },
+        { status: 400 },
+      )
     }
 
-    // Check for duplicate
     const { data: existing } = await supabase
       .from('member_languages')
       .select('id')
-      .eq('member_id', session.user.memberId)
-      .ilike('language', language.trim())
+      .eq('member_id', memberId)
+      .ilike('language', language)
       .maybeSingle()
 
     if (existing) {
-      return NextResponse.json({ error: 'This language already exists on your profile' }, { status: 409 })
+      return NextResponse.json(
+        { error: 'This language already exists on your profile', code: 'DUPLICATE_LANGUAGE' },
+        { status: 409 },
+      )
     }
 
     const { data, error } = await supabase
       .from('member_languages')
       .insert({
-        member_id: session.user.memberId,
-        language: language.trim(),
-        proficiency: proficiency?.trim() || null,
+        member_id: memberId,
+        language,
+        proficiency,
       })
       .select()
       .single()
@@ -90,15 +116,70 @@ export async function POST(req: NextRequest) {
   }
 }
 
-/**
- * DELETE /api/members/languages?id=xxx
- * Remove a language. Verifies ownership.
- */
+export async function PUT(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const memberId = await resolveMemberId(session.user.email)
+    if (!memberId) {
+      return NextResponse.json({ error: 'Member not found' }, { status: 404 })
+    }
+
+    const body = await req.json()
+    const id = typeof body?.id === 'string' ? body.id : null
+    const language = typeof body?.language === 'string' ? body.language.trim() : ''
+    const proficiency = typeof body?.proficiency === 'string' ? body.proficiency.trim() : ''
+
+    if (!id) {
+      return NextResponse.json({ error: 'id required' }, { status: 400 })
+    }
+    if (!language) {
+      return NextResponse.json(
+        { error: 'language is required', code: 'MISSING_REQUIRED' },
+        { status: 400 },
+      )
+    }
+    if (!proficiency) {
+      return NextResponse.json(
+        { error: 'proficiency is required', code: 'MISSING_REQUIRED' },
+        { status: 400 },
+      )
+    }
+
+    const { data, error } = await supabase
+      .from('member_languages')
+      .update({ language, proficiency })
+      .eq('id', id)
+      .eq('member_id', memberId)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Update language error:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+    if (!data) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ language: data })
+  } catch (err) {
+    console.error('PUT /api/members/languages error:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
 export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.memberId) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const memberId = await resolveMemberId(session.user.email)
+    if (!memberId) {
+      return NextResponse.json({ error: 'Member not found' }, { status: 404 })
     }
 
     const { searchParams } = new URL(req.url)
@@ -108,18 +189,19 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'id query parameter is required' }, { status: 400 })
     }
 
-    // Verify ownership
     const { data: existing, error: fetchError } = await supabase
       .from('member_languages')
       .select('id, member_id')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
-    if (fetchError || !existing) {
+    if (fetchError) {
+      return NextResponse.json({ error: fetchError.message }, { status: 500 })
+    }
+    if (!existing) {
       return NextResponse.json({ error: 'Language not found' }, { status: 404 })
     }
-
-    if (existing.member_id !== session.user.memberId) {
+    if (existing.member_id !== memberId) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

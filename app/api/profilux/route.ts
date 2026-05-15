@@ -261,6 +261,14 @@ export async function POST(req: NextRequest) {
   }
   if (has('salaryCurrency')) updatePayload.desired_salary_currency = coerceEmpty(body.salaryCurrency)
 
+  if (has('brands_worked_with')) {
+    updatePayload.brands_worked_with = Array.isArray(body.brands_worked_with)
+      ? body.brands_worked_with
+          .filter((s: unknown) => typeof s === 'string' && s.trim() !== '')
+          .map((s: string) => s.trim())
+      : null
+  }
+
   if (has('section_visibility')) {
     const v = body.section_visibility
     if (v !== null && (typeof v !== 'object' || Array.isArray(v))) {
