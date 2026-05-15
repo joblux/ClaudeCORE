@@ -417,6 +417,27 @@ const emptyExperienceDraft = (): ExperienceDraft => ({
   description: '',
 })
 
+type EducationDraft = {
+  id?: string
+  institution: string
+  degree_level: string
+  field_of_study: string
+  city: string
+  country: string
+  start_year: string
+  graduation_year: string
+}
+
+const emptyEducationDraft = (): EducationDraft => ({
+  institution: '',
+  degree_level: '',
+  field_of_study: '',
+  city: '',
+  country: '',
+  start_year: '',
+  graduation_year: '',
+})
+
 function draftFrom(e: EditorView): Screen3Draft {
   return {
     job_title: e.job_title ?? '',
@@ -583,6 +604,12 @@ export default function ProfiluxPage() {
   const [experienceSaving, setExperienceSaving] = useState(false)
   const [experienceError, setExperienceError] = useState<string | null>(null)
   const [experienceDeleting, setExperienceDeleting] = useState<string | null>(null)
+  const [educationDrawerOpen, setEducationDrawerOpen] = useState(false)
+  const [educationFormOpen, setEducationFormOpen] = useState(false)
+  const [educationDraft, setEducationDraft] = useState<EducationDraft>(emptyEducationDraft())
+  const [educationSaving, setEducationSaving] = useState(false)
+  const [educationError, setEducationError] = useState<string | null>(null)
+  const [educationDeleting, setEducationDeleting] = useState<string | null>(null)
   const [draft1, setDraft1] = useState<Screen1Draft>({
     first_name: '', last_name: '', city: '', country: '',
     nationality: '', phone: '', headline: '', bio: '',
@@ -1109,6 +1136,103 @@ export default function ProfiluxPage() {
       setExperienceError(String(err))
     } finally {
       setExperienceDeleting(null)
+    }
+  }
+
+  function startNewEducation() {
+    setEducationDraft(emptyEducationDraft())
+    setEducationError(null)
+    setEducationFormOpen(true)
+  }
+
+  function startEditEducation(ed: { id?: string; institution: string | null; degree_level: string | null; field_of_study: string | null; city: string | null; country: string | null; start_year: number | null; graduation_year: number | null }) {
+    if (!ed.id) return
+    setEducationDraft({
+      id: ed.id,
+      institution: ed.institution ?? '',
+      degree_level: ed.degree_level ?? '',
+      field_of_study: ed.field_of_study ?? '',
+      city: ed.city ?? '',
+      country: ed.country ?? '',
+      start_year: ed.start_year != null ? String(ed.start_year) : '',
+      graduation_year: ed.graduation_year != null ? String(ed.graduation_year) : '',
+    })
+    setEducationError(null)
+    setEducationFormOpen(true)
+  }
+
+  function cancelEducationEdit() {
+    setEducationDraft(emptyEducationDraft())
+    setEducationError(null)
+    setEducationFormOpen(false)
+  }
+
+  async function handleSaveEducation() {
+    const inst = educationDraft.institution.trim()
+    if (inst === '') {
+      setEducationError('Institution is required.')
+      return
+    }
+    setEducationSaving(true)
+    setEducationError(null)
+    try {
+      const isUpdate = educationDraft.id !== undefined
+      const sy = educationDraft.start_year.trim()
+      const gy = educationDraft.graduation_year.trim()
+      const payload: Record<string, unknown> = {
+        institution: inst,
+        degree_level: educationDraft.degree_level.trim() || null,
+        field_of_study: educationDraft.field_of_study.trim() || null,
+        city: educationDraft.city.trim() || null,
+        country: educationDraft.country.trim() || null,
+        start_year: sy === '' ? null : Number(sy),
+        graduation_year: gy === '' ? null : Number(gy),
+      }
+      if (isUpdate) payload.id = educationDraft.id
+
+      const res = await fetch('/api/profilux/education', {
+        method: isUpdate ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any))
+        setEducationError(typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+      setEducationDraft(emptyEducationDraft())
+      setEducationFormOpen(false)
+    } catch (err) {
+      setEducationError(String(err))
+    } finally {
+      setEducationSaving(false)
+    }
+  }
+
+  async function handleDeleteEducation(id: string) {
+    setEducationDeleting(id)
+    setEducationError(null)
+    try {
+      const res = await fetch('/api/profilux/education', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any))
+        setEducationError(typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+      if (educationDraft.id === id) {
+        setEducationDraft(emptyEducationDraft())
+        setEducationFormOpen(false)
+      }
+    } catch (err) {
+      setEducationError(String(err))
+    } finally {
+      setEducationDeleting(null)
     }
   }
 
@@ -2731,6 +2855,129 @@ export default function ProfiluxPage() {
               </div>
             )}
             {experienceError && <div style={{ marginTop: 16, color: '#ff6b6b', fontSize: 13 }}>{experienceError}</div>}
+          </>
+        )}
+      </Drawer>
+      <SectionCard eyebrow="Education">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div />
+          <button
+            type="button"
+            onClick={() => { setEducationDrawerOpen(true); cancelEducationEdit() }}
+            style={{
+              background: 'transparent',
+              color: '#ccc',
+              border: '1px solid #2a2a2a',
+              padding: '6px 12px',
+              fontSize: 12,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        </div>
+        {e.education.length === 0 ? (
+          <NoneSel />
+        ) : (
+          <div>
+            {e.education.map((ed, i) => (
+              <div key={ed.id ?? i} style={card}>
+                <div><strong>{ed.institution ?? 'Unknown'}</strong></div>
+                <div style={{ color: '#999', marginTop: 4 }}>
+                  {ed.degree_level ?? '—'} · {ed.field_of_study ?? '—'} · {ed.graduation_year ?? '—'}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </SectionCard>
+      <Drawer
+        open={educationDrawerOpen}
+        title="Education"
+        onClose={() => { setEducationDrawerOpen(false); cancelEducationEdit() }}
+      >
+        {educationFormOpen ? (
+          <>
+            <div style={grid}>
+              <div style={label}>Institution *</div>
+              <div><input style={input} value={educationDraft.institution} onChange={(ev) => setEducationDraft({ ...educationDraft, institution: ev.target.value })} placeholder="e.g. ESSEC Business School" /></div>
+              <div style={label}>Degree level</div>
+              <div><input style={input} value={educationDraft.degree_level} onChange={(ev) => setEducationDraft({ ...educationDraft, degree_level: ev.target.value })} placeholder="e.g. Master" /></div>
+              <div style={label}>Field of study</div>
+              <div><input style={input} value={educationDraft.field_of_study} onChange={(ev) => setEducationDraft({ ...educationDraft, field_of_study: ev.target.value })} placeholder="e.g. Luxury Brand Management" /></div>
+              <div style={label}>City</div>
+              <div><input style={input} value={educationDraft.city} onChange={(ev) => setEducationDraft({ ...educationDraft, city: ev.target.value })} placeholder="e.g. Paris" /></div>
+              <div style={label}>Country</div>
+              <div><input style={input} value={educationDraft.country} onChange={(ev) => setEducationDraft({ ...educationDraft, country: ev.target.value })} placeholder="e.g. France" /></div>
+              <div style={label}>Start year</div>
+              <div><input style={input} value={educationDraft.start_year} onChange={(ev) => setEducationDraft({ ...educationDraft, start_year: ev.target.value })} placeholder="e.g. 2018" /></div>
+              <div style={label}>Graduation year</div>
+              <div><input style={input} value={educationDraft.graduation_year} onChange={(ev) => setEducationDraft({ ...educationDraft, graduation_year: ev.target.value })} placeholder="e.g. 2020" /></div>
+            </div>
+            <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+              <button style={educationSaving ? saveBtnDis : saveBtn} disabled={educationSaving} onClick={handleSaveEducation}>
+                {educationSaving ? 'Saving…' : (educationDraft.id ? 'Save changes' : 'Add education')}
+              </button>
+              <button
+                type="button"
+                onClick={cancelEducationEdit}
+                disabled={educationSaving}
+                style={btn}
+              >
+                Cancel
+              </button>
+              {educationError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{educationError}</span>}
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ marginBottom: 16 }}>
+              <button type="button" onClick={startNewEducation} style={saveBtn}>
+                Add education
+              </button>
+            </div>
+            {e.education.length === 0 ? (
+              <div style={{ color: '#999', fontSize: 13 }}>No education yet. Click Add education to start.</div>
+            ) : (
+              <div>
+                {e.education.map((ed, i) => {
+                  const editable = typeof ed.id === 'string'
+                  return (
+                    <div key={ed.id ?? i} style={{ ...card, position: 'relative' }}>
+                      <div><strong>{ed.institution ?? 'Unknown'}</strong></div>
+                      <div style={{ color: '#999', marginTop: 4, fontSize: 12 }}>
+                        {ed.degree_level ?? '—'} · {ed.field_of_study ?? '—'} · {ed.graduation_year ?? '—'}
+                      </div>
+                      {editable ? (
+                        <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
+                          <button
+                            type="button"
+                            onClick={() => startEditEducation(ed)}
+                            style={{ background: 'transparent', color: '#ccc', border: '1px solid #2a2a2a', padding: '4px 10px', fontSize: 11, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            disabled={educationDeleting === ed.id}
+                            onClick={() => ed.id && handleDeleteEducation(ed.id)}
+                            style={{ background: 'transparent', color: '#ff6b6b', border: '1px solid #2a2a2a', padding: '4px 10px', fontSize: 11, cursor: educationDeleting === ed.id ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif', opacity: educationDeleting === ed.id ? 0.5 : 1 }}
+                          >
+                            {educationDeleting === ed.id ? 'Deleting…' : 'Delete'}
+                          </button>
+                        </div>
+                      ) : (
+                        <div style={{ marginTop: 10, fontSize: 11, color: '#777', fontStyle: 'italic' }}>
+                          Parsed from your CV. Add as a passport entry to edit.
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            {educationError && <div style={{ marginTop: 16, color: '#ff6b6b', fontSize: 13 }}>{educationError}</div>}
           </>
         )}
       </Drawer>
