@@ -182,6 +182,22 @@ export type CvParsedData = {
 }
 
 // =============================================================================
+// Section visibility + masked fields (PF-2 P1)
+// =============================================================================
+//
+// Substrate columns added in migration 20260515_profilux_section_visibility_masked_fields.
+// section_visibility consumed by projectFor('public') this slice. masked_fields
+// is substrate-only — no consumer yet; client/share surfaces follow in next slice.
+
+export const SECTION_IDS = ['identity','current_role','career_path','education','languages','luxury_fit','skills_markets','clienteling','compensation','availability'] as const
+export type SectionId = typeof SECTION_IDS[number]
+export type SectionVisibility = Partial<Record<SectionId, boolean>>
+
+export const MASKABLE_FIELDS = ['phone','email','current_employer','salary','availability','references'] as const
+export type MaskableField = typeof MASKABLE_FIELDS[number]
+export type MaskedFields = Partial<Record<MaskableField, boolean>>
+
+// =============================================================================
 // MemberRow — typed view of relevant members.* columns
 // =============================================================================
 //
@@ -245,6 +261,8 @@ export type MemberRow = {
   contact_preference: string | null // default 'email_only'
   contribution_points: number | null // default 0
   profile_visibility: string | null // default 'team_only'
+  section_visibility: SectionVisibility | null
+  masked_fields: MaskedFields | null
   // L1 provenance
   cv_url: string | null
   cv_parsed_at: string | null
@@ -434,6 +452,8 @@ export type ProfiLuxResolved = {
   contact_preference: string | null
   contribution_points: number | null
   profile_visibility: string | null
+  section_visibility: SectionVisibility
+  masked_fields: MaskedFields
   // L3 cached
   profile_completeness: number | null
   m6_confirmed_at: string | null
@@ -564,6 +584,8 @@ export type EditorView = {
     G5: boolean
     G6: boolean
   }
+  section_visibility: SectionVisibility
+  masked_fields: MaskedFields
 }
 
 export type EditorProjection = {

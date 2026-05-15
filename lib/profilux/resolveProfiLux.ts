@@ -341,6 +341,8 @@ export async function resolveProfiLux(
     contact_preference: row.contact_preference,
     contribution_points: row.contribution_points,
     profile_visibility: row.profile_visibility,
+    section_visibility: row.section_visibility ?? {},
+    masked_fields: row.masked_fields ?? {},
     // L3 cached
     profile_completeness: row.profile_completeness,
     m6_confirmed_at: row.m6_confirmed_at,

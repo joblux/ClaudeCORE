@@ -30,6 +30,7 @@ import type {
   ProjectedView,
   PublicExperience,
   PublicProjection,
+  SectionId,
   Surface,
   EditorView,
   EditorAvailability,
@@ -102,37 +103,75 @@ export function projectFor(
     }
 
     case 'public': {
+      // PF-2 P1 — per-section public visibility. Absent key = shared (default).
+      // Explicit false = mute fields rendered on /[slug] for that section.
+      const sv = view.section_visibility ?? {}
+      const isHidden = (id: SectionId) => sv[id] === false
+
+      // identity (V1: last_name still initial-only after muting; null stays null)
+      const idFirstName  = isHidden('identity') ? null : view.first_name
+      const idLastName   = isHidden('identity') ? null : toInitial(view.last_name)
+      const idAvatar     = isHidden('identity') ? null : view.avatar_url
+      const idHeadline   = isHidden('identity') ? null : view.headline
+      const idBio        = isHidden('identity') ? null : view.bio
+      const idCity       = isHidden('identity') ? null : view.city
+      const idCountry    = isHidden('identity') ? null : view.country
+
+      // current_role
+      const crJobTitle   = isHidden('current_role') ? null : view.job_title
+      const crSeniority  = isHidden('current_role') ? null : view.seniority
+      const crTotalYears = isHidden('current_role') ? null : view.total_years_experience
+      const crLuxYears   = isHidden('current_role') ? null : view.years_in_luxury
+
+      // career_path
+      const cpExperiences = isHidden('career_path') ? [] : view.experiences
+
+      // languages
+      const lgLanguages = isHidden('languages') ? [] : view.languages
+
+      // luxury_fit
+      const lfSectors            = isHidden('luxury_fit') ? [] : view.sectors
+      const lfProductCategories  = isHidden('luxury_fit') ? [] : view.product_categories
+      const lfExpertiseTags      = isHidden('luxury_fit') ? [] : view.expertise_tags
+
+      // skills_markets
+      const smKeySkills       = isHidden('skills_markets') ? [] : view.key_skills
+      const smMarketKnowledge = isHidden('skills_markets') ? [] : view.market_knowledge
+
+      // clienteling
+      const clClienteling = isHidden('clienteling') ? false : view.clienteling_experience
+
       const pub: PublicProjection = {
         surface: 'public',
-        first_name: view.first_name,
-        last_name: toInitial(view.last_name), // V1
-        avatar_url: view.avatar_url,
-        headline: view.headline,
-        bio: view.bio,
-        city: view.city,
-        country: view.country,
+        first_name: idFirstName,
+        last_name: idLastName, // V1
+        avatar_url: idAvatar,
+        headline: idHeadline,
+        bio: idBio,
+        city: idCity,
+        country: idCountry,
         // V7: nationality, DOB hidden — not included
-        job_title: view.job_title,
+        job_title: crJobTitle,
         // V3: current_employer hidden — not included
-        seniority: view.seniority,
-        total_years_experience: view.total_years_experience,
-        years_in_luxury: view.years_in_luxury,
+        seniority: crSeniority,
+        total_years_experience: crTotalYears,
+        years_in_luxury: crLuxYears,
         department: view.department,
         speciality: view.speciality,
         maison: view.maison,
         // V7: software_tools, keywords hidden — not included
-        key_skills: view.key_skills,
+        key_skills: smKeySkills,
         certifications: view.certifications,
-        product_categories: view.product_categories,
+        product_categories: lfProductCategories,
         // V4: brands_worked_with hidden — not included
         client_segment_experience: view.client_segment_experience,
-        market_knowledge: view.market_knowledge,
-        expertise_tags: view.expertise_tags,
-        clienteling_experience: view.clienteling_experience,
+        market_knowledge: smMarketKnowledge,
+        expertise_tags: lfExpertiseTags,
+        clienteling_experience: clClienteling,
         // V7: clienteling_description hidden — not included
-        sectors: view.sectors,
-        languages: view.languages,
-        experiences: anonymizeExperiences(view.experiences), // V5
+        sectors: lfSectors,
+        languages: lgLanguages,
+        experiences: anonymizeExperiences(cpExperiences), // V5
       }
       return pub
     }
@@ -280,5 +319,7 @@ export function projectEditorView(view: ProfiLuxResolved): EditorView {
     cv_education_suggestions: view.cv_education_suggestions,
     // A2.7-B — server-authoritative M6 group truth, same predicates as scorer
     m6_groups: computeM6Groups(view),
+    section_visibility: view.section_visibility ?? {},
+    masked_fields: view.masked_fields ?? {},
   }
 }

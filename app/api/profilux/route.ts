@@ -12,6 +12,7 @@ import type {
   ProfiLuxResolved,
   ResolvedExperience,
 } from '@/lib/profilux'
+import { SECTION_IDS, MASKABLE_FIELDS } from '@/lib/profilux/types'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -259,6 +260,42 @@ export async function POST(req: NextRequest) {
         : null // single editor value → max bucket; min untouched (Phase 4 owns range UX)
   }
   if (has('salaryCurrency')) updatePayload.desired_salary_currency = coerceEmpty(body.salaryCurrency)
+
+  if (has('section_visibility')) {
+    const v = body.section_visibility
+    if (v !== null && (typeof v !== 'object' || Array.isArray(v))) {
+      return NextResponse.json({ error: 'section_visibility must be object' }, { status: 400 })
+    }
+    if (v && typeof v === 'object') {
+      for (const k of Object.keys(v)) {
+        if (!(SECTION_IDS as readonly string[]).includes(k)) {
+          return NextResponse.json({ error: `Unknown section id: ${k}` }, { status: 400 })
+        }
+        if (typeof (v as any)[k] !== 'boolean') {
+          return NextResponse.json({ error: `section_visibility.${k} must be boolean` }, { status: 400 })
+        }
+      }
+    }
+    updatePayload.section_visibility = v ?? {}
+  }
+
+  if (has('masked_fields')) {
+    const v = body.masked_fields
+    if (v !== null && (typeof v !== 'object' || Array.isArray(v))) {
+      return NextResponse.json({ error: 'masked_fields must be object' }, { status: 400 })
+    }
+    if (v && typeof v === 'object') {
+      for (const k of Object.keys(v)) {
+        if (!(MASKABLE_FIELDS as readonly string[]).includes(k)) {
+          return NextResponse.json({ error: `Unknown maskable field: ${k}` }, { status: 400 })
+        }
+        if (typeof (v as any)[k] !== 'boolean') {
+          return NextResponse.json({ error: `masked_fields.${k} must be boolean` }, { status: 400 })
+        }
+      }
+    }
+    updatePayload.masked_fields = v ?? {}
+  }
 
   // §4.5 range validation: reject only when both values are present and min > max.
   // Allows min-only, max-only, both-null. No silent swap.
