@@ -176,33 +176,39 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 **Lane: V12 Product / Prototype Fidelity (ACTIVE — not complete).**
 
 V12 launch-blocking functional subset is closed:
-- V12-JC-1 (CV parse drop-off) CLOSED 2026-05-14 PM via `31f6bae` + `1c206ae`.
-- V12-JC-2 (3 lying UI elements) CLOSED 2026-05-15 via `d0e0a7e`.
-- V12-JC-3 (Education manual CRUD) CLOSED 2026-05-15 via `31e9813` + `4bf64be`.
+- V12-JC-1 CLOSED via `31f6bae` + `1c206ae`.
+- V12-JC-2 CLOSED via `d0e0a7e`.
+- V12-JC-3 CLOSED via `31e9813` + `4bf64be`.
 
-**V12 Product / Prototype Fidelity is NOT closed.** ProfiLux does not yet visually match the locked V12 prototypes. The functional subset closure was a milestone, not the lane's end.
+V12 Product / Prototype Fidelity slices:
+- V12-PF-1 (View tab posture pass) CLOSED 2026-05-15 via `f53a7ef`. Live-validated 8/8 on Alex Mason. Caveat: Current Role `Since <date>` and Education `start_year–graduation_year` range passed by fallback omission, not positive fixture render. Alex lacks `is_current=true`+`start_date` and education `start_year`. Code path verified; visual proof deferred until a full fixture exists.
 
 **Rule (locked 2026-05-15):**
-- Continue V12 until ProfiLux resembles the locked prototypes (`docs/PROFILUX_V12_LOCK.md` §3 visual posture, `docs/prototypes/profilux_journey_v12.html`).
-- Backend only if a validated UI piece needs it. Not the reverse.
-- Next work resumes prototype fidelity, NOT a fresh audit cycle.
+- Continue V12 until ProfiLux resembles the locked prototypes.
+- Backend only if a validated UI piece needs it.
+- Next work resumes prototype fidelity, not a fresh audit cycle.
 
-**Naming convention lock (2026-05-15, retained):**
-- Lane: V12 Product / Prototype Fidelity (doctrinal).
-- Slice IDs: V12-JC-N for journey-closure subset (complete); V12-PF-N for prototype-fidelity slices going forward.
-- `MLV-x` retired as a strategy label.
+**Naming convention lock:** V12-JC-N = closure subset complete; V12-PF-N = fidelity slices ongoing. MLV-x retired.
 
-**Next step:** Resume prototype fidelity from known live-vs-prototype divergences already inventoried in STATE + V12_LOCK. First slice TBD next message.
+**Next step:** V12-PF-2 — Edit tab no-backend posture pass. Single file. Fixes from execution cut:
+- Remove standalone page `ProfiLux` H1
+- Move tab switcher top-right same row as breadcrumb
+- Replace identity hero card with PROFILUX OVERVIEW progress band
+- Add `YOUR DOSSIER` eyebrow
+- Add `Done →` + `Re-upload CV` top-right pill actions
+- Invert Career History row hierarchy: title bold, company gold
+- Invert Education row hierarchy: program white, institution gold
+- Eyebrow + Edit button on same row
 
-Acceptable post-launch (V12 deltas that DO NOT block launch):
-- Per-field maskable toggles in Manage (§16 substrate parked)
-- Per-section hide toggles in Manage (§16A substrate parked)
-- Add Section library activation (Tier 2 substrate parked per §15.3)
-- Tier 1 fields: notice_period, work_authorization, salary_history, reporting_line, budget_responsibility, team_size (schema parked per §15.2)
-- CV merge diff modal (Phase 1.5 shipped re-upload as page; V12 §2.2 scene 6 spec is a modal with diff)
-- Languages L2 CRUD (L1 read-only acceptable; ledger `1609e494`)
+Acceptable post-launch:
+- Per-field maskable toggles in Manage
+- Per-section hide toggles in Manage
+- Add Section library activation
+- Tier 1 fields
+- CV merge diff modal
+- Languages L2 CRUD
 
-**Strict step order:** Resume V12 prototype fidelity. First execution slice surfaced from known divergences next message.
+**Strict step order:** V12-PF-2 (Edit tab posture pass). Prompt drafted next.
 
 **Audits closed this rotation (parked):**
 - **S-D Sectors** (2026-05-13 PM late): keep `1609e494` PARKED. L1 sectors render correctly; `member_sectors` table dormant and empty. Unpark requires Mo + GPT scope lock on rank semantics, add/remove/reorder UX, L1/L2 merge contract, and M6/G3 readiness implications.
@@ -322,7 +328,7 @@ Acceptable post-launch (V12 deltas that DO NOT block launch):
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 15, 2026 (V12 framing correction — Mo doctrinal pass). V12 launch-blocking functional subset (V12-JC-1, JC-2, JC-3) CLOSED. V12 Product / Prototype Fidelity lane REMAINS ACTIVE — V12 is NOT complete. Rule locked: continue V12 until ProfiLux visually matches locked prototypes; backend only if a validated UI piece needs it. Slice ID convention extended: V12-JC-N (closure subset, complete) + V12-PF-N (fidelity, going forward). MLV-x retired (historical text preserved in prior rotations). Next work resumes prototype fidelity, NOT a fresh audit cycle. First execution slice surfaced next message from known live-vs-prototype divergences already inventoried in STATE + V12_LOCK.
+**Last updated:** May 15, 2026 (V12-PF-1 live-validated via `f53a7ef`). V12 launch-blocking functional subset (V12-JC-1, JC-2, JC-3) CLOSED. V12 Product / Prototype Fidelity lane ACTIVE. PF-1 View tab posture pass shipped: spine sub-role split, Current Role 15-YRS removal + Since-line, Career Path year-only periods, Education program-first hierarchy + period range + city, Availability 6→1 row collapse. Live QA 8/8 PASS on Alex Mason; Current Role Since-line and Education range positive branches verified by code path only because Alex lacks the fixture fields. Next: V12-PF-2 Edit tab posture pass.
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
