@@ -182,6 +182,13 @@ V12 launch-blocking functional subset is closed:
 
 V12 Product / Prototype Fidelity slices:
 - V12-PF-1 (View tab posture pass) CLOSED 2026-05-15 via `f53a7ef`. Live-validated 8/8 on Alex Mason. Caveat: Current Role `Since <date>` and Education `start_year–graduation_year` range passed by fallback omission, not positive fixture render. Alex lacks `is_current=true`+`start_date` and education `start_year`. Code path verified; visual proof deferred until a full fixture exists.
+- V12-PF-2a (Edit page chrome + entry posture) CLOSED 2026-05-15 via `3a5de09`. Live QA 7/7 PASS on joblux.com. Shipped scope:
+  - Edit/Manage chrome unified with View pattern (breadcrumb-LEFT + tab-pill-RIGHT)
+  - Edit H1 `ProfiLux` removed
+  - `Re-upload CV` + `Done →` top-right pill actions added
+  - PROFILUX OVERVIEW progress band added
+  - YOUR DOSSIER eyebrow added
+  - Existing CV / Apply suggestions / Add education / Identity cards untouched (PF-2b scope)
 
 **Rule (locked 2026-05-15):**
 - Continue V12 until ProfiLux resembles the locked prototypes.
@@ -190,15 +197,11 @@ V12 Product / Prototype Fidelity slices:
 
 **Naming convention lock:** V12-JC-N = closure subset complete; V12-PF-N = fidelity slices ongoing. MLV-x retired.
 
-**Next step:** V12-PF-2 — Edit tab no-backend posture pass. Single file. Fixes from execution cut:
-- Remove standalone page `ProfiLux` H1
-- Move tab switcher top-right same row as breadcrumb
-- Replace identity hero card with PROFILUX OVERVIEW progress band
-- Add `YOUR DOSSIER` eyebrow
-- Add `Done →` + `Re-upload CV` top-right pill actions
+**Next step:** V12-PF-2b — Edit section internals posture pass. Single file. Section-card-internal posture work deferred from PF-2a:
 - Invert Career History row hierarchy: title bold, company gold
 - Invert Education row hierarchy: program white, institution gold
 - Eyebrow + Edit button on same row
+- Any remaining section-card internal divergences from locked V12 prototype
 
 Acceptable post-launch:
 - Per-field maskable toggles in Manage
@@ -208,7 +211,7 @@ Acceptable post-launch:
 - CV merge diff modal
 - Languages L2 CRUD
 
-**Strict step order:** V12-PF-2 (Edit tab posture pass). Prompt drafted next.
+**Strict step order:** V12-PF-2b (Edit section internals posture pass). Prompt drafted next.
 
 **Audits closed this rotation (parked):**
 - **S-D Sectors** (2026-05-13 PM late): keep `1609e494` PARKED. L1 sectors render correctly; `member_sectors` table dormant and empty. Unpark requires Mo + GPT scope lock on rank semantics, add/remove/reorder UX, L1/L2 merge contract, and M6/G3 readiness implications.
@@ -328,7 +331,7 @@ Acceptable post-launch:
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 15, 2026 (V12-PF-1 live-validated via `f53a7ef`). V12 launch-blocking functional subset (V12-JC-1, JC-2, JC-3) CLOSED. V12 Product / Prototype Fidelity lane ACTIVE. PF-1 View tab posture pass shipped: spine sub-role split, Current Role 15-YRS removal + Since-line, Career Path year-only periods, Education program-first hierarchy + period range + city, Availability 6→1 row collapse. Live QA 8/8 PASS on Alex Mason; Current Role Since-line and Education range positive branches verified by code path only because Alex lacks the fixture fields. Next: V12-PF-2 Edit tab posture pass.
+**Last updated:** May 15, 2026 (V12-PF-2a live-validated via `3a5de09`). V12 Product / Prototype Fidelity lane ACTIVE. PF-1 View posture pass shipped at `f53a7ef`; PF-2a Edit page chrome + entry posture shipped at `3a5de09` with 7/7 PASS. Next: V12-PF-2b Edit section internals.
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
