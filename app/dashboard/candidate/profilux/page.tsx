@@ -1698,46 +1698,34 @@ export default function ProfiluxPage() {
 
   return (
     <div style={wrap}>
-      {tab === 'view' ? (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '20px 0 16px', marginBottom: 24, borderBottom: '1px solid #2a2a2a' }}>
-          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999', letterSpacing: 0.2 }}>
-            ← Dashboard · ProfiLux
-          </div>
-          <div role="tablist" style={{ display: 'inline-flex', background: '#222', border: '1px solid #2a2a2a', borderRadius: 8, padding: 3 }}>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={true}
-              onClick={() => setTab('view')}
-              style={{ background: '#1a1a1a', color: '#fff', border: 'none', padding: '5px 12px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
-            >View</button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={false}
-              onClick={() => setTab('edit')}
-              style={{ background: 'transparent', color: '#999', border: 'none', padding: '5px 12px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
-            >Edit</button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={false}
-              onClick={() => setTab('manage')}
-              style={{ background: 'transparent', color: '#999', border: 'none', padding: '5px 12px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
-            >Manage</button>
-          </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '20px 0 16px', marginBottom: 24, borderBottom: '1px solid #2a2a2a' }}>
+        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999', letterSpacing: 0.2 }}>
+          ← Dashboard · ProfiLux
         </div>
-      ) : (
-        <>
-          <h1 style={h1Style}>ProfiLux</h1>
-
-          <div style={tabBarStyle}>
-            <button type="button" style={tabBtnBase} onClick={() => setTab('view')}>View</button>
-            <button type="button" style={tab === 'edit' ? tabBtnActive : tabBtnBase} onClick={() => setTab('edit')}>Edit</button>
-            <button type="button" style={tab === 'manage' ? tabBtnActive : tabBtnBase} onClick={() => setTab('manage')}>Manage</button>
-          </div>
-        </>
-      )}
+        <div role="tablist" style={{ display: 'inline-flex', background: '#222', border: '1px solid #2a2a2a', borderRadius: 8, padding: 3 }}>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'view'}
+            onClick={() => setTab('view')}
+            style={{ background: tab === 'view' ? '#1a1a1a' : 'transparent', color: tab === 'view' ? '#fff' : '#999', border: 'none', padding: '5px 12px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
+          >View</button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'edit'}
+            onClick={() => setTab('edit')}
+            style={{ background: tab === 'edit' ? '#1a1a1a' : 'transparent', color: tab === 'edit' ? '#fff' : '#999', border: 'none', padding: '5px 12px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
+          >Edit</button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'manage'}
+            onClick={() => setTab('manage')}
+            style={{ background: tab === 'manage' ? '#1a1a1a' : 'transparent', color: tab === 'manage' ? '#fff' : '#999', border: 'none', padding: '5px 12px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
+          >Manage</button>
+        </div>
+      </div>
 
       {tab === 'view' && (() => {
         const fn = e.first_name ?? ''
@@ -2162,81 +2150,49 @@ export default function ProfiluxPage() {
         <>
       {TUNNEL_VISIBLE && <div style={sub}>Screen {step} / {TOTAL} · {SCREEN_TITLES[step]}</div>}
       {(() => {
-        const fn = e.first_name ?? ''
-        const ln = e.last_name ?? ''
-        const fullName = `${fn} ${ln}`.trim()
-        const initials = `${(fn[0] ?? '').toUpperCase()}${(ln[0] ?? '').toUpperCase()}`.trim()
-        const hasAvatar = typeof e.avatar_url === 'string' && e.avatar_url.trim().length > 0
-        const hasHeadline = typeof e.headline === 'string' && e.headline.trim().length > 0
-        const hasJob = typeof e.job_title === 'string' && e.job_title.trim().length > 0
-        const hasEmp = typeof e.current_employer === 'string' && e.current_employer.trim().length > 0
-        const positionLine = hasJob && hasEmp
-          ? `${e.job_title} · ${e.current_employer}`
-          : hasJob
-            ? e.job_title
-            : hasEmp
-              ? e.current_employer
-              : null
-        const hasCity = typeof e.city === 'string' && e.city.trim().length > 0
-        const hasCountry = typeof e.country === 'string' && e.country.trim().length > 0
-        const locationLine = hasCity && hasCountry
-          ? `${e.city}, ${e.country}`
-          : hasCity
-            ? e.city
-            : hasCountry
-              ? e.country
-              : null
+        const pct = typeof e.profile_completeness === 'number' ? e.profile_completeness : 0
         return (
-          <SectionCard layout="flex">
-            <div style={{ flex: '0 0 auto' }}>
-              {hasAvatar ? (
-                <img src={e.avatar_url as string} alt="" style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
-              ) : (
-                <div style={{
-                  background: '#333',
-                  color: '#fff',
-                  fontFamily: 'Inter, sans-serif',
-                  fontSize: 18,
-                  fontWeight: 500,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '50%',
-                  width: 56,
-                  height: 56,
-                }}>
-                  {initials.length > 0 ? initials : '—'}
-                </div>
-              )}
+          <>
+            {/* Top-right action row — Re-upload CV + Done */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+              <Link
+                href="/dashboard/candidate/profilux/cv-merge"
+                style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#ccc', border: '1px solid #2a2a2a', borderRadius: 999, padding: '7px 16px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, textDecoration: 'none', cursor: 'pointer' }}
+              >
+                Re-upload CV
+              </Link>
+              <button
+                type="button"
+                onClick={() => setTab('view')}
+                style={{ display: 'inline-flex', alignItems: 'center', background: '#fff', color: '#1a1a1a', border: 'none', borderRadius: 999, padding: '7px 18px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', fontWeight: 500 }}
+              >
+                Done →
+              </button>
             </div>
-            <div style={{ flex: '1 1 auto', minWidth: 0 }}>
-              <div style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: 22, color: '#fff', lineHeight: 1.2, marginBottom: 4 }}>
-                {fullName.length > 0
-                  ? fullName
-                  : <em style={{ color: '#666', fontStyle: 'italic', fontFamily: 'Inter, sans-serif', fontSize: 14 }}>Not specified</em>}
+            {/* PROFILUX OVERVIEW progress band */}
+            <div style={{ background: '#222', border: '1px solid #2a2a2a', borderRadius: 6, padding: '20px 24px', marginBottom: 24 }}>
+              <div style={{ fontSize: 10, color: '#a58e28', letterSpacing: 1, marginBottom: 8, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
+                ProfiLux Overview
               </div>
-              {hasHeadline && (
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.4, marginBottom: 4 }}>
-                  {e.headline}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#ccc', lineHeight: 1.4, flex: '0 0 auto' }}>
+                  The more you tell us, the more we can work for you.
                 </div>
-              )}
-              {positionLine && (
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999', lineHeight: 1.4, marginBottom: 2 }}>
-                  {positionLine}
+                <div style={{ flex: '1 1 auto', display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+                  <div style={{ flex: 1, height: 3, background: '#2a2a2a', borderRadius: 2, overflow: 'hidden' }}>
+                    <div style={{ width: `${Math.max(0, Math.min(100, pct))}%`, height: '100%', background: '#1D9E75' }} />
+                  </div>
+                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#fff', fontVariantNumeric: 'tabular-nums', flex: '0 0 auto' }}>
+                    {pct}%
+                  </div>
                 </div>
-              )}
-              {locationLine && (
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.4 }}>
-                  {locationLine}
-                </div>
-              )}
-            </div>
-            <div style={{ flex: '0 0 auto', textAlign: 'right', alignSelf: 'center' }}>
-              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777' }}>
-                {e.profile_completeness ?? 0}% complete
               </div>
             </div>
-          </SectionCard>
+            {/* YOUR DOSSIER eyebrow */}
+            <div style={{ fontSize: 10, color: '#999', letterSpacing: 1, marginBottom: 16, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
+              Your dossier
+            </div>
+          </>
         )
       })()}
       {/* CV upload + parse card — S1 */}
