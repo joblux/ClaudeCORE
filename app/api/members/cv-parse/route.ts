@@ -285,10 +285,12 @@ export async function POST(req: NextRequest) {
     return errorResponse('M6_API_KEY_MISSING', 'Parser unavailable', 500)
   }
 
-  // Read member state
+  // Read member state. Phase C.1: idempotence now reads cv_parsed_pending,
+  // not cv_parsed_data. cv_parsed_data is only mutated by an explicit apply
+  // (phase C.2), so the freshness check belongs on the pending payload.
   const { data: member, error: memberErr } = await supabase
     .from('members')
-    .select('id, cv_url, cv_parsed_data, cv_parsed_at')
+    .select('id, cv_url, cv_parsed_pending')
     .eq('id', memberId)
     .maybeSingle()
 
@@ -303,24 +305,26 @@ export async function POST(req: NextRequest) {
 
   const cvPath = normalizeCvStoragePath(member.cv_url)
 
-  // Idempotence: short window cache, ONLY if cached parse refers to the SAME cv_url
-  // (a re-upload changes cv_url, in which case we must re-parse)
-  if (member.cv_parsed_at && member.cv_parsed_data) {
-    const ageMs = Date.now() - new Date(member.cv_parsed_at).getTime()
+  // Idempotence: short window cache, ONLY if the pending payload refers to the
+  // SAME cv_url path (a re-upload changes cv_url and must trigger a re-parse).
+  if (member.cv_parsed_pending && typeof member.cv_parsed_pending === 'object') {
+    const pending = member.cv_parsed_pending as Record<string, any>
+    const pendingParsedAt = typeof pending.parsed_at === 'string' ? pending.parsed_at : null
     const cachedPath =
-      typeof member.cv_parsed_data === 'object' &&
-      member.cv_parsed_data !== null &&
-      'source' in (member.cv_parsed_data as any)
-        ? (member.cv_parsed_data as any).source?.cv_storage_path
+      pending.source && typeof pending.source === 'object'
+        ? pending.source.cv_storage_path
         : null
     const samePath = typeof cachedPath === 'string' && normalizeCvStoragePath(cachedPath) === cvPath
-    if (ageMs < IDEMPOTENCE_WINDOW_SECONDS * 1000 && samePath) {
-      return NextResponse.json({
-        success: true,
-        cached: true,
-        parsed: member.cv_parsed_data,
-        parsed_at: member.cv_parsed_at,
-      })
+    if (pendingParsedAt) {
+      const ageMs = Date.now() - new Date(pendingParsedAt).getTime()
+      if (ageMs < IDEMPOTENCE_WINDOW_SECONDS * 1000 && samePath) {
+        return NextResponse.json({
+          success: true,
+          cached: true,
+          parsed: pending,
+          parsed_at: pendingParsedAt,
+        })
+      }
     }
   }
 
@@ -546,13 +550,13 @@ export async function POST(req: NextRequest) {
     needs_review: dedupNeedsReview,
   }
 
-  // Storage: write only cv_parsed_data, cv_parsed_at, updated_at
-  // NEVER touches cv_url, member_documents, or member-cvs bucket
+  // Storage: phase C.1 writes cv_parsed_pending only. cv_parsed_data and
+  // cv_parsed_at stay untouched until apply (phase C.2). Never touches cv_url,
+  // member_documents, or the member-cvs bucket.
   const { error: updErr } = await supabase
     .from('members')
     .update({
-      cv_parsed_data: finalPayload,
-      cv_parsed_at: finalPayload.parsed_at,
+      cv_parsed_pending: finalPayload,
       updated_at: new Date().toISOString(),
     })
     .eq('id', memberId)
@@ -567,6 +571,18 @@ export async function POST(req: NextRequest) {
       error_message: `db_update_failed: ${updErr.message}`,
     })
     return errorResponse('M6_PARSER_FAILED', 'Failed to persist parsed CV data', 500)
+  }
+
+  // Phase C.1 — append to cv_parse_history. Non-fatal: log on failure.
+  const { error: historyErr } = await supabase
+    .from('cv_parse_history')
+    .insert({
+      member_id: memberId,
+      parsed_at: finalPayload.parsed_at,
+      payload: finalPayload,
+    })
+  if (historyErr) {
+    console.error('[cv-parse] cv_parse_history insert failed:', historyErr.message)
   }
 
   // Logging success
