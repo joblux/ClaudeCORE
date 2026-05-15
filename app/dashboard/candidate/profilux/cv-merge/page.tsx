@@ -534,8 +534,8 @@ export default function CvMergePage() {
         body: JSON.stringify({ accept }),
       })
       if (!res.ok) {
-        const data = await res.json().catch(() => ({} as any))
-        setError(typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
+        const j = await res.json().catch(() => ({}))
+        setError(j.error || `Apply failed (${res.status})`)
         setMode('review')
         return
       }
@@ -858,6 +858,24 @@ export default function CvMergePage() {
       {renderLanguagesSection()}
       {renderSectorsSection()}
 
+      {error && (
+        <div
+          style={{
+            marginTop: 24,
+            padding: '12px 16px',
+            background: 'rgba(255, 107, 107, 0.08)',
+            border: '1px solid rgba(255, 107, 107, 0.35)',
+            borderRadius: 6,
+            color: '#ff6b6b',
+            fontSize: 13,
+            fontFamily: 'Inter, sans-serif',
+            lineHeight: 1.4,
+          }}
+        >
+          {error}
+        </div>
+      )}
+
       <div style={actionRow}>
         <button
           type="button"
@@ -868,7 +886,6 @@ export default function CvMergePage() {
           {mode === 'rejecting' ? 'Rejecting…' : 'Reject all'}
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          {error && <span style={{ fontSize: 12, color: '#ff6b6b' }}>{error}</span>}
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999' }}>
             {totalSelected} selected
           </span>

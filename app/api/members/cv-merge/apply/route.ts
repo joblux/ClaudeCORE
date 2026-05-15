@@ -99,6 +99,19 @@ export async function POST(req: NextRequest) {
   // source of truth for the actual values to insert.
   // ---------------------------------------------------------------------------
 
+  // CV parser emits partial dates (YYYY, YYYY-MM) per its SYSTEM_PROMPT spec.
+  // RPC apply_cv_merge casts via NULLIF(...)::date, which rejects anything
+  // shorter than YYYY-MM-DD. Pad month/year-only values before handing off.
+  function normalizeDate(v: unknown): string | null {
+    if (v == null) return null
+    const s = String(v).trim()
+    if (s === '') return null
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s
+    if (/^\d{4}-\d{2}$/.test(s)) return `${s}-01`
+    if (/^\d{4}$/.test(s)) return `${s}-01-01`
+    return null
+  }
+
   const acceptPayload: Record<string, any> = {}
 
   // Identity
@@ -132,7 +145,11 @@ export async function POST(req: NextRequest) {
     const company = typeof (row as any).company === 'string' ? (row as any).company.trim() : ''
     const jobTitle = typeof (row as any).job_title === 'string' ? (row as any).job_title.trim() : ''
     if (company === '' && jobTitle === '') continue
-    expOut.push(row)
+    expOut.push({
+      ...row,
+      start_date: normalizeDate((row as any).start_date),
+      end_date: normalizeDate((row as any).end_date),
+    })
   }
   if (expOut.length > 0) acceptPayload.experiences = expOut
 
