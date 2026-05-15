@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import type { EditorView, SectionId, MaskableField } from '@/lib/profilux/types'
+import type { EditorView, MaskableField } from '@/lib/profilux/types'
 import { MASKABLE_FIELDS } from '@/lib/profilux/types'
 import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS, PROFILUX_SECTOR_OPTIONS } from '@/lib/profilux/vocabulary'
 
@@ -685,27 +685,10 @@ export default function ProfiluxPage() {
     return e
   }
 
-  // PF-2 P1 — per-section public toggle + per-field mask toggle helpers.
-  const [sectionToggling, setSectionToggling] = useState<SectionId | null>(null)
+  // PF-2 P1 — per-field mask toggle helper. The per-section "PUBLIC" toggle was
+  // reverted: no public/section concept on the candidate side. Substrate
+  // (section_visibility column + projectFor public consumer) stays in place.
   const [maskToggling, setMaskToggling] = useState<MaskableField | null>(null)
-  const toggleSectionVisibility = async (id: SectionId, nextValue: boolean) => {
-    if (!editor) return
-    setSectionToggling(id)
-    try {
-      const next = { ...(editor.section_visibility ?? {}), [id]: nextValue }
-      const res = await fetch('/api/profilux', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ section_visibility: next }),
-      })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      await refetch()
-    } catch {
-      // surface inline only via spinner state; no toast in this slice
-    } finally {
-      setSectionToggling(null)
-    }
-  }
   const toggleMaskedField = async (field: MaskableField, nextValue: boolean) => {
     if (!editor) return
     setMaskToggling(field)
@@ -911,35 +894,6 @@ export default function ProfiluxPage() {
     } finally {
       setMaisonsSaving(false)
     }
-  }
-
-  const renderPublicToggle = (sectionId: SectionId): React.ReactNode => {
-    const isPublic = (editor?.section_visibility?.[sectionId]) !== false
-    const busy = sectionToggling === sectionId
-    const baseStyle: React.CSSProperties = {
-      padding: '6px 14px',
-      fontSize: 11,
-      fontWeight: 600,
-      letterSpacing: '0.4px',
-      borderRadius: 6,
-      cursor: busy ? 'wait' : 'pointer',
-      fontFamily: 'Inter, sans-serif',
-      opacity: busy ? 0.6 : 1,
-    }
-    const onStyle: React.CSSProperties = isPublic
-      ? { background: 'rgba(165,142,40,0.05)', color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)' }
-      : { background: 'transparent', color: '#999', border: '1px solid #2a2a2a' }
-    return (
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => toggleSectionVisibility(sectionId, !isPublic)}
-        style={{ ...baseStyle, ...onStyle }}
-        title="Controls whether this section appears on your public profile / share link"
-      >
-        {isPublic ? 'PUBLIC ON' : 'PUBLIC OFF'}
-      </button>
-    )
   }
 
   async function handleUploadClick() {
@@ -2737,7 +2691,6 @@ export default function ProfiluxPage() {
         eyebrow="Identity"
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {renderPublicToggle('identity')}
             <button
               type="button"
               onClick={() => setIdentityDrawerOpen(true)}
@@ -2821,7 +2774,6 @@ export default function ProfiluxPage() {
         eyebrow="Current Role"
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {renderPublicToggle('current_role')}
             <button
               type="button"
               onClick={() => setCurrentPositionDrawerOpen(true)}
@@ -2888,7 +2840,6 @@ export default function ProfiluxPage() {
         eyebrow="Career Path"
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {renderPublicToggle('career_path')}
             <button
               type="button"
               onClick={() => { setCareerHistoryDrawerOpen(true); cancelExperienceEdit() }}
@@ -3053,7 +3004,6 @@ export default function ProfiluxPage() {
         eyebrow="Education"
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {renderPublicToggle('education')}
             <button
               type="button"
               onClick={() => { setEducationDrawerOpen(true); cancelEducationEdit() }}
@@ -3204,7 +3154,6 @@ export default function ProfiluxPage() {
         eyebrow="Languages"
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {renderPublicToggle('languages')}
             <button
               type="button"
               onClick={openLanguagesDrawer}
@@ -3324,7 +3273,6 @@ export default function ProfiluxPage() {
         eyebrow="Luxury Fit"
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {renderPublicToggle('luxury_fit')}
             <button
               type="button"
               onClick={() => { setLuxuryFitDrawerOpen(true); setSectorsError(null); fetchSectorsL2() }}
@@ -3466,7 +3414,6 @@ export default function ProfiluxPage() {
         eyebrow="Skills & Markets"
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {renderPublicToggle('skills_markets')}
             <button
               type="button"
               onClick={() => setSkillsMarketsDrawerOpen(true)}
@@ -3544,7 +3491,6 @@ export default function ProfiluxPage() {
         eyebrow="Clienteling"
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {renderPublicToggle('clienteling')}
             <button
               type="button"
               onClick={() => setClientelingDrawerOpen(true)}
@@ -3681,7 +3627,6 @@ export default function ProfiluxPage() {
         eyebrow="Compensation"
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {renderPublicToggle('compensation')}
             <button
               type="button"
               onClick={() => setCompensationDrawerOpen(true)}
@@ -3744,7 +3689,6 @@ export default function ProfiluxPage() {
         eyebrow="Availability"
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {renderPublicToggle('availability')}
             <button
               type="button"
               onClick={() => setAvailabilityTargetsDrawerOpen(true)}
