@@ -97,27 +97,31 @@ type SectionCardProps = {
 
 function SectionCard({ eyebrow, layout = 'block', headerAction, children }: SectionCardProps) {
   const base: React.CSSProperties = {
-    background: '#222',
-    border: '1px solid #2a2a2a',
-    borderRadius: 6,
-    padding: '20px 24px',
-    marginBottom: 24,
+    background: '#1c1c1c',
+    border: '0.5px solid #2a2a2a',
+    borderRadius: 12,
+    padding: '24px 28px',
+    marginBottom: 14,
   }
   const flexExtras: React.CSSProperties = layout === 'flex'
     ? { display: 'flex', alignItems: 'center', gap: 20 }
     : {}
   const eyebrowStyle: React.CSSProperties = {
     fontSize: 10,
-    color: '#999',
-    letterSpacing: 0.5,
+    fontWeight: 600,
+    color: '#8e8e8e',
+    letterSpacing: 1.6,
     textTransform: 'uppercase',
+    fontFamily: 'Inter, sans-serif',
   }
   const headerRowStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
-    marginBottom: 10,
+    marginBottom: 18,
+    paddingBottom: 14,
+    borderBottom: '0.5px solid rgba(255,255,255,0.04)',
   }
   return (
     <div style={{ ...base, ...flexExtras }}>
@@ -2166,28 +2170,28 @@ export default function ProfiluxPage() {
         return (
           <>
             {/* Top-right action row — Re-upload CV + Done */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, marginBottom: 28 }}>
               <Link
                 href="/dashboard/candidate/profilux/cv-merge"
-                style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#ccc', border: '1px solid #2a2a2a', borderRadius: 999, padding: '7px 16px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, textDecoration: 'none', cursor: 'pointer' }}
+                style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#999', border: '0.5px solid #2a2a2a', borderRadius: 8, padding: '8px 16px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, textDecoration: 'none', cursor: 'pointer' }}
               >
                 Re-upload CV
               </Link>
               <button
                 type="button"
                 onClick={() => setTab('view')}
-                style={{ display: 'inline-flex', alignItems: 'center', background: '#fff', color: '#1a1a1a', border: 'none', borderRadius: 999, padding: '7px 18px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', fontWeight: 500 }}
+                style={{ display: 'inline-flex', alignItems: 'center', background: '#fff', color: '#1a1a1a', border: 'none', borderRadius: 8, padding: '8px 18px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', fontWeight: 600 }}
               >
                 Done →
               </button>
             </div>
             {/* PROFILUX OVERVIEW progress band */}
-            <div style={{ background: '#222', border: '1px solid #2a2a2a', borderRadius: 6, padding: '20px 24px', marginBottom: 24 }}>
-              <div style={{ fontSize: 10, color: '#a58e28', letterSpacing: 1, marginBottom: 8, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
+            <div style={{ background: '#1c1c1c', border: '0.5px solid rgba(165,142,40,0.2)', borderRadius: 12, padding: '22px 28px', marginBottom: 32 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: '#a58e28', letterSpacing: 2, marginBottom: 10, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
                 ProfiLux Overview
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#ccc', lineHeight: 1.4, flex: '0 0 auto' }}>
+                <div style={{ fontFamily: 'Playfair Display, Georgia, serif', fontStyle: 'italic', fontSize: 15, color: '#ccc', lineHeight: 1.4, flex: '0 0 auto' }}>
                   The more you tell us, the more we can work for you.
                 </div>
                 <div style={{ flex: '1 1 auto', display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
@@ -2201,7 +2205,7 @@ export default function ProfiluxPage() {
               </div>
             </div>
             {/* YOUR DOSSIER eyebrow */}
-            <div style={{ fontSize: 10, color: '#999', letterSpacing: 1, marginBottom: 16, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#8e8e8e', letterSpacing: 2, marginBottom: 18, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
               Your dossier
             </div>
           </>
