@@ -362,7 +362,9 @@ export async function resolveProfiLux(
     // A2.3-β.2: L2 + L1 (no replace, no dedup)
     experiences: [...(relationalExperiences ?? []), ...mapExperiences(cv?.experiences)],
     // S-B.1A: L2 first + L1 second (no replace, no dedup).
-    education: [...(relationalEducation ?? []), ...mapEducation(cv?.education)],
+    // Education: L2 (user-confirmed) replaces L1 (CV parser fallback) when present.
+    // Same rank-merge rationale as sectors — L2 is canonical when populated.
+    education: relationalEducation ?? mapEducation(cv?.education),
     // System
     role: row.role,
     status: row.status,
