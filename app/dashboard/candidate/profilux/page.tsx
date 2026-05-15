@@ -2698,7 +2698,7 @@ export default function ProfiluxPage() {
           <div>
             {e.experiences.map((exp, i) => (
               <div key={exp.id ?? i} style={card}>
-                <div><strong>{exp.company ?? 'Unknown'}</strong> — {exp.job_title ?? 'Role not specified'}</div>
+                <div><strong>{exp.job_title ?? 'Role not specified'}</strong> — {exp.company ?? 'Unknown'}</div>
                 <div style={{ color: '#999', marginTop: 4 }}>
                   {exp.city ?? '—'}, {exp.country ?? '—'} · {exp.start_date ?? '—'} → {exp.is_current ? 'Present' : (exp.end_date ?? '—')}
                 </div>
@@ -2855,14 +2855,35 @@ export default function ProfiluxPage() {
           <NoneSel />
         ) : (
           <div>
-            {e.education.map((ed, i) => (
-              <div key={ed.id ?? i} style={card}>
-                <div><strong>{ed.institution ?? 'Unknown'}</strong></div>
-                <div style={{ color: '#999', marginTop: 4 }}>
-                  {ed.degree_level ?? '—'} · {ed.field_of_study ?? '—'} · {ed.graduation_year ?? '—'}
+            {e.education.map((ed, i) => {
+              const primary = (typeof ed.degree === 'string' && ed.degree.trim().length > 0)
+                ? ed.degree
+                : (typeof ed.field_of_study === 'string' && ed.field_of_study.trim().length > 0)
+                  ? ed.field_of_study
+                  : 'Program not specified'
+              const edCity = typeof ed.city === 'string' && ed.city.trim().length > 0 ? ed.city : null
+              const instLine = ed.institution
+                ? (edCity ? `${ed.institution} · ${edCity}` : ed.institution)
+                : null
+              const hasSY = typeof ed.start_year === 'number'
+              const hasGY = typeof ed.graduation_year === 'number'
+              const periodText =
+                hasSY && hasGY ? `${ed.start_year}–${ed.graduation_year}`
+                : hasGY ? String(ed.graduation_year)
+                : hasSY ? String(ed.start_year)
+                : null
+              return (
+                <div key={ed.id ?? i} style={card}>
+                  <div><strong>{primary}</strong></div>
+                  {instLine && (
+                    <div style={{ color: '#a58e28', marginTop: 4 }}>{instLine}</div>
+                  )}
+                  {periodText && (
+                    <div style={{ color: '#999', marginTop: 4 }}>{periodText}</div>
+                  )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </SectionCard>
