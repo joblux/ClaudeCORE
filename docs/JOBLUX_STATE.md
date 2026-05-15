@@ -190,6 +190,9 @@ V12 Product / Prototype Fidelity slices:
   - YOUR DOSSIER eyebrow added
   - Existing CV / Apply suggestions / Add education / Identity cards untouched (PF-2b scope)
 - V12-PF-2b.1 (SectionCard headerAction refactor) CLOSED 2026-05-15 via `8266651`. Live QA layout 9/9 PASS on Alex Mason: all editable SectionCards now render eyebrow LEFT + Edit button RIGHT same row, empty inner wrapper row removed. Drawer wiring not click-tested; code-path proof accepted (onClicks preserved verbatim across all 9 sites including compound handlers on Career History `setCareerHistoryDrawerOpen + cancelExperienceEdit` and Education `setEducationDrawerOpen + cancelEducationEdit`). Non-editable SectionCards (CV, Apply suggestions, Add education, Languages, Visibility & sharing) unchanged. SectionCard component change additive — callers without headerAction render identically.
+- V12-PF-2b.2 (Edit section row hierarchy inverts) CLOSED 2026-05-15 via `18e9003`. Live QA PASS on Alex Mason. Career History rows render title-bold-first (`Boutique Leader — Hublot`); Education rows render 3-line stack: program/degree white bold / institution · city gold / year. Matches View hierarchy shipped at PF-1.
+
+**PF-2 implementation lane complete** (PF-2a + PF-2b.1 + PF-2b.2). Posture, chrome, and section row hierarchy converged against V12 prototype. **Edit surface convergence review required next** before declaring Edit fully converged or moving to the next surface.
 
 **Rule (locked 2026-05-15):**
 - Continue V12 until ProfiLux resembles the locked prototypes.
@@ -198,11 +201,7 @@ V12 Product / Prototype Fidelity slices:
 
 **Naming convention lock:** V12-JC-N = closure subset complete; V12-PF-N = fidelity slices ongoing. MLV-x retired.
 
-**Next step:** V12-PF-2b.2 — Edit section row hierarchy inverts. Single file. Two fixes:
-- Career History row: invert from `<strong>{exp.company}</strong> — {exp.job_title}` to `<strong>{exp.job_title}</strong> — {exp.company}` (title bold first per V12)
-- Education row: invert from institution-bold-first / degree+field+year-row-2 to program/degree white first + institution gold second (matches View hierarchy after PF-1)
-
-No backend. No schema. No resolver. No types. No View tab IIFE touch. No Manage tab body touch. No SectionCard component touch. No doctrine docs touched.
+**Next step:** Edit surface convergence review. Walk live joblux.com Edit tab against V12 prototype scene 2 element-by-element to confirm PF-2 closure is complete or surface any remaining Edit-tab divergences before moving on. Read-only audit pass. No code. No new slices proposed until review completes and Mo decides.
 
 Acceptable post-launch:
 - Per-field maskable toggles in Manage
@@ -212,7 +211,7 @@ Acceptable post-launch:
 - CV merge diff modal
 - Languages L2 CRUD
 
-**Strict step order:** V12-PF-2b.2 (Edit section row hierarchy inverts).
+**Strict step order:** Edit surface convergence review (read-only).
 
 **Audits closed this rotation (parked):**
 - **S-D Sectors** (2026-05-13 PM late): keep `1609e494` PARKED. L1 sectors render correctly; `member_sectors` table dormant and empty. Unpark requires Mo + GPT scope lock on rank semantics, add/remove/reorder UX, L1/L2 merge contract, and M6/G3 readiness implications.
@@ -332,7 +331,7 @@ Acceptable post-launch:
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 15, 2026 (V12-PF-2b.1 live-validated via `8266651`). V12 Product / Prototype Fidelity lane ACTIVE. PF-1 `f53a7ef` View tab posture (8/8 PASS, fallback-omission caveat on Since-line + Education-range positive branches). PF-2a `3a5de09` Edit page chrome (7/7 PASS). PF-2b.1 `8266651` SectionCard headerAction refactor (9/9 layout PASS, drawer wiring by code-path proof). Next: V12-PF-2b.2 row hierarchy inverts (Career History, Education).
+**Last updated:** May 15, 2026 (V12-PF-2b.2 live-validated via `18e9003`, closing PF-2 implementation lane). V12 Product / Prototype Fidelity progression: PF-1 `f53a7ef` (View), PF-2a `3a5de09` (Edit chrome), PF-2b.1 `8266651` (SectionCard headerAction), PF-2b.2 `18e9003` (Edit row hierarchy). PF-2 lane complete on posture/chrome/hierarchy. Next: Edit surface convergence review (read-only) before next slice or surface.
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
 ---
