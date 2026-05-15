@@ -17,7 +17,7 @@ const SCREEN_TITLES = [
   'Clienteling', 'Availability & Targets', 'Compensation', 'Confirm',
 ]
 
-const NotSet = () => <em style={{ color: '#666' }}>Not specified</em>
+const NotSet = () => <em style={{ color: '#666' }}>Not set</em>
 const NoneSel = () => <em style={{ color: '#666' }}>None selected</em>
 const Hint = ({ children }: { children: React.ReactNode }) => <em style={{ color: '#888' }}>{children}</em>
 
@@ -2918,7 +2918,7 @@ export default function ProfiluxPage() {
           <div>
             {e.languages.map((l, i) => (
               <div key={i} style={{ ...card, fontSize: 12 }}>
-                {l.language} — {l.proficiency ?? <em style={{ color: '#666' }}>level not specified</em>}
+                {l.proficiency ? `${l.language} — ${l.proficiency}` : l.language}
               </div>
             ))}
           </div>
