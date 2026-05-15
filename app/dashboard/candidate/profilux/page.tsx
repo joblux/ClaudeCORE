@@ -586,6 +586,21 @@ export default function ProfiluxPage() {
   const [compensationDrawerOpen, setCompensationDrawerOpen] = useState(false)
   const [clientelingDrawerOpen, setClientelingDrawerOpen] = useState(false)
   const [availabilityTargetsDrawerOpen, setAvailabilityTargetsDrawerOpen] = useState(false)
+  // PF-2 P-A.UI — Languages (add-only L2 drawer)
+  const [languagesDrawerOpen, setLanguagesDrawerOpen] = useState(false)
+  const [languagesL2, setLanguagesL2] = useState<Array<{ id: string; language: string; proficiency: string }> | null>(null)
+  const [languagesAddDraft, setLanguagesAddDraft] = useState<{ language: string; proficiency: string }>({ language: '', proficiency: '' })
+  const [languagesActioning, setLanguagesActioning] = useState(false)
+  const [languagesError, setLanguagesError] = useState<string | null>(null)
+  // PF-2 P-A.UI — Sectors (L2-only) inside Luxury Fit drawer
+  const [sectorsL2, setSectorsL2] = useState<Array<{ id?: string; sector: string; rank: number }> | null>(null)
+  const [sectorsActioning, setSectorsActioning] = useState<string | null>(null)
+  const [sectorsError, setSectorsError] = useState<string | null>(null)
+  // PF-2 P-A.UI — Maisons drawer (text[] textarea)
+  const [maisonsDrawerOpen, setMaisonsDrawerOpen] = useState(false)
+  const [maisonsDraftText, setMaisonsDraftText] = useState('')
+  const [maisonsSaving, setMaisonsSaving] = useState(false)
+  const [maisonsError, setMaisonsError] = useState<string | null>(null)
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -707,6 +722,194 @@ export default function ProfiluxPage() {
       // see above
     } finally {
       setMaskToggling(null)
+    }
+  }
+
+  // PF-2 P-A.UI — Languages helpers
+  async function fetchLanguagesL2() {
+    try {
+      const r = await fetch('/api/members/languages')
+      if (!r.ok) {
+        setLanguagesL2([])
+        return
+      }
+      const d = await r.json()
+      setLanguagesL2(Array.isArray(d.languages) ? d.languages : [])
+    } catch {
+      setLanguagesL2([])
+    }
+  }
+  async function openLanguagesDrawer() {
+    setLanguagesError(null)
+    setLanguagesAddDraft({ language: '', proficiency: '' })
+    setLanguagesDrawerOpen(true)
+    await fetchLanguagesL2()
+  }
+  async function handleAddLanguage() {
+    const language = languagesAddDraft.language.trim()
+    const proficiency = languagesAddDraft.proficiency.trim()
+    if (!language || !proficiency) {
+      setLanguagesError('Language and proficiency are required.')
+      return
+    }
+    setLanguagesActioning(true)
+    setLanguagesError(null)
+    try {
+      const res = await fetch('/api/members/languages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language, proficiency }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setLanguagesError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      setLanguagesAddDraft({ language: '', proficiency: '' })
+      await fetchLanguagesL2()
+      await refetch()
+    } catch (err) {
+      setLanguagesError(String(err))
+    } finally {
+      setLanguagesActioning(false)
+    }
+  }
+  async function handleDeleteLanguageL2(id: string) {
+    setLanguagesActioning(true)
+    setLanguagesError(null)
+    try {
+      const res = await fetch(`/api/members/languages?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setLanguagesError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await fetchLanguagesL2()
+      await refetch()
+    } catch (err) {
+      setLanguagesError(String(err))
+    } finally {
+      setLanguagesActioning(false)
+    }
+  }
+
+  // PF-2 P-A.UI — Sectors helpers (L2-only inside Luxury Fit drawer)
+  async function fetchSectorsL2() {
+    try {
+      const r = await fetch('/api/profilux/sectors')
+      if (!r.ok) {
+        setSectorsL2([])
+        return
+      }
+      const d = await r.json()
+      setSectorsL2(Array.isArray(d.sectors) ? d.sectors : [])
+    } catch {
+      setSectorsL2([])
+    }
+  }
+  const updateSectorRow = (idx: number, patch: Partial<{ sector: string; rank: number }>) => {
+    setSectorsL2(prev => {
+      const list = prev ?? []
+      return list.map((r, i) => (i === idx ? { ...r, ...patch } : r))
+    })
+  }
+  const addSectorRow = () => {
+    setSectorsL2(prev => {
+      const list = prev ?? []
+      const nextRank = list.length === 0 ? 1 : Math.max(...list.map(r => Number(r.rank) || 0)) + 1
+      return [...list, { sector: '', rank: nextRank }]
+    })
+  }
+  async function saveSectorRow(idx: number) {
+    const list = sectorsL2 ?? []
+    const row = list[idx]
+    if (!row) return
+    const sector = (row.sector ?? '').trim()
+    const rank = Number.isFinite(row.rank) ? Math.trunc(Number(row.rank)) : NaN
+    if (!sector || !Number.isFinite(rank) || rank < 0) {
+      setSectorsError('Sector and a non-negative rank are required.')
+      return
+    }
+    const key = row.id ?? `_tmp_${idx}`
+    setSectorsActioning(key)
+    setSectorsError(null)
+    try {
+      const isUpdate = typeof row.id === 'string'
+      const res = await fetch('/api/profilux/sectors', {
+        method: isUpdate ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: row.id, sector, rank }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setSectorsError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await fetchSectorsL2()
+      await refetch()
+    } catch (err) {
+      setSectorsError(String(err))
+    } finally {
+      setSectorsActioning(null)
+    }
+  }
+  async function deleteSectorRow(idx: number) {
+    const list = sectorsL2 ?? []
+    const row = list[idx]
+    if (!row) return
+    if (!row.id) {
+      setSectorsL2(list.filter((_, i) => i !== idx))
+      return
+    }
+    setSectorsActioning(row.id)
+    setSectorsError(null)
+    try {
+      const res = await fetch('/api/profilux/sectors', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: row.id }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setSectorsError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await fetchSectorsL2()
+      await refetch()
+    } catch (err) {
+      setSectorsError(String(err))
+    } finally {
+      setSectorsActioning(null)
+    }
+  }
+
+  // PF-2 P-A.UI — Maisons (brands_worked_with) drawer
+  function openMaisonsDrawer() {
+    setMaisonsError(null)
+    setMaisonsDraftText((editor?.brands_worked_with ?? []).join('\n'))
+    setMaisonsDrawerOpen(true)
+  }
+  async function handleSaveMaisons() {
+    setMaisonsSaving(true)
+    setMaisonsError(null)
+    try {
+      const arr = maisonsDraftText.split('\n').map(s => s.trim()).filter(s => s !== '')
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brands_worked_with: arr }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setMaisonsError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+      setMaisonsDrawerOpen(false)
+    } catch (err) {
+      setMaisonsError(String(err))
+    } finally {
+      setMaisonsSaving(false)
     }
   }
 
@@ -3002,6 +3205,24 @@ export default function ProfiluxPage() {
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             {renderPublicToggle('languages')}
+            <button
+              type="button"
+              onClick={openLanguagesDrawer}
+              style={{
+                background: 'rgba(165,142,40,0.05)',
+                color: '#a58e28',
+                border: '1px solid rgba(165,142,40,0.3)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Edit
+            </button>
           </div>
         }
       >
@@ -3017,6 +3238,88 @@ export default function ProfiluxPage() {
           </div>
         )}
       </SectionCard>
+      <Drawer
+        open={languagesDrawerOpen}
+        title="Languages"
+        onClose={() => setLanguagesDrawerOpen(false)}
+      >
+        <div style={sectionLabel}>Current languages</div>
+        {e.languages.length === 0 ? (
+          <div style={{ color: '#999', fontSize: 13, marginTop: 8 }}>No languages yet.</div>
+        ) : (
+          <div style={{ marginTop: 8 }}>
+            {e.languages.map((l, i) => (
+              <div key={i} style={{ ...card, fontSize: 12 }}>
+                {l.proficiency ? `${l.language} — ${l.proficiency}` : l.language}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div style={sectionLabel}>Add language</div>
+        <div style={grid}>
+          <div style={label}>Language</div>
+          <div>
+            <input
+              style={input}
+              value={languagesAddDraft.language}
+              onChange={(ev) => setLanguagesAddDraft(prev => ({ ...prev, language: ev.target.value }))}
+              placeholder="e.g. Italian"
+            />
+          </div>
+          <div style={label}>Proficiency</div>
+          <div>
+            <select
+              style={input}
+              value={languagesAddDraft.proficiency}
+              onChange={(ev) => setLanguagesAddDraft(prev => ({ ...prev, proficiency: ev.target.value }))}
+            >
+              <option value="">— Select —</option>
+              <option value="native">Native</option>
+              <option value="fluent">Fluent</option>
+              <option value="professional">Professional</option>
+              <option value="conversational">Conversational</option>
+              <option value="basic">Basic</option>
+            </select>
+          </div>
+        </div>
+        <div style={{ marginTop: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button
+            type="button"
+            style={languagesActioning ? saveBtnDis : saveBtn}
+            disabled={languagesActioning}
+            onClick={handleAddLanguage}
+          >
+            {languagesActioning ? 'Saving…' : 'Add'}
+          </button>
+          {languagesError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{languagesError}</span>}
+        </div>
+
+        <div style={sectionLabel}>Languages you added</div>
+        {languagesL2 === null ? (
+          <div style={{ color: '#999', fontSize: 13, marginTop: 8 }}>Loading…</div>
+        ) : languagesL2.length === 0 ? (
+          <div style={{ color: '#999', fontSize: 13, marginTop: 8 }}>You haven&apos;t added any yet.</div>
+        ) : (
+          <div style={{ marginTop: 8 }}>
+            {languagesL2.map((row) => (
+              <div key={row.id} style={{ ...card, position: 'relative', fontSize: 12 }}>
+                <div>{row.proficiency ? `${row.language} — ${row.proficiency}` : row.language}</div>
+                <div style={{ marginTop: 8 }}>
+                  <button
+                    type="button"
+                    disabled={languagesActioning}
+                    onClick={() => handleDeleteLanguageL2(row.id)}
+                    style={{ background: 'transparent', color: '#ff6b6b', border: '1px solid #2a2a2a', padding: '4px 10px', fontSize: 11, cursor: languagesActioning ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif', opacity: languagesActioning ? 0.5 : 1 }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Drawer>
       <SectionCard
         eyebrow="Luxury Fit"
         headerAction={
@@ -3024,7 +3327,7 @@ export default function ProfiluxPage() {
             {renderPublicToggle('luxury_fit')}
             <button
               type="button"
-              onClick={() => setLuxuryFitDrawerOpen(true)}
+              onClick={() => { setLuxuryFitDrawerOpen(true); setSectorsError(null); fetchSectorsL2() }}
               style={{
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
@@ -3099,6 +3402,65 @@ export default function ProfiluxPage() {
           {savedAt4 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
           {saveError4 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError4}</span>}
         </div>
+
+        <div style={sectionLabel}>Sectors (ranked, L2)</div>
+        {sectorsL2 === null ? (
+          <div style={{ color: '#999', fontSize: 13, marginTop: 8 }}>Loading…</div>
+        ) : (
+          <div style={{ marginTop: 8 }}>
+            {sectorsL2.length === 0 && (
+              <div style={{ color: '#999', fontSize: 13, marginBottom: 8 }}>No L2 sectors yet. Add one below — these replace L1 sectors on your profile.</div>
+            )}
+            {sectorsL2.map((row, idx) => {
+              const key = row.id ?? `_tmp_${idx}`
+              const busy = sectorsActioning === key
+              return (
+                <div key={key} style={{ ...card, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <input
+                    style={{ ...input, flex: 1 }}
+                    value={row.sector}
+                    onChange={(ev) => updateSectorRow(idx, { sector: ev.target.value })}
+                    placeholder="e.g. Watches"
+                  />
+                  <input
+                    style={{ ...input, width: 80 }}
+                    type="number"
+                    min={0}
+                    value={Number.isFinite(row.rank) ? row.rank : ''}
+                    onChange={(ev) => updateSectorRow(idx, { rank: ev.target.value === '' ? NaN : Number(ev.target.value) })}
+                    placeholder="rank"
+                  />
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => saveSectorRow(idx)}
+                    style={{ background: 'rgba(165,142,40,0.05)', color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)', padding: '6px 12px', fontSize: 11, cursor: busy ? 'wait' : 'pointer', fontFamily: 'Inter, sans-serif', borderRadius: 6, opacity: busy ? 0.6 : 1 }}
+                  >
+                    {busy ? 'Saving…' : (row.id ? 'Save' : 'Add')}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => deleteSectorRow(idx)}
+                    style={{ background: 'transparent', color: '#ff6b6b', border: '1px solid #2a2a2a', padding: '6px 10px', fontSize: 11, cursor: busy ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif', opacity: busy ? 0.5 : 1 }}
+                  >
+                    ×
+                  </button>
+                </div>
+              )
+            })}
+            <div style={{ marginTop: 8 }}>
+              <button
+                type="button"
+                onClick={addSectorRow}
+                style={{ background: 'transparent', color: '#ccc', border: '1px solid #2a2a2a', padding: '6px 12px', fontSize: 12, cursor: 'pointer', fontFamily: 'Inter, sans-serif', borderRadius: 6 }}
+              >
+                + Add sector
+              </button>
+            </div>
+            {sectorsError && <div style={{ marginTop: 8, color: '#ff6b6b', fontSize: 13 }}>{sectorsError}</div>}
+          </div>
+        )}
       </Drawer>
       <SectionCard
         eyebrow="Skills & Markets"
@@ -3258,6 +3620,61 @@ export default function ProfiluxPage() {
           </button>
           {savedAt8 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
           {saveError8 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError8}</span>}
+        </div>
+      </Drawer>
+      <SectionCard
+        eyebrow="Maisons"
+        headerAction={
+          <button
+            type="button"
+            onClick={openMaisonsDrawer}
+            style={{
+              background: 'rgba(165,142,40,0.05)',
+              color: '#a58e28',
+              border: '1px solid rgba(165,142,40,0.3)',
+              padding: '6px 14px',
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '0.4px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        }
+      >
+        <div>
+          {e.brands_worked_with.length > 0
+            ? e.brands_worked_with.join(', ')
+            : <NotSet />}
+        </div>
+      </SectionCard>
+      <Drawer
+        open={maisonsDrawerOpen}
+        title="Maisons"
+        onClose={() => setMaisonsDrawerOpen(false)}
+      >
+        <div style={{ color: '#999', fontSize: 12, marginBottom: 10 }}>
+          One maison per line. Empty lines are ignored.
+        </div>
+        <textarea
+          style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 160, resize: 'vertical' }}
+          rows={8}
+          value={maisonsDraftText}
+          onChange={(ev) => setMaisonsDraftText(ev.target.value)}
+          placeholder={'e.g.\nHermès\nLouis Vuitton\nCartier'}
+        />
+        <div style={{ marginTop: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button
+            style={maisonsSaving ? saveBtnDis : saveBtn}
+            disabled={maisonsSaving}
+            onClick={handleSaveMaisons}
+          >
+            {maisonsSaving ? 'Saving…' : 'Save'}
+          </button>
+          {maisonsError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{maisonsError}</span>}
         </div>
       </Drawer>
       <SectionCard
