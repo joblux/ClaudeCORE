@@ -91,10 +91,11 @@ type ProfiluxTab = 'view' | 'edit' | 'manage'
 type SectionCardProps = {
   eyebrow?: string
   layout?: 'block' | 'flex'
+  headerAction?: React.ReactNode
   children: React.ReactNode
 }
 
-function SectionCard({ eyebrow, layout = 'block', children }: SectionCardProps) {
+function SectionCard({ eyebrow, layout = 'block', headerAction, children }: SectionCardProps) {
   const base: React.CSSProperties = {
     background: '#222',
     border: '1px solid #2a2a2a',
@@ -109,12 +110,23 @@ function SectionCard({ eyebrow, layout = 'block', children }: SectionCardProps) 
     fontSize: 10,
     color: '#999',
     letterSpacing: 0.5,
-    marginBottom: 10,
     textTransform: 'uppercase',
+  }
+  const headerRowStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 10,
   }
   return (
     <div style={{ ...base, ...flexExtras }}>
-      {eyebrow && <div style={eyebrowStyle}>{eyebrow}</div>}
+      {(eyebrow || headerAction) && (
+        <div style={headerRowStyle}>
+          {eyebrow ? <div style={eyebrowStyle}>{eyebrow}</div> : <div />}
+          {headerAction ?? null}
+        </div>
+      )}
       {children}
     </div>
   )
@@ -2444,9 +2456,9 @@ export default function ProfiluxPage() {
           </SectionCard>
         )
       })()}
-      <SectionCard eyebrow="Identity">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div />
+      <SectionCard
+        eyebrow="Identity"
+        headerAction={
           <button
             type="button"
             onClick={() => setIdentityDrawerOpen(true)}
@@ -2462,7 +2474,8 @@ export default function ProfiluxPage() {
           >
             Edit
           </button>
-        </div>
+        }
+      >
         <div style={grid}>
           <div style={label}>First name</div>
           <div>{e.first_name ?? <NotSet />}</div>
@@ -2521,9 +2534,9 @@ export default function ProfiluxPage() {
           {saveError1 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError1}</span>}
         </div>
       </Drawer>
-      <SectionCard eyebrow="Current Position">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div />
+      <SectionCard
+        eyebrow="Current Position"
+        headerAction={
           <button
             type="button"
             onClick={() => setCurrentPositionDrawerOpen(true)}
@@ -2539,7 +2552,8 @@ export default function ProfiluxPage() {
           >
             Edit
           </button>
-        </div>
+        }
+      >
         <div style={grid}>
           <div style={label}>Job title</div>
           <div>{e.job_title ?? <NotSet />}</div>
@@ -2581,9 +2595,9 @@ export default function ProfiluxPage() {
           {saveError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError}</span>}
         </div>
       </Drawer>
-      <SectionCard eyebrow="Luxury Fit">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div />
+      <SectionCard
+        eyebrow="Luxury Fit"
+        headerAction={
           <button
             type="button"
             onClick={() => setLuxuryFitDrawerOpen(true)}
@@ -2599,7 +2613,8 @@ export default function ProfiluxPage() {
           >
             Edit
           </button>
-        </div>
+        }
+      >
         <div style={grid}>
           <div style={label}>Sectors</div>
           <div>{e.sectors.length > 0 ? e.sectors.map(sectorLabel).join(', ') : <NoneSel />}</div>
@@ -2657,9 +2672,9 @@ export default function ProfiluxPage() {
           {saveError4 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError4}</span>}
         </div>
       </Drawer>
-      <SectionCard eyebrow="Career History">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div />
+      <SectionCard
+        eyebrow="Career History"
+        headerAction={
           <button
             type="button"
             onClick={() => { setCareerHistoryDrawerOpen(true); cancelExperienceEdit() }}
@@ -2675,7 +2690,8 @@ export default function ProfiluxPage() {
           >
             Edit
           </button>
-        </div>
+        }
+      >
         {e.experiences.length === 0 ? (
           <NoneSel />
         ) : (
@@ -2815,9 +2831,9 @@ export default function ProfiluxPage() {
           </>
         )}
       </Drawer>
-      <SectionCard eyebrow="Education">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div />
+      <SectionCard
+        eyebrow="Education"
+        headerAction={
           <button
             type="button"
             onClick={() => { setEducationDrawerOpen(true); cancelEducationEdit() }}
@@ -2833,7 +2849,8 @@ export default function ProfiluxPage() {
           >
             Edit
           </button>
-        </div>
+        }
+      >
         {e.education.length === 0 ? (
           <NoneSel />
         ) : (
@@ -2951,9 +2968,9 @@ export default function ProfiluxPage() {
           </div>
         )}
       </SectionCard>
-      <SectionCard eyebrow="Skills & Markets">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div />
+      <SectionCard
+        eyebrow="Skills & Markets"
+        headerAction={
           <button
             type="button"
             onClick={() => setSkillsMarketsDrawerOpen(true)}
@@ -2969,7 +2986,8 @@ export default function ProfiluxPage() {
           >
             Edit
           </button>
-        </div>
+        }
+      >
         <div style={grid}>
           <div style={label}>Skills</div>
           <div>{e.key_skills.length > 0 ? e.key_skills.map(skillLabel).join(', ') : <NoneSel />}</div>
@@ -3022,9 +3040,9 @@ export default function ProfiluxPage() {
           {saveError7 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError7}</span>}
         </div>
       </Drawer>
-      <SectionCard eyebrow="Compensation">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div />
+      <SectionCard
+        eyebrow="Compensation"
+        headerAction={
           <button
             type="button"
             onClick={() => setCompensationDrawerOpen(true)}
@@ -3040,7 +3058,8 @@ export default function ProfiluxPage() {
           >
             Edit
           </button>
-        </div>
+        }
+      >
         <div style={grid}>
           <div style={label}>Target compensation (min)</div>
           <div>{e.desired_salary_min != null ? String(e.desired_salary_min) : <NotSet />}</div>
@@ -3078,9 +3097,9 @@ export default function ProfiluxPage() {
           {saveError10 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError10}</span>}
         </div>
       </Drawer>
-      <SectionCard eyebrow="Clienteling">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div />
+      <SectionCard
+        eyebrow="Clienteling"
+        headerAction={
           <button
             type="button"
             onClick={() => setClientelingDrawerOpen(true)}
@@ -3096,7 +3115,8 @@ export default function ProfiluxPage() {
           >
             Edit
           </button>
-        </div>
+        }
+      >
         <div style={grid}>
           <div style={label}>Clienteling experience</div>
           <div>{e.clienteling_experience === true ? 'Yes' : e.clienteling_experience === false ? 'No' : <NotSet />}</div>
@@ -3153,9 +3173,9 @@ export default function ProfiluxPage() {
           {saveError8 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError8}</span>}
         </div>
       </Drawer>
-      <SectionCard eyebrow="Availability & Targets">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div />
+      <SectionCard
+        eyebrow="Availability & Targets"
+        headerAction={
           <button
             type="button"
             onClick={() => setAvailabilityTargetsDrawerOpen(true)}
@@ -3171,7 +3191,8 @@ export default function ProfiluxPage() {
           >
             Edit
           </button>
-        </div>
+        }
+      >
         <div style={grid}>
           <div style={label}>Availability</div>
           <div>{availabilityLabel(e.availability) ?? <NotSet />}</div>
