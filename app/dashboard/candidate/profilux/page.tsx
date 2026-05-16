@@ -595,10 +595,11 @@ export default function ProfiluxPage() {
   const [compensationDrawerOpen, setCompensationDrawerOpen] = useState(false)
   const [clientelingDrawerOpen, setClientelingDrawerOpen] = useState(false)
   const [availabilityTargetsDrawerOpen, setAvailabilityTargetsDrawerOpen] = useState(false)
-  // PF-2 P-A.UI — Languages (add-only L2 drawer)
+  // PF-2 P-A.UI.2 — Languages (L2 add + edit-in-place drawer)
   const [languagesDrawerOpen, setLanguagesDrawerOpen] = useState(false)
   const [languagesL2, setLanguagesL2] = useState<Array<{ id: string; language: string; proficiency: string }> | null>(null)
-  const [languagesAddDraft, setLanguagesAddDraft] = useState<{ language: string; proficiency: string }>({ language: '', proficiency: '' })
+  const [languagesFormOpen, setLanguagesFormOpen] = useState(false)
+  const [languagesEditDraft, setLanguagesEditDraft] = useState<{ id?: string; language: string; proficiency: string }>({ language: '', proficiency: '' })
   const [languagesActioning, setLanguagesActioning] = useState(false)
   const [languagesError, setLanguagesError] = useState<string | null>(null)
   // PF-2 P-A.UI — Sectors (L2-only) inside Luxury Fit drawer
@@ -731,35 +732,59 @@ export default function ProfiluxPage() {
       setLanguagesL2([])
     }
   }
+  function emptyLanguageDraft(): { id?: string; language: string; proficiency: string } {
+    return { language: '', proficiency: '' }
+  }
   async function openLanguagesDrawer() {
     setLanguagesError(null)
-    setLanguagesAddDraft({ language: '', proficiency: '' })
+    setLanguagesEditDraft(emptyLanguageDraft())
+    setLanguagesFormOpen(false)
     setLanguagesDrawerOpen(true)
     await fetchLanguagesL2()
   }
-  async function handleAddLanguage() {
-    const language = languagesAddDraft.language.trim()
-    const proficiency = languagesAddDraft.proficiency.trim()
+  function startNewLanguage() {
+    setLanguagesEditDraft(emptyLanguageDraft())
+    setLanguagesError(null)
+    setLanguagesFormOpen(true)
+  }
+  function startEditLanguageL2(row: { id?: string; language: string; proficiency: string }) {
+    if (!row.id) return
+    setLanguagesEditDraft({ id: row.id, language: row.language ?? '', proficiency: row.proficiency ?? '' })
+    setLanguagesError(null)
+    setLanguagesFormOpen(true)
+  }
+  function cancelLanguageEdit() {
+    setLanguagesEditDraft(emptyLanguageDraft())
+    setLanguagesError(null)
+    setLanguagesFormOpen(false)
+  }
+  async function handleSaveLanguageL2() {
+    const language = languagesEditDraft.language.trim()
+    const proficiency = languagesEditDraft.proficiency.trim()
     if (!language || !proficiency) {
       setLanguagesError('Language and proficiency are required.')
       return
     }
+    const isUpdate = typeof languagesEditDraft.id === 'string'
     setLanguagesActioning(true)
     setLanguagesError(null)
     try {
+      const payload: Record<string, unknown> = { language, proficiency }
+      if (isUpdate) payload.id = languagesEditDraft.id
       const res = await fetch('/api/members/languages', {
-        method: 'POST',
+        method: isUpdate ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ language, proficiency }),
+        body: JSON.stringify(payload),
       })
       if (!res.ok) {
         const d = await res.json().catch(() => ({} as any))
         setLanguagesError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
         return
       }
-      setLanguagesAddDraft({ language: '', proficiency: '' })
       await fetchLanguagesL2()
       await refetch()
+      setLanguagesEditDraft(emptyLanguageDraft())
+      setLanguagesFormOpen(false)
     } catch (err) {
       setLanguagesError(String(err))
     } finally {
@@ -3297,7 +3322,7 @@ export default function ProfiluxPage() {
       <Drawer
         open={languagesDrawerOpen}
         title="Languages"
-        onClose={() => setLanguagesDrawerOpen(false)}
+        onClose={() => { setLanguagesDrawerOpen(false); cancelLanguageEdit() }}
       >
         <div style={sectionLabel}>Current languages</div>
         {e.languages.length === 0 ? (
@@ -3305,75 +3330,102 @@ export default function ProfiluxPage() {
         ) : (
           <div style={{ marginTop: 8 }}>
             {e.languages.map((l, i) => (
-              <div key={i} style={{ ...card, fontSize: 12 }}>
+              <div key={l.id ?? i} style={{ ...card, fontSize: 12 }}>
                 {l.proficiency ? `${l.language} — ${l.proficiency}` : l.language}
               </div>
             ))}
           </div>
         )}
 
-        <div style={sectionLabel}>Add language</div>
-        <div style={grid}>
-          <div style={label}>Language</div>
-          <div>
-            <input
-              style={input}
-              value={languagesAddDraft.language}
-              onChange={(ev) => setLanguagesAddDraft(prev => ({ ...prev, language: ev.target.value }))}
-              placeholder="e.g. Italian"
-            />
-          </div>
-          <div style={label}>Proficiency</div>
-          <div>
-            <select
-              style={input}
-              value={languagesAddDraft.proficiency}
-              onChange={(ev) => setLanguagesAddDraft(prev => ({ ...prev, proficiency: ev.target.value }))}
-            >
-              <option value="">— Select —</option>
-              <option value="native">Native</option>
-              <option value="fluent">Fluent</option>
-              <option value="professional">Professional</option>
-              <option value="conversational">Conversational</option>
-              <option value="basic">Basic</option>
-            </select>
-          </div>
-        </div>
-        <div style={{ marginTop: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
-          <button
-            type="button"
-            style={languagesActioning ? saveBtnDis : saveBtn}
-            disabled={languagesActioning}
-            onClick={handleAddLanguage}
-          >
-            {languagesActioning ? 'Saving…' : 'Add'}
-          </button>
-          {languagesError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{languagesError}</span>}
-        </div>
-
-        <div style={sectionLabel}>Languages you added</div>
-        {languagesL2 === null ? (
-          <div style={{ color: '#999', fontSize: 13, marginTop: 8 }}>Loading…</div>
-        ) : languagesL2.length === 0 ? (
-          <div style={{ color: '#999', fontSize: 13, marginTop: 8 }}>You haven&apos;t added any yet.</div>
-        ) : (
-          <div style={{ marginTop: 8 }}>
-            {languagesL2.map((row) => (
-              <div key={row.id} style={{ ...card, position: 'relative', fontSize: 12 }}>
-                <div>{row.proficiency ? `${row.language} — ${row.proficiency}` : row.language}</div>
-                <div style={{ marginTop: 8 }}>
-                  <button
-                    type="button"
-                    disabled={languagesActioning}
-                    onClick={() => handleDeleteLanguageL2(row.id)}
-                    style={{ background: 'transparent', color: '#ff6b6b', border: '1px solid #2a2a2a', padding: '4px 10px', fontSize: 11, cursor: languagesActioning ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif', opacity: languagesActioning ? 0.5 : 1 }}
-                  >
-                    Remove
-                  </button>
-                </div>
+        {languagesFormOpen ? (
+          <>
+            <div style={sectionLabel}>{languagesEditDraft.id ? 'Edit language' : 'Add language'}</div>
+            <div style={grid}>
+              <div style={label}>Language *</div>
+              <div>
+                <input
+                  style={input}
+                  value={languagesEditDraft.language}
+                  onChange={(ev) => setLanguagesEditDraft(prev => ({ ...prev, language: ev.target.value }))}
+                  placeholder="e.g. Italian"
+                />
               </div>
-            ))}
-          </div>
+              <div style={label}>Proficiency *</div>
+              <div>
+                <select
+                  style={input}
+                  value={languagesEditDraft.proficiency}
+                  onChange={(ev) => setLanguagesEditDraft(prev => ({ ...prev, proficiency: ev.target.value }))}
+                >
+                  <option value="">— Select —</option>
+                  <option value="native">Native</option>
+                  <option value="fluent">Fluent</option>
+                  <option value="professional">Professional</option>
+                  <option value="conversational">Conversational</option>
+                  <option value="basic">Basic</option>
+                </select>
+              </div>
+            </div>
+            <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+              <button
+                type="button"
+                style={languagesActioning ? saveBtnDis : saveBtn}
+                disabled={languagesActioning}
+                onClick={handleSaveLanguageL2}
+              >
+                {languagesActioning ? 'Saving…' : (languagesEditDraft.id ? 'Save' : 'Add')}
+              </button>
+              <button
+                type="button"
+                onClick={cancelLanguageEdit}
+                disabled={languagesActioning}
+                style={btn}
+              >
+                Cancel
+              </button>
+              {languagesError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{languagesError}</span>}
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={sectionLabel}>Languages you added</div>
+            <div style={{ marginTop: 8, marginBottom: 16 }}>
+              <button type="button" onClick={startNewLanguage} style={saveBtn}>
+                + Add language
+              </button>
+            </div>
+            {languagesL2 === null ? (
+              <div style={{ color: '#999', fontSize: 13 }}>Loading…</div>
+            ) : languagesL2.length === 0 ? (
+              <div style={{ color: '#999', fontSize: 13 }}>You haven&apos;t added any yet.</div>
+            ) : (
+              <div>
+                {languagesL2.map((row) => (
+                  <div key={row.id} style={{ ...card, position: 'relative', fontSize: 12 }}>
+                    <div>{row.proficiency ? `${row.language} — ${row.proficiency}` : row.language}</div>
+                    <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
+                      <button
+                        type="button"
+                        onClick={() => startEditLanguageL2(row)}
+                        style={{ background: 'transparent', color: '#ccc', border: '1px solid #2a2a2a', padding: '4px 10px', fontSize: 11, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        disabled={languagesActioning}
+                        onClick={() => handleDeleteLanguageL2(row.id)}
+                        style={{ background: 'transparent', color: '#ff6b6b', border: '1px solid #2a2a2a', padding: '4px 10px', fontSize: 11, cursor: languagesActioning ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif', opacity: languagesActioning ? 0.5 : 1 }}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {languagesError && <div style={{ marginTop: 16, color: '#ff6b6b', fontSize: 13 }}>{languagesError}</div>}
+          </>
         )}
       </Drawer>
       <SectionCard

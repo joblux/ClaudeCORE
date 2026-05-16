@@ -225,6 +225,7 @@ export async function resolveProfiLux(
   const relationalLanguages: ResolvedLanguage[] | null =
     Array.isArray(mlRows) && mlRows.length > 0
       ? mlRows.map((r) => ({
+          id: r.id,
           language: r.language,
           proficiency: (r.proficiency as ResolvedLanguage['proficiency']) ?? null,
         }))

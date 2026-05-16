@@ -327,6 +327,13 @@ export type ResolvedEducation = {
 }
 
 export type ResolvedLanguage = {
+  /**
+   * Present on L2 rows (member_languages.id), absent on L1 passthrough
+   * rows (cv_parsed_data.languages entries). Mirrors ResolvedExperience.id
+   * and ResolvedEducation.id semantics. UI uses presence/absence to gate
+   * edit/delete affordances.
+   */
+  id?: string
   language: string
   proficiency:
     | 'native'
