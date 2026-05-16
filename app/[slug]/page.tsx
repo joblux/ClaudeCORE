@@ -28,60 +28,34 @@ export default async function PublicProfilePage({ params }: Props) {
   // can keep an unshared profile reachable even after the toggle flips off.
   noStore()
 
-  // ---- B.1.2 dual-read gate ----
-  // share_links is the source of truth. Fall back to legacy profilux
-  // during the dual-read window (until B.1.4 drops legacy columns).
+  // share_links is the source of truth for public slug resolution.
 
-  let memberId: string | null = null
-  let activeShareLinkId: string | null = null
-
-  // Path A: share_links
   const { data: link } = await supabase
     .from('share_links')
     .select('id, member_id, sharing_enabled, password_hash, expires_at')
     .eq('slug', params.slug)
     .maybeSingle()
 
-  if (link) {
-    if (!link.sharing_enabled) notFound()
+  if (!link) notFound()
+  if (!link.sharing_enabled) notFound()
 
-    if (link.expires_at) {
-      const todayIso = new Date().toISOString().slice(0, 10)
-      if (link.expires_at < todayIso) {
-        redirect(`/${params.slug}/expired`)
-      }
+  if (link.expires_at) {
+    const todayIso = new Date().toISOString().slice(0, 10)
+    if (link.expires_at < todayIso) {
+      redirect(`/${params.slug}/expired`)
     }
-
-    if (link.password_hash) {
-      const cookieJar = cookies()
-      const raw = cookieJar.get(UNLOCK_COOKIE_NAME)?.value
-      if (!readUnlockCookie(raw, params.slug)) {
-        redirect(`/${params.slug}/password`)
-      }
-    }
-
-    memberId = link.member_id
-    activeShareLinkId = link.id
-  } else {
-    // Path B: legacy profilux fallback
-    const { data: shareState } = await supabase
-      .from('profilux')
-      .select('email')
-      .eq('share_slug', params.slug)
-      .eq('sharing_enabled', true)
-      .maybeSingle()
-
-    if (!shareState?.email) notFound()
-
-    const { data: legacyMember } = await supabase
-      .from('members')
-      .select('id')
-      .ilike('email', shareState.email)
-      .maybeSingle()
-
-    if (!legacyMember?.id) notFound()
-    memberId = legacyMember.id
   }
+
+  if (link.password_hash) {
+    const cookieJar = cookies()
+    const raw = cookieJar.get(UNLOCK_COOKIE_NAME)?.value
+    if (!readUnlockCookie(raw, params.slug)) {
+      redirect(`/${params.slug}/password`)
+    }
+  }
+
+  const memberId = link.member_id
+  const activeShareLinkId = link.id
 
   if (!memberId) notFound()
 
@@ -90,15 +64,13 @@ export default async function PublicProfilePage({ params }: Props) {
 
   const pub = projectFor(view, 'public') as PublicProjection
 
-  // Anonymous view tracking — only on Path A. Best-effort, never breaks render.
-  if (activeShareLinkId) {
-    try {
-      await supabase
-        .from('share_views')
-        .insert({ share_link_id: activeShareLinkId })
-    } catch {
-      // swallow — analytics best-effort
-    }
+  // Anonymous view tracking — best-effort, never breaks render.
+  try {
+    await supabase
+      .from('share_views')
+      .insert({ share_link_id: activeShareLinkId })
+  } catch {
+    // swallow — analytics best-effort
   }
 
   const initials = `${pub.first_name?.[0] || ''}${pub.last_name?.[0] || ''}`.toUpperCase()

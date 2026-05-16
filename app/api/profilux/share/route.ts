@@ -12,7 +12,7 @@ const supabase = createClient(
 // =============================================================================
 // GET /api/profilux/share — Manage tab v0 read-only visibility status
 //
-// Reads ONLY legacy profilux.share_slug + profilux.sharing_enabled.
+// Reads ONLY share_links (source of truth).
 // Does not read identity/profile fields from profilux.
 // Does not resolve or project the canonical members.* object.
 // Does not write. Does not touch reset-link.
@@ -24,8 +24,8 @@ const supabase = createClient(
 //     can_share: boolean }
 //
 // Unauthenticated → 401.
-// No profilux row for session email → returns the all-null/false default
-// shape (200), so the UI can render "Private" without an error state.
+// No share_links row for the session member → returns the all-null/false
+// default shape (200), so the UI can render "Private" without an error state.
 // =============================================================================
 
 export async function GET() {
@@ -47,7 +47,7 @@ export async function GET() {
   let expires_at: string | null = null
   let view_count: number = 0
 
-  // Path A: share_links (source of truth)
+  // Source of truth: share_links
   if (member?.id) {
     const { data: link } = await supabase
       .from('share_links')
@@ -68,22 +68,6 @@ export async function GET() {
 
       view_count = typeof count === 'number' ? count : 0
     }
-  }
-
-  // Path B: legacy profilux fallback (password_set/expires_at/view_count stay defaults)
-  if (!share_slug) {
-    const { data, error } = await supabase
-      .from('profilux')
-      .select('share_slug, sharing_enabled')
-      .eq('email', session.user.email)
-      .maybeSingle()
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    share_slug = data?.share_slug ?? null
-    sharing_enabled = data?.sharing_enabled === true
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXTAUTH_URL || 'https://joblux.com'
@@ -115,14 +99,13 @@ export async function GET() {
 //     expires_at?: string | null }
 //
 // At least one field must be present.
-//   - sharing_enabled: toggles share visibility. Mirrored to legacy profilux.
+//   - sharing_enabled: toggles share visibility.
 //   - password: string → scrypt-hashed via lib/share/auth.hashPassword.
 //               null   → clears password_hash + password_salt.
 //               Minimum 4 chars.
 //   - expires_at: 'YYYY-MM-DD' (must be today or later) or null to clear.
 //
-// password / expires_at writes REQUIRE a share_links row → NO_SHARE_LINK.
-// Legacy-only fallback handles sharing_enabled-only requests.
+// All writes REQUIRE a share_links row → NO_SHARE_LINK.
 //
 // Returns: { ok: true }
 // =============================================================================
@@ -212,51 +195,13 @@ export async function POST(req: Request) {
     .eq('member_id', member.id)
     .maybeSingle()
 
-  // Password / expiry require a share_links row
-  if ((hasPassword || hasExpiry) && !link) {
+  if (!link) {
     return NextResponse.json(
-      { error: 'Reserve a public link before configuring password or expiry.', code: 'NO_SHARE_LINK' },
+      { error: 'No share link. Reserve a public link first.', code: 'NO_SHARE_LINK' },
       { status: 400 },
     )
   }
 
-  if (!link) {
-    // Legacy-only path: sharing_enabled toggle on pre-share_links profilux row
-    const { data: existing, error: readErr } = await supabase
-      .from('profilux')
-      .select('share_slug, sharing_enabled')
-      .eq('email', session.user.email)
-      .maybeSingle()
-
-    if (readErr) {
-      return NextResponse.json({ error: readErr.message }, { status: 500 })
-    }
-    if (!existing) {
-      return NextResponse.json(
-        { error: 'No profilux row. Reserve a public link first.', code: 'NO_PROFILUX_ROW' },
-        { status: 400 },
-      )
-    }
-    if (nextSharing === true && !existing.share_slug) {
-      return NextResponse.json(
-        { error: 'Reserve a public link first to enable sharing.', code: 'NO_SLUG_RESERVED' },
-        { status: 400 },
-      )
-    }
-
-    const { error: updateErr } = await supabase
-      .from('profilux')
-      .update({ sharing_enabled: nextSharing })
-      .eq('email', session.user.email)
-
-    if (updateErr) {
-      return NextResponse.json({ error: updateErr.message }, { status: 500 })
-    }
-
-    return NextResponse.json({ ok: true })
-  }
-
-  // share_links path — assemble update payload
   if (nextSharing === true && !link.slug) {
     return NextResponse.json(
       { error: 'Reserve a public link first to enable sharing.', code: 'NO_SLUG_RESERVED' },
@@ -281,14 +226,6 @@ export async function POST(req: Request) {
 
   if (linkUpdateErr) {
     return NextResponse.json({ error: linkUpdateErr.message }, { status: 500 })
-  }
-
-  // Mirror ONLY sharing_enabled to legacy profilux (during dual-read window)
-  if (hasSharing) {
-    await supabase
-      .from('profilux')
-      .update({ sharing_enabled: nextSharing })
-      .eq('email', session.user.email)
   }
 
   return NextResponse.json({ ok: true })

@@ -37,31 +37,20 @@ export async function POST() {
     return NextResponse.json({ error: 'No member row' }, { status: 400 })
   }
 
-  // Find a unique slug across BOTH share_links and legacy profilux
+  // Find a unique slug in share_links (source of truth)
   let slug = generateSlug(profile.first_name, profile.last_name)
   let suffix = 2
 
   while (true) {
-    const [linkColl, legacyColl] = await Promise.all([
-      supabase
-        .from('share_links')
-        .select('member_id')
-        .eq('slug', slug)
-        .maybeSingle(),
-      supabase
-        .from('profilux')
-        .select('email')
-        .eq('share_slug', slug)
-        .maybeSingle(),
-    ])
-
-    const linkRow = linkColl.data
-    const legacyRow = legacyColl.data
+    const { data: linkRow } = await supabase
+      .from('share_links')
+      .select('member_id')
+      .eq('slug', slug)
+      .maybeSingle()
 
     const linkOwnedByMe = !linkRow || linkRow.member_id === profile.id
-    const legacyOwnedByMe = !legacyRow || legacyRow.email === session.user.email
 
-    if (linkOwnedByMe && legacyOwnedByMe) break
+    if (linkOwnedByMe) break
 
     slug = generateSlug(profile.first_name, profile.last_name, suffix)
     suffix++
@@ -113,13 +102,6 @@ export async function POST() {
       return NextResponse.json({ error: insErr.message }, { status: 500 })
     }
   }
-
-  await supabase
-    .from('profilux')
-    .upsert(
-      { email: session.user.email, share_slug: slug },
-      { onConflict: 'email' }
-    )
 
   return NextResponse.json({ slug })
 }
