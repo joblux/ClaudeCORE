@@ -25,7 +25,7 @@ export async function POST() {
 
   const { data: profile } = await supabase
     .from('members')
-    .select('first_name, last_name')
+    .select('id, first_name, last_name')
     .eq('email', session.user.email)
     .single()
 
@@ -33,20 +33,85 @@ export async function POST() {
     return NextResponse.json({ error: 'Please complete your personal info first' }, { status: 400 })
   }
 
-  // Find a unique slug
+  if (!profile.id) {
+    return NextResponse.json({ error: 'No member row' }, { status: 400 })
+  }
+
+  // Find a unique slug across BOTH share_links and legacy profilux
   let slug = generateSlug(profile.first_name, profile.last_name)
   let suffix = 2
 
   while (true) {
-    const { data: existing } = await supabase
-      .from('profilux')
-      .select('id, email')
-      .eq('share_slug', slug)
-      .single()
+    const [linkColl, legacyColl] = await Promise.all([
+      supabase
+        .from('share_links')
+        .select('member_id')
+        .eq('slug', slug)
+        .maybeSingle(),
+      supabase
+        .from('profilux')
+        .select('email')
+        .eq('share_slug', slug)
+        .maybeSingle(),
+    ])
 
-    if (!existing || existing.email === session.user.email) break
+    const linkRow = linkColl.data
+    const legacyRow = legacyColl.data
+
+    const linkOwnedByMe = !linkRow || linkRow.member_id === profile.id
+    const legacyOwnedByMe = !legacyRow || legacyRow.email === session.user.email
+
+    if (linkOwnedByMe && legacyOwnedByMe) break
+
     slug = generateSlug(profile.first_name, profile.last_name, suffix)
     suffix++
+
+    if (suffix > 200) {
+      return NextResponse.json({ error: 'Could not generate unique slug' }, { status: 500 })
+    }
+  }
+
+  // Read existing share_links row (if any) to capture rotated_from
+  const { data: existing } = await supabase
+    .from('share_links')
+    .select('id, slug')
+    .eq('member_id', profile.id)
+    .maybeSingle()
+
+  const previousSlug = existing?.slug ?? null
+  const isRotation = previousSlug !== null && previousSlug !== slug
+
+  if (existing) {
+    const updatePayload: Record<string, unknown> = {
+      slug,
+      rotated_from: isRotation ? previousSlug : null,
+      updated_at: new Date().toISOString(),
+    }
+
+    // On rotation, clear password + expiry (operator intent: fresh share).
+    // Keep sharing_enabled state — rotation does not flip visibility.
+    if (isRotation) {
+      updatePayload.password_hash = null
+      updatePayload.password_salt = null
+      updatePayload.expires_at = null
+    }
+
+    const { error: updErr } = await supabase
+      .from('share_links')
+      .update(updatePayload)
+      .eq('id', existing.id)
+
+    if (updErr) {
+      return NextResponse.json({ error: updErr.message }, { status: 500 })
+    }
+  } else {
+    const { error: insErr } = await supabase
+      .from('share_links')
+      .insert({ member_id: profile.id, slug })
+
+    if (insErr) {
+      return NextResponse.json({ error: insErr.message }, { status: 500 })
+    }
   }
 
   await supabase
