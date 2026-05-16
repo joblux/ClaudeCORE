@@ -28,6 +28,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid slug' }, { status: 400 })
   }
 
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXTAUTH_URL ||
+    'https://joblux.com'
+
   let password: string | null = null
   const ct = req.headers.get('content-type') || ''
   if (ct.includes('application/x-www-form-urlencoded') || ct.includes('multipart/form-data')) {
@@ -44,7 +49,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (!password) {
-    return NextResponse.redirect(new URL(`/${slug}/password?error=1`, req.url), { status: 303 })
+    return NextResponse.redirect(new URL(`/${slug}/password?error=1`, siteUrl), { status: 303 })
   }
 
   const { data: link } = await supabase
@@ -54,19 +59,19 @@ export async function POST(req: NextRequest) {
     .maybeSingle()
 
   if (!link || !link.sharing_enabled || !link.password_hash || !link.password_salt) {
-    return NextResponse.redirect(new URL(`/${slug}/password?error=1`, req.url), { status: 303 })
+    return NextResponse.redirect(new URL(`/${slug}/password?error=1`, siteUrl), { status: 303 })
   }
 
   if (link.expires_at) {
     const todayIso = new Date().toISOString().slice(0, 10)
     if (link.expires_at < todayIso) {
-      return NextResponse.redirect(new URL(`/${slug}/expired`, req.url), { status: 303 })
+      return NextResponse.redirect(new URL(`/${slug}/expired`, siteUrl), { status: 303 })
     }
   }
 
   const ok = verifyPassword(password, link.password_hash, link.password_salt)
   if (!ok) {
-    return NextResponse.redirect(new URL(`/${slug}/password?error=1`, req.url), { status: 303 })
+    return NextResponse.redirect(new URL(`/${slug}/password?error=1`, siteUrl), { status: 303 })
   }
 
   let cookieValue: string
@@ -76,7 +81,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
   }
 
-  const res = NextResponse.redirect(new URL(`/${slug}`, req.url), { status: 303 })
+  const res = NextResponse.redirect(new URL(`/${slug}`, siteUrl), { status: 303 })
   res.cookies.set({
     name: UNLOCK_COOKIE_NAME,
     value: cookieValue,
