@@ -39,6 +39,7 @@ export async function GET() {
     .from('members')
     .select('id')
     .ilike('email', session.user.email)
+    .is('deleted_at', null)
     .maybeSingle()
 
   let share_slug: string | null = null
@@ -179,6 +180,7 @@ export async function POST(req: Request) {
     .from('members')
     .select('id')
     .ilike('email', session.user.email)
+    .is('deleted_at', null)
     .maybeSingle()
 
   if (!member?.id) {

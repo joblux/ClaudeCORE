@@ -158,6 +158,9 @@ export async function resolveProfiLux(
 
   if (error) throw error
   if (!data) return null
+  // B.3.2: soft-delete gate. select('*') already includes deleted_at;
+  // surface a tombstoned row as not-found so read paths cannot resurrect it.
+  if ((data as { deleted_at?: string | null }).deleted_at != null) return null
 
   const row = data as MemberRow
 

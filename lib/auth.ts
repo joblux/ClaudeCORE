@@ -74,6 +74,7 @@ export const authOptions: NextAuthOptions = {
         .from("members")
         .select("id, status, role")
         .eq("email", user.email)
+        .is("deleted_at", null)
         .single();
       if (account?.provider === "email" && member) {
         const { data: existingProviders } = await supabaseAdmin
@@ -102,6 +103,7 @@ export const authOptions: NextAuthOptions = {
           .from("members")
           .select("id, role, status, first_name, last_name, registration_completed, tier_selected, avatar_url")
           .eq("email", email)
+          .is("deleted_at", null)
           .single();
         if (error) {
           console.error("JWT: Supabase query error:", error.message);
@@ -191,6 +193,7 @@ export const authOptions: NextAuthOptions = {
         .from("members")
         .select("id, avatar_url, avatar_source")
         .eq("email", user.email)
+        .is("deleted_at", null)
         .maybeSingle();
 
       if (!existing?.id) return;

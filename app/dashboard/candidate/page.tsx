@@ -219,6 +219,9 @@ export default function CandidateDashboard() {
             <Link href="/dashboard/candidate/profilux" className="block text-xs text-[#999] hover:text-[#ccc] transition-colors">
               Edit profile →
             </Link>
+            <Link href="/dashboard/candidate/settings" className="block text-xs text-[#999] hover:text-[#ccc] transition-colors">
+              Settings →
+            </Link>
           </div>
         </div>
 
