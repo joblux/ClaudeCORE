@@ -2665,8 +2665,15 @@ export default function ProfiluxPage() {
         const pct = typeof e.profile_completeness === 'number' ? e.profile_completeness : 0
         return (
           <>
-            {/* Top-right action row — Re-upload CV + Done */}
+            {/* Top-right action row — Add section · Re-upload CV · Done */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, marginBottom: 28 }}>
+              <button
+                type="button"
+                onClick={() => { setAddSectionError(null); setAddSectionDrawerOpen(true) }}
+                style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#999', border: '0.5px solid #2a2a2a', borderRadius: 8, padding: '8px 16px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer' }}
+              >
+                + Add section
+              </button>
               <Link
                 href="/dashboard/candidate/profilux/cv-merge"
                 style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#999', border: '0.5px solid #2a2a2a', borderRadius: 8, padding: '8px 16px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, textDecoration: 'none', cursor: 'pointer' }}
@@ -4241,29 +4248,7 @@ export default function ProfiluxPage() {
         </div>
       </Drawer>
 
-      {/* PF-D V2 — Add Section trigger + EXTEND DOSSIER drawer */}
-      <div style={{ marginTop: 16, marginBottom: 16 }}>
-        <button
-          type="button"
-          onClick={() => { setAddSectionError(null); setAddSectionDrawerOpen(true) }}
-          style={{
-            width: '100%',
-            background: 'transparent',
-            color: '#a58e28',
-            border: '1px dashed rgba(165,142,40,0.4)',
-            borderRadius: 8,
-            padding: '16px 14px',
-            fontSize: 12,
-            fontWeight: 600,
-            letterSpacing: '0.4px',
-            cursor: 'pointer',
-            fontFamily: 'Inter, sans-serif',
-            textAlign: 'center',
-          }}
-        >
-          + Add section
-        </button>
-      </div>
+      {/* PF-D V2.1 — EXTEND DOSSIER drawer (trigger lives in top-right action row) */}
       <Drawer
         open={addSectionDrawerOpen}
         title="EXTEND DOSSIER"
