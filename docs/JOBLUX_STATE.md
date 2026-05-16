@@ -54,6 +54,8 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **Pack B.1 — Share / Manage hardening** (`f42117b` + `26bf648` + `1b29bae` + `390aacf`) — May 16 2026. SHIPPED + COOLIFY-GREEN + LIVE-VALIDATED 13/13. Substrate: share_links + share_views tables (RLS, service-role-only grants, 4 legacy rows backfilled). Gate: dual-read at /[slug] (Path A share_links / Path B legacy fallback), password challenge + verify endpoint, expiry redirect, anonymous view tracking, scrypt+HMAC in lib/share/auth. Hotfix: siteUrl base in /api/profilux/share/verify redirects (Coolify standalone). Manage UI: GET extended with password_set / expires_at / view_count; POST accepts optional password (>=4 chars or null) + expires_at (>=today or null); Visibility & sharing card gains Password / Expiry / Views rows + normalizeShareStatus + refreshShareStatus helpers. Doctrine isolation maintained: share_links / share_views never enter lib/profilux/*.
+
 - **a206fe3** `fix(profilux): normalize partial dates in cv-merge apply + surface 500 errors` — May 16 2026. SHIPPED + COOLIFY-GREEN + LIVE-VALIDATED. Pack C closing fix. `app/api/members/cv-merge/apply/route.ts` adds `normalizeDate()` helper applied to each pending experience `start_date` + `end_date` before RPC: empty/null → null; YYYY → YYYY-01-01; YYYY-MM → YYYY-MM-01; YYYY-MM-DD passthrough; anything else → null. Trust boundary moved to apply route (not RPC, not schema). Required because CV parser SYSTEM_PROMPT explicitly supports partial precision dates which the RPC `NULLIF(...)::date` cast rejected ("invalid input syntax for type date: 2026-03"). Same commit: `app/dashboard/candidate/profilux/cv-merge/page.tsx` handleApply error branch now surfaces `j.error || Apply failed (${res.status})` in a dedicated red banner above the action row (was silently swallowed before). 2 files, +38/-4. Live: real atlas.pdf upload → review screen → apply with identity excluded → 5 experiences + 1 education + 1 language + 1 sector inserted atomically, cv_parsed_pending cleared, cv_parsed_data swapped to new payload, cv_parse_history.applied_at set, profile_completeness restored to 83%, Alex/Mason/Paris identity untouched. Pack C ships complete.
 
 - **f516ccd** `feat(profilux): add CV merge review UI` — May 16 2026. SHIPPED + COOLIFY-GREEN. C.4 of Pack C. Full rewrite of `app/dashboard/candidate/profilux/cv-merge/page.tsx` (+669/-23). State machine: loading | upload | review | applying | rejecting. On mount fetches `/api/members/cv-merge/diff`; pending null → upload state (existing flow, unchanged), pending exists → review state. Upload state: identical to prior flow, but on successful parse re-fetches /diff and transitions to review instead of redirecting. Review state: 5 conditional SectionCard blocks (Identity / Experiences / Education / Languages / Sectors) — each rendered only if `diff[section].length > 0`; Identity skips unchanged entries. Defaults: 'added' entries auto-checked, 'changed' (Identity only) unchecked, 'matched' read-only badges with no checkbox. Apply payload server-side: identity → `{ field: true }` map only when checked; experiences/education/languages/sectors → arrays of indices/signatures/keys/sectors; omitted entirely if empty. Cancel + Reject all → POST /reject → router.push /profilux. Apply selected → POST /apply with built accept → router.push on success; inline error keeps selections. "{N} selected" counter + apply button disabled when zero. Styling: review section cards mirror Edit tab SectionCard chrome; badges green/gold/muted per status. 1 file. Live QA on Alex via Chrome MCP: review screen rendered correctly with all 5 sections + status badges; checkbox defaults verified (Identity 4 unchecked, Experiences/Education/Languages/Sectors auto-checked).
@@ -195,32 +197,17 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 **Lane: ProfiLux Backend Convergence (ACTIVE).**
 
-V12 Product / Prototype Fidelity (PF-1, PF-2a, PF-2b.1, PF-2b.2) is closed. The lane this rotation entered is backend convergence of the remaining ProfiLux substrate: collections L2 activation, CV merge pipeline, visibility/masking substrate.
+**Next step: Pack B.1.4 — legacy share cleanup.**
 
-This rotation shipped:
-- P1 — section_visibility + masked_fields substrate (`26e3032`)
-- Pack A — collections L2 (`09f6b86` + `645ab23` + `cb879c9`)
-- Pack F — PUBLIC toggle revert (`5ce934e`)
-- Pack C — CV merge complet (`5db8d59` + `99f1f32` + `c2897c2` + `f516ccd` + `a206fe3`)
+Locked by Mo 2026-05-16: close dual-read / legacy share debt before adding B.3 governance features. Subtractive only — drop `profilux.share_slug` + `profilux.sharing_enabled` reads from `app/api/profilux/share/route.ts`, `app/api/profilux/reset-link/route.ts`, and Path B fallback in `app/[slug]/page.tsx`. Folds parked finding `652215ea`. Overlaps ledger `6aef236e`.
 
-**Next step: Pack B — Share / Manage finition.**
+**Queued after B.1.4:** Pack B.3 — `matching_opt_in` + RGPD export + soft-delete.
 
-Pack B scope (from 17-chantier ProfiLux backend inventory, items #6, #7, #8, #9, #10, #11, #17):
-- Share password gate + expiry + view tracking (`share_views` table)
-- masked_fields consumers (client share surface + PDF)
-- Private + share PDF export (PDF library decision + template)
-- Slug rotate/history
-- `matching_opt_in` toggle (separate from availability per STATE §20.x)
-- Account deletion (cascade) + RGPD export
-- Share view tracking consumer (Manage analytics)
+**Remaining Pack B (later):** masked_fields consumers, PDF export, slug rotation/history UI, share view tracking consumer.
 
-After Pack B: Pack D (Add Section library, 8 types) → Pack E (Recruiting loop).
+**After Pack B:** Pack D (Add Section library) → Pack E (Recruiting loop).
 
-**Workflow doctrine locked this rotation (2026-05-16):**
-- One operational prompt per chantier pack unless DB+UI mixed risk forces split.
-- Do not split for comfort. Each chantier shippable end-to-end.
-
-**Strict step order:** Pack B (next session) → Pack D → Pack E.
+**Workflow doctrine locked 2026-05-16:** Claude AI = audit / scope / QA. GPT = final compact Claude Code prompt. Claude Code = execution. Claude AI does NOT draft Claude Code prompts directly.
 
 **Handoff doc:** `docs/HANDOFF_2026-05-16.md`.
 
@@ -330,7 +317,7 @@ After Pack B: Pack D (Add Section library, 8 types) → Pack E (Recruiting loop)
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 16, 2026 (Pack A + Pack F + Pack C + P1 substrate shipped end-to-end this rotation). 10 commits. Pack C CV merge complet live-validated on real CV upload. Next: Pack B — Share / Manage finition.
+**Last updated:** May 16, 2026 (Pack A + Pack F + Pack C + P1 substrate + Pack B.1 shipped end-to-end this rotation). 14 commits. Next: Pack B.1.4 legacy share cleanup.
 
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
