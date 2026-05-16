@@ -269,6 +269,14 @@ export async function POST(req: NextRequest) {
       : null
   }
 
+  if (has('certifications')) {
+    updatePayload.certifications = Array.isArray(body.certifications)
+      ? body.certifications
+          .filter((s: unknown) => typeof s === 'string' && s.trim() !== '')
+          .map((s: string) => s.trim())
+      : null
+  }
+
   if (has('section_visibility')) {
     const v = body.section_visibility
     if (v !== null && (typeof v !== 'object' || Array.isArray(v))) {

@@ -553,6 +553,7 @@ export type EditorView = {
   product_categories: string[]
   expertise_tags: string[]
   brands_worked_with: string[]
+  certifications: string[]
   // Experience + education (L1)
   experiences: ResolvedExperience[]
   education: ResolvedEducation[]

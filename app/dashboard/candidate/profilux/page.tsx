@@ -611,6 +611,11 @@ export default function ProfiluxPage() {
   const [maisonsDraftText, setMaisonsDraftText] = useState('')
   const [maisonsSaving, setMaisonsSaving] = useState(false)
   const [maisonsError, setMaisonsError] = useState<string | null>(null)
+  // PF-D V1 — Certifications drawer (text[] textarea, free-text, mirrors Maisons)
+  const [certificationsDrawerOpen, setCertificationsDrawerOpen] = useState(false)
+  const [certificationsDraftText, setCertificationsDraftText] = useState('')
+  const [certificationsSaving, setCertificationsSaving] = useState(false)
+  const [certificationsError, setCertificationsError] = useState<string | null>(null)
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -927,6 +932,36 @@ export default function ProfiluxPage() {
       setMaisonsError(String(err))
     } finally {
       setMaisonsSaving(false)
+    }
+  }
+
+  // PF-D V1 — Certifications (free-text text[] textarea, mirrors Maisons)
+  function openCertificationsDrawer() {
+    setCertificationsError(null)
+    setCertificationsDraftText((editor?.certifications ?? []).join('\n'))
+    setCertificationsDrawerOpen(true)
+  }
+  async function handleSaveCertifications() {
+    setCertificationsSaving(true)
+    setCertificationsError(null)
+    try {
+      const arr = certificationsDraftText.split('\n').map(s => s.trim()).filter(s => s !== '')
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ certifications: arr }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setCertificationsError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+      setCertificationsDrawerOpen(false)
+    } catch (err) {
+      setCertificationsError(String(err))
+    } finally {
+      setCertificationsSaving(false)
     }
   }
 
@@ -2514,6 +2549,18 @@ export default function ProfiluxPage() {
             </ViewZone>
               )
             })()}
+
+            {/* PF-D V1 — Certifications (first library section, free-text, mirrors Maisons) */}
+            {(() => {
+              if (!Array.isArray(e.certifications) || e.certifications.length === 0) return null
+              return (
+            <ViewZone title="Certifications">
+              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.5 }}>
+                {e.certifications.join(' · ')}
+              </div>
+            </ViewZone>
+              )
+            })()}
               </div>
             </div>
 
@@ -3780,6 +3827,61 @@ export default function ProfiluxPage() {
             {maisonsSaving ? 'Saving…' : 'Save'}
           </button>
           {maisonsError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{maisonsError}</span>}
+        </div>
+      </Drawer>
+      <SectionCard
+        eyebrow="Certifications"
+        headerAction={
+          <button
+            type="button"
+            onClick={openCertificationsDrawer}
+            style={{
+              background: 'rgba(165,142,40,0.05)',
+              color: '#a58e28',
+              border: '1px solid rgba(165,142,40,0.3)',
+              padding: '6px 14px',
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '0.4px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        }
+      >
+        <div>
+          {e.certifications.length > 0
+            ? e.certifications.join(', ')
+            : <NotSet />}
+        </div>
+      </SectionCard>
+      <Drawer
+        open={certificationsDrawerOpen}
+        title="Certifications"
+        onClose={() => setCertificationsDrawerOpen(false)}
+      >
+        <div style={{ color: '#999', fontSize: 12, marginBottom: 10 }}>
+          One certification per line. Empty lines are ignored.
+        </div>
+        <textarea
+          style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 160, resize: 'vertical' }}
+          rows={8}
+          value={certificationsDraftText}
+          onChange={(ev) => setCertificationsDraftText(ev.target.value)}
+          placeholder={'e.g.\nGIA Graduate Gemologist\nWSET Level 3\nLuxury Retail Management Certificate'}
+        />
+        <div style={{ marginTop: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button
+            style={certificationsSaving ? saveBtnDis : saveBtn}
+            disabled={certificationsSaving}
+            onClick={handleSaveCertifications}
+          >
+            {certificationsSaving ? 'Saving…' : 'Save'}
+          </button>
+          {certificationsError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{certificationsError}</span>}
         </div>
       </Drawer>
       <SectionCard
