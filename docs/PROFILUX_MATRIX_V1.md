@@ -4,7 +4,7 @@ Domain contract for the ProfiLux object across JOBLUX. Locks the storage, resolu
 
 This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE wins until reconciled. See §12.
 
-**Status:** locked v1.9 (May 17 2026 RGPD machine-readable export shipped — B.3.4)
+**Status:** locked v1.10 (May 17 2026 RGPD export role-conditional tables shipped — B.3.4.1)
 **Originally locked:** April 30, 2026
 **v1.1 addendum locked:** May 6, 2026
 **v1.2 addendum locked:** May 7, 2026
@@ -13,6 +13,17 @@ This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE w
 ---
 
 ## CHANGE LOG
+
+
+**v1.10 — May 17 2026 RGPD export role-conditional tables shipped (B.3.4.1)**
+
+Closes the B.3.4 v1 deferral. `/api/members/export` now ships 16 tables; `business_briefs` and `bloglux_articles` join the export with `admin_notes` redacted. Endpoint behavior is unchanged for members who never authored either (empty arrays).
+
+- §19B.3 — scope expanded from 14 to 16 tables.
+- §19B.4 — redaction list extended for the 2 new admin_notes fields.
+- §19B.5 — deferral block replaced with the shipped record.
+
+§§1–19A, §20–25 — all KEEP unchanged.
 
 
 **v1.9 — May 17 2026 RGPD machine-readable export shipped (B.3.4)**
@@ -1029,11 +1040,11 @@ C6.1 is doctrine lock only. The following are deferred:
 
 The Download my data control lives on the candidate Settings page (`/dashboard/candidate/settings`) inside the DATA EXPORT card, between MATCHING CONSENT and DELETE ACCOUNT. View is not the export host (§22).
 
-### 19B.3 — Table scope (14)
+### 19B.3 — Table scope (16)
 
-`members`, `work_experiences`, `education_records`, `member_languages`, `member_sectors`, `member_documents`, `cv_parse_history`, `share_links`, `share_views`, `nextauth_accounts`, `applications`, `contributions`, `contact_messages`, `brand_contributions`.
+`members`, `work_experiences`, `education_records`, `member_languages`, `member_sectors`, `member_documents`, `cv_parse_history`, `share_links`, `share_views`, `nextauth_accounts`, `applications`, `contributions`, `contact_messages`, `brand_contributions`, `business_briefs`, `bloglux_articles`.
 
-Sibling tables are queried by `member_id`; `brand_contributions` is queried by `user_id`; `share_views` is fetched via `share_link_id IN (...)` after `share_links` resolves.
+Sibling tables are queried by `member_id`; `brand_contributions` is queried by `user_id`; `business_briefs` by `created_by`; `bloglux_articles` by `author_id`; `share_views` is fetched via `share_link_id IN (...)` after `share_links` resolves.
 
 ### 19B.4 — Redactions and exclusions
 
@@ -1041,24 +1052,29 @@ Sibling tables are queried by `member_id`; `brand_contributions` is queried by `
 - **`share_links.password_hash` / `password_salt`** — removed; `has_password: boolean` added in their place.
 - **`nextauth_accounts.access_token` / `refresh_token` / `id_token` / `session_state`** — set to `null`. Provider-side credentials, not portable user data.
 - **`brand_contributions.admin_notes`** — removed. Internal moderation surface.
+- **`business_briefs.admin_notes`** — excluded (admin operational data).
+- **`bloglux_articles.admin_notes`** — excluded (admin operational data).
 
 No other fields are redacted in v1. If a future field is added that contains operational/admin content, it must be added to this list before being merged.
 
-### 19B.5 — Operational audit
+### 19B.5 — Role-conditional tables (shipped B.3.4.1, May 17 2026)
+
+`business_briefs` (FK `created_by`) and `bloglux_articles` (FK `author_id`) export by default. The B.3.4 v1 deferral is closed: both tables ship verbatim with `admin_notes` redacted symmetric to §19B.4. Empty arrays return for members who never authored a brief or an article; no role gating is applied at the endpoint — RGPD scope is identity-driven, not role-driven.
+
+### 19B.6 — Operational audit
 
 The endpoint console-logs `{ member_id, email, exported_at }` on success. **No audit table** in v1. The console-log is the only record. Audit-table substrate is a forward dependency, not part of B.3.4.
 
-### 19B.6 — Out of scope (deferred)
+### 19B.7 — Out of scope (deferred)
 
-- `business_briefs` and `bloglux_articles` — deferred to B.3.4.1. Subject linkage and author/owner semantics need a separate doctrine pass before these tables can be exported cleanly.
 - Subject-access deletion confirmation receipts — separate slice.
 - CV file bytes — not re-bundled in the export; original uploads remain reachable via the View tab and storage URLs already in the payload.
 
-### 19B.7 — Distinction from §19A
+### 19B.8 — Distinction from §19A
 
 §19A produces a *human-readable* artifact (the rendered ProfiLux). §19B produces a *machine-readable* archive (the full personal-data graph). One is presentation; the other is portability. Code, copy, and UI surfaces must keep them separate.
 
-### 19B.8 — Cross-references
+### 19B.9 — Cross-references
 
 - §13 Deferred items — RGPD export row is now SHIPPED.
 - §19 Settings doctrine

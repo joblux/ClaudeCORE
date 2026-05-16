@@ -105,6 +105,8 @@ export async function GET() {
       contributions,
       contactMessages,
       brandContributions,
+      businessBriefs,
+      blogluxArticles,
     ] = await Promise.all([
       supabaseAdmin.from(TABLE_NAMES.work_experiences).select('*').eq('member_id', memberId),
       supabaseAdmin.from(TABLE_NAMES.education_records).select('*').eq('member_id', memberId),
@@ -118,6 +120,10 @@ export async function GET() {
       supabaseAdmin.from(TABLE_NAMES.contributions).select('*').eq('member_id', memberId),
       supabaseAdmin.from(TABLE_NAMES.contact_messages).select('*').eq('member_id', memberId),
       supabaseAdmin.from(TABLE_NAMES.brand_contributions).select('*').eq('user_id', memberId),
+      // B.3.4.1: role-conditional authorship tables. Empty array for members who
+      // never authored either; RGPD scope is identity-driven, not role-gated.
+      supabaseAdmin.from('business_briefs').select('*').eq('created_by', memberId),
+      supabaseAdmin.from('bloglux_articles').select('*').eq('author_id', memberId),
     ])
 
     // share_views is keyed by share_link_id, not member_id.
@@ -134,13 +140,21 @@ export async function GET() {
     const exportedAt = new Date().toISOString()
     const today = exportedAt.slice(0, 10)
 
+    // B.3.4.1: symmetric admin_notes redaction for the two role-conditional tables.
+    const businessBriefsRedacted = (businessBriefs.data ?? []).map(
+      ({ admin_notes, ...rest }: Record<string, any>) => rest
+    )
+    const blogluxArticlesRedacted = (blogluxArticles.data ?? []).map(
+      ({ admin_notes, ...rest }: Record<string, any>) => rest
+    )
+
     const payload = {
       export_metadata: {
         member_id: memberId,
         exported_at: exportedAt,
         format_version: '1.0',
         scope_note:
-          'Machine-readable export of personal data tied to this account. See MATRIX §19B for table scope, redactions, and the §19A rendered-ProfiLux export distinction.',
+          'Machine-readable export of personal data tied to this account. See MATRIX §19B for table scope and redactions; §19A covers the distinct rendered-ProfiLux export.',
       },
       members: memberPublic,
       work_experiences: workExperiences.data ?? [],
@@ -156,6 +170,8 @@ export async function GET() {
       contributions: contributions.data ?? [],
       contact_messages: contactMessages.data ?? [],
       brand_contributions: (brandContributions.data ?? []).map(redactBrandContribution),
+      business_briefs: businessBriefsRedacted,
+      bloglux_articles: blogluxArticlesRedacted,
     }
 
     // Operational audit: console-only per §19B (no audit table in v1).
