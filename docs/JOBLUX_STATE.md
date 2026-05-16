@@ -54,6 +54,10 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **5c66a87** `feat(ats): G2 + G9 minimal — propose-to-assignment with matching-opt-in gate` — May 16 2026 PM. SHIPPED + COOLIFY-GREEN + LIVE-VALIDATED 8/8. 2 files, +191/-1. `/api/applications` admin branch enforces `members.matching_opt_in === true` AND `deleted_at IS NULL`: 404/410/403 codes. Self-apply branch exempt by design. `assigned_recruiter` defaults to `session.user.email`. `/admin/members/[id]` topbar "Propose to assignment" button, `!isBusiness` gated, disabled+tooltip when opt-in false. Panel reads `/api/assignments?status=published&limit=100`, posts with `source='sourced_by_recruiter'`. First runtime consumer of B.3.3. Net DB delta = 0. Ledger `0ed736cd` closed. Partial advance on `1f7ccd56`.
+
+- **09660d5** `copy(connect): tighten /connect + employer signup vocabulary` — May 16 2026 PM. SHIPPED + COOLIFY-GREEN + LIVE-VALIDATED 8/8. 2 files, +8/-8. `/connect` + `/join/employer`: Employers→Companies, ProfiLux capitalization, organisation→organization (×3), drop "500+" from 2 houses bullets, "manager and up level"→"manager-and-up". Closes `/connect` vocabulary audit blocker. Ledger `d037e17e` closed.
+
 - **Pack B.3.4.1 — RGPD export role-conditional tables** (`3ea93d6`) — May 17 2026. SHIPPED + COOLIFY-GREEN + LIVE-VALIDATED 5/5 via Chrome MCP + Supabase MCP. Closes B.3.4 v1 deferral. `app/api/members/export/route.ts` gains 2 parallel SELECTs (`business_briefs` WHERE `created_by = m.id`, `bloglux_articles` WHERE `author_id = m.id`), `admin_notes` destructure-and-rest redaction on both (symmetric with `brand_contributions.admin_notes` and `members.notes`), 2 new payload keys appended after `brand_contributions`. `export_metadata.scope_note` rewritten — no "deferred" or "B.3.4.1" language. MATRIX v1.10: §19B.3 count 14→16, §19B.4 +2 redaction lines, §19B.5 deferral block replaced with shipped record. 2 files, +42/-10. QA proof via synthetic seeds (`business_briefs` 4013dcd0 + `bloglux_articles` c812b530 with admin_notes="SECRET-ADMIN-NOTE-DO-NOT-LEAK-B341"): both rows fetched in export with `admin_notes` ABSENT (28 keys / 31 keys respectively), content fields preserved, secret literal never reached response. Synthetic cleanup verified: Alex back to 0 briefs / 0 articles. Ledger `a740561c-9aa7-4571-92ff-46c94cf7b754` closed.
 
 - **Pack B.3.4 — RGPD machine-readable export endpoint + Settings DATA EXPORT card + MATRIX §19B** (`a6e3a95`) — May 17 2026. SHIPPED + COOLIFY-GREEN + LIVE-VALIDATED 8/8 via Chrome MCP + Supabase MCP. NEW `app/api/members/export/route.ts` (~200 LOC, force-dynamic, GET only): getServerSession → 401 if no session; resolve `members` by email with `.is('deleted_at', null)` filter → 410 Gone if soft-deleted; 10 parallel SELECTs by member_id (work_experiences, education_records, member_languages, member_sectors, member_documents, cv_parse_history, share_links, nextauth_accounts, applications, contributions, contact_messages, brand_contributions); share_views fetched via `share_link_id IN <member_share_link_ids>`. Redactions: `members.notes` excluded; `share_links.password_hash` + `password_salt` dropped, replaced by derived `has_password: boolean`; `nextauth_accounts.access_token` + `refresh_token` + `id_token` + `session_state` set to null; `brand_contributions.admin_notes` excluded. Response: `application/json` + `Content-Disposition: attachment; filename="joblux-data-export-<id>-<date>.json"` + `Cache-Control: no-store`. Settings page `/dashboard/candidate/settings` gains 4th "DATA EXPORT" card between MATCHING CONSENT and DELETE ACCOUNT — anchor `<a href="/api/members/export">Download my data</a>` triggers browser download via Content-Disposition. MATRIX v1.9: NEW §19B doctrine section; §13 deferred row marked SHIPPED; §25.9 export half marked satisfied. 3 files. 8/8 QA: card order correct, payload has 15 top-level keys (metadata + 14 tables), redactions verified on Alex (members.notes absent, share_links has no password fields + `has_password=false`, nextauth tokens all 4 null), soft-delete 410 path proven via code-review + B.3.2 precedent (synthetic ef53db69 created and cleaned, no Alex deleted_at toggle), `/alex-mason` regression PASS. Ledger `7636e388-57ea-43e8-b642-b9dc519ec16b` closed.
@@ -209,18 +213,17 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 **Lane: open — awaiting Mo direction.**
 
-Pack B is operationally complete. Member lifecycle / trust / sovereignty layer is fully runtime: candidate can control visibility (B.1), disappear safely (B.3.1 + B.3.2), consent to matching (B.3.3), and export 16 tables of personal data (B.3.4 + B.3.4.1). Resolver, auth, and share paths all respect lifecycle state.
+Track 2 doctrinally unblocked tonight: `/connect` vocabulary audit closed; recruiter→ATS loop has admin entry point with B.3.3 consent gate enforced at runtime.
 
-**No auto-derived next step.** Next track requires Mo direction. Candidate tracks (Mo's call):
+**No auto-derived next step.** Mo direction needed. Candidate tracks:
 
-1. **Pack B residuals (low priority)** — `6aef236e` profilux table retire (DDL drop of dormant columns), slug history/rotation tracking depth, share_views consumer surface. None launch-blocking.
-2. **Recruiting loop / ProfiLux completion** — resolve `/connect` vocabulary audit (open blocker per STATE doctrine, parked since pre-Pack-B). Unblocks ProfiLux → Admin surface → ATS submission flow.
-3. **Pre-launch infra blockers** — `7becdb12` data compliance pack (Privacy + ToS + DPAs + DSAR copy), `6f57a924` private-layer noindex strict hardening, `f8faee94`/`6b2318f1` env URL flips, `e732834c` OAuth callbacks, DNS records (`1fb968d4` DMARC, `c3ab92f3` BIMI).
-4. **Other priority track** — explicit Mo choice.
+1. **G7 candidate-side recruiting feed** — `/dashboard/candidate` widget over existing `/api/applications/mine`. Closes the loop opened by G2+G9. Advances `1f7ccd56`.
+2. **G3 client submission surface** — gated on `C-B-2` / `C-B-3` parked doctrine.
+3. **G1 matching engine v0** — requires doctrine call (score weights, surface ordering).
+4. **Pre-launch infra** — `7becdb12`, `6f57a924`, env flips, DNS.
+5. **Other** — explicit Mo choice.
 
-**Workflow doctrine locked 2026-05-16, reconfirmed twice 2026-05-17:** Claude AI = audit / scope / QA. GPT = final compact Claude Code prompt. Claude Code = execution. Claude AI does NOT draft Claude Code prompts directly. 5 slices this session (B.3.2 / B.3.3 / B.3.4 / B.3.4.1) executed cleanly under this loop. 0 production incidents. 27/27 QA flows PASS across 4 prod QA passes.
-
-**Handoff doc:** generated 2026-05-17 (see chat).
+**Handoff doc:** generated 2026-05-16 PM (see chat).
 
 ### DO NOT
 
@@ -281,6 +284,9 @@ Pack B is operationally complete. Member lifecycle / trust / sovereignty layer i
 - Do not hard-delete `members` rows from any code path. Use soft-delete via `members.deleted_at`. Hard delete is doctrine-forbidden per `docs/PROFILUX_MATRIX_V1.md` §25.2. The resolver enforces the surface cascade; service-role admin paths are the only paths permitted to read deleted rows, and must signal deleted state in UI.
 - Do not derive matching consent from `members.availability`. Matching consent storage SHIPPED at `members.matching_opt_in` (B.3.3, `d53b287` + DDL via Supabase MCP, May 17 2026). Only this column may gate matching-side visibility. See MATRIX §20.5 / §20.x / §25.8.
 - Do not place account-level controls (matching consent, RGPD export trigger, account deletion) inside the ProfiLux Manage tab. Manage tab is locked to share controls per `docs/PROFILUX_MATRIX_V1.md` §19.4 + §21.3. Account-level controls belong on the Settings page.
+- Do not wire decline/rejection email for `business_briefs.status='closed'`. Doctrine lock 2026-05-16 PM: `closed` is silent. Internal admin meaning covers "completed" and "declined/no-go" administratively. Single DB value.
+- Do not render `business_briefs.status='closed'` to clients with rejection/decline/no-go language. Client-visible label = `Closed` (capitalized, neutral). Aligns STATE §1 (confidential, discreet).
+- Do not touch `/api/applications` admin-branch matching_opt_in gate. G9 enforcement (5c66a87): `matching_opt_in === true` AND `deleted_at IS NULL` required before admin POST. Self-apply branch exempt by design. Error codes `MATCHING_OPT_IN_REQUIRED` / `CANDIDATE_DELETED` / `CANDIDATE_NOT_FOUND` are the contract.
 
 ### PARKED (admin_tasks status=parked)
 
@@ -331,7 +337,7 @@ Pack B is operationally complete. Member lifecycle / trust / sovereignty layer i
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 17, 2026 (Pack B operationally complete. B.3.2 runtime soft-delete shipped at `7819a59`; B.3.3 matching consent shipped at `d53b287` + DDL via Supabase MCP; B.3.4 RGPD export shipped at `a6e3a95`; B.3.4.1 role-conditional tables shipped at `3ea93d6`. 4 ledger rows closed. 27/27 prod QA flows PASS. 0 incidents.). Total this rotation: 20+ commits across Pack A / F / C / P1 / B.1 / B.1.4 / B.3.1 / B.3.2 / B.3.3 / B.3.4 / B.3.4.1. Next: Mo direction on next track — no auto-derived next step.
+**Last updated:** May 16, 2026 PM (09660d5 + 5c66a87 shipped, 16/16 prod QA flows PASS, 0 incidents, 3 ledger rows closed, brief decline doctrine clarified).
 
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
