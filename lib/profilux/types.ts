@@ -263,6 +263,8 @@ export type MemberRow = {
   profile_visibility: string | null // default 'team_only'
   section_visibility: SectionVisibility | null
   masked_fields: MaskedFields | null
+  // Consent (B.3.3) — gates matching/recruiter surfaces. NOT NULL DEFAULT false.
+  matching_opt_in: boolean
   // L1 provenance
   cv_url: string | null
   cv_parsed_at: string | null
@@ -454,6 +456,8 @@ export type ProfiLuxResolved = {
   profile_visibility: string | null
   section_visibility: SectionVisibility
   masked_fields: MaskedFields
+  // Consent (B.3.3) — gates matching/recruiter surfaces.
+  matching_opt_in: boolean
   // L3 cached
   profile_completeness: number | null
   m6_confirmed_at: string | null
@@ -586,6 +590,8 @@ export type EditorView = {
   }
   section_visibility: SectionVisibility
   masked_fields: MaskedFields
+  // Consent (B.3.3) — surfaces the matching opt-in toggle in Settings.
+  matching_opt_in: boolean
 }
 
 export type EditorProjection = {

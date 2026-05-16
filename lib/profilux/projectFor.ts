@@ -328,5 +328,8 @@ export function projectEditorView(view: ProfiLuxResolved): EditorView {
     m6_groups: computeM6Groups(view),
     section_visibility: view.section_visibility ?? {},
     masked_fields: view.masked_fields ?? {},
+    // B.3.3: matching consent. Editor surface only — public/client/ats
+    // projections intentionally omit this flag.
+    matching_opt_in: view.matching_opt_in ?? false,
   }
 }

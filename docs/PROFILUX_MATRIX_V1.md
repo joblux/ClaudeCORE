@@ -4,7 +4,7 @@ Domain contract for the ProfiLux object across JOBLUX. Locks the storage, resolu
 
 This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE wins until reconciled. See §12.
 
-**Status:** locked v1.7 (May 16/17 2026 member lifecycle addendum)
+**Status:** locked v1.8 (May 17 2026 matching consent shipped — B.3.3)
 **Originally locked:** April 30, 2026
 **v1.1 addendum locked:** May 6, 2026
 **v1.2 addendum locked:** May 7, 2026
@@ -13,6 +13,17 @@ This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE w
 ---
 
 ## CHANGE LOG
+
+
+**v1.8 — May 17 2026 Matching consent shipped (B.3.3)**
+
+§20 reopens. The deferred consent field is now substrate. `members.matching_opt_in BOOLEAN NOT NULL DEFAULT false` (DDL applied via Supabase MCP, ledger `047b1364-59b4-48c1-a47f-51ce94c78fd0`). Resolver projects the flag onto `ProfiLuxResolved`; `projectFor('editor')` exposes it on `EditorView`; public/client/admin/ats/dashboard projections intentionally omit it. `POST /api/profilux` accepts a boolean `matching_opt_in` field. The Settings page ships the live toggle.
+
+- **§20.5** rewritten — consent field shipped, no longer deferred. Column locked, write contract locked, default locked.
+- **§20.x** rewritten — moves from PROVISIONAL to SHIPPED. The forward-dependency hedge on `matching_opt_in` storage + UI is removed. Recruiter / ATS / matching surfaces MUST gate consumption on `members.matching_opt_in === true`. `availability` remains self-description and is never read as consent.
+- **View tab caption** — the previously-flagged *"Visible to JOBLUX matching only"* wording is already gone (removed by MLV-2). No further caption work owed by this slice.
+
+§§1–19A, §21–25 — all KEEP unchanged. §13 deferred-items row for matching consent storage is now historical.
 
 
 **v1.7 — May 16/17 2026 Member lifecycle doctrine lock**
@@ -1010,29 +1021,45 @@ Matching entry cannot be fully wired without Tier 1 fields (§15.2). Until Tier 
 
 There is no "X% complete" admission gate. There is no "Confirm my ProfiLux" button. The user grows the profile continuously; matching enters automatically when conditions hold.
 
-### 20.5 — Consent field (future)
+### 20.5 — Consent field (shipped, B.3.3)
 
-Do not derive consent from availability without a future explicit Mo decision. Consent is a NEW dedicated field. Column name and DB type are deferred. Schema decision part of Tier 1 work.
+Consent is a dedicated `members.*` column, never derived from `availability`.
 
-### 20.x — Provisional posture (locked May 14 2026)
+**Storage (locked):**
+- Column: `members.matching_opt_in`
+- Type: `BOOLEAN NOT NULL DEFAULT false`
+- DDL applied via Supabase MCP. Ledger: `047b1364-59b4-48c1-a47f-51ce94c78fd0`.
 
-This subsection extends §20.5 with the live-UI and recruiter-surface guards. §20.5 locks that consent is not derived from `availability`; §20.x locks what happens to existing UI and surfaces in the meantime.
+**Write contract:**
+- `POST /api/profilux` accepts `matching_opt_in` as a boolean. Non-boolean values coerce to `null` so the NOT NULL constraint rejects malformed writes rather than silently flipping to `false`.
+- Partial-body writes follow §4.5 W2 (column written only when the key is explicitly present).
 
-Until `matching_opt_in` storage + UI ship (forward dependency: B.3.3 slice), no recruiter, ATS, or matching surface may consume `members.availability` as a consent signal. The `availability` field expresses willingness to engage with opportunities in general; it is NOT a consent gate for matching exposure.
+**Surface exposure:**
+- `ProfiLuxResolved.matching_opt_in: boolean` — populated by `resolveProfiLux`.
+- `EditorView.matching_opt_in: boolean` — populated by `projectFor('editor')`.
+- `projectFor('public' | 'client' | 'admin' | 'ats' | 'dashboard')` — flag intentionally omitted; recruiter-facing surfaces must read it via the editor projection or a future explicit consumer contract.
+
+**UI:**
+- Settings page (`/dashboard/candidate/settings`) renders the live toggle. Default is OFF (per column default); the user owns the flip.
+
+### 20.x — Shipped posture (locked May 17 2026, B.3.3)
+
+This subsection moves from PROVISIONAL to SHIPPED. §20.5 locks the column; §20.x locks consumer behavior.
 
 **Locked separations:**
-- `availability` = candidate self-description, not consent. `availability` accepts legacy / normalized values that currently resolve into `active` / `open` / `passive` / `unavailable` UI states.
-- Matching consent (§20.5) = explicit user toggle, NOT yet implemented, NOT derived from `availability`.
-- Recruiter / ATS / matching consumers MUST wait for the explicit consent toggle before treating any availability state as opt-in to matching.
+- `availability` = candidate self-description, NEVER consent. `availability` accepts legacy / normalized values that currently resolve into `active` / `open` / `passive` / `unavailable` UI states. No surface may read it as opt-in.
+- `matching_opt_in` = explicit user consent. Single source of truth for matching exposure.
 
-**Provisional UI wording:**
-The View tab LEFT SPINE today renders *"Visible to JOBLUX matching only"* next to the availability indicator. This wording is PROVISIONAL. It coherently holds today only because (a) no recruiter-facing surface consumes `availability`, and (b) `projectFor('public')` correctly V7-hides availability from public web view. If a recruiter / ATS / matching consumer ships before the explicit consent toggle, the wording must either change (drop the matching claim) or the matching surface must be gated behind the §20.5 consent toggle.
+**Consumer rule (locked, applies to all future surfaces):**
+Recruiter, ATS, and matching surfaces MUST gate visibility on `members.matching_opt_in === true`. A record with `matching_opt_in = false` (or any soft-deleted record per §25) is invisible to matching consumers regardless of `availability`, `profile_completeness`, or any other readiness signal.
 
-**Out of scope of this provisional lock:**
-- No schema change for a consent column.
-- No UI removal of the "Visible to JOBLUX matching only" caption.
-- No new column on `members.*` for matching consent.
-- §20 PARKED status preserved.
+**View tab caption:**
+The previously-flagged *"Visible to JOBLUX matching only"* caption was removed by MLV-2. No caption work is owed by this slice.
+
+**Out of scope:**
+- No threshold percentage gate (§20.4 still applies).
+- No derived consent from availability (§20.5 lock).
+- Tier 1 schema (work_authorization, notice_period) remains parked per §20.2.
 
 ---
 

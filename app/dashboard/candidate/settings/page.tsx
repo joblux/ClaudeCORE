@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { signOut } from 'next-auth/react'
 
@@ -8,6 +8,54 @@ export default function CandidateSettingsPage() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // B.3.3 — matching consent state. Source of truth: GET /api/profilux .view.matching_opt_in.
+  const [matchingOptIn, setMatchingOptIn] = useState<boolean>(false)
+  const [matchingLoaded, setMatchingLoaded] = useState(false)
+  const [matchingSaving, setMatchingSaving] = useState(false)
+  const [matchingError, setMatchingError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      try {
+        const res = await fetch('/api/profilux')
+        if (!res.ok) throw new Error('Failed to load settings')
+        const data = await res.json()
+        if (!active) return
+        setMatchingOptIn(data?.view?.matching_opt_in ?? false)
+      } catch {
+        // Fall through; toggle stays disabled until load succeeds.
+      } finally {
+        if (active) setMatchingLoaded(true)
+      }
+    })()
+    return () => { active = false }
+  }, [])
+
+  async function toggleMatching() {
+    if (matchingSaving) return
+    const next = !matchingOptIn
+    setMatchingOptIn(next) // optimistic
+    setMatchingSaving(true)
+    setMatchingError(null)
+    try {
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ matching_opt_in: next }),
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => null)
+        throw new Error(body?.error || 'Failed to save')
+      }
+    } catch (e: any) {
+      setMatchingOptIn(!next) // revert
+      setMatchingError(e?.message || 'Failed to save')
+    } finally {
+      setMatchingSaving(false)
+    }
+  }
 
   async function handleDelete() {
     setDeleting(true)
@@ -58,14 +106,41 @@ export default function CandidateSettingsPage() {
 
           {/* Matching consent */}
           <section className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
-            <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-2">
-              MATCHING CONSENT
+            <div className="flex items-start justify-between gap-5">
+              <div className="flex-1 min-w-0">
+                <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-2">
+                  MATCHING CONSENT
+                </div>
+                <p className="text-sm text-[#ccc] mb-1">Confidential opportunity matching</p>
+                <p className="text-xs text-[#999] max-w-xl leading-relaxed mb-2">
+                  Allow JOBLUX to surface you for confidential opportunities when your profile
+                  fits a search. You can turn this off at any time.
+                </p>
+                <p className="text-[11px] text-[#777]">
+                  {matchingOptIn
+                    ? 'Your ProfiLux is eligible for confidential matching.'
+                    : 'When on, your ProfiLux can be considered for confidential matching.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={matchingOptIn}
+                aria-label="Confidential matching"
+                onClick={toggleMatching}
+                disabled={!matchingLoaded || matchingSaving}
+                className="relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
+                style={{ backgroundColor: matchingOptIn ? '#a58e28' : '#3a3a3a' }}
+              >
+                <span
+                  className="inline-block h-4 w-4 rounded-full bg-white transition-transform"
+                  style={{ transform: matchingOptIn ? 'translateX(24px)' : 'translateX(4px)' }}
+                />
+              </button>
             </div>
-            <p className="text-sm text-[#ccc] mb-1">Confidential opportunity matching</p>
-            <p className="text-xs text-[#999]">
-              You will be able to opt in or out of confidential matching here. The toggle ships
-              with the matching engine.
-            </p>
+            {matchingError && (
+              <p className="text-xs text-[#f44336] mt-3">{matchingError}</p>
+            )}
           </section>
 
           {/* Delete account */}

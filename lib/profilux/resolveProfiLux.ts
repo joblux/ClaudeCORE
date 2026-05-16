@@ -379,6 +379,8 @@ export async function resolveProfiLux(
     profile_visibility: row.profile_visibility,
     section_visibility: row.section_visibility ?? {},
     masked_fields: row.masked_fields ?? {},
+    // B.3.3: consent flag (members.matching_opt_in NOT NULL DEFAULT false).
+    matching_opt_in: row.matching_opt_in ?? false,
     // L3 cached
     profile_completeness: row.profile_completeness,
     m6_confirmed_at: row.m6_confirmed_at,

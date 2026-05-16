@@ -305,6 +305,13 @@ export async function POST(req: NextRequest) {
     updatePayload.masked_fields = v ?? {}
   }
 
+  // B.3.3 — matching consent. Boolean-only; non-boolean coerces to null so the
+  // NOT NULL column rejects malformed writes rather than silently flipping to false.
+  if (has('matching_opt_in')) {
+    updatePayload.matching_opt_in =
+      typeof body.matching_opt_in === 'boolean' ? body.matching_opt_in : null
+  }
+
   // §4.5 range validation: reject only when both values are present and min > max.
   // Allows min-only, max-only, both-null. No silent swap.
   const finalMin =
