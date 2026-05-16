@@ -4,7 +4,7 @@ Domain contract for the ProfiLux object across JOBLUX. Locks the storage, resolu
 
 This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE wins until reconciled. See §12.
 
-**Status:** locked v1.8 (May 17 2026 matching consent shipped — B.3.3)
+**Status:** locked v1.9 (May 17 2026 RGPD machine-readable export shipped — B.3.4)
 **Originally locked:** April 30, 2026
 **v1.1 addendum locked:** May 6, 2026
 **v1.2 addendum locked:** May 7, 2026
@@ -13,6 +13,19 @@ This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE w
 ---
 
 ## CHANGE LOG
+
+
+**v1.9 — May 17 2026 RGPD machine-readable export shipped (B.3.4)**
+
+§19B introduced and locked. `GET /api/members/export` returns a single JSON archive of 14 personal-data tables tied to the signed-in member; soft-deleted accounts are refused with `410`; password hashes are redacted; OAuth tokens are nulled; `members.notes` and `brand_contributions.admin_notes` are excluded; success is console-logged only (no audit table in v1). Settings ships the DATA EXPORT card between MATCHING CONSENT and DELETE ACCOUNT. Ledger: `7636e388-57ea-43e8-b642-b9dc519ec16b`.
+
+- **§19B** new section — RGPD machine-readable export doctrine. Contract, surface placement, 14-table scope, redactions, audit posture, deferred scope (`business_briefs` / `bloglux_articles` → B.3.4.1), and the §19A distinction locked.
+- **§19A.4** cross-references updated — §19B added as data-portability sibling.
+- **§13** deferred-items table — RGPD export row flipped to SHIPPED at B.3.4.
+- **§25.9** rewritten — machine-readable export is shipped; pointer updated from "future §19B" to "§19B (SHIPPED B.3.4)".
+- **§25.10** forward dependencies — B.3.3 and B.3.4 marked SHIPPED; B.3.4.1 added as the residual deferred slice.
+
+§§1–19A, §20–24, §25.1–25.8 — all KEEP unchanged.
 
 
 **v1.8 — May 17 2026 Matching consent shipped (B.3.3)**
@@ -674,7 +687,7 @@ The following items are intentionally out of v1.1. Each is a known future ticket
 | `profilux` ghost-table cleanup | The standalone `profilux` table contains 17 legacy columns beyond `share_slug` + `sharing_enabled`. Tracked at ledger `6aef236e`. Doctrine drift vs §9; substrate cleanup deferred. | Together with Manage tab A2 sharing UX rebuild |
 | View "Download PDF" placeholder removal | The LEFT SPINE row in `app/dashboard/candidate/profilux/page.tsx` is doctrinally misplaced per §19A.2. Cleanup deferred until Manage-side export control ships. | When candidate self-export ships in Manage / Settings |
 | Soft-delete substrate on `members` | `deleted_at` + `deleted_by` columns + email partial unique index `WHERE deleted_at IS NULL` (see §25) | B.3.1b DDL slice |
-| RGPD export endpoint | `/api/members/export` machine-readable archive of subject's personal data (see §25.9 forward ref to future §19B) | B.3.4 |
+| RGPD export endpoint | `/api/members/export` machine-readable archive of subject's personal data (see §19B) | SHIPPED B.3.4 |
 | Matching consent storage | `members.matching_opt_in boolean NOT NULL DEFAULT false` + endpoint + UI (see §20 reopen) | B.3.3 |
 
 ---
@@ -996,7 +1009,61 @@ C6.1 is doctrine lock only. The following are deferred:
 - §10 Implementation utilities (`resolveProfiLux`, `projectFor`)
 - §13 Deferred items (PDF library, resume extinction, `profilux` retire, View placeholder)
 - §19 Settings doctrine
+- §19B RGPD machine-readable export (data-portability sibling)
 - §22 Section catalog (View is not the export host)
+
+---
+
+## 19B. RGPD machine-readable export doctrine (locked May 17 2026, B.3.4)
+
+§19A locks the *rendered* ProfiLux export — a curated PDF/print artifact. §19B locks the *machine-readable* export — RGPD-style data portability. The two are distinct surfaces with distinct contracts and must not collapse into one.
+
+### 19B.1 — Contract
+
+- **Format:** JSON only in v1. No CSV, no ZIP, no XML, no per-table file split.
+- **Endpoint:** `GET /api/members/export` (force-dynamic). Auth via NextAuth session; resolves member by session email.
+- **Response:** `application/json` with `Content-Disposition: attachment; filename="joblux-data-export-<member_id>-<yyyy-mm-dd>.json"` and `Cache-Control: no-store`.
+- **Soft-deleted accounts:** `410 Account not available for export`. The export contract treats tombstoned rows as gone for portability purposes; the persisted row exists for audit (§25), not for self-service retrieval.
+
+### 19B.2 — Surface placement
+
+The Download my data control lives on the candidate Settings page (`/dashboard/candidate/settings`) inside the DATA EXPORT card, between MATCHING CONSENT and DELETE ACCOUNT. View is not the export host (§22).
+
+### 19B.3 — Table scope (14)
+
+`members`, `work_experiences`, `education_records`, `member_languages`, `member_sectors`, `member_documents`, `cv_parse_history`, `share_links`, `share_views`, `nextauth_accounts`, `applications`, `contributions`, `contact_messages`, `brand_contributions`.
+
+Sibling tables are queried by `member_id`; `brand_contributions` is queried by `user_id`; `share_views` is fetched via `share_link_id IN (...)` after `share_links` resolves.
+
+### 19B.4 — Redactions and exclusions
+
+- **`members.notes`** — excluded entirely. Operational/admin field, not the subject's personal data.
+- **`share_links.password_hash` / `password_salt`** — removed; `has_password: boolean` added in their place.
+- **`nextauth_accounts.access_token` / `refresh_token` / `id_token` / `session_state`** — set to `null`. Provider-side credentials, not portable user data.
+- **`brand_contributions.admin_notes`** — removed. Internal moderation surface.
+
+No other fields are redacted in v1. If a future field is added that contains operational/admin content, it must be added to this list before being merged.
+
+### 19B.5 — Operational audit
+
+The endpoint console-logs `{ member_id, email, exported_at }` on success. **No audit table** in v1. The console-log is the only record. Audit-table substrate is a forward dependency, not part of B.3.4.
+
+### 19B.6 — Out of scope (deferred)
+
+- `business_briefs` and `bloglux_articles` — deferred to B.3.4.1. Subject linkage and author/owner semantics need a separate doctrine pass before these tables can be exported cleanly.
+- Subject-access deletion confirmation receipts — separate slice.
+- CV file bytes — not re-bundled in the export; original uploads remain reachable via the View tab and storage URLs already in the payload.
+
+### 19B.7 — Distinction from §19A
+
+§19A produces a *human-readable* artifact (the rendered ProfiLux). §19B produces a *machine-readable* archive (the full personal-data graph). One is presentation; the other is portability. Code, copy, and UI surfaces must keep them separate.
+
+### 19B.8 — Cross-references
+
+- §13 Deferred items — RGPD export row is now SHIPPED.
+- §19 Settings doctrine
+- §19A Rendered ProfiLux export
+- §25.9 RGPD-adjacent obligations (machine-readable export reference)
 
 ---
 
@@ -1389,12 +1456,12 @@ Erasure ("right to be forgotten"): erasure requests are handled by soft-delete a
 
 ### 25.9 — RGPD-adjacent obligations
 
-Future export/delete obligations map to:
-- export endpoint → future §19B
+Export/delete obligations map to:
+- export endpoint → §19B (machine-readable export, SHIPPED B.3.4)
 - soft-delete substrate → B.3.1b
 - purge workflow → future legal escalation flow
 
-Machine-readable export remains deferred.
+Machine-readable export is shipped; see §19B for the contract, scope, and redactions.
 
 ### 25.10 — Forward dependencies
 
@@ -1402,8 +1469,9 @@ This doctrine intentionally precedes substrate.
 
 Future implementation slices:
 - B.3.1b → DB substrate (`deleted_at`, partial unique index)
-- B.3.3 → matching consent storage (`matching_opt_in`)
-- B.3.4 → machine-readable export endpoint
+- B.3.3 → matching consent storage (`matching_opt_in`) — SHIPPED
+- B.3.4 → machine-readable export endpoint — SHIPPED
+- B.3.4.1 → `business_briefs` + `bloglux_articles` export scope (deferred)
 
-No code or schema is introduced by §25 itself.
+No new code or schema is introduced by §25 itself.
 

@@ -143,6 +143,30 @@ export default function CandidateSettingsPage() {
             )}
           </section>
 
+          {/* Data export */}
+          <section className="bg-[#222] border border-[#2a2a2a] rounded-xl p-5">
+            <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-2">
+              DATA EXPORT
+            </div>
+            <p className="text-sm text-[#ccc] mb-1">Download a copy of your data</p>
+            <p className="text-xs text-[#999] max-w-xl leading-relaxed mb-4">
+              We hold your ProfiLux information, share-link history, contributions, and
+              application activity. You can request a machine-readable export of everything
+              tied to your account.
+            </p>
+            <a
+              href="/api/members/export"
+              className="inline-block text-xs text-[#a58e28] border border-[rgba(165,142,40,0.3)] rounded px-3 py-1.5 hover:bg-[rgba(165,142,40,0.08)] transition-colors"
+            >
+              Download my data
+            </a>
+            <p className="text-[11px] text-[#777] mt-3 max-w-xl leading-relaxed">
+              The export is a JSON file containing your profile, experiences, education,
+              languages, sectors, share-link config, contributions, and applications. Original
+              uploaded CVs are accessible separately via the View tab.
+            </p>
+          </section>
+
           {/* Delete account */}
           <section className="bg-[#222] border border-[rgba(244,67,54,0.25)] rounded-xl p-5">
             <div className="text-[10px] font-semibold tracking-[2px] text-[#f44336] mb-2">
