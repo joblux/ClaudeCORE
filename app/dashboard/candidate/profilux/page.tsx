@@ -18,6 +18,18 @@ const SCREEN_TITLES = [
   'Clienteling', 'Availability & Targets', 'Compensation', 'Confirm',
 ]
 
+// PF-D V2 — Add Section library. V1 ships Awards + Certifications; 6 others Coming soon.
+const ADD_SECTION_LIBRARY: Array<{ key: string; label: string; available: boolean }> = [
+  { key: 'awards',                label: 'Awards',                available: true  },
+  { key: 'certifications',        label: 'Certifications',        available: true  },
+  { key: 'portfolio',             label: 'Portfolio',             available: false },
+  { key: 'strategic_initiatives', label: 'Strategic Initiatives', available: false },
+  { key: 'memberships',           label: 'Memberships',           available: false },
+  { key: 'press_features',        label: 'Press & features',      available: false },
+  { key: 'references',            label: 'References',            available: false },
+  { key: 'internships',           label: 'Internships',           available: false },
+]
+
 const NotSet = () => <em style={{ color: '#666' }}>Not set</em>
 const NoneSel = () => <em style={{ color: '#666' }}>None selected</em>
 const Hint = ({ children }: { children: React.ReactNode }) => <em style={{ color: '#888' }}>{children}</em>
@@ -621,6 +633,10 @@ export default function ProfiluxPage() {
   const [awardsDraftText, setAwardsDraftText] = useState('')
   const [awardsSaving, setAwardsSaving] = useState(false)
   const [awardsError, setAwardsError] = useState<string | null>(null)
+  // PF-D V2 — Add Section shell (V12 restoration)
+  const [addSectionDrawerOpen, setAddSectionDrawerOpen] = useState(false)
+  const [activatingSectionKey, setActivatingSectionKey] = useState<string | null>(null)
+  const [addSectionError, setAddSectionError] = useState<string | null>(null)
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -997,6 +1013,33 @@ export default function ProfiluxPage() {
       setAwardsError(String(err))
     } finally {
       setAwardsSaving(false)
+    }
+  }
+
+  // PF-D V2 — Add Section shell: activate a library section by appending its key
+  // to members.activated_sections. Trusts client; server stores the array as-is.
+  async function handleActivateSection(key: string) {
+    setActivatingSectionKey(key)
+    setAddSectionError(null)
+    try {
+      const current = Array.isArray(editor?.activated_sections) ? editor!.activated_sections : []
+      const next = current.includes(key) ? current : [...current, key]
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activated_sections: next }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setAddSectionError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+      setAddSectionDrawerOpen(false)
+    } catch (err) {
+      setAddSectionError(String(err))
+    } finally {
+      setActivatingSectionKey(null)
     }
   }
 
@@ -3876,6 +3919,7 @@ export default function ProfiluxPage() {
           {maisonsError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{maisonsError}</span>}
         </div>
       </Drawer>
+      {e.activated_sections.includes('certifications') && (<>
       <SectionCard
         eyebrow="Certifications"
         headerAction={
@@ -3931,6 +3975,8 @@ export default function ProfiluxPage() {
           {certificationsError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{certificationsError}</span>}
         </div>
       </Drawer>
+      </>)}
+      {e.activated_sections.includes('awards') && (<>
       <SectionCard
         eyebrow="Awards"
         headerAction={
@@ -3986,6 +4032,7 @@ export default function ProfiluxPage() {
           {awardsError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{awardsError}</span>}
         </div>
       </Drawer>
+      </>)}
       <SectionCard
         eyebrow="Compensation"
         headerAction={
@@ -4193,6 +4240,122 @@ export default function ProfiluxPage() {
           {saveError9 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError9}</span>}
         </div>
       </Drawer>
+
+      {/* PF-D V2 — Add Section trigger + EXTEND DOSSIER drawer */}
+      <div style={{ marginTop: 16, marginBottom: 16 }}>
+        <button
+          type="button"
+          onClick={() => { setAddSectionError(null); setAddSectionDrawerOpen(true) }}
+          style={{
+            width: '100%',
+            background: 'transparent',
+            color: '#a58e28',
+            border: '1px dashed rgba(165,142,40,0.4)',
+            borderRadius: 8,
+            padding: '16px 14px',
+            fontSize: 12,
+            fontWeight: 600,
+            letterSpacing: '0.4px',
+            cursor: 'pointer',
+            fontFamily: 'Inter, sans-serif',
+            textAlign: 'center',
+          }}
+        >
+          + Add section
+        </button>
+      </div>
+      <Drawer
+        open={addSectionDrawerOpen}
+        title="EXTEND DOSSIER"
+        onClose={() => setAddSectionDrawerOpen(false)}
+      >
+        <div style={{ color: '#999', fontSize: 12, marginBottom: 14 }}>
+          Add a section to your dossier. New sections appear in the Edit tab; the View tab shows them when populated.
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {ADD_SECTION_LIBRARY.map((s) => {
+            const isActivated = e.activated_sections.includes(s.key)
+            const isInFlight = activatingSectionKey === s.key
+            if (!s.available) {
+              return (
+                <div
+                  key={s.key}
+                  aria-disabled="true"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 14px',
+                    border: '0.5px solid #2a2a2a',
+                    borderRadius: 6,
+                    color: '#999',
+                    fontSize: 13,
+                    fontFamily: 'Inter, sans-serif',
+                    pointerEvents: 'none',
+                    opacity: 0.4,
+                  }}
+                >
+                  <span>{s.label}</span>
+                  <span style={{ fontSize: 11, color: '#777', letterSpacing: '0.4px', textTransform: 'uppercase' }}>Coming soon</span>
+                </div>
+              )
+            }
+            if (isActivated) {
+              return (
+                <div
+                  key={s.key}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 14px',
+                    border: '0.5px solid #2a2a2a',
+                    borderRadius: 6,
+                    color: '#777',
+                    fontSize: 13,
+                    fontFamily: 'Inter, sans-serif',
+                  }}
+                >
+                  <span>{s.label}</span>
+                  <span style={{ fontSize: 11, color: '#777', letterSpacing: '0.4px', textTransform: 'uppercase' }}>Added</span>
+                </div>
+              )
+            }
+            return (
+              <button
+                key={s.key}
+                type="button"
+                disabled={isInFlight}
+                onClick={() => handleActivateSection(s.key)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 14px',
+                  background: 'transparent',
+                  border: '0.5px solid rgba(165,142,40,0.3)',
+                  borderRadius: 6,
+                  color: '#ccc',
+                  fontSize: 13,
+                  fontFamily: 'Inter, sans-serif',
+                  cursor: isInFlight ? 'not-allowed' : 'pointer',
+                  opacity: isInFlight ? 0.5 : 1,
+                  textAlign: 'left',
+                }}
+              >
+                <span>{s.label}</span>
+                <span style={{ fontSize: 11, color: '#a58e28', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
+                  {isInFlight ? 'Adding…' : 'Add'}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+        {addSectionError && (
+          <div style={{ marginTop: 14, color: '#ff6b6b', fontSize: 13 }}>{addSectionError}</div>
+        )}
+      </Drawer>
+
       {TUNNEL_VISIBLE && (
         <>
           {renderStep()}

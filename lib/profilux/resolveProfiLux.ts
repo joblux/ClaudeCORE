@@ -342,6 +342,16 @@ export async function resolveProfiLux(
     software_tools: arr(row.software_tools),
     certifications: arr(row.certifications),
     awards: arr(row.awards),
+    activated_sections: (() => {
+      const _explicitActivated = arr(row.activated_sections)
+      const _implicitActivated = _explicitActivated.length > 0
+        ? []
+        : [
+            ...(arr(row.certifications).length > 0 ? ['certifications'] : []),
+            ...(arr(row.awards).length > 0 ? ['awards'] : []),
+          ]
+      return _explicitActivated.length > 0 ? _explicitActivated : _implicitActivated
+    })(),
     product_categories: arr(row.product_categories),
     brands_worked_with: arr(row.brands_worked_with),
     client_segment_experience: arr(row.client_segment_experience),

@@ -285,6 +285,14 @@ export async function POST(req: NextRequest) {
       : null
   }
 
+  if (has('activated_sections')) {
+    updatePayload.activated_sections = Array.isArray(body.activated_sections)
+      ? body.activated_sections
+          .filter((s: unknown) => typeof s === 'string' && s.trim() !== '')
+          .map((s: string) => s.trim())
+      : null
+  }
+
   if (has('section_visibility')) {
     const v = body.section_visibility
     if (v !== null && (typeof v !== 'object' || Array.isArray(v))) {
