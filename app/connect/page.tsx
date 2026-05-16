@@ -7,9 +7,9 @@ export default function ConnectPage() {
 
         <Link href="/join/employer" className="group flex flex-col border-b md:border-b-0 md:border-r border-[#1e1e1e] bg-[#0f0f0f] hover:bg-[#121208] transition-colors duration-300">
           <div className="max-w-[600px] ml-auto w-full px-8 md:px-16 pt-16 pb-8">
-            <p className="text-[10px] font-semibold tracking-[2px] uppercase text-[#a58e28] mb-8">Employers & Luxury Brands</p>
+            <p className="text-[10px] font-semibold tracking-[2px] uppercase text-[#a58e28] mb-8">Companies & Luxury Brands</p>
             <h2 className="text-3xl md:text-4xl font-normal text-white leading-snug mb-6" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-              I represent a brand,<br />group, or organisation
+              I represent a brand,<br />group, or organization
             </h2>
             <p className="text-sm text-[#777] leading-relaxed mb-8 max-w-sm">
               Your confidential intelligence gateway to luxury talent | whether you're hiring, benchmarking, or simply staying ahead.
@@ -17,11 +17,11 @@ export default function ConnectPage() {
             <ul className="space-y-3 max-w-sm">
               {[
                 { text: 'Access salary benchmarks across markets', link: null },
-                { text: 'Track talent movement across 500+ houses', link: null },
+                { text: 'Track talent movement across luxury houses', link: null },
                 { text: 'Contribute market intelligence discreetly', link: null },
                 { text: 'Read exclusive industry news', link: null },
                 { text: 'Work directly with our search team', link: null },
-                { text: 'Request a manager and up level search', link: '/services/recruitment' },
+                { text: 'Request a manager-and-up search', link: '/services/recruitment' },
                 { text: 'Private details never listed or published.', link: null },
               ].map((item) => (
                 <li key={item.text} className="flex items-start gap-3 text-sm">
@@ -53,10 +53,10 @@ export default function ConnectPage() {
             </p>
             <ul className="space-y-3 max-w-sm">
               {[
-                { text: 'Build your confidential Profilux profile', link: null },
+                { text: 'Build your confidential ProfiLux profile', link: null },
                 { text: 'Access salary intelligence across brands', link: null },
                 { text: 'Contribute interview & career experiences', link: null },
-                { text: 'Follow signals across 500+ luxury houses', link: null },
+                { text: 'Follow signals across luxury houses', link: null },
                 { text: 'Read exclusive industry news', link: null },
                 { text: 'Be considered for exclusive assignments', link: null },
                 { text: 'Private details never listed or published.', link: null },

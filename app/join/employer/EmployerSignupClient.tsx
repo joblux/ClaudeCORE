@@ -93,7 +93,7 @@ export default function EmployerSignupClient() {
 
       <div className="w-full max-w-[420px] bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl px-8 py-9">
         <h1 className="text-[22px] font-light text-white text-center mb-6" style={{ fontFamily: "Playfair Display, Georgia, serif" }}>
-          Tell us about your organisation.
+          Tell us about your organization.
         </h1>
 
         {emailExists && (
@@ -118,7 +118,7 @@ export default function EmployerSignupClient() {
           </div>
 
           <div className="mb-5">
-            <label className={labelClass}>Type of organisation *</label>
+            <label className={labelClass}>Type of organization *</label>
             <select value={orgType} onChange={e => setOrgType(e.target.value)} required className={selectClass}>
               <option value=""></option>
               {ORG_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
