@@ -175,8 +175,40 @@ export async function POST(req: NextRequest) {
       memberId = body.member_id
       searchAssignmentId = body.search_assignment_id
       applicationSource = body.source || 'sourced_by_recruiter'
-      assignedRecruiter = body.assigned_recruiter || null
+      assignedRecruiter = body.assigned_recruiter || session.user.email
       initialNote = body.note || null
+
+      // Candidate gate (G2 + G9): verify the member exists, is not soft-deleted,
+      // and has consented to matching before any recruiter-sourced application.
+      // Self-apply branch below stays exempt by design.
+      const { data: candidate, error: candidateError } = await supabase
+        .from('members')
+        .select('matching_opt_in, deleted_at')
+        .eq('id', memberId)
+        .maybeSingle()
+
+      if (candidateError) {
+        console.error('[POST /api/applications] Candidate lookup error:', candidateError)
+        return NextResponse.json({ error: candidateError.message }, { status: 500 })
+      }
+      if (!candidate) {
+        return NextResponse.json(
+          { error: 'Candidate not found', code: 'CANDIDATE_NOT_FOUND' },
+          { status: 404 }
+        )
+      }
+      if (candidate.deleted_at) {
+        return NextResponse.json(
+          { error: 'Candidate account has been deleted', code: 'CANDIDATE_DELETED' },
+          { status: 410 }
+        )
+      }
+      if (candidate.matching_opt_in !== true) {
+        return NextResponse.json(
+          { error: 'Candidate has not opted in to matching', code: 'MATCHING_OPT_IN_REQUIRED' },
+          { status: 403 }
+        )
+      }
     } else {
       // Non-admin: self-apply only
       if (!body.search_assignment_id) {

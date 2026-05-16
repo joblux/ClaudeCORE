@@ -134,6 +134,21 @@ export default function MemberProfilePage() {
   const [aiReview, setAiReview] = useState<any>(null);
   const [reassessing, setReassessing] = useState(false);
 
+  // Propose to assignment (G2 + G9) — recruiter-sourced application.
+  const [proposeOpen, setProposeOpen] = useState(false);
+  const [proposeAssignments, setProposeAssignments] = useState<Array<{
+    id: string;
+    title: string | null;
+    maison: string | null;
+    reference_number: string | null;
+  }>>([]);
+  const [proposeAssignmentsLoading, setProposeAssignmentsLoading] = useState(false);
+  const [proposeAssignmentId, setProposeAssignmentId] = useState("");
+  const [proposeNote, setProposeNote] = useState("");
+  const [proposeSubmitting, setProposeSubmitting] = useState(false);
+  const [proposeError, setProposeError] = useState<string | null>(null);
+  const [proposeSuccess, setProposeSuccess] = useState(false);
+
   const fetchProfile = useCallback(async () => {
     setLoading(true);
     setError(false);
@@ -197,6 +212,70 @@ export default function MemberProfilePage() {
       }
     } catch {}
     setReassessing(false);
+  };
+
+  const openPropose = async () => {
+    setProposeError(null);
+    setProposeSuccess(false);
+    setProposeOpen(true);
+    setProposeAssignmentsLoading(true);
+    try {
+      const res = await fetch("/api/assignments?status=published&limit=100");
+      if (!res.ok) {
+        setProposeError("Could not load assignments.");
+        setProposeAssignments([]);
+      } else {
+        const data = await res.json();
+        setProposeAssignments(Array.isArray(data.assignments) ? data.assignments : []);
+      }
+    } catch {
+      setProposeError("Could not load assignments.");
+      setProposeAssignments([]);
+    }
+    setProposeAssignmentsLoading(false);
+  };
+
+  const submitPropose = async () => {
+    if (!member || !proposeAssignmentId) return;
+    setProposeError(null);
+    setProposeSuccess(false);
+    setProposeSubmitting(true);
+    try {
+      const trimmed = proposeNote.trim();
+      const res = await fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          member_id: member.id,
+          search_assignment_id: proposeAssignmentId,
+          source: "sourced_by_recruiter",
+          ...(trimmed ? { note: trimmed } : {}),
+        }),
+      });
+      if (res.status === 201) {
+        setProposeSuccess(true);
+        setProposeNote("");
+        setProposeAssignmentId("");
+      } else if (res.status === 409) {
+        setProposeError("This candidate has already been proposed to this assignment.");
+      } else {
+        let code: string | undefined;
+        try {
+          const data = await res.json();
+          code = data?.code;
+        } catch {}
+        if (res.status === 403 && code === "MATCHING_OPT_IN_REQUIRED") {
+          setProposeError("Candidate has not opted in to matching.");
+        } else if (res.status === 410 && code === "CANDIDATE_DELETED") {
+          setProposeError("Candidate account has been deleted.");
+        } else {
+          setProposeError("Could not create proposal. Please try again.");
+        }
+      }
+    } catch {
+      setProposeError("Could not create proposal. Please try again.");
+    }
+    setProposeSubmitting(false);
   };
 
   const saveNotes = async () => {
@@ -268,6 +347,16 @@ export default function MemberProfilePage() {
             &larr; Back to {isBusiness ? 'Businesses' : 'Profiles'}
           </a>
           <div className="flex items-center gap-2">
+            {!isBusiness && (
+              <button
+                onClick={openPropose}
+                disabled={acting || member.matching_opt_in !== true}
+                title={member.matching_opt_in !== true ? "Candidate has not opted in to matching" : undefined}
+                className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wide bg-white text-[#444] border border-[#e0e0e0] rounded-lg hover:bg-[#fafafa] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Propose to assignment
+              </button>
+            )}
             {member.status !== "approved" && (
               <button
                 onClick={() => updateStatus("approved")}
@@ -300,6 +389,75 @@ export default function MemberProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Propose to assignment — inline panel (G2 + G9) */}
+      {proposeOpen && (
+        <div className="bg-[#fafafa] border-b border-[#e8e8e8] px-8 py-5">
+          <div className="max-w-[720px]">
+            <div className="flex items-center justify-between mb-3.5">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#111]">
+                Propose to assignment
+              </div>
+              <button
+                onClick={() => setProposeOpen(false)}
+                className="text-xs text-[#999] hover:text-[#444] bg-transparent border-0 cursor-pointer p-0"
+              >
+                Close
+              </button>
+            </div>
+            {proposeSuccess ? (
+              <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-lg px-4 py-3 text-[13px] text-[#15803d]">
+                Proposal sent.
+              </div>
+            ) : (
+              <>
+                <div className="mb-3">
+                  <label className="block text-[10px] uppercase tracking-[0.1em] text-[#999] mb-1.5">Assignment</label>
+                  <select
+                    value={proposeAssignmentId}
+                    onChange={(e) => setProposeAssignmentId(e.target.value)}
+                    disabled={proposeAssignmentsLoading || proposeSubmitting}
+                    className="w-full px-3 py-2 text-sm border border-[#e8e8e8] bg-white text-[#111] rounded-lg focus:outline-none focus:border-[#ccc]"
+                  >
+                    <option value="">
+                      {proposeAssignmentsLoading ? "Loading assignments..." : "Select an assignment..."}
+                    </option>
+                    {proposeAssignments.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {[a.reference_number, a.maison, a.title].filter(Boolean).join(" · ") || a.id}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="mb-3">
+                  <label className="block text-[10px] uppercase tracking-[0.1em] text-[#999] mb-1.5">Internal note (optional)</label>
+                  <textarea
+                    value={proposeNote}
+                    onChange={(e) => setProposeNote(e.target.value)}
+                    disabled={proposeSubmitting}
+                    rows={3}
+                    className="w-full px-3 py-2 text-sm border border-[#e8e8e8] bg-white text-[#111] rounded-lg focus:outline-none focus:border-[#ccc] resize-y"
+                  />
+                </div>
+                {proposeError && (
+                  <div className="bg-[#fef2f2] border border-[#fecaca] rounded-lg px-3 py-2 mb-3 text-[12px] text-[#dc2626]">
+                    {proposeError}
+                  </div>
+                )}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={submitPropose}
+                    disabled={!proposeAssignmentId || proposeSubmitting}
+                    className="px-5 py-2 text-[11px] font-semibold uppercase tracking-wide bg-[#111] text-white rounded-lg hover:bg-[#333] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {proposeSubmitting ? "Sending..." : "Send proposal"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Header card */}
       <div className="bg-white border-b border-[#e8e8e8] px-8 py-6">
