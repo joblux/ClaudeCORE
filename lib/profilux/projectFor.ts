@@ -26,6 +26,7 @@ import type {
   CvParsedData,
   DashboardProjection,
   EditorProjection,
+  MaskableField,
   ProfiLuxResolved,
   ProjectedView,
   PublicExperience,
@@ -36,6 +37,10 @@ import type {
   EditorAvailability,
 } from './types'
 import { computeM6Groups } from './_m6Groups'
+
+function isMasked(view: ProfiLuxResolved, field: MaskableField): boolean {
+  return view.masked_fields?.[field] === true
+}
 
 /** "Laurent" → "L."; null/empty → null. */
 function toInitial(name: string | null): string | null {
@@ -189,7 +194,9 @@ export function projectFor(
         // V8: email, phone, linkedin_url hidden — not included
         // V7: nationality, DOB hidden — not included
         job_title: view.job_title,
-        current_employer: view.current_employer, // V3: visible
+        current_employer: isMasked(view, 'current_employer')
+          ? null
+          : view.current_employer,
         seniority: view.seniority,
         total_years_experience: view.total_years_experience,
         years_in_luxury: view.years_in_luxury,

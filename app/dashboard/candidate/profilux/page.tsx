@@ -3967,6 +3967,40 @@ export default function ProfiluxPage() {
             </>
           )}
         </SectionCard>
+        <SectionCard eyebrow="Export">
+          <div
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 12,
+              color: '#888',
+              fontStyle: 'italic',
+              marginBottom: 14,
+              lineHeight: 1.5,
+            }}
+          >
+            Download a private PDF snapshot of your ProfiLux.
+            Real names, real data, no masking applied.
+          </div>
+
+          <a
+            href="/api/profilux/export"
+            download
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              background: 'transparent',
+              color: '#fff',
+              border: '1px solid #444',
+              padding: '8px 16px',
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 13,
+              textDecoration: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            Export PDF
+          </a>
+        </SectionCard>
         <SectionCard eyebrow="Masked fields">
           <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#888', fontStyle: 'italic', marginBottom: 14, lineHeight: 1.5 }}>
             Masked fields will be hidden from public profiles and client share PDFs. Substrate ships now; the public profile already hides these fields. Consumer follows in next slice for client/share surfaces.
