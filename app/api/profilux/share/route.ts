@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
+import { hashPassword } from '@/lib/share/auth'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -42,22 +43,34 @@ export async function GET() {
 
   let share_slug: string | null = null
   let sharing_enabled: boolean = false
+  let password_set: boolean = false
+  let expires_at: string | null = null
+  let view_count: number = 0
 
   // Path A: share_links (source of truth)
   if (member?.id) {
     const { data: link } = await supabase
       .from('share_links')
-      .select('slug, sharing_enabled')
+      .select('id, slug, sharing_enabled, password_hash, expires_at')
       .eq('member_id', member.id)
       .maybeSingle()
 
     if (link) {
       share_slug = link.slug
       sharing_enabled = link.sharing_enabled === true
+      password_set = !!link.password_hash
+      expires_at = link.expires_at ?? null
+
+      const { count } = await supabase
+        .from('share_views')
+        .select('id', { count: 'exact', head: true })
+        .eq('share_link_id', link.id)
+
+      view_count = typeof count === 'number' ? count : 0
     }
   }
 
-  // Path B: legacy profilux fallback
+  // Path B: legacy profilux fallback (password_set/expires_at/view_count stay defaults)
   if (!share_slug) {
     const { data, error } = await supabase
       .from('profilux')
@@ -87,27 +100,34 @@ export async function GET() {
     sharing_enabled,
     public_url,
     can_share,
+    password_set,
+    expires_at,
+    view_count,
   })
 }
 
 // =============================================================================
-// POST /api/profilux/share — toggle sharing_enabled on legacy profilux row
+// POST /api/profilux/share — update sharing controls on share_links
 //
-// Body: { sharing_enabled: boolean }
+// Body accepts any subset of:
+//   { sharing_enabled?: boolean,
+//     password?: string | null,
+//     expires_at?: string | null }
 //
-// Writes ONLY profilux.sharing_enabled.
-// Does NOT touch share_slug (slug lifecycle is owned by /api/profilux/reset-link).
-// Does NOT touch identity / profile fields.
-// Does NOT create the row — if no profilux row exists for this email,
-// returns 400 (user must reserve a slug first via reset-link).
+// At least one field must be present.
+//   - sharing_enabled: toggles share visibility. Mirrored to legacy profilux.
+//   - password: string → scrypt-hashed via lib/share/auth.hashPassword.
+//               null   → clears password_hash + password_salt.
+//               Minimum 4 chars.
+//   - expires_at: 'YYYY-MM-DD' (must be today or later) or null to clear.
 //
-// Unauthenticated → 401.
-// No row → 400 with code 'NO_PROFILUX_ROW'.
-// No slug on row → 400 with code 'NO_SLUG_RESERVED'
-// (cannot enable sharing without a slug to share).
+// password / expires_at writes REQUIRE a share_links row → NO_SHARE_LINK.
+// Legacy-only fallback handles sharing_enabled-only requests.
 //
-// Returns: { sharing_enabled: boolean }
+// Returns: { ok: true }
 // =============================================================================
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
@@ -115,16 +135,60 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  let body: unknown
+  let body: any
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const next = (body as { sharing_enabled?: unknown })?.sharing_enabled
-  if (typeof next !== 'boolean') {
-    return NextResponse.json({ error: 'sharing_enabled must be boolean' }, { status: 400 })
+  const hasSharing = body && Object.prototype.hasOwnProperty.call(body, 'sharing_enabled')
+  const hasPassword = body && Object.prototype.hasOwnProperty.call(body, 'password')
+  const hasExpiry = body && Object.prototype.hasOwnProperty.call(body, 'expires_at')
+
+  if (!hasSharing && !hasPassword && !hasExpiry) {
+    return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
+  }
+
+  let nextSharing: boolean | undefined
+  if (hasSharing) {
+    if (typeof body.sharing_enabled !== 'boolean') {
+      return NextResponse.json({ error: 'sharing_enabled must be boolean' }, { status: 400 })
+    }
+    nextSharing = body.sharing_enabled
+  }
+
+  let nextPasswordHash: string | null | undefined
+  let nextPasswordSalt: string | null | undefined
+  if (hasPassword) {
+    if (body.password === null) {
+      nextPasswordHash = null
+      nextPasswordSalt = null
+    } else if (typeof body.password === 'string') {
+      if (body.password.length < 4) {
+        return NextResponse.json({ error: 'Password must be at least 4 characters' }, { status: 400 })
+      }
+      const { hash, salt } = hashPassword(body.password)
+      nextPasswordHash = hash
+      nextPasswordSalt = salt
+    } else {
+      return NextResponse.json({ error: 'password must be string or null' }, { status: 400 })
+    }
+  }
+
+  let nextExpiresAt: string | null | undefined
+  if (hasExpiry) {
+    if (body.expires_at === null) {
+      nextExpiresAt = null
+    } else if (typeof body.expires_at === 'string' && DATE_RE.test(body.expires_at)) {
+      const todayIso = new Date().toISOString().slice(0, 10)
+      if (body.expires_at < todayIso) {
+        return NextResponse.json({ error: 'expires_at must be today or later' }, { status: 400 })
+      }
+      nextExpiresAt = body.expires_at
+    } else {
+      return NextResponse.json({ error: 'expires_at must be YYYY-MM-DD or null' }, { status: 400 })
+    }
   }
 
   // Resolve member_id
@@ -148,8 +212,16 @@ export async function POST(req: Request) {
     .eq('member_id', member.id)
     .maybeSingle()
 
+  // Password / expiry require a share_links row
+  if ((hasPassword || hasExpiry) && !link) {
+    return NextResponse.json(
+      { error: 'Reserve a public link before configuring password or expiry.', code: 'NO_SHARE_LINK' },
+      { status: 400 },
+    )
+  }
+
   if (!link) {
-    // Legacy-only path (no share_links row yet)
+    // Legacy-only path: sharing_enabled toggle on pre-share_links profilux row
     const { data: existing, error: readErr } = await supabase
       .from('profilux')
       .select('share_slug, sharing_enabled')
@@ -165,7 +237,7 @@ export async function POST(req: Request) {
         { status: 400 },
       )
     }
-    if (next === true && !existing.share_slug) {
+    if (nextSharing === true && !existing.share_slug) {
       return NextResponse.json(
         { error: 'Reserve a public link first to enable sharing.', code: 'NO_SLUG_RESERVED' },
         { status: 400 },
@@ -174,39 +246,51 @@ export async function POST(req: Request) {
 
     const { error: updateErr } = await supabase
       .from('profilux')
-      .update({ sharing_enabled: next })
+      .update({ sharing_enabled: nextSharing })
       .eq('email', session.user.email)
 
     if (updateErr) {
       return NextResponse.json({ error: updateErr.message }, { status: 500 })
     }
 
-    return NextResponse.json({ sharing_enabled: next })
+    return NextResponse.json({ ok: true })
   }
 
-  // share_links path
-  if (next === true && !link.slug) {
+  // share_links path — assemble update payload
+  if (nextSharing === true && !link.slug) {
     return NextResponse.json(
       { error: 'Reserve a public link first to enable sharing.', code: 'NO_SLUG_RESERVED' },
       { status: 400 },
     )
   }
 
+  const updatePayload: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  }
+  if (hasSharing) updatePayload.sharing_enabled = nextSharing
+  if (hasPassword) {
+    updatePayload.password_hash = nextPasswordHash
+    updatePayload.password_salt = nextPasswordSalt
+  }
+  if (hasExpiry) updatePayload.expires_at = nextExpiresAt
+
   const { error: linkUpdateErr } = await supabase
     .from('share_links')
-    .update({ sharing_enabled: next, updated_at: new Date().toISOString() })
+    .update(updatePayload)
     .eq('id', link.id)
 
   if (linkUpdateErr) {
     return NextResponse.json({ error: linkUpdateErr.message }, { status: 500 })
   }
 
-  // Shadow write to legacy profilux (best-effort during dual-read window)
-  await supabase
-    .from('profilux')
-    .update({ sharing_enabled: next })
-    .eq('email', session.user.email)
+  // Mirror ONLY sharing_enabled to legacy profilux (during dual-read window)
+  if (hasSharing) {
+    await supabase
+      .from('profilux')
+      .update({ sharing_enabled: nextSharing })
+      .eq('email', session.user.email)
+  }
 
-  return NextResponse.json({ sharing_enabled: next })
+  return NextResponse.json({ ok: true })
 }
 

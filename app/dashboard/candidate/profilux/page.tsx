@@ -573,6 +573,9 @@ export default function ProfiluxPage() {
     sharing_enabled: boolean
     public_url: string | null
     can_share: boolean
+    password_set: boolean
+    expires_at: string | null
+    view_count: number
   } | null>(null)
   const [shareStatusError, setShareStatusError] = useState<string | null>(null)
   const [shareStatusLoading, setShareStatusLoading] = useState(false)
@@ -580,6 +583,12 @@ export default function ProfiluxPage() {
   const [sharingToggleError, setSharingToggleError] = useState<string | null>(null)
   const [reserving, setReserving] = useState(false)
   const [reserveError, setReserveError] = useState<string | null>(null)
+  const [passwordDraft, setPasswordDraft] = useState('')
+  const [passwordSaving, setPasswordSaving] = useState(false)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [expiryDraft, setExpiryDraft] = useState('')
+  const [expirySaving, setExpirySaving] = useState(false)
+  const [expiryError, setExpiryError] = useState<string | null>(null)
   const [currentPositionDrawerOpen, setCurrentPositionDrawerOpen] = useState(false)
   const [luxuryFitDrawerOpen, setLuxuryFitDrawerOpen] = useState(false)
   const [skillsMarketsDrawerOpen, setSkillsMarketsDrawerOpen] = useState(false)
@@ -970,6 +979,25 @@ export default function ProfiluxPage() {
     refetch().catch((e) => setError(String(e))).finally(() => setLoading(false))
   }, [])
 
+  function normalizeShareStatus(data: any) {
+    return {
+      share_slug: data?.share_slug ?? null,
+      sharing_enabled: data?.sharing_enabled === true,
+      public_url: data?.public_url ?? null,
+      can_share: data?.can_share === true,
+      password_set: data?.password_set === true,
+      expires_at: data?.expires_at ?? null,
+      view_count: typeof data?.view_count === 'number' ? data.view_count : 0,
+    }
+  }
+
+  async function refreshShareStatus() {
+    const res = await fetch('/api/profilux/share')
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const data = await res.json()
+    setShareStatus(normalizeShareStatus(data))
+  }
+
   useEffect(() => {
     if (tab !== 'manage') return
     let cancelled = false
@@ -980,12 +1008,7 @@ export default function ProfiluxPage() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const data = await res.json()
         if (cancelled) return
-        setShareStatus({
-          share_slug: data.share_slug ?? null,
-          sharing_enabled: data.sharing_enabled === true,
-          public_url: data.public_url ?? null,
-          can_share: data.can_share === true,
-        })
+        setShareStatus(normalizeShareStatus(data))
       })
       .catch((err) => {
         if (cancelled) return
@@ -1044,15 +1067,7 @@ export default function ProfiluxPage() {
         setReserveError(typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
         return
       }
-      const refetch = await fetch('/api/profilux/share')
-      if (!refetch.ok) throw new Error(`HTTP ${refetch.status}`)
-      const fresh = await refetch.json()
-      setShareStatus({
-        share_slug: fresh.share_slug ?? null,
-        sharing_enabled: fresh.sharing_enabled === true,
-        public_url: fresh.public_url ?? null,
-        can_share: fresh.can_share === true,
-      })
+      await refreshShareStatus()
     } catch (err) {
       setReserveError(String(err))
     } finally {
@@ -1075,19 +1090,111 @@ export default function ProfiluxPage() {
         setSharingToggleError(typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
         return
       }
-      const refetch = await fetch('/api/profilux/share')
-      if (!refetch.ok) throw new Error(`HTTP ${refetch.status}`)
-      const fresh = await refetch.json()
-      setShareStatus({
-        share_slug: fresh.share_slug ?? null,
-        sharing_enabled: fresh.sharing_enabled === true,
-        public_url: fresh.public_url ?? null,
-        can_share: fresh.can_share === true,
-      })
+      await refreshShareStatus()
     } catch (err) {
       setSharingToggleError(String(err))
     } finally {
       setSharingToggleSaving(false)
+    }
+  }
+
+  async function handleSetPassword() {
+    const value = passwordDraft
+    if (value.length < 4) {
+      setPasswordError('Password must be at least 4 characters')
+      return
+    }
+    setPasswordSaving(true)
+    setPasswordError(null)
+    try {
+      const res = await fetch('/api/profilux/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: value }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any))
+        setPasswordError(typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
+        return
+      }
+      await refreshShareStatus()
+      setPasswordDraft('')
+    } catch (err) {
+      setPasswordError(String(err))
+    } finally {
+      setPasswordSaving(false)
+    }
+  }
+
+  async function handleClearPassword() {
+    setPasswordSaving(true)
+    setPasswordError(null)
+    try {
+      const res = await fetch('/api/profilux/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: null }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any))
+        setPasswordError(typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
+        return
+      }
+      await refreshShareStatus()
+    } catch (err) {
+      setPasswordError(String(err))
+    } finally {
+      setPasswordSaving(false)
+    }
+  }
+
+  async function handleSetExpiry() {
+    const value = expiryDraft
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      setExpiryError('Pick a date')
+      return
+    }
+    setExpirySaving(true)
+    setExpiryError(null)
+    try {
+      const res = await fetch('/api/profilux/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expires_at: value }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any))
+        setExpiryError(typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
+        return
+      }
+      await refreshShareStatus()
+      setExpiryDraft('')
+    } catch (err) {
+      setExpiryError(String(err))
+    } finally {
+      setExpirySaving(false)
+    }
+  }
+
+  async function handleClearExpiry() {
+    setExpirySaving(true)
+    setExpiryError(null)
+    try {
+      const res = await fetch('/api/profilux/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expires_at: null }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any))
+        setExpiryError(typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
+        return
+      }
+      await refreshShareStatus()
+    } catch (err) {
+      setExpiryError(String(err))
+    } finally {
+      setExpirySaving(false)
     }
   }
 
@@ -3963,6 +4070,156 @@ export default function ProfiluxPage() {
                     )}
                   </>
                 )}
+              </div>
+              {/* Password row */}
+              <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #2a2a2a' }}>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
+                  Password
+                </div>
+                {shareStatus.password_set ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#fff' }}>Active</span>
+                    <button
+                      type="button"
+                      disabled={passwordSaving}
+                      onClick={handleClearPassword}
+                      style={{
+                        background: 'transparent',
+                        color: '#fff',
+                        border: '1px solid #444',
+                        padding: '6px 12px',
+                        cursor: passwordSaving ? 'not-allowed' : 'pointer',
+                        fontFamily: 'Inter, sans-serif',
+                        fontSize: 12,
+                        opacity: passwordSaving ? 0.5 : 1,
+                      }}
+                    >
+                      {passwordSaving ? 'Clearing…' : 'Clear'}
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <input
+                      type="password"
+                      value={passwordDraft}
+                      onChange={(ev) => setPasswordDraft(ev.target.value)}
+                      placeholder="Set password"
+                      style={{
+                        flex: 1,
+                        background: '#1a1a1a',
+                        border: '1px solid #2a2a2a',
+                        color: '#fff',
+                        padding: '6px 10px',
+                        fontFamily: 'Inter, sans-serif',
+                        fontSize: 13,
+                        borderRadius: 4,
+                      }}
+                    />
+                    <button
+                      type="button"
+                      disabled={passwordSaving || passwordDraft.length < 4}
+                      onClick={handleSetPassword}
+                      style={{
+                        background: 'transparent',
+                        color: '#fff',
+                        border: '1px solid #444',
+                        padding: '6px 12px',
+                        cursor: passwordSaving || passwordDraft.length < 4 ? 'not-allowed' : 'pointer',
+                        fontFamily: 'Inter, sans-serif',
+                        fontSize: 12,
+                        opacity: passwordSaving || passwordDraft.length < 4 ? 0.5 : 1,
+                      }}
+                    >
+                      {passwordSaving ? 'Saving…' : 'Set'}
+                    </button>
+                  </div>
+                )}
+                {passwordError && (
+                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#ff6b6b' }}>
+                    {passwordError}
+                  </div>
+                )}
+              </div>
+              {/* Expiry row */}
+              <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #2a2a2a' }}>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
+                  Expiry
+                </div>
+                {shareStatus.expires_at ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#fff' }}>
+                      Expires on {shareStatus.expires_at}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={expirySaving}
+                      onClick={handleClearExpiry}
+                      style={{
+                        background: 'transparent',
+                        color: '#fff',
+                        border: '1px solid #444',
+                        padding: '6px 12px',
+                        cursor: expirySaving ? 'not-allowed' : 'pointer',
+                        fontFamily: 'Inter, sans-serif',
+                        fontSize: 12,
+                        opacity: expirySaving ? 0.5 : 1,
+                      }}
+                    >
+                      {expirySaving ? 'Clearing…' : 'Clear'}
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <input
+                      type="date"
+                      value={expiryDraft}
+                      onChange={(ev) => setExpiryDraft(ev.target.value)}
+                      style={{
+                        background: '#1a1a1a',
+                        border: '1px solid #2a2a2a',
+                        color: '#fff',
+                        padding: '6px 10px',
+                        fontFamily: 'Inter, sans-serif',
+                        fontSize: 13,
+                        borderRadius: 4,
+                      }}
+                    />
+                    <button
+                      type="button"
+                      disabled={expirySaving || !expiryDraft}
+                      onClick={handleSetExpiry}
+                      style={{
+                        background: 'transparent',
+                        color: '#fff',
+                        border: '1px solid #444',
+                        padding: '6px 12px',
+                        cursor: expirySaving || !expiryDraft ? 'not-allowed' : 'pointer',
+                        fontFamily: 'Inter, sans-serif',
+                        fontSize: 12,
+                        opacity: expirySaving || !expiryDraft ? 0.5 : 1,
+                      }}
+                    >
+                      {expirySaving ? 'Saving…' : 'Set'}
+                    </button>
+                  </div>
+                )}
+                {expiryError && (
+                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#ff6b6b' }}>
+                    {expiryError}
+                  </div>
+                )}
+              </div>
+              {/* Views row */}
+              <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #2a2a2a' }}>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
+                  Views
+                </div>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#fff' }}>
+                  {shareStatus.view_count} view{shareStatus.view_count === 1 ? '' : 's'}
+                </div>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', fontStyle: 'italic', marginTop: 4 }}>
+                  Anonymous count only.
+                </div>
               </div>
             </>
           )}
