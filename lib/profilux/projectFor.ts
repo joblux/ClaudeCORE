@@ -290,6 +290,7 @@ export function projectEditorView(view: ProfiLuxResolved): EditorView {
     expertise_tags: view.expertise_tags,
     brands_worked_with: view.brands_worked_with,
     certifications: view.certifications,
+    awards: view.awards,
     // Experience + education
     experiences: view.experiences,
     education: view.education,

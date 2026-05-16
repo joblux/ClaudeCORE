@@ -341,6 +341,7 @@ export async function resolveProfiLux(
     key_skills: arr(row.key_skills),
     software_tools: arr(row.software_tools),
     certifications: arr(row.certifications),
+    awards: arr(row.awards),
     product_categories: arr(row.product_categories),
     brands_worked_with: arr(row.brands_worked_with),
     client_segment_experience: arr(row.client_segment_experience),

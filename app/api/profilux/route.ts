@@ -277,6 +277,14 @@ export async function POST(req: NextRequest) {
       : null
   }
 
+  if (has('awards')) {
+    updatePayload.awards = Array.isArray(body.awards)
+      ? body.awards
+          .filter((s: unknown) => typeof s === 'string' && s.trim() !== '')
+          .map((s: string) => s.trim())
+      : null
+  }
+
   if (has('section_visibility')) {
     const v = body.section_visibility
     if (v !== null && (typeof v !== 'object' || Array.isArray(v))) {

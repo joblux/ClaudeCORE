@@ -233,6 +233,7 @@ export type MemberRow = {
   key_skills: string[] | null
   software_tools: string[] | null
   certifications: string[] | null
+  awards: string[] | null
   product_categories: string[] | null
   brands_worked_with: string[] | null
   client_segment_experience: string[] | null
@@ -428,6 +429,7 @@ export type ProfiLuxResolved = {
   key_skills: string[]
   software_tools: string[]
   certifications: string[]
+  awards: string[]
   product_categories: string[]
   brands_worked_with: string[]
   client_segment_experience: string[]
@@ -554,6 +556,7 @@ export type EditorView = {
   expertise_tags: string[]
   brands_worked_with: string[]
   certifications: string[]
+  awards: string[]
   // Experience + education (L1)
   experiences: ResolvedExperience[]
   education: ResolvedEducation[]

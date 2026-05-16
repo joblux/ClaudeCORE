@@ -616,6 +616,11 @@ export default function ProfiluxPage() {
   const [certificationsDraftText, setCertificationsDraftText] = useState('')
   const [certificationsSaving, setCertificationsSaving] = useState(false)
   const [certificationsError, setCertificationsError] = useState<string | null>(null)
+  // PF-D V1 — Awards drawer (text[] textarea, free-text, mirrors Certifications)
+  const [awardsDrawerOpen, setAwardsDrawerOpen] = useState(false)
+  const [awardsDraftText, setAwardsDraftText] = useState('')
+  const [awardsSaving, setAwardsSaving] = useState(false)
+  const [awardsError, setAwardsError] = useState<string | null>(null)
   const [editor, setEditor] = useState<EditorView | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -962,6 +967,36 @@ export default function ProfiluxPage() {
       setCertificationsError(String(err))
     } finally {
       setCertificationsSaving(false)
+    }
+  }
+
+  // PF-D V1 — Awards (free-text text[] textarea, mirrors Certifications)
+  function openAwardsDrawer() {
+    setAwardsError(null)
+    setAwardsDraftText((editor?.awards ?? []).join('\n'))
+    setAwardsDrawerOpen(true)
+  }
+  async function handleSaveAwards() {
+    setAwardsSaving(true)
+    setAwardsError(null)
+    try {
+      const arr = awardsDraftText.split('\n').map(s => s.trim()).filter(s => s !== '')
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ awards: arr }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setAwardsError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+      setAwardsDrawerOpen(false)
+    } catch (err) {
+      setAwardsError(String(err))
+    } finally {
+      setAwardsSaving(false)
     }
   }
 
@@ -2561,6 +2596,18 @@ export default function ProfiluxPage() {
             </ViewZone>
               )
             })()}
+
+            {/* PF-D V1 — Awards (free-text, mirrors Certifications) */}
+            {(() => {
+              if (!Array.isArray(e.awards) || e.awards.length === 0) return null
+              return (
+            <ViewZone title="Awards">
+              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.5 }}>
+                {e.awards.join(' · ')}
+              </div>
+            </ViewZone>
+              )
+            })()}
               </div>
             </div>
 
@@ -3882,6 +3929,61 @@ export default function ProfiluxPage() {
             {certificationsSaving ? 'Saving…' : 'Save'}
           </button>
           {certificationsError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{certificationsError}</span>}
+        </div>
+      </Drawer>
+      <SectionCard
+        eyebrow="Awards"
+        headerAction={
+          <button
+            type="button"
+            onClick={openAwardsDrawer}
+            style={{
+              background: 'rgba(165,142,40,0.05)',
+              color: '#a58e28',
+              border: '1px solid rgba(165,142,40,0.3)',
+              padding: '6px 14px',
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '0.4px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        }
+      >
+        <div>
+          {e.awards.length > 0
+            ? e.awards.join(', ')
+            : <NotSet />}
+        </div>
+      </SectionCard>
+      <Drawer
+        open={awardsDrawerOpen}
+        title="Awards"
+        onClose={() => setAwardsDrawerOpen(false)}
+      >
+        <div style={{ color: '#999', fontSize: 12, marginBottom: 10 }}>
+          One award per line. Empty lines are ignored.
+        </div>
+        <textarea
+          style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 160, resize: 'vertical' }}
+          rows={8}
+          value={awardsDraftText}
+          onChange={(ev) => setAwardsDraftText(ev.target.value)}
+          placeholder={'e.g.\nLuxury Retail Excellence Award 2023\nForbes 30 Under 30 Luxury'}
+        />
+        <div style={{ marginTop: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button
+            style={awardsSaving ? saveBtnDis : saveBtn}
+            disabled={awardsSaving}
+            onClick={handleSaveAwards}
+          >
+            {awardsSaving ? 'Saving…' : 'Save'}
+          </button>
+          {awardsError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{awardsError}</span>}
         </div>
       </Drawer>
       <SectionCard
