@@ -4,7 +4,7 @@ Domain contract for the ProfiLux object across JOBLUX. Locks the storage, resolu
 
 This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE wins until reconciled. See §12.
 
-**Status:** locked v1.2 (May 7 UX promotion addendum)
+**Status:** locked v1.7 (May 16/17 2026 member lifecycle addendum)
 **Originally locked:** April 30, 2026
 **v1.1 addendum locked:** May 6, 2026
 **v1.2 addendum locked:** May 7, 2026
@@ -13,6 +13,18 @@ This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE w
 ---
 
 ## CHANGE LOG
+
+
+**v1.7 — May 16/17 2026 Member lifecycle doctrine lock**
+
+Locks member lifecycle (active / soft-deleted / purged), surface-cascade hide via resolver, audit-trail preservation rule, re-registration policy, restoration policy, RGPD-adjacent obligations mapping, and forward references to §19B (RGPD export) and §20 reopen (matching_opt_in). No substrate. No code. No schema. No new infrastructure. Doctrine text only.
+
+- **§25** new section — Member lifecycle. Soft-delete is the only deletion path; resolver cascades hide across all six projections; audit trail preserved by row retention; nextauth_accounts and active share_links suppressed at deletion; email uniqueness via partial unique index `WHERE deleted_at IS NULL`; re-registration is identity-final; restoration is row-level only; RGPD-adjacent obligations mapped; §19B (RGPD machine-readable export) and §20 reopen (matching_opt_in storage) flagged as forward dependencies.
+- **§20.x** Provisional posture: rewritten. The hedge "until matching-entry score wiring ships" is replaced with the explicit forward dependency on `matching_opt_in` storage + UI (B.3.3 slice). The View tab caption decision (gate on toggle vs remove) is deferred to B.3.3 execution.
+- **§13** Deferred items table: 3 rows appended — soft-delete substrate on `members`, RGPD export endpoint, matching consent storage.
+
+§§1–24 — all KEEP unchanged.
+
 
 **v1.6 — May 14, 2026 ProfiLux doctrine decisions lock**
 
@@ -650,6 +662,9 @@ The following items are intentionally out of v1.1. Each is a known future ticket
 | Resume extinction reconciliation | Retire `/api/resume/[slug]` route + retire planned `members.resume_*` columns + retire `resume_slug` slug space. All identified as fossil from a prior "Resume product" direction (see §19A.3). | After §19A doctrine lands; not in C6.1 |
 | `profilux` ghost-table cleanup | The standalone `profilux` table contains 17 legacy columns beyond `share_slug` + `sharing_enabled`. Tracked at ledger `6aef236e`. Doctrine drift vs §9; substrate cleanup deferred. | Together with Manage tab A2 sharing UX rebuild |
 | View "Download PDF" placeholder removal | The LEFT SPINE row in `app/dashboard/candidate/profilux/page.tsx` is doctrinally misplaced per §19A.2. Cleanup deferred until Manage-side export control ships. | When candidate self-export ships in Manage / Settings |
+| Soft-delete substrate on `members` | `deleted_at` + `deleted_by` columns + email partial unique index `WHERE deleted_at IS NULL` (see §25) | B.3.1b DDL slice |
+| RGPD export endpoint | `/api/members/export` machine-readable archive of subject's personal data (see §25.9 forward ref to future §19B) | B.3.4 |
+| Matching consent storage | `members.matching_opt_in boolean NOT NULL DEFAULT false` + endpoint + UI (see §20 reopen) | B.3.3 |
 
 ---
 
@@ -1003,7 +1018,7 @@ Do not derive consent from availability without a future explicit Mo decision. C
 
 This subsection extends §20.5 with the live-UI and recruiter-surface guards. §20.5 locks that consent is not derived from `availability`; §20.x locks what happens to existing UI and surfaces in the meantime.
 
-Until the matching-entry score wiring ships (§20 PARKED, Tier 1 schema dependency per §13), no recruiter, ATS, or matching surface may consume `members.availability` as a consent signal. The `availability` field expresses willingness to engage with opportunities in general; it is NOT a consent gate for matching exposure.
+Until `matching_opt_in` storage + UI ship (forward dependency: B.3.3 slice), no recruiter, ATS, or matching surface may consume `members.availability` as a consent signal. The `availability` field expresses willingness to engage with opportunities in general; it is NOT a consent gate for matching exposure.
 
 **Locked separations:**
 - `availability` = candidate self-description, not consent. `availability` accepts legacy / normalized values that currently resolve into `active` / `open` / `passive` / `unavailable` UI states.
@@ -1259,3 +1274,109 @@ Per §10 + §10.1: `resolveProfiLux`, `projectFor`, `computeProfileCompleteness`
 ---
 
 *End of PROFILUX_MATRIX_V1.md (v1.2 — May 7 UX promotion addendum)*
+
+
+---
+
+## 25. Member lifecycle
+
+### 25.1 — Lifecycle states
+
+A member exists in one of three operational states:
+
+| State | Meaning |
+|---|---|
+| Active | Normal operational account |
+| Soft-deleted | Hidden from operational surfaces but row retained |
+| Purged | Hard-erased through exceptional legal/operator escalation |
+
+Soft-delete is the operational default. Purge is exceptional.
+
+### 25.2 — Soft-delete doctrine
+
+Deletion requests do NOT hard-delete the `members` row in normal operation.
+
+Soft-delete means:
+- `deleted_at` timestamp set
+- operational projections suppressed
+- authentication blocked
+- recruiter/admin operational surfaces hide the member by default
+
+The row remains retained for audit, contribution integrity, legal traceability, and future restoration.
+
+### 25.3 — Resolver cascade
+
+`resolveProfiLux(memberId)` MUST refuse projection resolution for soft-deleted members across:
+- dashboard
+- editor
+- public
+- admin operational lists
+- ATS
+- client share
+
+No projection should accidentally leak a soft-deleted member through surface-specific direct reads.
+
+### 25.4 — Public/share suppression
+
+Soft-delete immediately suppresses:
+- public `/p/[slug]`
+- active sharing links
+- recruiter/client share artifacts
+
+Public identity exposure must terminate immediately at deletion time.
+
+### 25.5 — Audit trail preservation
+
+Soft-delete preserves:
+- contribution history
+- operational audit trails
+- recruiting history
+- intelligence lineage
+- LuxAI historical references where legally permitted
+
+Deletion does not rewrite historical operational events.
+
+### 25.6 — Re-registration posture
+
+Email uniqueness operates only on active members.
+
+Future substrate uses a partial unique index:
+`WHERE deleted_at IS NULL`
+
+Re-registration after deletion creates a NEW member identity. Restoration restores the original row. These are distinct operations.
+
+### 25.7 — Restoration posture
+
+Restoration is row-level restoration of the original member identity.
+
+Restoration:
+- clears lifecycle suppression
+- restores projection visibility
+- restores operational continuity
+
+Restoration is operator-controlled.
+
+### 25.8 — Erasure posture
+
+Erasure ("right to be forgotten"): erasure requests are handled by soft-delete as the operational default, with hard purge reserved for explicit legal/operator escalation when required.
+
+### 25.9 — RGPD-adjacent obligations
+
+Future export/delete obligations map to:
+- export endpoint → future §19B
+- soft-delete substrate → B.3.1b
+- purge workflow → future legal escalation flow
+
+Machine-readable export remains deferred.
+
+### 25.10 — Forward dependencies
+
+This doctrine intentionally precedes substrate.
+
+Future implementation slices:
+- B.3.1b → DB substrate (`deleted_at`, partial unique index)
+- B.3.3 → matching consent storage (`matching_opt_in`)
+- B.3.4 → machine-readable export endpoint
+
+No code or schema is introduced by §25 itself.
+

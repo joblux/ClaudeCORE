@@ -267,6 +267,9 @@ Locked by Mo 2026-05-16: close dual-read / legacy share debt before adding B.3 g
 - Treat the View tab "Download PDF" affordance as a live export feature. It is a doctrinally misplaced VISUAL PLACEHOLDER per `docs/PROFILUX_MATRIX_V1.md` §19A.2. Any export feature ships from Manage / Settings, consumes a private full ProfiLux snapshot generated from the canonical ProfiLux resolution pipeline, and never serves a public-facing PDF (public sharing stays web-first via `/p/[slug]`). Recruiter / client PDFs are PARKED on `C-B-2` / `C-B-3`.
 - Treat the `Internships` entry in `ADD_SECTION_LIBRARY` as an intentional surface-specific exception per `docs/PROFILUX_MATRIX_V1.md` §22.2 (locked v1.6, May 14 2026): Emerging-user early-career representation. Do not propose its removal on STATE §1 kill-word grounds. Kill-word doctrine elsewhere on the platform unchanged.
 - Do not treat `members.availability` as a consent signal in any recruiter, ATS, matching, or third-party-facing surface. Matching consent is locked as a separate explicit toggle per `docs/PROFILUX_MATRIX_V1.md` §20 / §20.x. The View tab caption "Visible to JOBLUX matching only" is PROVISIONAL and coherent only while no recruiter / matching consumer reads `availability`. Any recruiter, ATS, or matching surface that wants to read availability must either ship behind an explicit MATRIX §20 consent toggle, or the matching claim must be removed from the caption first.
+- Do not hard-delete `members` rows from any code path. Use soft-delete via `members.deleted_at`. Hard delete is doctrine-forbidden per `docs/PROFILUX_MATRIX_V1.md` §25.2. The resolver enforces the surface cascade; service-role admin paths are the only paths permitted to read deleted rows, and must signal deleted state in UI.
+- Do not derive matching consent from `members.availability`. Matching consent storage lives at `members.matching_opt_in` (forthcoming substrate, B.3.3 slice). Until that column ships and is wired, no recruiter / ATS / matching surface may consume `availability` as opt-in. See MATRIX §20 / §20.x / §25.8.
+- Do not place account-level controls (matching consent, RGPD export trigger, account deletion) inside the ProfiLux Manage tab. Manage tab is locked to share controls per `docs/PROFILUX_MATRIX_V1.md` §19.4 + §21.3. Account-level controls belong on the Settings page.
 
 ### PARKED (admin_tasks status=parked)
 
@@ -317,7 +320,7 @@ Locked by Mo 2026-05-16: close dual-read / legacy share debt before adding B.3 g
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 16, 2026 (Pack A + Pack F + Pack C + P1 substrate + Pack B.1 shipped end-to-end this rotation). 14 commits. Next: Pack B.1.4 legacy share cleanup.
+**Last updated:** May 17, 2026 (Pack A + Pack F + Pack C + P1 substrate + Pack B.1 shipped end-to-end this rotation). 14 commits. Next: Pack B.1.4 legacy share cleanup.
 
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
@@ -598,6 +601,8 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 - No advanced projection systems
 - No reopening of architecture debates
 
+- Member lifecycle (locked May 16/17 2026 via MATRIX §25): soft-delete shape `members.deleted_at TIMESTAMPTZ NULL` + `members.deleted_by UUID NULL` (substrate pending B.3.1b DDL). Resolver `resolveProfiLux` returns `null` when `deleted_at IS NOT NULL`, cascading hide through all six projections. No code path may hard-delete `members` rows. Audit trail preserved by row retention; nextauth_accounts and active share_links suppressed at deletion time. Email uniqueness via partial unique index `WHERE deleted_at IS NULL`. Account-level controls belong to Settings, not ProfiLux Manage.
+
 ---
 
 ## 13. LUXAI SYSTEM
@@ -823,6 +828,8 @@ All tabbed pages use `?tab=` query params. Brands: 5 tabs (~760 sitemap URLs).
 - No reopening of architecture debates
 
 **Drift reset phrase:** *"living document, not wizard / not submission / not approval / not completion funnel"*
+
+- Member lifecycle: soft-delete only, never hard delete. Resolver enforces surface cascade. Audit trail preserved by doctrine, not by side-table flagging. (MATRIX §25.)
 
 ## 25. V12 BASELINE LOCK
 
