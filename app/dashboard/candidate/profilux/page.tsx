@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import type { EditorView, MaskableField, ProfiLuxPortfolioItem, ProfiLuxPressFeatureItem, ProfiLuxStrategicInitiative } from '@/lib/profilux/types'
+import type { EditorView, MaskableField, ProfiLuxPortfolioItem, ProfiLuxPressFeatureItem, ProfiLuxReferenceItem, ProfiLuxStrategicInitiative } from '@/lib/profilux/types'
 import { MASKABLE_FIELDS } from '@/lib/profilux/types'
 import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS, PROFILUX_SECTOR_OPTIONS } from '@/lib/profilux/vocabulary'
 
@@ -26,7 +26,7 @@ const ADD_SECTION_LIBRARY: Array<{ key: string; label: string; available: boolea
   { key: 'strategic_initiatives', label: 'Strategic Initiatives', available: true  },
   { key: 'portfolio',             label: 'Portfolio',             available: true  },
   { key: 'press_features',        label: 'Press & features',      available: true  },
-  { key: 'references',            label: 'References',            available: false },
+  { key: 'references',            label: 'References',            available: true  },
   { key: 'internships',           label: 'Internships',           available: false },
 ]
 
@@ -663,6 +663,15 @@ export default function ProfiluxPage() {
   const [pressEditUrl, setPressEditUrl] = useState('')
   const [pressSaving, setPressSaving] = useState(false)
   const [pressError, setPressError] = useState<string | null>(null)
+  // PF-D V3.4 — References drawer (jsonb { name, role, company }, all required, no URL)
+  const [refsDrawerOpen, setRefsDrawerOpen] = useState(false)
+  const [refsDraftRows, setRefsDraftRows] = useState<ProfiLuxReferenceItem[]>([])
+  const [refsEditingIndex, setRefsEditingIndex] = useState<number | null>(null)
+  const [refsEditName, setRefsEditName] = useState('')
+  const [refsEditRole, setRefsEditRole] = useState('')
+  const [refsEditCompany, setRefsEditCompany] = useState('')
+  const [refsSaving, setRefsSaving] = useState(false)
+  const [refsError, setRefsError] = useState<string | null>(null)
   // PF-D V2 — Add Section shell (V12 restoration)
   const [addSectionDrawerOpen, setAddSectionDrawerOpen] = useState(false)
   const [activatingSectionKey, setActivatingSectionKey] = useState<string | null>(null)
@@ -1300,6 +1309,83 @@ export default function ProfiluxPage() {
       setPressError(String(err))
     } finally {
       setPressSaving(false)
+    }
+  }
+
+  // PF-D V3.4 — References (structured jsonb { name, role, company }).
+  // All three required. NO URL, NO contact info, NO relationship. Mirrors
+  // V3.3 press_features flow with renamed fields and validator simplified.
+  function openRefsDrawer() {
+    setRefsError(null)
+    setRefsDraftRows(Array.isArray(editor?.references) ? [...editor!.references] : [])
+    setRefsEditingIndex(null)
+    setRefsEditName('')
+    setRefsEditRole('')
+    setRefsEditCompany('')
+    setRefsDrawerOpen(true)
+  }
+  function refsStartAdd() {
+    setRefsEditingIndex(-1)
+    setRefsEditName('')
+    setRefsEditRole('')
+    setRefsEditCompany('')
+  }
+  function refsStartEdit(index: number) {
+    const row = refsDraftRows[index]
+    if (!row) return
+    setRefsEditingIndex(index)
+    setRefsEditName(row.name)
+    setRefsEditRole(row.role)
+    setRefsEditCompany(row.company)
+  }
+  function refsCancelEdit() {
+    setRefsEditingIndex(null)
+    setRefsEditName('')
+    setRefsEditRole('')
+    setRefsEditCompany('')
+  }
+  function refsRowValid(name: string, role: string, company: string): boolean {
+    return name.trim() !== '' && role.trim() !== '' && company.trim() !== ''
+  }
+  function refsCommitEdit() {
+    const name = refsEditName.trim()
+    const role = refsEditRole.trim()
+    const company = refsEditCompany.trim()
+    if (!refsRowValid(name, role, company)) return
+    const next: ProfiLuxReferenceItem = { name, role, company }
+    if (refsEditingIndex === -1) {
+      setRefsDraftRows([...refsDraftRows, next])
+    } else if (typeof refsEditingIndex === 'number' && refsEditingIndex >= 0) {
+      const copy = [...refsDraftRows]
+      copy[refsEditingIndex] = next
+      setRefsDraftRows(copy)
+    }
+    refsCancelEdit()
+  }
+  function refsRemove(index: number) {
+    setRefsDraftRows(refsDraftRows.filter((_, i) => i !== index))
+    if (refsEditingIndex === index) refsCancelEdit()
+  }
+  async function handleSaveReferences() {
+    setRefsSaving(true)
+    setRefsError(null)
+    try {
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ references: refsDraftRows }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setRefsError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+      setRefsDrawerOpen(false)
+    } catch (err) {
+      setRefsError(String(err))
+    } finally {
+      setRefsSaving(false)
     }
   }
 
@@ -4932,6 +5018,184 @@ export default function ProfiluxPage() {
             {pressSaving ? 'Saving…' : 'Save'}
           </button>
           {pressError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{pressError}</span>}
+        </div>
+      </Drawer>
+      </>)}
+      {e.activated_sections.includes('references') && (<>
+      <SectionCard
+        eyebrow="References"
+        headerAction={
+          <button
+            type="button"
+            onClick={openRefsDrawer}
+            style={{
+              background: 'rgba(165,142,40,0.05)',
+              color: '#a58e28',
+              border: '1px solid rgba(165,142,40,0.3)',
+              padding: '6px 14px',
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '0.4px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        }
+      >
+        <div>
+          {e.references.length > 0
+            ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {e.references.map((r, idx) => (
+                  <div key={idx}>
+                    <div style={{ color: '#fff', fontWeight: 600 }}>{r.name}</div>
+                    <div style={{ color: '#999', marginTop: 2, fontSize: 12 }}>{r.role}</div>
+                    <div style={{ color: '#999', marginTop: 2, fontSize: 12 }}>{r.company}</div>
+                  </div>
+                ))}
+              </div>
+            )
+            : <NotSet />}
+        </div>
+      </SectionCard>
+      <Drawer
+        open={refsDrawerOpen}
+        title="References"
+        onClose={() => setRefsDrawerOpen(false)}
+      >
+        <div style={{ color: '#999', fontSize: 12, marginBottom: 14 }}>
+          Each reference has a name (required), role (required), and company (required). Save commits the full list.
+        </div>
+
+        {/* Existing rows list */}
+        {refsDraftRows.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+            {refsDraftRows.map((row, idx) => (
+              <div
+                key={idx}
+                style={{
+                  border: '0.5px solid #2a2a2a',
+                  borderRadius: 6,
+                  padding: '10px 12px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: '#fff', fontSize: 14, fontWeight: 600 }}>{row.name}</div>
+                  <div style={{ color: '#999', fontSize: 12, marginTop: 2 }}>{row.role}</div>
+                  <div style={{ color: '#999', fontSize: 12, marginTop: 2 }}>{row.company}</div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                  <button
+                    type="button"
+                    onClick={() => refsStartEdit(idx)}
+                    style={{ background: 'transparent', color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)', padding: '4px 10px', fontSize: 11, borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => refsRemove(idx)}
+                    style={{ background: 'transparent', color: '#999', border: '1px solid #333', padding: '4px 10px', fontSize: 11, borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Inline edit/add form */}
+        {refsEditingIndex !== null ? (
+          <div style={{ border: '0.5px solid rgba(165,142,40,0.3)', borderRadius: 6, padding: 14, marginBottom: 14 }}>
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Name <span style={{ color: '#a58e28' }}>*</span></div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={refsEditName}
+                onChange={(ev) => setRefsEditName(ev.target.value)}
+                placeholder="e.g. Marie Dubois"
+              />
+            </div>
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Role <span style={{ color: '#a58e28' }}>*</span></div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={refsEditRole}
+                onChange={(ev) => setRefsEditRole(ev.target.value)}
+                placeholder="e.g. Global Retail Director"
+              />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Company <span style={{ color: '#a58e28' }}>*</span></div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={refsEditCompany}
+                onChange={(ev) => setRefsEditCompany(ev.target.value)}
+                placeholder="e.g. Chanel"
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                type="button"
+                onClick={refsCommitEdit}
+                disabled={!refsRowValid(refsEditName, refsEditRole, refsEditCompany)}
+                style={!refsRowValid(refsEditName, refsEditRole, refsEditCompany) ? saveBtnDis : saveBtn}
+              >
+                {refsEditingIndex === -1 ? 'Add' : 'Update'}
+              </button>
+              <button
+                type="button"
+                onClick={refsCancelEdit}
+                style={btn}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={refsStartAdd}
+            style={{
+              background: 'transparent',
+              color: '#a58e28',
+              border: '1px dashed rgba(165,142,40,0.4)',
+              padding: '10px 14px',
+              fontSize: 12,
+              letterSpacing: '0.4px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+              marginBottom: 14,
+              width: '100%',
+              maxWidth: 600,
+              textAlign: 'left',
+            }}
+          >
+            + Add reference
+          </button>
+        )}
+
+        <div style={{ marginTop: 4, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button
+            style={refsSaving ? saveBtnDis : saveBtn}
+            disabled={refsSaving}
+            onClick={handleSaveReferences}
+          >
+            {refsSaving ? 'Saving…' : 'Save'}
+          </button>
+          {refsError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{refsError}</span>}
         </div>
       </Drawer>
       </>)}

@@ -32,6 +32,7 @@ export type {
   // Resolved
   ProfiLuxPortfolioItem,
   ProfiLuxPressFeatureItem,
+  ProfiLuxReferenceItem,
   ProfiLuxResolved,
   ProfiLuxStrategicInitiative,
   ResolvedCvMeta,

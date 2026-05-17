@@ -228,6 +228,22 @@ export type ProfiLuxPressFeatureItem = {
   url: string
 }
 
+/**
+ * PF-D V3.4 — References (jsonb array-of-objects).
+ *
+ * Pack D Phase 2 path γ — { name, role, company } trio, all required.
+ * No contact fields (email/phone/relationship intentionally absent v1).
+ * Stored in members."references" (jsonb NULL — column name is a SQL reserved
+ * word, quoted in DDL; Supabase JS handles quoting via bare property access).
+ * Editor projection only — public/client/ats/admin/dashboard omit v1 (strict
+ * because reference content is sensitive).
+ */
+export type ProfiLuxReferenceItem = {
+  name: string
+  role: string
+  company: string
+}
+
 export const SECTION_IDS = ['identity','current_role','career_path','education','languages','luxury_fit','skills_markets','clienteling','compensation','availability'] as const
 export type SectionId = typeof SECTION_IDS[number]
 export type SectionVisibility = Partial<Record<SectionId, boolean>>
@@ -277,6 +293,7 @@ export type MemberRow = {
   strategic_initiatives: ProfiLuxStrategicInitiative[] | null
   portfolio: ProfiLuxPortfolioItem[] | null
   press_features: ProfiLuxPressFeatureItem[] | null
+  references: ProfiLuxReferenceItem[] | null
   activated_sections: string[] | null
   product_categories: string[] | null
   brands_worked_with: string[] | null
@@ -478,6 +495,7 @@ export type ProfiLuxResolved = {
   strategic_initiatives: ProfiLuxStrategicInitiative[]
   portfolio: ProfiLuxPortfolioItem[]
   press_features: ProfiLuxPressFeatureItem[]
+  references: ProfiLuxReferenceItem[]
   activated_sections: string[]
   product_categories: string[]
   brands_worked_with: string[]
@@ -610,6 +628,7 @@ export type EditorView = {
   strategic_initiatives: ProfiLuxStrategicInitiative[]
   portfolio: ProfiLuxPortfolioItem[]
   press_features: ProfiLuxPressFeatureItem[]
+  references: ProfiLuxReferenceItem[]
   activated_sections: string[]
   // Experience + education (L1)
   experiences: ResolvedExperience[]

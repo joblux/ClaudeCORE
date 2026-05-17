@@ -11,6 +11,7 @@ import type {
   EditorProjection,
   ProfiLuxPortfolioItem,
   ProfiLuxPressFeatureItem,
+  ProfiLuxReferenceItem,
   ProfiLuxResolved,
   ProfiLuxStrategicInitiative,
   ResolvedExperience,
@@ -147,6 +148,44 @@ function coercePressFeatureItem(
   if (!url.startsWith('http://') && !url.startsWith('https://')) return null
 
   return { title, publication, url }
+}
+
+// PF-D V3.4 — References row coercion. Trio { name, role, company } with all
+// three required. NO contact fields, NO URL, NO relationship field. Anything
+// failing → null so .filter drops the row.
+function coerceReferenceItem(
+  raw: unknown,
+): ProfiLuxReferenceItem | null {
+  if (
+    raw === null ||
+    typeof raw !== 'object' ||
+    Array.isArray(raw)
+  ) return null
+
+  const obj = raw as Record<string, unknown>
+
+  const name =
+    typeof obj.name === 'string'
+      ? obj.name.trim()
+      : ''
+
+  if (name === '') return null
+
+  const role =
+    typeof obj.role === 'string'
+      ? obj.role.trim()
+      : ''
+
+  if (role === '') return null
+
+  const company =
+    typeof obj.company === 'string'
+      ? obj.company.trim()
+      : ''
+
+  if (company === '') return null
+
+  return { name, role, company }
 }
 
 function buildEditorResponse(resolved: ProfiLuxResolved) {
@@ -421,6 +460,14 @@ export async function POST(req: NextRequest) {
       ? body.press_features
           .map((row: unknown): ProfiLuxPressFeatureItem | null => coercePressFeatureItem(row))
           .filter((r: ProfiLuxPressFeatureItem | null): r is ProfiLuxPressFeatureItem => r !== null)
+      : null
+  }
+
+  if (has('references')) {
+    updatePayload.references = Array.isArray(body.references)
+      ? body.references
+          .map((row: unknown): ProfiLuxReferenceItem | null => coerceReferenceItem(row))
+          .filter((r: ProfiLuxReferenceItem | null): r is ProfiLuxReferenceItem => r !== null)
       : null
   }
 
