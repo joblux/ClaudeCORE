@@ -30,6 +30,7 @@ export type {
   // L2
   MemberRow,
   // Resolved
+  ProfiLuxPortfolioItem,
   ProfiLuxResolved,
   ProfiLuxStrategicInitiative,
   ResolvedCvMeta,

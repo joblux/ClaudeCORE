@@ -201,6 +201,19 @@ export type ProfiLuxStrategicInitiative = {
   description: string | null
 }
 
+/**
+ * PF-D V3.2 — Portfolio (jsonb array-of-objects).
+ *
+ * Pack D Phase 2 path γ — paired semantic object (title + url). Both required.
+ * URL must be http(s)-only at write time (validated in POST /api/profilux).
+ * Stored in members.portfolio (jsonb NULL). Editor projection only —
+ * public/client/ats/admin/dashboard omit v1.
+ */
+export type ProfiLuxPortfolioItem = {
+  title: string
+  url: string
+}
+
 export const SECTION_IDS = ['identity','current_role','career_path','education','languages','luxury_fit','skills_markets','clienteling','compensation','availability'] as const
 export type SectionId = typeof SECTION_IDS[number]
 export type SectionVisibility = Partial<Record<SectionId, boolean>>
@@ -248,6 +261,7 @@ export type MemberRow = {
   awards: string[] | null
   memberships: string[] | null
   strategic_initiatives: ProfiLuxStrategicInitiative[] | null
+  portfolio: ProfiLuxPortfolioItem[] | null
   activated_sections: string[] | null
   product_categories: string[] | null
   brands_worked_with: string[] | null
@@ -447,6 +461,7 @@ export type ProfiLuxResolved = {
   awards: string[]
   memberships: string[]
   strategic_initiatives: ProfiLuxStrategicInitiative[]
+  portfolio: ProfiLuxPortfolioItem[]
   activated_sections: string[]
   product_categories: string[]
   brands_worked_with: string[]
@@ -577,6 +592,7 @@ export type EditorView = {
   awards: string[]
   memberships: string[]
   strategic_initiatives: ProfiLuxStrategicInitiative[]
+  portfolio: ProfiLuxPortfolioItem[]
   activated_sections: string[]
   // Experience + education (L1)
   experiences: ResolvedExperience[]

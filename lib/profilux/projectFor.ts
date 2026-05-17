@@ -293,6 +293,7 @@ export function projectEditorView(view: ProfiLuxResolved): EditorView {
     awards: view.awards,
     memberships: view.memberships,
     strategic_initiatives: view.strategic_initiatives,
+    portfolio: view.portfolio,
     activated_sections: view.activated_sections,
     // Experience + education
     experiences: view.experiences,

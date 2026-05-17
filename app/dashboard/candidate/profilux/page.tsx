@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import type { EditorView, MaskableField, ProfiLuxStrategicInitiative } from '@/lib/profilux/types'
+import type { EditorView, MaskableField, ProfiLuxPortfolioItem, ProfiLuxStrategicInitiative } from '@/lib/profilux/types'
 import { MASKABLE_FIELDS } from '@/lib/profilux/types'
 import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS, PROFILUX_SECTOR_OPTIONS } from '@/lib/profilux/vocabulary'
 
@@ -24,7 +24,7 @@ const ADD_SECTION_LIBRARY: Array<{ key: string; label: string; available: boolea
   { key: 'certifications',        label: 'Certifications',        available: true  },
   { key: 'memberships',           label: 'Memberships',           available: true  },
   { key: 'strategic_initiatives', label: 'Strategic Initiatives', available: true  },
-  { key: 'portfolio',             label: 'Portfolio',             available: false },
+  { key: 'portfolio',             label: 'Portfolio',             available: true  },
   { key: 'press_features',        label: 'Press & features',      available: false },
   { key: 'references',            label: 'References',            available: false },
   { key: 'internships',           label: 'Internships',           available: false },
@@ -646,6 +646,14 @@ export default function ProfiluxPage() {
   const [siEditDescription, setSiEditDescription] = useState('')
   const [siSaving, setSiSaving] = useState(false)
   const [siError, setSiError] = useState<string | null>(null)
+  // PF-D V3.2 — Portfolio drawer (jsonb array-of-objects, { title, url } with http(s) guard)
+  const [pfDrawerOpen, setPfDrawerOpen] = useState(false)
+  const [pfDraftRows, setPfDraftRows] = useState<ProfiLuxPortfolioItem[]>([])
+  const [pfEditingIndex, setPfEditingIndex] = useState<number | null>(null)
+  const [pfEditTitle, setPfEditTitle] = useState('')
+  const [pfEditUrl, setPfEditUrl] = useState('')
+  const [pfSaving, setPfSaving] = useState(false)
+  const [pfError, setPfError] = useState<string | null>(null)
   // PF-D V2 — Add Section shell (V12 restoration)
   const [addSectionDrawerOpen, setAddSectionDrawerOpen] = useState(false)
   const [activatingSectionKey, setActivatingSectionKey] = useState<string | null>(null)
@@ -1125,6 +1133,83 @@ export default function ProfiluxPage() {
       setSiError(String(err))
     } finally {
       setSiSaving(false)
+    }
+  }
+
+  // PF-D V3.2 — Portfolio (structured jsonb array-of-objects, { title, url }).
+  // URL must start with http:// or https:// (no auto-prepend). Mirror V3.1 SI
+  // drawer flow: list + Add CTA + inline form + per-row Edit/Remove. Save
+  // overwrites server array with draftRows. Cancel discards draftRows.
+  function openPfDrawer() {
+    setPfError(null)
+    setPfDraftRows(Array.isArray(editor?.portfolio) ? [...editor!.portfolio] : [])
+    setPfEditingIndex(null)
+    setPfEditTitle('')
+    setPfEditUrl('')
+    setPfDrawerOpen(true)
+  }
+  function pfStartAdd() {
+    setPfEditingIndex(-1)
+    setPfEditTitle('')
+    setPfEditUrl('')
+  }
+  function pfStartEdit(index: number) {
+    const row = pfDraftRows[index]
+    if (!row) return
+    setPfEditingIndex(index)
+    setPfEditTitle(row.title)
+    setPfEditUrl(row.url)
+  }
+  function pfCancelEdit() {
+    setPfEditingIndex(null)
+    setPfEditTitle('')
+    setPfEditUrl('')
+  }
+  // Client-side gate mirrors server coercePortfolioItem URL guard exactly.
+  function pfRowValid(title: string, url: string): boolean {
+    const t = title.trim()
+    const u = url.trim()
+    if (t === '' || u === '') return false
+    return /^https?:\/\//.test(u)
+  }
+  function pfCommitEdit() {
+    const title = pfEditTitle.trim()
+    const url = pfEditUrl.trim()
+    if (!pfRowValid(title, url)) return
+    const next: ProfiLuxPortfolioItem = { title, url }
+    if (pfEditingIndex === -1) {
+      setPfDraftRows([...pfDraftRows, next])
+    } else if (typeof pfEditingIndex === 'number' && pfEditingIndex >= 0) {
+      const copy = [...pfDraftRows]
+      copy[pfEditingIndex] = next
+      setPfDraftRows(copy)
+    }
+    pfCancelEdit()
+  }
+  function pfRemove(index: number) {
+    setPfDraftRows(pfDraftRows.filter((_, i) => i !== index))
+    if (pfEditingIndex === index) pfCancelEdit()
+  }
+  async function handleSavePortfolio() {
+    setPfSaving(true)
+    setPfError(null)
+    try {
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ portfolio: pfDraftRows }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setPfError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+      setPfDrawerOpen(false)
+    } catch (err) {
+      setPfError(String(err))
+    } finally {
+      setPfSaving(false)
     }
   }
 
@@ -4407,6 +4492,175 @@ export default function ProfiluxPage() {
             {siSaving ? 'Saving…' : 'Save'}
           </button>
           {siError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{siError}</span>}
+        </div>
+      </Drawer>
+      </>)}
+      {e.activated_sections.includes('portfolio') && (<>
+      <SectionCard
+        eyebrow="Portfolio"
+        headerAction={
+          <button
+            type="button"
+            onClick={openPfDrawer}
+            style={{
+              background: 'rgba(165,142,40,0.05)',
+              color: '#a58e28',
+              border: '1px solid rgba(165,142,40,0.3)',
+              padding: '6px 14px',
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '0.4px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        }
+      >
+        <div>
+          {e.portfolio.length > 0
+            ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {e.portfolio.map((pf, idx) => (
+                  <div key={idx}>
+                    <div style={{ color: '#fff', fontWeight: 600 }}>{pf.title}</div>
+                    <div style={{ color: '#999', marginTop: 2, fontSize: 13, wordBreak: 'break-all' }}>{pf.url}</div>
+                  </div>
+                ))}
+              </div>
+            )
+            : <NotSet />}
+        </div>
+      </SectionCard>
+      <Drawer
+        open={pfDrawerOpen}
+        title="Portfolio"
+        onClose={() => setPfDrawerOpen(false)}
+      >
+        <div style={{ color: '#999', fontSize: 12, marginBottom: 14 }}>
+          Each link has a title (required) and URL (required, must start with http:// or https://). Save commits the full list.
+        </div>
+
+        {/* Existing rows list */}
+        {pfDraftRows.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+            {pfDraftRows.map((row, idx) => (
+              <div
+                key={idx}
+                style={{
+                  border: '0.5px solid #2a2a2a',
+                  borderRadius: 6,
+                  padding: '10px 12px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: '#fff', fontSize: 14, fontWeight: 600 }}>{row.title}</div>
+                  <div style={{ color: '#999', fontSize: 13, marginTop: 4, wordBreak: 'break-all' }}>{row.url}</div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                  <button
+                    type="button"
+                    onClick={() => pfStartEdit(idx)}
+                    style={{ background: 'transparent', color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)', padding: '4px 10px', fontSize: 11, borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => pfRemove(idx)}
+                    style={{ background: 'transparent', color: '#999', border: '1px solid #333', padding: '4px 10px', fontSize: 11, borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Inline edit/add form */}
+        {pfEditingIndex !== null ? (
+          <div style={{ border: '0.5px solid rgba(165,142,40,0.3)', borderRadius: 6, padding: 14, marginBottom: 14 }}>
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Title <span style={{ color: '#a58e28' }}>*</span></div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={pfEditTitle}
+                onChange={(ev) => setPfEditTitle(ev.target.value)}
+                placeholder="e.g. Brand book — Spring 2025"
+              />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>URL <span style={{ color: '#a58e28' }}>*</span></div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={pfEditUrl}
+                onChange={(ev) => setPfEditUrl(ev.target.value)}
+                placeholder="https://example.com/portfolio"
+              />
+              <div style={{ color: '#777', fontSize: 11, marginTop: 4 }}>
+                Must start with http:// or https://
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                type="button"
+                onClick={pfCommitEdit}
+                disabled={!pfRowValid(pfEditTitle, pfEditUrl)}
+                style={!pfRowValid(pfEditTitle, pfEditUrl) ? saveBtnDis : saveBtn}
+              >
+                {pfEditingIndex === -1 ? 'Add' : 'Update'}
+              </button>
+              <button
+                type="button"
+                onClick={pfCancelEdit}
+                style={btn}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={pfStartAdd}
+            style={{
+              background: 'transparent',
+              color: '#a58e28',
+              border: '1px dashed rgba(165,142,40,0.4)',
+              padding: '10px 14px',
+              fontSize: 12,
+              letterSpacing: '0.4px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+              marginBottom: 14,
+              width: '100%',
+              maxWidth: 600,
+              textAlign: 'left',
+            }}
+          >
+            + Add link
+          </button>
+        )}
+
+        <div style={{ marginTop: 4, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button
+            style={pfSaving ? saveBtnDis : saveBtn}
+            disabled={pfSaving}
+            onClick={handleSavePortfolio}
+          >
+            {pfSaving ? 'Saving…' : 'Save'}
+          </button>
+          {pfError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{pfError}</span>}
         </div>
       </Drawer>
       </>)}

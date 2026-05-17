@@ -9,6 +9,7 @@ import {
 } from '@/lib/profilux'
 import type {
   EditorProjection,
+  ProfiLuxPortfolioItem,
   ProfiLuxResolved,
   ProfiLuxStrategicInitiative,
   ResolvedExperience,
@@ -74,6 +75,38 @@ function coerceStrategicInitiative(
       : null
 
   return { title, description }
+}
+
+// PF-D V3.2 — Portfolio row coercion. Paired { title, url } with both required.
+// URL must be http(s)-only (lowercase exact prefix, no protocol-relative, no
+// other schemes, no auto-prepend). Anything failing → null so .filter drops.
+function coercePortfolioItem(
+  raw: unknown,
+): ProfiLuxPortfolioItem | null {
+  if (
+    raw === null ||
+    typeof raw !== 'object' ||
+    Array.isArray(raw)
+  ) return null
+
+  const obj = raw as Record<string, unknown>
+
+  const title =
+    typeof obj.title === 'string'
+      ? obj.title.trim()
+      : ''
+
+  if (title === '') return null
+
+  const url =
+    typeof obj.url === 'string'
+      ? obj.url.trim()
+      : ''
+
+  if (url === '') return null
+  if (!url.startsWith('http://') && !url.startsWith('https://')) return null
+
+  return { title, url }
 }
 
 function buildEditorResponse(resolved: ProfiLuxResolved) {
@@ -332,6 +365,14 @@ export async function POST(req: NextRequest) {
       ? body.strategic_initiatives
           .map((row: unknown): ProfiLuxStrategicInitiative | null => coerceStrategicInitiative(row))
           .filter((r: ProfiLuxStrategicInitiative | null): r is ProfiLuxStrategicInitiative => r !== null)
+      : null
+  }
+
+  if (has('portfolio')) {
+    updatePayload.portfolio = Array.isArray(body.portfolio)
+      ? body.portfolio
+          .map((row: unknown): ProfiLuxPortfolioItem | null => coercePortfolioItem(row))
+          .filter((r: ProfiLuxPortfolioItem | null): r is ProfiLuxPortfolioItem => r !== null)
       : null
   }
 
