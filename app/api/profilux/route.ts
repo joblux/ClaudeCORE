@@ -10,6 +10,7 @@ import {
 import type {
   EditorProjection,
   ProfiLuxPortfolioItem,
+  ProfiLuxPressFeatureItem,
   ProfiLuxResolved,
   ProfiLuxStrategicInitiative,
   ResolvedExperience,
@@ -107,6 +108,45 @@ function coercePortfolioItem(
   if (!url.startsWith('http://') && !url.startsWith('https://')) return null
 
   return { title, url }
+}
+
+// PF-D V3.3 — Press & Features row coercion. Trio { title, publication, url }
+// with all three required. Same http(s)-only URL guard as Portfolio (lowercase
+// exact prefix, no auto-prepend). Anything failing → null so .filter drops.
+function coercePressFeatureItem(
+  raw: unknown,
+): ProfiLuxPressFeatureItem | null {
+  if (
+    raw === null ||
+    typeof raw !== 'object' ||
+    Array.isArray(raw)
+  ) return null
+
+  const obj = raw as Record<string, unknown>
+
+  const title =
+    typeof obj.title === 'string'
+      ? obj.title.trim()
+      : ''
+
+  if (title === '') return null
+
+  const publication =
+    typeof obj.publication === 'string'
+      ? obj.publication.trim()
+      : ''
+
+  if (publication === '') return null
+
+  const url =
+    typeof obj.url === 'string'
+      ? obj.url.trim()
+      : ''
+
+  if (url === '') return null
+  if (!url.startsWith('http://') && !url.startsWith('https://')) return null
+
+  return { title, publication, url }
 }
 
 function buildEditorResponse(resolved: ProfiLuxResolved) {
@@ -373,6 +413,14 @@ export async function POST(req: NextRequest) {
       ? body.portfolio
           .map((row: unknown): ProfiLuxPortfolioItem | null => coercePortfolioItem(row))
           .filter((r: ProfiLuxPortfolioItem | null): r is ProfiLuxPortfolioItem => r !== null)
+      : null
+  }
+
+  if (has('press_features')) {
+    updatePayload.press_features = Array.isArray(body.press_features)
+      ? body.press_features
+          .map((row: unknown): ProfiLuxPressFeatureItem | null => coercePressFeatureItem(row))
+          .filter((r: ProfiLuxPressFeatureItem | null): r is ProfiLuxPressFeatureItem => r !== null)
       : null
   }
 

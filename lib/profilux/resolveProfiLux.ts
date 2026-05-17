@@ -347,6 +347,7 @@ export async function resolveProfiLux(
       ? row.strategic_initiatives
       : [],
     portfolio: row.portfolio ?? [],
+    press_features: row.press_features ?? [],
     activated_sections: (() => {
       const _explicitActivated = arr(row.activated_sections)
       const _implicitActivated = _explicitActivated.length > 0

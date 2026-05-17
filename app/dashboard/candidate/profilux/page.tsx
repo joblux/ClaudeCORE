@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import type { EditorView, MaskableField, ProfiLuxPortfolioItem, ProfiLuxStrategicInitiative } from '@/lib/profilux/types'
+import type { EditorView, MaskableField, ProfiLuxPortfolioItem, ProfiLuxPressFeatureItem, ProfiLuxStrategicInitiative } from '@/lib/profilux/types'
 import { MASKABLE_FIELDS } from '@/lib/profilux/types'
 import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS, PROFILUX_SECTOR_OPTIONS } from '@/lib/profilux/vocabulary'
 
@@ -25,7 +25,7 @@ const ADD_SECTION_LIBRARY: Array<{ key: string; label: string; available: boolea
   { key: 'memberships',           label: 'Memberships',           available: true  },
   { key: 'strategic_initiatives', label: 'Strategic Initiatives', available: true  },
   { key: 'portfolio',             label: 'Portfolio',             available: true  },
-  { key: 'press_features',        label: 'Press & features',      available: false },
+  { key: 'press_features',        label: 'Press & features',      available: true  },
   { key: 'references',            label: 'References',            available: false },
   { key: 'internships',           label: 'Internships',           available: false },
 ]
@@ -654,6 +654,15 @@ export default function ProfiluxPage() {
   const [pfEditUrl, setPfEditUrl] = useState('')
   const [pfSaving, setPfSaving] = useState(false)
   const [pfError, setPfError] = useState<string | null>(null)
+  // PF-D V3.3 — Press & Features drawer (jsonb { title, publication, url } with http(s) guard)
+  const [pressDrawerOpen, setPressDrawerOpen] = useState(false)
+  const [pressDraftRows, setPressDraftRows] = useState<ProfiLuxPressFeatureItem[]>([])
+  const [pressEditingIndex, setPressEditingIndex] = useState<number | null>(null)
+  const [pressEditTitle, setPressEditTitle] = useState('')
+  const [pressEditPublication, setPressEditPublication] = useState('')
+  const [pressEditUrl, setPressEditUrl] = useState('')
+  const [pressSaving, setPressSaving] = useState(false)
+  const [pressError, setPressError] = useState<string | null>(null)
   // PF-D V2 — Add Section shell (V12 restoration)
   const [addSectionDrawerOpen, setAddSectionDrawerOpen] = useState(false)
   const [activatingSectionKey, setActivatingSectionKey] = useState<string | null>(null)
@@ -1210,6 +1219,87 @@ export default function ProfiluxPage() {
       setPfError(String(err))
     } finally {
       setPfSaving(false)
+    }
+  }
+
+  // PF-D V3.3 — Press & Features (structured jsonb { title, publication, url }).
+  // All three required. URL must start with http:// or https:// (no auto-prepend).
+  // Mirrors V3.2 portfolio flow exactly with one additional input.
+  function openPressDrawer() {
+    setPressError(null)
+    setPressDraftRows(Array.isArray(editor?.press_features) ? [...editor!.press_features] : [])
+    setPressEditingIndex(null)
+    setPressEditTitle('')
+    setPressEditPublication('')
+    setPressEditUrl('')
+    setPressDrawerOpen(true)
+  }
+  function pressStartAdd() {
+    setPressEditingIndex(-1)
+    setPressEditTitle('')
+    setPressEditPublication('')
+    setPressEditUrl('')
+  }
+  function pressStartEdit(index: number) {
+    const row = pressDraftRows[index]
+    if (!row) return
+    setPressEditingIndex(index)
+    setPressEditTitle(row.title)
+    setPressEditPublication(row.publication)
+    setPressEditUrl(row.url)
+  }
+  function pressCancelEdit() {
+    setPressEditingIndex(null)
+    setPressEditTitle('')
+    setPressEditPublication('')
+    setPressEditUrl('')
+  }
+  function pressRowValid(title: string, publication: string, url: string): boolean {
+    const t = title.trim()
+    const p = publication.trim()
+    const u = url.trim()
+    if (t === '' || p === '' || u === '') return false
+    return /^https?:\/\//.test(u)
+  }
+  function pressCommitEdit() {
+    const title = pressEditTitle.trim()
+    const publication = pressEditPublication.trim()
+    const url = pressEditUrl.trim()
+    if (!pressRowValid(title, publication, url)) return
+    const next: ProfiLuxPressFeatureItem = { title, publication, url }
+    if (pressEditingIndex === -1) {
+      setPressDraftRows([...pressDraftRows, next])
+    } else if (typeof pressEditingIndex === 'number' && pressEditingIndex >= 0) {
+      const copy = [...pressDraftRows]
+      copy[pressEditingIndex] = next
+      setPressDraftRows(copy)
+    }
+    pressCancelEdit()
+  }
+  function pressRemove(index: number) {
+    setPressDraftRows(pressDraftRows.filter((_, i) => i !== index))
+    if (pressEditingIndex === index) pressCancelEdit()
+  }
+  async function handleSavePressFeatures() {
+    setPressSaving(true)
+    setPressError(null)
+    try {
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ press_features: pressDraftRows }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setPressError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+      setPressDrawerOpen(false)
+    } catch (err) {
+      setPressError(String(err))
+    } finally {
+      setPressSaving(false)
     }
   }
 
@@ -4661,6 +4751,187 @@ export default function ProfiluxPage() {
             {pfSaving ? 'Saving…' : 'Save'}
           </button>
           {pfError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{pfError}</span>}
+        </div>
+      </Drawer>
+      </>)}
+      {e.activated_sections.includes('press_features') && (<>
+      <SectionCard
+        eyebrow="Press & features"
+        headerAction={
+          <button
+            type="button"
+            onClick={openPressDrawer}
+            style={{
+              background: 'rgba(165,142,40,0.05)',
+              color: '#a58e28',
+              border: '1px solid rgba(165,142,40,0.3)',
+              padding: '6px 14px',
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '0.4px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        }
+      >
+        <div>
+          {e.press_features.length > 0
+            ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {e.press_features.map((p, idx) => (
+                  <div key={idx}>
+                    <div style={{ color: '#fff', fontWeight: 600 }}>{p.title}</div>
+                    <div style={{ color: '#999', marginTop: 2, fontSize: 12 }}>{p.publication}</div>
+                    <div style={{ color: '#999', marginTop: 2, fontSize: 13, wordBreak: 'break-all' }}>{p.url}</div>
+                  </div>
+                ))}
+              </div>
+            )
+            : <NotSet />}
+        </div>
+      </SectionCard>
+      <Drawer
+        open={pressDrawerOpen}
+        title="Press & features"
+        onClose={() => setPressDrawerOpen(false)}
+      >
+        <div style={{ color: '#999', fontSize: 12, marginBottom: 14 }}>
+          Each feature has a title (required), publication (required), and URL (required, must start with http:// or https://). Save commits the full list.
+        </div>
+
+        {/* Existing rows list */}
+        {pressDraftRows.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+            {pressDraftRows.map((row, idx) => (
+              <div
+                key={idx}
+                style={{
+                  border: '0.5px solid #2a2a2a',
+                  borderRadius: 6,
+                  padding: '10px 12px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: '#fff', fontSize: 14, fontWeight: 600 }}>{row.title}</div>
+                  <div style={{ color: '#999', fontSize: 12, marginTop: 2 }}>{row.publication}</div>
+                  <div style={{ color: '#999', fontSize: 13, marginTop: 2, wordBreak: 'break-all' }}>{row.url}</div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                  <button
+                    type="button"
+                    onClick={() => pressStartEdit(idx)}
+                    style={{ background: 'transparent', color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)', padding: '4px 10px', fontSize: 11, borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => pressRemove(idx)}
+                    style={{ background: 'transparent', color: '#999', border: '1px solid #333', padding: '4px 10px', fontSize: 11, borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Inline edit/add form */}
+        {pressEditingIndex !== null ? (
+          <div style={{ border: '0.5px solid rgba(165,142,40,0.3)', borderRadius: 6, padding: 14, marginBottom: 14 }}>
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Title <span style={{ color: '#a58e28' }}>*</span></div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={pressEditTitle}
+                onChange={(ev) => setPressEditTitle(ev.target.value)}
+                placeholder="e.g. The new face of French luxury"
+              />
+            </div>
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Publication <span style={{ color: '#a58e28' }}>*</span></div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={pressEditPublication}
+                onChange={(ev) => setPressEditPublication(ev.target.value)}
+                placeholder="e.g. Business of Fashion"
+              />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>URL <span style={{ color: '#a58e28' }}>*</span></div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={pressEditUrl}
+                onChange={(ev) => setPressEditUrl(ev.target.value)}
+                placeholder="https://example.com/article"
+              />
+              <div style={{ color: '#777', fontSize: 11, marginTop: 4 }}>
+                Must start with http:// or https://
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                type="button"
+                onClick={pressCommitEdit}
+                disabled={!pressRowValid(pressEditTitle, pressEditPublication, pressEditUrl)}
+                style={!pressRowValid(pressEditTitle, pressEditPublication, pressEditUrl) ? saveBtnDis : saveBtn}
+              >
+                {pressEditingIndex === -1 ? 'Add' : 'Update'}
+              </button>
+              <button
+                type="button"
+                onClick={pressCancelEdit}
+                style={btn}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={pressStartAdd}
+            style={{
+              background: 'transparent',
+              color: '#a58e28',
+              border: '1px dashed rgba(165,142,40,0.4)',
+              padding: '10px 14px',
+              fontSize: 12,
+              letterSpacing: '0.4px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+              marginBottom: 14,
+              width: '100%',
+              maxWidth: 600,
+              textAlign: 'left',
+            }}
+          >
+            + Add feature
+          </button>
+        )}
+
+        <div style={{ marginTop: 4, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button
+            style={pressSaving ? saveBtnDis : saveBtn}
+            disabled={pressSaving}
+            onClick={handleSavePressFeatures}
+          >
+            {pressSaving ? 'Saving…' : 'Save'}
+          </button>
+          {pressError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{pressError}</span>}
         </div>
       </Drawer>
       </>)}

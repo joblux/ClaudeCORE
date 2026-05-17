@@ -31,6 +31,7 @@ export type {
   MemberRow,
   // Resolved
   ProfiLuxPortfolioItem,
+  ProfiLuxPressFeatureItem,
   ProfiLuxResolved,
   ProfiLuxStrategicInitiative,
   ResolvedCvMeta,
