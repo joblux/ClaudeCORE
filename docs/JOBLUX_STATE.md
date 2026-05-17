@@ -54,6 +54,8 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **d1a0274** `feat(profilux): PF-D V3.1 — Memberships (text[]) + Strategic Initiatives (jsonb) library sections` — May 17 2026 PM. SHIPPED + COOLIFY-GREEN + PROD QA 5/5 PASS. DB remediation applied via Supabase MCP: `pf_d_v3_remediation_recreate_structured_as_jsonb`; orphan May 16 MCP migration had created `strategic_initiatives`, `portfolio`, `press_features` as text[] and they were recreated as jsonb NULL. `memberships` kept text[]. Pack D active sections now: Awards, Certifications, Memberships, Strategic Initiatives. Remaining inert: Portfolio, Press & Features, References, Internships. Next natural slice: PF-D V3.2 Portfolio.
+
 - **5c66a87** `feat(ats): G2 + G9 minimal — propose-to-assignment with matching-opt-in gate` — May 16 2026 PM. SHIPPED + COOLIFY-GREEN + LIVE-VALIDATED 8/8. 2 files, +191/-1. `/api/applications` admin branch enforces `members.matching_opt_in === true` AND `deleted_at IS NULL`: 404/410/403 codes. Self-apply branch exempt by design. `assigned_recruiter` defaults to `session.user.email`. `/admin/members/[id]` topbar "Propose to assignment" button, `!isBusiness` gated, disabled+tooltip when opt-in false. Panel reads `/api/assignments?status=published&limit=100`, posts with `source='sourced_by_recruiter'`. First runtime consumer of B.3.3. Net DB delta = 0. Ledger `0ed736cd` closed. Partial advance on `1f7ccd56`.
 
 - **09660d5** `copy(connect): tighten /connect + employer signup vocabulary` — May 16 2026 PM. SHIPPED + COOLIFY-GREEN + LIVE-VALIDATED 8/8. 2 files, +8/-8. `/connect` + `/join/employer`: Employers→Companies, ProfiLux capitalization, organisation→organization (×3), drop "500+" from 2 houses bullets, "manager and up level"→"manager-and-up". Closes `/connect` vocabulary audit blocker. Ledger `d037e17e` closed.
@@ -213,17 +215,15 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 **Lane: open — awaiting Mo direction.**
 
-Track 2 doctrinally unblocked tonight: `/connect` vocabulary audit closed; recruiter→ATS loop has admin entry point with B.3.3 consent gate enforced at runtime.
+Pack D Phase 2 underway. V3.1 shipped and prod-validated: Memberships + Strategic Initiatives are active. Pack D is now 4/8 active.
 
-**No auto-derived next step.** Mo direction needed. Candidate tracks:
+**No auto-derived next step.** Candidate tracks:
 
-1. **G7 candidate-side recruiting feed** — `/dashboard/candidate` widget over existing `/api/applications/mine`. Closes the loop opened by G2+G9. Advances `1f7ccd56`.
-2. **G3 client submission surface** — gated on `C-B-2` / `C-B-3` parked doctrine.
-3. **G1 matching engine v0** — requires doctrine call (score weights, surface ordering).
-4. **Pre-launch infra** — `7becdb12`, `6f57a924`, env flips, DNS.
+1. **PF-D V3.2 Portfolio** — jsonb `{title, url}` with locked http(s) URL guard.
+2. **PF-D V3.3 Press & Features** — jsonb `{title, publication, url}`.
+3. **PF-D remaining sections** — References, Internships.
+4. **G7 candidate-side recruiting feed.**
 5. **Other** — explicit Mo choice.
-
-**Handoff doc:** generated 2026-05-16 PM (see chat).
 
 ### DO NOT
 
@@ -337,7 +337,7 @@ Track 2 doctrinally unblocked tonight: `/connect` vocabulary audit closed; recru
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 16, 2026 PM (09660d5 + 5c66a87 shipped, 16/16 prod QA flows PASS, 0 incidents, 3 ledger rows closed, brief decline doctrine clarified).
+**Last updated:** May 17, 2026 PM (09660d5 + 5c66a87 shipped, 16/16 prod QA flows PASS, 0 incidents, 3 ledger rows closed, brief decline doctrine clarified).
 
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
