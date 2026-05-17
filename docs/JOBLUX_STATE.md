@@ -54,6 +54,10 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **c61e352** `feat(profilux): PF-D V3.3 — Press & Features (jsonb {title, publication, url}) library section with http(s) URL guard` — May 17 2026 PM. SHIPPED + COOLIFY-GREEN + PROD QA 6/6 PASS. 6 files, +341/-2. Adds `ProfiLuxPressFeatureItem` type, `coercePressFeatureItem` validator (rejects rows missing title/publication/url or url not starting with `http://` or `https://` lowercase exact prefix, no auto-prepend). EditorView-only projection (public/client/ats/admin/dashboard intentionally omit). `members.press_features` substrate jsonb confirmed pre-flight (0 rows). ADD_SECTION_LIBRARY: press_features flipped COMING SOON → ADD. Mirror of V3.2 pattern + extra required `publication` field. Pack D now 6/8 active. Next inert sections (References, Internships) require DDL — both `members` columns missing per orphan May 16 migration that created only 4 of 6 jsonb columns. Live QA on Alex (49542211): valid 3-field row `{title:"Rising star in luxury retail", publication:"Business of Fashion", url:"https://businessoffashion.com/articles/rising-star"}` saved + persisted post-F5; invalid URL "example.com/article" rejected; missing publication rejected; zero console errors.
+
+- **88ed1a0** `feat(profilux): PF-D V3.2 — Portfolio (jsonb {title, url}) library section with http(s) URL guard` — May 17 2026 PM. SHIPPED + COOLIFY-GREEN + PROD QA 5/5 PASS. 6 files, +316/-2. Adds `ProfiLuxPortfolioItem` type, `coercePortfolioItem` validator (rejects rows missing title/url or url not starting with `http://` or `https://` lowercase exact prefix, no auto-prepend, no protocol-relative, no other schemes). EditorView-only projection (public/client/ats/admin/dashboard intentionally omit — defense in depth). `members.portfolio` substrate jsonb confirmed pre-flight (0 rows). ADD_SECTION_LIBRARY: portfolio flipped COMING SOON → ADD. URL guard pattern locked as canonical for Pack D forward: lowercase `http://` or `https://` prefix only, row rejected if invalid, no normalization. Live QA on Alex (49542211): valid row `{title:"Personal site", url:"https://alexmason.com"}` saved + persisted post-F5; invalid "example.com" rejected; zero console errors.
+
 - **d1a0274** `feat(profilux): PF-D V3.1 — Memberships (text[]) + Strategic Initiatives (jsonb) library sections` — May 17 2026 PM. SHIPPED + COOLIFY-GREEN + PROD QA 5/5 PASS. DB remediation applied via Supabase MCP: `pf_d_v3_remediation_recreate_structured_as_jsonb`; orphan May 16 MCP migration had created `strategic_initiatives`, `portfolio`, `press_features` as text[] and they were recreated as jsonb NULL. `memberships` kept text[]. Pack D active sections now: Awards, Certifications, Memberships, Strategic Initiatives. Remaining inert: Portfolio, Press & Features, References, Internships. Next natural slice: PF-D V3.2 Portfolio.
 
 - **5c66a87** `feat(ats): G2 + G9 minimal — propose-to-assignment with matching-opt-in gate` — May 16 2026 PM. SHIPPED + COOLIFY-GREEN + LIVE-VALIDATED 8/8. 2 files, +191/-1. `/api/applications` admin branch enforces `members.matching_opt_in === true` AND `deleted_at IS NULL`: 404/410/403 codes. Self-apply branch exempt by design. `assigned_recruiter` defaults to `session.user.email`. `/admin/members/[id]` topbar "Propose to assignment" button, `!isBusiness` gated, disabled+tooltip when opt-in false. Panel reads `/api/assignments?status=published&limit=100`, posts with `source='sourced_by_recruiter'`. First runtime consumer of B.3.3. Net DB delta = 0. Ledger `0ed736cd` closed. Partial advance on `1f7ccd56`.
@@ -215,15 +219,16 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 **Lane: open — awaiting Mo direction.**
 
-Pack D Phase 2 underway. V3.1 shipped and prod-validated: Memberships + Strategic Initiatives are active. Pack D is now 4/8 active.
+Pack D Phase 2 advanced. V3.1 + V3.2 + V3.3 shipped and prod-validated: Memberships, Strategic Initiatives, Portfolio, Press & Features all active. Pack D is now 6/8 active.
+
+Remaining inert: References, Internships. Both REQUIRE DDL before code — `members.references` and `members.internships` columns are missing (orphan May 16 MCP migration created only 4 of 6 jsonb columns). No code slice for either may start before DDL + type decision (column shape, jsonb vs text[], required fields).
 
 **No auto-derived next step.** Candidate tracks:
 
-1. **PF-D V3.2 Portfolio** — jsonb `{title, url}` with locked http(s) URL guard.
-2. **PF-D V3.3 Press & Features** — jsonb `{title, publication, url}`.
-3. **PF-D remaining sections** — References, Internships.
-4. **G7 candidate-side recruiting feed.**
-5. **Other** — explicit Mo choice.
+1. **PF-D V3.4 References** — pending DDL + shape decision (likely jsonb, fields TBD).
+2. **PF-D V3.5 Internships** — pending DDL + shape decision; doctrinal note: `Internships` is an intentional STATE §1 kill-word exception per MATRIX §22.2 v1.6 (Emerging-user representation), do not propose removal.
+3. **G7 candidate-side recruiting feed.**
+4. **Other** — explicit Mo choice.
 
 ### DO NOT
 
@@ -337,7 +342,7 @@ Pack D Phase 2 underway. V3.1 shipped and prod-validated: Memberships + Strategi
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 17, 2026 PM (09660d5 + 5c66a87 shipped, 16/16 prod QA flows PASS, 0 incidents, 3 ledger rows closed, brief decline doctrine clarified).
+**Last updated:** May 17, 2026 PM late (d1a0274 + 88ed1a0 + c61e352 shipped, Pack D Phase 2 now 6/8 active, 16/16 prod QA flows PASS across V3.1+V3.2+V3.3, References + Internships inert pending DDL + type decision).
 
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
