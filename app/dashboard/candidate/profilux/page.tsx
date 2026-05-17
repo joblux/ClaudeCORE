@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import type { EditorView, MaskableField } from '@/lib/profilux/types'
+import type { EditorView, MaskableField, ProfiLuxStrategicInitiative } from '@/lib/profilux/types'
 import { MASKABLE_FIELDS } from '@/lib/profilux/types'
 import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS, PROFILUX_SECTOR_OPTIONS } from '@/lib/profilux/vocabulary'
 
@@ -22,9 +22,9 @@ const SCREEN_TITLES = [
 const ADD_SECTION_LIBRARY: Array<{ key: string; label: string; available: boolean }> = [
   { key: 'awards',                label: 'Awards',                available: true  },
   { key: 'certifications',        label: 'Certifications',        available: true  },
+  { key: 'memberships',           label: 'Memberships',           available: true  },
+  { key: 'strategic_initiatives', label: 'Strategic Initiatives', available: true  },
   { key: 'portfolio',             label: 'Portfolio',             available: false },
-  { key: 'strategic_initiatives', label: 'Strategic Initiatives', available: false },
-  { key: 'memberships',           label: 'Memberships',           available: false },
   { key: 'press_features',        label: 'Press & features',      available: false },
   { key: 'references',            label: 'References',            available: false },
   { key: 'internships',           label: 'Internships',           available: false },
@@ -633,6 +633,19 @@ export default function ProfiluxPage() {
   const [awardsDraftText, setAwardsDraftText] = useState('')
   const [awardsSaving, setAwardsSaving] = useState(false)
   const [awardsError, setAwardsError] = useState<string | null>(null)
+  // PF-D V3.1 — Memberships drawer (text[] textarea, free-text, mirrors Awards)
+  const [membershipsDrawerOpen, setMembershipsDrawerOpen] = useState(false)
+  const [membershipsDraftText, setMembershipsDraftText] = useState('')
+  const [membershipsSaving, setMembershipsSaving] = useState(false)
+  const [membershipsError, setMembershipsError] = useState<string | null>(null)
+  // PF-D V3.1 — Strategic Initiatives drawer (jsonb array-of-objects, structured)
+  const [siDrawerOpen, setSiDrawerOpen] = useState(false)
+  const [siDraftRows, setSiDraftRows] = useState<ProfiLuxStrategicInitiative[]>([])
+  const [siEditingIndex, setSiEditingIndex] = useState<number | null>(null)
+  const [siEditTitle, setSiEditTitle] = useState('')
+  const [siEditDescription, setSiEditDescription] = useState('')
+  const [siSaving, setSiSaving] = useState(false)
+  const [siError, setSiError] = useState<string | null>(null)
   // PF-D V2 — Add Section shell (V12 restoration)
   const [addSectionDrawerOpen, setAddSectionDrawerOpen] = useState(false)
   const [activatingSectionKey, setActivatingSectionKey] = useState<string | null>(null)
@@ -1013,6 +1026,105 @@ export default function ProfiluxPage() {
       setAwardsError(String(err))
     } finally {
       setAwardsSaving(false)
+    }
+  }
+
+  // PF-D V3.1 — Memberships (free-text text[] textarea, mirrors Awards)
+  function openMembershipsDrawer() {
+    setMembershipsError(null)
+    setMembershipsDraftText((editor?.memberships ?? []).join('\n'))
+    setMembershipsDrawerOpen(true)
+  }
+  async function handleSaveMemberships() {
+    setMembershipsSaving(true)
+    setMembershipsError(null)
+    try {
+      const arr = membershipsDraftText.split('\n').map(s => s.trim()).filter(s => s !== '')
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberships: arr }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setMembershipsError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+      setMembershipsDrawerOpen(false)
+    } catch (err) {
+      setMembershipsError(String(err))
+    } finally {
+      setMembershipsSaving(false)
+    }
+  }
+
+  // PF-D V3.1 — Strategic Initiatives (structured jsonb array-of-objects).
+  // Drawer carries a draftRows working copy; per-row Add/Edit/Remove mutate it.
+  // Save overwrites server array with draftRows. Cancel discards draftRows.
+  function openSiDrawer() {
+    setSiError(null)
+    setSiDraftRows(Array.isArray(editor?.strategic_initiatives) ? [...editor!.strategic_initiatives] : [])
+    setSiEditingIndex(null)
+    setSiEditTitle('')
+    setSiEditDescription('')
+    setSiDrawerOpen(true)
+  }
+  function siStartAdd() {
+    setSiEditingIndex(-1)
+    setSiEditTitle('')
+    setSiEditDescription('')
+  }
+  function siStartEdit(index: number) {
+    const row = siDraftRows[index]
+    if (!row) return
+    setSiEditingIndex(index)
+    setSiEditTitle(row.title)
+    setSiEditDescription(row.description ?? '')
+  }
+  function siCancelEdit() {
+    setSiEditingIndex(null)
+    setSiEditTitle('')
+    setSiEditDescription('')
+  }
+  function siCommitEdit() {
+    const title = siEditTitle.trim()
+    if (title === '') return
+    const description = siEditDescription.trim() === '' ? null : siEditDescription.trim()
+    const next: ProfiLuxStrategicInitiative = { title, description }
+    if (siEditingIndex === -1) {
+      setSiDraftRows([...siDraftRows, next])
+    } else if (typeof siEditingIndex === 'number' && siEditingIndex >= 0) {
+      const copy = [...siDraftRows]
+      copy[siEditingIndex] = next
+      setSiDraftRows(copy)
+    }
+    siCancelEdit()
+  }
+  function siRemove(index: number) {
+    setSiDraftRows(siDraftRows.filter((_, i) => i !== index))
+    if (siEditingIndex === index) siCancelEdit()
+  }
+  async function handleSaveStrategicInitiatives() {
+    setSiSaving(true)
+    setSiError(null)
+    try {
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ strategic_initiatives: siDraftRows }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setSiError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+      setSiDrawerOpen(false)
+    } catch (err) {
+      setSiError(String(err))
+    } finally {
+      setSiSaving(false)
     }
   }
 
@@ -2651,6 +2763,37 @@ export default function ProfiluxPage() {
             </ViewZone>
               )
             })()}
+
+            {/* PF-D V3.1 — Memberships (free-text text[], mirrors Awards) */}
+            {(() => {
+              if (!Array.isArray(e.memberships) || e.memberships.length === 0) return null
+              return (
+            <ViewZone title="Memberships">
+              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.5 }}>
+                {e.memberships.join(' · ')}
+              </div>
+            </ViewZone>
+              )
+            })()}
+
+            {/* PF-D V3.1 — Strategic Initiatives (structured jsonb array-of-objects) */}
+            {(() => {
+              if (!Array.isArray(e.strategic_initiatives) || e.strategic_initiatives.length === 0) return null
+              return (
+            <ViewZone title="Strategic Initiatives">
+              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {e.strategic_initiatives.map((si, idx) => (
+                  <div key={idx}>
+                    <div style={{ color: '#fff', fontWeight: 600 }}>{si.title}</div>
+                    {si.description && (
+                      <div style={{ color: '#999', marginTop: 2 }}>{si.description}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </ViewZone>
+              )
+            })()}
               </div>
             </div>
 
@@ -4037,6 +4180,233 @@ export default function ProfiluxPage() {
             {awardsSaving ? 'Saving…' : 'Save'}
           </button>
           {awardsError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{awardsError}</span>}
+        </div>
+      </Drawer>
+      </>)}
+      {e.activated_sections.includes('memberships') && (<>
+      <SectionCard
+        eyebrow="Memberships"
+        headerAction={
+          <button
+            type="button"
+            onClick={openMembershipsDrawer}
+            style={{
+              background: 'rgba(165,142,40,0.05)',
+              color: '#a58e28',
+              border: '1px solid rgba(165,142,40,0.3)',
+              padding: '6px 14px',
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '0.4px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        }
+      >
+        <div>
+          {e.memberships.length > 0
+            ? e.memberships.join(', ')
+            : <NotSet />}
+        </div>
+      </SectionCard>
+      <Drawer
+        open={membershipsDrawerOpen}
+        title="Memberships"
+        onClose={() => setMembershipsDrawerOpen(false)}
+      >
+        <div style={{ color: '#999', fontSize: 12, marginBottom: 10 }}>
+          One membership per line. Empty lines are ignored.
+        </div>
+        <textarea
+          style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 160, resize: 'vertical' }}
+          rows={8}
+          value={membershipsDraftText}
+          onChange={(ev) => setMembershipsDraftText(ev.target.value)}
+          placeholder={'e.g.\nComité Colbert\nBoF Professional\nWalpole Member'}
+        />
+        <div style={{ marginTop: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button
+            style={membershipsSaving ? saveBtnDis : saveBtn}
+            disabled={membershipsSaving}
+            onClick={handleSaveMemberships}
+          >
+            {membershipsSaving ? 'Saving…' : 'Save'}
+          </button>
+          {membershipsError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{membershipsError}</span>}
+        </div>
+      </Drawer>
+      </>)}
+      {e.activated_sections.includes('strategic_initiatives') && (<>
+      <SectionCard
+        eyebrow="Strategic Initiatives"
+        headerAction={
+          <button
+            type="button"
+            onClick={openSiDrawer}
+            style={{
+              background: 'rgba(165,142,40,0.05)',
+              color: '#a58e28',
+              border: '1px solid rgba(165,142,40,0.3)',
+              padding: '6px 14px',
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '0.4px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        }
+      >
+        <div>
+          {e.strategic_initiatives.length > 0
+            ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {e.strategic_initiatives.map((si, idx) => (
+                  <div key={idx}>
+                    <div style={{ color: '#fff', fontWeight: 600 }}>{si.title}</div>
+                    {si.description && (
+                      <div style={{ color: '#999', marginTop: 2, fontSize: 13 }}>{si.description}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )
+            : <NotSet />}
+        </div>
+      </SectionCard>
+      <Drawer
+        open={siDrawerOpen}
+        title="Strategic Initiatives"
+        onClose={() => setSiDrawerOpen(false)}
+      >
+        <div style={{ color: '#999', fontSize: 12, marginBottom: 14 }}>
+          Each initiative has a title (required) and optional description. Save commits the full list.
+        </div>
+
+        {/* Existing rows list */}
+        {siDraftRows.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+            {siDraftRows.map((row, idx) => (
+              <div
+                key={idx}
+                style={{
+                  border: '0.5px solid #2a2a2a',
+                  borderRadius: 6,
+                  padding: '10px 12px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: '#fff', fontSize: 14, fontWeight: 600 }}>{row.title}</div>
+                  {row.description && (
+                    <div style={{ color: '#999', fontSize: 13, marginTop: 4 }}>{row.description}</div>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                  <button
+                    type="button"
+                    onClick={() => siStartEdit(idx)}
+                    style={{ background: 'transparent', color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)', padding: '4px 10px', fontSize: 11, borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => siRemove(idx)}
+                    style={{ background: 'transparent', color: '#999', border: '1px solid #333', padding: '4px 10px', fontSize: 11, borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Inline edit/add form */}
+        {siEditingIndex !== null ? (
+          <div style={{ border: '0.5px solid rgba(165,142,40,0.3)', borderRadius: 6, padding: 14, marginBottom: 14 }}>
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Title <span style={{ color: '#a58e28' }}>*</span></div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={siEditTitle}
+                onChange={(ev) => setSiEditTitle(ev.target.value)}
+                placeholder="e.g. Opened APAC retail"
+              />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Description</div>
+              <textarea
+                style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 80, resize: 'vertical' }}
+                rows={4}
+                value={siEditDescription}
+                onChange={(ev) => setSiEditDescription(ev.target.value)}
+                placeholder="Optional — what you led, scope, outcome"
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                type="button"
+                onClick={siCommitEdit}
+                disabled={siEditTitle.trim() === ''}
+                style={siEditTitle.trim() === '' ? saveBtnDis : saveBtn}
+              >
+                {siEditingIndex === -1 ? 'Add' : 'Update'}
+              </button>
+              <button
+                type="button"
+                onClick={siCancelEdit}
+                style={btn}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={siStartAdd}
+            style={{
+              background: 'transparent',
+              color: '#a58e28',
+              border: '1px dashed rgba(165,142,40,0.4)',
+              padding: '10px 14px',
+              fontSize: 12,
+              letterSpacing: '0.4px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+              marginBottom: 14,
+              width: '100%',
+              maxWidth: 600,
+              textAlign: 'left',
+            }}
+          >
+            + Add initiative
+          </button>
+        )}
+
+        <div style={{ marginTop: 4, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button
+            style={siSaving ? saveBtnDis : saveBtn}
+            disabled={siSaving}
+            onClick={handleSaveStrategicInitiatives}
+          >
+            {siSaving ? 'Saving…' : 'Save'}
+          </button>
+          {siError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{siError}</span>}
         </div>
       </Drawer>
       </>)}

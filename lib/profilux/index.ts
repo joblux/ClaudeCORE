@@ -31,6 +31,7 @@ export type {
   MemberRow,
   // Resolved
   ProfiLuxResolved,
+  ProfiLuxStrategicInitiative,
   ResolvedCvMeta,
   ResolvedEducation,
   ResolvedExperience,

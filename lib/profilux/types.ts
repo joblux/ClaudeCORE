@@ -189,6 +189,18 @@ export type CvParsedData = {
 // section_visibility consumed by projectFor('public') this slice. masked_fields
 // is substrate-only — no consumer yet; client/share surfaces follow in next slice.
 
+/**
+ * PF-D V3.1 — Strategic Initiatives (jsonb array-of-objects).
+ *
+ * Pack D Phase 2 path γ — paired semantic object (title + optional description).
+ * Stored in members.strategic_initiatives (jsonb NULL). title required;
+ * description optional. Editor projection only — public/client/ats omit v1.
+ */
+export type ProfiLuxStrategicInitiative = {
+  title: string
+  description: string | null
+}
+
 export const SECTION_IDS = ['identity','current_role','career_path','education','languages','luxury_fit','skills_markets','clienteling','compensation','availability'] as const
 export type SectionId = typeof SECTION_IDS[number]
 export type SectionVisibility = Partial<Record<SectionId, boolean>>
@@ -234,6 +246,8 @@ export type MemberRow = {
   software_tools: string[] | null
   certifications: string[] | null
   awards: string[] | null
+  memberships: string[] | null
+  strategic_initiatives: ProfiLuxStrategicInitiative[] | null
   activated_sections: string[] | null
   product_categories: string[] | null
   brands_worked_with: string[] | null
@@ -431,6 +445,8 @@ export type ProfiLuxResolved = {
   software_tools: string[]
   certifications: string[]
   awards: string[]
+  memberships: string[]
+  strategic_initiatives: ProfiLuxStrategicInitiative[]
   activated_sections: string[]
   product_categories: string[]
   brands_worked_with: string[]
@@ -559,6 +575,8 @@ export type EditorView = {
   brands_worked_with: string[]
   certifications: string[]
   awards: string[]
+  memberships: string[]
+  strategic_initiatives: ProfiLuxStrategicInitiative[]
   activated_sections: string[]
   // Experience + education (L1)
   experiences: ResolvedExperience[]

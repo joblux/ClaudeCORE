@@ -10,6 +10,7 @@ import {
 import type {
   EditorProjection,
   ProfiLuxResolved,
+  ProfiLuxStrategicInitiative,
   ResolvedExperience,
 } from '@/lib/profilux'
 import { SECTION_IDS, MASKABLE_FIELDS } from '@/lib/profilux/types'
@@ -40,6 +41,39 @@ function denormalizeAvailability(uiValue: string | null | undefined): string | n
       // sent by a future client), pass it through unchanged. Forward-compat.
       return trimmed
   }
+}
+
+// PF-D V3.1 — Strategic Initiatives row coercion. Mirrors text[] write blocks'
+// trim + reject-empty posture, lifted to a paired object: title required;
+// description optional, trimmed → null when empty. Anything not an object or
+// missing a title is rejected (returns null) so .filter drops the row.
+function coerceStrategicInitiative(
+  raw: unknown,
+): ProfiLuxStrategicInitiative | null {
+  if (
+    raw === null ||
+    typeof raw !== 'object' ||
+    Array.isArray(raw)
+  ) return null
+
+  const obj = raw as Record<string, unknown>
+
+  const title =
+    typeof obj.title === 'string'
+      ? obj.title.trim()
+      : ''
+
+  if (title === '') return null
+
+  const descRaw = obj.description
+
+  const description =
+    typeof descRaw === 'string' &&
+    descRaw.trim() !== ''
+      ? descRaw.trim()
+      : null
+
+  return { title, description }
 }
 
 function buildEditorResponse(resolved: ProfiLuxResolved) {
@@ -282,6 +316,22 @@ export async function POST(req: NextRequest) {
       ? body.awards
           .filter((s: unknown) => typeof s === 'string' && s.trim() !== '')
           .map((s: string) => s.trim())
+      : null
+  }
+
+  if (has('memberships')) {
+    updatePayload.memberships = Array.isArray(body.memberships)
+      ? body.memberships
+          .filter((s: unknown) => typeof s === 'string' && s.trim() !== '')
+          .map((s: string) => s.trim())
+      : null
+  }
+
+  if (has('strategic_initiatives')) {
+    updatePayload.strategic_initiatives = Array.isArray(body.strategic_initiatives)
+      ? body.strategic_initiatives
+          .map((row: unknown): ProfiLuxStrategicInitiative | null => coerceStrategicInitiative(row))
+          .filter((r: ProfiLuxStrategicInitiative | null): r is ProfiLuxStrategicInitiative => r !== null)
       : null
   }
 

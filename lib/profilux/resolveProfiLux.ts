@@ -342,6 +342,10 @@ export async function resolveProfiLux(
     software_tools: arr(row.software_tools),
     certifications: arr(row.certifications),
     awards: arr(row.awards),
+    memberships: arr(row.memberships),
+    strategic_initiatives: Array.isArray(row.strategic_initiatives)
+      ? row.strategic_initiatives
+      : [],
     activated_sections: (() => {
       const _explicitActivated = arr(row.activated_sections)
       const _implicitActivated = _explicitActivated.length > 0
@@ -349,6 +353,8 @@ export async function resolveProfiLux(
         : [
             ...(arr(row.certifications).length > 0 ? ['certifications'] : []),
             ...(arr(row.awards).length > 0 ? ['awards'] : []),
+            ...(arr(row.memberships).length > 0 ? ['memberships'] : []),
+            ...(Array.isArray(row.strategic_initiatives) && row.strategic_initiatives.length > 0 ? ['strategic_initiatives'] : []),
           ]
       return _explicitActivated.length > 0 ? _explicitActivated : _implicitActivated
     })(),
