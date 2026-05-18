@@ -4,7 +4,7 @@ Domain contract for the ProfiLux object across JOBLUX. Locks the storage, resolu
 
 This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE wins until reconciled. See §12.
 
-**Status:** locked v1.10 (May 17 2026 RGPD export role-conditional tables shipped — B.3.4.1)
+**Status:** locked v1.11 (May 18 2026 private PDF export reconciliation — Pack B residue close)
 **Originally locked:** April 30, 2026
 **v1.1 addendum locked:** May 6, 2026
 **v1.2 addendum locked:** May 7, 2026
@@ -13,6 +13,18 @@ This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE w
 ---
 
 ## CHANGE LOG
+
+
+**v1.11 — May 18 2026 private PDF export reconciliation (Pack B residue close)**
+
+Reconciles MATRIX with live shipped code (`/api/profilux/export` + `lib/profilux/pdf/ProfiLuxPDF.tsx`, `@react-pdf/renderer`). Doctrine β locked: private candidate export = full ProfiLux, unmasked. Masked share PDF (recruiter/client) stays parked under §19A Q3/Q5.
+
+- **§13** Deferred items table — "PDF library + render template" row flipped to SHIPPED for the private candidate path. Masked share PDF row remains parked.
+- **§19A.2** — deferred-infra framing removed; new paragraph locks the private self-export β contract. `masked_fields` (§16) and §16A apply to client/share surfaces only, never private export.
+- **§19A.3** — out-of-scope list pruned: PDF library decision + render template removed (both shipped β); `profilux` ghost-table cleanup removed (already retired 2026-05-18).
+- **§19A.4** — §13 cross-ref bullet amended to note private PDF SHIPPED v1.11.
+
+§§1–18, §19, §19B, §20–25 — all KEEP unchanged.
 
 
 **v1.10 — May 17 2026 RGPD export role-conditional tables shipped (B.3.4.1)**
@@ -693,7 +705,7 @@ The following items are intentionally out of v1.1. Each is a known future ticket
 | Anthropic Files API native PDF | Replace pdf-parse with native PDF input to Haiku | Per F-pdfparse-anthropic-files in STATE |
 | Matching-entry consent field | Explicit user toggle, NOT derived from `availability` (see §20) | When matching entry §20 is wired |
 | Matching-entry score wiring | Computed signal triggering (1) + (2) of §8.1 | When Tier 1 schema lands |
-| PDF library + render template | Selection of PDF generator (none in deps today) + template for the ProfiLux private snapshot (see §19A Q2). Doctrine locked at §19A; infra deferred. | When candidate self-export ships |
+| PDF library + render template | Selection of PDF generator + template for the ProfiLux private snapshot (see §19A Q2). Private candidate path SHIPPED v1.11 via `@react-pdf/renderer` + `lib/profilux/pdf/ProfiLuxPDF.tsx` consumed by `/api/profilux/export`. Masked share PDF (recruiter/client) stays parked per §19A Q3/Q5. | SHIPPED v1.11 (private path); masked share PDF parked |
 | Resume extinction reconciliation | Retire `/api/resume/[slug]` route + retire planned `members.resume_*` columns + retire `resume_slug` slug space. All identified as fossil from a prior "Resume product" direction (see §19A.3). | After §19A doctrine lands; not in C6.1 |
 | `profilux` ghost-table cleanup | The standalone `profilux` table contains 17 legacy columns beyond `share_slug` + `sharing_enabled`. Tracked at ledger `6aef236e`. Doctrine drift vs §9; substrate cleanup deferred. | Together with Manage tab A2 sharing UX rebuild |
 | View "Download PDF" placeholder removal | The LEFT SPINE row in `app/dashboard/candidate/profilux/page.tsx` is doctrinally misplaced per §19A.2. Cleanup deferred until Manage-side export control ships. | When candidate self-export ships in Manage / Settings |
@@ -1000,16 +1012,15 @@ Coexistent. Uploaded original = archive / input, immutable. ProfiLux render = fu
 
 The "Download PDF" affordance belongs in **Manage / Settings** (§19), **NOT** in View.
 
-The visual placeholder currently rendered in the LEFT SPINE of the View tab at `app/dashboard/candidate/profilux/page.tsx` is doctrinally MISPLACED. Cleanup of the View placeholder is NOT in scope of this slice and will be addressed when the Manage-side export control ships (§13 deferred item: View "Download PDF" placeholder removal).
+Private self-export SHIPPED (β): `GET /api/profilux/export` consumes `ProfiLuxResolved` directly, unmasked. `masked_fields` (§16) and §16A apply to client/share surfaces only, never private export.
+
+The visual placeholder currently rendered in the LEFT SPINE of the View tab at `app/dashboard/candidate/profilux/page.tsx` is doctrinally MISPLACED. Cleanup of the View placeholder is still parked (§13 deferred item: View "Download PDF" placeholder removal).
 
 ### 19A.3 — Out of scope of this doctrine lock
 
 C6.1 is doctrine lock only. The following are deferred:
 
-- No PDF library decision.
-- No render template.
 - No `/api/resume/[slug]` retirement (resume extinction reconciliation is a future slice, not C6.1).
-- No `profilux` ghost-table cleanup (tracked at ledger `6aef236e`).
 - No View "Download PDF" placeholder removal.
 - No B39 closure dependency work.
 
@@ -1018,7 +1029,7 @@ C6.1 is doctrine lock only. The following are deferred:
 - §2 ProfiLux is a living object
 - §7 Projection contract by surface
 - §10 Implementation utilities (`resolveProfiLux`, `projectFor`)
-- §13 Deferred items (PDF library, resume extinction, `profilux` retire, View placeholder)
+- §13 Deferred items (private PDF SHIPPED v1.11; resume extinction, View placeholder still deferred)
 - §19 Settings doctrine
 - §19B RGPD machine-readable export (data-portability sibling)
 - §22 Section catalog (View is not the export host)
