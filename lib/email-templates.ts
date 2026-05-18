@@ -1114,6 +1114,138 @@ export function adminApplicationWithdrawnEmail(params: {
 }
 
 // ────────────────────────────────────────────
+// PACK E.5 — Admin recruiting alerts (E.5a + E.5b)
+// ────────────────────────────────────────────
+
+/**
+ * E.5a — Sent to RECRUITING_ALERT_EMAIL when a candidate accepts
+ * a proposed outreach via POST /api/briefs/proposed/[id]/accept.
+ * Internal recipient — full identity disclosure allowed.
+ */
+export function adminBriefAcceptedEmail(params: {
+  candidateName: string
+  candidateEmail: string
+  sourceType: 'search_assignment' | 'business_brief'
+  title: string
+  location?: string | null
+  sector?: string | null
+  isConfidential?: boolean
+  showLocation?: boolean
+  applicationId?: string | null
+  outreachId: string
+  matchId?: string | null
+  acceptedAt: string
+}): EmailContent {
+  const sourceLabel = params.sourceType === 'search_assignment' ? 'Search assignment' : 'Business brief'
+  const ctaUrl = params.sourceType === 'search_assignment' && params.applicationId
+    ? `${SITE_URL}/admin/ats/${params.applicationId}`
+    : null
+
+  const ctaButton = ctaUrl ? adminButton('View in admin', ctaUrl) : ''
+
+  const html = adminLayout([
+    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">Outreach accepted</h2>`,
+    `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
+    adminRow('Candidate', params.candidateName),
+    adminRow('Email', params.candidateEmail),
+    adminRow('Source', sourceLabel),
+    adminRow('Title', params.title),
+    params.location ? adminRow('Location', params.location) : '',
+    params.sector ? adminRow('Sector', params.sector) : '',
+    typeof params.isConfidential === 'boolean' ? adminRow('Confidential', params.isConfidential ? 'Yes' : 'No') : '',
+    typeof params.showLocation === 'boolean' ? adminRow('Show location externally', params.showLocation ? 'Yes' : 'No') : '',
+    params.applicationId ? adminRow('Application ID', params.applicationId) : '',
+    params.matchId ? adminRow('Match ID', params.matchId) : '',
+    adminRow('Accepted at', params.acceptedAt),
+    `</table>`,
+    ctaButton,
+  ].join(''))
+
+  const textLines = [
+    `Outreach accepted`,
+    ``,
+    `Candidate: ${params.candidateName}`,
+    `Email: ${params.candidateEmail}`,
+    `Source: ${sourceLabel}`,
+    `Title: ${params.title}`,
+    params.location ? `Location: ${params.location}` : '',
+    params.sector ? `Sector: ${params.sector}` : '',
+    typeof params.isConfidential === 'boolean' ? `Confidential: ${params.isConfidential ? 'Yes' : 'No'}` : '',
+    typeof params.showLocation === 'boolean' ? `Show location externally: ${params.showLocation ? 'Yes' : 'No'}` : '',
+    params.applicationId ? `Application ID: ${params.applicationId}` : '',
+    params.matchId ? `Match ID: ${params.matchId}` : '',
+    `Accepted at: ${params.acceptedAt}`,
+    ctaUrl ? `
+View: ${ctaUrl}` : '',
+  ].filter(Boolean).join('\n')
+
+  return { html, text: textLines }
+}
+
+/**
+ * E.5b — Sent to RECRUITING_ALERT_EMAIL when a candidate declines
+ * a proposed outreach via POST /api/briefs/proposed/[id]/decline.
+ * Internal recipient — full identity disclosure allowed.
+ */
+export function adminBriefDeclinedEmail(params: {
+  candidateName: string
+  candidateEmail: string
+  sourceType: 'search_assignment' | 'business_brief'
+  sourceId: string
+  title: string
+  location?: string | null
+  sector?: string | null
+  isConfidential?: boolean
+  showLocation?: boolean
+  outreachId: string
+  declineReason?: string | null
+  declinedAt: string
+}): EmailContent {
+  const sourceLabel = params.sourceType === 'search_assignment' ? 'Search assignment' : 'Business brief'
+  const ctaUrl = params.sourceType === 'search_assignment'
+    ? `${SITE_URL}/admin/assignments/${params.sourceId}`
+    : `${SITE_URL}/admin/business-briefs/${params.sourceId}`
+
+  const html = adminLayout([
+    `<h2 style="font-size:16px;color:#1a1a1a;margin:0 0 16px;">Outreach declined</h2>`,
+    `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">`,
+    adminRow('Candidate', params.candidateName),
+    adminRow('Email', params.candidateEmail),
+    adminRow('Source', sourceLabel),
+    adminRow('Title', params.title),
+    params.location ? adminRow('Location', params.location) : '',
+    params.sector ? adminRow('Sector', params.sector) : '',
+    typeof params.isConfidential === 'boolean' ? adminRow('Confidential', params.isConfidential ? 'Yes' : 'No') : '',
+    typeof params.showLocation === 'boolean' ? adminRow('Show location externally', params.showLocation ? 'Yes' : 'No') : '',
+    adminRow('Reason', params.declineReason || 'Not provided'),
+    adminRow('Outreach ID', params.outreachId),
+    adminRow('Declined at', params.declinedAt),
+    `</table>`,
+    adminButton('View in admin', ctaUrl),
+  ].join(''))
+
+  const textLines = [
+    `Outreach declined`,
+    ``,
+    `Candidate: ${params.candidateName}`,
+    `Email: ${params.candidateEmail}`,
+    `Source: ${sourceLabel}`,
+    `Title: ${params.title}`,
+    params.location ? `Location: ${params.location}` : '',
+    params.sector ? `Sector: ${params.sector}` : '',
+    typeof params.isConfidential === 'boolean' ? `Confidential: ${params.isConfidential ? 'Yes' : 'No'}` : '',
+    typeof params.showLocation === 'boolean' ? `Show location externally: ${params.showLocation ? 'Yes' : 'No'}` : '',
+    `Reason: ${params.declineReason || 'Not provided'}`,
+    `Outreach ID: ${params.outreachId}`,
+    `Declined at: ${params.declinedAt}`,
+    `
+View: ${ctaUrl}`,
+  ].filter(Boolean).join('\n')
+
+  return { html, text: textLines }
+}
+
+// ────────────────────────────────────────────
 // Legacy compatibility wrappers
 // ────────────────────────────────────────────
 

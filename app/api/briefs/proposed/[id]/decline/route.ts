@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { sendEmail } from '@/lib/ses'
+import { adminBriefDeclinedEmail, RECRUITING_ALERT_EMAIL } from '@/lib/email-templates'
 
 export const dynamic = 'force-dynamic'
 
@@ -166,6 +168,95 @@ export async function POST(
 
   const source: 'business_brief' | 'search_assignment' =
     outreach.business_brief_id != null ? 'business_brief' : 'search_assignment'
+
+  // E.5b — Recruiting alert. Best-effort, never blocks the 200.
+  try {
+    const declinedAt = new Date().toISOString()
+    let candidateName = 'Unknown candidate'
+    let candidateEmail = 'unknown'
+    let title = '[unknown]'
+    let location: string | null = null
+    let sector: string | null = null
+    let isConfidential: boolean | undefined
+    let showLocation: boolean | undefined
+
+    const { data: memberRow, error: memberErr } = await supabase
+      .from('members')
+      .select('full_name, email')
+      .eq('id', member.id)
+      .maybeSingle()
+    if (memberErr) {
+      console.error('[E.5b] Member enrichment error:', memberErr)
+    } else if (memberRow) {
+      candidateName = memberRow.full_name || candidateName
+      candidateEmail = memberRow.email || candidateEmail
+    }
+
+    let sourceId = ''
+    if (source === 'business_brief' && outreach.business_brief_id) {
+      sourceId = outreach.business_brief_id
+      const { data: brief, error: briefErr } = await supabase
+        .from('business_briefs')
+        .select('mandate_title, sector, location')
+        .eq('id', outreach.business_brief_id)
+        .maybeSingle()
+      if (briefErr) {
+        console.error('[E.5b] Brief enrichment error:', briefErr)
+      } else if (brief) {
+        title = brief.mandate_title || title
+        sector = brief.sector ?? null
+        location = brief.location ?? null
+      }
+    } else if (source === 'search_assignment' && outreach.search_assignment_id) {
+      sourceId = outreach.search_assignment_id
+      const { data: asg, error: asgErr } = await supabase
+        .from('search_assignments')
+        .select('title, city, country, is_confidential, show_location')
+        .eq('id', outreach.search_assignment_id)
+        .maybeSingle()
+      if (asgErr) {
+        console.error('[E.5b] Assignment enrichment error:', asgErr)
+      } else if (asg) {
+        title = asg.title || title
+        const loc = [asg.city, asg.country].filter(Boolean).join(', ')
+        location = loc || null
+        isConfidential = typeof asg.is_confidential === 'boolean' ? asg.is_confidential : undefined
+        showLocation = typeof asg.show_location === 'boolean' ? asg.show_location : undefined
+      }
+    }
+
+    const tpl = adminBriefDeclinedEmail({
+      candidateName,
+      candidateEmail,
+      sourceType: source,
+      sourceId,
+      title,
+      location,
+      sector,
+      isConfidential,
+      showLocation,
+      outreachId: outreachId,
+      declineReason: declineReason,
+      declinedAt,
+    })
+
+    const subject = `Outreach declined: ${candidateName} — ${title}`
+    const sendResult = await sendEmail({
+      to: RECRUITING_ALERT_EMAIL,
+      subject,
+      body: tpl.text,
+      bodyHtml: tpl.html,
+    })
+    if (!sendResult.success) {
+      console.error('[E.5b] Recruiting alert send failed:', {
+        error: sendResult.error,
+        recipient: RECRUITING_ALERT_EMAIL,
+        outreach_id: outreachId,
+      })
+    }
+  } catch (notifyErr) {
+    console.error('[E.5b] Unexpected enrichment error:', notifyErr)
+  }
 
   return NextResponse.json(
     {

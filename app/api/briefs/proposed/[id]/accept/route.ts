@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { sendEmail } from '@/lib/ses'
+import { adminBriefAcceptedEmail, RECRUITING_ALERT_EMAIL } from '@/lib/email-templates'
 
 export const dynamic = 'force-dynamic'
 
@@ -110,6 +112,106 @@ export async function POST(
   }
 
   if (result.ok === true) {
+    // E.5a — Recruiting alert. Best-effort, never blocks the 201.
+    // All enrichment SELECTs are tolerant: failures log + fallback.
+    try {
+      const acceptedAt = new Date().toISOString()
+      let candidateName = 'Unknown candidate'
+      let candidateEmail = 'unknown'
+      let sourceType: 'search_assignment' | 'business_brief' = 'search_assignment'
+      let title = '[unknown]'
+      let location: string | null = null
+      let sector: string | null = null
+      let isConfidential: boolean | undefined
+      let showLocation: boolean | undefined
+
+      const { data: memberRow, error: memberErr } = await supabase
+        .from('members')
+        .select('full_name, email')
+        .eq('id', member.id)
+        .maybeSingle()
+      if (memberErr) {
+        console.error('[E.5a] Member enrichment error:', memberErr)
+      } else if (memberRow) {
+        candidateName = memberRow.full_name || candidateName
+        candidateEmail = memberRow.email || candidateEmail
+      }
+
+      const { data: outreachRow, error: outreachErr } = await supabase
+        .from('brief_outreach')
+        .select('business_brief_id, search_assignment_id')
+        .eq('id', outreachId)
+        .maybeSingle()
+      if (outreachErr) {
+        console.error('[E.5a] Outreach enrichment error:', outreachErr)
+      } else if (outreachRow) {
+        if (outreachRow.business_brief_id) {
+          sourceType = 'business_brief'
+          const { data: brief, error: briefErr } = await supabase
+            .from('business_briefs')
+            .select('mandate_title, sector, location')
+            .eq('id', outreachRow.business_brief_id)
+            .maybeSingle()
+          if (briefErr) {
+            console.error('[E.5a] Brief enrichment error:', briefErr)
+          } else if (brief) {
+            title = brief.mandate_title || title
+            sector = brief.sector ?? null
+            location = brief.location ?? null
+          }
+        } else if (outreachRow.search_assignment_id) {
+          sourceType = 'search_assignment'
+          const { data: asg, error: asgErr } = await supabase
+            .from('search_assignments')
+            .select('title, city, country, is_confidential, show_location')
+            .eq('id', outreachRow.search_assignment_id)
+            .maybeSingle()
+          if (asgErr) {
+            console.error('[E.5a] Assignment enrichment error:', asgErr)
+          } else if (asg) {
+            title = asg.title || title
+            const loc = [asg.city, asg.country].filter(Boolean).join(', ')
+            location = loc || null
+            isConfidential = typeof asg.is_confidential === 'boolean' ? asg.is_confidential : undefined
+            showLocation = typeof asg.show_location === 'boolean' ? asg.show_location : undefined
+          }
+        }
+      }
+
+      const tpl = adminBriefAcceptedEmail({
+        candidateName,
+        candidateEmail,
+        sourceType,
+        title,
+        location,
+        sector,
+        isConfidential,
+        showLocation,
+        applicationId: result.application_id ?? null,
+        outreachId: outreachId,
+        matchId: result.match_id ?? null,
+        acceptedAt,
+      })
+
+      const subject = `Outreach accepted: ${candidateName} — ${title}`
+      const sendResult = await sendEmail({
+        to: RECRUITING_ALERT_EMAIL,
+        subject,
+        body: tpl.text,
+        bodyHtml: tpl.html,
+      })
+      if (!sendResult.success) {
+        console.error('[E.5a] Recruiting alert send failed:', {
+          error: sendResult.error,
+          recipient: RECRUITING_ALERT_EMAIL,
+          outreach_id: outreachId,
+          application_id: result.application_id,
+        })
+      }
+    } catch (notifyErr) {
+      console.error('[E.5a] Unexpected enrichment error:', notifyErr)
+    }
+
     return NextResponse.json(
       {
         application_id: result.application_id,
