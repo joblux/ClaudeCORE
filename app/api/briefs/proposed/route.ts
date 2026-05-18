@@ -90,7 +90,6 @@ export async function GET(_req: NextRequest) {
         search_assignment:search_assignments (
           id,
           title,
-          sector,
           department,
           seniority,
           location,
@@ -134,7 +133,7 @@ export async function GET(_req: NextRequest) {
           source: 'search_assignment' as const,
           source_id: sa.id,
           title: sa.title ?? null,
-          sector: sa.sector ?? null,
+          sector: null,
           department: sa.department ?? null,
           seniority: sa.seniority ?? null,
           location: sa.show_location ? sa.location ?? null : null,
