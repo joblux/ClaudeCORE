@@ -41,13 +41,14 @@ Each defect row carries:
 - **Current state / evidence:** Three routes accept member submissions and write to three unrelated tables with no cross-reference: POST /api/contributions → contributions + child tables; POST /api/contribute → brand_contributions; POST /api/insider/submit-voice → bloglux_articles.
 - **Related ledger UUIDs:** —
 
-### D2 — /api/contribute has no reachable user-facing surface
+### D2 — /api/contribute has no reachable user-facing surface — OBSOLETE (retired 2026-05-18, see D1.a)
 - **Domain:** intake
-- **Surface:** —
-- **Severity:** medium
-- **Provenance:** [code]
-- **Current state / evidence:** Writes to brand_contributions but no user-facing surface identified that calls it. Endpoint is orphaned from the UI.
-- **Related ledger UUIDs:** —
+- **Surface:** /dashboard/insider/submit-correction (live)
+- **Severity:** medium → OBSOLETE
+- **Provenance:** [code] (revised)
+- **Current state / evidence:** OBSOLETE — original claim ("no user-facing surface identified, endpoint is orphaned") was STALE at audit time. Full repo grep on HEAD `82290a4` (D1.a, 2026-05-18 PM session 3) found 1 live caller: `app/dashboard/insider/submit-correction/page.tsx` — a 163-line client component linked from `app/dashboard/insider/page.tsx` insider dashboard nav ('Flag correction', icon '🔍 ', lines 45 + 360 + 388-389). The endpoint is reachable; 4 real rows in `brand_contributions` reflect actual member usage. Admin moderation surface exists at `app/api/admin/contributions/route.ts` (5 hits on `brand_contributions`). RGPD export contract (`app/api/members/export/route.ts`, Pack B.3.4 `a6e3a95`, MATRIX §19B) depends on `brand_contributions` presence with `admin_notes` redaction. The D2 "orphan endpoint" framing is therefore retracted.
+- **Related ledger UUIDs:** — (D1.a finding logged in `docs/JOBLUX_STATE.md` NEW FINDINGS LOGGED, 2026-05-18 PM session 3).
+- **Note:** D2 retirement DOES NOT close D1. The structural intake fragmentation (3 endpoints, 3 tables, 4 status vocabularies, no content_queue gate) remains OPEN. See D1, D3, D5, D10, D11. D5 ("brand_contributions is a FK-less silo") is a SEPARATE defect that stands on its own.
 
 ### D3 — Insider voices bypass the contribution system
 - **Domain:** intake
