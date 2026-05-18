@@ -244,6 +244,20 @@ export type ProfiLuxReferenceItem = {
   company: string
 }
 
+/**
+ * PF-D V3.5 — Internships (jsonb array-of-objects).
+ *
+ * Pack D Phase 2 path γ — { company, role, period } trio, all required.
+ * Stored in members.internships (jsonb NULL). Editor projection only —
+ * public/client/ats/admin/dashboard omit v1. No location, description,
+ * start_date, end_date — period is a free-text label (e.g. "Summer 2024").
+ */
+export type ProfiLuxInternshipItem = {
+  company: string
+  role: string
+  period: string
+}
+
 export const SECTION_IDS = ['identity','current_role','career_path','education','languages','luxury_fit','skills_markets','clienteling','compensation','availability'] as const
 export type SectionId = typeof SECTION_IDS[number]
 export type SectionVisibility = Partial<Record<SectionId, boolean>>
@@ -294,6 +308,7 @@ export type MemberRow = {
   portfolio: ProfiLuxPortfolioItem[] | null
   press_features: ProfiLuxPressFeatureItem[] | null
   references: ProfiLuxReferenceItem[] | null
+  internships: ProfiLuxInternshipItem[] | null
   activated_sections: string[] | null
   product_categories: string[] | null
   brands_worked_with: string[] | null
@@ -496,6 +511,7 @@ export type ProfiLuxResolved = {
   portfolio: ProfiLuxPortfolioItem[]
   press_features: ProfiLuxPressFeatureItem[]
   references: ProfiLuxReferenceItem[]
+  internships: ProfiLuxInternshipItem[]
   activated_sections: string[]
   product_categories: string[]
   brands_worked_with: string[]
@@ -629,6 +645,7 @@ export type EditorView = {
   portfolio: ProfiLuxPortfolioItem[]
   press_features: ProfiLuxPressFeatureItem[]
   references: ProfiLuxReferenceItem[]
+  internships: ProfiLuxInternshipItem[]
   activated_sections: string[]
   // Experience + education (L1)
   experiences: ResolvedExperience[]

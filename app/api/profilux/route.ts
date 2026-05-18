@@ -9,6 +9,7 @@ import {
 } from '@/lib/profilux'
 import type {
   EditorProjection,
+  ProfiLuxInternshipItem,
   ProfiLuxPortfolioItem,
   ProfiLuxPressFeatureItem,
   ProfiLuxReferenceItem,
@@ -186,6 +187,43 @@ function coerceReferenceItem(
   if (company === '') return null
 
   return { name, role, company }
+}
+
+// PF-D V3.5 — Internships row coercion. Trio { company, role, period } with all
+// three required. No location, description, start_date, end_date.
+function coerceInternshipItem(
+  raw: unknown,
+): ProfiLuxInternshipItem | null {
+  if (
+    raw === null ||
+    typeof raw !== 'object' ||
+    Array.isArray(raw)
+  ) return null
+
+  const obj = raw as Record<string, unknown>
+
+  const company =
+    typeof obj.company === 'string'
+      ? obj.company.trim()
+      : ''
+
+  if (company === '') return null
+
+  const role =
+    typeof obj.role === 'string'
+      ? obj.role.trim()
+      : ''
+
+  if (role === '') return null
+
+  const period =
+    typeof obj.period === 'string'
+      ? obj.period.trim()
+      : ''
+
+  if (period === '') return null
+
+  return { company, role, period }
 }
 
 function buildEditorResponse(resolved: ProfiLuxResolved) {
@@ -468,6 +506,14 @@ export async function POST(req: NextRequest) {
       ? body.references
           .map((row: unknown): ProfiLuxReferenceItem | null => coerceReferenceItem(row))
           .filter((r: ProfiLuxReferenceItem | null): r is ProfiLuxReferenceItem => r !== null)
+      : null
+  }
+
+  if (has('internships')) {
+    updatePayload.internships = Array.isArray(body.internships)
+      ? body.internships
+          .map((row: unknown): ProfiLuxInternshipItem | null => coerceInternshipItem(row))
+          .filter((r: ProfiLuxInternshipItem | null): r is ProfiLuxInternshipItem => r !== null)
       : null
   }
 

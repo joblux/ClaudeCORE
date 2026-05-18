@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import type { EditorView, MaskableField, ProfiLuxPortfolioItem, ProfiLuxPressFeatureItem, ProfiLuxReferenceItem, ProfiLuxStrategicInitiative } from '@/lib/profilux/types'
+import type { EditorView, MaskableField, ProfiLuxInternshipItem, ProfiLuxPortfolioItem, ProfiLuxPressFeatureItem, ProfiLuxReferenceItem, ProfiLuxStrategicInitiative } from '@/lib/profilux/types'
 import { MASKABLE_FIELDS } from '@/lib/profilux/types'
 import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS, PROFILUX_SECTOR_OPTIONS } from '@/lib/profilux/vocabulary'
 
@@ -27,7 +27,7 @@ const ADD_SECTION_LIBRARY: Array<{ key: string; label: string; available: boolea
   { key: 'portfolio',             label: 'Portfolio',             available: true  },
   { key: 'press_features',        label: 'Press & features',      available: true  },
   { key: 'references',            label: 'References',            available: true  },
-  { key: 'internships',           label: 'Internships',           available: false },
+  { key: 'internships',           label: 'Internships',           available: true  },
 ]
 
 const NotSet = () => <em style={{ color: '#666' }}>Not set</em>
@@ -672,6 +672,15 @@ export default function ProfiluxPage() {
   const [refsEditCompany, setRefsEditCompany] = useState('')
   const [refsSaving, setRefsSaving] = useState(false)
   const [refsError, setRefsError] = useState<string | null>(null)
+  // PF-D V3.5 — Internships drawer (jsonb { company, role, period }, all required)
+  const [intDrawerOpen, setIntDrawerOpen] = useState(false)
+  const [intDraftRows, setIntDraftRows] = useState<ProfiLuxInternshipItem[]>([])
+  const [intEditingIndex, setIntEditingIndex] = useState<number | null>(null)
+  const [intEditCompany, setIntEditCompany] = useState('')
+  const [intEditRole, setIntEditRole] = useState('')
+  const [intEditPeriod, setIntEditPeriod] = useState('')
+  const [intSaving, setIntSaving] = useState(false)
+  const [intError, setIntError] = useState<string | null>(null)
   // PF-D V2 — Add Section shell (V12 restoration)
   const [addSectionDrawerOpen, setAddSectionDrawerOpen] = useState(false)
   const [activatingSectionKey, setActivatingSectionKey] = useState<string | null>(null)
@@ -1386,6 +1395,82 @@ export default function ProfiluxPage() {
       setRefsError(String(err))
     } finally {
       setRefsSaving(false)
+    }
+  }
+
+  // PF-D V3.5 — Internships (structured jsonb { company, role, period }).
+  // All three required. No location, description, start_date, end_date.
+  function openIntDrawer() {
+    setIntError(null)
+    setIntDraftRows(Array.isArray(editor?.internships) ? [...editor!.internships] : [])
+    setIntEditingIndex(null)
+    setIntEditCompany('')
+    setIntEditRole('')
+    setIntEditPeriod('')
+    setIntDrawerOpen(true)
+  }
+  function intStartAdd() {
+    setIntEditingIndex(-1)
+    setIntEditCompany('')
+    setIntEditRole('')
+    setIntEditPeriod('')
+  }
+  function intStartEdit(index: number) {
+    const row = intDraftRows[index]
+    if (!row) return
+    setIntEditingIndex(index)
+    setIntEditCompany(row.company)
+    setIntEditRole(row.role)
+    setIntEditPeriod(row.period)
+  }
+  function intCancelEdit() {
+    setIntEditingIndex(null)
+    setIntEditCompany('')
+    setIntEditRole('')
+    setIntEditPeriod('')
+  }
+  function intRowValid(company: string, role: string, period: string): boolean {
+    return company.trim() !== '' && role.trim() !== '' && period.trim() !== ''
+  }
+  function intCommitEdit() {
+    const company = intEditCompany.trim()
+    const role = intEditRole.trim()
+    const period = intEditPeriod.trim()
+    if (!intRowValid(company, role, period)) return
+    const next: ProfiLuxInternshipItem = { company, role, period }
+    if (intEditingIndex === -1) {
+      setIntDraftRows([...intDraftRows, next])
+    } else if (typeof intEditingIndex === 'number' && intEditingIndex >= 0) {
+      const copy = [...intDraftRows]
+      copy[intEditingIndex] = next
+      setIntDraftRows(copy)
+    }
+    intCancelEdit()
+  }
+  function intRemove(index: number) {
+    setIntDraftRows(intDraftRows.filter((_, i) => i !== index))
+    if (intEditingIndex === index) intCancelEdit()
+  }
+  async function handleSaveInternships() {
+    setIntSaving(true)
+    setIntError(null)
+    try {
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ internships: intDraftRows }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setIntError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+      setIntDrawerOpen(false)
+    } catch (err) {
+      setIntError(String(err))
+    } finally {
+      setIntSaving(false)
     }
   }
 
@@ -5196,6 +5281,184 @@ export default function ProfiluxPage() {
             {refsSaving ? 'Saving…' : 'Save'}
           </button>
           {refsError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{refsError}</span>}
+        </div>
+      </Drawer>
+      </>)}
+      {e.activated_sections.includes('internships') && (<>
+      <SectionCard
+        eyebrow="Internships"
+        headerAction={
+          <button
+            type="button"
+            onClick={openIntDrawer}
+            style={{
+              background: 'rgba(165,142,40,0.05)',
+              color: '#a58e28',
+              border: '1px solid rgba(165,142,40,0.3)',
+              padding: '6px 14px',
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '0.4px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Edit
+          </button>
+        }
+      >
+        <div>
+          {e.internships.length > 0
+            ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {e.internships.map((r, idx) => (
+                  <div key={idx}>
+                    <div style={{ color: '#fff', fontWeight: 600 }}>{r.company}</div>
+                    <div style={{ color: '#999', marginTop: 2, fontSize: 12 }}>{r.role}</div>
+                    <div style={{ color: '#999', marginTop: 2, fontSize: 12 }}>{r.period}</div>
+                  </div>
+                ))}
+              </div>
+            )
+            : <NotSet />}
+        </div>
+      </SectionCard>
+      <Drawer
+        open={intDrawerOpen}
+        title="Internships"
+        onClose={() => setIntDrawerOpen(false)}
+      >
+        <div style={{ color: '#999', fontSize: 12, marginBottom: 14 }}>
+          Each internship has a company (required), role (required), and period (required). Save commits the full list.
+        </div>
+
+        {/* Existing rows list */}
+        {intDraftRows.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+            {intDraftRows.map((row, idx) => (
+              <div
+                key={idx}
+                style={{
+                  border: '0.5px solid #2a2a2a',
+                  borderRadius: 6,
+                  padding: '10px 12px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: '#fff', fontSize: 14, fontWeight: 600 }}>{row.company}</div>
+                  <div style={{ color: '#999', fontSize: 12, marginTop: 2 }}>{row.role}</div>
+                  <div style={{ color: '#999', fontSize: 12, marginTop: 2 }}>{row.period}</div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                  <button
+                    type="button"
+                    onClick={() => intStartEdit(idx)}
+                    style={{ background: 'transparent', color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)', padding: '4px 10px', fontSize: 11, borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => intRemove(idx)}
+                    style={{ background: 'transparent', color: '#999', border: '1px solid #333', padding: '4px 10px', fontSize: 11, borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Inline edit/add form */}
+        {intEditingIndex !== null ? (
+          <div style={{ border: '0.5px solid rgba(165,142,40,0.3)', borderRadius: 6, padding: 14, marginBottom: 14 }}>
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Company <span style={{ color: '#a58e28' }}>*</span></div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={intEditCompany}
+                onChange={(ev) => setIntEditCompany(ev.target.value)}
+                placeholder="e.g. Hermès"
+              />
+            </div>
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Role <span style={{ color: '#a58e28' }}>*</span></div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={intEditRole}
+                onChange={(ev) => setIntEditRole(ev.target.value)}
+                placeholder="e.g. Retail Intern"
+              />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Period <span style={{ color: '#a58e28' }}>*</span></div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={intEditPeriod}
+                onChange={(ev) => setIntEditPeriod(ev.target.value)}
+                placeholder="e.g. Summer 2024"
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                type="button"
+                onClick={intCommitEdit}
+                disabled={!intRowValid(intEditCompany, intEditRole, intEditPeriod)}
+                style={!intRowValid(intEditCompany, intEditRole, intEditPeriod) ? saveBtnDis : saveBtn}
+              >
+                {intEditingIndex === -1 ? 'Add' : 'Update'}
+              </button>
+              <button
+                type="button"
+                onClick={intCancelEdit}
+                style={btn}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={intStartAdd}
+            style={{
+              background: 'transparent',
+              color: '#a58e28',
+              border: '1px dashed rgba(165,142,40,0.4)',
+              padding: '10px 14px',
+              fontSize: 12,
+              letterSpacing: '0.4px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+              marginBottom: 14,
+              width: '100%',
+              maxWidth: 600,
+              textAlign: 'left',
+            }}
+          >
+            + Add internship
+          </button>
+        )}
+
+        <div style={{ marginTop: 4, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button
+            style={intSaving ? saveBtnDis : saveBtn}
+            disabled={intSaving}
+            onClick={handleSaveInternships}
+          >
+            {intSaving ? 'Saving…' : 'Save'}
+          </button>
+          {intError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{intError}</span>}
         </div>
       </Drawer>
       </>)}

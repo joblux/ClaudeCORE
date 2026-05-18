@@ -30,6 +30,7 @@ export type {
   // L2
   MemberRow,
   // Resolved
+  ProfiLuxInternshipItem,
   ProfiLuxPortfolioItem,
   ProfiLuxPressFeatureItem,
   ProfiLuxReferenceItem,
