@@ -18,7 +18,7 @@ const supabase = createClient(
  * OR search_assignment) per Mo lock 2026-05-18.
  *
  * Auth contract:
- * - session.user.role !== 'candidate' → 403 FORBIDDEN
+ * - session.user.role in ('admin','business') → 403 FORBIDDEN
  * - members lookup by email, deleted_at IS NULL gate
  * - matching_opt_in NOT re-checked (consent enforced at outreach create time)
  *
@@ -39,7 +39,7 @@ export async function GET(_req: NextRequest) {
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  if (session.user.role !== 'candidate') {
+  if (session.user.role === 'admin' || session.user.role === 'business') {
     return NextResponse.json(
       { error: 'Candidate-only endpoint', code: 'FORBIDDEN' },
       { status: 403 }
