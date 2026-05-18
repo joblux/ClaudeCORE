@@ -359,6 +359,10 @@ export async function resolveProfiLux(
             ...(arr(row.awards).length > 0 ? ['awards'] : []),
             ...(arr(row.memberships).length > 0 ? ['memberships'] : []),
             ...(Array.isArray(row.strategic_initiatives) && row.strategic_initiatives.length > 0 ? ['strategic_initiatives'] : []),
+            ...(Array.isArray(row.portfolio) && row.portfolio.length > 0 ? ['portfolio'] : []),
+            ...(Array.isArray(row.press_features) && row.press_features.length > 0 ? ['press_features'] : []),
+            ...(Array.isArray(row.references) && row.references.length > 0 ? ['references'] : []),
+            ...(Array.isArray(row.internships) && row.internships.length > 0 ? ['internships'] : []),
           ]
       return _explicitActivated.length > 0 ? _explicitActivated : _implicitActivated
     })(),
