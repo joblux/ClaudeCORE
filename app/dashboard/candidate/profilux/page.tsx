@@ -561,18 +561,18 @@ function VisibilityToggle({
     <span style={{
       display: 'inline-flex',
       alignItems: 'center',
-      gap: 10,
+      gap: 12,
       background: 'transparent',
       border: '0.5px solid #2a2a2a',
-      borderRadius: 10,
-      padding: '6px 12px',
+      borderRadius: 8,
+      padding: '8px 16px',
     }}>
       <span style={{
         fontFamily: 'Inter, sans-serif',
-        fontSize: 10,
+        fontSize: 11,
         fontWeight: 500,
-        letterSpacing: '1.8px',
-        color: '#8a8a8a',
+        letterSpacing: '2.2px',
+        color: '#999',
         textTransform: 'uppercase',
       }}>
         Visible
@@ -585,13 +585,13 @@ function VisibilityToggle({
         disabled={isToggling}
         onClick={() => onToggle(sectionId, !isVisible)}
         style={{
-          width: 46,
-          height: 24,
-          borderRadius: 999,
+          width: 32,
+          height: 16,
+          borderRadius: 8,
           border: 'none',
           padding: 0,
           position: 'relative',
-          background: isVisible ? '#b79d2a' : '#2a2a2a',
+          background: isVisible ? '#a58e28' : '#2a2a2a',
           cursor: isToggling ? 'not-allowed' : 'pointer',
           opacity: isToggling ? 0.5 : 1,
           transition: 'background 0.15s',
@@ -599,23 +599,23 @@ function VisibilityToggle({
       >
         <span style={{
           position: 'absolute',
-          top: 4,
-          left: isVisible ? 26 : 4,
-          width: 16,
-          height: 16,
+          top: 2,
+          left: isVisible ? 18 : 2,
+          width: 12,
+          height: 12,
           borderRadius: '50%',
-          background: '#111',
+          background: '#1a1a1a',
           transition: 'left 0.15s',
         }} />
       </button>
       <span style={{
         fontFamily: 'Inter, sans-serif',
-        fontSize: 10,
-        fontWeight: 600,
-        letterSpacing: '1px',
-        color: isVisible ? '#27d3b0' : '#777',
+        fontSize: 12,
+        fontWeight: 500,
+        letterSpacing: '0.5px',
+        color: isVisible ? '#5dcaa5' : '#777',
       }}>
-        {isVisible ? 'ON' : 'OFF'}
+        {isVisible ? 'On' : 'Off'}
       </span>
     </span>
   )
