@@ -98,7 +98,7 @@ export default async function ClientSubmissionPage({ params }: Props) {
 
           {/* BRAND BAR */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', paddingBottom: 24, borderBottom: '0.5px solid rgba(0,0,0,0.08)' }}>
-            <img src="/logos/joblux-gold.svg" alt="JOBLUX" style={{ height: 28, width: 'auto' }} />
+            <img src="/logos/joblux-gold.svg" alt="JOBLUX" style={{ height: 34, width: 'auto' }} />
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: 10, letterSpacing: '1.5px', color: '#888', marginBottom: 4 }}>PREPARED FOR</div>
               <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 14, color: '#1a1a1a', fontStyle: 'italic', marginBottom: 2 }}>{sub.client_business_name}</div>
@@ -134,7 +134,7 @@ export default async function ClientSubmissionPage({ params }: Props) {
             <div style={{ padding: '20px 22px', background: '#ffffff', border: '0.5px solid rgba(0,0,0,0.08)', marginBottom: 36, borderRadius: 4 }}>
               <div style={{ fontSize: 10, letterSpacing: '1.5px', color: '#888', marginBottom: 10 }}>RECRUITER NOTE</div>
               <div style={{ fontSize: 13, lineHeight: 1.7, color: '#2a2a2a' }}>{sub.recruiter_note}</div>
-              <div style={{ fontSize: 12, color: '#888', marginTop: 14, fontStyle: 'italic' }}>— {sub.recruiter_email}</div>
+              <div style={{ fontSize: 12, color: '#888', marginTop: 14, fontStyle: 'italic' }}>— alex@joblux.com</div>
             </div>
           )}
 
@@ -199,8 +199,8 @@ export default async function ClientSubmissionPage({ params }: Props) {
 
           {/* FOOTER */}
           <div style={{ paddingTop: 24, borderTop: '0.5px solid rgba(0,0,0,0.08)', textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: '#888', fontStyle: 'italic' }}>Prepared by {sub.recruiter_email}</div>
-            <div style={{ fontSize: 10, color: '#aaa', marginTop: 6, letterSpacing: '1.2px' }}>LUXURY TALENT INTELLIGENCE</div>
+            <div style={{ fontSize: 11, color: '#5a5a5a', fontStyle: 'italic' }}>Prepared by alex@joblux.com</div>
+            <div style={{ fontSize: 10, color: '#7a6818', marginTop: 6, letterSpacing: '1.2px' }}>LUXURY TALENT INTELLIGENCE</div>
           </div>
 
         </div>
