@@ -29,9 +29,10 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   const isEscape = pathname.startsWith('/escape')
   const isAdmin = pathname.startsWith('/admin')
   const isHolding = pathname.startsWith('/holding')
+  const isClientSubmission = pathname.startsWith('/client-submissions')
   const isPublicProfile = isPublicProfileSlug(pathname)
 
-  if (isEscape || isAdmin || isHolding || isPublicProfile) {
+  if (isEscape || isAdmin || isHolding || isPublicProfile || isClientSubmission) {
     return <>{children}</>
   }
 
