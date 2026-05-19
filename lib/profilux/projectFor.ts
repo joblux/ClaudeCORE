@@ -215,6 +215,7 @@ export function projectFor(
         sectors: view.sectors,
         languages: view.languages,
         experiences: view.experiences, // V5: full
+        education: view.education,
       }
       return client
     }

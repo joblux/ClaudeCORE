@@ -782,6 +782,7 @@ export type ClientProjection = {
   sectors: string[]
   languages: ResolvedLanguage[]
   experiences: ResolvedExperience[] // V5: full
+  education: ResolvedEducation[]
 }
 
 // --- Admin projection (full + L1 raw) ---------------------------------------
