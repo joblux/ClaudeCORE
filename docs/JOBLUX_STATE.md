@@ -54,6 +54,10 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **1ceb95a** `fix(client-submissions): F-AUDIT-1 dossier stage guard` — May 19 2026 PM. SHIPPED + COOLIFY-GREEN + LIVE-VALIDATED via Chrome MCP. Dossier now refuses to render when underlying `applications.current_stage != 'submitted_to_client'`. Prod QA 4/4 PASS including negative guard test (stage flip → not-found, restore → dossier; net DB delta 0). Companion DB backfill via Supabase MCP on preview app `6a59aed5` (stage→submitted_to_client, submitted_to_client_at=now(), submission_method=platform, +1 application_stage_history row applied→submitted_to_client). 1 file, +7/-1.
+
+- **800c23a** `fix: retire broken resume routes (F-AUDIT-3)` — May 19 2026 PM. SHIPPED + COOLIFY-GREEN. Deleted `app/api/resume/[slug]/route.ts` + `app/api/members/resume/route.ts` (referenced nonexistent `members.resume_*` columns; threw at runtime; zero UI callers). Empty parent dirs cleaned. Closes MATRIX §13 "Resume extinction reconciliation". Note: commit message overstated scope (F-AUDIT-1 dossier guard fell out of staged set via zsh bracket-glob; shipped in follow-up `1ceb95a`). 2 files, -252.
+
 - **50aa464** `fix(client-submissions): correct logo optical centering on state pages` — May 19 2026. SHIPPED + COOLIFY-GREEN + LIVE-VALIDATED via Chrome MCP. Re-fix on top of `8a4c537` after Mo screenshot review showed the not-found + expired logo still visibly left-of-center. Root cause: prior hotfix used `marginLeft: '-14px'` — wrong sign (decoder shifted logo further LEFT, not right). Live Chrome MCP measurement on prod confirmed the glyph visual center sat 37px LEFT of the column reference because `/logos/joblux-gold.svg` viewBox `0 0 600 120` places glyphs at `x=0` with ~200 SVG-units of empty space to the right. Fix: `marginLeft: '30px'` (positive, right-shift) on the `logo` style in both `app/client-submissions/[token]/expired/page.tsx` and `app/client-submissions/[token]/not-found.tsx`. Picked 30 over 37 so glyphs land slightly left of geometric center (reads better than slightly right). No SVG asset change. Dossier `page.tsx` untouched. 2 files, +2/-2.
 
 - **8a4c537** `fix(client-submissions): visual polish on dossier + state pages` — May 19 2026. SHIPPED + COOLIFY-GREEN + LIVE-VALIDATED via Chrome MCP. Bundle hotfix on E.6.1c after Mo prod review surfaced 5 visual defects. 3 files, +6/-10. DEFECT-02: hardcoded preparer email to `alex@joblux.com` on dossier (RECRUITER NOTE signature + footer "Prepared by"). Server-trusted audit trail still uses `session.user.email` via `client_submission.recruiter_email`; only the displayed email is locked to the brand identity. Future fix when a second recruiter ever exists is flagged but out of scope today. DEFECT-03: footer contrast raised on cream canvas. `'#888'` italic → `'#5a5a5a'`; `'#aaa'` caption → `'#7a6818'` (gold-tinted, readable). DEFECT-04: JOBLUX logo on dossier +22% (`height: 28` → `34`). DEFECT-05: logo optical centering on expired + not-found pages (`marginLeft: '-14px'` — corrected at 50aa464 to '30px' positive). DEFECT-06: `Luxury, decoded.` italic line + unused `italic` style const removed from expired + not-found footers. No dossier body changes, no projection/resolver/middleware touched, no SVG asset.
@@ -259,54 +263,26 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-**Lane: ProfiLux + Matching substrate audit (read-only, audit only — not UI work).**
+**Lane: TBD — UI/product (not backend audit).** Candidates: ProfiLux candidate experience evolution, or matching feed surface. Lane shape to be picked at next session start.
 
-**Pack E recruiting loop CLOSED for launch.** All sub-packs shipped end-to-end and validated in prod:
-- Pack E.1 (member_brief_matches substrate + admin POST endpoint)
-- Pack E.2 (brief_outreach substrate + candidate GET feed)
-- Pack E.3 (accept_outreach RPC + accept endpoint + decline endpoint)
-- Pack E.4 (submit-to-client stage-flip endpoint, superseded substrate-wise by E.6.1b token-minting endpoint)
-- Pack E.5a + E.5b (admin recruiting alerts on accept/decline)
-- Pack E.6.1a + E.6.1b + E.6.1c (tokenized client dossier — substrate + endpoint + render + LayoutShell bypass + visual polish bundle + logo centering re-fix)
+**ProfiLux + Matching substrate audit CLOSED** (ledger `cca052d0-9931-4241-a060-0f53a8e18d8d`). 9 findings produced + triaged. 2 fix-before-launch SHIPPED above. 3 parked. 4 accepted doctrine-consistent (recruiting loop 0% utilization by design, DashboardProjection dead branch forbidden from sole candidate caller, maskable wiring parked-by-doctrine, no CHECK on app/brief stages = Option C lock).
 
-Final repo HEAD: `50aa464`. Net DB delta from QA across all packs = zero. Preview submission `a6f65a6a-1b68-49c6-a583-41bc152bede1` remains live intentionally for Mo review; token/URL intentionally not recorded in STATE.
+**Final repo HEAD: `1ceb95a`.** Preview submission `a6f65a6a-1b68-49c6-a583-41bc152bede1` still live for Mo review, now in coherent substrate state. Net DB delta from QA = zero.
 
-**Next lane: ProfiLux + Matching substrate audit (read-only).**
+**Parked findings opened this session:**
+- `63a0104e-04c6-43c2-aae8-c84f584c559a` — F-AUDIT-4 directory §10.1 bypass (normal)
+- `46ceb39b-b5d3-428a-99d6-2e1c84efa337` — F-AUDIT-7 5 dormant members columns (low)
+- `c8cd77d5-8aaf-4667-8ab4-6a7f5c0b3afa` — F-AUDIT-9 ResolvedEducation.degree legacy (low)
+- `4fca2c39-1f64-4f35-88f6-a53567b3eb03` — F-MAINT-1 /client-submissions/* not in MAINTENANCE_BYPASS (medium; address before next maintenance_mode toggle)
 
-Read-only sweep across the cross-table referential surface laid down by Packs A–B–C–D–E. Verify projection contracts match MATRIX v1.11. Identify any post-Pack E doctrine drift. No code, no DDL, no UI work in this lane.
+**Pack E post-launch backlog (parked, unchanged):** ledger `0b6bfc85-c09f-493c-84aa-914dedb14f63` (E.5c-g, E.6.4, E.6.5, revocation UI).
 
-Scope inputs:
-- `lib/profilux/resolveProfiLux.ts` resolver contract
-- `lib/profilux/projectFor.ts` (6 surfaces: dashboard, editor, public, admin, ats, client)
-- `lib/profilux/types.ts` projection shapes
-- Recruiting substrate tables: `member_brief_matches`, `brief_outreach`, `applications`, `application_stage_history`, `client_submissions`
-- Referential integrity across the matching → outreach → application → submission chain
-- Dormant column inventory (per F-S-C-2 / F-S-C-3 / F-S-C-4 pattern)
-- MATRIX v1.11 §10.1 + §16 + §16A + §7.5 alignment vs live projection code
-
-Ledger anchor: `cca052d0-9931-4241-a060-0f53a8e18d8d` (ProfiLux + Matching substrate audit — open, high).
-
-**Pack E post-launch backlog (parked, not launch blockers):**
-
-- **E.5c — `new_match` candidate email.** Template exists; no call site; wires post-launch when admin matching UI ships or auto_v1 lands.
-- **E.5d — `profile_updated` candidate email.** Templates exist; trigger source + frequency limit deferred.
-- **E.5e — `share_viewed` candidate notification.** Doctrine call required from Mo (visibility vs discretion).
-- **E.5f — `completion_reminder` cron.** Requires cron infrastructure not present today.
-- **E.5g — `brief_proposed` candidate notification.** Gated on admin propose-outreach endpoint, which does not exist.
-- **E.6.4 — recruiter compose UI.** Admin-side form to mint client_submissions instead of POSTing raw JSON.
-- **E.6.5 — view tracking.** `client_submission_views` substrate + recruiter notification on first view. DDL deferred at E.6.1a.
-- **E.6 revocation UI.** `revoked_at` column exists; no admin button surface yet.
-
-Ledger anchor for E.6.4/E.6.5/revocation UI/E.5c-g: `0b6bfc85-c09f-493c-84aa-914dedb14f63` (Pack E post-launch backlog — parked, normal).
-
-**Out of scope this lane:**
-- Any new UI work (per GPT lock)
-- Any new endpoint, RPC, or DDL
-- Any MATRIX doctrine expansion
-- E.6 visual changes beyond defect repair surfaced by Mo
+**Out of scope until next lane defined:**
+- Any further backend audit work
+- Further code on F-AUDIT-1 / F-AUDIT-3 / F-MAINT-1 (shipped or parked)
+- MATRIX doctrine expansion
 - Auto-matching engine (`computed_by='auto_v1'`)
 - Brief-source accept conversion (Option C lock holds)
-
 
 ### DO NOT
 
@@ -433,7 +409,7 @@ Ledger anchor for E.6.4/E.6.5/revocation UI/E.5c-g: `0b6bfc85-c09f-493c-84aa-914
 - **F-members-me-shape-incomplete** *(NEW 2026-05-10c, observation_only)* — toLegacyMember() returns a curated subset of ProfiLuxResolved; phone added at a49fb09 closes only the immediate case. Future caution: any new dashboard field reading `member.<field>` off /api/members/me top level must either be added to toLegacyMember() or read from `.view` instead. Migrate consumers to `.view` in Phase 4 per route comments.
 - **F-bridge-v2-remote-control-cosmetic** *(NEW 2026-05-10c, doctrine_lock — ledger 6d11648c)* — Bridge V2 first iteration verdict. Tested end-to-end: Remote Control + GitHub MCP write + cloud sandbox push + PR-driven merge. Outcome: GitHub MCP write blocked (403 confirmed), cloud sandbox direct main push blocked (403), branch push works, PR merge works but Mo still does the merge clic. Net effect on relay-layer problem: ZERO. Mo remains the bridge between Claude AI / Claude Code / GitHub / Coolify. DECISION: Production flow stays Terminal Mac classique; Remote Control abandoned for JOBLUX shipping; do NOT propose again. @claude GitHub App and skill gpt-review NOT pursued (substitution of one bridge for another, not removal). Real unblock target = single-agent orchestration (Agent SDK or future Anthropic primitive) capable of reasoning + executing + committing in one process without Mo between layers; estimated 2-5 days dedicated work; NOT scoped today. Future Bridge V2 iterations must explicitly target relay-layer removal, not workflow cosmetics. Reject any proposal that does not eliminate at least one of: Mo→Code, Mo→GitHub, Mo→Coolify bridges.
 
-**Last updated:** May 19, 2026 PM (Pack E.6 SHIPPED end-to-end; HEAD `50aa464`; full chain: DDL substrate → `48092e7` endpoint → `4b96fa5` render route → `3e332a3` LayoutShell bypass → `8a4c537` visual polish bundle → `50aa464` logo centering re-fix; 6 prod QA passes via Chrome MCP across all paths; preview submission `a6f65a6a-1b68-49c6-a583-41bc152bede1` left live intentionally; net DB delta from QA = zero; Pack E recruiting loop closed for launch; ledger `994c50cc` closed, new anchors `0b6bfc85` post-launch parked + `cca052d0` next lane open; next lane = ProfiLux + Matching substrate audit, read-only).
+**Last updated:** May 19, 2026 PM close (ProfiLux + Matching substrate audit COMPLETE; `cca052d0` closed. 2 fix-before-launch SHIPPED [`1ceb95a` F-AUDIT-1 dossier guard, `800c23a` F-AUDIT-3 broken routes retired + DB backfill on preview app `6a59aed5`]; 3 parked, 4 accepted doctrine-consistent. F-MAINT-1 discovered during prod QA (parked, medium). Repo HEAD `1ceb95a`. Prod QA 4/4 PASS via admin Chrome MCP. Next lane = TBD UI/product.).
 
 **Maintained by:** Claude AI (Opus) · JOBLUX Ops
 
