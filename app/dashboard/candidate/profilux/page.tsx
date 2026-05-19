@@ -3154,28 +3154,38 @@ export default function ProfiluxPage() {
         const pct = typeof e.profile_completeness === 'number' ? e.profile_completeness : 0
         return (
           <>
-            {/* Top-right action row — Add section · Re-upload CV · Done */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-              <button
-                type="button"
-                onClick={() => { setAddSectionError(null); setAddSectionDrawerOpen(true) }}
-                style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#999', border: '0.5px solid #2a2a2a', borderRadius: 8, padding: '8px 16px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer' }}
-              >
-                + Add section
-              </button>
-              <Link
-                href="/dashboard/candidate/profilux/cv-merge"
-                style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#999', border: '0.5px solid #2a2a2a', borderRadius: 8, padding: '8px 16px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, textDecoration: 'none', cursor: 'pointer' }}
-              >
-                Re-upload CV
-              </Link>
-              <button
-                type="button"
-                onClick={() => setTab('view')}
-                style={{ display: 'inline-flex', alignItems: 'center', background: '#fff', color: '#1a1a1a', border: 'none', borderRadius: 8, padding: '8px 18px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', fontWeight: 600 }}
-              >
-                Done →
-              </button>
+            {/* V12 scene-2 doc-header — title + meta on the left, action row on the right */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 32, marginBottom: 28 }}>
+              <div>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: 'uppercase', color: '#fff', marginBottom: 6 }}>
+                  ProfiLux
+                </div>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999', margin: 0 }}>
+                  Generated from your CV · Edit each section to keep your dossier current
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+                <button
+                  type="button"
+                  onClick={() => { setAddSectionError(null); setAddSectionDrawerOpen(true) }}
+                  style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#999', border: '0.5px solid #2a2a2a', borderRadius: 8, padding: '8px 16px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer' }}
+                >
+                  + Add section
+                </button>
+                <Link
+                  href="/dashboard/candidate/profilux/cv-merge"
+                  style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#999', border: '0.5px solid #2a2a2a', borderRadius: 8, padding: '8px 16px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, textDecoration: 'none', cursor: 'pointer' }}
+                >
+                  Re-upload CV
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setTab('view')}
+                  style={{ display: 'inline-flex', alignItems: 'center', background: '#fff', color: '#1a1a1a', border: 'none', borderRadius: 8, padding: '8px 18px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', fontWeight: 600 }}
+                >
+                  Done →
+                </button>
+              </div>
             </div>
             {/* PROFILUX OVERVIEW progress band */}
             <div style={{ background: '#1c1c1c', border: '0.5px solid rgba(165,142,40,0.2)', borderRadius: 12, padding: '22px 28px', marginBottom: 32 }}>
