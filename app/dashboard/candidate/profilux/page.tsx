@@ -543,6 +543,84 @@ function mapParseError(code: string | null): string {
   }
 }
 
+// V12 chrome — per-section VISIBLE toggle. Used 10× in Edit-tab
+// SectionCard headerActions. Reads editor.section_visibility[id],
+// writes via toggleSectionVisibility passed down from parent.
+function VisibilityToggle({
+  sectionId,
+  isVisible,
+  isToggling,
+  onToggle,
+}: {
+  sectionId: SectionId
+  isVisible: boolean
+  isToggling: boolean
+  onToggle: (id: SectionId, next: boolean) => void
+}) {
+  return (
+    <span style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 12,
+      background: 'transparent',
+      border: '0.5px solid #2a2a2a',
+      borderRadius: 8,
+      padding: '8px 16px',
+    }}>
+      <span style={{
+        fontFamily: 'Inter, sans-serif',
+        fontSize: 11,
+        fontWeight: 500,
+        letterSpacing: '2.2px',
+        color: '#999',
+        textTransform: 'uppercase',
+      }}>
+        Visible
+      </span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={isVisible}
+        aria-label="Toggle visibility for this section in your View"
+        disabled={isToggling}
+        onClick={() => onToggle(sectionId, !isVisible)}
+        style={{
+          width: 32,
+          height: 16,
+          borderRadius: 8,
+          border: 'none',
+          padding: 0,
+          position: 'relative',
+          background: isVisible ? '#a58e28' : '#2a2a2a',
+          cursor: isToggling ? 'not-allowed' : 'pointer',
+          opacity: isToggling ? 0.5 : 1,
+          transition: 'background 0.15s',
+        }}
+      >
+        <span style={{
+          position: 'absolute',
+          top: 2,
+          left: isVisible ? 18 : 2,
+          width: 12,
+          height: 12,
+          borderRadius: '50%',
+          background: '#1a1a1a',
+          transition: 'left 0.15s',
+        }} />
+      </button>
+      <span style={{
+        fontFamily: 'Inter, sans-serif',
+        fontSize: 12,
+        fontWeight: 500,
+        letterSpacing: '0.5px',
+        color: isVisible ? '#5dcaa5' : '#777',
+      }}>
+        {isVisible ? 'On' : 'Off'}
+      </span>
+    </span>
+  )
+}
+
 export default function ProfiluxPage() {
   const [tab, setTab] = useState<ProfiluxTab>('edit')
   const [isMobile, setIsMobile] = useState<boolean>(() =>
@@ -2671,27 +2749,27 @@ export default function ProfiluxPage() {
         <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999', letterSpacing: 0.2 }}>
           ← Dashboard · ProfiLux
         </div>
-        <div role="tablist" style={{ display: 'inline-flex', background: '#222', border: '1px solid #2a2a2a', borderRadius: 8, padding: 3 }}>
+        <div role="tablist" style={{ display: 'inline-flex', background: '#1c1c1c', border: '0.5px solid #2a2a2a', borderRadius: 10, padding: 6 }}>
           <button
             type="button"
             role="tab"
             aria-selected={tab === 'view'}
             onClick={() => setTab('view')}
-            style={{ background: tab === 'view' ? '#1a1a1a' : 'transparent', color: tab === 'view' ? '#fff' : '#999', border: 'none', padding: '5px 12px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
+            style={{ background: tab === 'view' ? '#2a2a2a' : 'transparent', color: tab === 'view' ? '#a58e28' : '#999', border: tab === 'view' ? '0.5px solid #3a3a3a' : 'none', padding: '10px 22px', fontFamily: 'Inter, sans-serif', fontSize: 14, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
           >View</button>
           <button
             type="button"
             role="tab"
             aria-selected={tab === 'edit'}
             onClick={() => setTab('edit')}
-            style={{ background: tab === 'edit' ? '#1a1a1a' : 'transparent', color: tab === 'edit' ? '#fff' : '#999', border: 'none', padding: '5px 12px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
+            style={{ background: tab === 'edit' ? '#2a2a2a' : 'transparent', color: tab === 'edit' ? '#a58e28' : '#999', border: tab === 'edit' ? '0.5px solid #3a3a3a' : 'none', padding: '10px 22px', fontFamily: 'Inter, sans-serif', fontSize: 14, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
           >Edit</button>
           <button
             type="button"
             role="tab"
             aria-selected={tab === 'manage'}
             onClick={() => setTab('manage')}
-            style={{ background: tab === 'manage' ? '#1a1a1a' : 'transparent', color: tab === 'manage' ? '#fff' : '#999', border: 'none', padding: '5px 12px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
+            style={{ background: tab === 'manage' ? '#2a2a2a' : 'transparent', color: tab === 'manage' ? '#a58e28' : '#999', border: tab === 'manage' ? '0.5px solid #3a3a3a' : 'none', padding: '10px 22px', fontFamily: 'Inter, sans-serif', fontSize: 14, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
           >Manage</button>
         </div>
       </div>
@@ -3190,14 +3268,14 @@ export default function ProfiluxPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
                 <Link
                   href="/dashboard/candidate/profilux/cv-merge"
-                  style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#999', border: '0.5px solid #2a2a2a', borderRadius: 8, padding: '8px 16px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, textDecoration: 'none', cursor: 'pointer' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#ccc', border: '0.5px solid #2a2a2a', borderRadius: 10, padding: '11px 22px', fontFamily: 'Inter, sans-serif', fontSize: 14, letterSpacing: 0.2, textDecoration: 'none', cursor: 'pointer' }}
                 >
                   Re-upload CV
                 </Link>
                 <button
                   type="button"
                   onClick={() => setTab('view')}
-                  style={{ display: 'inline-flex', alignItems: 'center', background: '#fff', color: '#1a1a1a', border: 'none', borderRadius: 8, padding: '8px 18px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', fontWeight: 600 }}
+                  style={{ display: 'inline-flex', alignItems: 'center', background: '#fff', color: '#1a1a1a', border: 'none', borderRadius: 10, padding: '11px 24px', fontFamily: 'Inter, sans-serif', fontSize: 14, letterSpacing: 0.2, cursor: 'pointer', fontWeight: 600 }}
                 >
                   Done →
                 </button>
@@ -3230,9 +3308,9 @@ export default function ProfiluxPage() {
               <button
                 type="button"
                 onClick={() => { setAddSectionError(null); setAddSectionDrawerOpen(true) }}
-                style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#999', border: '0.5px solid #2a2a2a', borderRadius: 8, padding: '8px 16px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'transparent', color: '#ccc', border: '1px dashed #3a3a3a', borderRadius: 10, padding: '11px 22px', fontFamily: 'Inter, sans-serif', fontSize: 14, letterSpacing: 0.2, cursor: 'pointer' }}
               >
-                + Add section
+                <span style={{ color: '#a58e28' }}>+</span> Add section
               </button>
             </div>
           </>
@@ -3241,7 +3319,7 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Identity"
         headerAction={
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => setIdentityDrawerOpen(true)}
@@ -3249,9 +3327,9 @@ export default function ProfiluxPage() {
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
                 border: '1px solid rgba(165,142,40,0.3)',
-                padding: '6px 14px',
-                fontSize: 11,
-                fontWeight: 600,
+                padding: '9px 18px',
+                fontSize: 13,
+                fontWeight: 500,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -3260,45 +3338,12 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
-                Visible
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={(editor.section_visibility?.['identity'] ?? true)}
-                aria-label="Toggle visibility for this section in your View"
-                disabled={visibilityToggling === 'identity'}
-                onClick={() => toggleSectionVisibility('identity', !(editor.section_visibility?.['identity'] ?? true))}
-                style={{
-                  width: 34,
-                  height: 18,
-                  borderRadius: 9,
-                  border: 'none',
-                  padding: 0,
-                  position: 'relative',
-                  background: (editor.section_visibility?.['identity'] ?? true) ? '#a58e28' : '#2a2a2a',
-                  cursor: visibilityToggling === 'identity' ? 'not-allowed' : 'pointer',
-                  opacity: visibilityToggling === 'identity' ? 0.5 : 1,
-                  transition: 'background 0.15s',
-                }}
-              >
-                <span style={{
-                  position: 'absolute',
-                  top: 2,
-                  left: (editor.section_visibility?.['identity'] ?? true) ? 18 : 2,
-                  width: 14,
-                  height: 14,
-                  borderRadius: '50%',
-                  background: '#fff',
-                  transition: 'left 0.15s',
-                }} />
-              </button>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['identity'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
-                {(editor.section_visibility?.['identity'] ?? true) ? 'ON' : 'OFF'}
-              </span>
-            </span>
+            <VisibilityToggle
+              sectionId="identity"
+              isVisible={editor.section_visibility?.['identity'] ?? true}
+              isToggling={visibilityToggling === 'identity'}
+              onToggle={toggleSectionVisibility}
+            />
           </div>
         }
       >
@@ -3363,7 +3408,7 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Current Role"
         headerAction={
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => setCurrentPositionDrawerOpen(true)}
@@ -3371,9 +3416,9 @@ export default function ProfiluxPage() {
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
                 border: '1px solid rgba(165,142,40,0.3)',
-                padding: '6px 14px',
-                fontSize: 11,
-                fontWeight: 600,
+                padding: '9px 18px',
+                fontSize: 13,
+                fontWeight: 500,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -3382,45 +3427,12 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
-                Visible
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={(editor.section_visibility?.['current_role'] ?? true)}
-                aria-label="Toggle visibility for this section in your View"
-                disabled={visibilityToggling === 'current_role'}
-                onClick={() => toggleSectionVisibility('current_role', !(editor.section_visibility?.['current_role'] ?? true))}
-                style={{
-                  width: 34,
-                  height: 18,
-                  borderRadius: 9,
-                  border: 'none',
-                  padding: 0,
-                  position: 'relative',
-                  background: (editor.section_visibility?.['current_role'] ?? true) ? '#a58e28' : '#2a2a2a',
-                  cursor: visibilityToggling === 'current_role' ? 'not-allowed' : 'pointer',
-                  opacity: visibilityToggling === 'current_role' ? 0.5 : 1,
-                  transition: 'background 0.15s',
-                }}
-              >
-                <span style={{
-                  position: 'absolute',
-                  top: 2,
-                  left: (editor.section_visibility?.['current_role'] ?? true) ? 18 : 2,
-                  width: 14,
-                  height: 14,
-                  borderRadius: '50%',
-                  background: '#fff',
-                  transition: 'left 0.15s',
-                }} />
-              </button>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['current_role'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
-                {(editor.section_visibility?.['current_role'] ?? true) ? 'ON' : 'OFF'}
-              </span>
-            </span>
+            <VisibilityToggle
+              sectionId="current_role"
+              isVisible={editor.section_visibility?.['current_role'] ?? true}
+              isToggling={visibilityToggling === 'current_role'}
+              onToggle={toggleSectionVisibility}
+            />
           </div>
         }
       >
@@ -3468,7 +3480,7 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Career Path"
         headerAction={
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => { setCareerHistoryDrawerOpen(true); cancelExperienceEdit() }}
@@ -3476,9 +3488,9 @@ export default function ProfiluxPage() {
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
                 border: '1px solid rgba(165,142,40,0.3)',
-                padding: '6px 14px',
-                fontSize: 11,
-                fontWeight: 600,
+                padding: '9px 18px',
+                fontSize: 13,
+                fontWeight: 500,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -3487,45 +3499,12 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
-                Visible
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={(editor.section_visibility?.['career_path'] ?? true)}
-                aria-label="Toggle visibility for this section in your View"
-                disabled={visibilityToggling === 'career_path'}
-                onClick={() => toggleSectionVisibility('career_path', !(editor.section_visibility?.['career_path'] ?? true))}
-                style={{
-                  width: 34,
-                  height: 18,
-                  borderRadius: 9,
-                  border: 'none',
-                  padding: 0,
-                  position: 'relative',
-                  background: (editor.section_visibility?.['career_path'] ?? true) ? '#a58e28' : '#2a2a2a',
-                  cursor: visibilityToggling === 'career_path' ? 'not-allowed' : 'pointer',
-                  opacity: visibilityToggling === 'career_path' ? 0.5 : 1,
-                  transition: 'background 0.15s',
-                }}
-              >
-                <span style={{
-                  position: 'absolute',
-                  top: 2,
-                  left: (editor.section_visibility?.['career_path'] ?? true) ? 18 : 2,
-                  width: 14,
-                  height: 14,
-                  borderRadius: '50%',
-                  background: '#fff',
-                  transition: 'left 0.15s',
-                }} />
-              </button>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['career_path'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
-                {(editor.section_visibility?.['career_path'] ?? true) ? 'ON' : 'OFF'}
-              </span>
-            </span>
+            <VisibilityToggle
+              sectionId="career_path"
+              isVisible={editor.section_visibility?.['career_path'] ?? true}
+              isToggling={visibilityToggling === 'career_path'}
+              onToggle={toggleSectionVisibility}
+            />
           </div>
         }
       >
@@ -3671,7 +3650,7 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Education"
         headerAction={
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => { setEducationDrawerOpen(true); cancelEducationEdit() }}
@@ -3679,9 +3658,9 @@ export default function ProfiluxPage() {
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
                 border: '1px solid rgba(165,142,40,0.3)',
-                padding: '6px 14px',
-                fontSize: 11,
-                fontWeight: 600,
+                padding: '9px 18px',
+                fontSize: 13,
+                fontWeight: 500,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -3690,45 +3669,12 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
-                Visible
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={(editor.section_visibility?.['education'] ?? true)}
-                aria-label="Toggle visibility for this section in your View"
-                disabled={visibilityToggling === 'education'}
-                onClick={() => toggleSectionVisibility('education', !(editor.section_visibility?.['education'] ?? true))}
-                style={{
-                  width: 34,
-                  height: 18,
-                  borderRadius: 9,
-                  border: 'none',
-                  padding: 0,
-                  position: 'relative',
-                  background: (editor.section_visibility?.['education'] ?? true) ? '#a58e28' : '#2a2a2a',
-                  cursor: visibilityToggling === 'education' ? 'not-allowed' : 'pointer',
-                  opacity: visibilityToggling === 'education' ? 0.5 : 1,
-                  transition: 'background 0.15s',
-                }}
-              >
-                <span style={{
-                  position: 'absolute',
-                  top: 2,
-                  left: (editor.section_visibility?.['education'] ?? true) ? 18 : 2,
-                  width: 14,
-                  height: 14,
-                  borderRadius: '50%',
-                  background: '#fff',
-                  transition: 'left 0.15s',
-                }} />
-              </button>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['education'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
-                {(editor.section_visibility?.['education'] ?? true) ? 'ON' : 'OFF'}
-              </span>
-            </span>
+            <VisibilityToggle
+              sectionId="education"
+              isVisible={editor.section_visibility?.['education'] ?? true}
+              isToggling={visibilityToggling === 'education'}
+              onToggle={toggleSectionVisibility}
+            />
           </div>
         }
       >
@@ -3860,7 +3806,7 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Languages"
         headerAction={
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
             <button
               type="button"
               onClick={openLanguagesDrawer}
@@ -3868,9 +3814,9 @@ export default function ProfiluxPage() {
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
                 border: '1px solid rgba(165,142,40,0.3)',
-                padding: '6px 14px',
-                fontSize: 11,
-                fontWeight: 600,
+                padding: '9px 18px',
+                fontSize: 13,
+                fontWeight: 500,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -3879,45 +3825,12 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
-                Visible
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={(editor.section_visibility?.['languages'] ?? true)}
-                aria-label="Toggle visibility for this section in your View"
-                disabled={visibilityToggling === 'languages'}
-                onClick={() => toggleSectionVisibility('languages', !(editor.section_visibility?.['languages'] ?? true))}
-                style={{
-                  width: 34,
-                  height: 18,
-                  borderRadius: 9,
-                  border: 'none',
-                  padding: 0,
-                  position: 'relative',
-                  background: (editor.section_visibility?.['languages'] ?? true) ? '#a58e28' : '#2a2a2a',
-                  cursor: visibilityToggling === 'languages' ? 'not-allowed' : 'pointer',
-                  opacity: visibilityToggling === 'languages' ? 0.5 : 1,
-                  transition: 'background 0.15s',
-                }}
-              >
-                <span style={{
-                  position: 'absolute',
-                  top: 2,
-                  left: (editor.section_visibility?.['languages'] ?? true) ? 18 : 2,
-                  width: 14,
-                  height: 14,
-                  borderRadius: '50%',
-                  background: '#fff',
-                  transition: 'left 0.15s',
-                }} />
-              </button>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['languages'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
-                {(editor.section_visibility?.['languages'] ?? true) ? 'ON' : 'OFF'}
-              </span>
-            </span>
+            <VisibilityToggle
+              sectionId="languages"
+              isVisible={editor.section_visibility?.['languages'] ?? true}
+              isToggling={visibilityToggling === 'languages'}
+              onToggle={toggleSectionVisibility}
+            />
           </div>
         }
       >
@@ -4045,7 +3958,7 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Luxury Fit"
         headerAction={
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => { setLuxuryFitDrawerOpen(true); setSectorsError(null); fetchSectorsL2() }}
@@ -4053,9 +3966,9 @@ export default function ProfiluxPage() {
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
                 border: '1px solid rgba(165,142,40,0.3)',
-                padding: '6px 14px',
-                fontSize: 11,
-                fontWeight: 600,
+                padding: '9px 18px',
+                fontSize: 13,
+                fontWeight: 500,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -4064,45 +3977,12 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
-                Visible
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={(editor.section_visibility?.['luxury_fit'] ?? true)}
-                aria-label="Toggle visibility for this section in your View"
-                disabled={visibilityToggling === 'luxury_fit'}
-                onClick={() => toggleSectionVisibility('luxury_fit', !(editor.section_visibility?.['luxury_fit'] ?? true))}
-                style={{
-                  width: 34,
-                  height: 18,
-                  borderRadius: 9,
-                  border: 'none',
-                  padding: 0,
-                  position: 'relative',
-                  background: (editor.section_visibility?.['luxury_fit'] ?? true) ? '#a58e28' : '#2a2a2a',
-                  cursor: visibilityToggling === 'luxury_fit' ? 'not-allowed' : 'pointer',
-                  opacity: visibilityToggling === 'luxury_fit' ? 0.5 : 1,
-                  transition: 'background 0.15s',
-                }}
-              >
-                <span style={{
-                  position: 'absolute',
-                  top: 2,
-                  left: (editor.section_visibility?.['luxury_fit'] ?? true) ? 18 : 2,
-                  width: 14,
-                  height: 14,
-                  borderRadius: '50%',
-                  background: '#fff',
-                  transition: 'left 0.15s',
-                }} />
-              </button>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['luxury_fit'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
-                {(editor.section_visibility?.['luxury_fit'] ?? true) ? 'ON' : 'OFF'}
-              </span>
-            </span>
+            <VisibilityToggle
+              sectionId="luxury_fit"
+              isVisible={editor.section_visibility?.['luxury_fit'] ?? true}
+              isToggling={visibilityToggling === 'luxury_fit'}
+              onToggle={toggleSectionVisibility}
+            />
           </div>
         }
       >
@@ -4225,7 +4105,7 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Skills & Markets"
         headerAction={
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => setSkillsMarketsDrawerOpen(true)}
@@ -4233,9 +4113,9 @@ export default function ProfiluxPage() {
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
                 border: '1px solid rgba(165,142,40,0.3)',
-                padding: '6px 14px',
-                fontSize: 11,
-                fontWeight: 600,
+                padding: '9px 18px',
+                fontSize: 13,
+                fontWeight: 500,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -4244,45 +4124,12 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
-                Visible
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={(editor.section_visibility?.['skills_markets'] ?? true)}
-                aria-label="Toggle visibility for this section in your View"
-                disabled={visibilityToggling === 'skills_markets'}
-                onClick={() => toggleSectionVisibility('skills_markets', !(editor.section_visibility?.['skills_markets'] ?? true))}
-                style={{
-                  width: 34,
-                  height: 18,
-                  borderRadius: 9,
-                  border: 'none',
-                  padding: 0,
-                  position: 'relative',
-                  background: (editor.section_visibility?.['skills_markets'] ?? true) ? '#a58e28' : '#2a2a2a',
-                  cursor: visibilityToggling === 'skills_markets' ? 'not-allowed' : 'pointer',
-                  opacity: visibilityToggling === 'skills_markets' ? 0.5 : 1,
-                  transition: 'background 0.15s',
-                }}
-              >
-                <span style={{
-                  position: 'absolute',
-                  top: 2,
-                  left: (editor.section_visibility?.['skills_markets'] ?? true) ? 18 : 2,
-                  width: 14,
-                  height: 14,
-                  borderRadius: '50%',
-                  background: '#fff',
-                  transition: 'left 0.15s',
-                }} />
-              </button>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['skills_markets'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
-                {(editor.section_visibility?.['skills_markets'] ?? true) ? 'ON' : 'OFF'}
-              </span>
-            </span>
+            <VisibilityToggle
+              sectionId="skills_markets"
+              isVisible={editor.section_visibility?.['skills_markets'] ?? true}
+              isToggling={visibilityToggling === 'skills_markets'}
+              onToggle={toggleSectionVisibility}
+            />
           </div>
         }
       >
@@ -4341,7 +4188,7 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Clienteling"
         headerAction={
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => setClientelingDrawerOpen(true)}
@@ -4349,9 +4196,9 @@ export default function ProfiluxPage() {
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
                 border: '1px solid rgba(165,142,40,0.3)',
-                padding: '6px 14px',
-                fontSize: 11,
-                fontWeight: 600,
+                padding: '9px 18px',
+                fontSize: 13,
+                fontWeight: 500,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -4360,45 +4207,12 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
-                Visible
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={(editor.section_visibility?.['clienteling'] ?? true)}
-                aria-label="Toggle visibility for this section in your View"
-                disabled={visibilityToggling === 'clienteling'}
-                onClick={() => toggleSectionVisibility('clienteling', !(editor.section_visibility?.['clienteling'] ?? true))}
-                style={{
-                  width: 34,
-                  height: 18,
-                  borderRadius: 9,
-                  border: 'none',
-                  padding: 0,
-                  position: 'relative',
-                  background: (editor.section_visibility?.['clienteling'] ?? true) ? '#a58e28' : '#2a2a2a',
-                  cursor: visibilityToggling === 'clienteling' ? 'not-allowed' : 'pointer',
-                  opacity: visibilityToggling === 'clienteling' ? 0.5 : 1,
-                  transition: 'background 0.15s',
-                }}
-              >
-                <span style={{
-                  position: 'absolute',
-                  top: 2,
-                  left: (editor.section_visibility?.['clienteling'] ?? true) ? 18 : 2,
-                  width: 14,
-                  height: 14,
-                  borderRadius: '50%',
-                  background: '#fff',
-                  transition: 'left 0.15s',
-                }} />
-              </button>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['clienteling'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
-                {(editor.section_visibility?.['clienteling'] ?? true) ? 'ON' : 'OFF'}
-              </span>
-            </span>
+            <VisibilityToggle
+              sectionId="clienteling"
+              isVisible={editor.section_visibility?.['clienteling'] ?? true}
+              isToggling={visibilityToggling === 'clienteling'}
+              onToggle={toggleSectionVisibility}
+            />
           </div>
         }
       >
@@ -5563,7 +5377,7 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Compensation"
         headerAction={
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => setCompensationDrawerOpen(true)}
@@ -5571,9 +5385,9 @@ export default function ProfiluxPage() {
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
                 border: '1px solid rgba(165,142,40,0.3)',
-                padding: '6px 14px',
-                fontSize: 11,
-                fontWeight: 600,
+                padding: '9px 18px',
+                fontSize: 13,
+                fontWeight: 500,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -5582,45 +5396,12 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
-                Visible
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={(editor.section_visibility?.['compensation'] ?? true)}
-                aria-label="Toggle visibility for this section in your View"
-                disabled={visibilityToggling === 'compensation'}
-                onClick={() => toggleSectionVisibility('compensation', !(editor.section_visibility?.['compensation'] ?? true))}
-                style={{
-                  width: 34,
-                  height: 18,
-                  borderRadius: 9,
-                  border: 'none',
-                  padding: 0,
-                  position: 'relative',
-                  background: (editor.section_visibility?.['compensation'] ?? true) ? '#a58e28' : '#2a2a2a',
-                  cursor: visibilityToggling === 'compensation' ? 'not-allowed' : 'pointer',
-                  opacity: visibilityToggling === 'compensation' ? 0.5 : 1,
-                  transition: 'background 0.15s',
-                }}
-              >
-                <span style={{
-                  position: 'absolute',
-                  top: 2,
-                  left: (editor.section_visibility?.['compensation'] ?? true) ? 18 : 2,
-                  width: 14,
-                  height: 14,
-                  borderRadius: '50%',
-                  background: '#fff',
-                  transition: 'left 0.15s',
-                }} />
-              </button>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['compensation'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
-                {(editor.section_visibility?.['compensation'] ?? true) ? 'ON' : 'OFF'}
-              </span>
-            </span>
+            <VisibilityToggle
+              sectionId="compensation"
+              isVisible={editor.section_visibility?.['compensation'] ?? true}
+              isToggling={visibilityToggling === 'compensation'}
+              onToggle={toggleSectionVisibility}
+            />
           </div>
         }
       >
@@ -5664,7 +5445,7 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Availability"
         headerAction={
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => setAvailabilityTargetsDrawerOpen(true)}
@@ -5672,9 +5453,9 @@ export default function ProfiluxPage() {
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
                 border: '1px solid rgba(165,142,40,0.3)',
-                padding: '6px 14px',
-                fontSize: 11,
-                fontWeight: 600,
+                padding: '9px 18px',
+                fontSize: 13,
+                fontWeight: 500,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -5683,45 +5464,12 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
-                Visible
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={(editor.section_visibility?.['availability'] ?? true)}
-                aria-label="Toggle visibility for this section in your View"
-                disabled={visibilityToggling === 'availability'}
-                onClick={() => toggleSectionVisibility('availability', !(editor.section_visibility?.['availability'] ?? true))}
-                style={{
-                  width: 34,
-                  height: 18,
-                  borderRadius: 9,
-                  border: 'none',
-                  padding: 0,
-                  position: 'relative',
-                  background: (editor.section_visibility?.['availability'] ?? true) ? '#a58e28' : '#2a2a2a',
-                  cursor: visibilityToggling === 'availability' ? 'not-allowed' : 'pointer',
-                  opacity: visibilityToggling === 'availability' ? 0.5 : 1,
-                  transition: 'background 0.15s',
-                }}
-              >
-                <span style={{
-                  position: 'absolute',
-                  top: 2,
-                  left: (editor.section_visibility?.['availability'] ?? true) ? 18 : 2,
-                  width: 14,
-                  height: 14,
-                  borderRadius: '50%',
-                  background: '#fff',
-                  transition: 'left 0.15s',
-                }} />
-              </button>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['availability'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
-                {(editor.section_visibility?.['availability'] ?? true) ? 'ON' : 'OFF'}
-              </span>
-            </span>
+            <VisibilityToggle
+              sectionId="availability"
+              isVisible={editor.section_visibility?.['availability'] ?? true}
+              isToggling={visibilityToggling === 'availability'}
+              onToggle={toggleSectionVisibility}
+            />
           </div>
         }
       >
