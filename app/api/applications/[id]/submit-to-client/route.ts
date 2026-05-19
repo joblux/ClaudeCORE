@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { randomBytes } from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,28 +14,35 @@ const supabase = createClient(
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL
+  || process.env.NEXTAUTH_URL
+  || 'https://joblux.com'
+
+function mintToken(): string {
+  return randomBytes(32).toString('base64url')
+}
+
 /**
- * POST /api/applications/[id]/submit-to-client — Pack E.4
+ * POST /api/applications/[id]/submit-to-client — Pack E.6.1b
  *
  * Records the act of client submission. Admin-only.
+ * Mints a token + inserts client_submissions row on every successful call.
+ * 1:N per application. First call: 201. Subsequent: 200.
+ * submitted_to_client_at is set on first call only and preserved thereafter.
+ * submission_method defaults to 'platform' on first call only when absent.
  *
  * Writes:
- *   - applications.current_stage          = 'submitted_to_client'
- *   - applications.submitted_to_client_at = now()  (first time only)
- *   - applications.submission_method      = body.submission_method (optional)
- *   - applications.submission_cv_version  = body.submission_cv_version (optional)
+ *   - applications.current_stage          = 'submitted_to_client' (first call)
+ *   - applications.submitted_to_client_at = now()  (first call only)
+ *   - applications.submission_method      = body.submission_method (first call)
+ *   - applications.submission_cv_version  = body.submission_cv_version (first call)
  *   - applications.updated_at             = now()
- *   - application_stage_history INSERT row (from_stage, to_stage, moved_by, notes)
+ *   - application_stage_history INSERT row (first call only)
+ *   - client_submissions INSERT row (every call)
  *
  * Does NOT:
- *   - generate share_links
  *   - invoke projectFor('client')
  *   - send candidate or client emails (E.5 owns notifications)
- *
- * Idempotency:
- *   409 APPLICATION_ALREADY_SUBMITTED if submitted_to_client_at IS NOT NULL.
- *   First submission timestamp is preserved. Subsequent metadata edits go
- *   through PUT /api/applications/[id] (existing UPDATABLE_FIELDS path).
  */
 export async function POST(
   req: NextRequest,
@@ -82,6 +90,30 @@ export async function POST(
   const submissionMethod = trimOrNull(body.submission_method)
   const submissionCvVersion = trimOrNull(body.submission_cv_version)
   const notes = trimOrNull(body.notes)
+  const clientBusinessName  = trimOrNull(body.client_business_name)
+  const clientRecipientName = trimOrNull(body.client_recipient_name)
+  const clientRecipientRole = trimOrNull(body.client_recipient_role)
+  const recruiterNote       = trimOrNull(body.recruiter_note)
+  let   expiresAtInput: string | null = null
+  if (typeof body.expires_at === 'string' && body.expires_at.trim().length > 0) {
+    const d = new Date(body.expires_at)
+    if (Number.isNaN(d.getTime()) || d.getTime() <= Date.now()) {
+      return NextResponse.json(
+        { error: 'Invalid expires_at — must be a future ISO8601 timestamp',
+          code: 'INVALID_EXPIRY' },
+        { status: 400 }
+      )
+    }
+    expiresAtInput = d.toISOString()
+  }
+
+  if (!clientBusinessName || !clientRecipientName) {
+    return NextResponse.json(
+      { error: 'client_business_name and client_recipient_name are required',
+        code: 'MISSING_CLIENT_FIELDS' },
+      { status: 400 }
+    )
+  }
 
   // Fetch current state for guard + history from_stage capture
   const { data: current, error: fetchError } = await supabase
@@ -101,59 +133,131 @@ export async function POST(
     )
   }
 
-  // Idempotency guard — first-submission timestamp is sacred.
-  if (current.submitted_to_client_at) {
+  const isFirstSubmission = !current.submitted_to_client_at
+  const nowIso = new Date().toISOString()
+
+  let updated: any = null
+
+  if (isFirstSubmission) {
+    // First-call path: flip stage, set timestamp, write meta + history.
+    const fromStage = current.current_stage
+
+    // submission_method default 'platform' ONLY on first call ONLY when absent.
+    const effectiveSubmissionMethod =
+      submissionMethod !== null ? submissionMethod : 'platform'
+
+    const updates: Record<string, unknown> = {
+      current_stage: 'submitted_to_client',
+      submitted_to_client_at: nowIso,
+      submission_method: effectiveSubmissionMethod,
+      updated_at: nowIso,
+    }
+    if (submissionCvVersion !== null) {
+      updates.submission_cv_version = submissionCvVersion
+    }
+
+    const { data: u, error: updateError } = await supabase
+      .from('applications')
+      .update(updates)
+      .eq('id', applicationId)
+      .select('id, current_stage, submitted_to_client_at, submission_method, submission_cv_version, updated_at')
+      .single()
+
+    if (updateError) {
+      console.error('[submit-to-client] Update error:', updateError)
+      return NextResponse.json({ error: updateError.message }, { status: 500 })
+    }
+    updated = u
+
+    // Stage history — non-fatal (preserves existing E.4 pattern)
+    const { error: historyError } = await supabase
+      .from('application_stage_history')
+      .insert({
+        application_id: applicationId,
+        from_stage: fromStage,
+        to_stage: 'submitted_to_client',
+        moved_by: session.user.email,
+        notes: notes,
+      })
+    if (historyError) {
+      console.error('[submit-to-client] History insert error:', historyError)
+    }
+  } else {
+    // Subsequent-call path: do NOT touch submitted_to_client_at.
+    // Touch updated_at only so the row reflects activity.
+    const { data: u, error: updateError } = await supabase
+      .from('applications')
+      .update({ updated_at: nowIso })
+      .eq('id', applicationId)
+      .select('id, current_stage, submitted_to_client_at, submission_method, submission_cv_version, updated_at')
+      .single()
+
+    if (updateError) {
+      console.error('[submit-to-client] Touch updated_at error:', updateError)
+      return NextResponse.json({ error: updateError.message }, { status: 500 })
+    }
+    updated = u
+  }
+
+  const buildSubmissionRow = () => {
+    const row: Record<string, unknown> = {
+      application_id: applicationId,
+      token: mintToken(),
+      client_business_name: clientBusinessName,
+      client_recipient_name: clientRecipientName,
+      client_recipient_role: clientRecipientRole,
+      recruiter_email: session.user.email,
+      recruiter_note: recruiterNote,
+    }
+    if (expiresAtInput !== null) row.expires_at = expiresAtInput
+    return row
+  }
+
+  let inserted: any = null
+  let insertError: any = null
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const { data: ins, error } = await supabase
+      .from('client_submissions')
+      .insert(buildSubmissionRow())
+      .select('id, token, client_business_name, client_recipient_name, client_recipient_role, recruiter_email, recruiter_note, expires_at, revoked_at, created_at')
+      .single()
+    if (!error) { inserted = ins; insertError = null; break }
+    insertError = error
+    // Retry only on unique violation (token collision)
+    if (error.code !== '23505') break
+  }
+
+  if (!inserted) {
+    console.error('[submit-to-client] client_submissions insert failed:', insertError)
     return NextResponse.json(
-      {
-        error: 'Application already submitted to client',
-        code: 'APPLICATION_ALREADY_SUBMITTED',
-        submitted_to_client_at: current.submitted_to_client_at,
-      },
-      { status: 409 }
+      { error: insertError?.message || 'Failed to create client submission',
+        code: 'CLIENT_SUBMISSION_INSERT_FAILED',
+        application_already_advanced: isFirstSubmission },
+      { status: 500 }
     )
   }
 
-  const fromStage = current.current_stage
-  const nowIso = new Date().toISOString()
+  const url = `${SITE_URL.replace(/\/$/, '')}/client-submissions/${inserted.token}`
 
-  // Build update payload — only set metadata cols if caller provided them
-  const updates: Record<string, unknown> = {
-    current_stage: 'submitted_to_client',
-    submitted_to_client_at: nowIso,
-    updated_at: nowIso,
-  }
-  if (submissionMethod !== null) updates.submission_method = submissionMethod
-  if (submissionCvVersion !== null) updates.submission_cv_version = submissionCvVersion
-
-  const { data: updated, error: updateError } = await supabase
-    .from('applications')
-    .update(updates)
-    .eq('id', applicationId)
-    .select('id, current_stage, submitted_to_client_at, submission_method, submission_cv_version, updated_at')
-    .single()
-
-  if (updateError) {
-    console.error('[POST /api/applications/[id]/submit-to-client] Update error:', updateError)
-    return NextResponse.json({ error: updateError.message }, { status: 500 })
+  const responseBody = {
+    application: updated,
+    client_submission: {
+      id: inserted.id,
+      token: inserted.token,
+      url,
+      client_business_name: inserted.client_business_name,
+      client_recipient_name: inserted.client_recipient_name,
+      client_recipient_role: inserted.client_recipient_role,
+      recruiter_email: inserted.recruiter_email,
+      recruiter_note: inserted.recruiter_note,
+      expires_at: inserted.expires_at,
+      revoked_at: inserted.revoked_at,
+      created_at: inserted.created_at,
+    },
   }
 
-  // Stage history insert — non-fatal on error (sibling /stage pattern)
-  const { error: historyError } = await supabase
-    .from('application_stage_history')
-    .insert({
-      application_id: applicationId,
-      from_stage: fromStage,
-      to_stage: 'submitted_to_client',
-      moved_by: session.user.email,
-      notes: notes,
-    })
-
-  if (historyError) {
-    console.error('[POST /api/applications/[id]/submit-to-client] History insert error:', historyError)
-  }
-
-  return NextResponse.json(updated, {
-    status: 200,
+  return NextResponse.json(responseBody, {
+    status: isFirstSubmission ? 201 : 200,
     headers: { 'Cache-Control': 'no-store' },
   })
 }
