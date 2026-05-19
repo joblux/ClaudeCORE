@@ -110,19 +110,19 @@ type SectionCardProps = {
 
 function SectionCard({ eyebrow, layout = 'block', headerAction, children }: SectionCardProps) {
   const base: React.CSSProperties = {
-    background: '#1c1c1c',
-    border: '0.5px solid #2a2a2a',
-    borderRadius: 12,
-    padding: '24px 28px',
+    background: '#222',
+    border: '1px solid #2a2a2a',
+    borderRadius: 14,
+    padding: '24px 26px',
     marginBottom: 14,
   }
   const flexExtras: React.CSSProperties = layout === 'flex'
     ? { display: 'flex', alignItems: 'center', gap: 20 }
     : {}
   const eyebrowStyle: React.CSSProperties = {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: 600,
-    color: '#8e8e8e',
+    color: '#fff',
     letterSpacing: 1.6,
     textTransform: 'uppercase',
     fontFamily: 'Inter, sans-serif',
@@ -131,7 +131,7 @@ function SectionCard({ eyebrow, layout = 'block', headerAction, children }: Sect
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: 16,
     marginBottom: 18,
     paddingBottom: 14,
     borderBottom: '0.5px solid rgba(255,255,255,0.04)',
@@ -561,18 +561,18 @@ function VisibilityToggle({
     <span style={{
       display: 'inline-flex',
       alignItems: 'center',
-      gap: 12,
-      background: 'transparent',
+      gap: 8,
+      background: 'rgba(255,255,255,0.012)',
       border: '0.5px solid #2a2a2a',
-      borderRadius: 8,
-      padding: '8px 16px',
+      borderRadius: 6,
+      padding: '5px 10px',
     }}>
       <span style={{
         fontFamily: 'Inter, sans-serif',
-        fontSize: 11,
+        fontSize: 9.5,
         fontWeight: 500,
-        letterSpacing: '2.2px',
-        color: '#999',
+        letterSpacing: '1.2px',
+        color: '#8e8e8e',
         textTransform: 'uppercase',
       }}>
         Visible
@@ -585,13 +585,13 @@ function VisibilityToggle({
         disabled={isToggling}
         onClick={() => onToggle(sectionId, !isVisible)}
         style={{
-          width: 32,
-          height: 16,
-          borderRadius: 8,
+          width: 26,
+          height: 14,
+          borderRadius: 999,
           border: 'none',
           padding: 0,
           position: 'relative',
-          background: isVisible ? '#a58e28' : '#2a2a2a',
+          background: isVisible ? '#a58e28' : '#333',
           cursor: isToggling ? 'not-allowed' : 'pointer',
           opacity: isToggling ? 0.5 : 1,
           transition: 'background 0.15s',
@@ -600,20 +600,20 @@ function VisibilityToggle({
         <span style={{
           position: 'absolute',
           top: 2,
-          left: isVisible ? 18 : 2,
-          width: 12,
-          height: 12,
+          left: isVisible ? 14 : 2,
+          width: 10,
+          height: 10,
           borderRadius: '50%',
-          background: '#1a1a1a',
+          background: isVisible ? '#1a1a1a' : '#ccc',
           transition: 'left 0.15s',
         }} />
       </button>
       <span style={{
         fontFamily: 'Inter, sans-serif',
-        fontSize: 12,
-        fontWeight: 500,
-        letterSpacing: '0.5px',
-        color: isVisible ? '#5dcaa5' : '#777',
+        fontSize: 9.5,
+        fontWeight: 600,
+        letterSpacing: '1px',
+        color: isVisible ? '#1D9E75' : '#777',
       }}>
         {isVisible ? 'On' : 'Off'}
       </span>
@@ -2749,27 +2749,27 @@ export default function ProfiluxPage() {
         <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999', letterSpacing: 0.2 }}>
           ← Dashboard · ProfiLux
         </div>
-        <div role="tablist" style={{ display: 'inline-flex', background: '#1c1c1c', border: '0.5px solid #2a2a2a', borderRadius: 10, padding: 6 }}>
+        <div role="tablist" style={{ display: 'inline-flex', alignItems: 'center', gap: 0, background: 'rgba(255,255,255,0.025)', border: '0.5px solid #2a2a2a', borderRadius: 8, padding: 3 }}>
           <button
             type="button"
             role="tab"
             aria-selected={tab === 'view'}
             onClick={() => setTab('view')}
-            style={{ background: tab === 'view' ? '#2a2a2a' : 'transparent', color: tab === 'view' ? '#a58e28' : '#999', border: tab === 'view' ? '0.5px solid #3a3a3a' : 'none', padding: '10px 22px', fontFamily: 'Inter, sans-serif', fontSize: 14, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
+            style={{ background: tab === 'view' ? 'rgba(255,255,255,0.06)' : 'transparent', color: tab === 'view' ? '#fff' : '#999', border: 'none', padding: '6px 14px', fontFamily: 'Inter, sans-serif', fontSize: 11.5, fontWeight: 500, letterSpacing: '0.5px', cursor: 'pointer', borderRadius: 5 }}
           >View</button>
           <button
             type="button"
             role="tab"
             aria-selected={tab === 'edit'}
             onClick={() => setTab('edit')}
-            style={{ background: tab === 'edit' ? '#2a2a2a' : 'transparent', color: tab === 'edit' ? '#a58e28' : '#999', border: tab === 'edit' ? '0.5px solid #3a3a3a' : 'none', padding: '10px 22px', fontFamily: 'Inter, sans-serif', fontSize: 14, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
+            style={{ background: tab === 'edit' ? 'rgba(255,255,255,0.06)' : 'transparent', color: tab === 'edit' ? '#a58e28' : '#999', border: 'none', padding: '6px 14px', fontFamily: 'Inter, sans-serif', fontSize: 11.5, fontWeight: 500, letterSpacing: '0.5px', cursor: 'pointer', borderRadius: 5 }}
           >Edit</button>
           <button
             type="button"
             role="tab"
             aria-selected={tab === 'manage'}
             onClick={() => setTab('manage')}
-            style={{ background: tab === 'manage' ? '#2a2a2a' : 'transparent', color: tab === 'manage' ? '#a58e28' : '#999', border: tab === 'manage' ? '0.5px solid #3a3a3a' : 'none', padding: '10px 22px', fontFamily: 'Inter, sans-serif', fontSize: 14, letterSpacing: 0.2, cursor: 'pointer', borderRadius: 6 }}
+            style={{ background: tab === 'manage' ? 'rgba(255,255,255,0.06)' : 'transparent', color: tab === 'manage' ? '#a58e28' : '#999', border: 'none', padding: '6px 14px', fontFamily: 'Inter, sans-serif', fontSize: 11.5, fontWeight: 500, letterSpacing: '0.5px', cursor: 'pointer', borderRadius: 5 }}
           >Manage</button>
         </div>
       </div>
@@ -3256,7 +3256,7 @@ export default function ProfiluxPage() {
         return (
           <>
             {/* V12 scene-2 doc-header — title + meta on the left, action row on the right */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 32, marginBottom: 28 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 32, marginBottom: 32 }}>
               <div>
                 <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: 'uppercase', color: '#fff', marginBottom: 6 }}>
                   ProfiLux
@@ -3265,52 +3265,52 @@ export default function ProfiluxPage() {
                   Generated from your CV · Edit each section to keep your dossier current
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 <Link
                   href="/dashboard/candidate/profilux/cv-merge"
-                  style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#ccc', border: '0.5px solid #2a2a2a', borderRadius: 10, padding: '11px 22px', fontFamily: 'Inter, sans-serif', fontSize: 14, letterSpacing: 0.2, textDecoration: 'none', cursor: 'pointer' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#fff', border: '1px solid #2a2a2a', borderRadius: 8, padding: '8px 14px', fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 500, letterSpacing: 0.2, textDecoration: 'none', cursor: 'pointer' }}
                 >
                   Re-upload CV
                 </Link>
                 <button
                   type="button"
                   onClick={() => setTab('view')}
-                  style={{ display: 'inline-flex', alignItems: 'center', background: '#fff', color: '#1a1a1a', border: 'none', borderRadius: 10, padding: '11px 24px', fontFamily: 'Inter, sans-serif', fontSize: 14, letterSpacing: 0.2, cursor: 'pointer', fontWeight: 600 }}
+                  style={{ display: 'inline-flex', alignItems: 'center', background: '#fff', color: '#1a1a1a', border: '1px solid #fff', borderRadius: 8, padding: '8px 14px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', fontWeight: 500 }}
                 >
                   Done →
                 </button>
               </div>
             </div>
             {/* PROFILUX OVERVIEW progress band */}
-            <div style={{ background: '#1c1c1c', border: '0.5px solid rgba(165,142,40,0.2)', borderRadius: 12, padding: '22px 28px', marginBottom: 32 }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: '#a58e28', letterSpacing: 2, marginBottom: 10, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
+            <div style={{ background: '#222', border: '1px solid rgba(165,142,40,0.2)', borderRadius: 12, padding: 22, marginBottom: 28 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: '#a58e28', letterSpacing: 2, marginBottom: 6, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
                 ProfiLux Overview
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 14 }}>
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#ccc', lineHeight: 1.5 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
+                <div style={{ fontFamily: 'Playfair Display, Georgia, serif', fontStyle: 'italic', fontSize: 14.5, color: '#ccc', lineHeight: 1.4, margin: '0 0 12px 0' }}>
                   The more you tell us, the more we can work for you.
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div style={{ flex: 1, height: 3, background: '#2a2a2a', borderRadius: 2, overflow: 'hidden' }}>
                     <div style={{ width: `${Math.max(0, Math.min(100, pct))}%`, height: '100%', background: '#1D9E75' }} />
                   </div>
-                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#fff', fontVariantNumeric: 'tabular-nums', flex: '0 0 auto' }}>
+                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 500, color: '#fff', fontVariantNumeric: 'tabular-nums', flex: '0 0 auto', minWidth: 40 }}>
                     {pct}%
                   </div>
                 </div>
               </div>
             </div>
             {/* YOUR DOSSIER row — V12 places + Add section here */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 14, padding: '0 4px' }}>
               <div style={{ fontSize: 10, fontWeight: 600, color: '#8e8e8e', letterSpacing: 2, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
                 Your dossier
               </div>
               <button
                 type="button"
                 onClick={() => { setAddSectionError(null); setAddSectionDrawerOpen(true) }}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'transparent', color: '#ccc', border: '1px dashed #3a3a3a', borderRadius: 10, padding: '11px 22px', fontFamily: 'Inter, sans-serif', fontSize: 14, letterSpacing: 0.2, cursor: 'pointer' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'transparent', color: '#999', border: '1px dashed #2a2a2a', borderRadius: 8, padding: '9px 18px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: '0.3px', cursor: 'pointer' }}
               >
-                <span style={{ color: '#a58e28' }}>+</span> Add section
+                <span style={{ color: '#a58e28', fontWeight: 600 }}>+</span> Add section
               </button>
             </div>
           </>
@@ -3319,17 +3319,17 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Identity"
         headerAction={
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => setIdentityDrawerOpen(true)}
               style={{
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
-                border: '1px solid rgba(165,142,40,0.3)',
-                padding: '9px 18px',
-                fontSize: 13,
-                fontWeight: 500,
+                border: '1px solid rgba(165,142,40,0.2)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -3408,17 +3408,17 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Current Role"
         headerAction={
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => setCurrentPositionDrawerOpen(true)}
               style={{
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
-                border: '1px solid rgba(165,142,40,0.3)',
-                padding: '9px 18px',
-                fontSize: 13,
-                fontWeight: 500,
+                border: '1px solid rgba(165,142,40,0.2)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -3480,17 +3480,17 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Career Path"
         headerAction={
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => { setCareerHistoryDrawerOpen(true); cancelExperienceEdit() }}
               style={{
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
-                border: '1px solid rgba(165,142,40,0.3)',
-                padding: '9px 18px',
-                fontSize: 13,
-                fontWeight: 500,
+                border: '1px solid rgba(165,142,40,0.2)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -3650,17 +3650,17 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Education"
         headerAction={
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => { setEducationDrawerOpen(true); cancelEducationEdit() }}
               style={{
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
-                border: '1px solid rgba(165,142,40,0.3)',
-                padding: '9px 18px',
-                fontSize: 13,
-                fontWeight: 500,
+                border: '1px solid rgba(165,142,40,0.2)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -3806,17 +3806,17 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Languages"
         headerAction={
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
               type="button"
               onClick={openLanguagesDrawer}
               style={{
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
-                border: '1px solid rgba(165,142,40,0.3)',
-                padding: '9px 18px',
-                fontSize: 13,
-                fontWeight: 500,
+                border: '1px solid rgba(165,142,40,0.2)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -3958,17 +3958,17 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Luxury Fit"
         headerAction={
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => { setLuxuryFitDrawerOpen(true); setSectorsError(null); fetchSectorsL2() }}
               style={{
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
-                border: '1px solid rgba(165,142,40,0.3)',
-                padding: '9px 18px',
-                fontSize: 13,
-                fontWeight: 500,
+                border: '1px solid rgba(165,142,40,0.2)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -4105,17 +4105,17 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Skills & Markets"
         headerAction={
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => setSkillsMarketsDrawerOpen(true)}
               style={{
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
-                border: '1px solid rgba(165,142,40,0.3)',
-                padding: '9px 18px',
-                fontSize: 13,
-                fontWeight: 500,
+                border: '1px solid rgba(165,142,40,0.2)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -4188,17 +4188,17 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Clienteling"
         headerAction={
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => setClientelingDrawerOpen(true)}
               style={{
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
-                border: '1px solid rgba(165,142,40,0.3)',
-                padding: '9px 18px',
-                fontSize: 13,
-                fontWeight: 500,
+                border: '1px solid rgba(165,142,40,0.2)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -5377,17 +5377,17 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Compensation"
         headerAction={
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => setCompensationDrawerOpen(true)}
               style={{
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
-                border: '1px solid rgba(165,142,40,0.3)',
-                padding: '9px 18px',
-                fontSize: 13,
-                fontWeight: 500,
+                border: '1px solid rgba(165,142,40,0.2)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -5445,17 +5445,17 @@ export default function ProfiluxPage() {
       <SectionCard
         eyebrow="Availability"
         headerAction={
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => setAvailabilityTargetsDrawerOpen(true)}
               style={{
                 background: 'rgba(165,142,40,0.05)',
                 color: '#a58e28',
-                border: '1px solid rgba(165,142,40,0.3)',
-                padding: '9px 18px',
-                fontSize: 13,
-                fontWeight: 500,
+                border: '1px solid rgba(165,142,40,0.2)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
                 letterSpacing: '0.4px',
                 borderRadius: 6,
                 cursor: 'pointer',
