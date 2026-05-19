@@ -48,11 +48,17 @@ export default async function ClientSubmissionPage({ params }: Props) {
 
   const { data: app } = await supabase
     .from('applications')
-    .select('id, member_id, search_assignment_id')
+    .select('id, member_id, search_assignment_id, current_stage')
     .eq('id', sub.application_id)
     .maybeSingle()
 
   if (!app || !app.member_id) notFound()
+  // F-AUDIT-1 guard: token is bound to a submission, but only a submission
+  // whose underlying application reached the submitted_to_client stage is a
+  // valid dossier render target. Any other stage means the token should
+  // never have been minted (substrate incoherence). notFound is the correct
+  // fall-through — this is an invalid-state condition, not an expiry.
+  if (app.current_stage !== 'submitted_to_client') notFound()
 
   let assignmentTitle: string | null = null
   if (app.search_assignment_id) {
