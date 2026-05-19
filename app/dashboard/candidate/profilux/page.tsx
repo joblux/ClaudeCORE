@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import type { EditorView, MaskableField, ProfiLuxInternshipItem, ProfiLuxPortfolioItem, ProfiLuxPressFeatureItem, ProfiLuxReferenceItem, ProfiLuxStrategicInitiative } from '@/lib/profilux/types'
+import type { EditorView, MaskableField, ProfiLuxInternshipItem, ProfiLuxPortfolioItem, ProfiLuxPressFeatureItem, ProfiLuxReferenceItem, ProfiLuxStrategicInitiative, SectionId } from '@/lib/profilux/types'
 import { MASKABLE_FIELDS } from '@/lib/profilux/types'
 import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS, PROFILUX_SECTOR_OPTIONS } from '@/lib/profilux/vocabulary'
 
@@ -789,6 +789,29 @@ export default function ProfiluxPage() {
       // see above
     } finally {
       setMaskToggling(null)
+    }
+  }
+
+  // PF-EDIT-V12-CONVERGENCE-1 — per-section VISIBLE toggle. Mirrors
+  // toggleMaskedField pattern. Reuses existing section_visibility
+  // substrate (DB column + POST /api/profilux validation).
+  const [visibilityToggling, setVisibilityToggling] = useState<SectionId | null>(null)
+  const toggleSectionVisibility = async (id: SectionId, nextValue: boolean) => {
+    if (!editor) return
+    setVisibilityToggling(id)
+    try {
+      const next = { ...(editor.section_visibility ?? {}), [id]: nextValue }
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ section_visibility: next }),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      await refetch()
+    } catch {
+      // silent — mirrors toggleMaskedField posture
+    } finally {
+      setVisibilityToggling(null)
     }
   }
 
@@ -3165,13 +3188,6 @@ export default function ProfiluxPage() {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-                <button
-                  type="button"
-                  onClick={() => { setAddSectionError(null); setAddSectionDrawerOpen(true) }}
-                  style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#999', border: '0.5px solid #2a2a2a', borderRadius: 8, padding: '8px 16px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer' }}
-                >
-                  + Add section
-                </button>
                 <Link
                   href="/dashboard/candidate/profilux/cv-merge"
                   style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#999', border: '0.5px solid #2a2a2a', borderRadius: 8, padding: '8px 16px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, textDecoration: 'none', cursor: 'pointer' }}
@@ -3192,11 +3208,11 @@ export default function ProfiluxPage() {
               <div style={{ fontSize: 10, fontWeight: 600, color: '#a58e28', letterSpacing: 2, marginBottom: 10, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
                 ProfiLux Overview
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-                <div style={{ fontFamily: 'Playfair Display, Georgia, serif', fontStyle: 'italic', fontSize: 15, color: '#ccc', lineHeight: 1.4, flex: '0 0 auto' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 14 }}>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#ccc', lineHeight: 1.5 }}>
                   The more you tell us, the more we can work for you.
                 </div>
-                <div style={{ flex: '1 1 auto', display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div style={{ flex: 1, height: 3, background: '#2a2a2a', borderRadius: 2, overflow: 'hidden' }}>
                     <div style={{ width: `${Math.max(0, Math.min(100, pct))}%`, height: '100%', background: '#1D9E75' }} />
                   </div>
@@ -3206,260 +3222,20 @@ export default function ProfiluxPage() {
                 </div>
               </div>
             </div>
-            {/* YOUR DOSSIER eyebrow */}
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#8e8e8e', letterSpacing: 2, marginBottom: 18, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
-              Your dossier
-            </div>
-          </>
-        )
-      })()}
-      {/* CV upload + parse card — S1 */}
-      <SectionCard eyebrow="CV">
-        {!cvUrl && (
-          <>
-            <div style={{ fontSize: 13, color: '#ccc', marginBottom: 14 }}>Upload your CV. JOBLUX will parse it for review.</div>
-            <button
-              type="button"
-              onClick={handleUploadClick}
-              disabled={uploading}
-              style={uploading ? saveBtnDis : saveBtn}
-            >
-              {uploading ? 'Uploading...' : 'Upload CV'}
-            </button>
-          </>
-        )}
-
-        {cvUrl && !cvParsedAt && (
-          <>
-            <div style={{ fontSize: 13, color: '#ccc', marginBottom: 14 }}>
-              CV uploaded.{' '}
-              <Link
-                href="/dashboard/candidate/profilux/cv-merge"
-                style={{ color: '#ccc', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13 }}
-              >
-                Replace
-              </Link>
-            </div>
-            <button
-              type="button"
-              onClick={handleParse}
-              disabled={parsing}
-              style={parsing ? saveBtnDis : saveBtn}
-            >
-              {parsing ? 'Parsing...' : 'Parse CV'}
-            </button>
-          </>
-        )}
-
-        {cvUrl && cvParsedAt && (
-          <>
-            <div style={{ fontSize: 13, color: '#ccc', marginBottom: 14 }}>
-              CV parsed {parsedDateLabel}.{' '}
-              <Link
-                href="/dashboard/candidate/profilux/cv-merge"
-                style={{ color: '#ccc', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13 }}
-              >
-                Replace
-              </Link>
-            </div>
-            <button
-              type="button"
-              onClick={handleParse}
-              disabled={parsing}
-              style={{ background: 'transparent', color: '#fff', border: '1px solid #444', padding: '8px 16px', cursor: parsing ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13, opacity: parsing ? 0.5 : 1 }}
-            >
-              {parsing ? 'Parsing...' : 'Re-parse'}
-            </button>
-          </>
-        )}
-
-        {(parseError || uploadError) && (
-          <div style={{ marginTop: 10, fontSize: 11, color: '#ff6b6b' }}>{parseError || uploadError}</div>
-        )}
-
-        {needsReviewCount !== null && needsReviewCount > 0 && (
-          <div style={{ marginTop: 10, fontSize: 11, color: '#888' }}>
-            {needsReviewCount} {needsReviewCount === 1 ? 'item' : 'items'} to review
-          </div>
-        )}
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".pdf,.docx"
-          onChange={handleFileSelected}
-          style={{ display: 'none' }}
-        />
-      </SectionCard>
-      {/* Identity prefill review panel - S1.5 */}
-      {(() => {
-        const sug = editor.cv_identity_suggestions
-        const keys: Array<'first_name' | 'last_name' | 'city' | 'nationality'> = []
-        if (sug.first_name !== undefined) keys.push('first_name')
-        if (sug.last_name !== undefined) keys.push('last_name')
-        if (sug.city !== undefined) keys.push('city')
-        if (sug.nationality !== undefined) keys.push('nationality')
-        if (keys.length === 0) return null
-        const labels: Record<typeof keys[number], string> = {
-          first_name: 'First name',
-          last_name: 'Last name',
-          city: 'City',
-          nationality: 'Nationality',
-        }
-        const checkedCount = keys.filter(k => suggestionSelected[k]).length
-        return (
-          <SectionCard eyebrow="Apply suggestions from your CV">
-            <div style={{ fontSize: 13, color: '#ccc', marginBottom: 14 }}>
-              Your CV contains values that differ from your ProfiLux. Review each and apply or dismiss.
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '24px 160px 1fr auto', gap: 8, fontSize: 13, lineHeight: 1.6, alignItems: 'center' }}>
-              {keys.map((k) => (
-                <React.Fragment key={k}>
-                  <input
-                    type="checkbox"
-                    checked={suggestionSelected[k]}
-                    onChange={(ev) => setSuggestionSelected(prev => ({ ...prev, [k]: ev.target.checked }))}
-                    disabled={actioning}
-                    style={{ accentColor: '#a58e28' }}
-                  />
-                  <div style={{ color: '#999' }}>{labels[k]}</div>
-                  <div style={{ color: '#fff' }}>
-                    {(() => {
-                      const l1 = sug[k] as string
-                      const l2Raw = editor[k]
-                      const l2Str = typeof l2Raw === 'string' ? l2Raw : ''
-                      const l1Norm = l1.trim().toLowerCase()
-                      const l2Norm = l2Str.trim().toLowerCase()
-                      const l2WasEmpty = l2Norm === '' || l2Norm === l1Norm
-                      return (
-                        <>
-                          <span style={{ color: l2WasEmpty ? '#666' : '#999' }}>{l2WasEmpty ? '(none)' : l2Str}</span>
-                          <span style={{ color: '#666', margin: '0 8px' }}>→</span>
-                          <span style={{ color: '#fff' }}>{l1}</span>
-                        </>
-                      )
-                    })()}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => sug[k] !== undefined && handleDismissSuggestion(k, sug[k] as string)}
-                    disabled={actioning}
-                    style={{
-                      background: 'transparent',
-                      border: 'none',
-                      color: '#777',
-                      fontFamily: 'Inter, sans-serif',
-                      fontSize: 12,
-                      padding: '2px 6px',
-                      cursor: actioning ? 'default' : 'pointer',
-                      textDecoration: 'underline',
-                    }}
-                  >
-                    Dismiss
-                  </button>
-                </React.Fragment>
-              ))}
-            </div>
-            <div style={{ marginTop: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
+            {/* YOUR DOSSIER row — V12 places + Add section here */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: '#8e8e8e', letterSpacing: 2, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
+                Your dossier
+              </div>
               <button
                 type="button"
-                onClick={handleApplySuggestions}
-                disabled={actioning || checkedCount === 0}
-                style={(actioning || checkedCount === 0) ? saveBtnDis : saveBtn}
+                onClick={() => { setAddSectionError(null); setAddSectionDrawerOpen(true) }}
+                style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#999', border: '0.5px solid #2a2a2a', borderRadius: 8, padding: '8px 16px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer' }}
               >
-                {actioning ? 'Working...' : `Apply selected${checkedCount > 0 ? ` (${checkedCount})` : ''}`}
+                + Add section
               </button>
-              {actionError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{actionError}</span>}
             </div>
-          </SectionCard>
-        )
-      })()}
-      {/* S-B.1B.4 — Education suggestions panel (collection-shaped) */}
-      {(() => {
-        const eduSugs = Array.isArray(editor.cv_education_suggestions) ? editor.cv_education_suggestions : []
-        if (eduSugs.length === 0) return null
-        return (
-          <SectionCard eyebrow="Add education from your CV">
-            <div style={{ fontSize: 13, color: '#ccc', marginBottom: 14 }}>
-              Your CV includes education entries that are not yet in your ProfiLux.
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {eduSugs.map((row) => {
-                const sig = row.signature
-                const inFlight = educationActioningSig === sig
-                const anyInFlight = educationActioningSig !== null
-
-                const title =
-                  typeof row.institution === 'string' && row.institution.trim().length > 0
-                    ? row.institution
-                    : 'Untitled institution'
-
-                const secondaryParts: string[] = []
-                if (typeof row.degree_level === 'string' && row.degree_level.trim().length > 0) secondaryParts.push(row.degree_level)
-                if (typeof row.field_of_study === 'string' && row.field_of_study.trim().length > 0) secondaryParts.push(row.field_of_study)
-                if (typeof row.graduation_year === 'number') secondaryParts.push(String(row.graduation_year))
-                const secondaryLine = secondaryParts.join(' · ')
-
-                const locParts: string[] = []
-                if (typeof row.city === 'string' && row.city.trim().length > 0) locParts.push(row.city)
-                if (typeof row.country === 'string' && row.country.trim().length > 0) locParts.push(row.country)
-                const locStr = locParts.join(', ')
-
-                const tertiaryParts: string[] = []
-                if (locStr.length > 0) tertiaryParts.push(locStr)
-                if (typeof row.start_year === 'number') tertiaryParts.push(String(row.start_year))
-                const tertiaryLine = tertiaryParts.join(' · ')
-
-                return (
-                  <div key={sig} style={{ borderBottom: '1px solid #2a2a2a', paddingBottom: 14 }}>
-                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 500, color: '#fff', lineHeight: 1.4, marginBottom: 4 }}>
-                      {title}
-                    </div>
-                    {secondaryLine.length > 0 && (
-                      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5, marginBottom: 2 }}>
-                        {secondaryLine}
-                      </div>
-                    )}
-                    {tertiaryLine.length > 0 && (
-                      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.5, marginBottom: 10 }}>
-                        {tertiaryLine}
-                      </div>
-                    )}
-                    <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
-                      <button
-                        type="button"
-                        onClick={() => handleApplyEducationSuggestion(sig)}
-                        disabled={anyInFlight}
-                        style={anyInFlight ? saveBtnDis : saveBtn}
-                      >
-                        {inFlight ? 'Working…' : 'Add to ProfiLux'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDismissEducationSuggestion(sig)}
-                        disabled={anyInFlight}
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          color: '#777',
-                          fontFamily: 'Inter, sans-serif',
-                          fontSize: 12,
-                          padding: '2px 6px',
-                          cursor: anyInFlight ? 'default' : 'pointer',
-                          textDecoration: 'underline',
-                        }}
-                      >
-                        Dismiss
-                      </button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-            {actionError && (
-              <div style={{ marginTop: 12, color: '#ff6b6b', fontSize: 13 }}>{actionError}</div>
-            )}
-          </SectionCard>
+          </>
         )
       })()}
       <SectionCard
@@ -3484,6 +3260,45 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
+                Visible
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={(editor.section_visibility?.['identity'] ?? true)}
+                aria-label="Toggle visibility for this section in your View"
+                disabled={visibilityToggling === 'identity'}
+                onClick={() => toggleSectionVisibility('identity', !(editor.section_visibility?.['identity'] ?? true))}
+                style={{
+                  width: 34,
+                  height: 18,
+                  borderRadius: 9,
+                  border: 'none',
+                  padding: 0,
+                  position: 'relative',
+                  background: (editor.section_visibility?.['identity'] ?? true) ? '#a58e28' : '#2a2a2a',
+                  cursor: visibilityToggling === 'identity' ? 'not-allowed' : 'pointer',
+                  opacity: visibilityToggling === 'identity' ? 0.5 : 1,
+                  transition: 'background 0.15s',
+                }}
+              >
+                <span style={{
+                  position: 'absolute',
+                  top: 2,
+                  left: (editor.section_visibility?.['identity'] ?? true) ? 18 : 2,
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  transition: 'left 0.15s',
+                }} />
+              </button>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['identity'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
+                {(editor.section_visibility?.['identity'] ?? true) ? 'ON' : 'OFF'}
+              </span>
+            </span>
           </div>
         }
       >
@@ -3567,6 +3382,45 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
+                Visible
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={(editor.section_visibility?.['current_role'] ?? true)}
+                aria-label="Toggle visibility for this section in your View"
+                disabled={visibilityToggling === 'current_role'}
+                onClick={() => toggleSectionVisibility('current_role', !(editor.section_visibility?.['current_role'] ?? true))}
+                style={{
+                  width: 34,
+                  height: 18,
+                  borderRadius: 9,
+                  border: 'none',
+                  padding: 0,
+                  position: 'relative',
+                  background: (editor.section_visibility?.['current_role'] ?? true) ? '#a58e28' : '#2a2a2a',
+                  cursor: visibilityToggling === 'current_role' ? 'not-allowed' : 'pointer',
+                  opacity: visibilityToggling === 'current_role' ? 0.5 : 1,
+                  transition: 'background 0.15s',
+                }}
+              >
+                <span style={{
+                  position: 'absolute',
+                  top: 2,
+                  left: (editor.section_visibility?.['current_role'] ?? true) ? 18 : 2,
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  transition: 'left 0.15s',
+                }} />
+              </button>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['current_role'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
+                {(editor.section_visibility?.['current_role'] ?? true) ? 'ON' : 'OFF'}
+              </span>
+            </span>
           </div>
         }
       >
@@ -3633,6 +3487,45 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
+                Visible
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={(editor.section_visibility?.['career_path'] ?? true)}
+                aria-label="Toggle visibility for this section in your View"
+                disabled={visibilityToggling === 'career_path'}
+                onClick={() => toggleSectionVisibility('career_path', !(editor.section_visibility?.['career_path'] ?? true))}
+                style={{
+                  width: 34,
+                  height: 18,
+                  borderRadius: 9,
+                  border: 'none',
+                  padding: 0,
+                  position: 'relative',
+                  background: (editor.section_visibility?.['career_path'] ?? true) ? '#a58e28' : '#2a2a2a',
+                  cursor: visibilityToggling === 'career_path' ? 'not-allowed' : 'pointer',
+                  opacity: visibilityToggling === 'career_path' ? 0.5 : 1,
+                  transition: 'background 0.15s',
+                }}
+              >
+                <span style={{
+                  position: 'absolute',
+                  top: 2,
+                  left: (editor.section_visibility?.['career_path'] ?? true) ? 18 : 2,
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  transition: 'left 0.15s',
+                }} />
+              </button>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['career_path'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
+                {(editor.section_visibility?.['career_path'] ?? true) ? 'ON' : 'OFF'}
+              </span>
+            </span>
           </div>
         }
       >
@@ -3797,6 +3690,45 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
+                Visible
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={(editor.section_visibility?.['education'] ?? true)}
+                aria-label="Toggle visibility for this section in your View"
+                disabled={visibilityToggling === 'education'}
+                onClick={() => toggleSectionVisibility('education', !(editor.section_visibility?.['education'] ?? true))}
+                style={{
+                  width: 34,
+                  height: 18,
+                  borderRadius: 9,
+                  border: 'none',
+                  padding: 0,
+                  position: 'relative',
+                  background: (editor.section_visibility?.['education'] ?? true) ? '#a58e28' : '#2a2a2a',
+                  cursor: visibilityToggling === 'education' ? 'not-allowed' : 'pointer',
+                  opacity: visibilityToggling === 'education' ? 0.5 : 1,
+                  transition: 'background 0.15s',
+                }}
+              >
+                <span style={{
+                  position: 'absolute',
+                  top: 2,
+                  left: (editor.section_visibility?.['education'] ?? true) ? 18 : 2,
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  transition: 'left 0.15s',
+                }} />
+              </button>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['education'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
+                {(editor.section_visibility?.['education'] ?? true) ? 'ON' : 'OFF'}
+              </span>
+            </span>
           </div>
         }
       >
@@ -3947,6 +3879,45 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
+                Visible
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={(editor.section_visibility?.['languages'] ?? true)}
+                aria-label="Toggle visibility for this section in your View"
+                disabled={visibilityToggling === 'languages'}
+                onClick={() => toggleSectionVisibility('languages', !(editor.section_visibility?.['languages'] ?? true))}
+                style={{
+                  width: 34,
+                  height: 18,
+                  borderRadius: 9,
+                  border: 'none',
+                  padding: 0,
+                  position: 'relative',
+                  background: (editor.section_visibility?.['languages'] ?? true) ? '#a58e28' : '#2a2a2a',
+                  cursor: visibilityToggling === 'languages' ? 'not-allowed' : 'pointer',
+                  opacity: visibilityToggling === 'languages' ? 0.5 : 1,
+                  transition: 'background 0.15s',
+                }}
+              >
+                <span style={{
+                  position: 'absolute',
+                  top: 2,
+                  left: (editor.section_visibility?.['languages'] ?? true) ? 18 : 2,
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  transition: 'left 0.15s',
+                }} />
+              </button>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['languages'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
+                {(editor.section_visibility?.['languages'] ?? true) ? 'ON' : 'OFF'}
+              </span>
+            </span>
           </div>
         }
       >
@@ -4093,6 +4064,45 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
+                Visible
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={(editor.section_visibility?.['luxury_fit'] ?? true)}
+                aria-label="Toggle visibility for this section in your View"
+                disabled={visibilityToggling === 'luxury_fit'}
+                onClick={() => toggleSectionVisibility('luxury_fit', !(editor.section_visibility?.['luxury_fit'] ?? true))}
+                style={{
+                  width: 34,
+                  height: 18,
+                  borderRadius: 9,
+                  border: 'none',
+                  padding: 0,
+                  position: 'relative',
+                  background: (editor.section_visibility?.['luxury_fit'] ?? true) ? '#a58e28' : '#2a2a2a',
+                  cursor: visibilityToggling === 'luxury_fit' ? 'not-allowed' : 'pointer',
+                  opacity: visibilityToggling === 'luxury_fit' ? 0.5 : 1,
+                  transition: 'background 0.15s',
+                }}
+              >
+                <span style={{
+                  position: 'absolute',
+                  top: 2,
+                  left: (editor.section_visibility?.['luxury_fit'] ?? true) ? 18 : 2,
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  transition: 'left 0.15s',
+                }} />
+              </button>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['luxury_fit'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
+                {(editor.section_visibility?.['luxury_fit'] ?? true) ? 'ON' : 'OFF'}
+              </span>
+            </span>
           </div>
         }
       >
@@ -4234,6 +4244,45 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
+                Visible
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={(editor.section_visibility?.['skills_markets'] ?? true)}
+                aria-label="Toggle visibility for this section in your View"
+                disabled={visibilityToggling === 'skills_markets'}
+                onClick={() => toggleSectionVisibility('skills_markets', !(editor.section_visibility?.['skills_markets'] ?? true))}
+                style={{
+                  width: 34,
+                  height: 18,
+                  borderRadius: 9,
+                  border: 'none',
+                  padding: 0,
+                  position: 'relative',
+                  background: (editor.section_visibility?.['skills_markets'] ?? true) ? '#a58e28' : '#2a2a2a',
+                  cursor: visibilityToggling === 'skills_markets' ? 'not-allowed' : 'pointer',
+                  opacity: visibilityToggling === 'skills_markets' ? 0.5 : 1,
+                  transition: 'background 0.15s',
+                }}
+              >
+                <span style={{
+                  position: 'absolute',
+                  top: 2,
+                  left: (editor.section_visibility?.['skills_markets'] ?? true) ? 18 : 2,
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  transition: 'left 0.15s',
+                }} />
+              </button>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['skills_markets'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
+                {(editor.section_visibility?.['skills_markets'] ?? true) ? 'ON' : 'OFF'}
+              </span>
+            </span>
           </div>
         }
       >
@@ -4311,6 +4360,45 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
+                Visible
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={(editor.section_visibility?.['clienteling'] ?? true)}
+                aria-label="Toggle visibility for this section in your View"
+                disabled={visibilityToggling === 'clienteling'}
+                onClick={() => toggleSectionVisibility('clienteling', !(editor.section_visibility?.['clienteling'] ?? true))}
+                style={{
+                  width: 34,
+                  height: 18,
+                  borderRadius: 9,
+                  border: 'none',
+                  padding: 0,
+                  position: 'relative',
+                  background: (editor.section_visibility?.['clienteling'] ?? true) ? '#a58e28' : '#2a2a2a',
+                  cursor: visibilityToggling === 'clienteling' ? 'not-allowed' : 'pointer',
+                  opacity: visibilityToggling === 'clienteling' ? 0.5 : 1,
+                  transition: 'background 0.15s',
+                }}
+              >
+                <span style={{
+                  position: 'absolute',
+                  top: 2,
+                  left: (editor.section_visibility?.['clienteling'] ?? true) ? 18 : 2,
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  transition: 'left 0.15s',
+                }} />
+              </button>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['clienteling'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
+                {(editor.section_visibility?.['clienteling'] ?? true) ? 'ON' : 'OFF'}
+              </span>
+            </span>
           </div>
         }
       >
@@ -5494,6 +5582,45 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
+                Visible
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={(editor.section_visibility?.['compensation'] ?? true)}
+                aria-label="Toggle visibility for this section in your View"
+                disabled={visibilityToggling === 'compensation'}
+                onClick={() => toggleSectionVisibility('compensation', !(editor.section_visibility?.['compensation'] ?? true))}
+                style={{
+                  width: 34,
+                  height: 18,
+                  borderRadius: 9,
+                  border: 'none',
+                  padding: 0,
+                  position: 'relative',
+                  background: (editor.section_visibility?.['compensation'] ?? true) ? '#a58e28' : '#2a2a2a',
+                  cursor: visibilityToggling === 'compensation' ? 'not-allowed' : 'pointer',
+                  opacity: visibilityToggling === 'compensation' ? 0.5 : 1,
+                  transition: 'background 0.15s',
+                }}
+              >
+                <span style={{
+                  position: 'absolute',
+                  top: 2,
+                  left: (editor.section_visibility?.['compensation'] ?? true) ? 18 : 2,
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  transition: 'left 0.15s',
+                }} />
+              </button>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['compensation'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
+                {(editor.section_visibility?.['compensation'] ?? true) ? 'ON' : 'OFF'}
+              </span>
+            </span>
           </div>
         }
       >
@@ -5556,6 +5683,45 @@ export default function ProfiluxPage() {
             >
               Edit
             </button>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '1.6px', color: '#8e8e8e', textTransform: 'uppercase' }}>
+                Visible
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={(editor.section_visibility?.['availability'] ?? true)}
+                aria-label="Toggle visibility for this section in your View"
+                disabled={visibilityToggling === 'availability'}
+                onClick={() => toggleSectionVisibility('availability', !(editor.section_visibility?.['availability'] ?? true))}
+                style={{
+                  width: 34,
+                  height: 18,
+                  borderRadius: 9,
+                  border: 'none',
+                  padding: 0,
+                  position: 'relative',
+                  background: (editor.section_visibility?.['availability'] ?? true) ? '#a58e28' : '#2a2a2a',
+                  cursor: visibilityToggling === 'availability' ? 'not-allowed' : 'pointer',
+                  opacity: visibilityToggling === 'availability' ? 0.5 : 1,
+                  transition: 'background 0.15s',
+                }}
+              >
+                <span style={{
+                  position: 'absolute',
+                  top: 2,
+                  left: (editor.section_visibility?.['availability'] ?? true) ? 18 : 2,
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  transition: 'left 0.15s',
+                }} />
+              </button>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 600, color: (editor.section_visibility?.['availability'] ?? true) ? '#fff' : '#777', minWidth: 18 }}>
+                {(editor.section_visibility?.['availability'] ?? true) ? 'ON' : 'OFF'}
+              </span>
+            </span>
           </div>
         }
       >
