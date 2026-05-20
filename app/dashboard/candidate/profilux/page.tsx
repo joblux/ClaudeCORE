@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import type { EditorView, MaskableField, ProfiLuxInternshipItem, ProfiLuxPortfolioItem, ProfiLuxPressFeatureItem, ProfiLuxReferenceItem, ProfiLuxStrategicInitiative, SectionId } from '@/lib/profilux/types'
 import { MASKABLE_FIELDS } from '@/lib/profilux/types'
 import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS, PROFILUX_SECTOR_OPTIONS } from '@/lib/profilux/vocabulary'
@@ -18,7 +19,7 @@ const SCREEN_TITLES = [
   'Clienteling', 'Availability & Targets', 'Compensation', 'Confirm',
 ]
 
-// PF-D V2 — Add Section library. V1 ships Awards + Certifications; 6 others Coming soon.
+// PF-D V2 — Add Section library. 8 sections all live.
 const ADD_SECTION_LIBRARY: Array<{ key: string; label: string; available: boolean }> = [
   { key: 'awards',                label: 'Awards',                available: true  },
   { key: 'certifications',        label: 'Certifications',        available: true  },
@@ -679,6 +680,18 @@ export default function ProfiluxPage() {
   const [expiryDraft, setExpiryDraft] = useState('')
   const [expirySaving, setExpirySaving] = useState(false)
   const [expiryError, setExpiryError] = useState<string | null>(null)
+  // PF-MANAGE V12 — top-level state for Opportunity preferences toggle,
+  // share-URL copy feedback, and sticky-nav scrollspy. Hooks live ONLY at
+  // top scope (R2); helpers below this point contain zero hook calls.
+  const [matchingSaving, setMatchingSaving] = useState(false)
+  const [matchingError, setMatchingError] = useState<string | null>(null)
+  const [shareCopyStatus, setShareCopyStatus] = useState<'idle' | 'copied'>('idle')
+  const [activeManageSection, setActiveManageSection] = useState<string>('m-visibility')
+  // accountEmail comes from the session (NextAuth); EditorView intentionally
+  // excludes email per types.ts §7.6. Read-only — Account section "Change"
+  // row is non-destructive (R3).
+  const { data: pfSession } = useSession()
+  const accountEmail = pfSession?.user?.email ?? null
   const [currentPositionDrawerOpen, setCurrentPositionDrawerOpen] = useState(false)
   const [luxuryFitDrawerOpen, setLuxuryFitDrawerOpen] = useState(false)
   const [skillsMarketsDrawerOpen, setSkillsMarketsDrawerOpen] = useState(false)
@@ -1718,6 +1731,25 @@ export default function ProfiluxPage() {
     return () => { cancelled = true }
   }, [tab])
 
+  // PF-MANAGE V12 — scrollspy for sticky left-rail. Lives at top scope (R2).
+  useEffect(() => {
+    if (tab !== 'manage') return
+    const ids = ['m-visibility', 'm-share', 'm-mask', 'm-pref', 'm-cv', 'm-account']
+    const onScroll = () => {
+      let current = ids[0]
+      for (const id of ids) {
+        const el = document.getElementById(id)
+        if (!el) continue
+        const top = el.getBoundingClientRect().top
+        if (top - 160 <= 0) current = id
+      }
+      setActiveManageSection(current)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [tab])
+
   if (loading) return <div style={wrap}>Loading…</div>
   if (error) return <div style={{ ...wrap, color: '#ff6b6b' }}>Error: {error}</div>
   if (!editor) return <div style={wrap}>No editor data.</div>
@@ -1892,6 +1924,42 @@ export default function ProfiluxPage() {
       setExpiryError(String(err))
     } finally {
       setExpirySaving(false)
+    }
+  }
+
+  // PF-MANAGE V12 — Opportunity preferences toggle. Mirrors toggleMaskedField
+  // pattern; POSTs to existing /api/profilux which accepts matching_opt_in.
+  async function toggleMatching(next: boolean) {
+    setMatchingSaving(true)
+    setMatchingError(null)
+    try {
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ matching_opt_in: next }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any))
+        setMatchingError(typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+    } catch (err) {
+      setMatchingError(String(err))
+    } finally {
+      setMatchingSaving(false)
+    }
+  }
+
+  async function copyShareUrl() {
+    const url = shareStatus?.public_url
+    if (!url) return
+    try {
+      await navigator.clipboard.writeText(url)
+      setShareCopyStatus('copied')
+      window.setTimeout(() => setShareCopyStatus('idle'), 1600)
+    } catch {
+      setShareCopyStatus('idle')
     }
   }
 
@@ -2916,7 +2984,7 @@ export default function ProfiluxPage() {
                   onClick={() => setTab('manage')}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: 'transparent', border: 'none', borderBottom: '0.5px solid rgba(255,255,255,0.03)', padding: '9px 0', color: '#ccc', fontFamily: 'Inter, sans-serif', fontSize: 13, cursor: 'pointer', textAlign: 'left' }}
                 >
-                  <span>Manage &amp; share</span>
+                  <span>Manage</span>
                   <span aria-hidden="true" style={{ color: '#777' }}>→</span>
                 </button>
               </aside>
@@ -5700,373 +5768,495 @@ export default function ProfiluxPage() {
         </>
       )}
 
-      {tab === 'manage' && (
-        <>
-        <SectionCard eyebrow="Visibility & sharing">
-          {shareStatusLoading && (
-            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999' }}>
-              Loading…
-            </div>
-          )}
-          {!shareStatusLoading && shareStatusError && (
-            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ff6b6b' }}>
-              Could not load sharing status.
-            </div>
-          )}
-          {!shareStatusLoading && !shareStatusError && shareStatus && (
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                <span
-                  aria-hidden="true"
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    background: shareStatus.sharing_enabled ? '#1D9E75' : '#555',
-                    display: 'inline-block',
-                  }}
-                />
-                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#fff' }}>
-                  {shareStatus.sharing_enabled ? 'Public link active' : 'Private — public link off'}
-                </span>
-              </div>
-              {shareStatus.public_url ? (
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
-                    Share URL
-                  </div>
-                  <div style={{
-                    fontFamily: 'Inter, sans-serif',
-                    fontSize: 13,
-                    color: shareStatus.sharing_enabled ? '#ccc' : '#777',
-                    wordBreak: 'break-all',
-                    background: '#1a1a1a',
-                    border: '1px solid #2a2a2a',
-                    padding: '10px 12px',
-                    borderRadius: 4,
-                  }}>
-                    {shareStatus.public_url}
-                  </div>
-                  {!shareStatus.sharing_enabled && (
-                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', fontStyle: 'italic', marginTop: 8 }}>
-                      Link is reserved but not active. Sharing controls coming soon.
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999' }}>
-                  No public link reserved yet.
-                </div>
-              )}
-              <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #2a2a2a' }}>
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
-                  Sharing
-                </div>
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#888', fontStyle: 'italic', marginBottom: 12, lineHeight: 1.5 }}>
-                  Private link for direct outreach. Never indexed by search engines.
-                </div>
-                {shareStatus.share_slug ? (
-                  <>
-                    <button
-                      type="button"
-                      disabled={sharingToggleSaving}
-                      onClick={() => handleToggleSharing(!shareStatus.sharing_enabled)}
-                      style={{
-                        background: shareStatus.sharing_enabled ? '#fff' : 'transparent',
-                        color: shareStatus.sharing_enabled ? '#1a1a1a' : '#fff',
-                        border: shareStatus.sharing_enabled ? '1px solid #fff' : '1px solid #444',
-                        padding: '8px 16px',
-                        cursor: sharingToggleSaving ? 'not-allowed' : 'pointer',
-                        fontFamily: 'Inter, sans-serif',
-                        fontSize: 13,
-                        opacity: sharingToggleSaving ? 0.5 : 1,
-                      }}
-                    >
-                      {sharingToggleSaving
-                        ? 'Saving…'
-                        : shareStatus.sharing_enabled
-                          ? 'Disable sharing'
-                          : 'Enable sharing'}
-                    </button>
-                    {sharingToggleError && (
-                      <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#ff6b6b' }}>
-                        {sharingToggleError}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      disabled={reserving}
-                      onClick={handleReserveLink}
-                      style={{
-                        background: 'transparent',
-                        color: '#fff',
-                        border: '1px solid #444',
-                        padding: '8px 16px',
-                        cursor: reserving ? 'not-allowed' : 'pointer',
-                        fontFamily: 'Inter, sans-serif',
-                        fontSize: 13,
-                        opacity: reserving ? 0.5 : 1,
-                      }}
-                    >
-                      {reserving ? 'Reserving…' : 'Reserve public link'}
-                    </button>
-                    {reserveError && (
-                      <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#ff6b6b' }}>
-                        {reserveError}
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-              {/* Password row */}
-              <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #2a2a2a' }}>
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
-                  Password
-                </div>
-                {shareStatus.password_set ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#fff' }}>Active</span>
-                    <button
-                      type="button"
-                      disabled={passwordSaving}
-                      onClick={handleClearPassword}
-                      style={{
-                        background: 'transparent',
-                        color: '#fff',
-                        border: '1px solid #444',
-                        padding: '6px 12px',
-                        cursor: passwordSaving ? 'not-allowed' : 'pointer',
-                        fontFamily: 'Inter, sans-serif',
-                        fontSize: 12,
-                        opacity: passwordSaving ? 0.5 : 1,
-                      }}
-                    >
-                      {passwordSaving ? 'Clearing…' : 'Clear'}
-                    </button>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <input
-                      type="password"
-                      value={passwordDraft}
-                      onChange={(ev) => setPasswordDraft(ev.target.value)}
-                      placeholder="Set password"
-                      style={{
-                        flex: 1,
-                        background: '#1a1a1a',
-                        border: '1px solid #2a2a2a',
-                        color: '#fff',
-                        padding: '6px 10px',
-                        fontFamily: 'Inter, sans-serif',
-                        fontSize: 13,
-                        borderRadius: 4,
-                      }}
-                    />
-                    <button
-                      type="button"
-                      disabled={passwordSaving || passwordDraft.length < 4}
-                      onClick={handleSetPassword}
-                      style={{
-                        background: 'transparent',
-                        color: '#fff',
-                        border: '1px solid #444',
-                        padding: '6px 12px',
-                        cursor: passwordSaving || passwordDraft.length < 4 ? 'not-allowed' : 'pointer',
-                        fontFamily: 'Inter, sans-serif',
-                        fontSize: 12,
-                        opacity: passwordSaving || passwordDraft.length < 4 ? 0.5 : 1,
-                      }}
-                    >
-                      {passwordSaving ? 'Saving…' : 'Set'}
-                    </button>
-                  </div>
-                )}
-                {passwordError && (
-                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#ff6b6b' }}>
-                    {passwordError}
-                  </div>
-                )}
-              </div>
-              {/* Expiry row */}
-              <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #2a2a2a' }}>
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
-                  Expiry
-                </div>
-                {shareStatus.expires_at ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#fff' }}>
-                      Expires on {shareStatus.expires_at}
-                    </span>
-                    <button
-                      type="button"
-                      disabled={expirySaving}
-                      onClick={handleClearExpiry}
-                      style={{
-                        background: 'transparent',
-                        color: '#fff',
-                        border: '1px solid #444',
-                        padding: '6px 12px',
-                        cursor: expirySaving ? 'not-allowed' : 'pointer',
-                        fontFamily: 'Inter, sans-serif',
-                        fontSize: 12,
-                        opacity: expirySaving ? 0.5 : 1,
-                      }}
-                    >
-                      {expirySaving ? 'Clearing…' : 'Clear'}
-                    </button>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <input
-                      type="date"
-                      value={expiryDraft}
-                      onChange={(ev) => setExpiryDraft(ev.target.value)}
-                      style={{
-                        background: '#1a1a1a',
-                        border: '1px solid #2a2a2a',
-                        color: '#fff',
-                        padding: '6px 10px',
-                        fontFamily: 'Inter, sans-serif',
-                        fontSize: 13,
-                        borderRadius: 4,
-                      }}
-                    />
-                    <button
-                      type="button"
-                      disabled={expirySaving || !expiryDraft}
-                      onClick={handleSetExpiry}
-                      style={{
-                        background: 'transparent',
-                        color: '#fff',
-                        border: '1px solid #444',
-                        padding: '6px 12px',
-                        cursor: expirySaving || !expiryDraft ? 'not-allowed' : 'pointer',
-                        fontFamily: 'Inter, sans-serif',
-                        fontSize: 12,
-                        opacity: expirySaving || !expiryDraft ? 0.5 : 1,
-                      }}
-                    >
-                      {expirySaving ? 'Saving…' : 'Set'}
-                    </button>
-                  </div>
-                )}
-                {expiryError && (
-                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#ff6b6b' }}>
-                    {expiryError}
-                  </div>
-                )}
-              </div>
-              {/* Views row */}
-              <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #2a2a2a' }}>
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
-                  Views
-                </div>
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#fff' }}>
-                  {shareStatus.view_count} view{shareStatus.view_count === 1 ? '' : 's'}
-                </div>
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#777', fontStyle: 'italic', marginTop: 4 }}>
-                  Anonymous count only.
-                </div>
-              </div>
-            </>
-          )}
-        </SectionCard>
-        <SectionCard eyebrow="Export">
-          <div
+      {tab === 'manage' && (() => {
+        // PF-MANAGE V12 — single VISUAL slice. Page-level rewrite of the
+        // Manage tab. Six sections, left rail with scrollspy, V12 spacing
+        // and typography. No destructive account behavior (R3).
+        const RAIL_SECTIONS: Array<{ id: string; label: string }> = [
+          { id: 'm-visibility', label: 'Visibility' },
+          { id: 'm-share',      label: 'Share & export' },
+          { id: 'm-mask',       label: 'Maskable fields' },
+          { id: 'm-pref',       label: 'Opportunity preferences' },
+          { id: 'm-cv',         label: 'CV & document' },
+          { id: 'm-account',    label: 'Account' },
+        ]
+        const block: React.CSSProperties = {
+          background: '#222',
+          border: '1px solid #2a2a2a',
+          borderRadius: 14,
+          padding: '28px 30px',
+          marginBottom: 18,
+          scrollMarginTop: 120,
+        }
+        const blockHead: React.CSSProperties = { marginBottom: 18 }
+        const blockTitle: React.CSSProperties = {
+          fontFamily: 'Playfair Display, serif',
+          fontSize: 20,
+          color: '#fff',
+          fontWeight: 400,
+          margin: '0 0 4px 0',
+        }
+        const blockSub: React.CSSProperties = {
+          fontSize: 12.5,
+          color: '#999',
+          margin: 0,
+          lineHeight: 1.55,
+        }
+        const rowStyle: React.CSSProperties = {
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '14px 0',
+          gap: 24,
+          borderTop: '0.5px solid #2a2a2a',
+        }
+        const rowLeft: React.CSSProperties = { flex: 1, minWidth: 0 }
+        const rowTitle: React.CSSProperties = {
+          fontSize: 13.5,
+          color: '#fff',
+          marginBottom: 3,
+          fontFamily: 'Inter, sans-serif',
+        }
+        const rowSub: React.CSSProperties = {
+          fontSize: 12,
+          color: '#999',
+          lineHeight: 1.5,
+          fontFamily: 'Inter, sans-serif',
+        }
+        const rowRight: React.CSSProperties = { flexShrink: 0 }
+        const manageBtn: React.CSSProperties = {
+          background: 'transparent',
+          border: '1px solid #2a2a2a',
+          color: '#fff',
+          fontSize: 12,
+          padding: '7px 14px',
+          borderRadius: 7,
+          fontFamily: 'Inter, sans-serif',
+          cursor: 'pointer',
+        }
+        const manageBtnDisabled: React.CSSProperties = {
+          ...manageBtn,
+          color: '#777',
+          cursor: 'not-allowed',
+          opacity: 0.7,
+        }
+        const prefGrid: React.CSSProperties = {
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 14,
+          marginTop: 14,
+        }
+        const prefCell: React.CSSProperties = {
+          border: '1px solid #2a2a2a',
+          borderRadius: 10,
+          padding: '14px 16px',
+        }
+        const prefLabel: React.CSSProperties = {
+          fontSize: 10,
+          letterSpacing: 1.5,
+          textTransform: 'uppercase',
+          color: '#8e8e8e',
+          marginBottom: 6,
+          fontFamily: 'Inter, sans-serif',
+        }
+        const prefValue: React.CSSProperties = {
+          fontSize: 13.5,
+          color: '#fff',
+          fontFamily: 'Inter, sans-serif',
+        }
+        const prefValueEmpty: React.CSSProperties = {
+          ...prefValue,
+          color: '#777',
+          fontStyle: 'italic',
+        }
+        const renderToggle = (on: boolean, busy: boolean, onClick: () => void, label: string) => (
+          <button
+            type="button"
+            role="switch"
+            aria-checked={on}
+            aria-label={label}
+            disabled={busy}
+            onClick={onClick}
             style={{
-              fontFamily: 'Inter, sans-serif',
-              fontSize: 12,
-              color: '#888',
-              fontStyle: 'italic',
-              marginBottom: 14,
-              lineHeight: 1.5,
+              position: 'relative',
+              width: 38,
+              height: 22,
+              background: on ? '#a58e28' : '#333',
+              borderRadius: 999,
+              border: 'none',
+              cursor: busy ? 'not-allowed' : 'pointer',
+              padding: 0,
+              transition: 'background 0.2s',
+              opacity: busy ? 0.55 : 1,
             }}
           >
-            Download a private PDF snapshot of your ProfiLux.
-            Real names, real data, no masking applied.
-          </div>
+            <span
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                width: 16,
+                height: 16,
+                top: 3,
+                left: 3,
+                background: on ? '#1a1a1a' : '#ccc',
+                borderRadius: '50%',
+                transform: on ? 'translateX(16px)' : 'translateX(0)',
+                transition: 'transform 0.2s, background 0.2s',
+                display: 'block',
+              }}
+            />
+          </button>
+        )
 
-          <a
-            href="/api/profilux/export"
-            download
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              background: 'transparent',
-              color: '#fff',
-              border: '1px solid #444',
-              padding: '8px 16px',
-              fontFamily: 'Inter, sans-serif',
-              fontSize: 13,
-              textDecoration: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            Export PDF
-          </a>
-        </SectionCard>
-        <SectionCard eyebrow="Masked fields">
-          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#888', fontStyle: 'italic', marginBottom: 14, lineHeight: 1.5 }}>
-            Masked fields will be hidden from public profiles and client share PDFs. Substrate ships now; the public profile already hides these fields. Consumer follows in next slice for client/share surfaces.
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {MASKABLE_FIELDS.map((field) => {
-              const masked = (editor?.masked_fields ?? {})[field] === true
-              const busy = maskToggling === field
-              const labelText = ({
-                phone: 'Phone',
-                email: 'Email',
-                current_employer: 'Current employer',
-                salary: 'Salary',
-                availability: 'Availability',
-                references: 'References',
-              } as const)[field]
-              return (
-                <div
-                  key={field}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '10px 12px',
-                    background: '#1a1a1a',
-                    border: '1px solid #2a2a2a',
-                    borderRadius: 4,
-                  }}
-                >
-                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc' }}>
-                    {labelText}
-                  </span>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => toggleMaskedField(field, !masked)}
+        const maskableMeta = ({
+          phone:             { label: 'Phone',                          sub: 'Hidden by default in shared and public views.' },
+          email:             { label: 'Email',                          sub: 'Hidden by default in shared and public views.' },
+          current_employer:  { label: 'Current employer',               sub: 'Shown as "Confidential Maison" in shared views.' },
+          salary:            { label: 'Salary & compensation',          sub: 'Never shown publicly.' },
+          availability:      { label: 'Availability & notice period',   sub: 'Hidden in Share view by default.' },
+          references:        { label: 'References',                     sub: 'Always private. Released individually on your explicit consent.' },
+        } as const)
+
+        const seniorityValue = seniorityLabel(e.seniority)
+        const departmentsValue = (e.desired_departments ?? []).map(departmentLabel).filter(Boolean).join(' · ')
+        const marketsValue = (e.desired_locations ?? []).join(' · ')
+        const salaryValue = (() => {
+          const min = e.desired_salary_min
+          const max = e.desired_salary_max
+          const cur = e.desired_salary_currency || 'EUR'
+          if (min == null && max == null) return null
+          const fmt = (v: number) => new Intl.NumberFormat('en-US').format(v)
+          if (min != null && max != null) return `${cur} ${fmt(min)} – ${fmt(max)}`
+          if (min != null) return `${cur} ${fmt(min)}+`
+          if (max != null) return `Up to ${cur} ${fmt(max!)}`
+          return null
+        })()
+
+        const cvFilename = cvUrl ? (decodeURIComponent(cvUrl.split('/').pop() || '') || 'CV.pdf') : null
+
+        return (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : '220px 1fr',
+            gap: isMobile ? 24 : 48,
+            alignItems: 'flex-start',
+          }}>
+            {/* LEFT RAIL — sticky, scrollspy */}
+            <aside
+              style={{
+                position: isMobile ? 'static' : 'sticky',
+                top: 110,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4,
+              }}
+            >
+              <div style={{
+                fontSize: 10,
+                fontWeight: 600,
+                letterSpacing: 2,
+                color: '#777',
+                marginBottom: 14,
+                textTransform: 'uppercase',
+                fontFamily: 'Inter, sans-serif',
+              }}>
+                Sections
+              </div>
+              {RAIL_SECTIONS.map((s) => {
+                const active = activeManageSection === s.id
+                return (
+                  <a
+                    key={s.id}
+                    href={`#${s.id}`}
                     style={{
-                      padding: '6px 14px',
-                      fontSize: 11,
-                      fontWeight: 600,
-                      letterSpacing: '0.4px',
-                      borderRadius: 6,
-                      cursor: busy ? 'wait' : 'pointer',
+                      fontSize: 13,
+                      color: active ? '#a58e28' : '#999',
+                      padding: '8px 0 8px 14px',
+                      marginLeft: -16,
+                      borderLeft: `2px solid ${active ? '#a58e28' : 'transparent'}`,
+                      textDecoration: 'none',
                       fontFamily: 'Inter, sans-serif',
-                      opacity: busy ? 0.6 : 1,
-                      ...(masked
-                        ? { background: 'rgba(165,142,40,0.05)', color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)' }
-                        : { background: 'transparent', color: '#999', border: '1px solid #2a2a2a' }),
+                      transition: 'color 0.18s ease, border-color 0.18s ease',
                     }}
                   >
-                    {masked ? 'MASKED' : 'UNMASKED'}
-                  </button>
+                    {s.label}
+                  </a>
+                )
+              })}
+            </aside>
+
+            {/* RIGHT CONTENT — 6 V12 blocks */}
+            <div style={{ minWidth: 0 }}>
+
+              {/* 1. VISIBILITY */}
+              <div id="m-visibility" style={block}>
+                <div style={blockHead}>
+                  <h2 style={blockTitle}>Visibility</h2>
+                  <p style={blockSub}>Decide whether your ProfiLux is discoverable beyond JOBLUX&apos;s recruiting layer.</p>
                 </div>
-              )
-            })}
+
+                {/* Public profile toggle */}
+                {(() => {
+                  const hasSlug = Boolean(shareStatus?.share_slug)
+                  const on = Boolean(shareStatus?.sharing_enabled)
+                  const busy = shareStatusLoading || sharingToggleSaving || !hasSlug
+                  return (
+                    <div style={rowStyle}>
+                      <div style={rowLeft}>
+                        <div style={rowTitle}>Public profile</div>
+                        <div style={rowSub}>
+                          When ON, your ProfiLux can be opened via a private URL you choose to share. Your discoverability inside JOBLUX matching is unaffected.
+                          {!hasSlug && !shareStatusLoading && (
+                            <> {' '}<span style={{ color: '#777', fontStyle: 'italic' }}>Reserve a link in Share &amp; export first.</span></>
+                          )}
+                        </div>
+                        {sharingToggleError && (
+                          <div style={{ marginTop: 6, fontSize: 11, color: '#ff6b6b' }}>{sharingToggleError}</div>
+                        )}
+                      </div>
+                      <div style={rowRight}>
+                        {renderToggle(on, busy, () => handleToggleSharing(!on), 'Public profile')}
+                      </div>
+                    </div>
+                  )
+                })()}
+
+                {/* Considering opportunities toggle */}
+                <div style={rowStyle}>
+                  <div style={rowLeft}>
+                    <div style={rowTitle}>Considering opportunities</div>
+                    <div style={rowSub}>
+                      Quiet signal that you&apos;re open to be considered. Visible only to JOBLUX matching, never to recruiters directly.
+                    </div>
+                    {matchingError && (
+                      <div style={{ marginTop: 6, fontSize: 11, color: '#ff6b6b' }}>{matchingError}</div>
+                    )}
+                  </div>
+                  <div style={rowRight}>
+                    {renderToggle(Boolean(e.matching_opt_in), matchingSaving, () => toggleMatching(!e.matching_opt_in), 'Considering opportunities')}
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. SHARE & EXPORT */}
+              <div id="m-share" style={block}>
+                <div style={blockHead}>
+                  <h2 style={blockTitle}>Share &amp; export</h2>
+                  <p style={blockSub}>Generate a private link or download a PDF. Maskable fields are honoured in shared versions.</p>
+                </div>
+
+                {/* Private profile URL */}
+                <div style={rowStyle}>
+                  <div style={rowLeft}>
+                    <div style={rowTitle}>Private profile URL</div>
+                    <div style={rowSub}>
+                      Anyone with the link can view your shared ProfiLux. Revoke anytime.
+                    </div>
+                    {reserveError && (
+                      <div style={{ marginTop: 6, fontSize: 11, color: '#ff6b6b' }}>{reserveError}</div>
+                    )}
+                  </div>
+                  <div style={rowRight}>
+                    {shareStatus?.public_url ? (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        border: '1px solid #2a2a2a',
+                        borderRadius: 8,
+                        padding: '6px 6px 6px 14px',
+                        background: 'rgba(0,0,0,0.25)',
+                        maxWidth: 360,
+                      }}>
+                        <code style={{
+                          fontFamily: "'SF Mono', Menlo, monospace",
+                          fontSize: 12,
+                          color: '#a58e28',
+                          flex: 1,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {shareStatus.public_url.replace(/^https?:\/\//, '')}
+                        </code>
+                        <button
+                          type="button"
+                          onClick={copyShareUrl}
+                          style={{
+                            background: '#a58e28',
+                            color: '#1a1a1a',
+                            border: 'none',
+                            borderRadius: 5,
+                            padding: '6px 10px',
+                            fontSize: 11,
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            fontFamily: 'Inter, sans-serif',
+                          }}
+                        >
+                          {shareCopyStatus === 'copied' ? 'Copied' : 'Copy'}
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={reserving || shareStatusLoading}
+                        onClick={handleReserveLink}
+                        style={(reserving || shareStatusLoading) ? manageBtnDisabled : manageBtn}
+                      >
+                        {reserving ? 'Reserving…' : 'Reserve link'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Private PDF */}
+                <div style={rowStyle}>
+                  <div style={rowLeft}>
+                    <div style={rowTitle}>Download — Private PDF</div>
+                    <div style={rowSub}>Full document, all fields, for your records.</div>
+                  </div>
+                  <div style={rowRight}>
+                    <a
+                      href="/api/profilux/export"
+                      download
+                      style={{ ...manageBtn, display: 'inline-block', textDecoration: 'none' }}
+                    >
+                      Download
+                    </a>
+                  </div>
+                </div>
+
+                {/* Share PDF */}
+                <div style={rowStyle}>
+                  <div style={rowLeft}>
+                    <div style={rowTitle}>Download — Share PDF</div>
+                    <div style={rowSub}>
+                      Same document with maskable fields hidden, ready to send. <span style={{ color: '#777', fontStyle: 'italic' }}>Coming soon.</span>
+                    </div>
+                  </div>
+                  <div style={rowRight}>
+                    <button type="button" disabled style={manageBtnDisabled}>Download</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. MASKABLE FIELDS */}
+              <div id="m-mask" style={block}>
+                <div style={blockHead}>
+                  <h2 style={blockTitle}>Maskable fields</h2>
+                  <p style={blockSub}>Hides sensitive data inside shared, exported, and public views — even when the section itself is visible. Section visibility is controlled separately in Edit mode.</p>
+                </div>
+                {MASKABLE_FIELDS.map((field) => {
+                  const meta = maskableMeta[field]
+                  const masked = (editor?.masked_fields ?? {})[field] === true
+                  const busy = maskToggling === field
+                  return (
+                    <div key={field} style={rowStyle}>
+                      <div style={rowLeft}>
+                        <div style={rowTitle}>{meta.label}</div>
+                        <div style={rowSub}>{meta.sub}</div>
+                      </div>
+                      <div style={rowRight}>
+                        {renderToggle(masked, busy, () => toggleMaskedField(field, !masked), `${meta.label} mask`)}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* 4. OPPORTUNITY PREFERENCES */}
+              <div id="m-pref" style={block}>
+                <div style={blockHead}>
+                  <h2 style={blockTitle}>Opportunity preferences</h2>
+                  <p style={blockSub}>The kind of briefs we should match you against. Stays private.</p>
+                </div>
+                <div style={prefGrid}>
+                  <div style={prefCell}>
+                    <div style={prefLabel}>Seniority</div>
+                    <div style={seniorityValue ? prefValue : prefValueEmpty}>{seniorityValue || 'Not set'}</div>
+                  </div>
+                  <div style={prefCell}>
+                    <div style={prefLabel}>Departments</div>
+                    <div style={departmentsValue ? prefValue : prefValueEmpty}>{departmentsValue || 'Not set'}</div>
+                  </div>
+                  <div style={prefCell}>
+                    <div style={prefLabel}>Markets</div>
+                    <div style={marketsValue ? prefValue : prefValueEmpty}>{marketsValue || 'Not set'}</div>
+                  </div>
+                  <div style={prefCell}>
+                    <div style={prefLabel}>Salary expectation</div>
+                    <div style={salaryValue ? prefValue : prefValueEmpty}>{salaryValue || 'Not set'}</div>
+                  </div>
+                </div>
+                <div style={{ marginTop: 14, fontSize: 11.5, color: '#777', fontStyle: 'italic', fontFamily: 'Inter, sans-serif' }}>
+                  Edit these in the Edit tab — Availability &amp; Targets and Compensation sections.
+                </div>
+              </div>
+
+              {/* 5. CV & DOCUMENT */}
+              <div id="m-cv" style={block}>
+                <div style={blockHead}>
+                  <h2 style={blockTitle}>CV &amp; document</h2>
+                  <p style={blockSub}>Re-upload your CV anytime. Detected changes are presented field by field — you choose what to merge.</p>
+                </div>
+                <div style={rowStyle}>
+                  <div style={rowLeft}>
+                    <div style={rowTitle}>Last CV upload</div>
+                    <div style={rowSub}>
+                      {cvFilename ? `${cvFilename}${cvParsedAt ? ` · parsed ${parsedDateLabel}` : ''}` : 'No CV uploaded yet.'}
+                    </div>
+                  </div>
+                  <div style={rowRight}>
+                    <Link
+                      href="/dashboard/candidate/profilux/cv-merge"
+                      style={{ ...manageBtn, display: 'inline-block', textDecoration: 'none' }}
+                    >
+                      Re-upload CV
+                    </Link>
+                  </div>
+                </div>
+                <div style={rowStyle}>
+                  <div style={rowLeft}>
+                    <div style={rowTitle}>Edit ProfiLux content</div>
+                    <div style={rowSub}>Open the edit view to update, hide, or enrich each section.</div>
+                  </div>
+                  <div style={rowRight}>
+                    <button type="button" onClick={() => setTab('edit')} style={manageBtn}>Open editor</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 6. ACCOUNT — Email + Connected sign-in (R3 — no destructive rows) */}
+              <div id="m-account" style={block}>
+                <div style={blockHead}>
+                  <h2 style={blockTitle}>Account</h2>
+                  <p style={blockSub}>Credentials and core operational settings.</p>
+                </div>
+                <div style={rowStyle}>
+                  <div style={rowLeft}>
+                    <div style={rowTitle}>Email</div>
+                    <div style={rowSub}>{accountEmail || <em style={{ color: '#777' }}>Not set</em>}</div>
+                  </div>
+                  <div style={rowRight}>
+                    <button type="button" disabled style={manageBtnDisabled} title="Coming soon">Change</button>
+                  </div>
+                </div>
+                <div style={rowStyle}>
+                  <div style={rowLeft}>
+                    <div style={rowTitle}>Connected sign-in</div>
+                    <div style={rowSub}>Signed in via your JOBLUX account.</div>
+                  </div>
+                  <div style={rowRight}>
+                    <button type="button" disabled style={manageBtnDisabled} title="Coming soon">Manage</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
-        </SectionCard>
-        </>
-      )}
+        )
+      })()}
     </div>
   )
 }
