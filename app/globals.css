@@ -67,14 +67,8 @@ input, textarea, select, button {
   border-radius: 0;
 }
 
-/* ── Minimum tap target size | mobile accessibility ── */
-button,
-a,
-[role="button"],
-input[type="submit"],
-input[type="button"],
-input[type="reset"],
-label[for] {
+/* ── Tap target size | opt-in via .touch-target for mobile accessibility ── */
+.touch-target {
   min-height: 44px;
   min-width: 44px;
 }
