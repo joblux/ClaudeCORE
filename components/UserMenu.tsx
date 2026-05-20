@@ -72,13 +72,13 @@ export default function UserMenu() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-48 bg-[#222] border border-[#333] rounded-[4px] shadow-lg py-1 z-50">
+        <div className="absolute right-0 mt-2 min-w-48 bg-[#222] border border-[#333] rounded-[4px] shadow-lg py-1 z-50">
           {isApproved && (
             <>
               <Link
                 href="/dashboard"
                 onClick={() => setOpen(false)}
-                className="block px-4 py-2 text-[13px] text-[#ccc] hover:bg-[#2a2a2a] hover:text-white transition-colors"
+                className="block px-4 py-2 text-[13px] text-[#ccc] whitespace-nowrap hover:bg-[#2a2a2a] hover:text-white transition-colors"
               >
                 Dashboard
               </Link>
@@ -86,7 +86,7 @@ export default function UserMenu() {
                 <Link
                   href="/account"
                   onClick={() => setOpen(false)}
-                  className="block px-4 py-2 text-[13px] text-[#ccc] hover:bg-[#2a2a2a] hover:text-white transition-colors"
+                  className="block px-4 py-2 text-[13px] text-[#ccc] whitespace-nowrap hover:bg-[#2a2a2a] hover:text-white transition-colors"
                 >
                   Account
                 </Link>
@@ -94,7 +94,7 @@ export default function UserMenu() {
               <Link
                 href="/invite"
                 onClick={() => setOpen(false)}
-                className="block px-4 py-2 text-[13px] text-[#ccc] hover:bg-[#2a2a2a] hover:text-white transition-colors"
+                className="block px-4 py-2 text-[13px] text-[#ccc] whitespace-nowrap hover:bg-[#2a2a2a] hover:text-white transition-colors"
               >
                 Invite
               </Link>
@@ -103,7 +103,7 @@ export default function UserMenu() {
           <div className="border-t border-[#333] my-1" />
           <button
             onClick={() => signOut({ redirect: false }).then(() => { window.location.href = "/"; })}
-            className="block w-full text-left px-4 py-2 text-[13px] text-[#888] hover:bg-[#2a2a2a] hover:text-white transition-colors"
+            className="block w-full text-left px-4 py-2 text-[13px] text-[#888] whitespace-nowrap hover:bg-[#2a2a2a] hover:text-white transition-colors"
           >
             Sign out
           </button>
