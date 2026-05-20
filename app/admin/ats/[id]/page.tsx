@@ -195,6 +195,27 @@ export default function ApplicationDetailPage() {
   const [clientResponseAt, setClientResponseAt] = useState("");
   const [savingSub, setSavingSub] = useState(false);
 
+  // E.6.4 — Send-to-client compose card
+  type BusinessOption = {
+    id: string;
+    company_name?: string | null;
+    full_name?: string | null;
+    first_name?: string | null;
+    last_name?: string | null;
+  };
+  const [csBusinesses, setCsBusinesses] = useState<BusinessOption[]>([]);
+  const [csBusinessesLoading, setCsBusinessesLoading] = useState(false);
+  const [csBusinessesLoaded, setCsBusinessesLoaded] = useState(false);
+  const [csBusinessId, setCsBusinessId] = useState("");
+  const [csRecipientName, setCsRecipientName] = useState("");
+  const [csRecipientRole, setCsRecipientRole] = useState("");
+  const [csRecruiterNote, setCsRecruiterNote] = useState("");
+  const [csExpiresAt, setCsExpiresAt] = useState("");
+  const [csGenerating, setCsGenerating] = useState(false);
+  const [csError, setCsError] = useState<string | null>(null);
+  const [csResultUrl, setCsResultUrl] = useState<string | null>(null);
+  const [csCopied, setCsCopied] = useState(false);
+
   // Offer tab
   const [offerSalary, setOfferSalary] = useState("");
   const [offerCurrency, setOfferCurrency] = useState("EUR");
@@ -237,6 +258,36 @@ export default function ApplicationDetailPage() {
   useEffect(() => {
     if (id) fetchApp();
   }, [id, fetchApp]);
+
+  // E.6.4 — lazy load business accounts when Submission tab is first opened
+  useEffect(() => {
+    if (activeTab !== "submission") return;
+    if (csBusinessesLoaded || csBusinessesLoading) return;
+    setCsBusinessesLoading(true);
+    fetch("/api/admin/members?role=business")
+      .then(async (res) => {
+        const json = await res.json().catch(() => null);
+        const arr = Array.isArray(json?.members)
+          ? json.members
+          : Array.isArray(json?.data)
+            ? json.data
+            : null;
+        if (!arr) {
+          setCsBusinesses([]);
+          setCsError("Could not load business accounts.");
+        } else {
+          setCsBusinesses(arr as BusinessOption[]);
+        }
+      })
+      .catch(() => {
+        setCsBusinesses([]);
+        setCsError("Could not load business accounts.");
+      })
+      .finally(() => {
+        setCsBusinessesLoading(false);
+        setCsBusinessesLoaded(true);
+      });
+  }, [activeTab, csBusinessesLoaded, csBusinessesLoading]);
 
   // ----- actions -----
 
@@ -319,6 +370,76 @@ export default function ApplicationDetailPage() {
     } finally {
       setSavingSub(false);
     }
+  };
+
+  /** E.6.4 — Generate a client submission link for the selected business */
+  const handleGenerateClientLink = async () => {
+    if (!csBusinessId || !csRecipientName.trim()) return;
+    const biz = csBusinesses.find((b) => b.id === csBusinessId);
+    if (!biz) {
+      setCsError("Selected business not found in list.");
+      return;
+    }
+    const businessLabel =
+      biz.company_name ||
+      biz.full_name ||
+      [biz.first_name, biz.last_name].filter(Boolean).join(" ") ||
+      biz.id;
+
+    const body: Record<string, unknown> = {
+      business_member_id: csBusinessId,
+      client_business_name: businessLabel,
+      client_recipient_name: csRecipientName.trim(),
+    };
+    const roleTrim = csRecipientRole.trim();
+    if (roleTrim) body.client_recipient_role = roleTrim;
+    const noteTrim = csRecruiterNote.trim();
+    if (noteTrim) body.recruiter_note = noteTrim;
+    if (csExpiresAt) {
+      body.expires_at = new Date(`${csExpiresAt}T23:59:59`).toISOString();
+    }
+
+    setCsGenerating(true);
+    setCsError(null);
+    try {
+      const res = await fetch(`/api/applications/${id}/submit-to-client`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) {
+        const code = json?.code as string | undefined;
+        const map: Record<string, string> = {
+          MISSING_BUSINESS_MEMBER: "Select a business account.",
+          INVALID_BUSINESS_MEMBER: "Selected business is not a valid ID.",
+          BUSINESS_NOT_FOUND: "Selected business account no longer exists.",
+          NOT_A_BUSINESS: "Selected member is not a business account.",
+          MISSING_CLIENT_FIELDS: "Recipient name is required.",
+          INVALID_EXPIRY: "Expiry must be a future date.",
+        };
+        setCsError((code && map[code]) || json?.error || "Could not generate link.");
+        return;
+      }
+      setCsResultUrl(json?.client_submission?.url ?? null);
+      setCsRecipientName("");
+      setCsRecipientRole("");
+      setCsRecruiterNote("");
+      // Intentionally keep csBusinessId so recruiter can send another to the same business.
+      fetchApp();
+    } catch {
+      setCsError("Could not generate link.");
+    } finally {
+      setCsGenerating(false);
+    }
+  };
+
+  /** E.6.4 — Copy generated client link to clipboard */
+  const handleCopyClientLink = () => {
+    if (!csResultUrl) return;
+    navigator.clipboard?.writeText(csResultUrl);
+    setCsCopied(true);
+    setTimeout(() => setCsCopied(false), 1500);
   };
 
   /** Save offer details */
@@ -921,6 +1042,144 @@ export default function ApplicationDetailPage() {
             TAB 4: SUBMISSION
         ================================================================ */}
         {activeTab === "submission" && showSubmission && (
+          <>
+          {/* E.6.4 — Send to Client compose card */}
+          <div style={cardStyle}>
+            <h3 className="jl-serif" style={{ fontSize: 16, color: BLACK, marginTop: 0, marginBottom: 20 }}>
+              Send to Client
+            </h3>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+              {/* Business account (required) */}
+              <div style={{ gridColumn: "1 / -1" }}>
+                <label style={labelStyle}>Business Account *</label>
+                <select
+                  className="jl-select"
+                  value={csBusinessId}
+                  onChange={(e) => setCsBusinessId(e.target.value)}
+                  disabled={csBusinessesLoading}
+                  style={{ ...inputStyle, cursor: "pointer", marginTop: 4 }}
+                >
+                  <option value="">
+                    {csBusinessesLoading ? "Loading business accounts…" : "Select a business…"}
+                  </option>
+                  {csBusinesses.map((b) => {
+                    const label =
+                      b.company_name ||
+                      b.full_name ||
+                      [b.first_name, b.last_name].filter(Boolean).join(" ") ||
+                      b.id;
+                    return (
+                      <option key={b.id} value={b.id}>
+                        {label}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              {/* Recipient name (required) */}
+              <div>
+                <label style={labelStyle}>Recipient Name *</label>
+                <input
+                  type="text"
+                  className="jl-input"
+                  value={csRecipientName}
+                  onChange={(e) => setCsRecipientName(e.target.value)}
+                  placeholder="e.g. Marie Dubois"
+                  style={{ ...inputStyle, marginTop: 4 }}
+                />
+              </div>
+
+              {/* Recipient role */}
+              <div>
+                <label style={labelStyle}>Recipient Role</label>
+                <input
+                  type="text"
+                  className="jl-input"
+                  value={csRecipientRole}
+                  onChange={(e) => setCsRecipientRole(e.target.value)}
+                  placeholder="e.g. Head of Talent"
+                  style={{ ...inputStyle, marginTop: 4 }}
+                />
+              </div>
+
+              {/* Expiry (optional) */}
+              <div>
+                <label style={labelStyle}>Expiry (Optional)</label>
+                <input
+                  type="date"
+                  className="jl-input"
+                  value={csExpiresAt}
+                  onChange={(e) => setCsExpiresAt(e.target.value)}
+                  style={{ ...inputStyle, marginTop: 4 }}
+                />
+              </div>
+
+              {/* Recruiter note (full width) */}
+              <div style={{ gridColumn: "1 / -1" }}>
+                <label style={labelStyle}>Recruiter Note (Optional)</label>
+                <textarea
+                  className="jl-textarea"
+                  value={csRecruiterNote}
+                  onChange={(e) => setCsRecruiterNote(e.target.value)}
+                  placeholder="Context for the client…"
+                  rows={3}
+                  style={{ ...inputStyle, resize: "vertical", minHeight: 60, marginTop: 4 }}
+                />
+              </div>
+            </div>
+
+            {csError && (
+              <p style={{ color: "#c93a3a", fontSize: 13, margin: "16px 0 0" }}>{csError}</p>
+            )}
+
+            <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end" }}>
+              <button
+                className="jl-btn-primary"
+                onClick={handleGenerateClientLink}
+                disabled={csGenerating || !csBusinessId || !csRecipientName.trim()}
+                style={{
+                  ...btnPrimary,
+                  opacity:
+                    csGenerating || !csBusinessId || !csRecipientName.trim() ? 0.5 : 1,
+                }}
+              >
+                {csGenerating ? "Generating…" : "Generate link"}
+              </button>
+            </div>
+
+            {csResultUrl && (
+              <div
+                style={{
+                  marginTop: 20,
+                  padding: 16,
+                  background: "#f7f5ee",
+                  border: `1px solid ${BORDER}`,
+                  borderRadius: 6,
+                }}
+              >
+                <label style={labelStyle}>Client Link</label>
+                <div style={{ display: "flex", gap: 8, marginTop: 4, alignItems: "center" }}>
+                  <input
+                    type="text"
+                    readOnly
+                    value={csResultUrl}
+                    onFocus={(e) => e.target.select()}
+                    style={{ ...inputStyle, flex: 1 }}
+                  />
+                  <button
+                    className="jl-btn-sm"
+                    onClick={handleCopyClientLink}
+                    style={{ ...btnOutline, padding: "8px 14px", fontSize: 12, whiteSpace: "nowrap" }}
+                  >
+                    {csCopied ? "Copied" : "Copy link"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div style={cardStyle}>
             <h3 className="jl-serif" style={{ fontSize: 16, color: BLACK, marginTop: 0, marginBottom: 20 }}>
               Client Submission Details
@@ -1001,6 +1260,7 @@ export default function ApplicationDetailPage() {
               </button>
             </div>
           </div>
+          </>
         )}
 
         {/* ================================================================

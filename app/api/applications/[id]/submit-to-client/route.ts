@@ -94,6 +94,7 @@ export async function POST(
   const clientRecipientName = trimOrNull(body.client_recipient_name)
   const clientRecipientRole = trimOrNull(body.client_recipient_role)
   const recruiterNote       = trimOrNull(body.recruiter_note)
+  const businessMemberId    = trimOrNull(body.business_member_id)
   let   expiresAtInput: string | null = null
   if (typeof body.expires_at === 'string' && body.expires_at.trim().length > 0) {
     const d = new Date(body.expires_at)
@@ -115,6 +116,19 @@ export async function POST(
     )
   }
 
+  if (!businessMemberId) {
+    return NextResponse.json(
+      { error: 'business_member_id is required', code: 'MISSING_BUSINESS_MEMBER' },
+      { status: 400 }
+    )
+  }
+  if (!UUID_REGEX.test(businessMemberId)) {
+    return NextResponse.json(
+      { error: 'Invalid business_member_id', code: 'INVALID_BUSINESS_MEMBER' },
+      { status: 400 }
+    )
+  }
+
   // Fetch current state for guard + history from_stage capture
   const { data: current, error: fetchError } = await supabase
     .from('applications')
@@ -130,6 +144,28 @@ export async function POST(
     return NextResponse.json(
       { error: 'Application not found', code: 'APPLICATION_NOT_FOUND' },
       { status: 404 }
+    )
+  }
+
+  const { data: biz, error: bizErr } = await supabase
+    .from('members')
+    .select('id, role')
+    .eq('id', businessMemberId)
+    .maybeSingle()
+  if (bizErr) {
+    console.error('[submit-to-client] business lookup error:', bizErr)
+    return NextResponse.json({ error: bizErr.message }, { status: 500 })
+  }
+  if (!biz) {
+    return NextResponse.json(
+      { error: 'Business account not found', code: 'BUSINESS_NOT_FOUND' },
+      { status: 404 }
+    )
+  }
+  if (biz.role !== 'business') {
+    return NextResponse.json(
+      { error: 'Selected member is not a business account', code: 'NOT_A_BUSINESS' },
+      { status: 400 }
     )
   }
 
@@ -208,6 +244,7 @@ export async function POST(
       client_recipient_role: clientRecipientRole,
       recruiter_email: session.user.email,
       recruiter_note: recruiterNote,
+      business_member_id: businessMemberId,
     }
     if (expiresAtInput !== null) row.expires_at = expiresAtInput
     return row
@@ -219,7 +256,7 @@ export async function POST(
     const { data: ins, error } = await supabase
       .from('client_submissions')
       .insert(buildSubmissionRow())
-      .select('id, token, client_business_name, client_recipient_name, client_recipient_role, recruiter_email, recruiter_note, expires_at, revoked_at, created_at')
+      .select('id, token, client_business_name, client_recipient_name, client_recipient_role, recruiter_email, recruiter_note, business_member_id, expires_at, revoked_at, created_at')
       .single()
     if (!error) { inserted = ins; insertError = null; break }
     insertError = error
@@ -250,6 +287,7 @@ export async function POST(
       client_recipient_role: inserted.client_recipient_role,
       recruiter_email: inserted.recruiter_email,
       recruiter_note: inserted.recruiter_note,
+      business_member_id: inserted.business_member_id,
       expires_at: inserted.expires_at,
       revoked_at: inserted.revoked_at,
       created_at: inserted.created_at,

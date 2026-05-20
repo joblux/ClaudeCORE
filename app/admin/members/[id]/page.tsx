@@ -11,7 +11,7 @@ import type {
   AdminMemberDocument,
 } from "@/lib/profilux";
 
-type Tab = "overview" | "experience" | "skills" | "documents" | "preferences" | "notes" | "ai_review";
+type Tab = "overview" | "experience" | "skills" | "documents" | "preferences" | "notes" | "ai_review" | "submissions";
 
 const PROFESSIONAL_TABS: { key: Tab; label: string }[] = [
   { key: "overview", label: "Overview" },
@@ -26,8 +26,25 @@ const PROFESSIONAL_TABS: { key: Tab; label: string }[] = [
 const BUSINESS_TABS: { key: Tab; label: string }[] = [
   { key: "overview", label: "Overview" },
   { key: "ai_review", label: "AI Assessment" },
+  { key: "submissions", label: "Candidate Submissions" },
   { key: "notes", label: "Notes" },
 ];
+
+// E.6.4 — Per-row shape of admin GET .client_submissions[]
+type ClientSubmissionRow = {
+  id: string;
+  token: string;
+  client_business_name: string | null;
+  recipient_name: string | null;
+  recipient_role: string | null;
+  created_at: string;
+  expires_at: string | null;
+  revoked_at: string | null;
+  status: "active" | "expired" | "revoked";
+  candidate_name: string | null;
+  application_id: string | null;
+  assignment_title: string | null;
+};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -133,6 +150,8 @@ export default function MemberProfilePage() {
   const [notesSaved, setNotesSaved] = useState(false);
   const [aiReview, setAiReview] = useState<any>(null);
   const [reassessing, setReassessing] = useState(false);
+  // E.6.4 — Candidate submissions to this business
+  const [clientSubmissions, setClientSubmissions] = useState<ClientSubmissionRow[]>([]);
 
   // Propose to assignment (G2 + G9) — recruiter-sourced application.
   const [proposeOpen, setProposeOpen] = useState(false);
@@ -173,6 +192,11 @@ export default function MemberProfilePage() {
       setMember(profile);
       setNotes(data.member.notes ?? "");
       if (data.aiReview) setAiReview(data.aiReview);
+      setClientSubmissions(
+        Array.isArray((data as any).client_submissions)
+          ? ((data as any).client_submissions as ClientSubmissionRow[])
+          : []
+      );
     } catch {
       setError(true);
     }
@@ -540,6 +564,7 @@ export default function MemberProfilePage() {
         {activeTab === "skills" && <SkillsTab member={member} />}
         {activeTab === "documents" && <DocumentsTab member={member} />}
         {activeTab === "preferences" && <PreferencesTab member={member} />}
+        {activeTab === "submissions" && <SubmissionsTab rows={clientSubmissions} />}
         {activeTab === "notes" && (
           <NotesTab
             notes={notes}
@@ -1103,6 +1128,97 @@ function AIReviewTab({
           </div>
         )}
       </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Tab: Candidate Submissions (E.6.4) — business members only
+// ---------------------------------------------------------------------------
+
+function SubmissionsTab({ rows }: { rows: ClientSubmissionRow[] }) {
+  const [copiedSubmissionId, setCopiedSubmissionId] = useState<string | null>(null);
+  const [copyError, setCopyError] = useState<string | null>(null);
+
+  const handleCopy = async (row: ClientSubmissionRow) => {
+    try {
+      const url = `${window.location.origin}/client-submissions/${row.token}`;
+      await navigator.clipboard.writeText(url);
+      setCopyError(null);
+      setCopiedSubmissionId(row.id);
+      setTimeout(() => setCopiedSubmissionId(null), 1500);
+    } catch (e) {
+      console.error("[admin business submissions] copy failed:", e);
+      setCopyError("Could not copy link.");
+    }
+  };
+
+  const statusPillClass = (status: ClientSubmissionRow["status"]): string => {
+    if (status === "active") return "bg-[#dcfce7] text-[#15803d]";
+    if (status === "revoked") return "bg-[#fef2f2] text-[#dc2626]";
+    return "bg-[#f5f5f5] text-[#999]";
+  };
+
+  return (
+    <>
+      <SectionLabel>Candidate Submissions</SectionLabel>
+      {rows.length === 0 ? (
+        <div className="bg-white border border-[#e8e8e8] rounded-lg p-8 text-center text-sm text-[#999]">
+          No candidate submissions to this business yet.
+        </div>
+      ) : (
+        <div className="bg-white border border-[#e8e8e8] rounded-lg overflow-x-auto">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="bg-[#fafafa] border-b border-[#e8e8e8]">
+                <th className="px-4 py-2.5 text-left text-[9px] uppercase tracking-[0.12em] text-[#999] font-semibold whitespace-nowrap">Candidate</th>
+                <th className="px-4 py-2.5 text-left text-[9px] uppercase tracking-[0.12em] text-[#999] font-semibold whitespace-nowrap">Assignment</th>
+                <th className="px-4 py-2.5 text-left text-[9px] uppercase tracking-[0.12em] text-[#999] font-semibold whitespace-nowrap">Recipient</th>
+                <th className="px-4 py-2.5 text-left text-[9px] uppercase tracking-[0.12em] text-[#999] font-semibold whitespace-nowrap">Created</th>
+                <th className="px-4 py-2.5 text-left text-[9px] uppercase tracking-[0.12em] text-[#999] font-semibold whitespace-nowrap">Expires</th>
+                <th className="px-4 py-2.5 text-left text-[9px] uppercase tracking-[0.12em] text-[#999] font-semibold whitespace-nowrap">Status</th>
+                <th className="px-4 py-2.5 text-right text-[9px] uppercase tracking-[0.12em] text-[#999] font-semibold whitespace-nowrap"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => {
+                const candNameRaw = (row.candidate_name ?? "").trim();
+                const candName = candNameRaw.length > 0 ? candNameRaw : "—";
+                const recipient = row.recipient_name
+                  ? row.recipient_name + (row.recipient_role ? " · " + row.recipient_role : "")
+                  : "—";
+                return (
+                  <tr key={row.id} className="border-t border-[#f0f0f0] hover:bg-[#fafafa]">
+                    <td className="px-4 py-3 text-[#111]">{candName}</td>
+                    <td className="px-4 py-3 text-[#444]">{row.assignment_title || "—"}</td>
+                    <td className="px-4 py-3 text-[#444]">{recipient}</td>
+                    <td className="px-4 py-3 text-xs text-[#999] whitespace-nowrap">{formatDate(row.created_at)}</td>
+                    <td className="px-4 py-3 text-xs text-[#999] whitespace-nowrap">
+                      {row.expires_at ? formatDate(row.expires_at) : "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`text-[9px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded ${statusPillClass(row.status)}`}>
+                        {row.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={() => handleCopy(row)}
+                        className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide bg-white text-[#444] border border-[#e0e0e0] rounded hover:bg-[#fafafa] transition-colors whitespace-nowrap"
+                      >
+                        {row.id === copiedSubmissionId ? "Copied" : "Copy link"}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {copyError && (
+        <div className="mt-2 text-xs text-[#dc2626]">{copyError}</div>
+      )}
     </>
   );
 }
