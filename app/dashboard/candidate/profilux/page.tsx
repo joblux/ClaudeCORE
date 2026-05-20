@@ -2844,7 +2844,16 @@ export default function ProfiluxPage() {
     <div style={wrap}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '20px 0 16px', marginBottom: 24, borderBottom: '1px solid #2a2a2a' }}>
         <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999', letterSpacing: 0.2 }}>
-          ← Dashboard · ProfiLux
+          <Link
+            href="/dashboard"
+            style={{ color: '#999', textDecoration: 'none', transition: 'color 0.18s ease' }}
+            onMouseEnter={(ev) => { (ev.currentTarget as HTMLAnchorElement).style.color = '#a58e28' }}
+            onMouseLeave={(ev) => { (ev.currentTarget as HTMLAnchorElement).style.color = '#999' }}
+          >
+            ← Dashboard
+          </Link>
+          <span style={{ margin: '0 6px', color: '#666' }}>·</span>
+          <span>ProfiLux</span>
         </div>
         <div role="tablist" style={{ display: 'inline-flex', alignItems: 'center', gap: 0, background: 'rgba(255,255,255,0.025)', border: '0.5px solid #2a2a2a', borderRadius: 8, padding: 3 }}>
           <button
