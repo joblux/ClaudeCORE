@@ -35,6 +35,30 @@ const NotSet = () => <em style={{ color: '#666' }}>Not set</em>
 const NoneSel = () => <em style={{ color: '#666' }}>None selected</em>
 const Hint = ({ children }: { children: React.ReactNode }) => <em style={{ color: '#888' }}>{children}</em>
 
+// PF-MANAGE V12 hotfix — plain helpers used by Manage tab. Not hooks.
+function currencySymbol(code: string | null | undefined): string {
+  switch ((code || '').toUpperCase()) {
+    case 'USD': return '$'
+    case 'GBP': return '£'
+    case 'JPY': return '¥'
+    case 'EUR': return '€'
+    default: return '€'
+  }
+}
+function formatSalaryK(min: number | null | undefined, max: number | null | undefined, currency: string | null | undefined): string | null {
+  if (!min && !max) return null
+  const sym = currencySymbol(currency)
+  const minK = min ? `${Math.round(min / 1000)}K` : ''
+  const maxK = max ? `${Math.round(max / 1000)}K` : ''
+  return `${sym}${minK}${min && max ? '–' : ''}${maxK}`
+}
+function cvDateLabel(iso: string | null | undefined): string | null {
+  if (!iso) return null
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return null
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
 // A2.6 — State marker family (MATRIX §24.3, §14.3).
 // View tab only. Replaces inline <NotSet /> / <NoneSel /> on View cards.
 // Edit tab keeps NotSet/NoneSel verbatim.
@@ -623,7 +647,12 @@ function VisibilityToggle({
 }
 
 export default function ProfiluxPage() {
-  const [tab, setTab] = useState<ProfiluxTab>('edit')
+  const [tab, setTab] = useState<ProfiluxTab>(() => {
+    if (typeof window === 'undefined') return 'edit'
+    const p = new URLSearchParams(window.location.search).get('tab')
+    if (p === 'view' || p === 'edit' || p === 'manage') return p
+    return 'edit'
+  })
   const [isMobile, setIsMobile] = useState<boolean>(() =>
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
   )
@@ -5908,29 +5937,10 @@ export default function ProfiluxPage() {
           </button>
         )
 
-        const maskableMeta = ({
-          phone:             { label: 'Phone',                          sub: 'Hidden by default in shared and public views.' },
-          email:             { label: 'Email',                          sub: 'Hidden by default in shared and public views.' },
-          current_employer:  { label: 'Current employer',               sub: 'Shown as "Confidential Maison" in shared views.' },
-          salary:            { label: 'Salary & compensation',          sub: 'Never shown publicly.' },
-          availability:      { label: 'Availability & notice period',   sub: 'Hidden in Share view by default.' },
-          references:        { label: 'References',                     sub: 'Always private. Released individually on your explicit consent.' },
-        } as const)
-
         const seniorityValue = seniorityLabel(e.seniority)
         const departmentsValue = (e.desired_departments ?? []).map(departmentLabel).filter(Boolean).join(' · ')
         const marketsValue = (e.desired_locations ?? []).join(' · ')
-        const salaryValue = (() => {
-          const min = e.desired_salary_min
-          const max = e.desired_salary_max
-          const cur = e.desired_salary_currency || 'EUR'
-          if (min == null && max == null) return null
-          const fmt = (v: number) => new Intl.NumberFormat('en-US').format(v)
-          if (min != null && max != null) return `${cur} ${fmt(min)} – ${fmt(max)}`
-          if (min != null) return `${cur} ${fmt(min)}+`
-          if (max != null) return `Up to ${cur} ${fmt(max!)}`
-          return null
-        })()
+        const salaryValue = formatSalaryK(e.desired_salary_min, e.desired_salary_max, e.desired_salary_currency)
 
         const cvFilename = cvUrl ? (decodeURIComponent(cvUrl.split('/').pop() || '') || 'CV.pdf') : null
 
@@ -6139,6 +6149,125 @@ export default function ProfiluxPage() {
                     <button type="button" disabled style={manageBtnDisabled}>Download</button>
                   </div>
                 </div>
+
+                {/* Password */}
+                <div style={rowStyle}>
+                  <div style={rowLeft}>
+                    <div style={rowTitle}>Password</div>
+                    <div style={rowSub}>
+                      {shareStatus?.password_set
+                        ? 'Active'
+                        : 'Optional. Restrict link access to people you give the password to.'}
+                    </div>
+                    {passwordError && (
+                      <div style={{ marginTop: 6, fontSize: 12, color: '#ff6b6b' }}>{passwordError}</div>
+                    )}
+                  </div>
+                  <div style={rowRight}>
+                    {shareStatus?.password_set ? (
+                      <button
+                        type="button"
+                        onClick={handleClearPassword}
+                        disabled={passwordSaving}
+                        style={passwordSaving ? manageBtnDisabled : manageBtn}
+                      >
+                        {passwordSaving ? 'Clearing…' : 'Clear'}
+                      </button>
+                    ) : (
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <input
+                          type="password"
+                          value={passwordDraft}
+                          onChange={(ev) => setPasswordDraft(ev.target.value)}
+                          placeholder="Set password"
+                          style={{
+                            background: 'rgba(0,0,0,0.25)',
+                            border: '1px solid #2a2a2a',
+                            color: '#fff',
+                            padding: '6px 10px',
+                            fontFamily: 'Inter, sans-serif',
+                            fontSize: 13,
+                            borderRadius: 6,
+                            outline: 'none',
+                            width: 180,
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSetPassword}
+                          disabled={passwordSaving || passwordDraft.length < 4}
+                          style={(passwordSaving || passwordDraft.length < 4) ? manageBtnDisabled : manageBtn}
+                        >
+                          {passwordSaving ? 'Saving…' : 'Set'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Expiry */}
+                <div style={rowStyle}>
+                  <div style={rowLeft}>
+                    <div style={rowTitle}>Expiry</div>
+                    <div style={rowSub}>
+                      {shareStatus?.expires_at
+                        ? `Expires on ${shareStatus.expires_at}`
+                        : 'Optional. Auto-disable the link on a chosen date.'}
+                    </div>
+                    {expiryError && (
+                      <div style={{ marginTop: 6, fontSize: 12, color: '#ff6b6b' }}>{expiryError}</div>
+                    )}
+                  </div>
+                  <div style={rowRight}>
+                    {shareStatus?.expires_at ? (
+                      <button
+                        type="button"
+                        onClick={handleClearExpiry}
+                        disabled={expirySaving}
+                        style={expirySaving ? manageBtnDisabled : manageBtn}
+                      >
+                        {expirySaving ? 'Clearing…' : 'Clear'}
+                      </button>
+                    ) : (
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <input
+                          type="date"
+                          value={expiryDraft}
+                          onChange={(ev) => setExpiryDraft(ev.target.value)}
+                          style={{
+                            background: 'rgba(0,0,0,0.25)',
+                            border: '1px solid #2a2a2a',
+                            color: '#fff',
+                            padding: '6px 10px',
+                            fontFamily: 'Inter, sans-serif',
+                            fontSize: 13,
+                            borderRadius: 6,
+                            outline: 'none',
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSetExpiry}
+                          disabled={expirySaving || !expiryDraft}
+                          style={(expirySaving || !expiryDraft) ? manageBtnDisabled : manageBtn}
+                        >
+                          {expirySaving ? 'Saving…' : 'Set'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Views */}
+                <div style={rowStyle}>
+                  <div style={rowLeft}>
+                    <div style={rowTitle}>Views</div>
+                    <div style={rowSub}>
+                      {(shareStatus?.view_count ?? 0)} view{(shareStatus?.view_count ?? 0) === 1 ? '' : 's'}
+                    </div>
+                  </div>
+                  <div style={rowRight} />
+                </div>
               </div>
 
               {/* 3. MASKABLE FIELDS */}
@@ -6147,18 +6276,23 @@ export default function ProfiluxPage() {
                   <h2 style={blockTitle}>Maskable fields</h2>
                   <p style={blockSub}>Hides sensitive data inside shared, exported, and public views — even when the section itself is visible. Section visibility is controlled separately in Edit mode.</p>
                 </div>
-                {MASKABLE_FIELDS.map((field) => {
-                  const meta = maskableMeta[field]
+                {([
+                  { field: 'current_employer', title: 'Current employer',             sub: 'Currently shown as "Confidential Maison" in shared views.' },
+                  { field: 'salary',           title: 'Salary & compensation',        sub: 'Never shown publicly.' },
+                  { field: 'availability',     title: 'Availability & notice period', sub: 'Hidden in Share view by default.' },
+                  { field: 'phone',            title: 'Phone',                        sub: 'Hidden by default.' },
+                  { field: 'references',       title: 'References',                   sub: 'Always private. Released individually on your explicit consent.' },
+                ] as const).map(({ field, title, sub }) => {
                   const masked = (editor?.masked_fields ?? {})[field] === true
                   const busy = maskToggling === field
                   return (
                     <div key={field} style={rowStyle}>
                       <div style={rowLeft}>
-                        <div style={rowTitle}>{meta.label}</div>
-                        <div style={rowSub}>{meta.sub}</div>
+                        <div style={rowTitle}>{title}</div>
+                        <div style={rowSub}>{sub}</div>
                       </div>
                       <div style={rowRight}>
-                        {renderToggle(masked, busy, () => toggleMaskedField(field, !masked), `${meta.label} mask`)}
+                        {renderToggle(masked, busy, () => toggleMaskedField(field, !masked), `${title} mask`)}
                       </div>
                     </div>
                   )
@@ -6189,9 +6323,6 @@ export default function ProfiluxPage() {
                     <div style={salaryValue ? prefValue : prefValueEmpty}>{salaryValue || 'Not set'}</div>
                   </div>
                 </div>
-                <div style={{ marginTop: 14, fontSize: 11.5, color: '#777', fontStyle: 'italic', fontFamily: 'Inter, sans-serif' }}>
-                  Edit these in the Edit tab — Availability &amp; Targets and Compensation sections.
-                </div>
               </div>
 
               {/* 5. CV & DOCUMENT */}
@@ -6204,7 +6335,7 @@ export default function ProfiluxPage() {
                   <div style={rowLeft}>
                     <div style={rowTitle}>Last CV upload</div>
                     <div style={rowSub}>
-                      {cvFilename ? `${cvFilename}${cvParsedAt ? ` · parsed ${parsedDateLabel}` : ''}` : 'No CV uploaded yet.'}
+                      {cvFilename ? `${cvFilename}${cvParsedAt ? ` · parsed ${cvDateLabel(cvParsedAt) || 'recently'}` : ''}` : 'No CV uploaded yet.'}
                     </div>
                   </div>
                   <div style={rowRight}>
@@ -6245,7 +6376,7 @@ export default function ProfiluxPage() {
                 <div style={rowStyle}>
                   <div style={rowLeft}>
                     <div style={rowTitle}>Connected sign-in</div>
-                    <div style={rowSub}>Signed in via your JOBLUX account.</div>
+                    <div style={rowSub}>Google</div>
                   </div>
                   <div style={rowRight}>
                     <button type="button" disabled style={manageBtnDisabled} title="Coming soon">Manage</button>
