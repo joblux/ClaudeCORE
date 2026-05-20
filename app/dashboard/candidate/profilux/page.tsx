@@ -2958,11 +2958,11 @@ export default function ProfiluxPage() {
             <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 32, alignItems: 'flex-start' }}>
               {/* LEFT SPINE */}
               <aside style={{ width: isMobile ? '100%' : 300, flexShrink: 0 }}>
-                <div style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: 26, color: '#fff', lineHeight: 1.2, marginBottom: 6 }}>
-                  {fullName.length > 0
-                    ? fullName
-                    : <em style={{ color: '#666', fontStyle: 'italic', fontFamily: 'Inter, sans-serif', fontSize: 14 }}>Not specified</em>}
-                </div>
+                {(fullName.length > 0 || initials.length > 0) && (
+                  <div style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: 26, color: '#fff', lineHeight: 1.2, marginBottom: 6 }}>
+                    {fullName.length > 0 ? fullName : initials}
+                  </div>
+                )}
                 {(() => {
                   const hasEmp = typeof e.current_employer === 'string' && e.current_employer.trim().length > 0
                   if (!hasJob && !hasEmp) return null
@@ -3199,10 +3199,12 @@ export default function ProfiluxPage() {
               if (!filled) return null
               return (
             <ViewZone title="Expertise">
-              <div style={grid}>
-                <div style={label}>Years in luxury</div>
-                <div>{missingIfEmptyNum(e.years_in_luxury)}</div>
-              </div>
+              {typeof e.years_in_luxury === 'number' && (
+                <div style={grid}>
+                  <div style={label}>Years in luxury</div>
+                  <div>{e.years_in_luxury}</div>
+                </div>
+              )}
 
               {e.sectors.length > 0 && (
                 <>
@@ -3254,7 +3256,8 @@ export default function ProfiluxPage() {
 
             {/* §22.1 row 8 — Availability & Targets */}
             {(() => {
-              const filled = typeof e.availability === 'string' && e.availability.trim().length > 0
+              const label = availabilityLabel(e.availability)
+              const filled = typeof e.availability === 'string' && e.availability.trim().length > 0 && label !== null
               if (!filled) return null
               return (
             <ViewZone title="Availability">
@@ -3263,7 +3266,7 @@ export default function ProfiluxPage() {
                   Open to opportunities
                 </div>
                 <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.5, textAlign: 'right' }}>
-                  {availabilityLabel(e.availability) ?? <Marker kind="missing" />}
+                  {label}
                 </div>
               </div>
             </ViewZone>
@@ -3286,7 +3289,7 @@ export default function ProfiluxPage() {
 
             {/* PF-D V1 — Certifications (first library section, free-text, mirrors Maisons) */}
             {(() => {
-              if (!Array.isArray(e.certifications) || e.certifications.length === 0) return null
+              if (!e.activated_sections.includes('certifications') || !Array.isArray(e.certifications) || e.certifications.length === 0) return null
               return (
             <ViewZone title="Certifications">
               <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.5 }}>
@@ -3298,7 +3301,7 @@ export default function ProfiluxPage() {
 
             {/* PF-D V1 — Awards (free-text, mirrors Certifications) */}
             {(() => {
-              if (!Array.isArray(e.awards) || e.awards.length === 0) return null
+              if (!e.activated_sections.includes('awards') || !Array.isArray(e.awards) || e.awards.length === 0) return null
               return (
             <ViewZone title="Awards">
               <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.5 }}>
@@ -3310,7 +3313,7 @@ export default function ProfiluxPage() {
 
             {/* PF-D V3.1 — Memberships (free-text text[], mirrors Awards) */}
             {(() => {
-              if (!Array.isArray(e.memberships) || e.memberships.length === 0) return null
+              if (!e.activated_sections.includes('memberships') || !Array.isArray(e.memberships) || e.memberships.length === 0) return null
               return (
             <ViewZone title="Memberships">
               <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.5 }}>
@@ -3322,7 +3325,7 @@ export default function ProfiluxPage() {
 
             {/* PF-D V3.1 — Strategic Initiatives (structured jsonb array-of-objects) */}
             {(() => {
-              if (!Array.isArray(e.strategic_initiatives) || e.strategic_initiatives.length === 0) return null
+              if (!e.activated_sections.includes('strategic_initiatives') || !Array.isArray(e.strategic_initiatives) || e.strategic_initiatives.length === 0) return null
               return (
             <ViewZone title="Strategic Initiatives">
               <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -3336,6 +3339,77 @@ export default function ProfiluxPage() {
                 ))}
               </div>
             </ViewZone>
+              )
+            })()}
+
+            {/* PF-VIEW V12 — Portfolio (library section, jsonb array-of-objects) */}
+            {(() => {
+              if (!e.activated_sections.includes('portfolio') || !Array.isArray(e.portfolio) || e.portfolio.length === 0) return null
+              return (
+                <ViewZone title="Portfolio">
+                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {e.portfolio.map((pf, idx) => (
+                      <div key={idx}>
+                        <div style={{ color: '#fff', fontWeight: 600 }}>{pf.title}</div>
+                        {pf.url && <div style={{ color: '#999', marginTop: 2, wordBreak: 'break-all' }}>{pf.url}</div>}
+                      </div>
+                    ))}
+                  </div>
+                </ViewZone>
+              )
+            })()}
+
+            {/* PF-VIEW V12 — Press & features (library section, jsonb array-of-objects) */}
+            {(() => {
+              if (!e.activated_sections.includes('press_features') || !Array.isArray(e.press_features) || e.press_features.length === 0) return null
+              return (
+                <ViewZone title="Press & features">
+                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {e.press_features.map((p, idx) => (
+                      <div key={idx}>
+                        <div style={{ color: '#fff', fontWeight: 600 }}>{p.title}</div>
+                        {p.publication && <div style={{ color: '#a58e28', marginTop: 2, fontSize: 12 }}>{p.publication}</div>}
+                        {p.url && <div style={{ color: '#999', marginTop: 2, fontSize: 12, wordBreak: 'break-all' }}>{p.url}</div>}
+                      </div>
+                    ))}
+                  </div>
+                </ViewZone>
+              )
+            })()}
+
+            {/* PF-VIEW V12 — References (library section, jsonb array-of-objects) */}
+            {(() => {
+              if (!e.activated_sections.includes('references') || !Array.isArray(e.references) || e.references.length === 0) return null
+              return (
+                <ViewZone title="References">
+                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {e.references.map((r, idx) => (
+                      <div key={idx}>
+                        <div style={{ color: '#fff', fontWeight: 600 }}>{r.name}</div>
+                        {r.role && <div style={{ color: '#999', marginTop: 2, fontSize: 12 }}>{r.role}</div>}
+                        {r.company && <div style={{ color: '#a58e28', marginTop: 2, fontSize: 12 }}>{r.company}</div>}
+                      </div>
+                    ))}
+                  </div>
+                </ViewZone>
+              )
+            })()}
+
+            {/* PF-VIEW V12 — Internships (library section, jsonb array-of-objects) */}
+            {(() => {
+              if (!e.activated_sections.includes('internships') || !Array.isArray(e.internships) || e.internships.length === 0) return null
+              return (
+                <ViewZone title="Internships">
+                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {e.internships.map((r, idx) => (
+                      <div key={idx}>
+                        <div style={{ color: '#fff', fontWeight: 600 }}>{r.company}</div>
+                        {r.role && <div style={{ color: '#999', marginTop: 2, fontSize: 12 }}>{r.role}</div>}
+                        {r.period && <div style={{ color: '#a58e28', marginTop: 2, fontSize: 12 }}>{r.period}</div>}
+                      </div>
+                    ))}
+                  </div>
+                </ViewZone>
               )
             })()}
               </div>
