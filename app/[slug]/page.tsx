@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 import { resolveProfiLux } from '@/lib/profilux/resolveProfiLux'
 import { projectFor } from '@/lib/profilux/projectFor'
 import type { PublicProjection } from '@/lib/profilux/types'
+import { sectorLabel, productCategoryLabel, expertiseTagLabel, skillLabel, seniorityLabel } from '@/lib/profilux/labels'
 import { readUnlockCookie, UNLOCK_COOKIE_NAME } from '@/lib/share/auth'
 
 const supabase = createClient(
@@ -73,112 +74,263 @@ export default async function PublicProfilePage({ params }: Props) {
     // swallow — analytics best-effort
   }
 
-  const initials = `${pub.first_name?.[0] || ''}${pub.last_name?.[0] || ''}`.toUpperCase()
+  // ---------- V12 view-body precompute (PublicProjection only) ----------
+  const fullName = `${pub.first_name ?? ''} ${pub.last_name ?? ''}`.trim()
+  const hasJob = typeof pub.job_title === 'string' && pub.job_title.trim().length > 0
+  const hasSeniority = typeof pub.seniority === 'string' && pub.seniority.trim().length > 0
+  const hasCity = typeof pub.city === 'string' && pub.city.trim().length > 0
+  const hasCountry = typeof pub.country === 'string' && pub.country.trim().length > 0
+  const locationLine = hasCity && hasCountry
+    ? `${pub.city}, ${pub.country}`
+    : hasCity ? pub.city
+    : hasCountry ? pub.country
+    : null
+
+  const yearOf = (d: string | null | undefined): string | null => {
+    if (typeof d !== 'string') return null
+    const t = d.trim()
+    if (t.length === 0) return null
+    const m = t.match(/^(\d{4})/)
+    return m ? m[1] : null
+  }
+
+  // Career Path rows — V5: company is ALWAYS null on PublicExperience.
+  // Mirror View expRows; drop the hasCo branch and never render a company token.
+  type ExpRow = {
+    role: string
+    location: string | null
+    period: string | null
+    description: string | null
+  }
+  const expRows: ExpRow[] = (pub.experiences ?? [])
+    .map((exp): ExpRow | null => {
+      const hasJobT = typeof exp.job_title === 'string' && exp.job_title.trim().length > 0
+      if (!hasJobT) return null
+      const xCity = typeof exp.city === 'string' && exp.city.trim().length > 0 ? exp.city : null
+      const xCountry = typeof exp.country === 'string' && exp.country.trim().length > 0 ? exp.country : null
+      const location = xCity && xCountry ? `${xCity}, ${xCountry}` : (xCity ?? xCountry)
+      const startY = yearOf(exp.start_date)
+      const endY = yearOf(exp.end_date)
+      const period =
+        startY && endY ? `${startY}–${endY}`
+        : startY ? `${startY}–present`
+        : endY ? endY
+        : null
+      const description = typeof exp.description === 'string' && exp.description.trim().length > 0 ? exp.description : null
+      return { role: exp.job_title as string, location, period, description }
+    })
+    .filter((r): r is ExpRow => r !== null)
+
+  const languages = Array.isArray(pub.languages) ? pub.languages : []
+  const certifications = Array.isArray(pub.certifications) ? pub.certifications : []
+
+  const expertiseFilled =
+    typeof pub.years_in_luxury === 'number' ||
+    (Array.isArray(pub.sectors) && pub.sectors.length > 0) ||
+    (Array.isArray(pub.product_categories) && pub.product_categories.length > 0) ||
+    (Array.isArray(pub.expertise_tags) && pub.expertise_tags.length > 0) ||
+    (Array.isArray(pub.key_skills) && pub.key_skills.length > 0) ||
+    (Array.isArray(pub.market_knowledge) && pub.market_knowledge.length > 0)
+
+  // Inlined ViewZone tokens (mirror app/dashboard/candidate/profilux/page.tsx
+  // ViewZone, lines 241–267 — same wrap + title styles).
+  const zoneWrap: React.CSSProperties = {
+    background: '#222',
+    border: '1px solid #2a2a2a',
+    borderRadius: 14,
+    padding: '24px 26px',
+    marginBottom: 18,
+  }
+  const zoneTitle: React.CSSProperties = {
+    fontFamily: 'Inter, sans-serif',
+    fontWeight: 600,
+    fontSize: 10.5,
+    color: '#8e8e8e',
+    textTransform: 'uppercase',
+    letterSpacing: 1.8,
+    margin: 0,
+    paddingBottom: 14,
+    marginBottom: 18,
+    borderBottom: '0.5px solid #2a2a2a',
+  }
+  const sectionLabel: React.CSSProperties = {
+    marginTop: 24,
+    color: '#999',
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    fontFamily: 'Inter, sans-serif',
+  }
+  const dotList: React.CSSProperties = {
+    marginTop: 8,
+    fontFamily: 'Inter, sans-serif',
+    fontSize: 13,
+    color: '#ccc',
+    lineHeight: 1.5,
+  }
 
   return (
     <>
       <meta name="robots" content="noindex, nofollow" />
-      <div style={{ background: '#0f0f0f', minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: '#fff' }}>
+      <style>{`@media (max-width: 768px) { .pf-public-grid { flex-direction: column !important; } .pf-public-spine { width: 100% !important; } }`}</style>
+      <div style={{ background: '#1a1a1a', minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: '#fff' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '48px 28px 80px' }}>
 
+          {/* V12 convergence — two-column View layout (left spine + right field) */}
+          <div className="pf-public-grid" style={{ display: 'flex', flexDirection: 'row', gap: 32, alignItems: 'flex-start' }}>
 
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 40px 80px' }}>
-
-          {/* PROFILE HEADER */}
-          <div style={{ background: '#141414', border: '0.5px solid #2a2a2a', borderRadius: '8px', padding: '40px', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '28px' }}>
-              {pub.avatar_url ? (
-                <img src={pub.avatar_url} alt={pub.first_name || ''} style={{ width: '88px', height: '88px', borderRadius: '50%', objectFit: 'cover', border: '0.5px solid #333', flexShrink: 0 }} />
-              ) : (
-                <div style={{ width: '88px', height: '88px', borderRadius: '50%', background: '#1e1e1e', border: '0.5px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', color: '#fff', fontWeight: 400, flexShrink: 0 }}>{initials}</div>
+            {/* LEFT SPINE — identity only (no employer V3, no availability V7, no actions) */}
+            <aside className="pf-public-spine" style={{ width: 300, flexShrink: 0 }}>
+              {fullName.length > 0 && (
+                <div style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: 26, color: '#fff', lineHeight: 1.2, marginBottom: 6 }}>
+                  {fullName}
+                </div>
               )}
-              <div style={{ flex: 1 }}>
-                <div style={{ marginBottom: '10px' }}>
-                  <h1 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: '30px', margin: '0 0 6px', color: '#fff' }}>
-                    {pub.first_name} {pub.last_name}
-                  </h1>
-                  <p style={{ fontSize: '14px', color: '#fff', margin: 0, opacity: 0.7 }}>{pub.headline}</p>
+              {hasJob && (
+                <div style={{ fontFamily: 'Playfair Display, serif', fontStyle: 'italic', fontSize: 13.5, color: '#a58e28', lineHeight: 1.4, marginBottom: 4 }}>
+                  {pub.job_title}
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '14px' }}>
-                  {pub.city && <span style={{ fontSize: '12px', border: '0.5px solid #333', color: '#fff', padding: '5px 12px', borderRadius: '3px' }}>{pub.city}</span>}
-                  {pub.languages?.slice(0, 3).map((l) => (
-                    <span key={l.language} style={{ fontSize: '12px', border: '0.5px solid #333', color: '#fff', padding: '5px 12px', borderRadius: '3px' }}>{l.language}</span>
-                  ))}
+              )}
+              {locationLine && (
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999', lineHeight: 1.4 }}>
+                  {locationLine}
                 </div>
-              </div>
-            </div>
-            {pub.bio && (
-              <p style={{ fontSize: '14px', color: '#fff', lineHeight: 1.7, opacity: 0.7, margin: '24px 0 0', borderTop: '0.5px solid #1e1e1e', paddingTop: '24px' }}>
-                {pub.bio}
-              </p>
-            )}
-          </div>
+              )}
+            </aside>
 
-          {/* CAREER + EXPERTISE grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            {/* RIGHT FIELD — Current Role · Career Path · Languages · Expertise · Certifications */}
+            <div style={{ flex: 1, minWidth: 0 }}>
 
-            {/* CAREER HISTORY */}
-            {pub.experiences?.length > 0 && (
-              <div style={{ background: '#141414', border: '0.5px solid #2a2a2a', borderRadius: '8px', padding: '28px' }}>
-                <div style={{ fontSize: '10px', color: '#fff', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '20px', opacity: 0.5 }}>Career history</div>
-                {pub.experiences.map((exp, i) => (
-                  <div key={i} style={{ paddingBottom: '16px', marginBottom: '16px', borderBottom: i < pub.experiences.length - 1 ? '0.5px solid #1e1e1e' : 'none' }}>
-                    {exp.job_title && (
-                      <div style={{ fontSize: '14px', fontWeight: 500, color: '#fff', marginBottom: '4px' }}>{exp.job_title}</div>
-                    )}
-                    {/* V5: company anonymized to null - line intentionally omitted (Option C, GPT-locked) */}
-                    {(exp.start_date || exp.end_date || exp.city || exp.country) && (
-                      <div style={{ fontSize: '11px', color: '#fff', opacity: 0.4 }}>
-                        {exp.start_date || ''}{exp.end_date ? ` | ${exp.end_date}` : ''}
-                        {(exp.city || exp.country) ? ` · ${[exp.city, exp.country].filter(Boolean).join(', ')}` : ''}
+              {/* Current Role — neutral avatar (empty, employer is masked V3); no Since line */}
+              {(hasJob || hasSeniority) && (
+                <div style={zoneWrap}>
+                  <h3 style={zoneTitle}>Current Role</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
+                      border: '1px solid rgba(165,142,40,0.2)',
+                      flexShrink: 0,
+                    }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      {hasJob && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, color: '#fff', fontWeight: 500, lineHeight: 1.3, marginBottom: 2 }}>{pub.job_title}</div>
+                      )}
+                      {hasSeniority && (
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.4 }}>{seniorityLabel(pub.seniority)}</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Career Path — V5: company is null, never rendered */}
+              {expRows.length > 0 && (
+                <div style={zoneWrap}>
+                  <h3 style={zoneTitle}>Career Path</h3>
+                  {expRows.map((r, i) => {
+                    const isLast = i === expRows.length - 1
+                    const rowStyle: React.CSSProperties = isLast
+                      ? { display: 'grid', gridTemplateColumns: '108px 1fr', gap: 16, marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }
+                      : { display: 'grid', gridTemplateColumns: '108px 1fr', gap: 16, marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #2a2a2a' }
+                    return (
+                      <div key={i} style={rowStyle}>
+                        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#8e8e8e', letterSpacing: 0.3, fontVariantNumeric: 'tabular-nums', lineHeight: 1.4 }}>
+                          {r.period ?? ''}
+                        </div>
+                        <div>
+                          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: '#fff', fontWeight: 500, lineHeight: 1.4, marginBottom: 2 }}>{r.role}</div>
+                          {r.location && (
+                            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.4, marginBottom: 6 }}>
+                              {r.location}
+                            </div>
+                          )}
+                          {r.description && (
+                            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#8e8e8e', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{r.description}</div>
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                    )
+                  })}
+                </div>
+              )}
 
-            {/* EXPERTISE + SECTORS */}
-            <div style={{ background: '#141414', border: '0.5px solid #2a2a2a', borderRadius: '8px', padding: '28px' }}>
-              {pub.expertise_tags?.length > 0 && (
-                <>
-                  <div style={{ fontSize: '10px', color: '#fff', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px', opacity: 0.5 }}>Expertise</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px', marginBottom: '24px' }}>
-                    {pub.expertise_tags.map((s) => (
-                      <span key={s} style={{ fontSize: '12px', border: '0.5px solid #444', color: '#fff', padding: '5px 12px', borderRadius: '3px' }}>{s}</span>
+              {/* Languages */}
+              {languages.length > 0 && (
+                <div style={zoneWrap}>
+                  <h3 style={zoneTitle}>Languages</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {languages.map((l, i) => (
+                      <div key={`lg-${i}-${l.language}`} style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.4 }}>
+                        <span>{l.language}</span>
+                        {l.proficiency && <span style={{ color: '#999', marginLeft: 8 }}>{l.proficiency}</span>}
+                      </div>
                     ))}
                   </div>
-                </>
+                </div>
               )}
-              {pub.sectors?.length > 0 && (
-                <>
-                  <div style={{ fontSize: '10px', color: '#fff', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px', opacity: 0.5 }}>Sectors</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
-                    {pub.sectors.map((s) => (
-                      <span key={s} style={{ fontSize: '12px', border: '0.5px solid #2a2a2a', color: '#ccc', padding: '5px 12px', borderRadius: '3px' }}>{s}</span>
-                    ))}
+
+              {/* Expertise — 6 sub-rows, dot-separated (label helpers not importable; see report) */}
+              {expertiseFilled && (
+                <div style={zoneWrap}>
+                  <h3 style={zoneTitle}>Expertise</h3>
+                  {typeof pub.years_in_luxury === 'number' && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 12, fontSize: 14, lineHeight: 1.6 }}>
+                      <div style={{ color: '#999' }}>Years in luxury</div>
+                      <div>{pub.years_in_luxury}</div>
+                    </div>
+                  )}
+                  {pub.sectors.length > 0 && (
+                    <>
+                      <div style={sectionLabel}>Sectors</div>
+                      <div style={dotList}>{pub.sectors.map(v => sectorLabel(v)).join(' · ')}</div>
+                    </>
+                  )}
+                  {pub.product_categories.length > 0 && (
+                    <>
+                      <div style={sectionLabel}>Product categories</div>
+                      <div style={dotList}>{pub.product_categories.map(v => productCategoryLabel(v)).join(' · ')}</div>
+                    </>
+                  )}
+                  {pub.expertise_tags.length > 0 && (
+                    <>
+                      <div style={sectionLabel}>Areas of expertise</div>
+                      <div style={dotList}>{pub.expertise_tags.map(v => expertiseTagLabel(v)).join(' · ')}</div>
+                    </>
+                  )}
+                  {pub.key_skills.length > 0 && (
+                    <>
+                      <div style={sectionLabel}>Skills</div>
+                      <div style={dotList}>{pub.key_skills.map(v => skillLabel(v)).join(' · ')}</div>
+                    </>
+                  )}
+                  {pub.market_knowledge.length > 0 && (
+                    <>
+                      <div style={sectionLabel}>Markets</div>
+                      <div style={dotList}>{pub.market_knowledge.join(' · ')}</div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Certifications — no activated_sections gate on PublicProjection (expected) */}
+              {certifications.length > 0 && (
+                <div style={zoneWrap}>
+                  <h3 style={zoneTitle}>Certifications</h3>
+                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.5 }}>
+                    {certifications.join(' · ')}
                   </div>
-                </>
+                </div>
               )}
+
             </div>
-
           </div>
 
-          {/* MARKETS */}
-          {pub.market_knowledge?.length > 0 && (
-            <div style={{ background: '#141414', border: '0.5px solid #2a2a2a', borderRadius: '8px', padding: '28px', marginBottom: '16px' }}>
-              <div style={{ fontSize: '10px', color: '#fff', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px', opacity: 0.5 }}>Markets & geographies</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
-                {pub.market_knowledge.map((m) => (
-                  <span key={m} style={{ fontSize: '12px', border: '0.5px solid #2a2a2a', color: '#ccc', padding: '5px 12px', borderRadius: '3px' }}>{m}</span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* FOOTER */}
-          <div style={{ textAlign: 'center', padding: '28px 0 0', borderTop: '0.5px solid #1e1e1e' }}>
-            <p style={{ fontSize: '11px', color: '#fff', opacity: 0.2, margin: '0 0 4px' }}>This profile was shared privately via JOBLUX. It is not indexed by any search engine.</p>
-            <p style={{ fontSize: '10px', color: '#fff', opacity: 0.1, margin: 0 }}>joblux.com · Luxury talent intelligence</p>
+          {/* FOOTER — strings verbatim, discreet, full-width below dossier */}
+          <div style={{ textAlign: 'center', padding: '28px 0 0', marginTop: 48, borderTop: '0.5px solid #1e1e1e' }}>
+            <p style={{ fontSize: 11, color: '#fff', opacity: 0.2, margin: '0 0 4px' }}>This profile was shared privately via JOBLUX. It is not indexed by any search engine.</p>
+            <p style={{ fontSize: 10, color: '#fff', opacity: 0.1, margin: 0 }}>joblux.com · Luxury talent intelligence</p>
           </div>
 
         </div>

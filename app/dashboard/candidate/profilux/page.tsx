@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import type { EditorView, MaskableField, ProfiLuxInternshipItem, ProfiLuxPortfolioItem, ProfiLuxPressFeatureItem, ProfiLuxReferenceItem, ProfiLuxStrategicInitiative, SectionId } from '@/lib/profilux/types'
 import { MASKABLE_FIELDS } from '@/lib/profilux/types'
 import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS, PROFILUX_SECTOR_OPTIONS } from '@/lib/profilux/vocabulary'
+import { seniorityLabel, skillLabel, availabilityLabel, departmentLabel, contractTypeLabel, sectorLabel, productCategoryLabel, expertiseTagLabel } from '@/lib/profilux/labels'
 
 const TOTAL = 11
 
@@ -1784,31 +1785,6 @@ export default function ProfiluxPage() {
   if (!editor) return <div style={wrap}>No editor data.</div>
 
   const e = editor
-  const seniorityLabel = (value: string | null) => {
-    if (!value) return null
-    return PROFILUX_SENIORITY_OPTIONS.find(o => o.value === value)?.label ?? value
-  }
-  const skillLabel = (value: string) =>
-    PROFILUX_SKILL_OPTIONS.find(o => o.value === value)?.label ?? value
-  const availabilityLabel = (value: Screen9Draft['availability']) => {
-    switch (value) {
-      case 'active': return 'Actively looking'
-      case 'open': return 'Quietly considering'
-      case 'passive': return 'Passively exploring'
-      case 'unavailable': return 'Not available'
-      default: return null
-    }
-  }
-  const departmentLabel = (value: string) =>
-    PROFILUX_DEPARTMENT_OPTIONS.find(o => o.value === value)?.label ?? value
-  const contractTypeLabel = (value: string) =>
-    PROFILUX_CONTRACT_TYPE_OPTIONS.find(o => o.value === value)?.label ?? value
-  const sectorLabel = (value: string) =>
-    PROFILUX_SECTOR_OPTIONS.find(o => o.value === value)?.label ?? value
-  const productCategoryLabel = (value: string) =>
-    PROFILUX_PRODUCT_CATEGORY_OPTIONS.find(o => o.value === value)?.label ?? value
-  const expertiseTagLabel = (value: string) =>
-    PROFILUX_EXPERTISE_TAG_OPTIONS.find(o => o.value === value)?.label ?? value
   const cvUrl = e.cv_meta?.cv_url ?? null
   const cvParsedAt = e.cv_meta?.cv_parsed_at ?? null
   const parsedDateLabel = (cvParsedAt && !isNaN(new Date(cvParsedAt).getTime()))
