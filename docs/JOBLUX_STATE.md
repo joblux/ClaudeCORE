@@ -54,6 +54,12 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **d6c864b** `feat(profilux-edit): Slice 2a — added-section guided flow` — May 21 2026. SHIPPED + COOLIFY-GREEN + QA PASS. Structured library sections (Strategic Initiatives, Portfolio, Press & Features, References, Internships) gained editorial guidance: a one-line "why this section" intro + examples line at the top of each drawer; meaningful field labels (Title → Initiative / Project title / Headline; Description → "What you did & the impact"); and an activation feedback loop — newly-activated card scrolls into view and pulses a transient green `#1D9E75` outline+glow for ~1.5s before fading. Wrapper `<div id="lib-section-<key>">` added around each library SectionCard+Drawer pair; `handleActivateSection` extended with `scrollIntoView({ behavior: 'smooth' })` + `setHighlightedSectionKey` state. Gold is reserved for editorial accents — operational/activation feedback stays green. No data-shape change, no payload key changes, no migration. Removes "Item 1"-style generic UX from the five structured drawers. 1 file (`app/dashboard/candidate/profilux/page.tsx`), +78/-24.
+
+- **c9f3934** `feat(profilux-edit): Slice struct #1 — taxonomy split (+1b sub-label alignment at 3a40595)` — May 21 2026. SHIPPED + COOLIFY-GREEN + QA PASS. ProfiLux candidate Edit taxonomy split. **Exposed** as 3 clear, single-field drawers: **Luxury Sectors** (edits `sectors` via the existing L2 ranked-sectors sub-block + `/api/profilux/sectors` save path), **Business Functions** (edits `expertise_tags` via `PROFILUX_EXPERTISE_TAG_OPTIONS` chips, saved through narrowed `handleSave4` POST `{ expertise_tags }`), **Technical Skills** (edits `key_skills` via `PROFILUX_SKILL_OPTIONS` chips, saved through narrowed `handleSave7` POST `{ key_skills }`). **Removed** from candidate Edit surface: Luxury Fit card+drawer, Skills & Markets card+drawer, Clienteling card+drawer, Maisons card+drawer; `market_knowledge` chips and `product_categories` chips dropped from their host drawers. DB columns (`product_categories`, `market_knowledge`, `clienteling_experience`, `clienteling_description`, `brands_worked_with`) preserved — no migration, no resolver/projector touch. State + handlers for the removed UIs (`clientelingDrawerOpen`, `draft8`, `handleSave8`, `maisonsDrawerOpen`, `maisonsDraftText`, `handleSaveMaisons`, …) intentionally retained per surgical-edit doctrine (no cleanup sweep). Business Functions temporarily shares `section_visibility.luxury_fit` gate (no new SectionId added). Follow-up `3a40595` (Slice 1b) aligned sub-labels: "Areas of expertise" → "Business functions"; "Skills" → "Technical skills" in both view-card grid + drawer. 1 file, +68/−196 (Slice STRUCT #1) and +4/−4 (Slice 1b).
+
+- **fdf7441** `PF-PUBLIC V12 /[slug] controlled share` — May 21 2026. SHIPPED + COOLIFY-GREEN + QA PASS (Alex flows). Closed the PF-PUBLIC V12 launch-blocker lane across Slices 1 → 1.4 + Slice 1.1 (`lib/profilux/labels.ts`). **View-fidelity render** from `PublicProjection`: spine + stacked editorial sections mirroring the candidate View tab body, no `#222` cards (open dossier with spine `border-right: 1px solid #282828`, Georgia serif 36px name, 48×1 gold filet at 0.55 opacity, `ProfiLux dossier` eyebrow, contact group + skill-set group in the spine, label/value grid for Expertise/Availability). **Anonymization removed**: V1 last-name initial gone (full name when shown), V5 experiences company-stripping gone (real career history). **Three-lever masking** in the projector (`section_visibility` + `masked_fields` + `activated_sections`): identity/current_role/career_path/education/languages/luxury_fit/skills_markets/clienteling/availability/compensation gated section-side; `phone`/`email`/`current_employer`/`salary`/`availability`/`references` gated per-field; library zones gated on `activated_sections` + non-empty. **`masked_fields` semantics unchanged** (`true = hidden` everywhere — no DB inversion, no migration). **`contact` key** added to `MASKABLE_FIELDS` — single canonical lever for hiding both email + phone in the spine; legacy `phone` mask still honored as a defense-in-depth secondary gate. **Spine contact block** renders `mailto:` + `tel:` links when the projector left them non-null. **No-empty-zone rule**: every zone hidden when its projected data is empty (Current Role renders without employer when employer hidden, neutral avatar removed in Slice 1.4). **Shared label helpers** extracted into `lib/profilux/labels.ts` and consumed by both the View tab and `/[slug]` (replaces 8 inline closures in the candidate page). **PublicProjection** widened to a full "View, masked" shape (`current_employer`, `phone`, `email`, `experiences: ResolvedExperience[]`, `education`, `clienteling_description`, `availability`, `desired_*`, `desired_salary_*`, `brands_worked_with`, `memberships`, `awards`, `strategic_initiatives`, `portfolio`, `press_features`, `references`, `internships`, `activated_sections`). **Doctrine note**: `PublicExperience` type kept defined in `lib/profilux/types.ts` (still re-exported from the `lib/profilux/index.ts` barrel, no internal consumer post-Slice-1.2 — orphan for backward compatibility; future slice that touches the barrel can delete safely). All gate logic (`share_links` / `notFound` / expiry / password cookie / `<meta robots>` / `noStore`) preserved verbatim end-to-end. **Candidate-side toggle UI** updated: rail label + block heading "Maskable fields" → "Hidden from shared CV"; sub-text "ON = hidden, OFF = visible"; phone row merged into a single `Contact details` row; masking toggles switched to a green-track `renderMaskToggle` variant (same JOBLUX toggle shape, `#1D9E75` track when ON). Files touched across slices: `app/[slug]/page.tsx`, `lib/profilux/projectFor.ts`, `lib/profilux/types.ts`, `lib/profilux/labels.ts` (new), `app/dashboard/candidate/profilux/page.tsx`.
+
 - **b802b3b** `E.6.4: client-submission business relationship layer` — May 21 2026. SHIPPED + COOLIFY-GREEN + PROD-QA PASS (10/10, net DB delta 0). Durable `business_member_id` relationship added to `client_submissions` (DDL applied separately via Supabase MCP). submit-to-client endpoint now requires + validates business_member_id. ATS Submission tab gained “Send to Client” compose card with required business select. Business detail gained “Candidate Submissions” tab with copy-link flow. Ledger: dedicated CLOSED row `f7764185`; grouped parked row `0b6bfc85` updated.
 
 - **e624b92** `fix(userMenu): prevent dropdown item wrapping` — May 20 2026 PM. SHIPPED + COOLIFY-GREEN + LIVE-VALIDATED by Mo. 1 file `components/UserMenu.tsx`, +5/-5. Account dropdown `w-48` → `min-w-48`; `whitespace-nowrap` added to all 4 items (Dashboard / Account / Invite / Sign out). Sign out color stays `text-[#888]`. No logic or role behavior changed. Ledger `b7648617` closed.
@@ -277,7 +283,49 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-**Lane: TBD — May 20 PM session shipped 4 product/runtime slices + 2 STATE rotations. Product/runtime: PF-MANAGE V12 (`7c07e13`+`73cfefc`), PF-VIEW V12 (`5e1921e`), breadcrumb fix (`e115ec8`), UserMenu wrap fix (`e624b92`). Docs: PF-VIEW STATE rotation (`732b663`) + this session-close rotation. End-of-session ProfiLux audit (read-only) produced strict priority 1–6. Remaining unconverged ProfiLux surfaces: public `/[slug]` and Edit tab. Public `/[slug]` is the next launch-blocker lane. Strict order locked: 1) PF-PUBLIC V12 `/[slug]`, 2) Admin member ProfiLux audit/convergence, 3) Maintenance bypass `/client-submissions/*` (`4fca2c39`), 4) PF-EDIT V12 page-level rewrite, 5) Candidate dashboard `% complete` cleanup (`761cda8e`), 6) CV-merge QA + `eb186be2` reclassification. May 20–21 detour: E.6.4 shipped and closed at b802b3b; PF-PUBLIC V12 /[slug] resumes as #1.**
+**Lane: ProfiLux dossier restructuring** (philosophy locked: executive luxury dossier; taxonomy-assisted, not taxonomy-controlled).
+
+**Strict order:**
+1. **Slice 2b — Certifications + Awards**: textarea → structured guided rows.
+2. **Slice 3 — Section lifecycle**: hide / remove / reorder; unify core/addable behavior.
+3. **Slice 4 — Taxonomy-assisted "+ Add item"**: preset + free entry model.
+4. **Slice 5 — View cleanup**: align View with the new ProfiLux structure.
+
+**THEN:** return to slug downstream tasks (`/[slug]` remains downstream from Edit/View stabilization).
+
+**THEN:** 5 parked tasks.
+
+**Approved candidate structure:**
+
+CORE (9)
+- Identity
+- Current Position
+- Career Path
+- Education
+- Languages
+- Luxury Sectors
+- Business Functions
+- Availability / Mobility
+- Compensation
+
+OPTIONAL (8)
+- Technical Skills
+- Certifications
+- Awards
+- Strategic Initiatives
+- Portfolio
+- Press & Features
+- References
+- Internships
+
+Dropped:
+- Memberships
+
+Internal/admin-only (DB-resident, no candidate Edit surface):
+- `market_knowledge`
+- `clienteling_*`
+- `brands_worked_with`
+- `product_categories`
 
 **PF-MANAGE V12 follow-ups parked (not active queue, pickable when relevant):**
 - `7ceca5fc` — F-pf-manage-delete-account-absorption (medium). Settings page still hosts Delete account + RGPD export. Per Mo Q1 directive, Settings progressively absorbs into Manage. Next slice should move Delete account row to Manage Account section + decide if RGPD JSON export stays on Settings or moves to Share & export.
@@ -292,9 +340,9 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 **Maintenance debt (pickable before next maintenance_mode toggle):**
 - `4fca2c39` — F-MAINT-1. `/client-submissions/*` not in `MAINTENANCE_BYPASS`. Address before any future maintenance_mode true flip — would break tokenized client dossiers.
 
-**ProfiLux + Matching substrate audit CLOSED** (ledger `cca052d0-9931-4241-a060-0f53a8e18d8d`). 9 findings produced + triaged. Findings from this session's PF-MANAGE convergence are listed above and tracked independently.
+**ProfiLux + Matching substrate audit CLOSED** (ledger `cca052d0-9931-4241-a060-0f53a8e18d8d`). 9 findings produced + triaged.
 
-**Final repo HEAD: `b802b3b`.** Coolify GREEN.
+**Final repo HEAD: `d6c864b`** (last shipped product slice; the STATE rotation commit advances HEAD — see latest LAST SHIPPED entry for the post-rotation SHA). Coolify GREEN.
 
 **Parked findings opened this session:**
 - `63a0104e-04c6-43c2-aae8-c84f584c559a` — F-AUDIT-4 directory §10.1 bypass (normal)
@@ -386,6 +434,7 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 - Do not extend admin alerts with new templates by reusing brittle anchors. New admin templates go through the `adminLayout` + `adminRow` + `adminButton` primitives already present in `lib/email-templates.ts`. CTA URLs must point at routes that exist in `app/admin/*` — if no admin route exists for a given resource, omit the CTA rather than ship a dead link.
 - Do not convert `POST /api/contribute` to 410/Gone or delete the route file. D1.a (2026-05-18) confirms the endpoint has 1 live caller (`app/dashboard/insider/submit-correction/page.tsx`, linked from insider dashboard nav), an admin moderation surface (`app/api/admin/contributions/route.ts` reads `brand_contributions`), and an RGPD export contract dependency (Pack B.3.4 / MATRIX §19B). Any future D1 slice that removes `/api/contribute` MUST first migrate the insider caller, the admin surface, and the export contract — in that order. D2 in `docs/DEFECT_ANCHOR.md` is marked OBSOLETE; do not act on the original "orphan endpoint" framing. D1 structural intake debt remains OPEN as a multi-slice lane (see D1, D3, D5, D10, D11).
 - Do not alter the E.6.4 business relationship layer without a new slice + Mo approval: `business_member_id` remains REQUIRED on submit-to-client, `client_business_name` stays a derived snapshot label (never free-text), and the ATS compose + Business detail submissions surfaces are locked from ad-hoc redesign.
+- Do not use gold (`#a58e28`) for visibility, operational, or activation feedback. Gold stays editorial only (filets, italic accents, header eyebrows, hairlines on luxury surfaces). Operational state — visibility/hide toggles, activation success, save confirmations, "On"/"Off" affirmations — uses brand-green `#1D9E75` (or `rgba(29,158,117,0.18)` for glow). Anchors: PF-PUBLIC V12 spine availability dot, ProfiLux Edit "Hidden from shared CV" toggle track (`renderMaskToggle`), Slice 2a library-section activation pulse, Saved indicators across the candidate page.
 
 ### PARKED (admin_tasks status=parked)
 
@@ -968,5 +1017,8 @@ V12 is the strategic working-loop baseline for the entire ProfiLux candidate sur
 - **DO NOT** ship structural drift from V12 §2 hard locks without an explicit Mo + GPT reconciliation decision recorded in `PROFILUX_V12_LOCK.md`.
 
 ---
+
+**Last updated:** 2026-05-21
+**Session summary:** PF-PUBLIC V12 `/[slug]` controlled-share lane closed (View-fidelity through PublicProjection, three-lever masking, contact in spine, editorial refonte); ProfiLux Edit taxonomy restructuring (Luxury Sectors / Business Functions / Technical Skills exposed; Luxury Fit / Skills & Markets / Clienteling / Maisons retired from candidate Edit; DB columns preserved); guided added-section flow on the 5 structured library sections (intro + examples + meaningful labels + green activation feedback). Next lane: ProfiLux dossier restructuring — Slice 2b → 5.
 
 *This document replaces all prior context/handoff files. Update this file at the end of every session. One document, always current.*
