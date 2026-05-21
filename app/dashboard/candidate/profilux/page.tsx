@@ -125,6 +125,20 @@ const saveBtnDis: React.CSSProperties = { ...saveBtn, opacity: 0.5, cursor: 'not
 const chip: React.CSSProperties = { background: 'transparent', color: '#ccc', border: '1px solid #444', padding: '6px 12px', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13, borderRadius: 999 }
 const chipActive: React.CSSProperties = { ...chip, background: 'rgba(165, 142, 40, 0.15)', color: '#fff', borderColor: '#a58e28' }
 
+// Slice 2a — transient green-success outline for a newly-activated library
+// section. Applied to a thin wrapper around the SectionCard + Drawer pair.
+// Gold is reserved for editorial accents — operational feedback stays green.
+const libHighlightStyle = (active: boolean): React.CSSProperties =>
+  active
+    ? {
+        borderRadius: 14,
+        outline: '1px solid #1D9E75',
+        outlineOffset: 2,
+        boxShadow: '0 0 0 6px rgba(29,158,117,0.18)',
+        transition: 'box-shadow 0.5s ease, outline-color 0.5s ease',
+      }
+    : { transition: 'box-shadow 0.5s ease, outline-color 0.5s ease' }
+
 type ProfiluxTab = 'view' | 'edit' | 'manage'
 
 type SectionCardProps = {
@@ -808,6 +822,9 @@ export default function ProfiluxPage() {
   const [intError, setIntError] = useState<string | null>(null)
   // PF-D V2 — Add Section shell (V12 restoration)
   const [addSectionDrawerOpen, setAddSectionDrawerOpen] = useState(false)
+  // Slice 2a — transient green-success highlight on a newly-activated library
+  // section, paired with scrollIntoView. Cleared ~1.5s after activation.
+  const [highlightedSectionKey, setHighlightedSectionKey] = useState<string | null>(null)
   const [activatingSectionKey, setActivatingSectionKey] = useState<string | null>(null)
   const [addSectionError, setAddSectionError] = useState<string | null>(null)
   const [editor, setEditor] = useState<EditorView | null>(null)
@@ -1642,6 +1659,18 @@ export default function ProfiluxPage() {
       }
       await refetch()
       setAddSectionDrawerOpen(false)
+      // Slice 2a — scroll to the freshly-mounted card and pulse a transient
+      // green outline (#1D9E75) so the candidate sees what was added. Gold is
+      // reserved for editorial accents — never operational feedback.
+      if (typeof window !== 'undefined') {
+        setHighlightedSectionKey(key)
+        // Small delay lets the activated card mount after refetch's re-render.
+        setTimeout(() => {
+          const el = document.getElementById(`lib-section-${key}`)
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }, 80)
+        setTimeout(() => setHighlightedSectionKey(null), 1600)
+      }
     } catch (err) {
       setAddSectionError(String(err))
     } finally {
@@ -4526,7 +4555,8 @@ export default function ProfiluxPage() {
         </div>
       </Drawer>
       </>)}
-      {e.activated_sections.includes('strategic_initiatives') && (<>
+      {e.activated_sections.includes('strategic_initiatives') && (
+      <div id="lib-section-strategic_initiatives" style={libHighlightStyle(highlightedSectionKey === 'strategic_initiatives')}>
       <SectionCard
         eyebrow="Strategic Initiatives"
         headerAction={
@@ -4572,8 +4602,11 @@ export default function ProfiluxPage() {
         title="Strategic Initiatives"
         onClose={() => setSiDrawerOpen(false)}
       >
-        <div style={{ color: '#999', fontSize: 12, marginBottom: 14 }}>
-          Each initiative has a title (required) and optional description. Save commits the full list.
+        <div style={{ color: '#ccc', fontSize: 13, marginBottom: 4 }}>
+          High-impact projects you led that recruiters remember you for.
+        </div>
+        <div style={{ color: '#777', fontSize: 12, marginBottom: 14 }}>
+          Examples: opened APAC flagship · CRM transformation · clienteling launch
         </div>
 
         {/* Existing rows list */}
@@ -4623,7 +4656,7 @@ export default function ProfiluxPage() {
         {siEditingIndex !== null ? (
           <div style={{ border: '0.5px solid rgba(165,142,40,0.3)', borderRadius: 6, padding: 14, marginBottom: 14 }}>
             <div style={{ marginBottom: 10 }}>
-              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Title <span style={{ color: '#a58e28' }}>*</span></div>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Initiative <span style={{ color: '#a58e28' }}>*</span></div>
               <input
                 type="text"
                 style={{ ...input, maxWidth: 600 }}
@@ -4633,7 +4666,7 @@ export default function ProfiluxPage() {
               />
             </div>
             <div style={{ marginBottom: 12 }}>
-              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Description</div>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>What you did &amp; the impact</div>
               <textarea
                 style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 80, resize: 'vertical' }}
                 rows={4}
@@ -4695,8 +4728,10 @@ export default function ProfiluxPage() {
           {siError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{siError}</span>}
         </div>
       </Drawer>
-      </>)}
-      {e.activated_sections.includes('portfolio') && (<>
+      </div>
+      )}
+      {e.activated_sections.includes('portfolio') && (
+      <div id="lib-section-portfolio" style={libHighlightStyle(highlightedSectionKey === 'portfolio')}>
       <SectionCard
         eyebrow="Portfolio"
         headerAction={
@@ -4740,8 +4775,11 @@ export default function ProfiluxPage() {
         title="Portfolio"
         onClose={() => setPfDrawerOpen(false)}
       >
-        <div style={{ color: '#999', fontSize: 12, marginBottom: 14 }}>
-          Each link has a title (required) and URL (required, must start with http:// or https://). Save commits the full list.
+        <div style={{ color: '#ccc', fontSize: 13, marginBottom: 4 }}>
+          Selected projects, launches or commercial work you want to be remembered for.
+        </div>
+        <div style={{ color: '#777', fontSize: 12, marginBottom: 14 }}>
+          Examples: boutique opening · VIC activation · retail transformation · hospitality launch
         </div>
 
         {/* Existing rows list */}
@@ -4789,7 +4827,7 @@ export default function ProfiluxPage() {
         {pfEditingIndex !== null ? (
           <div style={{ border: '0.5px solid rgba(165,142,40,0.3)', borderRadius: 6, padding: 14, marginBottom: 14 }}>
             <div style={{ marginBottom: 10 }}>
-              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Title <span style={{ color: '#a58e28' }}>*</span></div>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Project title <span style={{ color: '#a58e28' }}>*</span></div>
               <input
                 type="text"
                 style={{ ...input, maxWidth: 600 }}
@@ -4864,8 +4902,10 @@ export default function ProfiluxPage() {
           {pfError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{pfError}</span>}
         </div>
       </Drawer>
-      </>)}
-      {e.activated_sections.includes('press_features') && (<>
+      </div>
+      )}
+      {e.activated_sections.includes('press_features') && (
+      <div id="lib-section-press_features" style={libHighlightStyle(highlightedSectionKey === 'press_features')}>
       <SectionCard
         eyebrow="Press & features"
         headerAction={
@@ -4910,8 +4950,11 @@ export default function ProfiluxPage() {
         title="Press & features"
         onClose={() => setPressDrawerOpen(false)}
       >
-        <div style={{ color: '#999', fontSize: 12, marginBottom: 14 }}>
-          Each feature has a title (required), publication (required), and URL (required, must start with http:// or https://). Save commits the full list.
+        <div style={{ color: '#ccc', fontSize: 13, marginBottom: 4 }}>
+          Media coverage that builds your external profile and authority.
+        </div>
+        <div style={{ color: '#777', fontSize: 12, marginBottom: 14 }}>
+          Examples: Business of Fashion feature · WWD interview · campaign mention
         </div>
 
         {/* Existing rows list */}
@@ -4960,7 +5003,7 @@ export default function ProfiluxPage() {
         {pressEditingIndex !== null ? (
           <div style={{ border: '0.5px solid rgba(165,142,40,0.3)', borderRadius: 6, padding: 14, marginBottom: 14 }}>
             <div style={{ marginBottom: 10 }}>
-              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Title <span style={{ color: '#a58e28' }}>*</span></div>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Headline <span style={{ color: '#a58e28' }}>*</span></div>
               <input
                 type="text"
                 style={{ ...input, maxWidth: 600 }}
@@ -5045,8 +5088,10 @@ export default function ProfiluxPage() {
           {pressError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{pressError}</span>}
         </div>
       </Drawer>
-      </>)}
-      {e.activated_sections.includes('references') && (<>
+      </div>
+      )}
+      {e.activated_sections.includes('references') && (
+      <div id="lib-section-references" style={libHighlightStyle(highlightedSectionKey === 'references')}>
       <SectionCard
         eyebrow="References"
         headerAction={
@@ -5091,8 +5136,11 @@ export default function ProfiluxPage() {
         title="References"
         onClose={() => setRefsDrawerOpen(false)}
       >
-        <div style={{ color: '#999', fontSize: 12, marginBottom: 14 }}>
-          Each reference has a name (required), role (required), and company (required). Save commits the full list.
+        <div style={{ color: '#ccc', fontSize: 13, marginBottom: 4 }}>
+          Trusted contacts who can vouch for your work. Kept private until you consent to release.
+        </div>
+        <div style={{ color: '#777', fontSize: 12, marginBottom: 14 }}>
+          Examples: former manager · brand director · senior client partner
         </div>
 
         {/* Existing rows list */}
@@ -5223,8 +5271,10 @@ export default function ProfiluxPage() {
           {refsError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{refsError}</span>}
         </div>
       </Drawer>
-      </>)}
-      {e.activated_sections.includes('internships') && (<>
+      </div>
+      )}
+      {e.activated_sections.includes('internships') && (
+      <div id="lib-section-internships" style={libHighlightStyle(highlightedSectionKey === 'internships')}>
       <SectionCard
         eyebrow="Internships"
         headerAction={
@@ -5269,8 +5319,11 @@ export default function ProfiluxPage() {
         title="Internships"
         onClose={() => setIntDrawerOpen(false)}
       >
-        <div style={{ color: '#999', fontSize: 12, marginBottom: 14 }}>
-          Each internship has a company (required), role (required), and period (required). Save commits the full list.
+        <div style={{ color: '#ccc', fontSize: 13, marginBottom: 4 }}>
+          Early-career experiences that show your foundation in luxury.
+        </div>
+        <div style={{ color: '#777', fontSize: 12, marginBottom: 14 }}>
+          Examples: buying internship · retail graduate program · brand placement
         </div>
 
         {/* Existing rows list */}
@@ -5401,7 +5454,8 @@ export default function ProfiluxPage() {
           {intError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{intError}</span>}
         </div>
       </Drawer>
-      </>)}
+      </div>
+      )}
       <SectionCard
         eyebrow="Compensation"
         headerAction={
