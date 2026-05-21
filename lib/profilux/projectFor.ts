@@ -4,19 +4,17 @@
  * Pure function. No DB. No async.
  * Single switch over Surface, returns surface-specific shape.
  *
- * Masks per Mo's V1–V9 decisions (locked Apr 30):
- *   V1: public last_name → initial only
+ * Public surface (Slice 1.2): controlled CV share — candidate-driven via
+ * section_visibility + masked_fields + activated_sections. No automatic
+ * V1 (last_name initial) or V5 (anonymized experiences) masking; full
+ * dossier minus what the candidate has hidden.
+ *
+ * Other surfaces retain Mo's V2/V4/V6/V8/V9 decisions (locked Apr 30):
  *   V2: client share last_name → full
- *   V3: current_employer → hidden public, visible client
- *   V4: brands_worked_with → hidden public, visible client
- *   V5: public experiences → company anonymized to null (UI placeholder)
+ *   V4: brands_worked_with → visible client
  *   V6: dashboard → identity strip + L3 status + membership + CV status
- *   V7: public hides nationality, DOB, graduation_year, salary, availability,
- *       software_tools, keywords, clienteling_description
  *   V8: client share hides email, phone, linkedin_url
  *   V9: ATS = full operational, no L1 raw, no admin overlay
- *
- * No per-field toggles in v1 (deterministic only).
  */
 
 import type {
@@ -29,7 +27,6 @@ import type {
   MaskableField,
   ProfiLuxResolved,
   ProjectedView,
-  PublicExperience,
   PublicProjection,
   SectionId,
   Surface,
@@ -40,29 +37,6 @@ import { computeM6Groups } from './_m6Groups'
 
 function isMasked(view: ProfiLuxResolved, field: MaskableField): boolean {
   return view.masked_fields?.[field] === true
-}
-
-/** "Laurent" → "L."; null/empty → null. */
-function toInitial(name: string | null): string | null {
-  if (!name || typeof name !== 'string') return null
-  const trimmed = name.trim()
-  if (trimmed === '') return null
-  return `${trimmed[0].toUpperCase()}.`
-}
-
-/** Strip company from each experience (V5). */
-function anonymizeExperiences(
-  exps: ProfiLuxResolved['experiences'],
-): PublicExperience[] {
-  return exps.map((e) => ({
-    company: null,
-    job_title: e.job_title,
-    city: e.city,
-    country: e.country,
-    start_date: e.start_date,
-    end_date: e.end_date,
-    description: e.description,
-  }))
 }
 
 export function projectFor(
@@ -108,75 +82,84 @@ export function projectFor(
     }
 
     case 'public': {
-      // PF-2 P1 — per-section public visibility. Absent key = shared (default).
-      // Explicit false = mute fields rendered on /[slug] for that section.
+      // Slice 1.2 — Controlled CV share. View − Edit/Manage/PDF − candidate-masked.
+      // Three levers, all candidate-controlled:
+      //   section_visibility[id] !== false  → core section shown
+      //   masked_fields[field] === true     → that field nulled
+      //   activated_sections (page-side)    → library section render-gated
       const sv = view.section_visibility ?? {}
-      const isHidden = (id: SectionId) => sv[id] === false
+      const mf = view.masked_fields ?? {}
+      const shown  = (id: SectionId)    => sv[id] !== false
+      const masked = (f: MaskableField) => mf[f] === true
 
-      // identity (V1: last_name still initial-only after muting; null stays null)
-      const idFirstName  = isHidden('identity') ? null : view.first_name
-      const idLastName   = isHidden('identity') ? null : toInitial(view.last_name)
-      const idAvatar     = isHidden('identity') ? null : view.avatar_url
-      const idHeadline   = isHidden('identity') ? null : view.headline
-      const idBio        = isHidden('identity') ? null : view.bio
-      const idCity       = isHidden('identity') ? null : view.city
-      const idCountry    = isHidden('identity') ? null : view.country
-
-      // current_role
-      const crJobTitle   = isHidden('current_role') ? null : view.job_title
-      const crSeniority  = isHidden('current_role') ? null : view.seniority
-      const crTotalYears = isHidden('current_role') ? null : view.total_years_experience
-      const crLuxYears   = isHidden('current_role') ? null : view.years_in_luxury
-
-      // career_path
-      const cpExperiences = isHidden('career_path') ? [] : view.experiences
-
-      // languages
-      const lgLanguages = isHidden('languages') ? [] : view.languages
-
-      // luxury_fit
-      const lfSectors            = isHidden('luxury_fit') ? [] : view.sectors
-      const lfProductCategories  = isHidden('luxury_fit') ? [] : view.product_categories
-      const lfExpertiseTags      = isHidden('luxury_fit') ? [] : view.expertise_tags
-
-      // skills_markets
-      const smKeySkills       = isHidden('skills_markets') ? [] : view.key_skills
-      const smMarketKnowledge = isHidden('skills_markets') ? [] : view.market_knowledge
-
-      // clienteling
-      const clClienteling = isHidden('clienteling') ? false : view.clienteling_experience
+      const showIdentity      = shown('identity')
+      const showCurrentRole   = shown('current_role')
+      const showCareerPath    = shown('career_path')
+      const showEducation     = shown('education')
+      const showLanguages     = shown('languages')
+      const showLuxuryFit     = shown('luxury_fit')
+      const showSkillsMarkets = shown('skills_markets')
+      const showClienteling   = shown('clienteling')
+      const showAvailability  = shown('availability') && !masked('availability')
+      const showCompensation  = shown('compensation')
 
       const pub: PublicProjection = {
         surface: 'public',
-        first_name: idFirstName,
-        last_name: idLastName, // V1
-        avatar_url: idAvatar,
-        headline: idHeadline,
-        bio: idBio,
-        city: idCity,
-        country: idCountry,
-        // V7: nationality, DOB hidden — not included
-        job_title: crJobTitle,
-        // V3: current_employer hidden — not included
-        seniority: crSeniority,
-        total_years_experience: crTotalYears,
-        years_in_luxury: crLuxYears,
-        department: view.department,
-        speciality: view.speciality,
-        maison: view.maison,
-        // V7: software_tools, keywords hidden — not included
-        key_skills: smKeySkills,
-        certifications: view.certifications,
-        product_categories: lfProductCategories,
-        // V4: brands_worked_with hidden — not included
+        // Identity — FULL last_name when shown (no automatic V1 initial).
+        first_name: showIdentity ? view.first_name : null,
+        last_name:  showIdentity ? view.last_name  : null,
+        avatar_url: showIdentity ? view.avatar_url : null,
+        headline:   showIdentity ? view.headline   : null,
+        bio:        showIdentity ? view.bio        : null,
+        city:       showIdentity ? view.city       : null,
+        country:    showIdentity ? view.country    : null,
+        // Contact — mask-only, no section gate.
+        phone: masked('phone') ? null : view.phone,
+        email: masked('email') ? null : view.email,
+        // Current role + employer. masked('current_employer') hides ONLY the
+        // current employer; experiences[].company below stays real history.
+        job_title:              showCurrentRole ? view.job_title : null,
+        current_employer:       showCurrentRole && !masked('current_employer') ? view.current_employer : null,
+        seniority:              showCurrentRole ? view.seniority : null,
+        total_years_experience: showCurrentRole ? view.total_years_experience : null,
+        years_in_luxury:        showCurrentRole ? view.years_in_luxury : null,
+        department:  view.department,
+        speciality:  view.speciality,
+        maison:      view.maison,
+        // Capability arrays.
+        key_skills:                showSkillsMarkets ? view.key_skills : [],
+        certifications:            view.certifications,
+        product_categories:        showLuxuryFit ? view.product_categories : [],
+        brands_worked_with:        view.brands_worked_with,
         client_segment_experience: view.client_segment_experience,
-        market_knowledge: smMarketKnowledge,
-        expertise_tags: lfExpertiseTags,
-        clienteling_experience: clClienteling,
-        // V7: clienteling_description hidden — not included
-        sectors: lfSectors,
-        languages: lgLanguages,
-        experiences: anonymizeExperiences(cpExperiences), // V5
+        market_knowledge:          showSkillsMarkets ? view.market_knowledge : [],
+        expertise_tags:            showLuxuryFit ? view.expertise_tags : [],
+        // Clienteling.
+        clienteling_experience:  showClienteling ? view.clienteling_experience : false,
+        clienteling_description: showClienteling ? view.clienteling_description : null,
+        // Availability + targets — gated by section_visibility AND mask.
+        availability:           showAvailability ? view.availability : null,
+        desired_locations:      showAvailability ? view.desired_locations : [],
+        desired_departments:    showAvailability ? view.desired_departments : [],
+        desired_contract_types: showAvailability ? view.desired_contract_types : [],
+        // Compensation — section gate + salary mask.
+        desired_salary_min:      showCompensation && !masked('salary') ? view.desired_salary_min : null,
+        desired_salary_max:      showCompensation && !masked('salary') ? view.desired_salary_max : null,
+        desired_salary_currency: showCompensation && !masked('salary') ? view.desired_salary_currency : null,
+        // L1 passthrough — real experiences + education, candidate-controlled.
+        sectors:     showLuxuryFit ? view.sectors : [],
+        languages:   showLanguages ? view.languages : [],
+        experiences: showCareerPath ? view.experiences : [],
+        education:   showEducation ? view.education : [],
+        // Library sections — page renders gated on activated_sections + non-empty.
+        awards:                view.awards,
+        memberships:           view.memberships,
+        strategic_initiatives: view.strategic_initiatives,
+        portfolio:             view.portfolio,
+        press_features:        view.press_features,
+        references:            masked('references') ? [] : view.references,
+        internships:           view.internships,
+        activated_sections:    view.activated_sections,
       }
       return pub
     }

@@ -714,37 +714,62 @@ export type PublicExperience = {
 
 export type PublicProjection = {
   surface: 'public'
-  // Identity
+  // Identity (FULL — last_name is candidate-controlled via section_visibility,
+  // no automatic V1 initial doctrine; mask-or-show is candidate-driven)
   first_name: string | null
-  last_name: string | null // V1: initial only — first letter + '.'
+  last_name: string | null
   avatar_url: string | null
   headline: string | null
   bio: string | null
   city: string | null
   country: string | null
-  // Professional (curated)
+  // Contact (subject to masked_fields.phone / .email)
+  phone: string | null
+  email: string | null
+  // Professional (section_visibility.current_role; current_employer also gated
+  // by masked_fields.current_employer — history company names stay real)
   job_title: string | null
-  // current_employer hidden (V3)
+  current_employer: string | null
   seniority: string | null
   total_years_experience: number | null
   years_in_luxury: number | null
   department: string | null
   speciality: string | null
   maison: string | null
-  // Capability (curated; software_tools, keywords hidden V7)
+  // Capability arrays
   key_skills: string[]
   certifications: string[]
   product_categories: string[]
-  // brands_worked_with hidden (V4)
+  brands_worked_with: string[]
   client_segment_experience: string[]
   market_knowledge: string[]
   expertise_tags: string[]
-  // Clienteling
+  // Clienteling (section_visibility.clienteling)
   clienteling_experience: boolean
-  // L1 passthrough
+  clienteling_description: string | null
+  // Availability + targets (section_visibility.availability AND NOT masked.availability)
+  availability: string | null
+  desired_locations: string[]
+  desired_departments: string[]
+  desired_contract_types: string[]
+  // Compensation (section_visibility.compensation; nulled if masked_fields.salary)
+  desired_salary_min: number | null
+  desired_salary_max: number | null
+  desired_salary_currency: string | null
+  // L1 passthrough — real, candidate-controlled experiences + education
   sectors: string[]
   languages: ResolvedLanguage[]
-  experiences: PublicExperience[] // anonymized
+  experiences: ResolvedExperience[]
+  education: ResolvedEducation[]
+  // Library sections (page renders gated on activated_sections + non-empty)
+  awards: string[]
+  memberships: string[]
+  strategic_initiatives: ProfiLuxStrategicInitiative[]
+  portfolio: ProfiLuxPortfolioItem[]
+  press_features: ProfiLuxPressFeatureItem[]
+  references: ProfiLuxReferenceItem[]
+  internships: ProfiLuxInternshipItem[]
+  activated_sections: string[]
 }
 
 // --- Client share projection (V2 V3 V4 V5 V7 V8) ----------------------------
