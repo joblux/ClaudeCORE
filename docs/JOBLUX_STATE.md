@@ -54,6 +54,8 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **b802b3b** `E.6.4: client-submission business relationship layer` — May 21 2026. SHIPPED + COOLIFY-GREEN + PROD-QA PASS (10/10, net DB delta 0). Durable `business_member_id` relationship added to `client_submissions` (DDL applied separately via Supabase MCP). submit-to-client endpoint now requires + validates business_member_id. ATS Submission tab gained “Send to Client” compose card with required business select. Business detail gained “Candidate Submissions” tab with copy-link flow. Ledger: dedicated CLOSED row `f7764185`; grouped parked row `0b6bfc85` updated.
+
 - **e624b92** `fix(userMenu): prevent dropdown item wrapping` — May 20 2026 PM. SHIPPED + COOLIFY-GREEN + LIVE-VALIDATED by Mo. 1 file `components/UserMenu.tsx`, +5/-5. Account dropdown `w-48` → `min-w-48`; `whitespace-nowrap` added to all 4 items (Dashboard / Account / Invite / Sign out). Sign out color stays `text-[#888]`. No logic or role behavior changed. Ledger `b7648617` closed.
 
 - **e115ec8** `fix(profilux): F-pf-dashboard-breadcrumb-nav — make Dashboard breadcrumb clickable` — May 20 2026 PM. SHIPPED + COOLIFY-GREEN + LIVE-VALIDATED 4/4 via Chrome MCP. 1 file `app/dashboard/candidate/profilux/page.tsx`, +10/-1. "Dashboard" wrapped in next/link Link to `/dashboard` with gold hover; "ProfiLux" stays plain label. No new imports. Closes ledger `7bd44f7a`.
@@ -275,7 +277,7 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-**Lane: TBD — May 20 PM session shipped 4 product/runtime slices + 2 STATE rotations. Product/runtime: PF-MANAGE V12 (`7c07e13`+`73cfefc`), PF-VIEW V12 (`5e1921e`), breadcrumb fix (`e115ec8`), UserMenu wrap fix (`e624b92`). Docs: PF-VIEW STATE rotation (`732b663`) + this session-close rotation. End-of-session ProfiLux audit (read-only) produced strict priority 1–6. Remaining unconverged ProfiLux surfaces: public `/[slug]` and Edit tab. Public `/[slug]` is the next launch-blocker lane. Strict order locked: 1) PF-PUBLIC V12 `/[slug]`, 2) Admin member ProfiLux audit/convergence, 3) Maintenance bypass `/client-submissions/*` (`4fca2c39`), 4) PF-EDIT V12 page-level rewrite, 5) Candidate dashboard `% complete` cleanup (`761cda8e`), 6) CV-merge QA + `eb186be2` reclassification.**
+**Lane: TBD — May 20 PM session shipped 4 product/runtime slices + 2 STATE rotations. Product/runtime: PF-MANAGE V12 (`7c07e13`+`73cfefc`), PF-VIEW V12 (`5e1921e`), breadcrumb fix (`e115ec8`), UserMenu wrap fix (`e624b92`). Docs: PF-VIEW STATE rotation (`732b663`) + this session-close rotation. End-of-session ProfiLux audit (read-only) produced strict priority 1–6. Remaining unconverged ProfiLux surfaces: public `/[slug]` and Edit tab. Public `/[slug]` is the next launch-blocker lane. Strict order locked: 1) PF-PUBLIC V12 `/[slug]`, 2) Admin member ProfiLux audit/convergence, 3) Maintenance bypass `/client-submissions/*` (`4fca2c39`), 4) PF-EDIT V12 page-level rewrite, 5) Candidate dashboard `% complete` cleanup (`761cda8e`), 6) CV-merge QA + `eb186be2` reclassification. May 20–21 detour: E.6.4 shipped and closed at b802b3b; PF-PUBLIC V12 /[slug] resumes as #1.**
 
 **PF-MANAGE V12 follow-ups parked (not active queue, pickable when relevant):**
 - `7ceca5fc` — F-pf-manage-delete-account-absorption (medium). Settings page still hosts Delete account + RGPD export. Per Mo Q1 directive, Settings progressively absorbs into Manage. Next slice should move Delete account row to Manage Account section + decide if RGPD JSON export stays on Settings or moves to Share & export.
@@ -292,7 +294,7 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 **ProfiLux + Matching substrate audit CLOSED** (ledger `cca052d0-9931-4241-a060-0f53a8e18d8d`). 9 findings produced + triaged. Findings from this session's PF-MANAGE convergence are listed above and tracked independently.
 
-**Final repo HEAD: `5e1921e`.** Coolify GREEN.
+**Final repo HEAD: `b802b3b`.** Coolify GREEN.
 
 **Parked findings opened this session:**
 - `63a0104e-04c6-43c2-aae8-c84f584c559a` — F-AUDIT-4 directory §10.1 bypass (normal)
@@ -383,6 +385,7 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 - Do not silent-catch `sendEmail()` on new notification call sites. New code must capture the result, branch on `!result.success`, and `console.error` with `{error, recipient, context_id}` payload. The pre-existing `.catch(()=>{})` pattern on legacy call sites is parked debt (`contributionApprovedEmail` and ~10 others), not a precedent. Wrap the entire enrichment + send block in `try/catch` with a top-level `[E.5*] Unexpected enrichment error` log so email failures never fail the HTTP response.
 - Do not extend admin alerts with new templates by reusing brittle anchors. New admin templates go through the `adminLayout` + `adminRow` + `adminButton` primitives already present in `lib/email-templates.ts`. CTA URLs must point at routes that exist in `app/admin/*` — if no admin route exists for a given resource, omit the CTA rather than ship a dead link.
 - Do not convert `POST /api/contribute` to 410/Gone or delete the route file. D1.a (2026-05-18) confirms the endpoint has 1 live caller (`app/dashboard/insider/submit-correction/page.tsx`, linked from insider dashboard nav), an admin moderation surface (`app/api/admin/contributions/route.ts` reads `brand_contributions`), and an RGPD export contract dependency (Pack B.3.4 / MATRIX §19B). Any future D1 slice that removes `/api/contribute` MUST first migrate the insider caller, the admin surface, and the export contract — in that order. D2 in `docs/DEFECT_ANCHOR.md` is marked OBSOLETE; do not act on the original "orphan endpoint" framing. D1 structural intake debt remains OPEN as a multi-slice lane (see D1, D3, D5, D10, D11).
+- Do not alter the E.6.4 business relationship layer without a new slice + Mo approval: `business_member_id` remains REQUIRED on submit-to-client, `client_business_name` stays a derived snapshot label (never free-text), and the ATS compose + Business detail submissions surfaces are locked from ad-hoc redesign.
 
 ### PARKED (admin_tasks status=parked)
 
