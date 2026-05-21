@@ -275,6 +275,20 @@ export default async function PublicProfilePage({ params }: Props) {
                   {locationLine}
                 </div>
               )}
+              {(pub.email || pub.phone) && (
+                <div style={{ marginTop: 14, paddingTop: 14, borderTop: '0.5px solid #2a2a2a', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {pub.email && (
+                    <a href={`mailto:${pub.email}`} style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#ccc', lineHeight: 1.4, textDecoration: 'none', wordBreak: 'break-all' }}>
+                      {pub.email}
+                    </a>
+                  )}
+                  {pub.phone && (
+                    <a href={`tel:${pub.phone}`} style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#ccc', lineHeight: 1.4, textDecoration: 'none' }}>
+                      {pub.phone}
+                    </a>
+                  )}
+                </div>
+              )}
             </aside>
 
             {/* RIGHT FIELD — zones in View order */}

@@ -113,9 +113,12 @@ export function projectFor(
         bio:        showIdentity ? view.bio        : null,
         city:       showIdentity ? view.city       : null,
         country:    showIdentity ? view.country    : null,
-        // Contact — mask-only, no section gate.
-        phone: masked('phone') ? null : view.phone,
-        email: masked('email') ? null : view.email,
+        // Contact — mask-only, no section gate. 'contact' is the canonical
+        // single lever (email + phone). Legacy 'phone' still respected so any
+        // pre-Slice-1.3 phone-only mask keeps phone hidden until cleared.
+        // DB semantics unchanged: true = hidden everywhere.
+        email: masked('contact') ? null : view.email,
+        phone: (masked('contact') || masked('phone')) ? null : view.phone,
         // Current role + employer. masked('current_employer') hides ONLY the
         // current employer; experiences[].company below stays real history.
         job_title:              showCurrentRole ? view.job_title : null,

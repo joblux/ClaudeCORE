@@ -5863,7 +5863,7 @@ export default function ProfiluxPage() {
         const RAIL_SECTIONS: Array<{ id: string; label: string }> = [
           { id: 'm-visibility', label: 'Visibility' },
           { id: 'm-share',      label: 'Share & export' },
-          { id: 'm-mask',       label: 'Maskable fields' },
+          { id: 'm-mask',       label: 'Hidden from shared CV' },
           { id: 'm-pref',       label: 'Opportunity preferences' },
           { id: 'm-cv',         label: 'CV & document' },
           { id: 'm-account',    label: 'Account' },
@@ -5970,6 +5970,48 @@ export default function ProfiluxPage() {
               width: 38,
               height: 22,
               background: on ? '#a58e28' : '#333',
+              borderRadius: 999,
+              border: 'none',
+              cursor: busy ? 'not-allowed' : 'pointer',
+              padding: 0,
+              transition: 'background 0.2s',
+              opacity: busy ? 0.55 : 1,
+            }}
+          >
+            <span
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                width: 16,
+                height: 16,
+                top: 3,
+                left: 3,
+                background: on ? '#1a1a1a' : '#ccc',
+                borderRadius: '50%',
+                transform: on ? 'translateX(16px)' : 'translateX(0)',
+                transition: 'transform 0.2s, background 0.2s',
+                display: 'block',
+              }}
+            />
+          </button>
+        )
+        // Mask-toggle variant: same JOBLUX toggle shape as renderToggle, but the
+        // ON track is brand-green (#1D9E75) — matches the affirmative palette
+        // used elsewhere (Saved indicator, availability dot, progress bar).
+        // ON here means "hidden from shared CV" (DB semantics unchanged).
+        const renderMaskToggle = (on: boolean, busy: boolean, onClick: () => void, label: string) => (
+          <button
+            type="button"
+            role="switch"
+            aria-checked={on}
+            aria-label={label}
+            disabled={busy}
+            onClick={onClick}
+            style={{
+              position: 'relative',
+              width: 38,
+              height: 22,
+              background: on ? '#1D9E75' : '#333',
               borderRadius: 999,
               border: 'none',
               cursor: busy ? 'not-allowed' : 'pointer',
@@ -6111,7 +6153,7 @@ export default function ProfiluxPage() {
               <div id="m-share" style={block}>
                 <div style={blockHead}>
                   <h2 style={blockTitle}>Share &amp; export</h2>
-                  <p style={blockSub}>Generate a private link or download a PDF. Maskable fields are honoured in shared versions.</p>
+                  <p style={blockSub}>Generate a private link or download a PDF. Fields you have hidden in the section below are respected in shared versions.</p>
                 </div>
 
                 {/* Private profile URL */}
@@ -6329,18 +6371,18 @@ export default function ProfiluxPage() {
                 </div>
               </div>
 
-              {/* 3. MASKABLE FIELDS */}
+              {/* 3. HIDDEN FROM SHARED CV */}
               <div id="m-mask" style={block}>
                 <div style={blockHead}>
-                  <h2 style={blockTitle}>Maskable fields</h2>
-                  <p style={blockSub}>Hides sensitive data inside shared, exported, and public views — even when the section itself is visible. Section visibility is controlled separately in Edit mode.</p>
+                  <h2 style={blockTitle}>Hidden from shared CV</h2>
+                  <p style={blockSub}>ON = hidden from the shared CV. OFF = visible from the shared CV. Section visibility is controlled separately in Edit mode.</p>
                 </div>
                 {([
-                  { field: 'current_employer', title: 'Current employer',             sub: 'Currently shown as "Confidential Maison" in shared views.' },
-                  { field: 'salary',           title: 'Salary & compensation',        sub: 'Never shown publicly.' },
-                  { field: 'availability',     title: 'Availability & notice period', sub: 'Hidden in Share view by default.' },
-                  { field: 'phone',            title: 'Phone',                        sub: 'Hidden by default.' },
-                  { field: 'references',       title: 'References',                   sub: 'Always private. Released individually on your explicit consent.' },
+                  { field: 'contact',          title: 'Contact details',              sub: 'Hide email and phone from shared CV' },
+                  { field: 'current_employer', title: 'Current employer',             sub: 'Hide current employer from shared CV' },
+                  { field: 'salary',           title: 'Salary & compensation',        sub: 'Hide compensation from shared CV' },
+                  { field: 'availability',     title: 'Availability & notice period', sub: 'Hide availability from shared CV' },
+                  { field: 'references',       title: 'References',                   sub: 'Always private. Released individually on your consent.' },
                 ] as const).map(({ field, title, sub }) => {
                   const masked = (editor?.masked_fields ?? {})[field] === true
                   const busy = maskToggling === field
@@ -6351,7 +6393,7 @@ export default function ProfiluxPage() {
                         <div style={rowSub}>{sub}</div>
                       </div>
                       <div style={rowRight}>
-                        {renderToggle(masked, busy, () => toggleMaskedField(field, !masked), `${title} mask`)}
+                        {renderMaskToggle(masked, busy, () => toggleMaskedField(field, !masked), `${title} — hidden from shared CV`)}
                       </div>
                     </div>
                   )

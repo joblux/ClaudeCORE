@@ -262,7 +262,7 @@ export const SECTION_IDS = ['identity','current_role','career_path','education',
 export type SectionId = typeof SECTION_IDS[number]
 export type SectionVisibility = Partial<Record<SectionId, boolean>>
 
-export const MASKABLE_FIELDS = ['phone','email','current_employer','salary','availability','references'] as const
+export const MASKABLE_FIELDS = ['contact','phone','email','current_employer','salary','availability','references'] as const
 export type MaskableField = typeof MASKABLE_FIELDS[number]
 export type MaskedFields = Partial<Record<MaskableField, boolean>>
 
