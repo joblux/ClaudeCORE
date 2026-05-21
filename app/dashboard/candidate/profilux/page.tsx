@@ -724,6 +724,10 @@ export default function ProfiluxPage() {
   const accountEmail = pfSession?.user?.email ?? null
   const [currentPositionDrawerOpen, setCurrentPositionDrawerOpen] = useState(false)
   const [luxuryFitDrawerOpen, setLuxuryFitDrawerOpen] = useState(false)
+  // Slice STRUCT #1 — split taxonomy entry points. Sectors drawer reuses the
+  // existing luxuryFitDrawerOpen flag (its render moved to "Luxury Sectors").
+  // Business Functions is a new entry point editing expertise_tags only.
+  const [businessFunctionsDrawerOpen, setBusinessFunctionsDrawerOpen] = useState(false)
   const [skillsMarketsDrawerOpen, setSkillsMarketsDrawerOpen] = useState(false)
   const [compensationDrawerOpen, setCompensationDrawerOpen] = useState(false)
   const [clientelingDrawerOpen, setClientelingDrawerOpen] = useState(false)
@@ -1997,14 +2001,15 @@ export default function ProfiluxPage() {
   }
 
   async function handleSave4() {
+    // Slice STRUCT #1 — handleSave4 now writes the Business Functions drawer.
+    // Payload narrowed to expertise_tags only; years_in_luxury and
+    // product_categories columns stay in the DB and remain reachable through
+    // other paths (resolver/projector), they just no longer have a candidate
+    // edit surface.
     setSaving4(true)
     setSaveError4(null)
     try {
-      const yearsRaw = draft4.years_in_luxury.trim()
-      const yearsNum = yearsRaw === '' ? null : Number(yearsRaw)
       const body: Record<string, unknown> = {
-        years_in_luxury: yearsNum != null && Number.isFinite(yearsNum) && yearsNum >= 0 ? yearsNum : null,
-        product_categories: draft4.product_categories,
         expertise_tags: draft4.expertise_tags,
       }
       const res = await fetch('/api/profilux', {
@@ -2106,12 +2111,13 @@ export default function ProfiluxPage() {
   }
 
   async function handleSave7() {
+    // Slice STRUCT #1 — Technical Skills drawer writes key_skills only.
+    // market_knowledge column stays in the DB; no candidate edit surface.
     setSaving7(true)
     setSaveError7(null)
     try {
       const body: Record<string, unknown> = {
         key_skills: draft7.key_skills,
-        market_knowledge: draft7.market_knowledge,
       }
       const res = await fetch('/api/profilux', {
         method: 'POST',
@@ -4111,8 +4117,12 @@ export default function ProfiluxPage() {
           </>
         )}
       </Drawer>
+      {/* Slice STRUCT #1 — taxonomy split. Luxury Fit replaced by two clear,
+          single-field entry points: Luxury Sectors (sectors) + Business
+          Functions (expertise_tags). product_categories + years_in_luxury
+          columns remain in the DB but have no candidate edit surface. */}
       <SectionCard
-        eyebrow="Luxury Fit"
+        eyebrow="Luxury Sectors"
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
@@ -4145,60 +4155,13 @@ export default function ProfiluxPage() {
         <div style={grid}>
           <div style={label}>Sectors</div>
           <div>{e.sectors.length > 0 ? e.sectors.map(sectorLabel).join(', ') : <NoneSel />}</div>
-          <div style={label}>Years in luxury</div>
-          <div>{e.years_in_luxury != null ? String(e.years_in_luxury) : <NotSet />}</div>
-          <div style={label}>Product categories</div>
-          <div>{e.product_categories.length > 0 ? e.product_categories.map(productCategoryLabel).join(', ') : <NoneSel />}</div>
-          <div style={label}>Areas of expertise</div>
-          <div>{e.expertise_tags.length > 0 ? e.expertise_tags.map(expertiseTagLabel).join(', ') : <NoneSel />}</div>
         </div>
       </SectionCard>
       <Drawer
         open={luxuryFitDrawerOpen}
-        title="Luxury Fit"
+        title="Luxury Sectors"
         onClose={() => setLuxuryFitDrawerOpen(false)}
       >
-        <div style={grid}>
-          <div style={label}>Years in luxury</div>
-          <div><input style={input} type="number" min={0} value={draft4.years_in_luxury} onChange={(ev) => setDraft4({ ...draft4, years_in_luxury: ev.target.value })} placeholder="e.g. 8" /></div>
-        </div>
-
-        <div style={sectionLabel}>Product categories</div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
-          {PROFILUX_PRODUCT_CATEGORY_OPTIONS.map((o) => (
-            <button
-              key={o.value}
-              type="button"
-              style={draft4.product_categories.includes(o.value) ? chipActive : chip}
-              onClick={() => setDraft4({ ...draft4, product_categories: draft4.product_categories.includes(o.value) ? draft4.product_categories.filter(v => v !== o.value) : [...draft4.product_categories, o.value] })}
-            >
-              {o.label}
-            </button>
-          ))}
-        </div>
-
-        <div style={sectionLabel}>Areas of expertise</div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
-          {PROFILUX_EXPERTISE_TAG_OPTIONS.map((o) => (
-            <button
-              key={o.value}
-              type="button"
-              style={draft4.expertise_tags.includes(o.value) ? chipActive : chip}
-              onClick={() => setDraft4({ ...draft4, expertise_tags: draft4.expertise_tags.includes(o.value) ? draft4.expertise_tags.filter(v => v !== o.value) : [...draft4.expertise_tags, o.value] })}
-            >
-              {o.label}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
-          <button style={saving4 ? saveBtnDis : saveBtn} disabled={saving4} onClick={handleSave4}>
-            {saving4 ? 'Saving…' : 'Save'}
-          </button>
-          {savedAt4 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
-          {saveError4 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError4}</span>}
-        </div>
-
         <div style={sectionLabel}>Sectors (ranked, L2)</div>
         {sectorsL2 === null ? (
           <div style={{ color: '#999', fontSize: 13, marginTop: 8 }}>Loading…</div>
@@ -4259,7 +4222,72 @@ export default function ProfiluxPage() {
         )}
       </Drawer>
       <SectionCard
-        eyebrow="Skills & Markets"
+        eyebrow="Business Functions"
+        headerAction={
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button
+              type="button"
+              onClick={() => setBusinessFunctionsDrawerOpen(true)}
+              style={{
+                background: 'rgba(165,142,40,0.05)',
+                color: '#a58e28',
+                border: '1px solid rgba(165,142,40,0.2)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Edit
+            </button>
+            <VisibilityToggle
+              sectionId="luxury_fit"
+              isVisible={editor.section_visibility?.['luxury_fit'] ?? true}
+              isToggling={visibilityToggling === 'luxury_fit'}
+              onToggle={toggleSectionVisibility}
+            />
+          </div>
+        }
+      >
+        <div style={grid}>
+          <div style={label}>Areas of expertise</div>
+          <div>{e.expertise_tags.length > 0 ? e.expertise_tags.map(expertiseTagLabel).join(', ') : <NoneSel />}</div>
+        </div>
+      </SectionCard>
+      <Drawer
+        open={businessFunctionsDrawerOpen}
+        title="Business Functions"
+        onClose={() => setBusinessFunctionsDrawerOpen(false)}
+      >
+        <div style={sectionLabel}>Areas of expertise</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+          {PROFILUX_EXPERTISE_TAG_OPTIONS.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              style={draft4.expertise_tags.includes(o.value) ? chipActive : chip}
+              onClick={() => setDraft4({ ...draft4, expertise_tags: draft4.expertise_tags.includes(o.value) ? draft4.expertise_tags.filter(v => v !== o.value) : [...draft4.expertise_tags, o.value] })}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button style={saving4 ? saveBtnDis : saveBtn} disabled={saving4} onClick={handleSave4}>
+            {saving4 ? 'Saving…' : 'Save'}
+          </button>
+          {savedAt4 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
+          {saveError4 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError4}</span>}
+        </div>
+      </Drawer>
+      {/* Slice STRUCT #1 — renamed Skills & Markets -> Technical Skills.
+          key_skills only; market_knowledge column stays in DB, no edit surface. */}
+      <SectionCard
+        eyebrow="Technical Skills"
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
@@ -4292,17 +4320,11 @@ export default function ProfiluxPage() {
         <div style={grid}>
           <div style={label}>Skills</div>
           <div>{e.key_skills.length > 0 ? e.key_skills.map(skillLabel).join(', ') : <NoneSel />}</div>
-          <div style={label}>Markets</div>
-          <div>{e.market_knowledge.length > 0
-            ? (typeof PROFILUX_MARKET_OPTIONS[0] === 'string'
-                ? e.market_knowledge.join(', ')
-                : e.market_knowledge.map(v => ((PROFILUX_MARKET_OPTIONS as unknown as Array<{ value: string, label: string }>).find(o => o.value === v)?.label) ?? v).join(', '))
-            : <NoneSel />}</div>
         </div>
       </SectionCard>
       <Drawer
         open={skillsMarketsDrawerOpen}
-        title="Skills & Markets"
+        title="Technical Skills"
         onClose={() => setSkillsMarketsDrawerOpen(false)}
       >
         <div style={sectionLabel}>Skills</div>
@@ -4319,20 +4341,6 @@ export default function ProfiluxPage() {
           ))}
         </div>
 
-        <div style={sectionLabel}>Markets</div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
-          {PROFILUX_MARKET_OPTIONS.map((o) => (
-            <button
-              key={o}
-              type="button"
-              style={draft7.market_knowledge.includes(o) ? chipActive : chip}
-              onClick={() => setDraft7({ ...draft7, market_knowledge: draft7.market_knowledge.includes(o) ? draft7.market_knowledge.filter(v => v !== o) : [...draft7.market_knowledge, o] })}
-            >
-              {o}
-            </button>
-          ))}
-        </div>
-
         <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
           <button style={saving7 ? saveBtnDis : saveBtn} disabled={saving7} onClick={handleSave7}>
             {saving7 ? 'Saving…' : 'Save'}
@@ -4341,148 +4349,12 @@ export default function ProfiluxPage() {
           {saveError7 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError7}</span>}
         </div>
       </Drawer>
-      <SectionCard
-        eyebrow="Clienteling"
-        headerAction={
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button
-              type="button"
-              onClick={() => setClientelingDrawerOpen(true)}
-              style={{
-                background: 'rgba(165,142,40,0.05)',
-                color: '#a58e28',
-                border: '1px solid rgba(165,142,40,0.2)',
-                padding: '6px 14px',
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: '0.4px',
-                borderRadius: 6,
-                cursor: 'pointer',
-                fontFamily: 'Inter, sans-serif',
-              }}
-            >
-              Edit
-            </button>
-            <VisibilityToggle
-              sectionId="clienteling"
-              isVisible={editor.section_visibility?.['clienteling'] ?? true}
-              isToggling={visibilityToggling === 'clienteling'}
-              onToggle={toggleSectionVisibility}
-            />
-          </div>
-        }
-      >
-        <div style={grid}>
-          <div style={label}>Clienteling experience</div>
-          <div>{e.clienteling_experience === true ? 'Yes' : e.clienteling_experience === false ? 'No' : <NotSet />}</div>
-          <div style={label}>Background description</div>
-          <div>{e.clienteling_experience === true && typeof e.clienteling_description === 'string' && e.clienteling_description.length > 0 ? e.clienteling_description : <NotSet />}</div>
-        </div>
-      </SectionCard>
-      <Drawer
-        open={clientelingDrawerOpen}
-        title="Clienteling"
-        onClose={() => setClientelingDrawerOpen(false)}
-      >
-        <div style={sectionLabel}>Clienteling experience</div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
-          <button
-            type="button"
-            style={draft8.clienteling_experience === true ? chipActive : chip}
-            onClick={() => setDraft8(prev => prev.clienteling_experience === true
-              ? { clienteling_experience: null, clienteling_description: '' }
-              : { clienteling_experience: true, clienteling_description: prev.clienteling_description })}
-          >
-            Yes
-          </button>
-          <button
-            type="button"
-            style={draft8.clienteling_experience === false ? chipActive : chip}
-            onClick={() => setDraft8(prev => ({
-              clienteling_experience: prev.clienteling_experience === false ? null : false,
-              clienteling_description: '',
-            }))}
-          >
-            No
-          </button>
-        </div>
-
-        {draft8.clienteling_experience === true && (
-          <>
-            <div style={sectionLabel}>Background description</div>
-            <textarea
-              style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 80, resize: 'vertical' }}
-              rows={3}
-              value={draft8.clienteling_description}
-              onChange={(ev) => setDraft8(prev => ({ ...prev, clienteling_description: ev.target.value }))}
-              placeholder="Briefly describe your clienteling experience"
-            />
-          </>
-        )}
-
-        <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
-          <button style={saving8 ? saveBtnDis : saveBtn} disabled={saving8} onClick={handleSave8}>
-            {saving8 ? 'Saving…' : 'Save'}
-          </button>
-          {savedAt8 && <span style={{ color: '#1D9E75', fontSize: 13 }}>Saved</span>}
-          {saveError8 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError8}</span>}
-        </div>
-      </Drawer>
-      <SectionCard
-        eyebrow="Maisons"
-        headerAction={
-          <button
-            type="button"
-            onClick={openMaisonsDrawer}
-            style={{
-              background: 'rgba(165,142,40,0.05)',
-              color: '#a58e28',
-              border: '1px solid rgba(165,142,40,0.3)',
-              padding: '6px 14px',
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: '0.4px',
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
-            Edit
-          </button>
-        }
-      >
-        <div>
-          {e.brands_worked_with.length > 0
-            ? e.brands_worked_with.join(', ')
-            : <NotSet />}
-        </div>
-      </SectionCard>
-      <Drawer
-        open={maisonsDrawerOpen}
-        title="Maisons"
-        onClose={() => setMaisonsDrawerOpen(false)}
-      >
-        <div style={{ color: '#999', fontSize: 12, marginBottom: 10 }}>
-          One maison per line. Empty lines are ignored.
-        </div>
-        <textarea
-          style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 160, resize: 'vertical' }}
-          rows={8}
-          value={maisonsDraftText}
-          onChange={(ev) => setMaisonsDraftText(ev.target.value)}
-          placeholder={'e.g.\nHermès\nLouis Vuitton\nCartier'}
-        />
-        <div style={{ marginTop: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
-          <button
-            style={maisonsSaving ? saveBtnDis : saveBtn}
-            disabled={maisonsSaving}
-            onClick={handleSaveMaisons}
-          >
-            {maisonsSaving ? 'Saving…' : 'Save'}
-          </button>
-          {maisonsError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{maisonsError}</span>}
-        </div>
-      </Drawer>
+      {/* Slice STRUCT #1 — Clienteling + Maisons cards/drawers removed from
+          candidate Edit surface. clienteling_experience, clienteling_description
+          and brands_worked_with columns stay in the DB. State + handlers
+          (clientelingDrawerOpen, draft8, handleSave8, maisonsDrawerOpen,
+          maisonsDraftText, handleSaveMaisons, openMaisonsDrawer) retained per
+          brief — no cleanup sweep this slice. */}
       {e.activated_sections.includes('certifications') && (<>
       <SectionCard
         eyebrow="Certifications"
