@@ -4253,7 +4253,7 @@ export default function ProfiluxPage() {
         }
       >
         <div style={grid}>
-          <div style={label}>Areas of expertise</div>
+          <div style={label}>Business functions</div>
           <div>{e.expertise_tags.length > 0 ? e.expertise_tags.map(expertiseTagLabel).join(', ') : <NoneSel />}</div>
         </div>
       </SectionCard>
@@ -4262,7 +4262,7 @@ export default function ProfiluxPage() {
         title="Business Functions"
         onClose={() => setBusinessFunctionsDrawerOpen(false)}
       >
-        <div style={sectionLabel}>Areas of expertise</div>
+        <div style={sectionLabel}>Business functions</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
           {PROFILUX_EXPERTISE_TAG_OPTIONS.map((o) => (
             <button
@@ -4318,7 +4318,7 @@ export default function ProfiluxPage() {
         }
       >
         <div style={grid}>
-          <div style={label}>Skills</div>
+          <div style={label}>Technical skills</div>
           <div>{e.key_skills.length > 0 ? e.key_skills.map(skillLabel).join(', ') : <NoneSel />}</div>
         </div>
       </SectionCard>
@@ -4327,7 +4327,7 @@ export default function ProfiluxPage() {
         title="Technical Skills"
         onClose={() => setSkillsMarketsDrawerOpen(false)}
       >
-        <div style={sectionLabel}>Skills</div>
+        <div style={sectionLabel}>Technical skills</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
           {PROFILUX_SKILL_OPTIONS.map((o) => (
             <button
