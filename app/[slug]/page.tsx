@@ -581,8 +581,18 @@ export default async function PublicProfilePage({ params }: Props) {
               {showCertifications && (
                 <section style={zoneBlock}>
                   <h3 style={zoneHeader}>Certifications</h3>
-                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.7 }}>
-                    {pub.certifications.join(' · ')}
+                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, lineHeight: 1.7, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {pub.certifications.map((c, idx) => {
+                      const meta = [c.institution, c.year].filter((s): s is string => typeof s === 'string' && s.trim() !== '').join(' · ')
+                      return (
+                        <div key={idx}>
+                          <div style={{ color: '#fff', fontWeight: 600 }}>{c.title}</div>
+                          {meta !== '' && (
+                            <div style={{ color: '#999', marginTop: 2 }}>{meta}</div>
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                 </section>
               )}
@@ -591,8 +601,18 @@ export default async function PublicProfilePage({ params }: Props) {
               {showAwards && (
                 <section style={zoneBlock}>
                   <h3 style={zoneHeader}>Awards</h3>
-                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.7 }}>
-                    {pub.awards.join(' · ')}
+                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, lineHeight: 1.7, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {pub.awards.map((a, idx) => {
+                      const meta = [a.body, a.year].filter((s): s is string => typeof s === 'string' && s.trim() !== '').join(' · ')
+                      return (
+                        <div key={idx}>
+                          <div style={{ color: '#fff', fontWeight: 600 }}>{a.title}</div>
+                          {meta !== '' && (
+                            <div style={{ color: '#999', marginTop: 2 }}>{meta}</div>
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                 </section>
               )}

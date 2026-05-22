@@ -258,6 +258,31 @@ export type ProfiLuxInternshipItem = {
   period: string
 }
 
+/**
+ * Slice 2b — Certifications (jsonb array-of-objects).
+ *
+ * Mirrors ProfiLuxStrategicInitiative posture: title required, optional
+ * paired fields. year is FREE-TEXT (string) — mirrors internships.period
+ * precedent (no number coercion). Stored in members.certifications (jsonb).
+ */
+export type ProfiLuxCertificationItem = {
+  title: string
+  institution: string | null
+  year: string | null
+}
+
+/**
+ * Slice 2b — Awards (jsonb array-of-objects).
+ *
+ * Mirrors ProfiLuxCertificationItem posture: title required, body and year
+ * optional. year is FREE-TEXT (string). Stored in members.awards (jsonb).
+ */
+export type ProfiLuxAwardItem = {
+  title: string
+  body: string | null
+  year: string | null
+}
+
 export const SECTION_IDS = ['identity','current_role','career_path','education','languages','luxury_fit','skills_markets','clienteling','compensation','availability'] as const
 export type SectionId = typeof SECTION_IDS[number]
 export type SectionVisibility = Partial<Record<SectionId, boolean>>
@@ -301,8 +326,8 @@ export type MemberRow = {
   // Capability arrays (L2)
   key_skills: string[] | null
   software_tools: string[] | null
-  certifications: string[] | null
-  awards: string[] | null
+  certifications: ProfiLuxCertificationItem[] | null
+  awards: ProfiLuxAwardItem[] | null
   memberships: string[] | null
   strategic_initiatives: ProfiLuxStrategicInitiative[] | null
   portfolio: ProfiLuxPortfolioItem[] | null
@@ -504,8 +529,8 @@ export type ProfiLuxResolved = {
   // Capability arrays (always arrays, NULL → [])
   key_skills: string[]
   software_tools: string[]
-  certifications: string[]
-  awards: string[]
+  certifications: ProfiLuxCertificationItem[]
+  awards: ProfiLuxAwardItem[]
   memberships: string[]
   strategic_initiatives: ProfiLuxStrategicInitiative[]
   portfolio: ProfiLuxPortfolioItem[]
@@ -638,8 +663,8 @@ export type EditorView = {
   product_categories: string[]
   expertise_tags: string[]
   brands_worked_with: string[]
-  certifications: string[]
-  awards: string[]
+  certifications: ProfiLuxCertificationItem[]
+  awards: ProfiLuxAwardItem[]
   memberships: string[]
   strategic_initiatives: ProfiLuxStrategicInitiative[]
   portfolio: ProfiLuxPortfolioItem[]
@@ -738,7 +763,7 @@ export type PublicProjection = {
   maison: string | null
   // Capability arrays
   key_skills: string[]
-  certifications: string[]
+  certifications: ProfiLuxCertificationItem[]
   product_categories: string[]
   brands_worked_with: string[]
   client_segment_experience: string[]
@@ -762,7 +787,7 @@ export type PublicProjection = {
   experiences: ResolvedExperience[]
   education: ResolvedEducation[]
   // Library sections (page renders gated on activated_sections + non-empty)
-  awards: string[]
+  awards: ProfiLuxAwardItem[]
   memberships: string[]
   strategic_initiatives: ProfiLuxStrategicInitiative[]
   portfolio: ProfiLuxPortfolioItem[]
@@ -795,7 +820,7 @@ export type ClientProjection = {
   maison: string | null
   // Capability (full minus operational)
   key_skills: string[]
-  certifications: string[]
+  certifications: ProfiLuxCertificationItem[]
   product_categories: string[]
   brands_worked_with: string[] // V4: visible
   client_segment_experience: string[]

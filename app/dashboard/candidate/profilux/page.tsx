@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
-import type { EditorView, MaskableField, ProfiLuxInternshipItem, ProfiLuxPortfolioItem, ProfiLuxPressFeatureItem, ProfiLuxReferenceItem, ProfiLuxStrategicInitiative, SectionId } from '@/lib/profilux/types'
+import type { EditorView, MaskableField, ProfiLuxAwardItem, ProfiLuxCertificationItem, ProfiLuxInternshipItem, ProfiLuxPortfolioItem, ProfiLuxPressFeatureItem, ProfiLuxReferenceItem, ProfiLuxStrategicInitiative, SectionId } from '@/lib/profilux/types'
 import { MASKABLE_FIELDS } from '@/lib/profilux/types'
 import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS, PROFILUX_SECTOR_OPTIONS } from '@/lib/profilux/vocabulary'
 import { seniorityLabel, skillLabel, availabilityLabel, departmentLabel, contractTypeLabel, sectorLabel, productCategoryLabel, expertiseTagLabel } from '@/lib/profilux/labels'
@@ -762,14 +762,22 @@ export default function ProfiluxPage() {
   const [maisonsDraftText, setMaisonsDraftText] = useState('')
   const [maisonsSaving, setMaisonsSaving] = useState(false)
   const [maisonsError, setMaisonsError] = useState<string | null>(null)
-  // PF-D V1 — Certifications drawer (text[] textarea, free-text, mirrors Maisons)
+  // Slice 2b — Certifications drawer (jsonb array-of-objects, structured)
   const [certificationsDrawerOpen, setCertificationsDrawerOpen] = useState(false)
-  const [certificationsDraftText, setCertificationsDraftText] = useState('')
+  const [certDraftRows, setCertDraftRows] = useState<ProfiLuxCertificationItem[]>([])
+  const [certEditingIndex, setCertEditingIndex] = useState<number | null>(null)
+  const [certEditTitle, setCertEditTitle] = useState('')
+  const [certEditInstitution, setCertEditInstitution] = useState('')
+  const [certEditYear, setCertEditYear] = useState('')
   const [certificationsSaving, setCertificationsSaving] = useState(false)
   const [certificationsError, setCertificationsError] = useState<string | null>(null)
-  // PF-D V1 — Awards drawer (text[] textarea, free-text, mirrors Certifications)
+  // Slice 2b — Awards drawer (jsonb array-of-objects, structured)
   const [awardsDrawerOpen, setAwardsDrawerOpen] = useState(false)
-  const [awardsDraftText, setAwardsDraftText] = useState('')
+  const [awardsDraftRows, setAwardsDraftRows] = useState<ProfiLuxAwardItem[]>([])
+  const [awardsEditingIndex, setAwardsEditingIndex] = useState<number | null>(null)
+  const [awardsEditTitle, setAwardsEditTitle] = useState('')
+  const [awardsEditBody, setAwardsEditBody] = useState('')
+  const [awardsEditYear, setAwardsEditYear] = useState('')
   const [awardsSaving, setAwardsSaving] = useState(false)
   const [awardsError, setAwardsError] = useState<string | null>(null)
   // PF-D V3.1 — Memberships drawer (text[] textarea, free-text, mirrors Awards)
@@ -1169,21 +1177,65 @@ export default function ProfiluxPage() {
     }
   }
 
-  // PF-D V1 — Certifications (free-text text[] textarea, mirrors Maisons)
+  // Slice 2b — Certifications (structured jsonb array-of-objects).
+  // Mirrors strategic_initiatives drawer: per-row Add/Edit/Remove on a draftRows
+  // working copy. Save overwrites server array. Cancel discards draftRows.
   function openCertificationsDrawer() {
     setCertificationsError(null)
-    setCertificationsDraftText((editor?.certifications ?? []).join('\n'))
+    setCertDraftRows(Array.isArray(editor?.certifications) ? [...editor!.certifications] : [])
+    setCertEditingIndex(null)
+    setCertEditTitle('')
+    setCertEditInstitution('')
+    setCertEditYear('')
     setCertificationsDrawerOpen(true)
+  }
+  function certStartAdd() {
+    setCertEditingIndex(-1)
+    setCertEditTitle('')
+    setCertEditInstitution('')
+    setCertEditYear('')
+  }
+  function certStartEdit(index: number) {
+    const row = certDraftRows[index]
+    if (!row) return
+    setCertEditingIndex(index)
+    setCertEditTitle(row.title)
+    setCertEditInstitution(row.institution ?? '')
+    setCertEditYear(row.year ?? '')
+  }
+  function certCancelEdit() {
+    setCertEditingIndex(null)
+    setCertEditTitle('')
+    setCertEditInstitution('')
+    setCertEditYear('')
+  }
+  function certCommitEdit() {
+    const title = certEditTitle.trim()
+    if (title === '') return
+    const institution = certEditInstitution.trim() === '' ? null : certEditInstitution.trim()
+    const year = certEditYear.trim() === '' ? null : certEditYear.trim()
+    const next: ProfiLuxCertificationItem = { title, institution, year }
+    if (certEditingIndex === -1) {
+      setCertDraftRows([...certDraftRows, next])
+    } else if (typeof certEditingIndex === 'number' && certEditingIndex >= 0) {
+      const copy = [...certDraftRows]
+      copy[certEditingIndex] = next
+      setCertDraftRows(copy)
+    }
+    certCancelEdit()
+  }
+  function certRemove(index: number) {
+    setCertDraftRows(certDraftRows.filter((_, i) => i !== index))
+    if (certEditingIndex === index) certCancelEdit()
   }
   async function handleSaveCertifications() {
     setCertificationsSaving(true)
     setCertificationsError(null)
     try {
-      const arr = certificationsDraftText.split('\n').map(s => s.trim()).filter(s => s !== '')
       const res = await fetch('/api/profilux', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ certifications: arr }),
+        body: JSON.stringify({ certifications: certDraftRows }),
       })
       if (!res.ok) {
         const d = await res.json().catch(() => ({} as any))
@@ -1199,21 +1251,63 @@ export default function ProfiluxPage() {
     }
   }
 
-  // PF-D V1 — Awards (free-text text[] textarea, mirrors Certifications)
+  // Slice 2b — Awards (structured jsonb array-of-objects, mirrors Certifications).
   function openAwardsDrawer() {
     setAwardsError(null)
-    setAwardsDraftText((editor?.awards ?? []).join('\n'))
+    setAwardsDraftRows(Array.isArray(editor?.awards) ? [...editor!.awards] : [])
+    setAwardsEditingIndex(null)
+    setAwardsEditTitle('')
+    setAwardsEditBody('')
+    setAwardsEditYear('')
     setAwardsDrawerOpen(true)
+  }
+  function awardsStartAdd() {
+    setAwardsEditingIndex(-1)
+    setAwardsEditTitle('')
+    setAwardsEditBody('')
+    setAwardsEditYear('')
+  }
+  function awardsStartEdit(index: number) {
+    const row = awardsDraftRows[index]
+    if (!row) return
+    setAwardsEditingIndex(index)
+    setAwardsEditTitle(row.title)
+    setAwardsEditBody(row.body ?? '')
+    setAwardsEditYear(row.year ?? '')
+  }
+  function awardsCancelEdit() {
+    setAwardsEditingIndex(null)
+    setAwardsEditTitle('')
+    setAwardsEditBody('')
+    setAwardsEditYear('')
+  }
+  function awardsCommitEdit() {
+    const title = awardsEditTitle.trim()
+    if (title === '') return
+    const body = awardsEditBody.trim() === '' ? null : awardsEditBody.trim()
+    const year = awardsEditYear.trim() === '' ? null : awardsEditYear.trim()
+    const next: ProfiLuxAwardItem = { title, body, year }
+    if (awardsEditingIndex === -1) {
+      setAwardsDraftRows([...awardsDraftRows, next])
+    } else if (typeof awardsEditingIndex === 'number' && awardsEditingIndex >= 0) {
+      const copy = [...awardsDraftRows]
+      copy[awardsEditingIndex] = next
+      setAwardsDraftRows(copy)
+    }
+    awardsCancelEdit()
+  }
+  function awardsRemove(index: number) {
+    setAwardsDraftRows(awardsDraftRows.filter((_, i) => i !== index))
+    if (awardsEditingIndex === index) awardsCancelEdit()
   }
   async function handleSaveAwards() {
     setAwardsSaving(true)
     setAwardsError(null)
     try {
-      const arr = awardsDraftText.split('\n').map(s => s.trim()).filter(s => s !== '')
       const res = await fetch('/api/profilux', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ awards: arr }),
+        body: JSON.stringify({ awards: awardsDraftRows }),
       })
       if (!res.ok) {
         const d = await res.json().catch(() => ({} as any))
@@ -3307,25 +3401,45 @@ export default function ProfiluxPage() {
               )
             })()}
 
-            {/* PF-D V1 — Certifications (first library section, free-text, mirrors Maisons) */}
+            {/* Slice 2b — Certifications (structured jsonb array-of-objects) */}
             {(() => {
               if (!e.activated_sections.includes('certifications') || !Array.isArray(e.certifications) || e.certifications.length === 0) return null
               return (
             <ViewZone title="Certifications">
-              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.5 }}>
-                {e.certifications.join(' · ')}
+              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {e.certifications.map((c, idx) => {
+                  const meta = [c.institution, c.year].filter((s): s is string => typeof s === 'string' && s.trim() !== '').join(' · ')
+                  return (
+                    <div key={idx}>
+                      <div style={{ color: '#fff', fontWeight: 600 }}>{c.title}</div>
+                      {meta !== '' && (
+                        <div style={{ color: '#999', marginTop: 2 }}>{meta}</div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </ViewZone>
               )
             })()}
 
-            {/* PF-D V1 — Awards (free-text, mirrors Certifications) */}
+            {/* Slice 2b — Awards (structured jsonb array-of-objects) */}
             {(() => {
               if (!e.activated_sections.includes('awards') || !Array.isArray(e.awards) || e.awards.length === 0) return null
               return (
             <ViewZone title="Awards">
-              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.5 }}>
-                {e.awards.join(' · ')}
+              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {e.awards.map((a, idx) => {
+                  const meta = [a.body, a.year].filter((s): s is string => typeof s === 'string' && s.trim() !== '').join(' · ')
+                  return (
+                    <div key={idx}>
+                      <div style={{ color: '#fff', fontWeight: 600 }}>{a.title}</div>
+                      {meta !== '' && (
+                        <div style={{ color: '#999', marginTop: 2 }}>{meta}</div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </ViewZone>
               )
@@ -4384,7 +4498,8 @@ export default function ProfiluxPage() {
           (clientelingDrawerOpen, draft8, handleSave8, maisonsDrawerOpen,
           maisonsDraftText, handleSaveMaisons, openMaisonsDrawer) retained per
           brief — no cleanup sweep this slice. */}
-      {e.activated_sections.includes('certifications') && (<>
+      {e.activated_sections.includes('certifications') && (
+      <div id="lib-section-certifications" style={libHighlightStyle(highlightedSectionKey === 'certifications')}>
       <SectionCard
         eyebrow="Certifications"
         headerAction={
@@ -4410,7 +4525,21 @@ export default function ProfiluxPage() {
       >
         <div>
           {e.certifications.length > 0
-            ? e.certifications.join(', ')
+            ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {e.certifications.map((c, idx) => {
+                  const meta = [c.institution, c.year].filter((s): s is string => typeof s === 'string' && s.trim() !== '').join(' · ')
+                  return (
+                    <div key={idx}>
+                      <div style={{ color: '#fff', fontWeight: 600 }}>{c.title}</div>
+                      {meta !== '' && (
+                        <div style={{ color: '#999', marginTop: 2, fontSize: 13 }}>{meta}</div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )
             : <NotSet />}
         </div>
       </SectionCard>
@@ -4419,17 +4548,135 @@ export default function ProfiluxPage() {
         title="Certifications"
         onClose={() => setCertificationsDrawerOpen(false)}
       >
-        <div style={{ color: '#999', fontSize: 12, marginBottom: 10 }}>
-          One certification per line. Empty lines are ignored.
+        <div style={{ color: '#ccc', fontSize: 13, marginBottom: 4 }}>
+          Credentials that signal expertise.
         </div>
-        <textarea
-          style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 160, resize: 'vertical' }}
-          rows={8}
-          value={certificationsDraftText}
-          onChange={(ev) => setCertificationsDraftText(ev.target.value)}
-          placeholder={'e.g.\nGIA Graduate Gemologist\nWSET Level 3\nLuxury Retail Management Certificate'}
-        />
-        <div style={{ marginTop: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ color: '#777', fontSize: 12, marginBottom: 14 }}>
+          Examples: GIA Graduate Gemologist · WSET Level 3 · Luxury Retail Management
+        </div>
+
+        {/* Existing rows list */}
+        {certDraftRows.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+            {certDraftRows.map((row, idx) => {
+              const meta = [row.institution, row.year].filter((s): s is string => typeof s === 'string' && s.trim() !== '').join(' · ')
+              return (
+              <div
+                key={idx}
+                style={{
+                  border: '0.5px solid #2a2a2a',
+                  borderRadius: 6,
+                  padding: '10px 12px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: '#fff', fontSize: 14, fontWeight: 600 }}>{row.title}</div>
+                  {meta !== '' && (
+                    <div style={{ color: '#999', fontSize: 13, marginTop: 4 }}>{meta}</div>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                  <button
+                    type="button"
+                    onClick={() => certStartEdit(idx)}
+                    style={{ background: 'transparent', color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)', padding: '4px 10px', fontSize: 11, borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => certRemove(idx)}
+                    style={{ background: 'transparent', color: '#999', border: '1px solid #333', padding: '4px 10px', fontSize: 11, borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Inline edit/add form */}
+        {certEditingIndex !== null ? (
+          <div style={{ border: '0.5px solid rgba(165,142,40,0.3)', borderRadius: 6, padding: 14, marginBottom: 14 }}>
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Title <span style={{ color: '#a58e28' }}>*</span></div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={certEditTitle}
+                onChange={(ev) => setCertEditTitle(ev.target.value)}
+                placeholder="e.g. GIA Graduate Gemologist"
+              />
+            </div>
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Institution</div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={certEditInstitution}
+                onChange={(ev) => setCertEditInstitution(ev.target.value)}
+                placeholder="Optional — e.g. Gemological Institute of America"
+              />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Year</div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={certEditYear}
+                onChange={(ev) => setCertEditYear(ev.target.value)}
+                placeholder="Optional — e.g. 2022"
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                type="button"
+                onClick={certCommitEdit}
+                disabled={certEditTitle.trim() === ''}
+                style={certEditTitle.trim() === '' ? saveBtnDis : saveBtn}
+              >
+                {certEditingIndex === -1 ? 'Add' : 'Update'}
+              </button>
+              <button
+                type="button"
+                onClick={certCancelEdit}
+                style={btn}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={certStartAdd}
+            style={{
+              background: 'transparent',
+              color: '#a58e28',
+              border: '1px dashed rgba(165,142,40,0.4)',
+              padding: '10px 14px',
+              fontSize: 12,
+              letterSpacing: '0.4px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+              marginBottom: 14,
+              width: '100%',
+              maxWidth: 600,
+              textAlign: 'left',
+            }}
+          >
+            + Add certification
+          </button>
+        )}
+
+        <div style={{ marginTop: 4, display: 'flex', gap: 12, alignItems: 'center' }}>
           <button
             style={certificationsSaving ? saveBtnDis : saveBtn}
             disabled={certificationsSaving}
@@ -4440,8 +4687,10 @@ export default function ProfiluxPage() {
           {certificationsError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{certificationsError}</span>}
         </div>
       </Drawer>
-      </>)}
-      {e.activated_sections.includes('awards') && (<>
+      </div>
+      )}
+      {e.activated_sections.includes('awards') && (
+      <div id="lib-section-awards" style={libHighlightStyle(highlightedSectionKey === 'awards')}>
       <SectionCard
         eyebrow="Awards"
         headerAction={
@@ -4467,7 +4716,21 @@ export default function ProfiluxPage() {
       >
         <div>
           {e.awards.length > 0
-            ? e.awards.join(', ')
+            ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {e.awards.map((a, idx) => {
+                  const meta = [a.body, a.year].filter((s): s is string => typeof s === 'string' && s.trim() !== '').join(' · ')
+                  return (
+                    <div key={idx}>
+                      <div style={{ color: '#fff', fontWeight: 600 }}>{a.title}</div>
+                      {meta !== '' && (
+                        <div style={{ color: '#999', marginTop: 2, fontSize: 13 }}>{meta}</div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )
             : <NotSet />}
         </div>
       </SectionCard>
@@ -4476,17 +4739,135 @@ export default function ProfiluxPage() {
         title="Awards"
         onClose={() => setAwardsDrawerOpen(false)}
       >
-        <div style={{ color: '#999', fontSize: 12, marginBottom: 10 }}>
-          One award per line. Empty lines are ignored.
+        <div style={{ color: '#ccc', fontSize: 13, marginBottom: 4 }}>
+          Recognition from industry bodies, publications, or employers.
         </div>
-        <textarea
-          style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 160, resize: 'vertical' }}
-          rows={8}
-          value={awardsDraftText}
-          onChange={(ev) => setAwardsDraftText(ev.target.value)}
-          placeholder={'e.g.\nLuxury Retail Excellence Award 2023\nForbes 30 Under 30 Luxury'}
-        />
-        <div style={{ marginTop: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ color: '#777', fontSize: 12, marginBottom: 14 }}>
+          Examples: Luxury Retail Excellence Award · Forbes 30 Under 30 Luxury
+        </div>
+
+        {/* Existing rows list */}
+        {awardsDraftRows.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+            {awardsDraftRows.map((row, idx) => {
+              const meta = [row.body, row.year].filter((s): s is string => typeof s === 'string' && s.trim() !== '').join(' · ')
+              return (
+              <div
+                key={idx}
+                style={{
+                  border: '0.5px solid #2a2a2a',
+                  borderRadius: 6,
+                  padding: '10px 12px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: '#fff', fontSize: 14, fontWeight: 600 }}>{row.title}</div>
+                  {meta !== '' && (
+                    <div style={{ color: '#999', fontSize: 13, marginTop: 4 }}>{meta}</div>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                  <button
+                    type="button"
+                    onClick={() => awardsStartEdit(idx)}
+                    style={{ background: 'transparent', color: '#a58e28', border: '1px solid rgba(165,142,40,0.3)', padding: '4px 10px', fontSize: 11, borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => awardsRemove(idx)}
+                    style={{ background: 'transparent', color: '#999', border: '1px solid #333', padding: '4px 10px', fontSize: 11, borderRadius: 4, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Inline edit/add form */}
+        {awardsEditingIndex !== null ? (
+          <div style={{ border: '0.5px solid rgba(165,142,40,0.3)', borderRadius: 6, padding: 14, marginBottom: 14 }}>
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Title <span style={{ color: '#a58e28' }}>*</span></div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={awardsEditTitle}
+                onChange={(ev) => setAwardsEditTitle(ev.target.value)}
+                placeholder="e.g. Luxury Retail Excellence Award"
+              />
+            </div>
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Awarding body</div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={awardsEditBody}
+                onChange={(ev) => setAwardsEditBody(ev.target.value)}
+                placeholder="Optional — e.g. Walpole British Luxury"
+              />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ color: '#999', fontSize: 12, marginBottom: 6 }}>Year</div>
+              <input
+                type="text"
+                style={{ ...input, maxWidth: 600 }}
+                value={awardsEditYear}
+                onChange={(ev) => setAwardsEditYear(ev.target.value)}
+                placeholder="Optional — e.g. 2023"
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                type="button"
+                onClick={awardsCommitEdit}
+                disabled={awardsEditTitle.trim() === ''}
+                style={awardsEditTitle.trim() === '' ? saveBtnDis : saveBtn}
+              >
+                {awardsEditingIndex === -1 ? 'Add' : 'Update'}
+              </button>
+              <button
+                type="button"
+                onClick={awardsCancelEdit}
+                style={btn}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={awardsStartAdd}
+            style={{
+              background: 'transparent',
+              color: '#a58e28',
+              border: '1px dashed rgba(165,142,40,0.4)',
+              padding: '10px 14px',
+              fontSize: 12,
+              letterSpacing: '0.4px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+              marginBottom: 14,
+              width: '100%',
+              maxWidth: 600,
+              textAlign: 'left',
+            }}
+          >
+            + Add award
+          </button>
+        )}
+
+        <div style={{ marginTop: 4, display: 'flex', gap: 12, alignItems: 'center' }}>
           <button
             style={awardsSaving ? saveBtnDis : saveBtn}
             disabled={awardsSaving}
@@ -4497,7 +4878,8 @@ export default function ProfiluxPage() {
           {awardsError && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{awardsError}</span>}
         </div>
       </Drawer>
-      </>)}
+      </div>
+      )}
       {e.activated_sections.includes('memberships') && (<>
       <SectionCard
         eyebrow="Memberships"

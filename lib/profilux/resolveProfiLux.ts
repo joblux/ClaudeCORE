@@ -340,8 +340,8 @@ export async function resolveProfiLux(
     // Capability arrays (NULL → [])
     key_skills: arr(row.key_skills),
     software_tools: arr(row.software_tools),
-    certifications: arr(row.certifications),
-    awards: arr(row.awards),
+    certifications: row.certifications ?? [],
+    awards: row.awards ?? [],
     memberships: arr(row.memberships),
     strategic_initiatives: Array.isArray(row.strategic_initiatives)
       ? row.strategic_initiatives
@@ -355,8 +355,8 @@ export async function resolveProfiLux(
       const _implicitActivated = _explicitActivated.length > 0
         ? []
         : [
-            ...(arr(row.certifications).length > 0 ? ['certifications'] : []),
-            ...(arr(row.awards).length > 0 ? ['awards'] : []),
+            ...(Array.isArray(row.certifications) && row.certifications.length > 0 ? ['certifications'] : []),
+            ...(Array.isArray(row.awards) && row.awards.length > 0 ? ['awards'] : []),
             ...(arr(row.memberships).length > 0 ? ['memberships'] : []),
             ...(Array.isArray(row.strategic_initiatives) && row.strategic_initiatives.length > 0 ? ['strategic_initiatives'] : []),
             ...(Array.isArray(row.portfolio) && row.portfolio.length > 0 ? ['portfolio'] : []),

@@ -17,7 +17,12 @@ import type {
   ProfiLuxStrategicInitiative,
   ResolvedExperience,
 } from '@/lib/profilux'
-import { SECTION_IDS, MASKABLE_FIELDS } from '@/lib/profilux/types'
+import {
+  SECTION_IDS,
+  MASKABLE_FIELDS,
+  type ProfiLuxAwardItem,
+  type ProfiLuxCertificationItem,
+} from '@/lib/profilux/types'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -224,6 +229,77 @@ function coerceInternshipItem(
   if (period === '') return null
 
   return { company, role, period }
+}
+
+// Slice 2b — Certifications row coercion. Mirrors coerceStrategicInitiative:
+// title required; institution/year optional, trimmed → null when empty. year
+// is FREE-TEXT string (no number coercion). Mirrors internships.period.
+function coerceCertificationItem(
+  raw: unknown,
+): ProfiLuxCertificationItem | null {
+  if (
+    raw === null ||
+    typeof raw !== 'object' ||
+    Array.isArray(raw)
+  ) return null
+
+  const obj = raw as Record<string, unknown>
+
+  const title =
+    typeof obj.title === 'string'
+      ? obj.title.trim()
+      : ''
+
+  if (title === '') return null
+
+  const instRaw = obj.institution
+  const institution =
+    typeof instRaw === 'string' && instRaw.trim() !== ''
+      ? instRaw.trim()
+      : null
+
+  const yearRaw = obj.year
+  const year =
+    typeof yearRaw === 'string' && yearRaw.trim() !== ''
+      ? yearRaw.trim()
+      : null
+
+  return { title, institution, year }
+}
+
+// Slice 2b — Awards row coercion. Mirrors coerceCertificationItem: title
+// required; body/year optional, trimmed → null when empty. year is FREE-TEXT.
+function coerceAwardItem(
+  raw: unknown,
+): ProfiLuxAwardItem | null {
+  if (
+    raw === null ||
+    typeof raw !== 'object' ||
+    Array.isArray(raw)
+  ) return null
+
+  const obj = raw as Record<string, unknown>
+
+  const title =
+    typeof obj.title === 'string'
+      ? obj.title.trim()
+      : ''
+
+  if (title === '') return null
+
+  const bodyRaw = obj.body
+  const body =
+    typeof bodyRaw === 'string' && bodyRaw.trim() !== ''
+      ? bodyRaw.trim()
+      : null
+
+  const yearRaw = obj.year
+  const year =
+    typeof yearRaw === 'string' && yearRaw.trim() !== ''
+      ? yearRaw.trim()
+      : null
+
+  return { title, body, year }
 }
 
 function buildEditorResponse(resolved: ProfiLuxResolved) {
@@ -456,16 +532,16 @@ export async function POST(req: NextRequest) {
   if (has('certifications')) {
     updatePayload.certifications = Array.isArray(body.certifications)
       ? body.certifications
-          .filter((s: unknown) => typeof s === 'string' && s.trim() !== '')
-          .map((s: string) => s.trim())
+          .map((row: unknown): ProfiLuxCertificationItem | null => coerceCertificationItem(row))
+          .filter((r: ProfiLuxCertificationItem | null): r is ProfiLuxCertificationItem => r !== null)
       : null
   }
 
   if (has('awards')) {
     updatePayload.awards = Array.isArray(body.awards)
       ? body.awards
-          .filter((s: unknown) => typeof s === 'string' && s.trim() !== '')
-          .map((s: string) => s.trim())
+          .map((row: unknown): ProfiLuxAwardItem | null => coerceAwardItem(row))
+          .filter((r: ProfiLuxAwardItem | null): r is ProfiLuxAwardItem => r !== null)
       : null
   }
 

@@ -803,8 +803,18 @@ function SkillsTab({ member }: { member: AdminMemberDetail }) {
         {(member.certifications?.length ?? 0) === 0 ? (
           <div className="text-sm text-[#999]">No certifications listed.</div>
         ) : (
-          <div className="flex flex-wrap">
-            {member.certifications!.map((s, i) => <TagBadge key={i}>{s}</TagBadge>)}
+          <div className="flex flex-col gap-2">
+            {member.certifications!.map((c, i) => {
+              const meta = [c.institution, c.year].filter((s): s is string => typeof s === 'string' && s.trim() !== '').join(' · ')
+              return (
+                <div key={i}>
+                  <div className="text-sm text-[#111] font-semibold">{c.title}</div>
+                  {meta !== '' && (
+                    <div className="text-xs text-[#666] mt-0.5">{meta}</div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
