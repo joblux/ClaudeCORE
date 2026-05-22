@@ -3308,15 +3308,15 @@ export default function ProfiluxPage() {
               )
             })()}
 
-            {/* §22.1 row 3 — Expertise (merged: Luxury Fit + Skills & Markets per V12-divergence-2) */}
+            {/* §22.1 row 3 — Expertise (merged: Luxury Fit + Skills & Markets per V12-divergence-2).
+                Slice 5: dropped Product categories + Markets sub-rows (internal-only); relabeled
+                Areas of expertise → Business functions, Skills → Technical skills. */}
             {(() => {
               const filled =
                 typeof e.years_in_luxury === 'number' ||
                 (Array.isArray(e.sectors) && e.sectors.length > 0) ||
-                (Array.isArray(e.product_categories) && e.product_categories.length > 0) ||
                 (Array.isArray(e.expertise_tags) && e.expertise_tags.length > 0) ||
-                (Array.isArray(e.key_skills) && e.key_skills.length > 0) ||
-                (Array.isArray(e.market_knowledge) && e.market_knowledge.length > 0)
+                (Array.isArray(e.key_skills) && e.key_skills.length > 0)
               if (!filled) return null
               return (
             <ViewZone title="Expertise">
@@ -3336,18 +3336,9 @@ export default function ProfiluxPage() {
                 </>
               )}
 
-              {e.product_categories.length > 0 && (
-                <>
-                  <div style={sectionLabel}>Product categories</div>
-                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>
-                    {e.product_categories.map(v => productCategoryLabel(v)).join(' · ')}
-                  </div>
-                </>
-              )}
-
               {e.expertise_tags.length > 0 && (
                 <>
-                  <div style={sectionLabel}>Areas of expertise</div>
+                  <div style={sectionLabel}>Business functions</div>
                   <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>
                     {e.expertise_tags.map(v => expertiseTagLabel(v)).join(' · ')}
                   </div>
@@ -3356,18 +3347,9 @@ export default function ProfiluxPage() {
 
               {e.key_skills.length > 0 && (
                 <>
-                  <div style={sectionLabel}>Skills</div>
+                  <div style={sectionLabel}>Technical skills</div>
                   <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>
                     {e.key_skills.map(v => skillLabel(v)).join(' · ')}
-                  </div>
-                </>
-              )}
-
-              {e.market_knowledge.length > 0 && (
-                <>
-                  <div style={sectionLabel}>Markets</div>
-                  <div style={{ marginTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>
-                    {e.market_knowledge.join(' · ')}
                   </div>
                 </>
               )}
@@ -3394,19 +3376,8 @@ export default function ProfiluxPage() {
               )
             })()}
 
-            {/* §22.1 row 5 — Maisons (V12-divergence-3 ledger 28303edd) */}
-            {(() => {
-              const brands = Array.isArray(e.brands_worked_with) ? e.brands_worked_with : []
-              if (brands.length === 0) return null
-              const filled = true
-              return (
-            <ViewZone title="Maisons">
-              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#a58e28', lineHeight: 1.5 }}>
-                {brands.join(' · ')}
-              </div>
-            </ViewZone>
-              )
-            })()}
+            {/* Slice 5: Maisons ViewZone removed — brands_worked_with is internal-only
+                (no candidate edit surface since Slice STRUCT #1). DB column retained. */}
 
             {/* Slice 2b — Certifications (structured jsonb array-of-objects) */}
             {(() => {
