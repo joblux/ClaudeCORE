@@ -615,13 +615,13 @@ function VisibilityToggle({
         color: '#8e8e8e',
         textTransform: 'uppercase',
       }}>
-        Visible
+        Shared profile
       </span>
       <button
         type="button"
         role="switch"
         aria-checked={isVisible}
-        aria-label="Toggle visibility for this section in your View"
+        aria-label="Toggle visibility for this section on your shared profile"
         disabled={isToggling}
         onClick={() => onToggle(sectionId, !isVisible)}
         style={{
@@ -631,7 +631,7 @@ function VisibilityToggle({
           border: 'none',
           padding: 0,
           position: 'relative',
-          background: isVisible ? '#a58e28' : '#333',
+          background: isVisible ? '#1D9E75' : '#333',
           cursor: isToggling ? 'not-allowed' : 'pointer',
           opacity: isToggling ? 0.5 : 1,
           transition: 'background 0.15s',
