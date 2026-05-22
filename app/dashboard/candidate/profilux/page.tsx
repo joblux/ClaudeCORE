@@ -847,6 +847,10 @@ export default function ProfiluxPage() {
   const [saving4, setSaving4] = useState(false)
   const [savedAt4, setSavedAt4] = useState<number | null>(null)
   const [saveError4, setSaveError4] = useState<string | null>(null)
+  // Slice 4 — transient text input for "Add your own" Business Function.
+  // Stored verbatim (trim only) into draft4.expertise_tags; not persisted in
+  // its own field. Case-insensitive de-dup against existing array values.
+  const [customExpertiseTag, setCustomExpertiseTag] = useState('')
   const [draft8, setDraft8] = useState<Screen8Draft>({ clienteling_experience: null, clienteling_description: '' })
   const [saving8, setSaving8] = useState(false)
   const [savedAt8, setSavedAt8] = useState<number | null>(null)
@@ -863,6 +867,9 @@ export default function ProfiluxPage() {
   const [saving7, setSaving7] = useState(false)
   const [savedAt7, setSavedAt7] = useState<number | null>(null)
   const [saveError7, setSaveError7] = useState<string | null>(null)
+  // Slice 4 — transient text input for "Add your own" Technical Skill.
+  // Same posture as customExpertiseTag.
+  const [customSkill, setCustomSkill] = useState('')
   const [identityDrawerOpen, setIdentityDrawerOpen] = useState(false)
   const [careerHistoryDrawerOpen, setCareerHistoryDrawerOpen] = useState(false)
   const [experienceFormOpen, setExperienceFormOpen] = useState(false)
@@ -4417,6 +4424,53 @@ export default function ProfiluxPage() {
               {o.label}
             </button>
           ))}
+          {draft4.expertise_tags
+            .filter(v => !PROFILUX_EXPERTISE_TAG_OPTIONS.some(o => o.value === v))
+            .map((v) => (
+              <button
+                key={`custom-${v}`}
+                type="button"
+                style={chipActive}
+                onClick={() => setDraft4({ ...draft4, expertise_tags: draft4.expertise_tags.filter(x => x !== v) })}
+              >
+                {v}
+              </button>
+            ))}
+        </div>
+
+        <div style={{ marginTop: 16, display: 'flex', gap: 8, alignItems: 'center', maxWidth: 400 }}>
+          <input
+            type="text"
+            style={{ ...input, maxWidth: 'none', flex: 1 }}
+            value={customExpertiseTag}
+            placeholder="Add your own"
+            onChange={(ev) => setCustomExpertiseTag(ev.target.value)}
+            onKeyDown={(ev) => {
+              if (ev.key === 'Enter') {
+                ev.preventDefault()
+                const v = customExpertiseTag.trim()
+                if (v === '') return
+                const exists = draft4.expertise_tags.some(x => x.toLowerCase() === v.toLowerCase())
+                if (exists) { setCustomExpertiseTag(''); return }
+                setDraft4({ ...draft4, expertise_tags: [...draft4.expertise_tags, v] })
+                setCustomExpertiseTag('')
+              }
+            }}
+          />
+          <button
+            type="button"
+            style={btn}
+            onClick={() => {
+              const v = customExpertiseTag.trim()
+              if (v === '') return
+              const exists = draft4.expertise_tags.some(x => x.toLowerCase() === v.toLowerCase())
+              if (exists) { setCustomExpertiseTag(''); return }
+              setDraft4({ ...draft4, expertise_tags: [...draft4.expertise_tags, v] })
+              setCustomExpertiseTag('')
+            }}
+          >
+            Add
+          </button>
         </div>
 
         <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
@@ -4482,6 +4536,53 @@ export default function ProfiluxPage() {
               {o.label}
             </button>
           ))}
+          {draft7.key_skills
+            .filter(v => !PROFILUX_SKILL_OPTIONS.some(o => o.value === v))
+            .map((v) => (
+              <button
+                key={`custom-${v}`}
+                type="button"
+                style={chipActive}
+                onClick={() => setDraft7({ ...draft7, key_skills: draft7.key_skills.filter(x => x !== v) })}
+              >
+                {v}
+              </button>
+            ))}
+        </div>
+
+        <div style={{ marginTop: 16, display: 'flex', gap: 8, alignItems: 'center', maxWidth: 400 }}>
+          <input
+            type="text"
+            style={{ ...input, maxWidth: 'none', flex: 1 }}
+            value={customSkill}
+            placeholder="Add your own"
+            onChange={(ev) => setCustomSkill(ev.target.value)}
+            onKeyDown={(ev) => {
+              if (ev.key === 'Enter') {
+                ev.preventDefault()
+                const v = customSkill.trim()
+                if (v === '') return
+                const exists = draft7.key_skills.some(x => x.toLowerCase() === v.toLowerCase())
+                if (exists) { setCustomSkill(''); return }
+                setDraft7({ ...draft7, key_skills: [...draft7.key_skills, v] })
+                setCustomSkill('')
+              }
+            }}
+          />
+          <button
+            type="button"
+            style={btn}
+            onClick={() => {
+              const v = customSkill.trim()
+              if (v === '') return
+              const exists = draft7.key_skills.some(x => x.toLowerCase() === v.toLowerCase())
+              if (exists) { setCustomSkill(''); return }
+              setDraft7({ ...draft7, key_skills: [...draft7.key_skills, v] })
+              setCustomSkill('')
+            }}
+          >
+            Add
+          </button>
         </div>
 
         <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
