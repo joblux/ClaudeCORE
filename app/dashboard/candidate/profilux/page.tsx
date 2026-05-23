@@ -1793,6 +1793,33 @@ export default function ProfiluxPage() {
     }
   }
 
+  // G1 — Corrective lane: remove a library section key from activated_sections.
+  // Drops the key only; underlying data arrays (certifications, awards, etc.)
+  // are preserved so re-adding restores the existing content unchanged.
+  async function handleDeactivateSection(key: string) {
+    setActivatingSectionKey(key)
+    setAddSectionError(null)
+    try {
+      const current = Array.isArray(editor?.activated_sections) ? editor!.activated_sections : []
+      const next = current.filter(k => k !== key)
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activated_sections: next }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setAddSectionError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+    } catch (err) {
+      setAddSectionError(String(err))
+    } finally {
+      setActivatingSectionKey(null)
+    }
+  }
+
   async function handleUploadClick() {
     setUploadError(null)
     fileInputRef.current?.click()
@@ -6257,23 +6284,32 @@ export default function ProfiluxPage() {
             }
             if (isActivated) {
               return (
-                <div
+                <button
                   key={s.key}
+                  type="button"
+                  disabled={isInFlight}
+                  onClick={() => handleDeactivateSection(s.key)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '12px 14px',
+                    background: 'transparent',
                     border: '0.5px solid #2a2a2a',
                     borderRadius: 6,
                     color: '#777',
                     fontSize: 13,
                     fontFamily: 'Inter, sans-serif',
+                    cursor: isInFlight ? 'not-allowed' : 'pointer',
+                    opacity: isInFlight ? 0.5 : 1,
+                    textAlign: 'left',
                   }}
                 >
                   <span>{s.label}</span>
-                  <span style={{ fontSize: 11, color: '#777', letterSpacing: '0.4px', textTransform: 'uppercase' }}>Added</span>
-                </div>
+                  <span style={{ fontSize: 11, color: '#999', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
+                    {isInFlight ? 'Removing…' : 'Remove'}
+                  </span>
+                </button>
               )
             }
             return (
