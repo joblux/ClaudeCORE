@@ -1790,10 +1790,21 @@ export default function ProfiluxPage() {
     }
   }
 
-  // G1 — Corrective lane: remove a library section key from activated_sections.
-  // Drops the key only; underlying data arrays (certifications, awards, etc.)
-  // are preserved so re-adding restores the existing content unchanged.
+  // G1 — REMOVE means DELETE (Mo decision 2026-05-23). Removing an optional
+  // section drops its key from activated_sections AND clears its stored content
+  // in the same write. Works whether the section is empty or filled. If content
+  // exists, confirm first — removal is destructive and not restored on re-add.
   async function handleDeactivateSection(key: string) {
+    // Each optional section key maps 1:1 to a members.* array column of the same name.
+    const content = (editor as any)?.[key]
+    const hasContent = Array.isArray(content) && content.length > 0
+    if (hasContent) {
+      const label = ADD_SECTION_LIBRARY.find(s => s.key === key)?.label ?? key
+      const ok = typeof window !== 'undefined'
+        ? window.confirm(`Delete ${label}? This permanently deletes the section content. This cannot be undone.`)
+        : true
+      if (!ok) return
+    }
     setActivatingSectionKey(key)
     setAddSectionError(null)
     try {
@@ -1802,7 +1813,9 @@ export default function ProfiluxPage() {
       const res = await fetch('/api/profilux', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ activated_sections: next }),
+        // Deactivate + clear content in one write. Empty array clears the column
+        // via the route's W2 partial-body handling for this key.
+        body: JSON.stringify({ activated_sections: next, [key]: [] }),
       })
       if (!res.ok) {
         const d = await res.json().catch(() => ({} as any))
