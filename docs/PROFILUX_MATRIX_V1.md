@@ -4,7 +4,7 @@ Domain contract for the ProfiLux object across JOBLUX. Locks the storage, resolu
 
 This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE wins until reconciled. See §12.
 
-**Status:** locked v1.11 (May 18 2026 private PDF export reconciliation — Pack B residue close)
+**Status:** locked v1.12 (May 23 2026 section visibility & sovereignty doctrine — §26)
 **Originally locked:** April 30, 2026
 **v1.1 addendum locked:** May 6, 2026
 **v1.2 addendum locked:** May 7, 2026
@@ -14,6 +14,15 @@ This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE w
 
 ## CHANGE LOG
 
+
+**v1.12 — May 23 2026 section visibility & sovereignty doctrine lock**
+
+Locks the candidate's mental model for what sections exist on their ProfiLux and what is exposed outbound. Consolidates the two already-shipped substrates (`section_visibility` core hide/show, `activated_sections` optional add/remove) and the keep-data rule (G1, `190c44d`) under one doctrine. No DB change — meaning, not storage. Vocabulary locked: "Visible on shared profile" / "Hidden from shared profile" / "Removed from my passport". G2 scope bounded to a presentation-only dim/label treatment (sovereignty indicator, never error/incomplete).
+
+- **§26** new section — Section visibility & sovereignty doctrine (core vs optional substrate separation, no-delete-on-visibility rule, candidate owns outbound visibility, authenticated-cockpit rule, outbound-honors-visibility rule, canonical vocabulary, G2 disposition).
+- **§16A.1** cross-ref appended — framing superseded by §26; §16A retains field/section projection mechanics.
+
+§§1–25 — all KEEP unchanged.
 
 **v1.11 — May 18 2026 private PDF export reconciliation (Pack B residue close)**
 
@@ -828,6 +837,8 @@ When schema lands, `public` and `client` projections will honor maskable flags b
 
 Candidate-controlled section-level hide. The candidate decides which entire sections appear in their externally-shared ProfiLux, beyond the per-field maskable layer of §16.
 
+*Superseded in framing by §26 (Section visibility & sovereignty, locked v1.12). §16A retains the field/section projection mechanics; §26 is the authoritative mental model.*
+
 ### 16A.2 — Projection scope (locked v1.6)
 
 Section hide affects EXACTLY these projections:
@@ -1501,4 +1512,62 @@ Future implementation slices:
 - B.3.4.1 → `business_briefs` + `bloglux_articles` export scope (deferred)
 
 No new code or schema is introduced by §25 itself.
+
+---
+
+## 26. Section visibility & sovereignty doctrine (locked 2026-05-23)
+
+Consolidates the candidate's control over what sections exist on their ProfiLux and what is exposed outbound. Supersedes the scope framing of §16A (which remains valid for field-level mechanics) and formalizes the two distinct substrates already shipped. No DB change — this locks meaning, not storage.
+
+### 26.1 — Core vs optional sections
+
+- **Core sections** are the permanent ProfiLux spine. They always belong to the object; the candidate cannot remove them. (Per §22.4: the default sections.) Outbound exposure governed by `section_visibility` (§26.4/§26.5).
+- **Optional sections** are candidate-added sections from the §22.2 library. They exist on the passport only when the candidate adds them. Substrate: `members.activated_sections text[]`.
+
+These two are intentionally separate substrates (`section_visibility` jsonb for core hide/show; `activated_sections` text[] for optional add/remove). "Unify" means UX coherence only — never a DB merge. (STATE lock, 2026-05-22.)
+
+### 26.2 — Visibility actions never delete data
+
+No visibility or removal action is destructive. Hiding a core section, or removing an optional section, ALWAYS retains the underlying field data server-side. Content deletion is a separate, explicit act performed inside a section's drawer (row-level delete), never a side-effect of a visibility toggle or a section removal.
+
+- Core hide (`section_visibility[id]=false`): data untouched, section withheld from outbound surfaces only.
+- Optional remove (drop key from `activated_sections`): section returns to the library and is re-addable; its data remains in `members.*` until explicitly deleted in the drawer. (Shipped G1, commit `190c44d`, keep-data proven.)
+
+### 26.3 — Candidate owns outbound visibility
+
+Visibility and removal are candidate-only actions. The system MAY suggest (e.g. "this section is empty — add content or hide it") but never auto-hides or auto-removes. Admin/operator surfaces never silently alter candidate visibility; they read full data through their own projection (§7) and do not write the candidate's visibility state.
+
+### 26.4 — Cockpit rule: the candidate never hides data from themselves
+
+The candidate's own AUTHENTICATED View and Edit surfaces (at `/dashboard/candidate/profilux`) are the cockpit. They render the full ProfiLux — including hidden core sections and added optional sections — regardless of outbound visibility state. A core section set to `section_visibility=false` still renders in the candidate's own authenticated View/Edit; it is only withheld from the outbound public/share/client surfaces. The public `/[slug]` surface is NOT the cockpit — it is an outbound projection and honors visibility/masking per §26.5. (This confirms the authenticated-View-shows-everything behavior is correct, not a leak.)
+
+### 26.5 — Outbound surfaces honor visibility and masking
+
+`public` (`/[slug]`), share, and `client` projections honor:
+- `section_visibility` (§16A) — whole-section hide
+- `masked_fields` (§16) — field-level hide
+
+Admin/operator surfaces (`admin`, `ats`) always retain full access to the underlying data through their own projection paths (per §16A.2 + §7.3); candidate visibility settings do not narrow what operators see. Outbound client/public/share surfaces honor candidate visibility and masking settings. The candidate's control is over OUTBOUND exposure, not over what JOBLUX retains or what operators can access internally.
+
+### 26.6 — Canonical vocabulary (locked)
+
+The candidate-facing surfaces and all copy MUST use exactly these terms; the words are not interchangeable:
+
+| State | Phrase | Mechanism |
+|---|---|---|
+| Core section shown outbound | "Visible on shared profile" | `section_visibility[id]=true` |
+| Core section withheld outbound | "Hidden from shared profile" | `section_visibility[id]=false` |
+| Optional section taken off passport | "Removed from my passport" | dropped from `activated_sections` |
+
+Forbidden: using "inactive" and "hidden" interchangeably; implying deletion when removing a section; "deactivate" as a candidate-facing word for removal.
+
+### 26.7 — G2 disposition (Edit-tab presentation)
+
+A core section set to "Hidden from shared profile" MUST remain fully editable in Edit, rendered with a dim/marked treatment + the literal label "Hidden from shared profile". This is presentation only on the existing `section_visibility=false` state — no new substrate, no DB change.
+
+The dim treatment is a SOVEREIGNTY INDICATOR, not an error or incompleteness state. It MUST NOT: reduce legibility of the section's content, read as "disabled" or "error", or resemble an unfilled/incomplete field. "Hidden from shared profile" is a deliberate candidate choice, visually distinct from "Missing" / "Review" markers (§14.3) and from any error state. (This is the scope boundary for the future G2 slice.)
+
+### 26.8 — Status
+
+Doctrine locked. Substrate already shipped (`section_visibility`, `activated_sections`, `masked_fields`). G2 dim/label treatment is the only remaining presentation slice and is unblocked by this lock. Operational feedback (toggles, activation) uses brand-green `#1D9E75`, never gold (STATE design lock).
 
