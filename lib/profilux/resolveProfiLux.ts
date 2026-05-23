@@ -374,22 +374,13 @@ export async function resolveProfiLux(
     press_features: row.press_features ?? [],
     references: row.references ?? [],
     internships: row.internships ?? [],
-    activated_sections: (() => {
-      const _explicitActivated = arr(row.activated_sections)
-      const _implicitActivated = _explicitActivated.length > 0
-        ? []
-        : [
-            ...(Array.isArray(row.certifications) && row.certifications.length > 0 ? ['certifications'] : []),
-            ...(Array.isArray(row.awards) && row.awards.length > 0 ? ['awards'] : []),
-            ...(arr(row.memberships).length > 0 ? ['memberships'] : []),
-            ...(Array.isArray(row.strategic_initiatives) && row.strategic_initiatives.length > 0 ? ['strategic_initiatives'] : []),
-            ...(Array.isArray(row.portfolio) && row.portfolio.length > 0 ? ['portfolio'] : []),
-            ...(Array.isArray(row.press_features) && row.press_features.length > 0 ? ['press_features'] : []),
-            ...(Array.isArray(row.references) && row.references.length > 0 ? ['references'] : []),
-            ...(Array.isArray(row.internships) && row.internships.length > 0 ? ['internships'] : []),
-          ]
-      return _explicitActivated.length > 0 ? _explicitActivated : _implicitActivated
-    })(),
+    // G1 (Mo decision 2026-05-23): activated_sections is the SINGLE source of
+    // truth, read literally from the column. The prior implicit back-fill
+    // (auto-activate any optional section whose content column was non-empty
+    // when activated_sections was empty) is removed: it resurrected removed
+    // sections after delete and contradicts "REMOVE = delete" + sovereignty.
+    // Empty means empty. Content with no explicit activation does not render.
+    activated_sections: arr(row.activated_sections),
     product_categories: arr(row.product_categories),
     brands_worked_with: arr(row.brands_worked_with),
     client_segment_experience: arr(row.client_segment_experience),
