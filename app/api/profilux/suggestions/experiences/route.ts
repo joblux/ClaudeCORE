@@ -41,8 +41,9 @@ const supabase = createClient(
 //   - 409 ALREADY_APPLIED if resolution_state.experiences[signature].status
 //     === 'applied' (idempotency; no second INSERT).
 //   - 422 START_DATE_UNPARSEABLE if the matched row's start_date is null or
-//     not a YYYY-MM-DD parseable ISO date (work_experiences.start_date is
-//     `date NOT NULL`).
+//     not a YYYY-MM-DD / YYYY-MM parseable ISO date (work_experiences.start_date
+//     is `date NOT NULL`). YYYY-MM is coerced to YYYY-MM-01 before insert;
+//     l1_snapshot still records the raw parser value.
 //   - INSERTs into work_experiences using the matched SERVER-SIDE row. Same
 //     column set the manual /api/profilux/experiences endpoint uses:
 //     member_id, job_title, company, city, country, start_date, end_date,
@@ -60,6 +61,7 @@ const supabase = createClient(
 // =============================================================================
 
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/
+const ISO_YEAR_MONTH_REGEX = /^\d{4}-\d{2}$/
 
 function buildEditorResponse(resolved: ProfiLuxResolved) {
   const projection = projectFor(resolved, 'editor') as EditorProjection
@@ -160,18 +162,28 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // Validate start_date parseability. work_experiences.start_date is `date NOT NULL`
-  // and the CV parser writes partial precision (YYYY-MM-DD, YYYY-MM, or YYYY).
-  // Only YYYY-MM-DD survives a Postgres `date` cast — anything else fails 422.
+  // Validate + coerce start_date. work_experiences.start_date is `date NOT NULL`.
+  // Slice 1.1: Haiku CV parser emits month precision for ~100% of rows ('2026-03'),
+  // so strict YYYY-MM-DD validation rejected every real confirm. Coerce YYYY-MM to
+  // YYYY-MM-01 (day defaulted to 1) before the L2 insert. YYYY-only and free-text /
+  // null still 422. The l1_snapshot below preserves the RAW parser value — the
+  // coercion only affects what lands in work_experiences.start_date.
   const rawStartDate = matchedRow.start_date
-  if (
-    typeof rawStartDate !== 'string' ||
-    !ISO_DATE_REGEX.test(rawStartDate) ||
-    Number.isNaN(Date.parse(rawStartDate))
-  ) {
+  let normalizedStartDate: string | null = null
+  if (typeof rawStartDate === 'string') {
+    if (ISO_DATE_REGEX.test(rawStartDate) && !Number.isNaN(Date.parse(rawStartDate))) {
+      normalizedStartDate = rawStartDate
+    } else if (ISO_YEAR_MONTH_REGEX.test(rawStartDate)) {
+      const candidate = `${rawStartDate}-01`
+      if (!Number.isNaN(Date.parse(candidate))) {
+        normalizedStartDate = candidate
+      }
+    }
+  }
+  if (normalizedStartDate === null) {
     return NextResponse.json(
       {
-        error: 'Start date is missing or not in YYYY-MM-DD format; cannot promote to work_experiences',
+        error: 'Start date is missing or not in YYYY-MM-DD / YYYY-MM format; cannot promote to work_experiences',
         code: 'START_DATE_UNPARSEABLE',
       },
       { status: 422 }
@@ -211,7 +223,7 @@ export async function POST(req: NextRequest) {
     company,
     city,
     country,
-    start_date: rawStartDate,
+    start_date: normalizedStartDate,
     end_date: isCurrent ? null : endDate,
     is_current: isCurrent,
     description,
