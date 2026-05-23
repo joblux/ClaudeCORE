@@ -60,6 +60,15 @@ function cvDateLabel(iso: string | null | undefined): string | null {
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+function locationLabel(city: string | null | undefined, country: string | null | undefined): string {
+  const c = typeof city === 'string' && city.trim().length > 0 ? city.trim() : null
+  const k = typeof country === 'string' && country.trim().length > 0 ? country.trim() : null
+  if (c && k) return `${c}, ${k}`
+  if (c) return c
+  if (k) return k
+  return '—'
+}
+
 // A2.6 — State marker family (MATRIX §24.3, §14.3).
 // View tab only. Replaces inline <NotSet /> / <NoneSel /> on View cards.
 // Edit tab keeps NotSet/NoneSel verbatim.
@@ -2747,7 +2756,7 @@ export default function ProfiluxPage() {
           {e.experiences.map((exp, i) => (
             <div key={i} style={card}>
               <div><strong>{exp.company ?? 'Unknown'}</strong> — {exp.job_title ?? 'Role not specified'}</div>
-              <div style={{ color: '#999', marginTop: 4 }}>{exp.city ?? '—'}, {exp.country ?? '—'} · {exp.start_date ?? '—'} → {exp.end_date ?? 'Present'}</div>
+              <div style={{ color: '#999', marginTop: 4 }}>{locationLabel(exp.city, exp.country)} · {exp.start_date ?? '—'} → {exp.end_date ?? 'Present'}</div>
               {exp.description && <div style={{ color: '#ccc', marginTop: 8 }}>{exp.description}</div>}
             </div>
           ))}
@@ -3844,7 +3853,7 @@ export default function ProfiluxPage() {
               <div key={exp.id ?? i} style={card}>
                 <div><strong>{exp.job_title ?? 'Role not specified'}</strong> — {exp.company ?? 'Unknown'}</div>
                 <div style={{ color: '#999', marginTop: 4 }}>
-                  {exp.city ?? '—'}, {exp.country ?? '—'} · {exp.start_date ?? '—'} → {exp.is_current ? 'Present' : (exp.end_date ?? '—')}
+                  {locationLabel(exp.city, exp.country)} · {exp.start_date ?? '—'} → {exp.is_current ? 'Present' : (exp.end_date ?? '—')}
                 </div>
                 {exp.description && <div style={{ color: '#ccc', marginTop: 8 }}>{exp.description}</div>}
               </div>
@@ -3947,7 +3956,7 @@ export default function ProfiluxPage() {
                     <div key={exp.id ?? i} style={{ ...card, position: 'relative' }}>
                       <div><strong>{exp.company ?? 'Unknown'}</strong> — {exp.job_title ?? 'Role not specified'}</div>
                       <div style={{ color: '#999', marginTop: 4, fontSize: 12 }}>
-                        {exp.city ?? '—'}, {exp.country ?? '—'} · {exp.start_date ?? '—'} → {exp.is_current ? 'Present' : (exp.end_date ?? '—')}
+                        {locationLabel(exp.city, exp.country)} · {exp.start_date ?? '—'} → {exp.is_current ? 'Present' : (exp.end_date ?? '—')}
                       </div>
                       {exp.description && <div style={{ color: '#ccc', marginTop: 8, fontSize: 12 }}>{exp.description}</div>}
                       {editable ? (
