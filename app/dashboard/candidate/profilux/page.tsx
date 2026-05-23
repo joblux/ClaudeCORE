@@ -6019,6 +6019,19 @@ export default function ProfiluxPage() {
       </Drawer>
       </div>
       )}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{
+          fontSize: 12,
+          fontWeight: 600,
+          color: '#fff',
+          letterSpacing: 1.6,
+          textTransform: 'uppercase',
+          fontFamily: 'Inter, sans-serif',
+          marginBottom: 10,
+          paddingLeft: 2,
+        }}>
+          Opportunity Preferences
+        </div>
       <SectionCard
         eyebrow="Compensation"
         hiddenFromShare={(editor.section_visibility?.['compensation'] ?? true) === false}
@@ -6224,6 +6237,7 @@ export default function ProfiluxPage() {
           {saveError9 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError9}</span>}
         </div>
       </Drawer>
+      </div>
 
       {/* PF-D V2.1 — EXTEND DOSSIER drawer (trigger lives in top-right action row) */}
       <Drawer
