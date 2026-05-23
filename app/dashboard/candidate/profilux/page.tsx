@@ -130,10 +130,11 @@ type SectionCardProps = {
   eyebrow?: string
   layout?: 'block' | 'flex'
   headerAction?: React.ReactNode
+  hiddenFromShare?: boolean
   children: React.ReactNode
 }
 
-function SectionCard({ eyebrow, layout = 'block', headerAction, children }: SectionCardProps) {
+function SectionCard({ eyebrow, layout = 'block', headerAction, hiddenFromShare = false, children }: SectionCardProps) {
   const base: React.CSSProperties = {
     background: '#222',
     border: '1px solid #2a2a2a',
@@ -152,6 +153,19 @@ function SectionCard({ eyebrow, layout = 'block', headerAction, children }: Sect
     textTransform: 'uppercase',
     fontFamily: 'Inter, sans-serif',
   }
+  // G2 (MATRIX §26.7): sovereignty indicator for a core section the candidate
+  // has set to "Hidden from shared profile" (section_visibility[id]=false).
+  // Neutral/muted, NOT an error/disabled/missing state. Header + toggle stay
+  // fully opaque and interactive; only the body content is gently dimmed.
+  const hiddenLabelStyle: React.CSSProperties = {
+    fontSize: 9.5,
+    fontWeight: 500,
+    color: '#8e8e8e',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    fontFamily: 'Inter, sans-serif',
+    marginTop: 4,
+  }
   const headerRowStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
@@ -165,11 +179,18 @@ function SectionCard({ eyebrow, layout = 'block', headerAction, children }: Sect
     <div style={{ ...base, ...flexExtras }}>
       {(eyebrow || headerAction) && (
         <div style={headerRowStyle}>
-          {eyebrow ? <div style={eyebrowStyle}>{eyebrow}</div> : <div />}
+          {eyebrow ? (
+            <div>
+              <div style={eyebrowStyle}>{eyebrow}</div>
+              {hiddenFromShare && <div style={hiddenLabelStyle}>Hidden from shared profile</div>}
+            </div>
+          ) : <div />}
           {headerAction ?? null}
         </div>
       )}
-      {children}
+      <div style={hiddenFromShare ? { opacity: 0.7 } : undefined}>
+        {children}
+      </div>
     </div>
   )
 }
@@ -3638,6 +3659,7 @@ export default function ProfiluxPage() {
       })()}
       <SectionCard
         eyebrow="Identity"
+        hiddenFromShare={(editor.section_visibility?.['identity'] ?? true) === false}
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
@@ -3727,6 +3749,7 @@ export default function ProfiluxPage() {
       </Drawer>
       <SectionCard
         eyebrow="Current Role"
+        hiddenFromShare={(editor.section_visibility?.['current_role'] ?? true) === false}
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
@@ -3799,6 +3822,7 @@ export default function ProfiluxPage() {
       </Drawer>
       <SectionCard
         eyebrow="Career Path"
+        hiddenFromShare={(editor.section_visibility?.['career_path'] ?? true) === false}
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
@@ -4003,6 +4027,7 @@ export default function ProfiluxPage() {
       </Drawer>
       <SectionCard
         eyebrow="Education"
+        hiddenFromShare={(editor.section_visibility?.['education'] ?? true) === false}
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
@@ -4159,6 +4184,7 @@ export default function ProfiluxPage() {
       </Drawer>
       <SectionCard
         eyebrow="Languages"
+        hiddenFromShare={(editor.section_visibility?.['languages'] ?? true) === false}
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
@@ -4315,6 +4341,7 @@ export default function ProfiluxPage() {
           columns remain in the DB but have no candidate edit surface. */}
       <SectionCard
         eyebrow="Luxury Sectors"
+        hiddenFromShare={(editor.section_visibility?.['luxury_fit'] ?? true) === false}
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
@@ -4415,6 +4442,7 @@ export default function ProfiluxPage() {
       </Drawer>
       <SectionCard
         eyebrow="Business Functions"
+        hiddenFromShare={(editor.section_visibility?.['luxury_fit'] ?? true) === false}
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
@@ -4527,6 +4555,7 @@ export default function ProfiluxPage() {
           key_skills only; market_knowledge column stays in DB, no edit surface. */}
       <SectionCard
         eyebrow="Technical Skills"
+        hiddenFromShare={(editor.section_visibility?.['skills_markets'] ?? true) === false}
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
@@ -5983,6 +6012,7 @@ export default function ProfiluxPage() {
       )}
       <SectionCard
         eyebrow="Compensation"
+        hiddenFromShare={(editor.section_visibility?.['compensation'] ?? true) === false}
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
@@ -6051,6 +6081,7 @@ export default function ProfiluxPage() {
       </Drawer>
       <SectionCard
         eyebrow="Availability"
+        hiddenFromShare={(editor.section_visibility?.['availability'] ?? true) === false}
         headerAction={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button
