@@ -69,30 +69,6 @@ function locationLabel(city: string | null | undefined, country: string | null |
   return '—'
 }
 
-// A2.6 — State marker family (MATRIX §24.3, §14.3).
-// View tab only. Replaces inline <NotSet /> / <NoneSel /> on View cards.
-// Edit tab keeps NotSet/NoneSel verbatim.
-type MarkerKind = 'missing' | 'review'
-const Marker = ({ kind }: { kind: MarkerKind }) => {
-  if (kind === 'review') {
-    return (
-      <span style={{
-        display: 'inline-block',
-        background: 'rgba(165, 142, 40, 0.15)',
-        color: '#a58e28',
-        padding: '2px 8px',
-        borderRadius: 999,
-        fontSize: 11,
-        fontFamily: 'Inter, sans-serif',
-        letterSpacing: 0.3,
-      }}>Review</span>
-    )
-  }
-  return (
-    <em style={{ color: '#777', fontSize: 13, fontStyle: 'italic' }}>Missing</em>
-  )
-}
-
 const wrap: React.CSSProperties = { maxWidth: 1200, margin: '0 auto', padding: '0 28px', background: '#1a1a1a', color: '#fff', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }
 const h1Style: React.CSSProperties = { fontFamily: 'Playfair Display, serif', fontWeight: 400, fontSize: 28, marginBottom: 8 }
 const sub: React.CSSProperties = { color: '#999', fontSize: 13, marginBottom: 24 }
@@ -3103,26 +3079,6 @@ export default function ProfiluxPage() {
           tagLineParts.push(`${e.years_in_luxury} years in luxury`)
         }
         const tagLine = tagLineParts.length > 0 ? tagLineParts.join(' · ') : null
-
-        // A2.6 — Marker compute (client-side only, MATRIX §24.3).
-        // Review marker shown ONLY when L2 is empty AND cv_identity_suggestions
-        // has a value for that key. All other empty fields render Missing.
-        const sug = e.cv_identity_suggestions
-        const reviewFor = (key: 'first_name' | 'last_name' | 'city' | 'nationality') => {
-          // A2.6.1 — Check suggestion presence FIRST. sug[key] is computed
-          // pre-Rule-A in the resolver and is the only honest signal of
-          // "L2 was empty AND L1 had a value". e[key] reads post-Rule-A
-          // and contains L1 fallback when L2 is null — using it here would
-          // falsely treat L1 fallback as a real L2 value.
-          if (sug[key] !== undefined) return <Marker kind="review" />
-          const v = e[key]
-          if (typeof v === 'string' && v.trim().length > 0) return v
-          return <Marker kind="missing" />
-        }
-        const missingIfEmptyStr = (v: string | null | undefined) =>
-          (typeof v === 'string' && v.trim().length > 0) ? v : <Marker kind="missing" />
-        const missingIfEmptyNum = (v: number | null | undefined) =>
-          (typeof v === 'number') ? String(v) : <Marker kind="missing" />
 
         const experiences = Array.isArray(e.experiences) ? e.experiences : []
         const expRows = experiences.map((exp) => {
