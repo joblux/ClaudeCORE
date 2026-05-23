@@ -411,7 +411,19 @@ export async function resolveProfiLux(
     desired_departments: arr(row.desired_departments),
     // L1 passthroughs (now with L2 merge per PF-2 P-A)
     sectors: relationalSectors ?? arr(cv?.sectors),
-    languages: [...(relationalLanguages ?? []), ...mapLanguages(cv?.languages)],
+    // 65d30cd5: dedupe L1 against L2 by case-insensitive language name.
+    // L2 (member_languages) wins; matching L1 rows suppressed so a language
+    // present in both the editor store and the parsed CV renders once.
+    languages: (() => {
+      const l2 = relationalLanguages ?? []
+      const l2Names = new Set(
+        l2.map((l) => l.language.trim().toLowerCase()),
+      )
+      const l1 = mapLanguages(cv?.languages).filter(
+        (l) => !l2Names.has(l.language.trim().toLowerCase()),
+      )
+      return [...l2, ...l1]
+    })(),
     // A2.3-β.2: L2 + L1 (no replace, no dedup).
     // Career History V2 Slice 1: mapExperiences suppresses L1 rows whose
     // signature is already resolved (status 'applied'/'dismissed') in
