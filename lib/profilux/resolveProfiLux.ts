@@ -19,6 +19,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { computeEducationSignature } from './educationSignature'
+import { computeExperienceSignature } from './experienceSignature'
 import type {
   CvEducationSuggestion,
   CvEducationSuggestions,
@@ -100,22 +101,45 @@ function arr<T>(v: T[] | null | undefined): T[] {
 
 function mapExperiences(
   l1: CvParsedExperience[] | undefined,
+  resolution?: CvParsedData['resolution_state'],
 ): ResolvedExperience[] {
-  return arr(l1).map((e) => ({
-    company: e.company ?? null,
-    job_title: e.job_title ?? null,
-    city: e.city ?? null,
-    country: e.country ?? null,
-    start_date: e.start_date ?? null,
-    end_date: e.end_date ?? null,
-    // S-C.0: pass is_current through from L1. Defensive `?? false` mirrors
-    // resolver's existing defensive style and tolerates stale cv_parsed_data
-    // that predates the boolean-NN zod enforcement. raw_dates_text is parsed
-    // but intentionally NOT lifted to ResolvedExperience (no UI consumer
-    // exists; future lift is a 1-line slice when needed).
-    is_current: e.is_current ?? false,
-    description: e.description ?? null,
-  }))
+  // Career History V2 Slice 1: suppress L1 rows the user already promoted to L2.
+  // Mirror education suppression in cv_education_suggestions: rows with no
+  // company can't be signed (signature requires a company anchor) — pass them
+  // through unchanged. For signable rows, compute the signature and omit any
+  // row whose status in resolution_state.experiences is 'applied' or
+  // 'dismissed'. The corresponding L2 (work_experiences) row already shows
+  // up in the resolver's experiences concat, so confirmed entries render
+  // once — no ghost.
+  const expResolution = resolution?.experiences ?? {}
+  const out: ResolvedExperience[] = []
+  for (const e of arr(l1)) {
+    if (nonEmptyStr(e.company)) {
+      const sig = computeExperienceSignature({
+        company: e.company ?? null,
+        job_title: e.job_title ?? null,
+        start_date: e.start_date ?? null,
+      })
+      const res = expResolution[sig]
+      if (res && (res.status === 'applied' || res.status === 'dismissed')) continue
+    }
+    out.push({
+      company: e.company ?? null,
+      job_title: e.job_title ?? null,
+      city: e.city ?? null,
+      country: e.country ?? null,
+      start_date: e.start_date ?? null,
+      end_date: e.end_date ?? null,
+      // S-C.0: pass is_current through from L1. Defensive `?? false` mirrors
+      // resolver's existing defensive style and tolerates stale cv_parsed_data
+      // that predates the boolean-NN zod enforcement. raw_dates_text is parsed
+      // but intentionally NOT lifted to ResolvedExperience (no UI consumer
+      // exists; future lift is a 1-line slice when needed).
+      is_current: e.is_current ?? false,
+      description: e.description ?? null,
+    })
+  }
+  return out
 }
 
 function mapEducation(
@@ -388,8 +412,14 @@ export async function resolveProfiLux(
     // L1 passthroughs (now with L2 merge per PF-2 P-A)
     sectors: relationalSectors ?? arr(cv?.sectors),
     languages: [...(relationalLanguages ?? []), ...mapLanguages(cv?.languages)],
-    // A2.3-β.2: L2 + L1 (no replace, no dedup)
-    experiences: [...(relationalExperiences ?? []), ...mapExperiences(cv?.experiences)],
+    // A2.3-β.2: L2 + L1 (no replace, no dedup).
+    // Career History V2 Slice 1: mapExperiences suppresses L1 rows whose
+    // signature is already resolved (status 'applied'/'dismissed') in
+    // resolution_state.experiences — so the L2 twin is the only render.
+    experiences: [
+      ...(relationalExperiences ?? []),
+      ...mapExperiences(cv?.experiences, cv?.resolution_state),
+    ],
     // S-B.1A: L2 first + L1 second (no replace, no dedup).
     // Education: L2 (user-confirmed) replaces L1 (CV parser fallback) when present.
     // Same rank-merge rationale as sectors — L2 is canonical when populated.

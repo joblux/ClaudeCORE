@@ -144,6 +144,22 @@ export type CvParsedDataResolutionState = {
    * Never written by /api/members/cv-parse (parser preserves but does not touch).
    */
   education?: Record<string, CvParsedDataResolutionEducationItem>
+  /**
+   * experiences — Career History V2 Slice 1.
+   *
+   * Per-row apply tracking for cv_parsed_data.experiences entries (L1). Mirrors
+   * the education sibling: key = sha256(company|job_title|start_date), lowercased
+   * + trimmed. end_date intentionally excluded so an L1 row whose end_date the
+   * parser later fills/changes does NOT re-fire after the user confirmed it.
+   *
+   * status:
+   *   - 'applied'   → user confirmed the L1 row; work_experiences INSERT succeeded; l2_id set
+   *   - 'dismissed' → reserved (no UI wiring v1; type slot kept for symmetry with education)
+   *
+   * Written by /api/profilux/suggestions/experiences only.
+   * Never written by /api/members/cv-parse (parser preserves but does not touch).
+   */
+  experiences?: Record<string, CvParsedDataResolutionExperienceItem>
 }
 
 /**
@@ -161,6 +177,26 @@ export type CvParsedDataResolutionEducationItem = {
     degree_level: string | null
     field_of_study: string | null
     graduation_year: number | null
+  }
+  l2_id: string | null
+  at: string
+}
+
+/**
+ * resolution_state.experiences entry — Career History V2 Slice 1.
+ *
+ * Sibling to CvParsedDataResolutionEducationItem. l1_snapshot captures the
+ * matched server-side L1 row at confirm time (the four fields actually carried
+ * across the L1→L2 promotion). l2_id links to work_experiences.id on apply.
+ */
+export type CvParsedDataResolutionExperienceItem = {
+  status: 'applied' | 'dismissed'
+  signature: string
+  l1_snapshot: {
+    company: string | null
+    job_title: string | null
+    start_date: string | null
+    end_date: string | null
   }
   l2_id: string | null
   at: string

@@ -907,6 +907,11 @@ export default function ProfiluxPage() {
   // S-B.1B.4 — per-row in-flight state for education suggestions panel.
   // Reuses actionError for failures; no education-specific error hook.
   const [educationActioningSig, setEducationActioningSig] = useState<string | null>(null)
+  // Career History V2 Slice 1 — per-row in-flight state for the L1 experience
+  // Confirm button. Keyed on a plain local string (company|job_title|start_date)
+  // — NOT a crypto signature. The server computes the canonical signature on
+  // its side after matching the row. Reuses experienceError for failure surface.
+  const [experienceConfirmingKey, setExperienceConfirmingKey] = useState<string | null>(null)
 
   const refetch = async () => {
     const res = await fetch('/api/profilux')
@@ -2395,6 +2400,46 @@ export default function ProfiluxPage() {
     }
   }
 
+  // Career History V2 Slice 1 — Confirm a parsed-CV (L1) experience into the
+  // work_experiences (L2) table. Posts the three identity fields; the server
+  // matches against the live cv_parsed_data row and is fully authoritative.
+  function experienceRowKey(exp: { company: string | null; job_title: string | null; start_date: string | null }): string {
+    return `${exp.company ?? ''}|${exp.job_title ?? ''}|${exp.start_date ?? ''}`
+  }
+  async function handleConfirmExperience(exp: { company: string | null; job_title: string | null; start_date: string | null }) {
+    const key = experienceRowKey(exp)
+    setExperienceConfirmingKey(key)
+    setExperienceError(null)
+    try {
+      const res = await fetch('/api/profilux/suggestions/experiences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'apply',
+          company: exp.company,
+          job_title: exp.job_title,
+          start_date: exp.start_date,
+        }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any))
+        const code = typeof data?.code === 'string' ? data.code : null
+        const msg =
+          code === 'SIGNATURE_NOT_FOUND' ? 'This entry no longer matches your CV. Refresh.'
+          : code === 'ALREADY_APPLIED' ? 'This entry is already confirmed.'
+          : code === 'START_DATE_UNPARSEABLE' ? 'Start date is missing or incomplete; cannot confirm. Add it manually instead.'
+          : (typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
+        setExperienceError(msg)
+        return
+      }
+      await refetch()
+    } catch (err) {
+      setExperienceError(String(err))
+    } finally {
+      setExperienceConfirmingKey(null)
+    }
+  }
+
   function startNewEducation() {
     setEducationDraft(emptyEducationDraft())
     setEducationError(null)
@@ -3855,8 +3900,8 @@ export default function ProfiluxPage() {
               <div style={label}>Description</div>
               <div>
                 <textarea
-                  style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 80, resize: 'vertical' }}
-                  rows={3}
+                  style={{ ...input, maxWidth: 600, fontFamily: 'Inter, sans-serif', minHeight: 160, resize: 'vertical' }}
+                  rows={6}
                   value={experienceDraft.description}
                   onChange={(ev) => setExperienceDraft({ ...experienceDraft, description: ev.target.value })}
                   placeholder="Optional brief description"
@@ -3891,6 +3936,13 @@ export default function ProfiluxPage() {
               <div>
                 {e.experiences.map((exp, i) => {
                   const editable = typeof exp.id === 'string'
+                  // Career History V2 Slice 1: an L1 row is confirmable only with
+                  // a company anchor (server requires it for the work_experiences
+                  // insert). Loading key is the plain row tuple — server holds the
+                  // canonical signature.
+                  const canConfirm = !editable && typeof exp.company === 'string' && exp.company.trim() !== ''
+                  const rowKey = canConfirm ? experienceRowKey(exp) : null
+                  const confirming = rowKey !== null && experienceConfirmingKey === rowKey
                   return (
                     <div key={exp.id ?? i} style={{ ...card, position: 'relative' }}>
                       <div><strong>{exp.company ?? 'Unknown'}</strong> — {exp.job_title ?? 'Role not specified'}</div>
@@ -3899,7 +3951,7 @@ export default function ProfiluxPage() {
                       </div>
                       {exp.description && <div style={{ color: '#ccc', marginTop: 8, fontSize: 12 }}>{exp.description}</div>}
                       {editable ? (
-                        <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
+                        <div style={{ marginTop: 10, display: 'flex', gap: 8, alignItems: 'center' }}>
                           <button
                             type="button"
                             onClick={() => startEditExperience(exp)}
@@ -3915,10 +3967,37 @@ export default function ProfiluxPage() {
                           >
                             {experienceDeleting === exp.id ? 'Deleting…' : 'Delete'}
                           </button>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginLeft: 4, fontSize: 9, color: '#1D9E75', fontWeight: 500, opacity: 0.85, letterSpacing: '0.4px', textTransform: 'uppercase' }}>
+                            <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#1D9E75', display: 'inline-block' }} />
+                            Confirmed
+                          </span>
                         </div>
                       ) : (
-                        <div style={{ marginTop: 10, fontSize: 11, color: '#777', fontStyle: 'italic' }}>
-                          Parsed from your CV. Add as a passport entry to edit.
+                        <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          <button
+                            type="button"
+                            disabled={!canConfirm || confirming}
+                            onClick={() => canConfirm && handleConfirmExperience({ company: exp.company, job_title: exp.job_title, start_date: exp.start_date })}
+                            style={{
+                              alignSelf: 'flex-start',
+                              background: 'rgba(165,142,40,0.05)',
+                              color: '#a58e28',
+                              border: '1px solid rgba(165,142,40,0.30)',
+                              padding: '6px 14px',
+                              fontSize: 11,
+                              fontWeight: 600,
+                              letterSpacing: '0.4px',
+                              borderRadius: 6,
+                              cursor: !canConfirm || confirming ? 'not-allowed' : 'pointer',
+                              fontFamily: 'Inter, sans-serif',
+                              opacity: !canConfirm || confirming ? 0.5 : 1,
+                            }}
+                          >
+                            {confirming ? 'Confirming…' : 'Confirm'}
+                          </button>
+                          <div style={{ fontSize: 11, color: '#777', fontStyle: 'italic' }}>
+                            Parsed from your CV. Confirm this entry to edit it.
+                          </div>
                         </div>
                       )}
                     </div>
