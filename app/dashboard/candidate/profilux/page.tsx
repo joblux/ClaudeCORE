@@ -3873,7 +3873,20 @@ export default function ProfiluxPage() {
               <div key={exp.id ?? i} style={card}>
                 <div><strong>{exp.job_title ?? 'Role not specified'}</strong> — {exp.company ?? 'Unknown'}</div>
                 <div style={{ color: '#999', marginTop: 4 }}>
-                  {locationLabel(exp.city, exp.country)} · {exp.start_date ?? '—'} → {exp.is_current ? 'Present' : (exp.end_date ?? '—')}
+                  {(() => {
+                    // 967b8836 — assemble meta from present parts only. A missing
+                    // location must not render a naked "— ·" prefix. Dates: show
+                    // start when present; end is "Present" if current, else the
+                    // end date, else nothing (no trailing "→ —").
+                    const c = typeof exp.city === 'string' && exp.city.trim().length > 0 ? exp.city.trim() : null
+                    const k = typeof exp.country === 'string' && exp.country.trim().length > 0 ? exp.country.trim() : null
+                    const loc = c && k ? `${c}, ${k}` : (c ?? k)
+                    const sd = typeof exp.start_date === 'string' && exp.start_date.trim().length > 0 ? exp.start_date.trim() : null
+                    const ed = exp.is_current ? 'Present' : (typeof exp.end_date === 'string' && exp.end_date.trim().length > 0 ? exp.end_date.trim() : null)
+                    const dates = sd && ed ? `${sd} → ${ed}` : sd ? `${sd} → Present` : ed ? ed : null
+                    const parts = [loc, dates].filter(Boolean)
+                    return parts.length > 0 ? parts.join(' · ') : null
+                  })()}
                 </div>
                 {exp.description && <div style={{ color: '#ccc', marginTop: 8 }}>{exp.description}</div>}
               </div>
