@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import type { EditorView, MaskableField, ProfiLuxAwardItem, ProfiLuxCertificationItem, ProfiLuxInternshipItem, ProfiLuxPortfolioItem, ProfiLuxPressFeatureItem, ProfiLuxReferenceItem, ProfiLuxStrategicInitiative, SectionId } from '@/lib/profilux/types'
 import { MASKABLE_FIELDS } from '@/lib/profilux/types'
-import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_DEPARTMENT_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS, PROFILUX_SECTOR_OPTIONS } from '@/lib/profilux/vocabulary'
-import { seniorityLabel, skillLabel, availabilityLabel, departmentLabel, contractTypeLabel, sectorLabel, productCategoryLabel, expertiseTagLabel } from '@/lib/profilux/labels'
+import { PROFILUX_SENIORITY_OPTIONS, PROFILUX_PRODUCT_CATEGORY_OPTIONS, PROFILUX_EXPERTISE_TAG_OPTIONS, PROFILUX_CURRENCY_OPTIONS, PROFILUX_CONTRACT_TYPE_OPTIONS, PROFILUX_LOCATION_OPTIONS, PROFILUX_SKILL_OPTIONS, PROFILUX_MARKET_OPTIONS, PROFILUX_SECTOR_OPTIONS } from '@/lib/profilux/vocabulary'
+import { seniorityLabel, skillLabel, availabilityLabel, contractTypeLabel, sectorLabel, productCategoryLabel, expertiseTagLabel } from '@/lib/profilux/labels'
 
 const TOTAL = 11
 
@@ -447,7 +447,6 @@ type Screen10Draft = {
 type Screen9Draft = {
   availability: 'not_specified' | 'actively_looking' | 'quietly_considering' | 'passively_exploring' | 'not_available' | null
   desired_locations: string[]
-  desired_departments: string[]
   desired_contract_types: string[]
   open_to_relocation: boolean | null
   relocation_preferences: string
@@ -566,7 +565,6 @@ const draftFrom10 = (e: EditorView): Screen10Draft => ({
 const draftFrom9 = (e: EditorView): Screen9Draft => ({
   availability: e.availability,
   desired_locations: e.desired_locations ?? [],
-  desired_departments: e.desired_departments ?? [],
   desired_contract_types: e.desired_contract_types ?? [],
   open_to_relocation: e.open_to_relocation,
   relocation_preferences: e.relocation_preferences ?? '',
@@ -865,7 +863,7 @@ export default function ProfiluxPage() {
   const [saving10, setSaving10] = useState(false)
   const [savedAt10, setSavedAt10] = useState<number | null>(null)
   const [saveError10, setSaveError10] = useState<string | null>(null)
-  const [draft9, setDraft9] = useState<Screen9Draft>({ availability: null, desired_locations: [], desired_departments: [], desired_contract_types: [], open_to_relocation: null, relocation_preferences: '' })
+  const [draft9, setDraft9] = useState<Screen9Draft>({ availability: null, desired_locations: [], desired_contract_types: [], open_to_relocation: null, relocation_preferences: '' })
   const [saving9, setSaving9] = useState(false)
   const [savedAt9, setSavedAt9] = useState<number | null>(null)
   const [saveError9, setSaveError9] = useState<string | null>(null)
@@ -2270,7 +2268,6 @@ export default function ProfiluxPage() {
       const body: Record<string, unknown> = {
         availability: draft9.availability,
         desired_locations: draft9.desired_locations,
-        desired_departments: draft9.desired_departments,
         desired_contract_types: draft9.desired_contract_types,
         open_to_relocation: exp,
         relocation_preferences: exp === true && prefRaw !== '' ? prefRaw : null,
@@ -2927,20 +2924,6 @@ export default function ProfiluxPage() {
                 onClick={() => setDraft9({ ...draft9, desired_locations: draft9.desired_locations.includes(o) ? draft9.desired_locations.filter(v => v !== o) : [...draft9.desired_locations, o] })}
               >
                 {o}
-              </button>
-            ))}
-          </div>
-
-          <div style={sectionLabel}>Target departments</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
-            {PROFILUX_DEPARTMENT_OPTIONS.map((o) => (
-              <button
-                key={o.value}
-                type="button"
-                style={draft9.desired_departments.includes(o.value) ? chipActive : chip}
-                onClick={() => setDraft9({ ...draft9, desired_departments: draft9.desired_departments.includes(o.value) ? draft9.desired_departments.filter(v => v !== o.value) : [...draft9.desired_departments, o.value] })}
-              >
-                {o.label}
               </button>
             ))}
           </div>
@@ -6142,8 +6125,6 @@ export default function ProfiluxPage() {
           <div>{availabilityLabel(e.availability) ?? <NotSet />}</div>
           <div style={label}>Desired locations</div>
           <div>{e.desired_locations.length > 0 ? e.desired_locations.join(', ') : <NoneSel />}</div>
-          <div style={label}>Desired departments</div>
-          <div>{e.desired_departments.length > 0 ? e.desired_departments.map(departmentLabel).join(', ') : <NoneSel />}</div>
           <div style={label}>Desired contract types</div>
           <div>{e.desired_contract_types.length > 0 ? e.desired_contract_types.map(contractTypeLabel).join(', ') : <NoneSel />}</div>
           <div style={label}>Open to relocation</div>
@@ -6180,20 +6161,6 @@ export default function ProfiluxPage() {
               onClick={() => setDraft9({ ...draft9, desired_locations: draft9.desired_locations.includes(o) ? draft9.desired_locations.filter(v => v !== o) : [...draft9.desired_locations, o] })}
             >
               {o}
-            </button>
-          ))}
-        </div>
-
-        <div style={sectionLabel}>Target departments</div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
-          {PROFILUX_DEPARTMENT_OPTIONS.map((o) => (
-            <button
-              key={o.value}
-              type="button"
-              style={draft9.desired_departments.includes(o.value) ? chipActive : chip}
-              onClick={() => setDraft9({ ...draft9, desired_departments: draft9.desired_departments.includes(o.value) ? draft9.desired_departments.filter(v => v !== o.value) : [...draft9.desired_departments, o.value] })}
-            >
-              {o.label}
             </button>
           ))}
         </div>
@@ -6556,7 +6523,6 @@ export default function ProfiluxPage() {
         )
 
         const seniorityValue = seniorityLabel(e.seniority)
-        const departmentsValue = (e.desired_departments ?? []).map(departmentLabel).filter(Boolean).join(' · ')
         const marketsValue = (e.desired_locations ?? []).join(' · ')
         const salaryValue = formatSalaryK(e.desired_salary_min, e.desired_salary_max, e.desired_salary_currency)
 
@@ -6927,10 +6893,6 @@ export default function ProfiluxPage() {
                   <div style={prefCell}>
                     <div style={prefLabel}>Seniority</div>
                     <div style={seniorityValue ? prefValue : prefValueEmpty}>{seniorityValue || 'Not set'}</div>
-                  </div>
-                  <div style={prefCell}>
-                    <div style={prefLabel}>Departments</div>
-                    <div style={departmentsValue ? prefValue : prefValueEmpty}>{departmentsValue || 'Not set'}</div>
                   </div>
                   <div style={prefCell}>
                     <div style={prefLabel}>Markets</div>
