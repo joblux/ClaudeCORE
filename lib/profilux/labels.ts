@@ -8,7 +8,13 @@ import {
   PROFILUX_EXPERTISE_TAG_OPTIONS,
 } from '@/lib/profilux/vocabulary'
 
-export type ProfiLuxAvailability = 'active' | 'open' | 'passive' | 'unavailable' | null
+export type ProfiLuxAvailability =
+  | 'not_specified'
+  | 'actively_looking'
+  | 'quietly_considering'
+  | 'passively_exploring'
+  | 'not_available'
+  | null
 
 export function seniorityLabel(value: string | null): string | null {
   if (!value) return null
@@ -39,12 +45,20 @@ export function expertiseTagLabel(value: string): string {
   return PROFILUX_EXPERTISE_TAG_OPTIONS.find(o => o.value === value)?.label ?? value
 }
 
-export function availabilityLabel(value: ProfiLuxAvailability): string | null {
+export function availabilityLabel(value: string | null | undefined): string | null {
   switch (value) {
-    case 'active': return 'Actively looking'
-    case 'open': return 'Quietly considering'
-    case 'passive': return 'Passively exploring'
-    case 'unavailable': return 'Not available'
-    default: return null
+    // Canonical
+    case 'not_specified':       return '— Not specified —'
+    case 'actively_looking':    return 'Actively looking'
+    case 'quietly_considering': return 'Quietly considering'
+    case 'passively_exploring': return 'Passively exploring'
+    case 'not_available':       return 'Not available'
+    // LEGACY — remove after DB migration (prompt #2)
+    case 'not_actively_looking': return '— Not specified —'
+    case 'unavailable':          return 'Not available'
+    case 'active':               return 'Actively looking'
+    case 'open':                 return '— Not specified —'
+    case 'passive':              return 'Passively exploring'
+    default:                     return null
   }
 }

@@ -31,27 +31,6 @@ const supabase = createClient(
 
 // =============================================================================
 
-// on read; without an inverse, every read+write round-trip rewrites the DB-canonical value.
-function denormalizeAvailability(uiValue: string | null | undefined): string | null {
-  if (uiValue === null || uiValue === undefined) return null
-  const trimmed = typeof uiValue === 'string' ? uiValue.trim() : ''
-  if (trimmed === '') return null
-  switch (trimmed) {
-    case 'active':
-      return 'actively_looking'
-    case 'open':
-      return 'not_actively_looking' // canonical default per §4.5 Phase 4.1
-    case 'passive':
-      return 'passively_exploring'
-    case 'unavailable':
-      return 'unavailable'
-    default:
-      // If a non-UI value somehow reaches the write path (e.g. a DB-canonical value
-      // sent by a future client), pass it through unchanged. Forward-compat.
-      return trimmed
-  }
-}
-
 // PF-D V3.1 — Strategic Initiatives row coercion. Mirrors text[] write blocks'
 // trim + reject-empty posture, lifted to a paired object: title required;
 // description optional, trimmed → null when empty. Anything not an object or
@@ -480,7 +459,7 @@ export async function POST(req: NextRequest) {
   if (has('desired_salary_currency')) {
     updatePayload.desired_salary_currency = coerceEmpty(body.desired_salary_currency)
   }
-  if (has('availability')) updatePayload.availability = denormalizeAvailability(body.availability)
+  if (has('availability')) updatePayload.availability = coerceEmpty(body.availability)
   if (has('desired_locations')) {
     updatePayload.desired_locations = Array.isArray(body.desired_locations)
       ? body.desired_locations

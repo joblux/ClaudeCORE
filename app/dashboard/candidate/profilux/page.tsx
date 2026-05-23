@@ -445,7 +445,7 @@ type Screen10Draft = {
 }
 
 type Screen9Draft = {
-  availability: 'active' | 'open' | 'passive' | 'unavailable' | null
+  availability: 'not_specified' | 'actively_looking' | 'quietly_considering' | 'passively_exploring' | 'not_available' | null
   desired_locations: string[]
   desired_departments: string[]
   desired_contract_types: string[]
@@ -2908,11 +2908,11 @@ export default function ProfiluxPage() {
             <div style={label}>Availability</div>
             <div>
               <select style={select} value={draft9.availability ?? ''} onChange={(ev) => setDraft9({ ...draft9, availability: ev.target.value === '' ? null : ev.target.value as Screen9Draft['availability'] })}>
-                <option value="">— Not specified —</option>
-                <option value="active">Actively looking</option>
-                <option value="open">Quietly considering</option>
-                <option value="passive">Passively exploring</option>
-                <option value="unavailable">Not available</option>
+                <option value="not_specified">— Not specified —</option>
+                <option value="actively_looking">Actively looking</option>
+                <option value="quietly_considering">Quietly considering</option>
+                <option value="passively_exploring">Passively exploring</option>
+                <option value="not_available">Not available</option>
               </select>
             </div>
           </div>
@@ -6161,11 +6161,11 @@ export default function ProfiluxPage() {
           <div style={label}>Availability</div>
           <div>
             <select style={select} value={draft9.availability ?? ''} onChange={(ev) => setDraft9({ ...draft9, availability: ev.target.value === '' ? null : ev.target.value as Screen9Draft['availability'] })}>
-              <option value="">— Not specified —</option>
-              <option value="active">Actively looking</option>
-              <option value="open">Quietly considering</option>
-              <option value="passive">Passively exploring</option>
-              <option value="unavailable">Not available</option>
+              <option value="not_specified">— Not specified —</option>
+              <option value="actively_looking">Actively looking</option>
+              <option value="quietly_considering">Quietly considering</option>
+              <option value="passively_exploring">Passively exploring</option>
+              <option value="not_available">Not available</option>
             </select>
           </div>
         </div>

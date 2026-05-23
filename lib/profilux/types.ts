@@ -668,10 +668,11 @@ export type DashboardProjection = {
 // `view` retained for backward compatibility with /api/profilux legacy adapter.
 
 export type EditorAvailability =
-  | 'active'
-  | 'open'
-  | 'passive'
-  | 'unavailable'
+  | 'not_specified'
+  | 'actively_looking'
+  | 'quietly_considering'
+  | 'passively_exploring'
+  | 'not_available'
   | null
 
 export type EditorCvMeta = {

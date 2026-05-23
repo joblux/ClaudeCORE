@@ -233,24 +233,24 @@ export function projectFor(
 // §7.6 native flat shape projector. Strict subset of ProfiLuxResolved:
 // - System fields (id, email, role, status, ...) dropped
 // - cv_meta tightened to { cv_url, cv_parsed_at, needs_review: number }
-// - availability normalized to 4-value EditorAvailability union
+// - availability normalized to canonical EditorAvailability union
 // - profile_completeness coerced to number (?? 0)
 
 function normalizeEditorAvailability(value: string | null): EditorAvailability {
   if (value == null) return null
   switch (value) {
-    case 'actively_looking':
-      return 'active'
+    case 'not_specified':
     case 'not_actively_looking':
-    case 'open':
-    case 'considering':
-    case 'open_to_opportunities':
-      return 'open'
+      return 'not_specified'
+    case 'actively_looking':
+      return 'actively_looking'
+    case 'quietly_considering':
+      return 'quietly_considering'
     case 'passively_exploring':
-    case 'passive':
-      return 'passive'
+      return 'passively_exploring'
+    case 'not_available':
     case 'unavailable':
-      return 'unavailable'
+      return 'not_available'
     default:
       return null
   }
