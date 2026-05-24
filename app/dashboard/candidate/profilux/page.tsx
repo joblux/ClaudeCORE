@@ -1815,9 +1815,9 @@ export default function ProfiluxPage() {
     }
   }
 
-  // Awards pilot — destructive Remove (MATRIX v1.13 §22.4). Drops 'awards' from
-  // activated_sections AND clears the awards column in one write. Irreversible.
-  // Confirmation required before the write.
+  // Destructive Remove handlers (MATRIX v1.13 §22.4). Each drops the key from
+  // activated_sections, clears the content column, and removes the section_visibility
+  // entry in one write. Irreversible. Confirmation required.
   async function handleRemoveAwardsSection() {
     const ok = typeof window !== 'undefined'
       ? window.confirm('Remove Awards? This permanently deletes the section and its content. This cannot be undone.')
@@ -1828,10 +1828,222 @@ export default function ProfiluxPage() {
     try {
       const current = Array.isArray(editor?.activated_sections) ? editor!.activated_sections : []
       const next = current.filter(k => k !== 'awards')
+      const sv = { ...(editor?.section_visibility ?? {}) }
+      delete sv['awards']
       const res = await fetch('/api/profilux', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ activated_sections: next, awards: [] }),
+        body: JSON.stringify({ activated_sections: next, awards: [], section_visibility: sv }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setAddSectionError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+    } catch (err) {
+      setAddSectionError(String(err))
+    } finally {
+      setActivatingSectionKey(null)
+    }
+  }
+
+  async function handleRemoveCertificationsSection() {
+    const ok = typeof window !== 'undefined'
+      ? window.confirm('Remove Certifications? This permanently deletes the section and its content. This cannot be undone.')
+      : true
+    if (!ok) return
+    setActivatingSectionKey('certifications')
+    setAddSectionError(null)
+    try {
+      const current = Array.isArray(editor?.activated_sections) ? editor!.activated_sections : []
+      const next = current.filter(k => k !== 'certifications')
+      const sv = { ...(editor?.section_visibility ?? {}) }
+      delete sv['certifications']
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activated_sections: next, certifications: [], section_visibility: sv }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setAddSectionError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+    } catch (err) {
+      setAddSectionError(String(err))
+    } finally {
+      setActivatingSectionKey(null)
+    }
+  }
+
+  async function handleRemoveMembershipsSection() {
+    const ok = typeof window !== 'undefined'
+      ? window.confirm('Remove Memberships? This permanently deletes the section and its content. This cannot be undone.')
+      : true
+    if (!ok) return
+    setActivatingSectionKey('memberships')
+    setAddSectionError(null)
+    try {
+      const current = Array.isArray(editor?.activated_sections) ? editor!.activated_sections : []
+      const next = current.filter(k => k !== 'memberships')
+      const sv = { ...(editor?.section_visibility ?? {}) }
+      delete sv['memberships']
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activated_sections: next, memberships: [], section_visibility: sv }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setAddSectionError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+    } catch (err) {
+      setAddSectionError(String(err))
+    } finally {
+      setActivatingSectionKey(null)
+    }
+  }
+
+  async function handleRemoveStrategicInitiativesSection() {
+    const ok = typeof window !== 'undefined'
+      ? window.confirm('Remove Strategic Initiatives? This permanently deletes the section and its content. This cannot be undone.')
+      : true
+    if (!ok) return
+    setActivatingSectionKey('strategic_initiatives')
+    setAddSectionError(null)
+    try {
+      const current = Array.isArray(editor?.activated_sections) ? editor!.activated_sections : []
+      const next = current.filter(k => k !== 'strategic_initiatives')
+      const sv = { ...(editor?.section_visibility ?? {}) }
+      delete sv['strategic_initiatives']
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activated_sections: next, strategic_initiatives: [], section_visibility: sv }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setAddSectionError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+    } catch (err) {
+      setAddSectionError(String(err))
+    } finally {
+      setActivatingSectionKey(null)
+    }
+  }
+
+  async function handleRemovePortfolioSection() {
+    const ok = typeof window !== 'undefined'
+      ? window.confirm('Remove Portfolio? This permanently deletes the section and its content. This cannot be undone.')
+      : true
+    if (!ok) return
+    setActivatingSectionKey('portfolio')
+    setAddSectionError(null)
+    try {
+      const current = Array.isArray(editor?.activated_sections) ? editor!.activated_sections : []
+      const next = current.filter(k => k !== 'portfolio')
+      const sv = { ...(editor?.section_visibility ?? {}) }
+      delete sv['portfolio']
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activated_sections: next, portfolio: [], section_visibility: sv }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setAddSectionError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+    } catch (err) {
+      setAddSectionError(String(err))
+    } finally {
+      setActivatingSectionKey(null)
+    }
+  }
+
+  async function handleRemovePressFeaturesSection() {
+    const ok = typeof window !== 'undefined'
+      ? window.confirm('Remove Press & features? This permanently deletes the section and its content. This cannot be undone.')
+      : true
+    if (!ok) return
+    setActivatingSectionKey('press_features')
+    setAddSectionError(null)
+    try {
+      const current = Array.isArray(editor?.activated_sections) ? editor!.activated_sections : []
+      const next = current.filter(k => k !== 'press_features')
+      const sv = { ...(editor?.section_visibility ?? {}) }
+      delete sv['press_features']
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activated_sections: next, press_features: [], section_visibility: sv }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setAddSectionError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+    } catch (err) {
+      setAddSectionError(String(err))
+    } finally {
+      setActivatingSectionKey(null)
+    }
+  }
+
+  async function handleRemoveReferencesSection() {
+    const ok = typeof window !== 'undefined'
+      ? window.confirm('Remove References? This permanently deletes the section and its content. This cannot be undone.')
+      : true
+    if (!ok) return
+    setActivatingSectionKey('references')
+    setAddSectionError(null)
+    try {
+      const current = Array.isArray(editor?.activated_sections) ? editor!.activated_sections : []
+      const next = current.filter(k => k !== 'references')
+      const sv = { ...(editor?.section_visibility ?? {}) }
+      delete sv['references']
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activated_sections: next, references: [], section_visibility: sv }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setAddSectionError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+    } catch (err) {
+      setAddSectionError(String(err))
+    } finally {
+      setActivatingSectionKey(null)
+    }
+  }
+
+  async function handleRemoveInternshipsSection() {
+    const ok = typeof window !== 'undefined'
+      ? window.confirm('Remove Internships? This permanently deletes the section and its content. This cannot be undone.')
+      : true
+    if (!ok) return
+    setActivatingSectionKey('internships')
+    setAddSectionError(null)
+    try {
+      const current = Array.isArray(editor?.activated_sections) ? editor!.activated_sections : []
+      const next = current.filter(k => k !== 'internships')
+      const sv = { ...(editor?.section_visibility ?? {}) }
+      delete sv['internships']
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activated_sections: next, internships: [], section_visibility: sv }),
       })
       if (!res.ok) {
         const d = await res.json().catch(() => ({} as any))
@@ -4701,25 +4913,53 @@ export default function ProfiluxPage() {
       <div id="lib-section-certifications" style={libHighlightStyle(highlightedSectionKey === 'certifications')}>
       <SectionCard
         eyebrow="Certifications"
+        hiddenFromShare={(editor?.section_visibility?.['certifications'] ?? true) === false}
         headerAction={
-          <button
-            type="button"
-            onClick={openCertificationsDrawer}
-            style={{
-              background: 'rgba(165,142,40,0.05)',
-              color: '#a58e28',
-              border: '1px solid rgba(165,142,40,0.3)',
-              padding: '6px 14px',
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: '0.4px',
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
-            Edit
-          </button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <VisibilityToggle
+              sectionId="certifications"
+              isVisible={editor?.section_visibility?.['certifications'] ?? true}
+              isToggling={visibilityToggling === 'certifications'}
+              onToggle={toggleSectionVisibility}
+            />
+            <button
+              type="button"
+              disabled={activatingSectionKey === 'certifications'}
+              onClick={handleRemoveCertificationsSection}
+              style={{
+                background: 'transparent',
+                color: '#999',
+                border: '1px solid #2a2a2a',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Remove
+            </button>
+            <button
+              type="button"
+              onClick={openCertificationsDrawer}
+              style={{
+                background: 'rgba(165,142,40,0.05)',
+                color: '#a58e28',
+                border: '1px solid rgba(165,142,40,0.3)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Edit
+            </button>
+          </div>
         }
       >
         <div>
@@ -5110,25 +5350,53 @@ export default function ProfiluxPage() {
       {e.activated_sections.includes('memberships') && (<>
       <SectionCard
         eyebrow="Memberships"
+        hiddenFromShare={(editor?.section_visibility?.['memberships'] ?? true) === false}
         headerAction={
-          <button
-            type="button"
-            onClick={openMembershipsDrawer}
-            style={{
-              background: 'rgba(165,142,40,0.05)',
-              color: '#a58e28',
-              border: '1px solid rgba(165,142,40,0.3)',
-              padding: '6px 14px',
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: '0.4px',
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
-            Edit
-          </button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <VisibilityToggle
+              sectionId="memberships"
+              isVisible={editor?.section_visibility?.['memberships'] ?? true}
+              isToggling={visibilityToggling === 'memberships'}
+              onToggle={toggleSectionVisibility}
+            />
+            <button
+              type="button"
+              disabled={activatingSectionKey === 'memberships'}
+              onClick={handleRemoveMembershipsSection}
+              style={{
+                background: 'transparent',
+                color: '#999',
+                border: '1px solid #2a2a2a',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Remove
+            </button>
+            <button
+              type="button"
+              onClick={openMembershipsDrawer}
+              style={{
+                background: 'rgba(165,142,40,0.05)',
+                color: '#a58e28',
+                border: '1px solid rgba(165,142,40,0.3)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Edit
+            </button>
+          </div>
         }
       >
         <div>
@@ -5168,25 +5436,53 @@ export default function ProfiluxPage() {
       <div id="lib-section-strategic_initiatives" style={libHighlightStyle(highlightedSectionKey === 'strategic_initiatives')}>
       <SectionCard
         eyebrow="Strategic Initiatives"
+        hiddenFromShare={(editor?.section_visibility?.['strategic_initiatives'] ?? true) === false}
         headerAction={
-          <button
-            type="button"
-            onClick={openSiDrawer}
-            style={{
-              background: 'rgba(165,142,40,0.05)',
-              color: '#a58e28',
-              border: '1px solid rgba(165,142,40,0.3)',
-              padding: '6px 14px',
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: '0.4px',
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
-            Edit
-          </button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <VisibilityToggle
+              sectionId="strategic_initiatives"
+              isVisible={editor?.section_visibility?.['strategic_initiatives'] ?? true}
+              isToggling={visibilityToggling === 'strategic_initiatives'}
+              onToggle={toggleSectionVisibility}
+            />
+            <button
+              type="button"
+              disabled={activatingSectionKey === 'strategic_initiatives'}
+              onClick={handleRemoveStrategicInitiativesSection}
+              style={{
+                background: 'transparent',
+                color: '#999',
+                border: '1px solid #2a2a2a',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Remove
+            </button>
+            <button
+              type="button"
+              onClick={openSiDrawer}
+              style={{
+                background: 'rgba(165,142,40,0.05)',
+                color: '#a58e28',
+                border: '1px solid rgba(165,142,40,0.3)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Edit
+            </button>
+          </div>
         }
       >
         <div>
@@ -5343,25 +5639,53 @@ export default function ProfiluxPage() {
       <div id="lib-section-portfolio" style={libHighlightStyle(highlightedSectionKey === 'portfolio')}>
       <SectionCard
         eyebrow="Portfolio"
+        hiddenFromShare={(editor?.section_visibility?.['portfolio'] ?? true) === false}
         headerAction={
-          <button
-            type="button"
-            onClick={openPfDrawer}
-            style={{
-              background: 'rgba(165,142,40,0.05)',
-              color: '#a58e28',
-              border: '1px solid rgba(165,142,40,0.3)',
-              padding: '6px 14px',
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: '0.4px',
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
-            Edit
-          </button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <VisibilityToggle
+              sectionId="portfolio"
+              isVisible={editor?.section_visibility?.['portfolio'] ?? true}
+              isToggling={visibilityToggling === 'portfolio'}
+              onToggle={toggleSectionVisibility}
+            />
+            <button
+              type="button"
+              disabled={activatingSectionKey === 'portfolio'}
+              onClick={handleRemovePortfolioSection}
+              style={{
+                background: 'transparent',
+                color: '#999',
+                border: '1px solid #2a2a2a',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Remove
+            </button>
+            <button
+              type="button"
+              onClick={openPfDrawer}
+              style={{
+                background: 'rgba(165,142,40,0.05)',
+                color: '#a58e28',
+                border: '1px solid rgba(165,142,40,0.3)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Edit
+            </button>
+          </div>
         }
       >
         <div>
@@ -5517,25 +5841,53 @@ export default function ProfiluxPage() {
       <div id="lib-section-press_features" style={libHighlightStyle(highlightedSectionKey === 'press_features')}>
       <SectionCard
         eyebrow="Press & features"
+        hiddenFromShare={(editor?.section_visibility?.['press_features'] ?? true) === false}
         headerAction={
-          <button
-            type="button"
-            onClick={openPressDrawer}
-            style={{
-              background: 'rgba(165,142,40,0.05)',
-              color: '#a58e28',
-              border: '1px solid rgba(165,142,40,0.3)',
-              padding: '6px 14px',
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: '0.4px',
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
-            Edit
-          </button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <VisibilityToggle
+              sectionId="press_features"
+              isVisible={editor?.section_visibility?.['press_features'] ?? true}
+              isToggling={visibilityToggling === 'press_features'}
+              onToggle={toggleSectionVisibility}
+            />
+            <button
+              type="button"
+              disabled={activatingSectionKey === 'press_features'}
+              onClick={handleRemovePressFeaturesSection}
+              style={{
+                background: 'transparent',
+                color: '#999',
+                border: '1px solid #2a2a2a',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Remove
+            </button>
+            <button
+              type="button"
+              onClick={openPressDrawer}
+              style={{
+                background: 'rgba(165,142,40,0.05)',
+                color: '#a58e28',
+                border: '1px solid rgba(165,142,40,0.3)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Edit
+            </button>
+          </div>
         }
       >
         <div>
@@ -5703,25 +6055,53 @@ export default function ProfiluxPage() {
       <div id="lib-section-references" style={libHighlightStyle(highlightedSectionKey === 'references')}>
       <SectionCard
         eyebrow="References"
+        hiddenFromShare={(editor?.section_visibility?.['references'] ?? true) === false}
         headerAction={
-          <button
-            type="button"
-            onClick={openRefsDrawer}
-            style={{
-              background: 'rgba(165,142,40,0.05)',
-              color: '#a58e28',
-              border: '1px solid rgba(165,142,40,0.3)',
-              padding: '6px 14px',
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: '0.4px',
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
-            Edit
-          </button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <VisibilityToggle
+              sectionId="references"
+              isVisible={editor?.section_visibility?.['references'] ?? true}
+              isToggling={visibilityToggling === 'references'}
+              onToggle={toggleSectionVisibility}
+            />
+            <button
+              type="button"
+              disabled={activatingSectionKey === 'references'}
+              onClick={handleRemoveReferencesSection}
+              style={{
+                background: 'transparent',
+                color: '#999',
+                border: '1px solid #2a2a2a',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Remove
+            </button>
+            <button
+              type="button"
+              onClick={openRefsDrawer}
+              style={{
+                background: 'rgba(165,142,40,0.05)',
+                color: '#a58e28',
+                border: '1px solid rgba(165,142,40,0.3)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Edit
+            </button>
+          </div>
         }
       >
         <div>
@@ -5886,25 +6266,53 @@ export default function ProfiluxPage() {
       <div id="lib-section-internships" style={libHighlightStyle(highlightedSectionKey === 'internships')}>
       <SectionCard
         eyebrow="Internships"
+        hiddenFromShare={(editor?.section_visibility?.['internships'] ?? true) === false}
         headerAction={
-          <button
-            type="button"
-            onClick={openIntDrawer}
-            style={{
-              background: 'rgba(165,142,40,0.05)',
-              color: '#a58e28',
-              border: '1px solid rgba(165,142,40,0.3)',
-              padding: '6px 14px',
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: '0.4px',
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
-            Edit
-          </button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <VisibilityToggle
+              sectionId="internships"
+              isVisible={editor?.section_visibility?.['internships'] ?? true}
+              isToggling={visibilityToggling === 'internships'}
+              onToggle={toggleSectionVisibility}
+            />
+            <button
+              type="button"
+              disabled={activatingSectionKey === 'internships'}
+              onClick={handleRemoveInternshipsSection}
+              style={{
+                background: 'transparent',
+                color: '#999',
+                border: '1px solid #2a2a2a',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Remove
+            </button>
+            <button
+              type="button"
+              onClick={openIntDrawer}
+              style={{
+                background: 'rgba(165,142,40,0.05)',
+                color: '#a58e28',
+                border: '1px solid rgba(165,142,40,0.3)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Edit
+            </button>
+          </div>
         }
       >
         <div>

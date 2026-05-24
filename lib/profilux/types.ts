@@ -319,7 +319,7 @@ export type ProfiLuxAwardItem = {
   year: string | null
 }
 
-export const SECTION_IDS = ['identity','current_role','career_path','education','languages','luxury_fit','skills_markets','clienteling','compensation','availability','awards'] as const
+export const SECTION_IDS = ['identity','current_role','career_path','education','languages','luxury_fit','skills_markets','clienteling','compensation','availability','awards','certifications','memberships','strategic_initiatives','portfolio','press_features','references','internships'] as const
 export type SectionId = typeof SECTION_IDS[number]
 export type SectionVisibility = Partial<Record<SectionId, boolean>>
 
