@@ -1815,6 +1815,37 @@ export default function ProfiluxPage() {
     }
   }
 
+  // Awards pilot — destructive Remove (MATRIX v1.13 §22.4). Drops 'awards' from
+  // activated_sections AND clears the awards column in one write. Irreversible.
+  // Confirmation required before the write.
+  async function handleRemoveAwardsSection() {
+    const ok = typeof window !== 'undefined'
+      ? window.confirm('Remove Awards? This permanently deletes the section and its content. This cannot be undone.')
+      : true
+    if (!ok) return
+    setActivatingSectionKey('awards')
+    setAddSectionError(null)
+    try {
+      const current = Array.isArray(editor?.activated_sections) ? editor!.activated_sections : []
+      const next = current.filter(k => k !== 'awards')
+      const res = await fetch('/api/profilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activated_sections: next, awards: [] }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setAddSectionError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await refetch()
+    } catch (err) {
+      setAddSectionError(String(err))
+    } finally {
+      setActivatingSectionKey(null)
+    }
+  }
+
   async function handleUploadClick() {
     setUploadError(null)
     fileInputRef.current?.click()
@@ -4861,25 +4892,53 @@ export default function ProfiluxPage() {
       <div id="lib-section-awards" style={libHighlightStyle(highlightedSectionKey === 'awards')}>
       <SectionCard
         eyebrow="Awards"
+        hiddenFromShare={(editor?.section_visibility?.['awards'] ?? true) === false}
         headerAction={
-          <button
-            type="button"
-            onClick={openAwardsDrawer}
-            style={{
-              background: 'rgba(165,142,40,0.05)',
-              color: '#a58e28',
-              border: '1px solid rgba(165,142,40,0.3)',
-              padding: '6px 14px',
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: '0.4px',
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
-            Edit
-          </button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <VisibilityToggle
+              sectionId="awards"
+              isVisible={editor?.section_visibility?.['awards'] ?? true}
+              isToggling={visibilityToggling === 'awards'}
+              onToggle={toggleSectionVisibility}
+            />
+            <button
+              type="button"
+              disabled={activatingSectionKey === 'awards'}
+              onClick={handleRemoveAwardsSection}
+              style={{
+                background: 'transparent',
+                color: '#999',
+                border: '1px solid #2a2a2a',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Remove
+            </button>
+            <button
+              type="button"
+              onClick={openAwardsDrawer}
+              style={{
+                background: 'rgba(165,142,40,0.05)',
+                color: '#a58e28',
+                border: '1px solid rgba(165,142,40,0.3)',
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.4px',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Edit
+            </button>
+          </div>
         }
       >
         <div>
