@@ -6019,58 +6019,107 @@ export default function ProfiluxPage() {
       </Drawer>
       </div>
       )}
-      <div style={{ marginBottom: 14 }}>
-        <div style={{
-          fontSize: 12,
-          fontWeight: 600,
-          color: '#fff',
-          letterSpacing: 1.6,
-          textTransform: 'uppercase',
-          fontFamily: 'Inter, sans-serif',
-          marginBottom: 10,
-          paddingLeft: 2,
-        }}>
-          Opportunity Preferences
-        </div>
-      <SectionCard
-        eyebrow="Compensation"
-        hiddenFromShare={(editor.section_visibility?.['compensation'] ?? true) === false}
-        headerAction={
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button
-              type="button"
-              onClick={() => setCompensationDrawerOpen(true)}
-              style={{
-                background: 'rgba(165,142,40,0.05)',
-                color: '#a58e28',
-                border: '1px solid rgba(165,142,40,0.2)',
-                padding: '6px 14px',
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: '0.4px',
-                borderRadius: 6,
-                cursor: 'pointer',
-                fontFamily: 'Inter, sans-serif',
-              }}
-            >
-              Edit
-            </button>
-            <VisibilityToggle
-              sectionId="compensation"
-              isVisible={editor.section_visibility?.['compensation'] ?? true}
-              isToggling={visibilityToggling === 'compensation'}
-              onToggle={toggleSectionVisibility}
-            />
+      <SectionCard eyebrow="Opportunity Preferences">
+        {/* Sub-section: Compensation */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 14 }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#999', letterSpacing: 1, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>Compensation</div>
+              {(editor.section_visibility?.['compensation'] ?? true) === false && (
+                <div style={{ fontSize: 9.5, fontWeight: 500, color: '#8e8e8e', letterSpacing: 1, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif', marginTop: 3 }}>Hidden from shared profile</div>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setCompensationDrawerOpen(true)}
+                style={{
+                  background: 'rgba(165,142,40,0.05)',
+                  color: '#a58e28',
+                  border: '1px solid rgba(165,142,40,0.2)',
+                  padding: '6px 14px',
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: '0.4px',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  fontFamily: 'Inter, sans-serif',
+                }}
+              >
+                Edit
+              </button>
+              <VisibilityToggle
+                sectionId="compensation"
+                isVisible={editor.section_visibility?.['compensation'] ?? true}
+                isToggling={visibilityToggling === 'compensation'}
+                onToggle={toggleSectionVisibility}
+              />
+            </div>
           </div>
-        }
-      >
-        <div style={grid}>
-          <div style={label}>Target compensation (min)</div>
-          <div>{e.desired_salary_min != null ? String(e.desired_salary_min) : <NotSet />}</div>
-          <div style={label}>Target compensation (max)</div>
-          <div>{e.desired_salary_max != null ? String(e.desired_salary_max) : <NotSet />}</div>
-          <div style={label}>Currency</div>
-          <div>{e.desired_salary_currency ?? <NotSet />}</div>
+          <div style={(editor.section_visibility?.['compensation'] ?? true) === false ? { opacity: 0.7 } : undefined}>
+            <div style={grid}>
+              <div style={label}>Target compensation (min)</div>
+              <div>{e.desired_salary_min != null ? String(e.desired_salary_min) : <NotSet />}</div>
+              <div style={label}>Target compensation (max)</div>
+              <div>{e.desired_salary_max != null ? String(e.desired_salary_max) : <NotSet />}</div>
+              <div style={label}>Currency</div>
+              <div>{e.desired_salary_currency ?? <NotSet />}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ borderTop: '0.5px solid rgba(255,255,255,0.06)', margin: '18px 0' }} />
+
+        {/* Sub-section: Availability */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 14 }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#999', letterSpacing: 1, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>Availability</div>
+              {(editor.section_visibility?.['availability'] ?? true) === false && (
+                <div style={{ fontSize: 9.5, fontWeight: 500, color: '#8e8e8e', letterSpacing: 1, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif', marginTop: 3 }}>Hidden from shared profile</div>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setAvailabilityTargetsDrawerOpen(true)}
+                style={{
+                  background: 'rgba(165,142,40,0.05)',
+                  color: '#a58e28',
+                  border: '1px solid rgba(165,142,40,0.2)',
+                  padding: '6px 14px',
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: '0.4px',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  fontFamily: 'Inter, sans-serif',
+                }}
+              >
+                Edit
+              </button>
+              <VisibilityToggle
+                sectionId="availability"
+                isVisible={editor.section_visibility?.['availability'] ?? true}
+                isToggling={visibilityToggling === 'availability'}
+                onToggle={toggleSectionVisibility}
+              />
+            </div>
+          </div>
+          <div style={(editor.section_visibility?.['availability'] ?? true) === false ? { opacity: 0.7 } : undefined}>
+            <div style={grid}>
+              <div style={label}>Availability</div>
+              <div>{availabilityLabel(e.availability) ?? <NotSet />}</div>
+              <div style={label}>Desired locations</div>
+              <div>{e.desired_locations.length > 0 ? e.desired_locations.join(', ') : <NoneSel />}</div>
+              <div style={label}>Desired contract types</div>
+              <div>{e.desired_contract_types.length > 0 ? e.desired_contract_types.map(contractTypeLabel).join(', ') : <NoneSel />}</div>
+              <div style={label}>Open to relocation</div>
+              <div>{e.open_to_relocation === true ? 'Yes' : e.open_to_relocation === false ? 'No' : <NotSet />}</div>
+              <div style={label}>Relocation preferences</div>
+              <div>{e.open_to_relocation === true && typeof e.relocation_preferences === 'string' && e.relocation_preferences.length > 0 ? e.relocation_preferences : <NotSet />}</div>
+            </div>
+          </div>
         </div>
       </SectionCard>
       <Drawer
@@ -6101,51 +6150,6 @@ export default function ProfiluxPage() {
           {saveError10 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError10}</span>}
         </div>
       </Drawer>
-      <SectionCard
-        eyebrow="Availability"
-        hiddenFromShare={(editor.section_visibility?.['availability'] ?? true) === false}
-        headerAction={
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button
-              type="button"
-              onClick={() => setAvailabilityTargetsDrawerOpen(true)}
-              style={{
-                background: 'rgba(165,142,40,0.05)',
-                color: '#a58e28',
-                border: '1px solid rgba(165,142,40,0.2)',
-                padding: '6px 14px',
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: '0.4px',
-                borderRadius: 6,
-                cursor: 'pointer',
-                fontFamily: 'Inter, sans-serif',
-              }}
-            >
-              Edit
-            </button>
-            <VisibilityToggle
-              sectionId="availability"
-              isVisible={editor.section_visibility?.['availability'] ?? true}
-              isToggling={visibilityToggling === 'availability'}
-              onToggle={toggleSectionVisibility}
-            />
-          </div>
-        }
-      >
-        <div style={grid}>
-          <div style={label}>Availability</div>
-          <div>{availabilityLabel(e.availability) ?? <NotSet />}</div>
-          <div style={label}>Desired locations</div>
-          <div>{e.desired_locations.length > 0 ? e.desired_locations.join(', ') : <NoneSel />}</div>
-          <div style={label}>Desired contract types</div>
-          <div>{e.desired_contract_types.length > 0 ? e.desired_contract_types.map(contractTypeLabel).join(', ') : <NoneSel />}</div>
-          <div style={label}>Open to relocation</div>
-          <div>{e.open_to_relocation === true ? 'Yes' : e.open_to_relocation === false ? 'No' : <NotSet />}</div>
-          <div style={label}>Relocation preferences</div>
-          <div>{e.open_to_relocation === true && typeof e.relocation_preferences === 'string' && e.relocation_preferences.length > 0 ? e.relocation_preferences : <NotSet />}</div>
-        </div>
-      </SectionCard>
       <Drawer
         open={availabilityTargetsDrawerOpen}
         title="Availability & Targets"
@@ -6237,7 +6241,6 @@ export default function ProfiluxPage() {
           {saveError9 && <span style={{ color: '#ff6b6b', fontSize: 13 }}>{saveError9}</span>}
         </div>
       </Drawer>
-      </div>
 
       {/* PF-D V2.1 — EXTEND DOSSIER drawer (trigger lives in top-right action row) */}
       <Drawer
