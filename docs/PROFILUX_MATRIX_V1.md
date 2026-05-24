@@ -4,7 +4,7 @@ Domain contract for the ProfiLux object across JOBLUX. Locks the storage, resolu
 
 This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE wins until reconciled. See §12.
 
-**Status:** locked v1.12 (May 23 2026 section visibility & sovereignty doctrine — §26)
+**Status:** locked v1.13 (May 24 2026 optional-section dual-action lock — §22.4 / §26.6)
 **Originally locked:** April 30, 2026
 **v1.1 addendum locked:** May 6, 2026
 **v1.2 addendum locked:** May 7, 2026
@@ -14,6 +14,25 @@ This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE w
 
 ## CHANGE LOG
 
+
+**v1.13 — May 24 2026 optional-section dual-action lock (Mo product decision)**
+
+Locks Mo's product decision for optional library sections (§22.2): each optional
+section carries TWO distinct actions on its Edit card — "Désactiver" (hide from
+the active visible surface, data retained, reversible, via section_visibility)
+and "Remove" (permanent deletion of the section AND its content, irreversible,
+confirmation required). Extends section_visibility eligibility (§16A / SECTION_IDS)
+from the 9 core sections to include the 8 optional library keys. The §26.6
+"deactivate forbidden" rule is lifted for OPTIONAL sections only; core sections
+keep the §26.4/§26.6 model unchanged. This reverses the F-C2-1 non-destructive
+posture (commit c2620a7) for the Remove action specifically: Remove is now
+intentionally destructive for optional sections.
+
+- **§22.4** rewritten — optional sections carry dual actions (Désactiver / Remove).
+- **§26.6** amended — two optional-section rows added; deactivate-forbidden scoped to core.
+- **§16A.2** amended — section_visibility eligibility extended to 8 optional keys.
+
+§§1–22.3, §23–25, §26.1–26.5, §26.7–26.8 — all KEEP unchanged.
 
 **v1.12 — May 23 2026 section visibility & sovereignty doctrine lock**
 
@@ -856,6 +875,14 @@ Section hide MUST NOT affect:
 
 Internal/admin/recruiter truth remains complete regardless of candidate hide choices. The candidate cannot hide content from JOBLUX itself or from recruiters; they can only hide content from outbound public sharing.
 
+**Optional-section extension (v1.13, 2026-05-24):** section_visibility eligibility,
+previously limited to the 9 core SECTION_IDS, is extended to the 8 optional
+library keys (awards, certifications, memberships, strategic_initiatives,
+portfolio, press_features, references, internships). The "Désactiver" action on
+an optional card writes `section_visibility[key]=false`; "Remove" is a separate
+destructive action on `activated_sections` + content. The hide honors the same
+Public + PDF projection scope as core sections.
+
 ### 16A.3 — Default state
 
 Default = show all sections. Hide is opt-in per section. New members carry zero hidden sections.
@@ -1322,7 +1349,14 @@ None of these are resolved as of v1.3. Any reorder slice opens with these decisi
 ### 22.4 — Removable vs permanent
 
 - **Permanent (cannot remove):** all 9 default sections.
-- **Removable (opt-in/out):** all 8 add-library sections.
+- **Optional (8 library sections):** carry TWO distinct actions on their Edit card:
+  - **Désactiver** — hides the section from the active visible surface. Data is
+    retained server-side and the action is reversible (re-show restores it).
+    Mechanism: section_visibility (§16A), now extended to optional keys.
+  - **Remove** — permanently deletes the section AND its stored content
+    (drop from activated_sections + clear the section's content column).
+    Irreversible. A confirmation is required before the destructive write.
+  The two actions are never collapsed into one control and are not drawer-only.
 - Empty default sections are visible but render an empty state with state markers per §14.3.
 
 ### 22.5 — Expansion philosophy
@@ -1558,8 +1592,11 @@ The candidate-facing surfaces and all copy MUST use exactly these terms; the wor
 | Core section shown outbound | "Visible on shared profile" | `section_visibility[id]=true` |
 | Core section withheld outbound | "Hidden from shared profile" | `section_visibility[id]=false` |
 | Optional section taken off passport | "Removed from my passport" | dropped from `activated_sections` |
+| Optional section hidden from active surface | "Désactiver" | `section_visibility[key]=false` |
+| Optional section permanently deleted | "Remove" | dropped from `activated_sections` + content column cleared |
 
-Forbidden: using "inactive" and "hidden" interchangeably; implying deletion when removing a section; "deactivate" as a candidate-facing word for removal.
+Forbidden (CORE sections): using "inactive" and "hidden" interchangeably; implying deletion when hiding a core section. The "deactivate" prohibition applies to CORE sections only.
+OPTIONAL sections (Mo decision 2026-05-24): "Désactiver" is the authorized candidate-facing label for the hide action, and "Remove" is the authorized label for permanent deletion. These are two distinct actions, never interchangeable.
 
 ### 26.7 — G2 disposition (Edit-tab presentation)
 
