@@ -54,6 +54,16 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **99e1a99** `feat(profilux): inline adoption of CV-parsed languages (L1 → L2)` — May 24 2026. SHIPPED + COOLIFY-GREEN + QA-PASS. CV-parsed languages (L1, no id) now show "Parsed from CV" + proficiency select + "Add to ProfiLux" button inline. Adoption POSTs to existing `/api/members/languages`, creating an L2 row; resolver dedup (65d30cd5) auto-removes the CV line. No cv_parsed_data write, no resolver change, no route change. 1 file, +81/-1.
+
+- **099dfb9** `feat(profilux): replicate dual-action to all 8 optional sections + section_visibility cleanup on Remove` — May 24 2026. SHIPPED + COOLIFY-GREEN + QA-PASS. Replicates Awards pilot (59af345) to the 7 remaining optional sections. Each Edit card now carries VisibilityToggle + destructive Remove + Edit. SECTION_IDS extended to all 8 optional keys. Remove also cleans section_visibility entry (stale-flag residue fix). handleDeactivateSection untouched. Route unchanged. 2 files, +539/-131.
+
+- **59af345** `feat(profilux): Awards dual-action pilot — Désactiver (VisibilityToggle) + destructive Remove (MATRIX v1.13)` — May 24 2026. SHIPPED + COOLIFY-GREEN + QA-PASS. Pilot of v1.13 optional-section dual-action lock on Awards only. SECTION_IDS extended with 'awards'. Awards SectionCard carries VisibilityToggle (core-coherent hide, data retained, reversible) + handleRemoveAwardsSection (destructive, confirmation required, drops activated_sections + clears awards column) + Edit. 2 files, +78/-19.
+
+- **a0a4a8c** `docs(profilux): MATRIX v1.13 — optional-section dual-action lock (Désactiver / Remove)` — May 24 2026. SHIPPED (docs-only). Locks Mo product decision: optional library sections carry two distinct Edit-card actions. §22.4 rewritten, §26.6 amended (deactivate-forbidden scoped to core), §16A.2 extended to 8 optional keys. Reverses F-C2-1 non-destructive posture for the Remove action on optional sections. 1 file, +40/-3.
+
+- **c2620a7** `fix(profilux): F-C2-1 — section removal is non-destructive (§26.2 conformance)` — May 24 2026. SHIPPED + COOLIFY-GREEN. Intermediate fix: removed content-clear from handleDeactivateSection POST body + deleted destructive confirm dialog. Superseded same session by the v1.13 final dual-action model (a0a4a8c doctrine + 59af345/099dfb9 code). 1 file, +4/-17.
+
 - **e995b12** `fix(profilux): Slice 2 redo — real single Opportunity Preferences frame with 2 independent sub-block toggles` — May 24 2026. SHIPPED + COOLIFY-GREEN + QA-PASS live (Chrome MCP, 49542211). Replaces the REJECTED wrapper 1548f1b (card-in-card, Mo rejected). One real `<SectionCard eyebrow="Opportunity Preferences">`; inside it two sub-blocks (Availability, Compensation) separated by a hairline, each keeping its OWN Edit button + real VisibilityToggle + G2 hidden indicator + body dim 0.7. Surface fusion != substrate fusion: the 2 Drawers, handleSave9/handleSave10, draft9/draft10, and section_visibility[availability]/[compensation] all stay separate. Resolves the hide/share conflict Mo surfaced (candidate can hide salary while showing availability). Reversible independent-visibility QA: net DB delta 0. Validated on a dark-JOBLUX mock BEFORE final code. 1 file, +99/-96. No DB/API/resolver/recruiting/taxonomy touch. Ledger e7814d8e.
 
 - **1548f1b** `feat(profilux): Slice 2 — wrap Availability + Compensation into one Opportunity Preferences surface (visual only)` — May 23 2026 PM. SHIPPED then REJECTED by Mo (card-in-card double-border). Superseded same session by e995b12. History only. 1 file, +14/-0.
@@ -316,36 +326,22 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-**Lane: ProfiLux dossier restructuring — COMPLETE (2026-05-22).** All 5 slices shipped + QA-PASS (struct#1 `c9f3934`, 2a `d6c864b`, 2b `f59888e`, 3 `10dd6b9`, 4 `8792baa`, 5 `1e31617`).
+LANE 1 (Ownership & flexibility) COMPLETE.
+- C1 Career History: already built; Confirm flow QA-PASS.
+- C2 section lifecycle: dual-action model shipped for all 8 optional sections.
+- C3 Languages: CV-parsed language adoption L1→L2 shipped and QA-PASS.
 
-**Career History V2 Slice 1 + 1.1 — SHIPPED + QA-PASS (2026-05-23).** L1→L2 Confirm flow live (`5e03b84`) + month-precision start_date coercion (`8e9f36d`). G4 of the Career History V2 corrective lane (ledger `9bb7f5fc`) is CLOSED.
+NEXT: LANE 2 (Career modeling) — DO NOT auto-start.
+- C4 Availability & Targets: Mo taxonomy workshop first; blocked by f0e9be64.
+- C5 Compensation V2: mechanical/unblocked after C4 direction; audit 468c980a.
+- C6 Memberships: keep/drop decision first.
+- C7 Taxonomy redesign: after stabilization.
 
-**Career History V2 corrective lane — DRAINED at HEAD 4f2e0ce (2026-05-23). All clean/decided items shipped; remainder is Mo-decision-gated:**
-- 967b8836 (empty-location) — SHIPPED 4f2e0ce. MO-VALIDATED (QA-PASS live).
-- G1 (optional-section remove) — SHIPPED 347c14b + b5cbc0b as REMOVE=DELETE (Mo decision supersedes 190c44d keep-data). Mo-validation pending (ledger b3a2180d).
-- G2 (core-card hidden-from-share dim/label) — SHIPPED 763d839 as presentation-only sovereignty indicator (MATRIX §26.7). Mo-validation pending (ledger 5b9f26d9).
-- 65d30cd5 (language L2/L1 dedupe) — SHIPPED de65210. Mo-validation pending. Was the last "clean draftable" item — now closed.
-- G3 (Languages V2) — ALREADY BUILT at HEAD (phantom gap; prior 6-layer audit). Do NOT rebuild. Mo-validation pending (ledger f17c1a8e).
-- G6 (Compensation) — REAL open work, flat substrate, needs DDL + Mo decisions (shape/taxonomy/visibility). Parked. NOT scoped.
-- G5/G9 — BLOCKED on Mo taxonomy decision (f0e9be64).
+PARKED COLLATERAL:
+- 30b9acad CV sovereignty lane: sets A–D discussed in session, not yet doctrine. Requires Mo workshop before implementation.
 
-**No clean draftable item remains in this lane.** Next macro-lane requires Mo direction (LANE 1 continuation / LANE 2 taxonomy workshop). Do NOT auto-start.
-
-**LANE 2 (data convergence) — partial progress shipped 2026-05-23/24 (NON-taxonomy slices only):**
-- Availability taxonomy convergence SHIPPED + migrated + QA-PASS (`63737a2`). Canonical 5 values end-to-end; blank-label bug closed.
-- Slice 1 desired_departments removed from Opportunity layer UI (`a95703e`). MODEL DECISION (Mo): department = parasitic recruiting-core axis, not a live ProfiLux primitive. Substrate kept inert; DB column drop = future separate slice.
-- Slice 2 Opportunity Preferences = ONE visual section, TWO independent sub-block visibilities (`e995b12`, replaces rejected wrapper 1548f1b). Locks the principle: surface fusion != substrate fusion. Resolves the hide/share granularity conflict (hide salary while showing availability).
-- Convergence audit #2 (departments/contract/locations) logged as finding `d87953f9` — read-only. contract_types = safe-convergence candidate; departments = taxonomy-gated (largely mooted by Slice 1); locations = tied to mobility/regions C4 (blocked).
-- Legacy availability fallbacks in `labels.ts` + `projectFor.ts` are TEMPORARY debt to remove in a later cleanup slice (DB now clean). Not urgent.
-- DEFERRED to next session (Mo): semantics / Taxonomy V2 workshop (LANE 2 C4 target-roles/mobility, C5 compensation shape G6, C6 memberships, C7 redesign). Governance `f0e9be64`. Do NOT auto-start.
-
-**Bloc 2 (visibility / sovereignty) doctrine LOCKED — MATRIX §26 (2026-05-23).** The section-visibility mental model is now locked (core vs optional substrate separation, no-delete-on-visibility, candidate cockpit, outbound-honors-visibility, canonical vocabulary). G2 is now a clean PRESENTATION-ONLY slice (dim/label on `section_visibility=false` core cards in Edit, sovereignty indicator) gated only on this doctrine landing — NOT auto-started. G3/G5/G6/G8/G9 remain Mo-decision-gated (taxonomy `f0e9be64` / product `30b9acad`).
-
-**Mo product-direction signal (parked 30b9acad, NOT doctrine):** CV optional / manual journey first-class / profile sovereignty. To workshop. Do NOT absorb into G2/G3/G6 without explicit Mo decision.
-
-**Boundary reaffirmed:** Mo decides product direction; Claude audits/executes; GPT challenges/reconciles. Do not lock product philosophy in ledger/STATE without Mo validation.
-
-After the Career History V2 corrective lane closes, the next macro-lane is LANE 1 continuation (C2 section lifecycle remove/restore/dim → C3 Languages V2 `[{language,level}]`), then LANE 2 (C4 Availability/Targets taxonomy workshop with Mo FIRST → C5 Compensation → C6 Memberships → C7 taxonomy redesign). Do NOT batch lanes. Mock reference: `profilux-living-passport-mock.html` (visual language only; taxonomy labels illustrative, not approved).
+OPEN FINDING:
+- 69c7fb97 Career dedup fragile: Career dedup depends on resolution_state; risk of duplicate L1/L2 if L2 created outside Confirm flow. Decision pending.
 
 **Approved candidate structure:**
 
@@ -394,7 +390,7 @@ Internal/admin-only (DB-resident, no candidate Edit surface):
 
 **ProfiLux + Matching substrate audit CLOSED** (ledger `cca052d0-9931-4241-a060-0f53a8e18d8d`). 9 findings produced + triaged.
 
-**Final repo HEAD: `e995b12`** (last product slice — Slice 2 redo single Opportunity Preferences frame; the STATE rotation commit advances HEAD — see latest LAST SHIPPED entry for the post-rotation SHA). Coolify GREEN.
+**Final repo HEAD: `99e1a99`** (last product slice — inline adoption of CV-parsed languages L1→L2; the STATE rotation commit advances HEAD — see latest LAST SHIPPED entry for the post-rotation SHA). Coolify GREEN.
 
 **Parked findings opened this session:**
 - `63a0104e-04c6-43c2-aae8-c84f584c559a` — F-AUDIT-4 directory §10.1 bypass (normal)
