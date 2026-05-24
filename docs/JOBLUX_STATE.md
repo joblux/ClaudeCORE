@@ -54,6 +54,8 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### LAST SHIPPED
 
+- **542d3541** `docs(profilux): MATRIX v1.14 — CV sovereignty Sets C+D lock (§27 dedup/overwrite + §28 delete)` — May 24 2026. SHIPPED (docs-only, +128/-1, no Coolify dependency). CV sovereignty workshop minimum set locked. §27 (Set D): dedup unified to existence-L2-prime — L2/user-owned wins over L1/parsed; collection-specific equivalence keys may differ; resolution_state demoted to audit-only (retained, no longer sole gate; dedup = (a) L2 exists OR (b) resolution_state applied/dismissed); Career aligned to Languages model, closing 69c7fb97 at the doctrine level; Career equivalence key = company + job_title + normalized start month (both sides truncated to YYYY-MM); Education/Sectors keep replace-when-present as degenerate existence-prime case; dismiss-without-L2 parked. §28 (Set C): CV = optional accelerator not source of truth; L2 confirmed data never depends on the file; replace/re-upload supported (already live); user-facing CV delete PARKED (no destructive flow pre-launch); old-upload cleanup (storage files, is_primary residue measured 12 docs/9 members, parse history) booked as internal backlog. Sets A/B/E not opened (covered implicitly). GPT guardrail approved (2 wording fixes applied). 1 file.
+
 - **99e1a99** `feat(profilux): inline adoption of CV-parsed languages (L1 → L2)` — May 24 2026. SHIPPED + COOLIFY-GREEN + QA-PASS. CV-parsed languages (L1, no id) now show "Parsed from CV" + proficiency select + "Add to ProfiLux" button inline. Adoption POSTs to existing `/api/members/languages`, creating an L2 row; resolver dedup (65d30cd5) auto-removes the CV line. No cv_parsed_data write, no resolver change, no route change. 1 file, +81/-1.
 
 - **099dfb9** `feat(profilux): replicate dual-action to all 8 optional sections + section_visibility cleanup on Remove` — May 24 2026. SHIPPED + COOLIFY-GREEN + QA-PASS. Replicates Awards pilot (59af345) to the 7 remaining optional sections. Each Edit card now carries VisibilityToggle + destructive Remove + Edit. SECTION_IDS extended to all 8 optional keys. Remove also cleans section_visibility entry (stale-flag residue fix). handleDeactivateSection untouched. Route unchanged. 2 files, +539/-131.
@@ -326,22 +328,21 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-LANE 1 (Ownership & flexibility) COMPLETE.
-- C1 Career History: already built; Confirm flow QA-PASS.
-- C2 section lifecycle: dual-action model shipped for all 8 optional sections.
-- C3 Languages: CV-parsed language adoption L1→L2 shipped and QA-PASS.
+CV SOVEREIGNTY WORKSHOP — minimum set C+D COMPLETE — doctrine locked at MATRIX v1.14 (542d3541).
+- Set D (§27): dedup unified to existence-L2-prime. 69c7fb97 model resolved.
+- Set C (§28): CV delete parked; L2 independent of file.
+- Sets A/B/E not opened (covered implicitly). 30b9acad residue parked.
 
-NEXT: LANE 2 (Career modeling) — DO NOT auto-start.
-- C4 Availability & Targets: Mo taxonomy workshop first; blocked by f0e9be64.
-- C5 Compensation V2: mechanical/unblocked after C4 direction; audit 468c980a.
-- C6 Memberships: keep/drop decision first.
-- C7 Taxonomy redesign: after stabilization.
-
-PARKED COLLATERAL:
-- 30b9acad CV sovereignty lane: sets A–D discussed in session, not yet doctrine. Requires Mo workshop before implementation.
+NEXT (none auto-started — Mo picks the lane):
+- Resolver Career existence-L2-prime slice (69c7fb97) — model locked §27, CODE PENDING.
+  Audit-first: experienceSignature.ts + resolver mapExperiences/languages blocks before any draft.
+  Mirror Languages 65d30cd5 in spirit; 3-field key with YYYY-MM truncation, NOT single-field copy.
+  Keep dedup condition (b) resolution_state alongside new (a) existence — ADD not replace.
+- C4 Availability & Targets taxonomy workshop — blocked by f0e9be64, separate axis, not started.
+- C5/C6/C7 — gated behind C4.
 
 OPEN FINDING:
-- 69c7fb97 Career dedup fragile: Career dedup depends on resolution_state; risk of duplicate L1/L2 if L2 created outside Confirm flow. Decision pending.
+- 69c7fb97 requalified: model locked (§27), resolver implementation pending.
 
 **Approved candidate structure:**
 
