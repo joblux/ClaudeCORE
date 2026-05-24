@@ -757,6 +757,7 @@ export default function ProfiluxPage() {
   const [languagesEditDraft, setLanguagesEditDraft] = useState<{ id?: string; language: string; proficiency: string }>({ language: '', proficiency: '' })
   const [languagesActioning, setLanguagesActioning] = useState(false)
   const [languagesError, setLanguagesError] = useState<string | null>(null)
+  const [adoptLangProf, setAdoptLangProf] = useState<Record<string, string>>({})
   // PF-2 P-A.UI — Sectors (L2-only) inside Luxury Fit drawer
   const [sectorsL2, setSectorsL2] = useState<Array<{ id?: string; sector: string; rank: number }> | null>(null)
   const [sectorsActioning, setSectorsActioning] = useState<string | null>(null)
@@ -1066,6 +1067,38 @@ export default function ProfiluxPage() {
       }
       await fetchLanguagesL2()
       await refetch()
+    } catch (err) {
+      setLanguagesError(String(err))
+    } finally {
+      setLanguagesActioning(false)
+    }
+  }
+
+  // Adopt a CV-parsed language (L1) into member_languages (L2). Proficiency
+  // required. No cv_parsed_data write. Resolver dedup removes the CV row once L2 exists.
+  async function handleAdoptCvLanguage(language: string) {
+    const proficiency = adoptLangProf[language] ?? ''
+    if (proficiency === '') return
+    setLanguagesActioning(true)
+    setLanguagesError(null)
+    try {
+      const res = await fetch('/api/members/languages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language, proficiency }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setLanguagesError(typeof d?.error === 'string' ? d.error : `HTTP ${res.status}`)
+        return
+      }
+      await fetchLanguagesL2()
+      await refetch()
+      setAdoptLangProf((prev) => {
+        const nextState = { ...prev }
+        delete nextState[language]
+        return nextState
+      })
     } catch (err) {
       setLanguagesError(String(err))
     } finally {
@@ -4459,7 +4492,54 @@ export default function ProfiluxPage() {
           <div>
             {e.languages.map((l, i) => (
               <div key={i} style={{ ...card, fontSize: 12 }}>
-                {l.proficiency ? `${l.language} — ${l.proficiency}` : l.language}
+                {(l as any).id ? (
+                  l.proficiency ? `${l.language} — ${l.proficiency}` : l.language
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                    <span>{l.language}</span>
+                    <span style={{ color: '#777', fontStyle: 'italic', fontSize: 11 }}>Parsed from CV</span>
+                    <select
+                      value={adoptLangProf[l.language] ?? ''}
+                      onChange={(ev) => setAdoptLangProf((prev) => ({ ...prev, [l.language]: ev.target.value }))}
+                      style={{
+                        background: '#1a1a1a',
+                        color: '#ccc',
+                        border: '1px solid #2a2a2a',
+                        borderRadius: 6,
+                        padding: '4px 8px',
+                        fontSize: 11,
+                        fontFamily: 'Inter, sans-serif',
+                      }}
+                    >
+                      <option value="">— Select —</option>
+                      <option value="native">Native</option>
+                      <option value="fluent">Fluent</option>
+                      <option value="professional">Professional</option>
+                      <option value="conversational">Conversational</option>
+                      <option value="basic">Basic</option>
+                    </select>
+                    <button
+                      type="button"
+                      disabled={!(adoptLangProf[l.language]) || languagesActioning}
+                      onClick={() => handleAdoptCvLanguage(l.language)}
+                      style={{
+                        background: 'rgba(165,142,40,0.05)',
+                        color: '#a58e28',
+                        border: '1px solid rgba(165,142,40,0.3)',
+                        padding: '4px 10px',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        letterSpacing: '0.4px',
+                        borderRadius: 6,
+                        cursor: !(adoptLangProf[l.language]) || languagesActioning ? 'not-allowed' : 'pointer',
+                        fontFamily: 'Inter, sans-serif',
+                        opacity: !(adoptLangProf[l.language]) || languagesActioning ? 0.5 : 1,
+                      }}
+                    >
+                      Add to ProfiLux
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
