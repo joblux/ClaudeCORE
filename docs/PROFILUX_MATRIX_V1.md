@@ -4,7 +4,7 @@ Domain contract for the ProfiLux object across JOBLUX. Locks the storage, resolu
 
 This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE wins until reconciled. See §12.
 
-**Status:** locked v1.13 (May 24 2026 optional-section dual-action lock — §22.4 / §26.6)
+**Status:** locked v1.14 (May 24 2026 CV sovereignty Sets C+D — §27 / §28)
 **Originally locked:** April 30, 2026
 **v1.1 addendum locked:** May 6, 2026
 **v1.2 addendum locked:** May 7, 2026
@@ -13,6 +13,31 @@ This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE w
 ---
 
 ## CHANGE LOG
+
+
+**v1.14 — May 24 2026 CV sovereignty Sets C+D lock (Mo product decision)**
+
+Locks the CV sovereignty workshop minimum set: Set D (dedup/overwrite, includes
+finding 69c7fb97) and Set C (delete). No substrate. No code. No schema. Doctrine text only.
+
+- **§27** new section — Set D dedup/overwrite. Unifies the sovereignty rule to
+  existence-L2-prime (L2/user-owned wins over L1/parsed); collection-specific
+  equivalence keys may differ. resolution_state demoted to audit-only, retained,
+  no longer the sole dedup gate. Career aligned to the Languages model (closes
+  69c7fb97). Career equivalence key = company + job_title + normalized start month.
+  Education/Sectors keep replace-when-present as a degenerate existence-prime case.
+  Dismiss-without-L2 parked.
+- **§28** new section — Set C delete. CV is an optional accelerator, not the source
+  of truth; L2 confirmed data never depends on the file. Replace/re-upload supported
+  (already live). User-facing CV delete PARKED (no destructive flow before launch).
+  Old-upload cleanup (storage files, is_primary residue, parse history) acknowledged
+  as internal backlog, not launch-blocking.
+
+Sets A/B/E of the CV sovereignty workshop intentionally not opened — covered
+implicitly (A = L2 ownership in §27/§28.1; B/E = re-upload/re-parse in §28.2;
+upload cleanup backlog in §28.4).
+
+§§1–26 — all KEEP unchanged.
 
 
 **v1.13 — May 24 2026 optional-section dual-action lock (Mo product decision)**
@@ -1607,4 +1632,106 @@ The dim treatment is a SOVEREIGNTY INDICATOR, not an error or incompleteness sta
 ### 26.8 — Status
 
 Doctrine locked. Substrate already shipped (`section_visibility`, `activated_sections`, `masked_fields`). G2 dim/label treatment is the only remaining presentation slice and is unblocked by this lock. Operational feedback (toggles, activation) uses brand-green `#1D9E75`, never gold (STATE design lock).
+
+---
+
+## §27 — CV Sovereignty: Set D (Dedup / Overwrite) — LOCKED 2026-05-24 (Mo)
+
+### §27.1 Principle: existence-L2-prime
+L2 (user-confirmed / user-owned) data always wins over L1 (parsed CV) data.
+When an equivalent L2 entry exists, the matching L1 parsed entry MUST NOT render
+on any surface. The mere existence of the L2 entry is sufficient to suppress its
+L1 twin — no journal entry is required for suppression to occur.
+
+This establishes one sovereignty rule across ProfiLux collections: L2/user-owned
+data wins over L1/parsed data. Collection-specific equivalence may differ. The
+prior split (Languages = existence-prime, Career = resolution_state-journal,
+Education/Sectors = replace-when-present) is retired as the governing model.
+
+### §27.2 Dedup condition (canonical)
+A parsed L1 row is suppressed when EITHER holds:
+  (a) an equivalent L2 row exists (existence-prime — primary condition), OR
+  (b) resolution_state marks its signature 'applied' or 'dismissed' (audit-retained).
+Condition (a) is sufficient on its own. resolution_state is NO LONGER the sole
+dedup condition for any collection.
+
+### §27.3 Career History alignment
+Career History MUST align with Languages: existence of an equivalent
+work_experiences (L2) row suppresses the matching cv_parsed_data.experiences (L1)
+row, independent of resolution_state. This closes the 69c7fb97 fragility class
+(an L2 row created outside the Confirm flow no longer leaves a duplicate L1 twin).
+
+### §27.4 Equivalence key (LOCKED 2026-05-24, Mo)
+"Equivalent L2 entry" is defined per collection:
+
+  - Languages: language name, case-insensitive + trimmed. (already live, unchanged)
+
+  - Career: company + job_title + normalized start month.
+    Both sides are normalized to month precision before comparison:
+      L1 start_date is YYYY-MM  -> compare as YYYY-MM
+      L2 start_date is YYYY-MM-01 (per 8e9f36d) -> truncate to YYYY-MM, compare as YYYY-MM
+    start_date REMAINS part of the key. company + job_title alone is rejected as too
+    risky for repeated roles at the same company (e.g. two distinct tenures at the
+    same maison would collide and one would be wrongly suppressed).
+    Company + job_title: case-insensitive + trimmed, consistent with the existing
+    normalizeExperienceField rule (single source of truth, experienceSignature.ts).
+
+  - Education / Sectors: replace-when-present, accepted as a valid degenerate case
+    of existence-L2-prime. When L2 exists for these collections it wins wholesale
+    over L1; no per-row equivalence key is computed. No rewrite required.
+
+### §27.5 resolution_state status
+resolution_state is retained as audit/history only. It MAY continue to be written
+and read, but it is no longer load-bearing as a dedup gate. It must not be deleted
+in this slice (no migration, no data change).
+
+### §27.6 Out of scope (parked, not this set)
+- "Dismiss / ignore a parsed item without creating an L2" is NOT prioritized now.
+  Parked. Under pure existence-prime a dismiss with no L2 twin cannot be expressed;
+  if this becomes a real product need, it returns via resolution_state path (b) or
+  a dedicated mechanism — to be decided then, not now.
+- No code. No resolver change. No C4. Set A/B/E of the CV sovereignty workshop
+  remain unopened.
+
+---
+
+## §28 — CV Sovereignty: Set C (Delete) — LOCKED 2026-05-24 (Mo)
+
+### §28.1 Principle: CV is an optional accelerator, not the source of truth
+The uploaded CV is an optional accelerator for populating ProfiLux. It is an
+input, not the canonical record. L2 confirmed ProfiLux data (work_experiences,
+education_records, member_languages, member_sectors, and member scalars) NEVER
+depends on the continued existence of the CV file or its parsed L1 layer. A
+member who has confirmed data to L2 owns that data independently of the file.
+
+### §28.2 Supported at launch: replace / re-upload
+Members can replace their CV by re-uploading. The latest upload becomes the
+active CV; a fresh parse runs into cv_parsed_pending. Re-upload is non-destructive
+to L1 and L2 — it only changes the active file pointer and the pending parse.
+(Confirmed live behavior: cv-upload writes a new timestamped path with
+upsert:false; cv-parse re-fires on path change.)
+
+### §28.3 PARKED: no user-facing CV delete at launch
+There is NO user-facing "Delete CV" action at launch. Building a destructive
+delete flow (physical storage removal + L1 clear + member_documents cleanup) is
+deliberately deferred — a sensitive destructive operation should not ship under
+launch pressure. When it returns, it must distinguish file-scope vs parsed-scope
+and must never touch L2 (which is governed by per-section remove/edit, already
+shipped).
+
+### §28.4 Internal/backlog: old-upload cleanup
+Accumulation of superseded CV artifacts is acknowledged and accepted as internal
+backlog, NOT launch-blocking:
+  - multiple storage files per member (upsert:false, old files retained)
+  - orphaned member_documents rows (re-upload does not flip prior is_primary to
+    false; measured 2026-05-24: 12 cv document rows / 9 members, 12 is_primary=true
+    -> 3 members carry multiple primary rows)
+  - cv_parse_history accumulation (audit, intentionally retained)
+These are housekeeping items, addressed in a dedicated cleanup slice when CV
+delete is designed — not before. No data change in this set.
+
+### §28.5 Out of scope
+- No delete route. No storage removal. No member_documents mutation.
+- No is_primary reconciliation in this set (parked to the cleanup slice).
+- No code. No C4. Set A / B / E remain unopened.
 
