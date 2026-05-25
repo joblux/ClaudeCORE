@@ -27,8 +27,6 @@ const IDENTITY_FIELDS = [
   'country',
   'nationality',
   'phone',
-  'headline',
-  'bio',
 ] as const
 type IdentityField = (typeof IDENTITY_FIELDS)[number]
 
@@ -82,8 +80,6 @@ export async function GET() {
     country: resolved.country,
     nationality: resolved.nationality,
     phone: resolved.phone,
-    headline: resolved.headline,
-    bio: resolved.bio,
   }
   const pendingIdentity = (pending.identity ?? {}) as Record<string, unknown>
   const identity: Array<{

@@ -25,8 +25,7 @@ const supabase = createClient(
 //   {
 //     accept: {
 //       identity?: { first_name?: true, last_name?: true, city?: true,
-//                    country?: true, nationality?: true, phone?: true,
-//                    headline?: true, bio?: true },
+//                    country?: true, nationality?: true, phone?: true },
 //       experiences?: number[],     // indices into pending.experiences
 //       education?: string[],       // signatures (sha256 hex)
 //       languages?: string[],       // lowercased trimmed language keys
@@ -47,8 +46,6 @@ const IDENTITY_FIELDS = [
   'country',
   'nationality',
   'phone',
-  'headline',
-  'bio',
 ] as const
 type IdentityField = (typeof IDENTITY_FIELDS)[number]
 
