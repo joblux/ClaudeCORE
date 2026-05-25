@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
 import { computeEducationSignature } from '@/lib/profilux/educationSignature'
+import { resolveProfiLux } from '@/lib/profilux'
+import type { ProfiLuxResolved } from '@/lib/profilux'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,11 +14,8 @@ const supabase = createClient(
 // =============================================================================
 // GET /api/members/cv-merge/diff — Phase C.2
 //
-// Read-only diff between members.cv_parsed_pending and the canonical L2 state
-// (L2 columns + work_experiences + education_records + member_languages +
-// member_sectors). Resolver is NOT used here: we deliberately compare against
-// raw L2 only, since cv_parsed_data L1 fallbacks are about to be replaced by
-// the pending payload on apply.
+// Read-only diff between members.cv_parsed_pending and the RESOLVED view
+// (resolveProfiLux = L2 + L1). "matched" means "already visible to the user".
 //
 // No DB writes. cv_parsed_pending remains untouched.
 // =============================================================================
@@ -48,7 +47,7 @@ export async function GET() {
   const { data: member, error: memberErr } = await supabase
     .from('members')
     .select(
-      'id, first_name, last_name, city, country, nationality, phone, headline, bio, cv_parsed_pending'
+      'id, cv_parsed_pending'
     )
     .eq('email', session.user.email)
     .maybeSingle()
@@ -65,32 +64,27 @@ export async function GET() {
     return NextResponse.json({ pending: null, diff: null })
   }
 
-  // -- L2 fetches (parallel) ---------------------------------------------------
-  const [weRes, erRes, mlRes, msRes] = await Promise.all([
-    supabase
-      .from('work_experiences')
-      .select('id, company, start_date')
-      .eq('member_id', member.id),
-    supabase
-      .from('education_records')
-      .select('id, institution, field_of_study, graduation_year')
-      .eq('member_id', member.id),
-    supabase
-      .from('member_languages')
-      .select('id, language')
-      .eq('member_id', member.id),
-    supabase
-      .from('member_sectors')
-      .select('id, sector')
-      .eq('member_id', member.id),
-  ])
-
-  if (weRes.error) return NextResponse.json({ error: weRes.error.message }, { status: 500 })
-  if (erRes.error) return NextResponse.json({ error: erRes.error.message }, { status: 500 })
-  if (mlRes.error) return NextResponse.json({ error: mlRes.error.message }, { status: 500 })
-  if (msRes.error) return NextResponse.json({ error: msRes.error.message }, { status: 500 })
+  let resolved: ProfiLuxResolved | null
+  try {
+    resolved = await resolveProfiLux(member.id, supabase)
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? 'resolveProfiLux failed' }, { status: 500 })
+  }
+  if (!resolved) {
+    return NextResponse.json({ error: 'Member not found' }, { status: 404 })
+  }
 
   // -- identity ----------------------------------------------------------------
+  const resolvedIdentity: Record<IdentityField, unknown> = {
+    first_name: resolved.first_name,
+    last_name: resolved.last_name,
+    city: resolved.city,
+    country: resolved.country,
+    nationality: resolved.nationality,
+    phone: resolved.phone,
+    headline: resolved.headline,
+    bio: resolved.bio,
+  }
   const pendingIdentity = (pending.identity ?? {}) as Record<string, unknown>
   const identity: Array<{
     field: IdentityField
@@ -102,7 +96,7 @@ export async function GET() {
     const raw = pendingIdentity[field]
     const pVal = typeof raw === 'string' ? raw.trim() : ''
     if (pVal === '') continue
-    const cRaw = (member as Record<string, unknown>)[field]
+    const cRaw = resolvedIdentity[field]
     const cVal = typeof cRaw === 'string' ? cRaw.trim() : ''
     let status: IdentityStatus
     if (cVal === '') status = 'added'
@@ -117,10 +111,8 @@ export async function GET() {
   }
 
   // -- experiences -------------------------------------------------------------
-  const l2WeKeys = new Set<string>(
-    (weRes.data ?? [])
-      .map((r) => `${norm(r.company)}|${r.start_date ?? ''}`)
-      .filter((k) => !k.startsWith('|') || k !== '|') // skip the empty-empty case
+  const currentWeKeys = new Set<string>(
+    resolved.experiences.map((r) => `${norm(r.company)}|${r.start_date ?? ''}`)
   )
   const pendingExperiencesRaw = Array.isArray(pending.experiences) ? pending.experiences : []
   const experiences: Array<{
@@ -135,13 +127,13 @@ export async function GET() {
     const jobTitle = typeof exp.job_title === 'string' ? exp.job_title : ''
     if (company.trim() === '' && jobTitle.trim() === '') return
     const key = `${norm(company)}|${typeof exp.start_date === 'string' ? exp.start_date : ''}`
-    const status: CollectionStatus = l2WeKeys.has(key) ? 'matched' : 'added'
+    const status: CollectionStatus = currentWeKeys.has(key) ? 'matched' : 'added'
     experiences.push({ index, key, status, item: exp })
   })
 
   // -- education ---------------------------------------------------------------
-  const l2EduSignatures = new Set<string>(
-    (erRes.data ?? []).map((r) =>
+  const currentEduSignatures = new Set<string>(
+    resolved.education.map((r) =>
       computeEducationSignature({
         institution: r.institution ?? null,
         field_of_study: r.field_of_study ?? null,
@@ -164,12 +156,12 @@ export async function GET() {
       field_of_study: typeof edu.field_of_study === 'string' ? edu.field_of_study : null,
       graduation_year: typeof edu.graduation_year === 'number' ? edu.graduation_year : null,
     })
-    const status: CollectionStatus = l2EduSignatures.has(signature) ? 'matched' : 'added'
+    const status: CollectionStatus = currentEduSignatures.has(signature) ? 'matched' : 'added'
     education.push({ signature, status, item: edu })
   })
 
   // -- languages ---------------------------------------------------------------
-  const l2LangKeys = new Set<string>((mlRes.data ?? []).map((r) => norm(r.language)))
+  const currentLangKeys = new Set<string>(resolved.languages.map((r) => norm(r.language)))
   const pendingLanguagesRaw = Array.isArray(pending.languages) ? pending.languages : []
   const languages: Array<{
     key: string
@@ -181,19 +173,19 @@ export async function GET() {
     const language = typeof lng.language === 'string' ? lng.language : ''
     if (language.trim() === '') return
     const key = norm(language)
-    const status: CollectionStatus = l2LangKeys.has(key) ? 'matched' : 'added'
+    const status: CollectionStatus = currentLangKeys.has(key) ? 'matched' : 'added'
     languages.push({ key, status, item: lng })
   })
 
   // -- sectors -----------------------------------------------------------------
-  const l2SectorSet = new Set<string>((msRes.data ?? []).map((r) => (r.sector ?? '') as string))
+  const currentSectorSet = new Set<string>(resolved.sectors)
   const pendingSectorsRaw = Array.isArray(pending.sectors) ? pending.sectors : []
   const sectors: Array<{ sector: string; status: CollectionStatus }> = []
   for (const s of pendingSectorsRaw) {
     if (typeof s !== 'string') continue
     const value = s.trim()
     if (value === '') continue
-    const status: CollectionStatus = l2SectorSet.has(value) ? 'matched' : 'added'
+    const status: CollectionStatus = currentSectorSet.has(value) ? 'matched' : 'added'
     sectors.push({ sector: value, status })
   }
 
