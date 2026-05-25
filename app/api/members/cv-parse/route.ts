@@ -271,6 +271,19 @@ function normalizeCvStoragePath(cvUrl: string): string {
   return match ? match[1] : value
 }
 
+function normalizeShoutingCase(value: string | null): string | null {
+  if (value == null) return value
+  const s = value.trim()
+  if (s === '') return value
+  const hasLetter = /[A-Za-z]/.test(s)
+  const hasLower = /[a-z]/.test(s)
+  if (!hasLetter || hasLower) return value
+  return s.replace(/[A-Za-z][A-Za-z''’]*/g, (word) => {
+    if (word.length <= 3) return word
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  })
+}
+
 export async function POST(req: NextRequest) {
   // Auth
   const session = await getServerSession(authOptions)
@@ -540,8 +553,15 @@ export async function POST(req: NextRequest) {
       cv_storage_path: cvPath,
       extraction_method: extractionMethod,
     },
-    identity: validated.identity,
-    experiences: sortedExperiences,
+    identity: {
+      ...validated.identity,
+      first_name: normalizeShoutingCase(validated.identity.first_name),
+      last_name: normalizeShoutingCase(validated.identity.last_name),
+    },
+    experiences: sortedExperiences.map((e) => ({
+      ...e,
+      job_title: normalizeShoutingCase(e.job_title),
+    })),
     education: filteredEducation,
     sectors: validated.sectors,
     languages: validated.languages,
