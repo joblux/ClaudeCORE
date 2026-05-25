@@ -57,6 +57,30 @@ const pillBase: React.CSSProperties = {
   cursor: 'default',
 }
 
+const segGroup: React.CSSProperties = {
+  display: 'inline-flex',
+  background: '#222',
+  border: '1px solid #2a2a2a',
+  borderRadius: 8,
+  padding: 3,
+  gap: 2,
+  flexShrink: 0,
+  alignSelf: 'flex-start',
+  marginTop: 1,
+}
+const segBtn = (active: boolean): React.CSSProperties => ({
+  background: active ? 'rgba(255,255,255,0.10)' : 'transparent',
+  color: active ? '#fff' : '#777',
+  padding: '5px 12px',
+  fontFamily: 'Inter, sans-serif',
+  fontSize: 12,
+  letterSpacing: 0.2,
+  borderRadius: 6,
+  border: 'none',
+  cursor: 'pointer',
+  whiteSpace: 'nowrap',
+})
+
 const headerRow: React.CSSProperties = {
   display: 'flex',
   alignItems: 'flex-start',
@@ -216,13 +240,6 @@ const checkboxLabel: React.CSSProperties = {
   lineHeight: 1.5,
 }
 
-const checkboxInput: React.CSSProperties = {
-  width: 16,
-  height: 16,
-  accentColor: '#a58e28',
-  cursor: 'pointer',
-  flexShrink: 0,
-}
 
 const badge: React.CSSProperties = {
   fontFamily: 'Inter, sans-serif',
@@ -438,7 +455,7 @@ export default function CvMergePage() {
 
   const seedSelections = (d: DiffResponse['diff']) => {
     if (!d) return
-    setIdentitySel(new Set(d.identity.filter((e) => e.status === 'added' || e.status === 'changed').map((e) => e.field)))
+    setIdentitySel(new Set(d.identity.filter((e) => e.status === 'added').map((e) => e.field)))
     setExpSel(new Set(d.experiences.filter((e) => e.status === 'added').map((e) => e.index)))
     setEduSel(new Set(d.education.filter((e) => e.status === 'added').map((e) => e.signature)))
     setLangSel(new Set(d.languages.filter((e) => e.status === 'added').map((e) => e.key)))
@@ -568,14 +585,22 @@ export default function CvMergePage() {
     }
   }
 
-  function toggleSet<T>(setter: React.Dispatch<React.SetStateAction<Set<T>>>, value: T) {
+  function setMembership<T>(setter: React.Dispatch<React.SetStateAction<Set<T>>>, value: T, include: boolean) {
     setter((prev) => {
       const next = new Set(prev)
-      if (next.has(value)) next.delete(value)
-      else next.add(value)
+      if (include) next.add(value)
+      else next.delete(value)
       return next
     })
   }
+  const Segmented = ({
+    inLabel, outLabel, isIn, onPick,
+  }: { inLabel: string; outLabel: string; isIn: boolean; onPick: (include: boolean) => void }) => (
+    <span style={segGroup}>
+      <button type="button" style={segBtn(isIn)} onClick={() => onPick(true)}>{inLabel}</button>
+      <button type="button" style={segBtn(!isIn)} onClick={() => onPick(false)}>{outLabel}</button>
+    </span>
+  )
 
   // ----------------------------------------------------------
   // Render helpers
@@ -632,30 +657,27 @@ export default function CvMergePage() {
     return (
       <div style={sectionCard}>
         <div style={sectionEyebrow}>Identity</div>
-        {entries.map((e) => {
-          const checked = identitySel.has(e.field)
-          return (
-            <label key={e.field} style={{ ...rowStyle, cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                style={checkboxInput}
-                checked={checked}
-                onChange={() => toggleSet(setIdentitySel, e.field)}
-              />
-              <span style={checkboxLabel}>
-                <span style={{ color: '#fff', fontWeight: 500, minWidth: 110 }}>
-                  {IDENTITY_LABELS[e.field]}
-                </span>
-                <span>
-                  {e.current ? <span style={currentVal}>{e.current}</span> : <span style={currentVal}>—</span>}
-                  <span style={arrowSep}>→</span>
-                  <span style={pendingVal}>{e.pending}</span>
-                </span>
+        {entries.map((e) => (
+          <div key={e.field} style={rowStyle}>
+            <span style={checkboxLabel}>
+              <span style={{ color: '#fff', fontWeight: 500, minWidth: 110 }}>
+                {IDENTITY_LABELS[e.field]}
               </span>
-              <span style={e.status === 'added' ? badgeAdded : badgeChanged}>{e.status}</span>
-            </label>
-          )
-        })}
+              <span>
+                {e.current ? <span style={currentVal}>{e.current}</span> : <span style={currentVal}>—</span>}
+                <span style={arrowSep}>→</span>
+                <span style={pendingVal}>{e.pending}</span>
+              </span>
+            </span>
+            <span style={e.status === 'added' ? badgeAdded : badgeChanged}>{e.status}</span>
+            <Segmented
+              inLabel={e.status === 'added' ? 'Add' : 'Apply new'}
+              outLabel={e.status === 'added' ? 'Skip' : 'Keep existing'}
+              isIn={identitySel.has(e.field)}
+              onPick={(include) => setMembership(setIdentitySel, e.field, include)}
+            />
+          </div>
+        ))}
       </div>
     )
   }
@@ -673,7 +695,7 @@ export default function CvMergePage() {
           if (e.status === 'matched') {
             return (
               <div key={e.index} style={rowStyle}>
-                <span style={{ ...checkboxLabel, paddingLeft: 26 }}>
+                <span style={checkboxLabel}>
                   <span>
                     <span style={pendingVal}>{company}</span>
                     <span style={arrowSep}>·</span>
@@ -685,15 +707,8 @@ export default function CvMergePage() {
               </div>
             )
           }
-          const checked = expSel.has(e.index)
           return (
-            <label key={e.index} style={{ ...rowStyle, cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                style={checkboxInput}
-                checked={checked}
-                onChange={() => toggleSet(setExpSel, e.index)}
-              />
+            <div key={e.index} style={rowStyle}>
               <span style={checkboxLabel}>
                 <span>
                   <span style={pendingVal}>{company}</span>
@@ -703,7 +718,13 @@ export default function CvMergePage() {
                 </span>
               </span>
               <span style={badgeAdded}>added</span>
-            </label>
+              <Segmented
+                inLabel="Import"
+                outLabel="Don't import"
+                isIn={expSel.has(e.index)}
+                onPick={(include) => setMembership(setExpSel, e.index, include)}
+              />
+            </div>
           )
         })}
       </div>
@@ -723,7 +744,7 @@ export default function CvMergePage() {
           if (e.status === 'matched') {
             return (
               <div key={e.signature} style={rowStyle}>
-                <span style={{ ...checkboxLabel, paddingLeft: 26 }}>
+                <span style={checkboxLabel}>
                   <span>
                     <span style={pendingVal}>{inst}</span>
                     {subtitle && <div style={meta}>{subtitle}</div>}
@@ -733,15 +754,8 @@ export default function CvMergePage() {
               </div>
             )
           }
-          const checked = eduSel.has(e.signature)
           return (
-            <label key={e.signature} style={{ ...rowStyle, cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                style={checkboxInput}
-                checked={checked}
-                onChange={() => toggleSet(setEduSel, e.signature)}
-              />
+            <div key={e.signature} style={rowStyle}>
               <span style={checkboxLabel}>
                 <span>
                   <span style={pendingVal}>{inst}</span>
@@ -749,7 +763,13 @@ export default function CvMergePage() {
                 </span>
               </span>
               <span style={badgeAdded}>added</span>
-            </label>
+              <Segmented
+                inLabel="Import"
+                outLabel="Don't import"
+                isIn={eduSel.has(e.signature)}
+                onPick={(include) => setMembership(setEduSel, e.signature, include)}
+              />
+            </div>
           )
         })}
       </div>
@@ -768,27 +788,26 @@ export default function CvMergePage() {
           if (e.status === 'matched') {
             return (
               <div key={e.key} style={rowStyle}>
-                <span style={{ ...checkboxLabel, paddingLeft: 26 }}>
+                <span style={checkboxLabel}>
                   <span style={pendingVal}>{display}</span>
                 </span>
                 <span style={badgeMatched}>matched</span>
               </div>
             )
           }
-          const checked = langSel.has(e.key)
           return (
-            <label key={e.key} style={{ ...rowStyle, cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                style={checkboxInput}
-                checked={checked}
-                onChange={() => toggleSet(setLangSel, e.key)}
-              />
+            <div key={e.key} style={rowStyle}>
               <span style={checkboxLabel}>
                 <span style={pendingVal}>{display}</span>
               </span>
               <span style={badgeAdded}>added</span>
-            </label>
+              <Segmented
+                inLabel="Import"
+                outLabel="Don't import"
+                isIn={langSel.has(e.key)}
+                onPick={(include) => setMembership(setLangSel, e.key, include)}
+              />
+            </div>
           )
         })}
       </div>
@@ -804,27 +823,26 @@ export default function CvMergePage() {
           if (e.status === 'matched') {
             return (
               <div key={e.sector} style={rowStyle}>
-                <span style={{ ...checkboxLabel, paddingLeft: 26 }}>
+                <span style={checkboxLabel}>
                   <span style={pendingVal}>{e.sector}</span>
                 </span>
                 <span style={badgeMatched}>matched</span>
               </div>
             )
           }
-          const checked = sectorSel.has(e.sector)
           return (
-            <label key={e.sector} style={{ ...rowStyle, cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                style={checkboxInput}
-                checked={checked}
-                onChange={() => toggleSet(setSectorSel, e.sector)}
-              />
+            <div key={e.sector} style={rowStyle}>
               <span style={checkboxLabel}>
                 <span style={pendingVal}>{e.sector}</span>
               </span>
               <span style={badgeAdded}>added</span>
-            </label>
+              <Segmented
+                inLabel="Import"
+                outLabel="Don't import"
+                isIn={sectorSel.has(e.sector)}
+                onPick={(include) => setMembership(setSectorSel, e.sector, include)}
+              />
+            </div>
           )
         })}
       </div>
@@ -841,8 +859,7 @@ export default function CvMergePage() {
           <div style={eyebrow}>CV MERGE</div>
           <h1 style={titleStyle}>Review your re-parsed CV</h1>
           <p style={lede}>
-            Pick what to apply to your dossier. Unmatched items will be added; matched
-            items already exist.
+            For each item, choose what to do. Nothing is changed unless you choose it.
           </p>
         </div>
         <button type="button" style={cancelLink} onClick={handleReject}>
@@ -887,7 +904,7 @@ export default function CvMergePage() {
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999' }}>
-            {totalSelected} selected
+            {totalSelected} changes will apply
           </span>
           <button
             type="button"
