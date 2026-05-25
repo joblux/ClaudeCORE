@@ -438,7 +438,7 @@ export default function CvMergePage() {
 
   const seedSelections = (d: DiffResponse['diff']) => {
     if (!d) return
-    setIdentitySel(new Set(d.identity.filter((e) => e.status === 'added').map((e) => e.field)))
+    setIdentitySel(new Set(d.identity.filter((e) => e.status === 'added' || e.status === 'changed').map((e) => e.field)))
     setExpSel(new Set(d.experiences.filter((e) => e.status === 'added').map((e) => e.index)))
     setEduSel(new Set(d.education.filter((e) => e.status === 'added').map((e) => e.signature)))
     setLangSel(new Set(d.languages.filter((e) => e.status === 'added').map((e) => e.key)))
