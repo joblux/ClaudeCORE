@@ -99,21 +99,29 @@ function arr<T>(v: T[] | null | undefined): T[] {
   return Array.isArray(v) ? v : []
 }
 
+function experienceEquivKey(
+  company: string | null | undefined,
+  job_title: string | null | undefined,
+  start_date: string | null | undefined,
+): string {
+  const norm = (x: string | null | undefined) => (x ?? '').trim().toLowerCase()
+  const d = (start_date ?? '').trim()
+  const month = /^\d{4}-\d{2}/.test(d) ? d.slice(0, 7) : d
+  return `${norm(company)}|${norm(job_title)}|${month}`
+}
+
 function mapExperiences(
   l1: CvParsedExperience[] | undefined,
-  resolution?: CvParsedData['resolution_state'],
+  resolution: CvParsedData['resolution_state'] | undefined,
+  l2: ResolvedExperience[],
 ): ResolvedExperience[] {
-  // Career History V2 Slice 1: suppress L1 rows the user already promoted to L2.
-  // Mirror education suppression in cv_education_suggestions: rows with no
-  // company can't be signed (signature requires a company anchor) — pass them
-  // through unchanged. For signable rows, compute the signature and omit any
-  // row whose status in resolution_state.experiences is 'applied' or
-  // 'dismissed'. The corresponding L2 (work_experiences) row already shows
-  // up in the resolver's experiences concat, so confirmed entries render
-  // once — no ghost.
+  const l2Keys = new Set(
+    l2.map((e) => experienceEquivKey(e.company, e.job_title, e.start_date)),
+  )
   const expResolution = resolution?.experiences ?? {}
   const out: ResolvedExperience[] = []
   for (const e of arr(l1)) {
+    if (l2Keys.has(experienceEquivKey(e.company, e.job_title, e.start_date))) continue
     if (nonEmptyStr(e.company)) {
       const sig = computeExperienceSignature({
         company: e.company ?? null,
@@ -419,10 +427,10 @@ export async function resolveProfiLux(
     // Career History V2 Slice 1: mapExperiences suppresses L1 rows whose
     // signature is already resolved (status 'applied'/'dismissed') in
     // resolution_state.experiences — so the L2 twin is the only render.
-    experiences: [
-      ...(relationalExperiences ?? []),
-      ...mapExperiences(cv?.experiences, cv?.resolution_state),
-    ],
+    experiences: (() => {
+      const l2 = relationalExperiences ?? []
+      return [...l2, ...mapExperiences(cv?.experiences, cv?.resolution_state, l2)]
+    })(),
     // S-B.1A: L2 first + L1 second (no replace, no dedup).
     // Education: L2 (user-confirmed) replaces L1 (CV parser fallback) when present.
     // Same rank-merge rationale as sectors — L2 is canonical when populated.
