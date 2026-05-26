@@ -195,10 +195,26 @@ export default function CandidateDashboard() {
 
   // Profile completeness — server value, single source of truth (Matrix v1 §10.1)
   const profiluxCompletion = profilux?.profile_completeness ?? 0
-  // Slice 1 — CV-state acknowledgement. True if a CV was uploaded but ProfiLux
-  // is still empty (parse not yet run / not yet reviewed). Presentation only:
-  // does NOT alter profile_completeness. Source = editor projection cv_meta.cv_url.
-  const cvUploadedNotAnalyzed = Boolean(profilux?.cv_meta?.cv_url) && profiluxCompletion === 0
+  // Slice B — CV onboarding state model (S0-S4), derived from Slice A cv_meta
+  // signals. Presentation only: never alters profile_completeness, never parses.
+  const cvm = profilux?.cv_meta
+  const cvState: 'S0' | 'S1' | 'S2' | 'S3' | 'S4' = (() => {
+    if (!cvm?.has_cv) return 'S0'
+    if (cvm.has_pending_cv_review) return 'S2'
+    if (cvm.has_applied_cv_parse) return 'S3'
+    if ((cvm.cv_parse_attempt_count ?? 0) > 0) return 'S4'
+    return 'S1'
+  })()
+  // Card value + sub-label + CTA per state. S0/S3/S4 use normal completion copy.
+  const completionValue = profiluxCompletion === 100 ? 'Up to date' : `${profiluxCompletion}% complete`
+  const cvCardValue = cvState === 'S1' ? 'CV received' : cvState === 'S2' ? 'Analysis ready' : completionValue
+  const cvCardSub = cvState === 'S1' ? 'Ready to analyze' : cvState === 'S2' ? 'Review to apply' : 'Continue editing'
+  const cvBarCopy = cvState === 'S1'
+    ? 'CV received · ready to analyze · 0% complete until reviewed'
+    : cvState === 'S2'
+    ? 'CV analysis ready · review to apply'
+    : `${profiluxCompletion}% complete · Your profile is a living document — keep refining it.`
+  const cvCta = cvState === 'S1' ? 'Analyze my CV →' : cvState === 'S2' ? 'Review CV analysis →' : 'Continue →' 
 
   // ══════════════════════════════════════════════════════════════════
   // RENDER
@@ -234,8 +250,8 @@ export default function CandidateDashboard() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
             <Link href="/dashboard/candidate/profilux" className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 hover:border-[#3a3a3a] transition-colors block">
               <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-2">PROFILE</div>
-              <div className="text-sm text-[#ccc] mb-1">{cvUploadedNotAnalyzed ? 'CV received' : (profiluxCompletion === 100 ? 'Up to date' : `${profiluxCompletion}% complete`)}</div>
-              <div className="text-[11px] text-[#999]">{cvUploadedNotAnalyzed ? 'Ready to analyze' : 'Continue editing'}</div>
+              <div className="text-sm text-[#ccc] mb-1">{cvCardValue}</div>
+              <div className="text-[11px] text-[#999]">{cvCardSub}</div>
             </Link>
             <Link href="/careers" className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 hover:border-[#3a3a3a] transition-colors block">
               <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-2">CAREERS</div>
@@ -266,13 +282,11 @@ export default function CandidateDashboard() {
               <div className="h-full bg-[#1D9E75] rounded-full transition-all" style={{ width: `${profiluxCompletion}%` }} />
             </div>
             <div className="text-[11px] text-[#999]">
-              {cvUploadedNotAnalyzed
-                ? 'CV received · ready to analyze · 0% complete until reviewed'
-                : `${profiluxCompletion}% complete · Your profile is a living document — keep refining it.`}
+              {cvBarCopy}
             </div>
           </div>
           <Link href="/dashboard/candidate/profilux" className="bg-white text-[#1a1a1a] text-xs font-semibold px-4 py-2 rounded-lg hover:opacity-85 transition-opacity whitespace-nowrap">
-            {cvUploadedNotAnalyzed ? 'Analyze →' : 'Continue →'}
+            {cvCta}
           </Link>
         </div>
 
