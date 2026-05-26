@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import type { EditorView, MaskableField, ProfiLuxAwardItem, ProfiLuxCertificationItem, ProfiLuxInternshipItem, ProfiLuxPortfolioItem, ProfiLuxPressFeatureItem, ProfiLuxReferenceItem, ProfiLuxStrategicInitiative, SectionId } from '@/lib/profilux/types'
@@ -900,6 +901,8 @@ export default function ProfiluxPage() {
   const [parsing, setParsing] = useState(false)
   // Slice 2 — guard so the first-entry auto-parse fires at most once per mount.
   const autoParseTriedRef = useRef(false)
+  // Slice 4 — router for post-parse redirect to cv-merge review.
+  const router = useRouter()
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [parseError, setParseError] = useState<string | null>(null)
   const [needsReviewCount, setNeedsReviewCount] = useState<number | null>(null)
@@ -2180,7 +2183,13 @@ export default function ProfiluxPage() {
     const empty = (editor.profile_completeness ?? 0) === 0
     if (hasCv && neverParsed && empty) {
       autoParseTriedRef.current = true
-      void handleParse()
+      // Slice 4 — after the first-entry parse succeeds, route to cv-merge review
+      // so the parsed CV (cv_parsed_pending) is presented for explicit Apply/Keep.
+      // Only the auto first-entry parse redirects; manual "Parse CV" never does.
+      void (async () => {
+        await handleParse()
+        router.push('/dashboard/candidate/profilux/cv-merge')
+      })()
     }
   }, [loading, editor, parsing])
 
