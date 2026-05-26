@@ -862,8 +862,12 @@ export default function CvMergePage() {
             For each item, choose what to do. Nothing is changed unless you choose it.
           </p>
         </div>
-        <button type="button" style={cancelLink} onClick={handleReject}>
-          {mode === 'rejecting' ? 'Cancelling…' : 'Cancel'}
+        <button
+          type="button"
+          style={cancelLink}
+          onClick={() => router.push('/dashboard/candidate/profilux')}
+        >
+          Cancel
         </button>
       </div>
 
@@ -897,10 +901,10 @@ export default function CvMergePage() {
         <button
           type="button"
           style={rejectLink}
-          onClick={handleReject}
+          onClick={() => { if (window.confirm('Discard analysis? This permanently clears the parsed CV results. Your uploaded CV file is kept and can be re-analyzed.')) handleReject() }}
           disabled={mode === 'applying' || mode === 'rejecting'}
         >
-          {mode === 'rejecting' ? 'Rejecting…' : 'Reject all'}
+          {mode === 'rejecting' ? 'Discarding…' : 'Discard analysis'}
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999' }}>

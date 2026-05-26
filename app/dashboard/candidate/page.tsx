@@ -214,7 +214,8 @@ export default function CandidateDashboard() {
     : cvState === 'S2'
     ? 'CV analysis ready · review to apply'
     : `${profiluxCompletion}% complete · Your profile is a living document — keep refining it.`
-  const cvCta = cvState === 'S1' ? 'Analyze my CV →' : cvState === 'S2' ? 'Review CV analysis →' : 'Continue →' 
+  const cvCta = cvState === 'S1' ? 'Analyze my CV →' : cvState === 'S2' ? 'Review CV analysis →' : cvState === 'S4' ? 'Re-analyze my CV →' : 'Continue →'
+  const cvCtaHref = cvState === 'S4' ? '/dashboard/candidate/profilux?reanalyze=1' : '/dashboard/candidate/profilux' 
 
   // ══════════════════════════════════════════════════════════════════
   // RENDER
@@ -285,7 +286,7 @@ export default function CandidateDashboard() {
               {cvBarCopy}
             </div>
           </div>
-          <Link href="/dashboard/candidate/profilux" className="bg-white text-[#1a1a1a] text-xs font-semibold px-4 py-2 rounded-lg hover:opacity-85 transition-opacity whitespace-nowrap">
+          <Link href={cvCtaHref} className="bg-white text-[#1a1a1a] text-xs font-semibold px-4 py-2 rounded-lg hover:opacity-85 transition-opacity whitespace-nowrap">
             {cvCta}
           </Link>
         </div>
