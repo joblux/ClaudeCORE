@@ -433,6 +433,9 @@ export default function CvMergePage() {
 
   // Review-state selections
   const [identitySel, setIdentitySel] = useState<Set<IdentityField>>(new Set())
+  // Option 2 — changed identity fields explicitly set to "Keep existing".
+  // A changed field counts as decided only if it is in identitySel (apply) or here (keep).
+  const [identityKeepDecided, setIdentityKeepDecided] = useState<Set<IdentityField>>(new Set())
   const [expSel, setExpSel] = useState<Set<number>>(new Set())
   const [eduSel, setEduSel] = useState<Set<string>>(new Set())
   const [langSel, setLangSel] = useState<Set<string>>(new Set())
@@ -456,6 +459,7 @@ export default function CvMergePage() {
   const seedSelections = (d: DiffResponse['diff']) => {
     if (!d) return
     setIdentitySel(new Set(d.identity.filter((e) => e.status === 'added').map((e) => e.field)))
+    setIdentityKeepDecided(new Set())
     setExpSel(new Set(d.experiences.filter((e) => e.status === 'added').map((e) => e.index)))
     setEduSel(new Set(d.education.filter((e) => e.status === 'added').map((e) => e.signature)))
     setLangSel(new Set(d.languages.filter((e) => e.status === 'added').map((e) => e.key)))
@@ -594,11 +598,11 @@ export default function CvMergePage() {
     })
   }
   const Segmented = ({
-    inLabel, outLabel, isIn, onPick,
-  }: { inLabel: string; outLabel: string; isIn: boolean; onPick: (include: boolean) => void }) => (
+    inLabel, outLabel, isIn, onPick, isOut,
+  }: { inLabel: string; outLabel: string; isIn: boolean; onPick: (include: boolean) => void; isOut?: boolean }) => (
     <span style={segGroup}>
       <button type="button" style={segBtn(isIn)} onClick={() => onPick(true)}>{inLabel}</button>
-      <button type="button" style={segBtn(!isIn)} onClick={() => onPick(false)}>{outLabel}</button>
+      <button type="button" style={segBtn(isOut ?? !isIn)} onClick={() => onPick(false)}>{outLabel}</button>
     </span>
   )
 
@@ -674,7 +678,16 @@ export default function CvMergePage() {
               inLabel={e.status === 'added' ? 'Add' : 'Apply new'}
               outLabel={e.status === 'added' ? 'Skip' : 'Keep existing'}
               isIn={identitySel.has(e.field)}
-              onPick={(include) => setMembership(setIdentitySel, e.field, include)}
+              isOut={e.status === 'added' ? !identitySel.has(e.field) : identityKeepDecided.has(e.field)}
+              onPick={(include) => {
+                if (include) {
+                  setMembership(setIdentitySel, e.field, true)
+                  setMembership(setIdentityKeepDecided, e.field, false)
+                } else {
+                  setMembership(setIdentitySel, e.field, false)
+                  if (e.status !== 'added') setMembership(setIdentityKeepDecided, e.field, true)
+                }
+              }}
             />
           </div>
         ))}
@@ -851,6 +864,12 @@ export default function CvMergePage() {
 
   const totalSelected =
     identitySel.size + expSel.size + eduSel.size + langSel.size + sectorSel.size
+  // Option 2 — every changed identity field must be decided (apply or keep) before Apply.
+  const changedIdentityFields = (diff?.identity ?? []).filter((e) => e.status === 'changed').map((e) => e.field)
+  const undecidedIdentityCount = changedIdentityFields.filter(
+    (f) => !identitySel.has(f) && !identityKeepDecided.has(f),
+  ).length
+  const identityDecisionPending = undecidedIdentityCount > 0
 
   const renderReview = () => (
     <>
@@ -907,18 +926,20 @@ export default function CvMergePage() {
           {mode === 'rejecting' ? 'Discarding…' : 'Discard analysis'}
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: '#999' }}>
-            {totalSelected} changes will apply
+          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: identityDecisionPending ? '#e0a93a' : '#999' }}>
+            {identityDecisionPending
+              ? `${undecidedIdentityCount} identity ${undecidedIdentityCount === 1 ? 'change needs' : 'changes need'} a decision`
+              : `${totalSelected} changes will apply`}
           </span>
           <button
             type="button"
             style={{
               ...applyBtn,
-              opacity: mode === 'applying' || totalSelected === 0 ? 0.6 : 1,
-              cursor: mode === 'applying' || totalSelected === 0 ? 'not-allowed' : 'pointer',
+              opacity: mode === 'applying' || totalSelected === 0 || identityDecisionPending ? 0.6 : 1,
+              cursor: mode === 'applying' || totalSelected === 0 || identityDecisionPending ? 'not-allowed' : 'pointer',
             }}
             onClick={handleApply}
-            disabled={mode === 'applying' || totalSelected === 0}
+            disabled={mode === 'applying' || totalSelected === 0 || identityDecisionPending}
           >
             {mode === 'applying' ? 'Applying…' : 'Apply selected'}
           </button>
