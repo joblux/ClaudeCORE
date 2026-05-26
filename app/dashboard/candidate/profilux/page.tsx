@@ -898,6 +898,8 @@ export default function ProfiluxPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [parsing, setParsing] = useState(false)
+  // Slice 2 — guard so the first-entry auto-parse fires at most once per mount.
+  const autoParseTriedRef = useRef(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [parseError, setParseError] = useState<string | null>(null)
   const [needsReviewCount, setNeedsReviewCount] = useState<number | null>(null)
@@ -2165,6 +2167,23 @@ export default function ProfiluxPage() {
     refetch().catch((e) => setError(String(e))).finally(() => setLoading(false))
   }, [])
 
+  // Slice 2 — first ProfiLux entry: if a CV was uploaded but never parsed, run
+  // the existing parse chain automatically. Route-level idempotence + parsing
+  // state + autoParseTriedRef together prevent any duplicate parse. Failures
+  // surface via the existing parseError path; manual "Parse CV" stays as fallback.
+  // Parse fills cv_parsed_pending only; % rises later via cv-merge review (Slice 4).
+  useEffect(() => {
+    if (loading || !editor) return
+    if (autoParseTriedRef.current || parsing) return
+    const hasCv = Boolean(editor.cv_meta?.cv_url)
+    const neverParsed = editor.cv_meta?.cv_parsed_at == null
+    const empty = (editor.profile_completeness ?? 0) === 0
+    if (hasCv && neverParsed && empty) {
+      autoParseTriedRef.current = true
+      void handleParse()
+    }
+  }, [loading, editor, parsing])
+
   function normalizeShareStatus(data: any) {
     return {
       share_slug: data?.share_slug ?? null,
@@ -2229,6 +2248,18 @@ export default function ProfiluxPage() {
   if (loading) return <div style={wrap}>Loading…</div>
   if (error) return <div style={{ ...wrap, color: '#ff6b6b' }}>Error: {error}</div>
   if (!editor) return <div style={wrap}>No editor data.</div>
+
+  // Slice 3 — visible interstitial while the first-entry auto-parse runs, so the
+  // analysis never feels silent. Shown only during the first-entry parse (CV
+  // present, not yet parsed). Reuses the parsing state + wrap style; no new surface.
+  if (parsing && editor.cv_meta?.cv_parsed_at == null && Boolean(editor.cv_meta?.cv_url)) {
+    return (
+      <div style={{ ...wrap, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+        <div style={{ fontSize: 20, fontWeight: 600 }}>Analyzing your CV…</div>
+        <div style={{ fontSize: 13, color: '#999' }}>Reading your experience to set up your ProfiLux. This takes a few seconds.</div>
+      </div>
+    )
+  }
 
   const e = editor
   const cvUrl = e.cv_meta?.cv_url ?? null
