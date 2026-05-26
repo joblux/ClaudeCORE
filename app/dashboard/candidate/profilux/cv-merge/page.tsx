@@ -578,7 +578,7 @@ export default function CvMergePage() {
         setMode('review')
         return
       }
-      router.push('/dashboard/candidate/profilux')
+      router.push('/dashboard/candidate')
     } catch (err) {
       setError(String(err))
       setMode('review')
@@ -865,7 +865,7 @@ export default function CvMergePage() {
         <button
           type="button"
           style={cancelLink}
-          onClick={() => router.push('/dashboard/candidate/profilux')}
+          onClick={() => router.push('/dashboard/candidate')}
         >
           Cancel
         </button>
@@ -930,7 +930,7 @@ export default function CvMergePage() {
   return (
     <div style={wrap}>
       <div style={sceneBand}>
-        <Link href="/dashboard/candidate/profilux" style={breadcrumb}>
+        <Link href="/dashboard/candidate" style={breadcrumb}>
           ← Dashboard · ProfiLux · CV merge
         </Link>
         <div role="tablist" aria-hidden="true" style={pillGroup}>

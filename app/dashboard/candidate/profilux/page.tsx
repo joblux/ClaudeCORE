@@ -2206,10 +2206,11 @@ export default function ProfiluxPage() {
     const hasPending = Boolean(cvm?.has_pending_cv_review)
     const hasApplied = Boolean(cvm?.has_applied_cv_parse)
     const attempts = cvm?.cv_parse_attempt_count ?? 0
+    // S2 — pending review exists: do NOT force-redirect to cv-merge. The pending
+    // banner + "Review analysis" link surface it; the user chooses. Trapping the
+    // user in review was the bug. Mark tried so S1 auto-parse cannot also fire.
     if (hasPending) {
-      // S2 — pending review already exists; present it without re-parsing.
       autoParseTriedRef.current = true
-      router.push('/dashboard/candidate/profilux/cv-merge')
       return
     }
     if (hasCv && !hasApplied && attempts === 0) {
