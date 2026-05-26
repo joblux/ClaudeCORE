@@ -4,7 +4,7 @@ Domain contract for the ProfiLux object across JOBLUX. Locks the storage, resolu
 
 This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE wins until reconciled. See §12.
 
-**Status:** locked v1.14 (May 24 2026 CV sovereignty Sets C+D — §27 / §28)
+**Status:** locked v1.15 (May 26 2026 Taxonomy V2 three-representation doctrine + boundary-map dependency — §29)
 **Originally locked:** April 30, 2026
 **v1.1 addendum locked:** May 6, 2026
 **v1.2 addendum locked:** May 7, 2026
@@ -1735,3 +1735,32 @@ delete is designed — not before. No data change in this set.
 - No is_primary reconciliation in this set (parked to the cleanup slice).
 - No code. No C4. Set A / B / E remain unopened.
 
+
+## §29 — Taxonomy representations & boundary-map dependency — LOCKED 2026-05-26 (Mo)
+
+### §29.1 Three representations (by design, do not "fix")
+The same controlled axis exists in three forms today:
+1. Canonical snake_case — lib/profilux/vocabulary.ts (candidate ProfiLux side).
+2. Title-Case display strings — lib/assignment-options.ts (recruiting/brief forms; label == value).
+3. Persisted recruiting shorthand — search_assignments columns, matching NEITHER file. Live values (2026-05-26): seniority = senior / director / mid-level / c-suite / vp / junior; contract_type = permanent. Department persists Title-Case verbatim (matches representation 2).
+This divergence is intentional. It is NOT resolved by renaming files, merging vocabularies, or migrating DB values (Mo decision, Taxonomy V2, 2026-05-26 — Option 2).
+
+### §29.2 No live consumer today
+There is no equality-matching between candidate axes and assignment axes at present. member_brief_matches rows are computed_by=admin_manual; computed_by=auto_v1 is parked. The candidate axis columns (members.seniority / department / desired_departments / desired_contract_types) are empty in prod. The drift is therefore LATENT, not live-breaking.
+
+### §29.3 Boundary-map dependency (build WITH the consumer)
+When auto-matching opens, introduce one read-only pure module lib/profilux/taxonomy-bridge.ts as the SINGLE permitted translation point. It normalizes all three representations to canonical at the comparison boundary only:
+- toCanonicalSeniority(input) -> ProfiLuxSeniority | null
+- toCanonicalDepartment(input) -> ProfiLuxDepartment | null
+- toCanonicalContractType(input) -> ProfiLuxContractType | null
+Rules: explicit lookup tables keyed on normalize(lowercase+trim); no fuzzy matching; unmapped input returns null (never guesses); never writes; never mutates vocab files or DB. First axes only: seniority, department, contract_type. Other axes (sector, product_category, location, market, skill, specialization) deferred — several touch the C4 mobility/regions axis.
+
+### §29.4 Out of scope
+- No code yet (map built with the auto_v1 consumer slice, not before).
+- No DB value migration; persisted values stay as-is.
+- No file rename or deletion (profile-options.ts shim stays; migration parked 4323e247).
+- No C4.
+- Availability canonical-5 (63737a2) vs legacy-shim AVAILABILITY_OPTIONS drift = noted only, not actioned here.
+
+### §29.5 Governance
+Governed by f0e9be64 (Taxonomy Governance Rule, permanent doctrine). This section is the doctrine fold of that rule's taxonomy-representation scope; f0e9be64 stays OPEN as the canonical governance anchor.
