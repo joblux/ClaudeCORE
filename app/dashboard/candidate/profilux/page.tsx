@@ -2170,27 +2170,39 @@ export default function ProfiluxPage() {
     refetch().catch((e) => setError(String(e))).finally(() => setLoading(false))
   }, [])
 
-  // Slice 2 — first ProfiLux entry: if a CV was uploaded but never parsed, run
-  // the existing parse chain automatically. Route-level idempotence + parsing
-  // state + autoParseTriedRef together prevent any duplicate parse. Failures
-  // surface via the existing parseError path; manual "Parse CV" stays as fallback.
-  // Parse fills cv_parsed_pending only; % rises later via cv-merge review (Slice 4).
+  // Slice C — ProfiLux entry behavior by CV state (S0-S4), from Slice A cv_meta
+  // signals. Replaces the earlier profile_completeness===0 + cv_parsed_at logic
+  // (which left CV-uploaded users with any completeness>0 stuck, and risked a
+  // re-parse loop on rejected CVs). Route-level idempotence + parsing state +
+  // autoParseTriedRef still guard against duplicate parse. handleParse fills
+  // cv_parsed_pending only; % rises after explicit cv-merge review/apply.
+  //   S1 (CV, never parsed, attempts 0) -> auto-parse once, then route to review
+  //   S2 (review pending)               -> route straight to review, no re-parse
+  //   S4 (parsed then rejected, >0)     -> nothing (no auto-trigger, no harassment)
+  //   S0 / S3                           -> nothing (normal editor)
   useEffect(() => {
     if (loading || !editor) return
     if (autoParseTriedRef.current || parsing) return
-    const hasCv = Boolean(editor.cv_meta?.cv_url)
-    const neverParsed = editor.cv_meta?.cv_parsed_at == null
-    const empty = (editor.profile_completeness ?? 0) === 0
-    if (hasCv && neverParsed && empty) {
+    const cvm = editor.cv_meta
+    const hasCv = Boolean(cvm?.has_cv)
+    const hasPending = Boolean(cvm?.has_pending_cv_review)
+    const hasApplied = Boolean(cvm?.has_applied_cv_parse)
+    const attempts = cvm?.cv_parse_attempt_count ?? 0
+    if (hasPending) {
+      // S2 — pending review already exists; present it without re-parsing.
       autoParseTriedRef.current = true
-      // Slice 4 — after the first-entry parse succeeds, route to cv-merge review
-      // so the parsed CV (cv_parsed_pending) is presented for explicit Apply/Keep.
-      // Only the auto first-entry parse redirects; manual "Parse CV" never does.
+      router.push('/dashboard/candidate/profilux/cv-merge')
+      return
+    }
+    if (hasCv && !hasApplied && attempts === 0) {
+      // S1 — first-entry parse, then route to review.
+      autoParseTriedRef.current = true
       void (async () => {
         await handleParse()
         router.push('/dashboard/candidate/profilux/cv-merge')
       })()
     }
+    // S0 / S3 / S4 — no auto action.
   }, [loading, editor, parsing])
 
   function normalizeShareStatus(data: any) {
