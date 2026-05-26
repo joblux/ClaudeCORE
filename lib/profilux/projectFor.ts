@@ -315,6 +315,11 @@ export function projectEditorView(view: ProfiLuxResolved): EditorView {
       cv_url: view.cv_meta?.cv_url ?? null,
       cv_parsed_at: view.cv_meta?.cv_parsed_at ?? null,
       needs_review: view.cv_meta?.needs_review?.length ?? 0,
+      // Slice A — state signals passthrough.
+      has_cv: view.cv_meta?.has_cv ?? false,
+      has_pending_cv_review: view.cv_meta?.has_pending_cv_review ?? false,
+      has_applied_cv_parse: view.cv_meta?.has_applied_cv_parse ?? false,
+      cv_parse_attempt_count: view.cv_meta?.cv_parse_attempt_count ?? 0,
     },
     // Computed
     profile_completeness: view.profile_completeness ?? 0,

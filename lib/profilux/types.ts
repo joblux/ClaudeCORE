@@ -407,6 +407,7 @@ export type MemberRow = {
   cv_url: string | null
   cv_parsed_at: string | null
   cv_parsed_data: CvParsedData | null
+  cv_parsed_pending: Record<string, unknown> | null
   // L3 cached
   profile_completeness: number | null // default 0
   m6_confirmed_at: string | null
@@ -536,6 +537,11 @@ export type ResolvedCvMeta = {
   parsed_at: string | null
   confidence: CvParsedConfidence | null
   needs_review: CvParsedNeedsReviewItem[]
+  // Slice A — lightweight CV-state signals (no raw pending payload exposed).
+  has_cv: boolean
+  has_pending_cv_review: boolean
+  has_applied_cv_parse: boolean
+  cv_parse_attempt_count: number
 }
 
 export type ProfiLuxResolved = {
@@ -679,6 +685,11 @@ export type EditorCvMeta = {
   cv_url: string | null
   cv_parsed_at: string | null
   needs_review: number
+  // Slice A — lightweight CV-state signals (no raw pending payload exposed).
+  has_cv: boolean
+  has_pending_cv_review: boolean
+  has_applied_cv_parse: boolean
+  cv_parse_attempt_count: number
 }
 
 export type EditorView = {

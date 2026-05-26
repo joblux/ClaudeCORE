@@ -196,6 +196,13 @@ export async function resolveProfiLux(
 
   const row = data as MemberRow
 
+  // Slice A — CV parse attempt count (distinguishes never-parsed S1 from
+  // parsed-then-rejected S4; both have pending=null + data=null). Read-only count.
+  const { count: cvParseAttemptCount } = await supabase
+    .from('cv_parse_history')
+    .select('id', { count: 'exact', head: true })
+    .eq('member_id', memberId)
+
   // A2.3-β: relational L2 for experiences. If rows exist, they win over L1.
   const { data: weRows } = await supabase
     .from('work_experiences')
@@ -343,6 +350,11 @@ export async function resolveProfiLux(
     parsed_at: cv?.parsed_at ?? null,
     confidence: cv?.confidence ?? null,
     needs_review: arr(cv?.needs_review),
+    // Slice A — state signals (no raw pending payload).
+    has_cv: Boolean(row.cv_url),
+    has_pending_cv_review: row.cv_parsed_pending != null,
+    has_applied_cv_parse: row.cv_parsed_data != null,
+    cv_parse_attempt_count: cvParseAttemptCount ?? 0,
   }
 
   const resolved: ProfiLuxResolved = {
