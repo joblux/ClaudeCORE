@@ -4,7 +4,7 @@ Domain contract for the ProfiLux object across JOBLUX. Locks the storage, resolu
 
 This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE wins until reconciled. See §12.
 
-**Status:** locked v1.15 (May 26 2026 Taxonomy V2 three-representation doctrine + boundary-map dependency — §29)
+**Status:** locked v1.15 (May 26 2026 Taxonomy V2 three-representation doctrine + boundary-map dependency — §29) + v1.16 CV pre-fill model pivot
 **Originally locked:** April 30, 2026
 **v1.1 addendum locked:** May 6, 2026
 **v1.2 addendum locked:** May 7, 2026
@@ -13,6 +13,26 @@ This document is **subordinate** to `docs/JOBLUX_STATE.md`. On conflict, STATE w
 ---
 
 ## CHANGE LOG
+
+
+**v1.16 — May 29 2026 CV pre-fill model pivot lock (Mo product decision)**
+
+Aligns doctrine to the validated v4 onboarding model.
+
+VERROU: Initial CV = pre-fills ProfiLux Edit. Re-upload CV = protects already-edited data.
+ProfiLux Edit = user control. View = result.
+
+PRINCIPLE: shift from "I found something, go confirm it" to "I already built something, improve it."
+
+Two paths, no Review screen anywhere:
+- Initial:  Upload -> ProfiLux Edit pre-filled -> edit -> Done -> View
+- Re-upload: Re-upload -> conflict? no = non-destructive auto-enrich -> Edit / yes = conflict resolution layer -> Edit
+
+"Review"/"merge review"/"confirmation flow" retired as product concepts (conflict resolution
+layer replaces them on re-upload only); cv-merge stays a technical route name, not a screen.
+
+Sections touched: 3.1 (xref), 5.2, 6.2 (note), 7.6/14.3 (marker), 11.1, 17 (renamed), 20.4, 22.1, 23.6.
+KEEP unchanged: 1-2, 4, 8, 9, 12-13, 15, 16, 16A, 18, 19, 19A, 19B, 20.1-20.x, 21, 22.2-22.5, 24-29.
 
 
 **v1.14 — May 24 2026 CV sovereignty Sets C+D lock (Mo product decision)**
@@ -262,7 +282,7 @@ Three explicit layers. No mixing. Every read and write in the system maps to exa
 **Authoritative for:** what the CV said at parse time.
 **Not authoritative for:** what the candidate's current profile is.
 
-L1 is overwritten on re-upload (§5). L1 never silently writes to L2 (§5).
+L1 is overwritten on re-upload (§5). L1 never silently writes to L2 (§5). See §5.2 two-path rule.
 
 ### 3.2 L2 — Editable ProfiLux Profile
 
@@ -381,10 +401,11 @@ No versioning in v1. The previous parse is gone after re-upload.
 
 ### 5.2 L2 sovereignty
 
-A new parse **never silently writes** to `members.*` flat columns. New parse output may:
+Two explicit paths govern how a parse can reach L2 (v1.16 CV pre-fill model pivot):
 
-- **suggest/prefill** an L2 field, but only when that L2 field is currently NULL and only via explicit user confirmation (the editor surface presents the suggestion; the user accepts or ignores)
-- **feed admin review** via the admin surface (§7) where an admin can see L1 vs L2 diffs
+**INITIAL PATH:** the first parse writes `cv_parsed_data` (L1); rendered directly in ProfiLux Edit as editable drafts. Editing/saving a parsed row promotes it to L2 — the edit/save IS the explicit user action (not a silent write). Identity = registration-wins; CV fills EMPTY identity fields only (non-destructive; never overwrites a populated field).
+
+**RE-UPLOAD PATH:** a later re-upload writes `cv_parsed_pending`; a lightweight diff/protection ("conflict resolution layer") activates ONLY when a re-parse would overwrite a user-edited L2 value; otherwise new details enter as non-destructive editable drafts. L2 is never overwritten silently on either path.
 
 Once a `members.*` field is populated by user action, L1 cannot overwrite it via any code path.
 
@@ -415,6 +436,8 @@ For every field that exists in both L1 and L2:
 3. Else → return null/empty
 
 L1 fills NULL gaps. L2 always wins when populated. L1 never auto-writes to L2.
+
+Note: on the initial path, editing a rendered L1 row writes L2 on save — an explicit user act, not a silent auto-write.
 
 ### 6.3 Email exception
 
@@ -681,7 +704,7 @@ The following utilities are normative. They are the only entry points for ProfiL
 ### 11.1 Hard guardrails (v1)
 
 - **No fourth profile store.** Storage is `members` row + `cv_parsed_data` jsonb on it. That is the entirety of v1's profile surface area.
-- **No L1 → L2 silent writes.** Any prefill from L1 to L2 is user-confirmed via the editor surface.
+- **No silent L1 → L2 writes.** Silent = without a user action. Editing/saving a rendered row IS the user action and writes L2. Identity fill-if-empty is non-destructive and never overwrites a populated field.
 - **No per-field confirmation flags.** `members.l2_confirmed_fields` or similar is explicitly out of v1. Rule A precedence (NULL-as-empty) is the v1 inference.
 - **`m6_confirmed_at` is no longer user-set.** Per §8, no UX writes this field. Its future is deferred (§8.3).
 - **No client-side resolver.** Surfaces never resolve. They consume.
@@ -786,7 +809,7 @@ No modals for primary edits. No tunnels. No multi-step wizards.
 
 Field-level state surfaced via subtle visual markers (per MODEL):
 - "Missing" — field expected but empty
-- "Review" — value parsed from CV, awaits user confirmation
+- "Added from CV" — editable draft pre-filled from the CV; becomes yours when you edit/save (no confirmation gate)
 - "AI inferred" — generated suggestion, click to confirm and remove the marker
 
 Markers are visual cues, not admission gates. They inform the user; they do not block.
@@ -933,18 +956,13 @@ When schema lands, `public` and PDF projections will receive the candidate's hid
 
 ---
 
-## 17. CV re-upload merge target doctrine
+## 17. CV re-upload conflict resolution doctrine
 
-### 17.1 — Target UX (per MODEL §6)
+### 17.1 — Target UX (per MODEL §6, locked v1.16)
 
-User re-uploads CV at any time. System parses via Haiku 4.5 (existing `/api/members/cv-parse`). UI presents a merge review:
+A lightweight conflict resolution layer activates ONLY when a re-parse would overwrite a user-edited L2 value. The user resolves only the conflicting fields. There is no full candidate-facing review screen by default. Non-conflicting new details enter as non-destructive editable drafts in ProfiLux Edit.
 
-- Modal-style "X changes detected"
-- Field-by-field diff (current value vs newly parsed value)
-- Accept / reject per field
-- Apply commits accepted changes to `members.*`
-
-No silent auto-merge. User explicitly accepts each change.
+The technical route name `cv-merge` is retained for the existing re-upload pipeline; the candidate-facing concept is conflict resolution, not merge review.
 
 ### 17.2 — Storage contract (preserved from §5)
 
@@ -1176,7 +1194,7 @@ Matching entry cannot be fully wired without Tier 1 fields (§15.2). Until Tier 
 
 ### 20.4 — No threshold percentage
 
-There is no "X% complete" admission gate. There is no "Confirm my ProfiLux" button. The user grows the profile continuously; matching enters automatically when conditions hold.
+There is no "X% complete" admission gate. There is no "Confirm my ProfiLux" button. The user grows the profile continuously; matching enters automatically when conditions hold. Completion is internal-only (matching/admin per §8.2); it is never rendered candidate-facing on View, Edit, or the dashboard.
 
 ### 20.5 — Consent field (shipped, B.3.3)
 
@@ -1292,6 +1310,7 @@ Field assignments mirror §7.6.1 `EditorView` exactly. Grouping is locked here. 
 - Compensation never in View — V12-violation-1 (commit `66f8cf3`).
 - Clienteling not currently in View — live truth as of May 14 2026; no doctrine commitment to add.
 - Identity is structurally separate from the ordered section catalog on View (LEFT SPINE).
+- Initial path renders CV-prefilled sections EXPANDED (parsed L1/L2 content visible inline); Edit is in-place modification, not a collapsed summary behind an Edit gate (v1.16).
 - Education truth surface = `education_records` (S-B.2C).
 - Languages remains L1 read-only on Edit until a dedicated L2 collection slice ships (parked under `1609e494`).
 - `linkedin_url` is intentionally omitted from the Identity row per the LinkedIn doctrine lock (`docs/JOBLUX_STATE.md` DO NOT block, 2026-05-10): no LinkedIn in ProfiLux, no LinkedIn dependency on JOBLUX, applies to UI, write-path, display, prompt copy.
@@ -1426,7 +1445,7 @@ The passport grows by adding sections from the library, not by exploding default
 ### 23.6 — Density priorities
 
 - Mobile: collapsed cards by default.
-- Desktop: mixed (collapsed for filled sections, expanded for empty-state sections — recommendation).
+- Desktop: mixed (collapsed for filled sections, expanded for empty-state sections AND for CV-prefilled sections on the initial path — recommendation).
 
 ---
 

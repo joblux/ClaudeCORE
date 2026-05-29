@@ -334,6 +334,13 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 V1 CV RE-UPLOAD COHERENCE — CLOSED (S-A..S-E, lane 942cb78 -> 7c8a38d, repo HEAD 7c8a38d). Re-upload is now non-destructive (S-C preserve-old-only RPC) + explicit per-row choice (S-D), clean casing (S-B), no duplicate experiences (S-A; 69c7fb97 resolver impl DONE), no dead merge fields (S-E). PROD-QA PASS live, net DB delta 0.
 
+ACTIVE LANE — CV PRE-FILL MODEL PIVOT (GPT-approved 2026-05-29; doctrine locked MATRIX v1.16).
+VERROU: Initial CV = pre-fills ProfiLux Edit. Re-upload CV = protects already-edited data.
+Edit = user control. View = result.
+Initial path: parse-on-first-open RETAINED, target cv_parsed_data, NO route to cv-merge, user lands/stays in Edit with prefilled data visible+editable (edit/save promotes L1->L2).
+Re-upload path: cv_parsed_pending + conflict resolution layer (lightweight, activates only on L2-overwrite conflict). % removed candidate-facing (scorer internal). Identity registration-wins + fill-if-empty. Tracked under ledger 08e74eb1 (no new finding). NEXT after lock = code prompt.
+Resolves the registration-path no-autotrigger gap via the initial-path target change.
+
 NEXT (none auto-started — Mo picks the lane):
 - Taxonomy V2 — AUDIT CLOSED 2026-05-26 (read-only, zero mutation). Decision: Option 2 boundary-map. Finding: THREE representations coexist by design — canonical snake_case (lib/profilux/vocabulary.ts), Title-Case UI labels (lib/assignment-options.ts), persisted recruiting shorthand (search_assignments, e.g. seniority senior/director/mid-level/c-suite/vp/junior, contract permanent). No rename, no DB migration, no file deletion. Future boundary-map lib/profilux/taxonomy-bridge.ts normalizes all three to canonical at read time (first axes: seniority, department, contract_type); BUILD WITH the auto-matching (computed_by=auto_v1) consumer, not before. Doctrine: MATRIX §29. Governed by f0e9be64. profile-options.ts shim untouched (migration parked 4323e247); availability canonical-5 vs legacy-shim drift noted only.
 - ProfiLux Versions V2 — tailored presentation lenses over the master (ledger 101f4deb parked). Projection lenses NOT duplicated profiles; max 3; subtractive-only; master cascades; override headline/summary/order/visibility only. V1 dependency now met. Do not build until Mo opens.
@@ -384,7 +391,7 @@ Internal/admin-only (DB-resident, no candidate Edit surface):
 
 **ProfiLux candidate experience open items (audit-surfaced, parked):**
 - `de93a399` — F-pf-cold-start-no-editor-data (medium). Line 1723 of `app/dashboard/candidate/profilux/page.tsx` renders literal "No editor data." on cold-start.
-- `761cda8e` — F-pf-completion-vs-living-document-tension (low). Edit hero "% complete" band contradicts STATE V12 "maintenance signal only" lock.
+- `761cda8e` — F-pf-completion-vs-living-document-tension — RESOLVED-BY-PIVOT (pending QA). % removed candidate-facing per MATRIX v1.16; scorer stays internal.
 - `1d48010d` — F-pf-candidate-visible-confessional-copy (medium). "Substrate ships now" wording leaks substrate vocab to candidates.
 
 **Maintenance debt (pickable before next maintenance_mode toggle):**
@@ -411,8 +418,9 @@ Internal/admin-only (DB-resident, no candidate Edit surface):
 
 ### DO NOT
 
-- **CV merge apply = PRESERVE-OLD-ONLY (S-C, live RPC `apply_cv_merge`, migration `apply_cv_merge_preserve_cv_parsed_data`, 2026-05-25):** never reintroduce the wholesale `cv_parsed_data := pending` swap. Accepted items write to L2 only; the final RPC step clears `cv_parsed_pending` and leaves `cv_parsed_data` / `cv_parsed_at` untouched; `p_new_cv_parsed_data` stays in the signature unused. Reintroducing the swap = the 83->49 destructive regression + silent import of unaccepted CV data.
-- **CV merge UI = no silent overwrite (S-D, `cv-merge/page.tsx`, 2026-05-25):** identity `changed` rows default to Keep existing (omitted from accept); the user must actively pick Apply new (supersedes 1b49091 auto-select). Do not re-add an `Ignore` option to identity rows (Keep existing already = omit). `matched` rows stay informational, no control.
+- **CV merge apply = PRESERVE-OLD-ONLY (S-C, live RPC `apply_cv_merge`, migration `apply_cv_merge_preserve_cv_parsed_data`, 2026-05-25):** never reintroduce the wholesale `cv_parsed_data := pending` swap. Accepted items write to L2 only; the final RPC step clears `cv_parsed_pending` and leaves `cv_parsed_data` / `cv_parsed_at` untouched; `p_new_cv_parsed_data` stays in the signature unused. Reintroducing the swap = the 83->49 destructive regression + silent import of unaccepted CV data. Clarification (v1.16): the initial-path parse writing cv_parsed_data is the first-pass pre-fill, NOT the forbidden apply-time `cv_parsed_data := pending` swap, which remains forbidden on the re-upload path.
+- **CV merge UI = no silent overwrite (S-D, `cv-merge/page.tsx`, 2026-05-25):** identity `changed` rows default to Keep existing (omitted from accept); the user must actively pick Apply new (supersedes 1b49091 auto-select). Do not re-add an `Ignore` option to identity rows (Keep existing already = omit). `matched` rows stay informational, no control. Applies to the re-upload conflict resolution layer only (v1.16).
+- 'Review' is retired as a ProfiLux product concept (CV pre-fill model pivot, v1.16). Re-upload uses a conflict resolution layer, not a review screen. The word survives only in historical LAST SHIPPED commit descriptions and as the technical route name cv-merge. Do not reintroduce a candidate-facing Review/confirm screen on the initial path.
 - **Taxonomy Governance Rule (ledger `f0e9be64`, permanent doctrine):** any change to vocabulary, job-family, sector, target-role, matching-tag, or category taxonomies requires an explicit Mo decision BEFORE any mock, plan, or code work begins. Claude and GPT may only audit existing taxonomy state, propose options, or ask clarifying questions — they may NOT introduce, rename, merge, split, or reorder taxonomy entries without prior written approval from Mo. This rule blocks Career History V2 gaps G5 and G9, and any future slice whose surface touches a taxonomy axis.
 - Touch `app/api/profilux/suggestions/route.ts` outside of new slices in the C1 family. Endpoint contract is locked: `{ action: 'apply' | 'dismiss', field: <identity_key>, value: string }`. New actions/fields/response shapes require explicit Mo approval.
 - Reintroduce a global "Dismiss all" button to the S1.5 panel. K3 contract = per-row dismiss only.
@@ -431,7 +439,7 @@ Internal/admin-only (DB-resident, no candidate Edit surface):
 - Use Hélène BILLARD as fixture (consent unconfirmed, blocked permanently).
 - Read `members.*` or `cv_parsed_data` directly from any UI surface for ProfiLux fields — go through `projectFor` / resolver / EditorView.
 - Consume `projectFor` client-side in any candidate UI surface. Public-projection masking is server-owned. The View tab at `/dashboard/candidate/profilux` is the candidate's PRIVATE living document surface (real names, real data); it does NOT consume the `public` or `client` projection.
-- Reintroduce completion/readiness language on the View tab. View = living document, not score. Edit tab keeps the internal "% complete" footer as a maintenance signal only.
+- Render completion/readiness % on ANY candidate-facing surface (View, Edit, dashboard). Completion is internal-only (matching/admin) per MATRIX §8.2. Superseded the prior 'Edit keeps % as maintenance signal' allowance (CV pre-fill model pivot, MATRIX v1.16).
 - Reintroduce demo drawers, demo buttons, or "preview" UI in Manage tab. Manage tab is now production read-only; future controls must replace, not coexist with, the current state panel.
 - Build any product-facing surface (tunnel, editor, dashboard, admin) without first read-only inspecting the live components per the visual guardrail.
 - Drift from the executive-presence guardrail in any copy or microstate.
@@ -788,7 +796,7 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 ### Candidate (`/dashboard/candidate`):
 - 4-card next-steps: Profile, Careers, Intelligence, Contribute
 - Reads `profile_completeness` from `/api/profilux` GET (single source of truth, canonical M6)
-- ProfiLux editor at `/dashboard/candidate/profilux`: View / Edit / Manage triad. View = candidate's private living professional document. Edit = enrichment/data capture surface (S1.5 prefill panel + 7 per-section drawers + 11-screen tunnel coexisting). Manage = read-only Visibility & sharing panel (v0 shipped at `a829033`); reads `/api/profilux/share`; sharing toggle UX gated on reset-link unparking (`0e6f3271`).
+- ProfiLux editor at `/dashboard/candidate/profilux`: View / Edit / Manage triad. View = candidate's private living professional document. Edit = enrichment/data capture surface (S1.5 prefill panel + 7 per-section drawers + 11-screen tunnel coexisting). Manage = read-only Visibility & sharing panel (v0 shipped at `a829033`); reads `/api/profilux/share`; sharing toggle UX gated on reset-link unparking (`0e6f3271`). Transition: Edit (control) -> Done -> View (result); dashboard is a separate voluntary exit (v1.16).
 
 ### Business (`/dashboard/business`):
 - Submit brief CTA
@@ -822,7 +830,7 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 - Section visibility (§16A, doctrine locked v1.6): candidate can hide whole sections from `public` + PDF only; internal/admin/recruiter projections complete. Schema parked.
 - Share state: sourced from `share_links` table (member_id-keyed; slug + sharing_enabled + password_hash + expires_at). Read via dedicated `GET /api/profilux/share` endpoint. Stays OUT of `EditorView`, resolver, and `projectFor` (read via dedicated endpoint, not joined into the canonical resolution pipeline). Legacy `profilux` table retired 2026-05-18.
 - CV pipeline: Haiku 4.5 parser at `/api/members/cv-parse`, schema_v1.0, locked sectors + proficiencies. Canonical recompute fires post-write per Matrix §4.4 (D2 fix at `6d820f7`).
-- Identity prefill: explicit-confirmation only (S1.5). L1 → L2 silent writes forbidden across all code paths.
+- Identity prefill: registration-wins + fill-if-empty on the initial path; edit/save promotes L1->L2 (explicit act). Silent L1->L2 writes (without a user action) remain forbidden across all code paths (v1.16).
 - `members.profile_completeness` computed via `lib/profilux/computeProfileCompleteness` (canonical M6 binary group scorer: G1-G6). Internal-only signal, NOT a user-facing score on View tab. Two canonical recompute trigger sites: `/api/profilux` POST + `/api/members/cv-parse` POST. Legacy `calculateProfileCompleteness` deleted at D3 (`392c947`).
 - Doctrine fork on what `profile_completeness` semantically represents PARKED observation-only under `f6508e54`. Current scorer is "matching readiness coverage disguised as a percentage" per GPT framing.
 
@@ -1036,7 +1044,8 @@ All tabbed pages use `?tab=` query params. Brands: 5 tabs (~760 sitemap URLs).
 - Component families: section card, drawer, state marker, chip multi-toggle, tri-state Yes/No, identity strip
 
 **Identity prefill (S1.5 — May 7, 2026, commit `38c2100`):**
-- Explicit user confirmation only — no silent L1 → L2 writes
+- Initial path: registration values win; CV fills EMPTY identity fields only (fill-if-empty, non-destructive). Editing/saving an identity field writes L2 (explicit act). Visible copy: 'Kept from your registration — never overwritten by your CV.'
+- Re-upload path: identity conflicts handled by the conflict resolution layer (never silent overwrite)
 - Resolver computes `cv_identity_suggestions` pre-Rule-A from raw `members.*` and `cv_parsed_data.identity`
 - 4 fields scoped: `first_name`, `last_name`, `city`, `nationality`
 - Eligibility: L1 non-empty AND raw L2 null/empty
