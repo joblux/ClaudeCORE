@@ -2147,11 +2147,19 @@ export default function ProfiluxPage() {
     }
   }
 
-  async function handleParse() {
+  async function handleParse(mode?: 'initial' | 'reupload') {
     setParsing(true)
     setParseError(null)
     try {
-      const res = await fetch('/api/members/cv-parse', { method: 'POST' })
+      // v1.16 — mode selects the write target. 'initial' parses straight into
+      // cv_parsed_data (first CV). Omitting mode keeps the server default
+      // ('reupload' → cv_parsed_pending, conflict-resolution path).
+      const res = await fetch('/api/members/cv-parse', {
+        method: 'POST',
+        ...(mode
+          ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode }) }
+          : {}),
+      })
       const data = await res.json().catch(() => ({} as any))
       if (res.ok && data?.success) {
         await refetch()
@@ -2186,7 +2194,7 @@ export default function ProfiluxPage() {
   // re-parse loop on rejected CVs). Route-level idempotence + parsing state +
   // autoParseTriedRef still guard against duplicate parse. handleParse fills
   // cv_parsed_pending only; % rises after explicit cv-merge review/apply.
-  //   S1 (CV, never parsed, attempts 0) -> auto-parse once, then route to review
+  //   S1 (CV, never parsed, attempts 0) -> auto-parse once into cv_parsed_data (initial mode), stay in Edit
   //   S2 (review pending)               -> route straight to review, no re-parse
   //   S4 (parsed then rejected, >0)     -> nothing (no auto-trigger, no harassment)
   //   S0 / S3                           -> nothing (normal editor)
@@ -2214,12 +2222,11 @@ export default function ProfiluxPage() {
       return
     }
     if (hasCv && !hasApplied && attempts === 0) {
-      // S1 — first-entry parse, then route to review.
+      // S1 — v1.16 initial path: parse straight into cv_parsed_data and remain
+      // in ProfiLux Edit. No redirect to cv-merge (that is the re-upload
+      // conflict-resolution path, not the first-CV path).
       autoParseTriedRef.current = true
-      void (async () => {
-        await handleParse()
-        router.push('/dashboard/candidate/profilux/cv-merge')
-      })()
+      void handleParse('initial')
     }
     // S0 / S3 / S4 — no auto action.
   }, [loading, editor, parsing])

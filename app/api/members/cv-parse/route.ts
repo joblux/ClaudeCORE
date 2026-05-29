@@ -298,12 +298,28 @@ export async function POST(req: NextRequest) {
     return errorResponse('M6_API_KEY_MISSING', 'Parser unavailable', 500)
   }
 
+  // v1.16 model — optional mode selects the write target:
+  //   'initial'  → first CV (never parsed): write cv_parsed_data directly,
+  //                idempotence reads cv_parsed_data. Caller (ProfiLux S1) only
+  //                invokes this when no L2/applied data exists, so this is not a
+  //                silent L2 overwrite — it is the first authoritative write.
+  //   'reupload' → DEFAULT: write cv_parsed_pending (conflict-resolution path
+  //                via cv-merge), idempotence reads cv_parsed_pending. Unchanged.
+  // An absent/invalid body defaults to 'reupload' (existing callers send none).
+  let mode: 'initial' | 'reupload' = 'reupload'
+  try {
+    const body = (await req.json()) as { mode?: unknown } | null
+    if (body && body.mode === 'initial') mode = 'initial'
+  } catch {
+    // No body or invalid JSON — keep the 'reupload' default.
+  }
+
   // Read member state. Phase C.1: idempotence now reads cv_parsed_pending,
   // not cv_parsed_data. cv_parsed_data is only mutated by an explicit apply
   // (phase C.2), so the freshness check belongs on the pending payload.
   const { data: member, error: memberErr } = await supabase
     .from('members')
-    .select('id, cv_url, cv_parsed_pending')
+    .select('id, cv_url, cv_parsed_pending, cv_parsed_data')
     .eq('id', memberId)
     .maybeSingle()
 
@@ -318,10 +334,12 @@ export async function POST(req: NextRequest) {
 
   const cvPath = normalizeCvStoragePath(member.cv_url)
 
-  // Idempotence: short window cache, ONLY if the pending payload refers to the
+  // Idempotence: short window cache, ONLY if the cached payload refers to the
   // SAME cv_url path (a re-upload changes cv_url and must trigger a re-parse).
-  if (member.cv_parsed_pending && typeof member.cv_parsed_pending === 'object') {
-    const pending = member.cv_parsed_pending as Record<string, any>
+  // Initial mode caches off cv_parsed_data; reupload caches off cv_parsed_pending.
+  const idempotenceSource = mode === 'initial' ? member.cv_parsed_data : member.cv_parsed_pending
+  if (idempotenceSource && typeof idempotenceSource === 'object') {
+    const pending = idempotenceSource as Record<string, any>
     const pendingParsedAt = typeof pending.parsed_at === 'string' ? pending.parsed_at : null
     const cachedPath =
       pending.source && typeof pending.source === 'object'
@@ -570,15 +588,25 @@ export async function POST(req: NextRequest) {
     needs_review: dedupNeedsReview,
   }
 
-  // Storage: phase C.1 writes cv_parsed_pending only. cv_parsed_data and
-  // cv_parsed_at stay untouched until apply (phase C.2). Never touches cv_url,
-  // member_documents, or the member-cvs bucket.
+  // Storage. Reupload (default): write cv_parsed_pending only — cv_parsed_data
+  // and cv_parsed_at stay untouched until apply (cv-merge conflict path). Initial
+  // (v1.16): write cv_parsed_data directly and stamp cv_parsed_at, since the
+  // first parse is itself authoritative and there is no L2 to protect. Neither
+  // mode touches cv_url, member_documents, or the member-cvs bucket.
   const { error: updErr } = await supabase
     .from('members')
-    .update({
-      cv_parsed_pending: finalPayload,
-      updated_at: new Date().toISOString(),
-    })
+    .update(
+      mode === 'initial'
+        ? {
+            cv_parsed_data: finalPayload,
+            cv_parsed_at: finalPayload.parsed_at,
+            updated_at: new Date().toISOString(),
+          }
+        : {
+            cv_parsed_pending: finalPayload,
+            updated_at: new Date().toISOString(),
+          }
+    )
     .eq('id', memberId)
 
   if (updErr) {
