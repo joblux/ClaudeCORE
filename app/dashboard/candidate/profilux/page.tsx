@@ -3357,7 +3357,6 @@ export default function ProfiluxPage() {
       )
       case 11: return (
         <div style={grid}>
-          <div style={label}>Profile completeness</div><div>{e.profile_completeness}%</div>
           <div style={label}>CV file</div><div style={{ wordBreak: 'break-all', fontSize: 12 }}>{e.cv_meta.cv_url ?? <NotSet />}</div>
           <div style={label}>CV last parsed</div><div>{e.cv_meta.cv_parsed_at ?? <NotSet />}</div>
           <div style={label}>Items to review</div><div>{e.cv_meta.needs_review}</div>
@@ -3931,12 +3930,11 @@ export default function ProfiluxPage() {
       {e.cv_meta?.has_pending_cv_review && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, background: 'rgba(186,117,23,0.12)', border: '1px solid rgba(186,117,23,0.4)', borderRadius: 8, padding: '10px 14px', marginBottom: 20 }}>
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#e0a93a' }}>CV analysis ready · not applied yet</span>
-          <Link href="/dashboard/candidate/profilux/cv-merge" style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 500, color: '#e0a93a', whiteSpace: 'nowrap', textDecoration: 'none' }}>Review analysis →</Link>
+          <Link href="/dashboard/candidate/profilux/cv-merge" style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 500, color: '#e0a93a', whiteSpace: 'nowrap', textDecoration: 'none' }}>Resolve CV updates →</Link>
         </div>
       )}
       {TUNNEL_VISIBLE && <div style={sub}>Screen {step} / {TOTAL} · {SCREEN_TITLES[step]}</div>}
       {(() => {
-        const pct = typeof e.profile_completeness === 'number' ? e.profile_completeness : 0
         return (
           <>
             {/* V12 scene-2 doc-header — title + meta on the left, action row on the right */}
@@ -3981,16 +3979,8 @@ export default function ProfiluxPage() {
                 ProfiLux Overview
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
-                <div style={{ fontFamily: 'Playfair Display, Georgia, serif', fontStyle: 'italic', fontSize: 14.5, color: '#ccc', lineHeight: 1.4, margin: '0 0 12px 0' }}>
+                <div style={{ fontFamily: 'Playfair Display, Georgia, serif', fontStyle: 'italic', fontSize: 14.5, color: '#ccc', lineHeight: 1.4, margin: 0 }}>
                   The more you tell us, the more we can work for you.
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <div style={{ flex: 1, height: 3, background: '#2a2a2a', borderRadius: 2, overflow: 'hidden' }}>
-                    <div style={{ width: `${Math.max(0, Math.min(100, pct))}%`, height: '100%', background: '#1D9E75' }} />
-                  </div>
-                  <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 500, color: '#fff', fontVariantNumeric: 'tabular-nums', flex: '0 0 auto', minWidth: 40 }}>
-                    {pct}%
-                  </div>
                 </div>
               </div>
             </div>
@@ -4378,7 +4368,7 @@ export default function ProfiluxPage() {
                             {confirming ? 'Confirming…' : 'Confirm'}
                           </button>
                           <div style={{ fontSize: 11, color: '#777', fontStyle: 'italic' }}>
-                            Parsed from your CV. Confirm this entry to edit it.
+                            Added from CV — confirm to edit.
                           </div>
                         </div>
                       )}
@@ -4536,7 +4526,7 @@ export default function ProfiluxPage() {
                         </div>
                       ) : (
                         <div style={{ marginTop: 10, fontSize: 11, color: '#777', fontStyle: 'italic' }}>
-                          Parsed from your CV. Add as a passport entry to edit.
+                          Added from CV — add to edit.
                         </div>
                       )}
                     </div>
@@ -4591,7 +4581,7 @@ export default function ProfiluxPage() {
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                     <span>{l.language}</span>
-                    <span style={{ color: '#777', fontStyle: 'italic', fontSize: 11 }}>Parsed from CV</span>
+                    <span style={{ color: '#777', fontStyle: 'italic', fontSize: 11 }}>Added from CV</span>
                     <select
                       value={adoptLangProf[l.language] ?? ''}
                       onChange={(ev) => setAdoptLangProf((prev) => ({ ...prev, [l.language]: ev.target.value }))}
