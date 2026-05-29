@@ -193,30 +193,6 @@ export default function CandidateDashboard() {
   const today = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
   const tierLabel = TIER_LABELS[role || ''] || 'PROFESSIONAL'
 
-  // Profile completeness — server value, single source of truth (Matrix v1 §10.1)
-  const profiluxCompletion = profilux?.profile_completeness ?? 0
-  // Slice B — CV onboarding state model (S0-S4), derived from Slice A cv_meta
-  // signals. Presentation only: never alters profile_completeness, never parses.
-  const cvm = profilux?.cv_meta
-  const cvState: 'S0' | 'S1' | 'S2' | 'S3' | 'S4' = (() => {
-    if (!cvm?.has_cv) return 'S0'
-    if (cvm.has_pending_cv_review) return 'S2'
-    if (cvm.has_applied_cv_parse) return 'S3'
-    if ((cvm.cv_parse_attempt_count ?? 0) > 0) return 'S4'
-    return 'S1'
-  })()
-  // Card value + sub-label + CTA per state. S0/S3/S4 use normal completion copy.
-  const completionValue = profiluxCompletion === 100 ? 'Up to date' : `${profiluxCompletion}% complete`
-  const cvCardValue = cvState === 'S1' ? 'CV received' : cvState === 'S2' ? 'Analysis ready' : completionValue
-  const cvCardSub = cvState === 'S1' ? 'Ready to analyze' : cvState === 'S2' ? 'Review to apply' : 'Continue editing'
-  const cvBarCopy = cvState === 'S1'
-    ? 'CV received · ready to analyze · 0% complete until reviewed'
-    : cvState === 'S2'
-    ? 'CV analysis ready · review to apply'
-    : `${profiluxCompletion}% complete · Your profile is a living document — keep refining it.`
-  const cvCta = cvState === 'S1' ? 'Analyze my CV →' : cvState === 'S2' ? 'Review CV analysis →' : cvState === 'S4' ? 'Re-analyze my CV →' : 'Continue →'
-  const cvCtaHref = cvState === 'S4' ? '/dashboard/candidate/profilux?reanalyze=1' : '/dashboard/candidate/profilux' 
-
   // ══════════════════════════════════════════════════════════════════
   // RENDER
   // ══════════════════════════════════════════════════════════════════
@@ -251,8 +227,8 @@ export default function CandidateDashboard() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
             <Link href="/dashboard/candidate/profilux" className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 hover:border-[#3a3a3a] transition-colors block">
               <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-2">PROFILE</div>
-              <div className="text-sm text-[#ccc] mb-1">{cvCardValue}</div>
-              <div className="text-[11px] text-[#999]">{cvCardSub}</div>
+              <div className="text-sm text-[#ccc] mb-1">Your dossier</div>
+              <div className="text-[11px] text-[#999]">View &amp; edit</div>
             </Link>
             <Link href="/careers" className="bg-[#222] border border-[#2a2a2a] rounded-xl p-4 hover:border-[#3a3a3a] transition-colors block">
               <div className="text-[10px] font-semibold tracking-[1.5px] text-[#a58e28] mb-2">CAREERS</div>
@@ -276,18 +252,14 @@ export default function CandidateDashboard() {
         <div className="bg-[#222] border border-[rgba(165,142,40,0.2)] rounded-xl p-4 flex items-center gap-5 mb-8">
           <div className="flex-shrink-0">
             <div className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-1">PROFILUX</div>
-            <div className="text-xs text-[#999]">Your confidential professional profile</div>
           </div>
           <div className="flex-1">
-            <div className="h-[3px] bg-[#2a2a2a] rounded-full mb-1">
-              <div className="h-full bg-[#1D9E75] rounded-full transition-all" style={{ width: `${profiluxCompletion}%` }} />
-            </div>
             <div className="text-[11px] text-[#999]">
-              {cvBarCopy}
+              Your confidential professional profile — keep it current.
             </div>
           </div>
-          <Link href={cvCtaHref} className="bg-white text-[#1a1a1a] text-xs font-semibold px-4 py-2 rounded-lg hover:opacity-85 transition-opacity whitespace-nowrap">
-            {cvCta}
+          <Link href="/dashboard/candidate/profilux" className="bg-white text-[#1a1a1a] text-xs font-semibold px-4 py-2 rounded-lg hover:opacity-85 transition-opacity whitespace-nowrap">
+            Continue →
           </Link>
         </div>
 
