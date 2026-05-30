@@ -79,7 +79,7 @@ Guidelines:
     } else {
       // Generate new result
       const message = await anthropic.messages.create({
-        model: 'claude-haiku-3-5-20241022',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 1000,
         messages: [{ role: 'user', content: prompt }],
       })
@@ -110,7 +110,7 @@ Guidelines:
     // Log to history
     await supabase.from('luxai_history').insert({
       type: 'salary_benchmark',
-      model: 'claude-haiku-3-5-20241022',
+      model: 'claude-haiku-4-5-20251001',
       prompt,
       response: result,
       tokens_used: tokensUsed,
@@ -161,7 +161,7 @@ Guidelines:
     // Log error
     await supabase.from('luxai_history').insert({
       type: 'salary_benchmark',
-      model: 'claude-haiku-3-5-20241022',
+      model: 'claude-haiku-4-5-20251001',
       prompt: JSON.stringify(error),
       response: {},
       status: 'error',

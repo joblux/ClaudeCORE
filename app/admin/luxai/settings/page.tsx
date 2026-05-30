@@ -20,7 +20,7 @@ export default function LUXAISettingsPage() {
           salary_require_approval: false,
           interview_generation_enabled: true,
           interview_require_approval: true,
-          model: 'claude-haiku-3-5-20241022',
+          model: 'claude-haiku-4-5-20251001',
           max_tokens: 1500
         })
         setLoading(false)
@@ -232,7 +232,7 @@ export default function LUXAISettingsPage() {
               onChange={(e) => setSettings({...settings, model: e.target.value})}
               className="px-2.5 py-1.5 border border-[#e8e8e8] rounded text-sm"
             >
-              <option value="claude-haiku-3-5-20241022">Claude Haiku 3.5</option>
+              <option value="claude-haiku-4-5-20251001">Claude Haiku 3.5</option>
               <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
             </select>
           </div>

@@ -14,7 +14,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const PARSER_MODEL = 'claude-haiku-4-5'
+const PARSER_MODEL = 'claude-haiku-4-5-20251001'
 const PARSER_MAX_TOKENS = 4000
 const PARSER_TEMPERATURE = 0
 const SCHEMA_VERSION = '1.0'
