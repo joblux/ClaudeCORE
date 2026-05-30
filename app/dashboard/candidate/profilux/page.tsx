@@ -4017,6 +4017,19 @@ export default function ProfiluxPage() {
                 </button>
               </div>
             </div>
+            {/* C3 — orientation card: situational, parse-triggered only */}
+            {Boolean(e.cv_meta?.has_cv) && Boolean(e.cv_meta?.has_applied_cv_parse) && (e.cv_meta?.cv_parse_attempt_count ?? 0) === 1 && (
+              <div style={{ background: '#1e1e1e', border: '1px solid #2a2a2a', borderRadius: 10, padding: '14px 18px', marginBottom: 18, fontFamily: 'Inter, sans-serif' }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: '#ccc', marginBottom: 4 }}>Your profile was created from your resume.</div>
+                <div style={{ fontSize: 12, color: '#777', lineHeight: 1.5 }}>Review and edit each section below — this is your living professional document.</div>
+              </div>
+            )}
+            {Boolean(e.cv_meta?.has_cv) && Boolean(e.cv_meta?.has_applied_cv_parse) && (e.cv_meta?.cv_parse_attempt_count ?? 0) > 1 && (
+              <div style={{ background: '#1e1e1e', border: '1px solid #2a2a2a', borderRadius: 10, padding: '14px 18px', marginBottom: 18, fontFamily: 'Inter, sans-serif' }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: '#ccc', marginBottom: 4 }}>Your resume was updated.</div>
+                <div style={{ fontSize: 12, color: '#777', lineHeight: 1.5 }}>New information has been added to your profile — review and edit below.</div>
+              </div>
+            )}
             {/* PROFILUX OVERVIEW progress band */}
             <div style={{ background: '#222', border: '1px solid rgba(165,142,40,0.2)', borderRadius: 12, padding: 22, marginBottom: 28 }}>
               <div style={{ fontSize: 10, fontWeight: 600, color: '#a58e28', letterSpacing: 2, marginBottom: 6, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
