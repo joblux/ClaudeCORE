@@ -2174,16 +2174,6 @@ export default function ProfiluxPage() {
     }
   }
 
-  // Flow patch — explicit re-analysis from the already-uploaded cv_url. Non
-  // destructive: cv-parse writes cv_parsed_pending only, never cv_parsed_data,
-  // so an applied profile (S3) keeps its master data; the user reviews the new
-  // parse and chooses. Distinct from "Re-upload CV" (which uploads a new file).
-  async function handleReanalyze() {
-    autoParseTriedRef.current = true
-    await handleParse()
-    router.push('/dashboard/candidate/profilux/cv-merge')
-  }
-
   useEffect(() => {
     refetch().catch((e) => setError(String(e))).finally(() => setLoading(false))
   }, [])
@@ -2201,14 +2191,6 @@ export default function ProfiluxPage() {
   useEffect(() => {
     if (loading || !editor) return
     if (autoParseTriedRef.current || parsing) return
-    // Flow patch — explicit re-analyze requested from the dashboard S4 CTA.
-    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('reanalyze') === '1') {
-      const cvm0 = editor.cv_meta
-      if (cvm0?.has_cv && !cvm0?.has_pending_cv_review) {
-        void handleReanalyze()
-        return
-      }
-    }
     const cvm = editor.cv_meta
     const hasCv = Boolean(cvm?.has_cv)
     const hasPending = Boolean(cvm?.has_pending_cv_review)
@@ -3948,16 +3930,6 @@ export default function ProfiluxPage() {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                {e.cv_meta?.has_cv && !e.cv_meta?.has_pending_cv_review && (
-                  <button
-                    type="button"
-                    onClick={handleReanalyze}
-                    disabled={parsing}
-                    style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#fff', border: '1px solid #2a2a2a', borderRadius: 8, padding: '8px 14px', fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 500, letterSpacing: 0.2, cursor: 'pointer' }}
-                  >
-                    {parsing ? 'Analyzing…' : 'Re-analyze my CV'}
-                  </button>
-                )}
                 <Link
                   href="/dashboard/candidate/profilux/cv-merge"
                   style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#fff', border: '1px solid #2a2a2a', borderRadius: 8, padding: '8px 14px', fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 500, letterSpacing: 0.2, textDecoration: 'none', cursor: 'pointer' }}
