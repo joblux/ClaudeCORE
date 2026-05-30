@@ -8,7 +8,7 @@ Required session-start reading, in order:
 
 REPO TRUTH SOURCE PROTOCOL (May 2026):
 1. GitHub MCP / GitHub connector - primary source for committed repo truth (joblux/ClaudeCORE).
-2. Claude Code / local terminal - local truth only: git status, uncommitted changes, unpushed files, tests/builds, execution, deploy confirmation.
+2. Claude Code / local terminal - (a) local truth: git status, uncommitted changes, unpushed files, tests/builds, execution, deploy confirmation; AND (b) committed-repo + DB reads via its OWN GitHub MCP and Supabase MCP connectors. Code reads committed truth and queries Supabase directly — Mo is NOT the relay for reads.
 3. User paste from Claude Code - fallback when MCP tools do not surface.
 4. Never use uploaded project files, stale memory, old chats, or summaries as repo truth.
 
@@ -16,9 +16,9 @@ Announce every repo read with path + branch/HEAD/commit when available. State: "
 
 ## EXECUTION SURFACE BOUNDARY (May 2026)
 
-- Claude AI = planning, connected reads (GitHub MCP / Supabase MCP), browser QA via Chrome MCP, prod validation. Runs these directly. Never relays to Mo as a prompt.
-- Claude Code = local repo execution: patch / test / build / git status / commit / push, deploy confirmation. No committed-file reads via Code (use GitHub MCP).
-- Mo = product authority + approval gate (Propose → Wait → Approve → Execute). Not transport middleware between tools.
+- Claude AI = browser/visual QA via Chrome MCP, GPT strategy + approval-gate conversations, and product/doctrine review when needed. Also prod validation. Never relays to Mo as a prompt.
+- Claude Code = full local loop AND its own connected reads: patch / test / build / git status / commit / push / deploy confirmation; committed-repo reads via its OWN GitHub MCP; DB QA via its OWN Supabase MCP. Does not route reads through Mo.
+- Mo = product authority + approval gate (Propose → Wait → Approve → Execute). Approves at the DECISION level — never couriers files or output between tools.
 - Prod QA happens only after commit + push + Coolify deploy green. Never on uncommitted local state.
 
 Canonical contracts referenced by STATE:
