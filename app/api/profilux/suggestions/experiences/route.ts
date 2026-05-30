@@ -27,6 +27,16 @@ const supabase = createClient(
 // Body: { action: 'apply', company, job_title, start_date }
 //   (dismiss intentionally NOT wired v1 — confirm-only flow per Mo scope lock.)
 //
+// Body: { action: 'apply_edited', routing: { company, job_title, start_date },
+//         payload: { company, job_title, city, country, start_date, end_date,
+//                    is_current, description } }
+//   Direct-edit-to-L2: routing locates the RAW L1 row (same match/signature path);
+//   payload supplies the EDITED values that land in work_experiences. The signature
+//   and l1_snapshot stay anchored on the RAW matched row so resolver suppression
+//   (shared with re-upload) still re-hashes the RAW twin — no ghost row. Edited
+//   company is required (400 EDITED_COMPANY_REQUIRED); start_date / end_date obey
+//   the same coercion rules as apply, applied to the payload values.
+//
 // Apply contract (server-authoritative):
 //   - Resolves member by session email.
 //   - Reads current cv_parsed_data.
@@ -85,22 +95,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  if (body?.action !== 'apply') {
+  if (body?.action !== 'apply' && body?.action !== 'apply_edited') {
     return NextResponse.json(
       { error: 'Invalid or unsupported action', code: 'INVALID_ACTION' },
       { status: 400 }
     )
   }
+  // apply_edited shares this route's match / signature / idempotency /
+  // resolution_state with apply; it diverges only in the L2 insert value source
+  // (edited body.payload vs the matched RAW L1 row). isEdited gates that one fork.
+  const isEdited = body.action === 'apply_edited'
 
   // Routing fields — coerced to nullable strings. The signature normalizer
   // tolerates null/undefined uniformly so we don't reject on missing fields
   // here; mismatch surfaces as 404 SIGNATURE_NOT_FOUND.
+  // Routing tuple locates the RAW L1 row. apply reads it flat off the body;
+  // apply_edited reads it from body.routing (body.payload carries edited values).
+  const routing = isEdited ? (body?.routing ?? {}) : body
   const submittedCompany: string | null =
-    typeof body?.company === 'string' ? body.company : null
+    typeof routing?.company === 'string' ? routing.company : null
   const submittedJobTitle: string | null =
-    typeof body?.job_title === 'string' ? body.job_title : null
+    typeof routing?.job_title === 'string' ? routing.job_title : null
   const submittedStartDate: string | null =
-    typeof body?.start_date === 'string' ? body.start_date : null
+    typeof routing?.start_date === 'string' ? routing.start_date : null
 
   const { data: member, error: memberErr } = await supabase
     .from('members')
@@ -162,13 +179,27 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  // apply_edited promotes the L1 row to L2 using EDITED payload values, while the
+  // match / signature / l1_snapshot stay anchored on the RAW matchedRow above — so
+  // resolver suppression (shared with re-upload) re-hashes the RAW twin and no ghost
+  // row appears. apply keeps matchedRow as its value source (insert unchanged).
+  const valueSource: any = isEdited ? (body?.payload ?? {}) : matchedRow
+
+  const editedCompany = (valueSource.company ?? '').trim()
+  if (isEdited && editedCompany === '') {
+    return NextResponse.json(
+      { error: 'Edited company is required', code: 'EDITED_COMPANY_REQUIRED' },
+      { status: 400 }
+    )
+  }
+
   // Validate + coerce start_date. work_experiences.start_date is `date NOT NULL`.
   // Slice 1.1: Haiku CV parser emits month precision for ~100% of rows ('2026-03'),
   // so strict YYYY-MM-DD validation rejected every real confirm. Coerce YYYY-MM to
   // YYYY-MM-01 (day defaulted to 1) before the L2 insert. YYYY-only and free-text /
   // null still 422. The l1_snapshot below preserves the RAW parser value — the
   // coercion only affects what lands in work_experiences.start_date.
-  const rawStartDate = matchedRow.start_date
+  const rawStartDate = valueSource.start_date
   let normalizedStartDate: string | null = null
   if (typeof rawStartDate === 'string') {
     if (ISO_DATE_REGEX.test(rawStartDate) && !Number.isNaN(Date.parse(rawStartDate))) {
@@ -193,7 +224,7 @@ export async function POST(req: NextRequest) {
   // end_date is nullable in work_experiences; tolerate partial-precision L1
   // by demoting anything that is not YYYY-MM-DD to null. Mirrors the implicit
   // contract of the manual endpoint (which coerces blanks to null).
-  const rawEndDate = matchedRow.end_date
+  const rawEndDate = valueSource.end_date
   const endDate =
     typeof rawEndDate === 'string' &&
     ISO_DATE_REGEX.test(rawEndDate) &&
@@ -201,20 +232,20 @@ export async function POST(req: NextRequest) {
       ? rawEndDate
       : null
 
-  const isCurrent = matchedRow.is_current === true
+  const isCurrent = valueSource.is_current === true
 
-  const company = (matchedRow.company ?? '').trim()
-  const jobTitle = typeof matchedRow.job_title === 'string' && matchedRow.job_title.trim() !== ''
-    ? matchedRow.job_title.trim()
+  const company = editedCompany
+  const jobTitle = typeof valueSource.job_title === 'string' && valueSource.job_title.trim() !== ''
+    ? valueSource.job_title.trim()
     : null
-  const city = typeof matchedRow.city === 'string' && matchedRow.city.trim() !== ''
-    ? matchedRow.city.trim()
+  const city = typeof valueSource.city === 'string' && valueSource.city.trim() !== ''
+    ? valueSource.city.trim()
     : null
-  const country = typeof matchedRow.country === 'string' && matchedRow.country.trim() !== ''
-    ? matchedRow.country.trim()
+  const country = typeof valueSource.country === 'string' && valueSource.country.trim() !== ''
+    ? valueSource.country.trim()
     : null
-  const description = typeof matchedRow.description === 'string' && matchedRow.description.trim() !== ''
-    ? matchedRow.description.trim()
+  const description = typeof valueSource.description === 'string' && valueSource.description.trim() !== ''
+    ? valueSource.description.trim()
     : null
 
   const insertPayload = {
