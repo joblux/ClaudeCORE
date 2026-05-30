@@ -880,6 +880,10 @@ export default function ProfiluxPage() {
   const [careerHistoryDrawerOpen, setCareerHistoryDrawerOpen] = useState(false)
   const [experienceFormOpen, setExperienceFormOpen] = useState(false)
   const [experienceDraft, setExperienceDraft] = useState<ExperienceDraft>(emptyExperienceDraft())
+  // B2 — when editing an L1 (parsed-CV) row, holds the ORIGINAL match tuple so the
+  // draft can be edited freely while apply_edited still routes to the RAW L1 row.
+  // null = L2 edit or new experience (the PUT/POST path); non-null = L1 edit.
+  const [experienceRouting, setExperienceRouting] = useState<{ company: string | null; job_title: string | null; start_date: string | null } | null>(null)
   const [experienceSaving, setExperienceSaving] = useState(false)
   const [experienceError, setExperienceError] = useState<string | null>(null)
   const [experienceDeleting, setExperienceDeleting] = useState<string | null>(null)
@@ -2669,6 +2673,7 @@ export default function ProfiluxPage() {
 
   function startNewExperience() {
     setExperienceDraft(emptyExperienceDraft())
+    setExperienceRouting(null)
     setExperienceError(null)
     setExperienceFormOpen(true)
   }
@@ -2686,12 +2691,33 @@ export default function ProfiluxPage() {
       is_current: exp.is_current === true,
       description: exp.description ?? '',
     })
+    setExperienceRouting(null)
+    setExperienceError(null)
+    setExperienceFormOpen(true)
+  }
+
+  // B2 — open the SAME drawer to edit an L1 (parsed-CV) row. No draft.id (L1 has
+  // none); the ORIGINAL tuple is captured in experienceRouting so editing the
+  // draft can't shift the apply_edited match key. Save promotes the row to L2.
+  function startEditL1Experience(exp: { job_title: string | null; company: string | null; city: string | null; country: string | null; start_date: string | null; end_date: string | null; is_current?: boolean; description: string | null }) {
+    setExperienceDraft({
+      job_title: exp.job_title ?? '',
+      company: exp.company ?? '',
+      city: exp.city ?? '',
+      country: exp.country ?? '',
+      start_date: exp.start_date ?? '',
+      end_date: exp.end_date ?? '',
+      is_current: exp.is_current === true,
+      description: exp.description ?? '',
+    })
+    setExperienceRouting({ company: exp.company, job_title: exp.job_title, start_date: exp.start_date })
     setExperienceError(null)
     setExperienceFormOpen(true)
   }
 
   function cancelExperienceEdit() {
     setExperienceDraft(emptyExperienceDraft())
+    setExperienceRouting(null)
     setExperienceError(null)
     setExperienceFormOpen(false)
   }
@@ -2707,6 +2733,45 @@ export default function ProfiluxPage() {
     setExperienceSaving(true)
     setExperienceError(null)
     try {
+      if (experienceRouting !== null) {
+        // B2 — L1 edit: promote the parsed-CV row to L2 with EDITED draft values
+        // while routing stays pinned to the ORIGINAL tuple (the resolver match key).
+        const res = await fetch('/api/profilux/suggestions/experiences', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'apply_edited',
+            routing: experienceRouting,
+            payload: {
+              company: co,
+              job_title: jt,
+              city: experienceDraft.city.trim() || null,
+              country: experienceDraft.country.trim() || null,
+              start_date: sd,
+              end_date: experienceDraft.is_current ? null : (experienceDraft.end_date.trim() || null),
+              is_current: experienceDraft.is_current,
+              description: experienceDraft.description.trim() || null,
+            },
+          }),
+        })
+        const data = await res.json().catch(() => ({} as any))
+        if (!res.ok) {
+          const code = typeof data?.code === 'string' ? data.code : null
+          const msg =
+            code === 'SIGNATURE_NOT_FOUND' ? 'This entry no longer matches your CV. Refresh.'
+            : code === 'ALREADY_APPLIED' ? 'This entry is already confirmed.'
+            : code === 'START_DATE_UNPARSEABLE' ? 'Start date is missing or incomplete; cannot save. Add it manually instead.'
+            : code === 'EDITED_COMPANY_REQUIRED' ? 'Company is required.'
+            : (typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`)
+          setExperienceError(msg)
+          return
+        }
+        await refetch()
+        setExperienceDraft(emptyExperienceDraft())
+        setExperienceFormOpen(false)
+        setExperienceRouting(null)
+        return
+      }
       const isUpdate = experienceDraft.id !== undefined
       const payload: Record<string, unknown> = {
         job_title: jt,
@@ -4318,29 +4383,37 @@ export default function ProfiluxPage() {
                         </div>
                       ) : (
                         <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                          <button
-                            type="button"
-                            disabled={!canConfirm || confirming}
-                            onClick={() => canConfirm && handleConfirmExperience({ company: exp.company, job_title: exp.job_title, start_date: exp.start_date })}
-                            style={{
-                              alignSelf: 'flex-start',
-                              background: 'rgba(165,142,40,0.05)',
-                              color: '#a58e28',
-                              border: '1px solid rgba(165,142,40,0.30)',
-                              padding: '6px 14px',
-                              fontSize: 11,
-                              fontWeight: 600,
-                              letterSpacing: '0.4px',
-                              borderRadius: 6,
-                              cursor: !canConfirm || confirming ? 'not-allowed' : 'pointer',
-                              fontFamily: 'Inter, sans-serif',
-                              opacity: !canConfirm || confirming ? 0.5 : 1,
-                            }}
-                          >
-                            {confirming ? 'Confirming…' : 'Confirm'}
-                          </button>
+                          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                            <button
+                              type="button"
+                              disabled={!canConfirm || confirming}
+                              onClick={() => canConfirm && handleConfirmExperience({ company: exp.company, job_title: exp.job_title, start_date: exp.start_date })}
+                              style={{
+                                background: 'rgba(165,142,40,0.05)',
+                                color: '#a58e28',
+                                border: '1px solid rgba(165,142,40,0.30)',
+                                padding: '6px 14px',
+                                fontSize: 11,
+                                fontWeight: 600,
+                                letterSpacing: '0.4px',
+                                borderRadius: 6,
+                                cursor: !canConfirm || confirming ? 'not-allowed' : 'pointer',
+                                fontFamily: 'Inter, sans-serif',
+                                opacity: !canConfirm || confirming ? 0.5 : 1,
+                              }}
+                            >
+                              {confirming ? 'Saving…' : 'Looks good'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => startEditL1Experience(exp)}
+                              style={{ background: 'transparent', color: '#ccc', border: '1px solid #2a2a2a', padding: '6px 14px', fontSize: 11, cursor: 'pointer', fontFamily: 'Inter, sans-serif', borderRadius: 6 }}
+                            >
+                              Edit
+                            </button>
+                          </div>
                           <div style={{ fontSize: 11, color: '#777', fontStyle: 'italic' }}>
-                            Added from CV — confirm to edit.
+                            Added from your CV.
                           </div>
                         </div>
                       )}
