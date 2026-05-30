@@ -3419,6 +3419,12 @@ export default function ProfiluxPage() {
 
   return (
     <div style={wrap}>
+      <style jsx global>{`
+        @keyframes joblux-slide {
+          0% { left: -40%; }
+          100% { left: 110%; }
+        }
+      `}</style>
       <input
         ref={fileInputRef}
         type="file"
@@ -3996,7 +4002,7 @@ export default function ProfiluxPage() {
                   ProfiLux
                 </div>
                 <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#999', margin: 0 }}>
-                  Generated from your CV · Edit each section to keep your dossier current
+                  Generated from your resume · Edit each section to keep your dossier current
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
@@ -4017,30 +4023,18 @@ export default function ProfiluxPage() {
                 </button>
               </div>
             </div>
-            {/* C3 — orientation card: situational, parse-triggered only */}
-            {Boolean(e.cv_meta?.has_cv) && Boolean(e.cv_meta?.has_applied_cv_parse) && (e.cv_meta?.cv_parse_attempt_count ?? 0) === 1 && (
-              <div style={{ background: '#1e1e1e', border: '1px solid #2a2a2a', borderRadius: 10, padding: '14px 18px', marginBottom: 18, fontFamily: 'Inter, sans-serif' }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#ccc', marginBottom: 4 }}>Your profile was created from your resume.</div>
-                <div style={{ fontSize: 12, color: '#777', lineHeight: 1.5 }}>Review and edit each section below — this is your living professional document.</div>
-              </div>
-            )}
-            {Boolean(e.cv_meta?.has_cv) && Boolean(e.cv_meta?.has_applied_cv_parse) && (e.cv_meta?.cv_parse_attempt_count ?? 0) > 1 && (
-              <div style={{ background: '#1e1e1e', border: '1px solid #2a2a2a', borderRadius: 10, padding: '14px 18px', marginBottom: 18, fontFamily: 'Inter, sans-serif' }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#ccc', marginBottom: 4 }}>Your resume was updated.</div>
-                <div style={{ fontSize: 12, color: '#777', lineHeight: 1.5 }}>New information has been added to your profile — review and edit below.</div>
-              </div>
-            )}
-            {/* PROFILUX OVERVIEW progress band */}
-            <div style={{ background: '#222', border: '1px solid rgba(165,142,40,0.2)', borderRadius: 12, padding: 22, marginBottom: 28 }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: '#a58e28', letterSpacing: 2, marginBottom: 6, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
-                ProfiLux Overview
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
-                <div style={{ fontFamily: 'Playfair Display, Georgia, serif', fontStyle: 'italic', fontSize: 14.5, color: '#ccc', lineHeight: 1.4, margin: 0 }}>
-                  The more you tell us, the more we can work for you.
+            {/* Re-upload feedback — parse-in-progress card only; nothing when idle */}
+            {parsing && (
+              <div style={{ background: '#111', border: '1px solid #a58e28', borderRadius: 12, padding: '24px 28px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 20 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 6, fontFamily: 'Inter, sans-serif' }}>Building your dossier…</div>
+                  <div style={{ fontSize: 12, color: '#777', marginBottom: 14, fontFamily: 'Inter, sans-serif' }}>We're reading your resume and updating your sections. This takes a few seconds.</div>
+                  <div style={{ background: '#222', borderRadius: 4, height: 3, overflow: 'hidden', position: 'relative' }}>
+                    <div style={{ position: 'absolute', top: 0, left: '-40%', height: '100%', width: '40%', background: '#a58e28', borderRadius: 4, animation: 'joblux-slide 1.4s ease-in-out infinite' }} />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
             {/* YOUR DOSSIER row — V12 places + Add section here */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 14, padding: '0 4px' }}>
               <div style={{ fontSize: 10, fontWeight: 600, color: '#8e8e8e', letterSpacing: 2, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
