@@ -2127,7 +2127,11 @@ export default function ProfiluxPage() {
         // "Parse CV" button remains available as a retry fallback.
         setParsing(true)
         try {
-          const parseRes = await fetch('/api/members/cv-parse', { method: 'POST' })
+          const parseRes = await fetch('/api/members/cv-parse', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mode: 'initial' }),
+          })
           const parseData = await parseRes.json().catch(() => ({} as any))
           if (parseRes.ok && parseData?.success) {
             await refetch()
@@ -3995,12 +3999,14 @@ export default function ProfiluxPage() {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                <Link
-                  href="/dashboard/candidate/profilux/cv-merge"
+                <button
+                  type="button"
+                  onClick={handleUploadClick}
+                  disabled={uploading || parsing}
                   style={{ display: 'inline-flex', alignItems: 'center', background: 'transparent', color: '#fff', border: '1px solid #2a2a2a', borderRadius: 8, padding: '8px 14px', fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 500, letterSpacing: 0.2, textDecoration: 'none', cursor: 'pointer' }}
                 >
-                  Re-upload CV
-                </Link>
+                  {uploading ? 'Uploading…' : parsing ? 'Analyzing…' : 'Re-upload CV'}
+                </button>
                 <button
                   type="button"
                   onClick={() => { if (e.cv_meta?.has_pending_cv_review) { router.push('/dashboard/candidate') } else { setTab('view') } }}
@@ -7589,7 +7595,7 @@ export default function ProfiluxPage() {
               <div id="m-cv" style={block}>
                 <div style={blockHead}>
                   <h2 style={blockTitle}>CV &amp; document</h2>
-                  <p style={blockSub}>Re-upload your CV anytime. Detected changes are presented field by field — you choose what to merge.</p>
+                  <p style={blockSub}>Re-upload your CV anytime. We&apos;ll refresh your profile with anything new — your existing information stays.</p>
                 </div>
                 <div style={rowStyle}>
                   <div style={rowLeft}>
@@ -7599,12 +7605,14 @@ export default function ProfiluxPage() {
                     </div>
                   </div>
                   <div style={rowRight}>
-                    <Link
-                      href="/dashboard/candidate/profilux/cv-merge"
+                    <button
+                      type="button"
+                      onClick={handleUploadClick}
+                      disabled={uploading || parsing}
                       style={{ ...manageBtn, display: 'inline-block', textDecoration: 'none' }}
                     >
-                      Re-upload CV
-                    </Link>
+                      {uploading ? 'Uploading…' : parsing ? 'Analyzing…' : 'Re-upload CV'}
+                    </button>
                   </div>
                 </div>
                 <div style={rowStyle}>
