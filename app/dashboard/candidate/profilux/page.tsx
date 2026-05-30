@@ -3985,12 +3985,6 @@ export default function ProfiluxPage() {
 
       {tab === 'edit' && (
         <>
-      {e.cv_meta?.has_pending_cv_review && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, background: 'rgba(186,117,23,0.12)', border: '1px solid rgba(186,117,23,0.4)', borderRadius: 8, padding: '10px 14px', marginBottom: 20 }}>
-          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#e0a93a' }}>CV analysis ready · not applied yet</span>
-          <Link href="/dashboard/candidate/profilux/cv-merge" style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 500, color: '#e0a93a', whiteSpace: 'nowrap', textDecoration: 'none' }}>Resolve CV updates →</Link>
-        </div>
-      )}
       {TUNNEL_VISIBLE && <div style={sub}>Screen {step} / {TOTAL} · {SCREEN_TITLES[step]}</div>}
       {(() => {
         return (
@@ -4016,7 +4010,7 @@ export default function ProfiluxPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { if (e.cv_meta?.has_pending_cv_review) { router.push('/dashboard/candidate') } else { setTab('view') } }}
+                  onClick={() => setTab('view')}
                   style={{ display: 'inline-flex', alignItems: 'center', background: '#fff', color: '#1a1a1a', border: '1px solid #fff', borderRadius: 8, padding: '8px 14px', fontFamily: 'Inter, sans-serif', fontSize: 12, letterSpacing: 0.2, cursor: 'pointer', fontWeight: 500 }}
                 >
                   Done →
