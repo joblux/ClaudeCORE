@@ -31,16 +31,6 @@ export function Footer() {
             <Link href="/services/recruitment" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Talent Search</Link>
             <Link href="/contribute" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Contribute data</Link>
             <Link href="/connect" style={{ display: 'block', fontSize: 13, color: '#8e8e8e', marginBottom: 12, textDecoration: 'none' }}>Request access</Link>
-            <div style={{ marginTop: 40 }}>
-              <Link href="/escape" style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', fontStyle: 'italic', fontSize: 18, color: '#a58e28', display: 'inline-block', marginBottom: 6, textDecoration: 'none' }}>
-                Escape
-              </Link>
-              <div>
-                <span style={{ display: 'inline-block', border: '1px solid #333', borderRadius: 2, padding: '4px 10px', fontSize: '12px', color: '#fff' }}>
-                  Curated travels.
-                </span>
-              </div>
-            </div>
           </div>
 
           <div>
