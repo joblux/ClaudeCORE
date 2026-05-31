@@ -41,11 +41,11 @@ export function Header() {
     <>
       <header style={{ position: 'sticky', top: 0, zIndex: 50, backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', background: 'rgba(23,23,23,0.9)', borderBottom: '0.5px solid #2b2b2b' }}>
         <div style={{ maxWidth: 1220, margin: '0 auto', padding: '0 28px' }}>
-          <div style={{ height: 84, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
+          <div style={{ height: 105, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
 
             {/* Logo */}
             <Link href="/" style={{ flexShrink: 0 }}>
-              <Image src="/logos/joblux-header.png" height={28} width={112} alt="JOBLUX" style={{ height: 28, width: 'auto' }} />
+              <Image src="/logos/joblux-header.png" height={35} width={140} alt="JOBLUX" style={{ height: 35, width: 'auto' }} />
             </Link>
 
             {/* Center nav — desktop */}
@@ -57,7 +57,7 @@ export function Header() {
                     <Link
                       key={item.label}
                       href={item.href}
-                      style={{ fontSize: 13.5, color: isActive ? '#fff' : 'rgba(255,255,255,0.8)', textDecoration: 'none', transition: 'color 0.18s ease' }}
+                      style={{ fontSize: 16, fontWeight: 600, color: isActive ? '#fff' : 'rgba(255,255,255,0.8)', textDecoration: 'none', transition: 'color 0.18s ease' }}
                     >
                       {item.label}
                     </Link>
