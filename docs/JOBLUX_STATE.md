@@ -53,6 +53,8 @@ This section overrides any prior contradictory instruction in this file.
 Execution order. Ledger statuses untouched — this is the mental map, not DB truth.
 
 ### LAST SHIPPED
+- **ceb41ed + 6487485** `Temporarily disable Escape module` — May 31 2026. SHIPPED + COOLIFY-GREEN. Mo decision: Escape not launching this year. (ceb41ed) all `/escape/*` routes redirect to `/` via `redirect('/')` (302); Escape files preserved on disk for future reactivation. (6487485) removed the gold italic Escape link + "Curated travels." badge from the global footer. Leftover unused `import EscapeNav` in layout.tsx is acceptable (no runtime cost). Admin `/admin/escape` nav untouched. Separate "miscellaneous" lane — NOT the parked ProfiLux/Taxonomy active lane.
+
 - **9c079e5 / 6efcb62 / f2b3c7d** `ProfiLux one-world convergence C2+C3+feedback` — May 31 2026. SHIPPED + COOLIFY-GREEN + live-validated. (C2 9c079e5) removed last candidate cv-merge link (has_pending_cv_review banner + Resolve CV updates Link) + simplified Done onClick to setTab('view'). (C3 6efcb62) added first-time/re-upload orientation cards — superseded same session by feedback cleanup. (f2b3c7d) replaced both C3 cards + ProfiLux Overview band with a single {parsing && ...} "Building your dossier…" card (gold border, animated indeterminate bar via @keyframes joblux-slide in <style jsx global>); changed doc-header subtitle "Generated from your CV" → "Generated from your resume". Net: one-world lane FULLY CLOSED. cv-merge orphan (page + 3 API routes) confirmed dead by grep, parked for cleanup slice (ledger 8aee8108). 1 file, +17/-23.
 
 - **541ae9d** `chore: Anthropic model migration` — May 31 2026. SHIPPED + COOLIFY-GREEN. Replaced claude-haiku-3-5-20241022 + bare claude-haiku-4-5 → claude-haiku-4-5-20251001 across 6 live files (salary-benchmark, salary-compare, generate-signal, interview-detail, admin/luxai/settings, members/cv-parse). Admin UI label corrected (Haiku 3.5 → 4.5). 6 files, +11/-11. Deadline Jun 15 cleared. Ledger 2847ac29 closed.
@@ -339,9 +341,11 @@ Execution order. Ledger statuses untouched — this is the mental map, not DB tr
 
 ### CURRENT STEP — strict order
 
-One-world convergence lane CLOSED (C2 9c079e5 + C3 6efcb62 + feedback f2b3c7d). Anthropic model migration CLOSED (541ae9d). Repo HEAD: 541ae9d.
+One-world convergence lane CLOSED. Anthropic model migration CLOSED. Escape module disabled this session (ceb41ed + 6487485). Repo HEAD: 6487485.
 
-NEXT — none auto-started. Mo picks the lane.
+LuxAI Command Center refoundation FROZEN (ledger 9d5b95e4). Reason: scope grew once it became clear the EXISTING admin already carries overlapping surfaces — admin WikiLux pages overlap the cockpit's Brands view, admin Insights/Signals pages overlap listings the cockpit re-shows. Redundancy spans the whole admin. NEXT dedicated session = admin-wide reorg / de-duplication BEFORE resuming any command-center build. Command-center work this session was HTML mockup only (never shipped to TSX); backend confirmed fully ready (all generate/ingest/regenerate/approve endpoints exist) — refoundation is pure frontend once the admin reorg settles structure.
+
+NEXT — none auto-started. Mo picks the lane (admin reorg is the surfaced candidate).
 
 Candidates (per STATE NEXT block):
 - Taxonomy V2 implementation — boundary-map lib/profilux/taxonomy-bridge.ts (build WITH auto-matching consumer, not before; governed by f0e9be64)
@@ -352,7 +356,8 @@ Candidates (per STATE NEXT block):
 HELD (Mo): ProfiLux cosmetic debt (ledger parked) — Edit overview eyebrow "ProfiLux Overview" -> "Overview" (mock approved) + apply/route.ts stale "cv_parsed_data is swapped" JSDoc (false since S-C).
 
 OPEN FINDING:
-- none new this session.
+- `7a64d29d` — F-add-brand-publishes-empty-on-gen-failure (parked, low). add-brand publishes is_published=true + content={} before generation; if gen fails, brand left published+empty and Fill empty (is_published=false filter) never catches it. Not urgent (all 73 brands have content). Surfaced during cockpit Brands design.
+- `9d5b95e4` — LuxAI Command Center refoundation FROZEN pending admin-wide reorg (parked, normal).
 
 **Approved candidate structure:**
 

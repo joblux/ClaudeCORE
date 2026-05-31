@@ -1,30 +1,15 @@
-# JOBLUX HANDOFF — 2026-05-31
+# JOBLUX HANDOFF V3 — 2026-05-31 (session close)
 
-## 🔥 SNAPSHOT
-- No active blockers
-- Next 3 steps: Mo picks lane → read STATE → proceed
+## SHIPPED THIS SESSION
+- **Escape module disabled** (ceb41ed + 6487485, Coolify-green). `/escape/*` → `/` (302 via redirect('/')); footer Escape block removed; Escape files preserved for future reactivation. Admin `/admin/escape` nav untouched. Repo HEAD = 6487485.
+- **Ledger writes** (Supabase MCP): finding `7a64d29d` parked (add-brand publishes-empty-on-gen-failure, low); task `9d5b95e4` parked (Command Center refoundation FROZEN).
 
-## 1. WHAT WAS COMPLETED TODAY
-- C2 `9c079e5` — last cv-merge candidate link removed, Done simplified
-- C3 `6efcb62` — orientation cards (superseded by f2b3c7d same session)
-- Re-upload feedback `f2b3c7d` — "Building your dossier…" card + animated gold bar + subtitle "Generated from your resume"
-- Model migration `541ae9d` — haiku-3-5-20241022 + bare haiku-4-5 → haiku-4-5-20251001, 6 files, deadline Jun 15 cleared
-- Ledger: 08e74eb1 closed, 2847ac29 closed, 8aee8108 added (cv-merge cleanup parked)
+## UNRESOLVED / FROZEN
+- **LuxAI Command Center refoundation — FROZEN** (ledger 9d5b95e4). Built this session as HTML mockup ONLY (never shipped to TSX, lives in /mnt outputs, not in repo): 5-tab cockpit (Overview / Operations / Brands / Analytics / Queue), light admin theme, all real Supabase data. Queue = master-detail reading panel + sourced(RSS) / manufactured(AI) split. Brands = 16-subpart anatomy + 2-action model (Add brand / Regenerate); Fill empty + Fill metadata demoted to maintenance (0 targets today). Operations = provenance-grouped manual actions. Signals / Events / Salary tab previews approved but NOT built into the file.
+  - **Freeze reason (Mo):** scope grew once it surfaced that the EXISTING admin already carries overlapping surfaces — admin WikiLux pages overlap the cockpit Brands view; admin Insights / Signals pages overlap listings the cockpit re-shows. Redundancy spans the whole admin.
+  - **Backend confirmed fully ready** this session (all generate / ingest / regenerate / approve endpoints exist + verified via code reads). Refoundation is pure frontend.
+- **Parked bug `7a64d29d`:** add-brand/route.ts inserts is_published=true + content={} BEFORE generation; if regenerate-wikilux fails after insert → brand published+empty, and Fill empty (is_published=false filter) never catches it. Not urgent (all 73 brands have content). Do NOT fix now.
 
-## 2. STILL OPEN — ACTIVE ONLY
-- `f0e9be64` — Taxonomy governance gate (permanent doctrine, high)
-- `8aee8108` — cv-merge route/API deletion cleanup (parked, low)
-- `de93a399` — F-pf-cold-start-no-editor-data (parked, medium)
-- `4fca2c39` — F-MAINT-1 /client-submissions/* not in MAINTENANCE_BYPASS (parked, medium)
-
-## 3. NEXT 3 STEPS
-1. Mo picks next lane from STATE candidates
-2. Read docs/JOBLUX_STATE.md at session open
-3. Proceed from CURRENT STEP
-
-## 4. NEXT SESSION START
-- Focus: Mo-directed — no auto-start
-- IN: STATE read → CURRENT STEP → Mo lane decision
-- OUT: cv-merge deletion, taxonomy, seniority (until Mo opens)
-
-— Claude AI
+## NEXT STRICT STEP
+- Dedicated **admin-wide reorg / de-duplication** session BEFORE resuming any command-center build. Resolve the WikiLux / Insights / Signals overlap between the existing admin and the proposed cockpit, THEN decide command-center structure.
+- Active product lane (ProfiLux / Taxonomy V2) remains parked exactly as left — resumes when Mo picks it. This LuxAI/Escape work was a separate "miscellaneous" lane.
