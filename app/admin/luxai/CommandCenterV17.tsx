@@ -428,6 +428,9 @@ export default function CommandCenterV17() {
   const [eventsRunning, setEventsRunning] = useState(false)
   const [eventsResult, setEventsResult] = useState<{ ok: boolean; text: string } | null>(null)
 
+  const [rssEventsRunning, setRssEventsRunning] = useState(false)
+  const [rssEventsResult, setRssEventsResult] = useState<{ ok: boolean; text: string } | null>(null)
+
   const handleGenerateArticle = async () => {
     if (articleRunning) return
     setArticleRunning(true)
@@ -497,6 +500,27 @@ export default function CommandCenterV17() {
       setEventsResult({ ok: false, text: 'Generation failed' })
     } finally {
       setEventsRunning(false)
+    }
+  }
+
+  const handlePullRssEvents = async () => {
+    if (rssEventsRunning) return
+    setRssEventsRunning(true)
+    try {
+      const res = await fetch('/api/luxai/ingest-events-rss', { method: 'POST' })
+      const body = await res.json().catch(() => ({}))
+      if (res.ok && body?.success) {
+        setRssEventsResult({
+          ok: true,
+          text: `Events pulled — ${body.inserted ?? 0} new, ${body.skipped ?? 0} skipped`,
+        })
+      } else {
+        setRssEventsResult({ ok: false, text: body?.message || 'RSS pull failed' })
+      }
+    } catch {
+      setRssEventsResult({ ok: false, text: 'RSS pull failed' })
+    } finally {
+      setRssEventsRunning(false)
     }
   }
 
@@ -632,8 +656,21 @@ export default function CommandCenterV17() {
         </div>
         <div className="v17-action-row">
           <button type="button" className="v17-btn-secondary" disabled>↻ Pull RSS signals</button>
-          <button type="button" className="v17-btn-secondary" disabled>↻ Pull RSS events</button>
-          <span className="v17-not-connected">Not connected yet</span>
+          <button
+            type="button"
+            className="v17-btn-secondary"
+            onClick={handlePullRssEvents}
+            disabled={rssEventsRunning}
+          >
+            {rssEventsRunning ? 'Pulling…' : '↻ Pull RSS events'}
+          </button>
+          {rssEventsResult ? (
+            <span style={{ fontSize: 11, color: rssEventsResult.ok ? '#16a34a' : '#b91c1c' }}>
+              {rssEventsResult.text}
+            </span>
+          ) : (
+            <span className="v17-not-connected">Not connected yet</span>
+          )}
         </div>
       </div>
 
