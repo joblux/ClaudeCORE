@@ -25,6 +25,18 @@ type InventoryRow = {
   last_added: string | null
 }
 
+type QueueRow = {
+  id: string
+  content_type: string
+  source_type: string | null
+  source_name: string | null
+  title: string | null
+  category: string | null
+  brand_tags: string[] | null
+  status: string
+  created_at: string | null
+}
+
 // Types where an editorial queue does not structurally apply (presentation only)
 const NO_QUEUE_TYPES = new Set(['brands', 'salary', 'interviews'])
 
@@ -415,6 +427,11 @@ export default function CommandCenterV17() {
   const [invLoading, setInvLoading] = useState(true)
   const [invError, setInvError] = useState(false)
 
+  const [queue, setQueue] = useState<QueueRow[]>([])
+  const [queueLoading, setQueueLoading] = useState(false)
+  const [queueError, setQueueError] = useState(false)
+  const [queueLoaded, setQueueLoaded] = useState(false)
+
   // Operations — only the "Generate article" action is wired
   const [articleTopic, setArticleTopic] = useState('career-trends')
   const [articleRunning, setArticleRunning] = useState(false)
@@ -645,6 +662,32 @@ export default function CommandCenterV17() {
     }
   }, [])
 
+  useEffect(() => {
+    if (activeTab !== 'queue' || queueLoaded) return
+    let cancelled = false
+    setQueueLoading(true)
+    fetch('/api/admin/luxai/queue')
+      .then((r) => {
+        if (!r.ok) throw new Error(`status ${r.status}`)
+        return r.json()
+      })
+      .then((data) => {
+        if (cancelled) return
+        setQueue(Array.isArray(data?.queue) ? data.queue : [])
+        setQueueLoading(false)
+        setQueueLoaded(true)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setQueueError(true)
+        setQueueLoading(false)
+        setQueueLoaded(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [activeTab, queueLoaded])
+
   const activeLabel = TABS.find((t) => t.id === activeTab)?.label ?? ''
 
   const totals = inventory.reduce(
@@ -709,6 +752,39 @@ export default function CommandCenterV17() {
           </table>
         </div>
       </>
+    )
+  }
+
+  const renderQueue = () => {
+    if (queueLoading) return <div className="v17-state">Loading…</div>
+    if (queueError) return <div className="v17-state error">Failed to load queue.</div>
+    if (queue.length === 0) return <div className="v17-state">No items awaiting review.</div>
+
+    return (
+      <div className="v17-table-wrap">
+        <table className="v17-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Title</th>
+              <th>Source</th>
+              <th>Category</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {queue.map((row) => (
+              <tr key={row.id}>
+                <td>{row.content_type}</td>
+                <td>{row.title ?? '—'}</td>
+                <td>{row.source_name ?? row.source_type ?? '—'}</td>
+                <td>{row.category ?? '—'}</td>
+                <td>{formatDate(row.created_at)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     )
   }
 
@@ -1023,6 +1099,8 @@ export default function CommandCenterV17() {
             renderOverview()
           ) : activeTab === 'operations' ? (
             renderOperations()
+          ) : activeTab === 'queue' ? (
+            renderQueue()
           ) : (
             <h1 className="v17-pane-heading">{activeLabel}</h1>
           )}
