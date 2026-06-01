@@ -540,6 +540,10 @@ export default function CommandCenterV17() {
   const [eventsRunning, setEventsRunning] = useState(false)
   const [eventsResult, setEventsResult] = useState<{ ok: boolean; text: string } | null>(null)
 
+  const [interviewBrand, setInterviewBrand] = useState('')
+  const [interviewRunning, setInterviewRunning] = useState(false)
+  const [interviewResult, setInterviewResult] = useState<{ ok: boolean; text: string } | null>(null)
+
   const [rssEventsRunning, setRssEventsRunning] = useState(false)
   const [rssEventsResult, setRssEventsResult] = useState<{ ok: boolean; text: string } | null>(null)
 
@@ -703,6 +707,36 @@ export default function CommandCenterV17() {
       setEventsResult({ ok: false, text: 'Generation failed' })
     } finally {
       setEventsRunning(false)
+    }
+  }
+
+  const handleGenerateInterview = async () => {
+    if (interviewRunning) return
+    if (!interviewBrand) return
+    setInterviewRunning(true)
+    try {
+      const res = await fetch('/api/luxai/generate-interview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: interviewBrand }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (body?.skipped) {
+        setInterviewResult({
+          ok: true,
+          text: body?.reason === 'duplicate'
+            ? 'Skipped — duplicate already in queue'
+            : (body?.message || 'Skipped'),
+        })
+      } else if (res.ok && body?.success) {
+        setInterviewResult({ ok: true, text: body.message || 'Interview drafts queued for review' })
+      } else {
+        setInterviewResult({ ok: false, text: body?.message || 'Generation failed' })
+      }
+    } catch {
+      setInterviewResult({ ok: false, text: 'Generation failed' })
+    } finally {
+      setInterviewRunning(false)
     }
   }
 
@@ -973,7 +1007,7 @@ export default function CommandCenterV17() {
   }, [activeTab, usageLoaded])
 
   useEffect(() => {
-    if (activeTab !== 'brands' || brandsListLoaded) return
+    if ((activeTab !== 'brands' && activeTab !== 'operations') || brandsListLoaded) return
     let cancelled = false
     setBrandsListLoading(true)
     fetch('/api/admin/luxai/brands-enriched')
@@ -1483,6 +1517,33 @@ export default function CommandCenterV17() {
           {reportResult && (
             <span style={{ fontSize: 11, color: reportResult.ok ? '#16a34a' : '#b91c1c' }}>
               {reportResult.text}
+            </span>
+          )}
+        </div>
+        <div className="v17-action-row">
+          <select
+            className="v17-select"
+            value={interviewBrand}
+            onChange={(e) => setInterviewBrand(e.target.value)}
+            disabled={interviewRunning}
+            style={{ minWidth: 180 }}
+          >
+            <option value="">Select brand…</option>
+            {brandsList.map((b) => (
+              <option key={b.slug} value={b.slug}>{b.brand_name ?? b.slug}</option>
+            ))}
+          </select>
+          <button
+            type="button"
+            className="v17-btn-secondary"
+            onClick={handleGenerateInterview}
+            disabled={interviewRunning || !interviewBrand}
+          >
+            {interviewRunning ? 'Generating…' : 'Generate interview'}
+          </button>
+          {interviewResult && (
+            <span style={{ fontSize: 11, color: interviewResult.ok ? '#16a34a' : '#b91c1c' }}>
+              {interviewResult.text}
             </span>
           )}
         </div>
