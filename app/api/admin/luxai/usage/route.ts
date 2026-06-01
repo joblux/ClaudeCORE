@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -9,6 +11,12 @@ const supabase = createClient(
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
+  const session = await getServerSession(authOptions)
+  const role = (session?.user as { role?: string } | undefined)?.role
+  if (role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
