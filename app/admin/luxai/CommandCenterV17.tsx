@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const TABS = [
   { id: 'overview', label: 'Overview' },
@@ -14,6 +14,26 @@ const TABS = [
 ] as const
 
 type TabId = (typeof TABS)[number]['id']
+
+type InventoryRow = {
+  type: string
+  label: string
+  total: number
+  live: number
+  in_queue: number
+  added_30d: number
+  last_added: string | null
+}
+
+// Types where an editorial queue does not structurally apply (presentation only)
+const NO_QUEUE_TYPES = new Set(['brands', 'salary', 'interviews'])
+
+function formatDate(value: string | null): string {
+  if (!value) return '—'
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+}
 
 const ICON_PROPS = {
   width: 14,
@@ -223,12 +243,155 @@ const STYLE = `
     color: #111;
     margin: 0;
   }
+  .v17-state { font-size: 12px; color: #888; }
+  .v17-state.error { color: #b91c1c; }
+  .v17-kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .v17-kpi-card {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .v17-kpi-label {
+    font-size: 10px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .v17-kpi-value {
+    font-size: 26px;
+    font-weight: 600;
+    color: #111;
+    margin-top: 4px;
+  }
+  .v17-table-wrap {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .v17-table { width: 100%; border-collapse: collapse; }
+  .v17-table thead th {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #aaa;
+    font-weight: 600;
+    background: #fafafa;
+    text-align: left;
+    padding: 9px 16px;
+  }
+  .v17-table tbody td {
+    font-size: 12px;
+    color: #111;
+    border-bottom: 1px solid #f5f5f5;
+    padding: 9px 16px;
+  }
+  .v17-table tbody tr:last-child td { border-bottom: none; }
+  .v17-table tbody tr:hover td { background: #fafafa; }
+  .v17-num { text-align: right; font-variant-numeric: tabular-nums; }
 `
 
 export default function CommandCenterV17() {
   const [activeTab, setActiveTab] = useState<TabId>('overview')
 
+  const [inventory, setInventory] = useState<InventoryRow[]>([])
+  const [invLoading, setInvLoading] = useState(true)
+  const [invError, setInvError] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/admin/luxai/inventory')
+      .then((r) => {
+        if (!r.ok) throw new Error(`status ${r.status}`)
+        return r.json()
+      })
+      .then((data) => {
+        if (cancelled) return
+        setInventory(Array.isArray(data?.inventory) ? data.inventory : [])
+        setInvLoading(false)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setInvError(true)
+        setInvLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const activeLabel = TABS.find((t) => t.id === activeTab)?.label ?? ''
+
+  const totals = inventory.reduce(
+    (acc, r) => ({
+      total: acc.total + (r.total || 0),
+      live: acc.live + (r.live || 0),
+      in_queue: acc.in_queue + (r.in_queue || 0),
+      added_30d: acc.added_30d + (r.added_30d || 0),
+    }),
+    { total: 0, live: 0, in_queue: 0, added_30d: 0 }
+  )
+
+  const renderOverview = () => {
+    if (invLoading) return <div className="v17-state">Loading…</div>
+    if (invError) return <div className="v17-state error">Failed to load inventory.</div>
+
+    return (
+      <>
+        <div className="v17-kpi-strip">
+          <div className="v17-kpi-card">
+            <div className="v17-kpi-label">Total content</div>
+            <div className="v17-kpi-value">{totals.total}</div>
+          </div>
+          <div className="v17-kpi-card">
+            <div className="v17-kpi-label">Live</div>
+            <div className="v17-kpi-value">{totals.live}</div>
+          </div>
+          <div className="v17-kpi-card">
+            <div className="v17-kpi-label">In queue</div>
+            <div className="v17-kpi-value">{totals.in_queue}</div>
+          </div>
+          <div className="v17-kpi-card">
+            <div className="v17-kpi-label">Added (30d)</div>
+            <div className="v17-kpi-value">{totals.added_30d}</div>
+          </div>
+        </div>
+
+        <div className="v17-table-wrap">
+          <table className="v17-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th className="v17-num">Total</th>
+                <th className="v17-num">Live</th>
+                <th className="v17-num">In queue</th>
+                <th className="v17-num">Added 30d</th>
+                <th>Last added</th>
+              </tr>
+            </thead>
+            <tbody>
+              {inventory.map((row) => (
+                <tr key={row.type}>
+                  <td>{row.label}</td>
+                  <td className="v17-num">{row.total}</td>
+                  <td className="v17-num">{row.live}</td>
+                  <td className="v17-num">{NO_QUEUE_TYPES.has(row.type) ? '—' : row.in_queue}</td>
+                  <td className="v17-num">{row.added_30d}</td>
+                  <td>{formatDate(row.last_added)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </>
+    )
+  }
 
   return (
     <div className="v17-root">
@@ -321,7 +484,11 @@ export default function CommandCenterV17() {
         </div>
 
         <div className="v17-content">
-          <h1 className="v17-pane-heading">{activeLabel}</h1>
+          {activeTab === 'overview' ? (
+            renderOverview()
+          ) : (
+            <h1 className="v17-pane-heading">{activeLabel}</h1>
+          )}
         </div>
       </main>
     </div>
