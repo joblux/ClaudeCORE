@@ -573,6 +573,16 @@ export default function CommandCenterV17() {
 
   useEffect(() => clearRssSignalsTimer, [])
 
+  // Enrich card intelligence — LIVE WRITE to brand cards, behind a 2-click inline confirmation
+  const [cardIntelConfirm, setCardIntelConfirm] = useState(false)
+  const [cardIntelRunning, setCardIntelRunning] = useState(false)
+  const [cardIntelResult, setCardIntelResult] = useState<{ ok: boolean; text: string } | null>(null)
+  const cardIntelTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const clearCardIntelTimer = () => {
+    if (cardIntelTimerRef.current) { clearTimeout(cardIntelTimerRef.current); cardIntelTimerRef.current = null }
+  }
+  useEffect(() => clearCardIntelTimer, [])
+
   const handleSignalsClick = async (count: 5 | 10) => {
     if (signalsRunning) return
 
@@ -732,6 +742,36 @@ export default function CommandCenterV17() {
     } finally {
       setRssSignalsRunning(false)
       setRssSignalsConfirm(false)
+    }
+  }
+
+  const handleEnrichCardIntel = async () => {
+    if (cardIntelRunning) return
+    if (!cardIntelConfirm) {
+      clearCardIntelTimer()
+      setCardIntelConfirm(true)
+      cardIntelTimerRef.current = setTimeout(() => setCardIntelConfirm(false), 4000)
+      return
+    }
+    clearCardIntelTimer()
+    setCardIntelRunning(true)
+    try {
+      const res = await fetch('/api/luxai/enrich-card-intelligence', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (res.ok && body?.success) {
+        setCardIntelResult({ ok: true, text: `${body.written ?? 0} written · ${body.skipped ?? 0} skipped` })
+      } else {
+        setCardIntelResult({ ok: false, text: body?.message || 'Enrichment failed' })
+      }
+    } catch {
+      setCardIntelResult({ ok: false, text: 'Enrichment failed' })
+    } finally {
+      setCardIntelRunning(false)
+      setCardIntelConfirm(false)
     }
   }
 
@@ -1399,6 +1439,38 @@ export default function CommandCenterV17() {
           {reportResult && (
             <span style={{ fontSize: 11, color: reportResult.ok ? '#16a34a' : '#b91c1c' }}>
               {reportResult.text}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Block — Enrich (AI, live write, not a draft) */}
+      <div className="v17-block">
+        <div className="v17-block-head">
+          <span className="v17-dot purple" />
+          <span className="v17-block-title">Enrich card intelligence</span>
+          <span className="v17-tag">AI · live write</span>
+        </div>
+        <div className="v17-block-desc">
+          Runs Haiku across all published brands to refresh card markers from the latest signals. Writes live to brand cards — not a queue draft.
+        </div>
+        <div className="v17-action-row">
+          <button
+            type="button"
+            className="v17-btn-secondary"
+            onClick={handleEnrichCardIntel}
+            disabled={cardIntelRunning}
+            style={cardIntelConfirm ? { color: '#b45309', borderColor: '#b45309' } : undefined}
+          >
+            {cardIntelRunning
+              ? 'Enriching…'
+              : cardIntelConfirm
+                ? '⚠ Writes live to brand cards — click again'
+                : 'Enrich card intelligence'}
+          </button>
+          {cardIntelResult && (
+            <span style={{ fontSize: 11, color: cardIntelResult.ok ? '#16a34a' : '#b91c1c' }}>
+              {cardIntelResult.text}
             </span>
           )}
         </div>
