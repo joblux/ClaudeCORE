@@ -143,6 +143,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!isAdmin) return null
 
+  // v17 cockpit renders standalone (no admin sidebar/topbar), auth still enforced above
+  if (pathname.startsWith('/admin/luxai/v17')) {
+    return <>{children}</>
+  }
+
   const isActive = (href: string, exact?: boolean) => {
     if (href.includes('?')) {
       const [path, qs] = href.split('?')
