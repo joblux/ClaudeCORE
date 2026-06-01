@@ -76,6 +76,23 @@ type ArticleRow = {
   created_at: string | null
 }
 
+type UsageStats = {
+  this_month: number
+  this_month_requests: number
+  last_month: number
+  last_month_requests: number
+  avg_cost: number
+}
+
+type UsageHistoryRow = {
+  id: string
+  action: string | null
+  model: string | null
+  tokens_used: number | null
+  cost_usd: number | null
+  created_at: string | null
+}
+
 // Types where an editorial queue does not structurally apply (presentation only)
 const NO_QUEUE_TYPES = new Set(['brands', 'salary', 'interviews'])
 
@@ -486,6 +503,12 @@ export default function CommandCenterV17() {
   const [articlesListError, setArticlesListError] = useState(false)
   const [articlesListLoaded, setArticlesListLoaded] = useState(false)
 
+  const [usageStats, setUsageStats] = useState<UsageStats | null>(null)
+  const [usageHistory, setUsageHistory] = useState<UsageHistoryRow[]>([])
+  const [usageLoading, setUsageLoading] = useState(false)
+  const [usageError, setUsageError] = useState(false)
+  const [usageLoaded, setUsageLoaded] = useState(false)
+
   // Operations — only the "Generate article" action is wired
   const [articleTopic, setArticleTopic] = useState('career-trends')
   const [articleRunning, setArticleRunning] = useState(false)
@@ -820,6 +843,33 @@ export default function CommandCenterV17() {
     }
   }, [activeTab, articlesListLoaded])
 
+  useEffect(() => {
+    if (activeTab !== 'analytics' || usageLoaded) return
+    let cancelled = false
+    setUsageLoading(true)
+    fetch('/api/admin/luxai/usage')
+      .then((r) => {
+        if (!r.ok) throw new Error(`status ${r.status}`)
+        return r.json()
+      })
+      .then((data) => {
+        if (cancelled) return
+        setUsageStats(data?.stats ?? null)
+        setUsageHistory(Array.isArray(data?.history) ? data.history : [])
+        setUsageLoading(false)
+        setUsageLoaded(true)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setUsageError(true)
+        setUsageLoading(false)
+        setUsageLoaded(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [activeTab, usageLoaded])
+
   const activeLabel = TABS.find((t) => t.id === activeTab)?.label ?? ''
 
   const totals = inventory.reduce(
@@ -1016,6 +1066,66 @@ export default function CommandCenterV17() {
           </tbody>
         </table>
       </div>
+    )
+  }
+
+  const fmtUsd = (n: number | null | undefined) =>
+    typeof n === 'number' ? `$${n.toFixed(2)}` : '—'
+
+  const renderAnalytics = () => {
+    if (usageLoading) return <div className="v17-state">Loading…</div>
+    if (usageError) return <div className="v17-state error">Failed to load usage.</div>
+
+    return (
+      <>
+        <div className="v17-kpi-strip">
+          <div className="v17-kpi-card">
+            <div className="v17-kpi-label">This month (cost)</div>
+            <div className="v17-kpi-value">{fmtUsd(usageStats?.this_month)}</div>
+          </div>
+          <div className="v17-kpi-card">
+            <div className="v17-kpi-label">This month (requests)</div>
+            <div className="v17-kpi-value">{usageStats?.this_month_requests ?? 0}</div>
+          </div>
+          <div className="v17-kpi-card">
+            <div className="v17-kpi-label">Last month (cost)</div>
+            <div className="v17-kpi-value">{fmtUsd(usageStats?.last_month)}</div>
+          </div>
+          <div className="v17-kpi-card">
+            <div className="v17-kpi-label">Avg cost / request</div>
+            <div className="v17-kpi-value">{fmtUsd(usageStats?.avg_cost)}</div>
+          </div>
+        </div>
+
+        {usageHistory.length === 0 ? (
+          <div className="v17-state">No usage history.</div>
+        ) : (
+          <div className="v17-table-wrap">
+            <table className="v17-table">
+              <thead>
+                <tr>
+                  <th>Action</th>
+                  <th>Model</th>
+                  <th>Tokens</th>
+                  <th>Cost</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                {usageHistory.map((row) => (
+                  <tr key={row.id}>
+                    <td>{row.action ?? '—'}</td>
+                    <td>{row.model ?? '—'}</td>
+                    <td>{row.tokens_used ?? '—'}</td>
+                    <td>{fmtUsd(row.cost_usd)}</td>
+                    <td>{formatDate(row.created_at)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </>
     )
   }
 
@@ -1338,6 +1448,8 @@ export default function CommandCenterV17() {
             renderEvents()
           ) : activeTab === 'articles' ? (
             renderArticles()
+          ) : activeTab === 'analytics' ? (
+            renderAnalytics()
           ) : (
             <h1 className="v17-pane-heading">{activeLabel}</h1>
           )}
