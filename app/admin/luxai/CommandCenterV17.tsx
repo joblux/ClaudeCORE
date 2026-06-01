@@ -431,6 +431,12 @@ export default function CommandCenterV17() {
   const [rssEventsRunning, setRssEventsRunning] = useState(false)
   const [rssEventsResult, setRssEventsResult] = useState<{ ok: boolean; text: string } | null>(null)
 
+  // Pull RSS signals — AUTO-PUBLISHES live (Step 6b auto-approve), behind a 2-click inline confirmation
+  const [rssSignalsConfirm, setRssSignalsConfirm] = useState(false)
+  const [rssSignalsRunning, setRssSignalsRunning] = useState(false)
+  const [rssSignalsResult, setRssSignalsResult] = useState<{ ok: boolean; text: string } | null>(null)
+  const rssSignalsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   // Generate signals — AUTO-PUBLISHES live, behind a 2-click inline confirmation
   const [signalsConfirm, setSignalsConfirm] = useState<null | 5 | 10>(null)
   const [signalsRunning, setSignalsRunning] = useState(false)
@@ -445,6 +451,15 @@ export default function CommandCenterV17() {
   }
 
   useEffect(() => clearSignalsTimer, [])
+
+  const clearRssSignalsTimer = () => {
+    if (rssSignalsTimerRef.current) {
+      clearTimeout(rssSignalsTimerRef.current)
+      rssSignalsTimerRef.current = null
+    }
+  }
+
+  useEffect(() => clearRssSignalsTimer, [])
 
   const handleSignalsClick = async (count: 5 | 10) => {
     if (signalsRunning) return
@@ -579,6 +594,35 @@ export default function CommandCenterV17() {
     }
   }
 
+  const handlePullRssSignals = async () => {
+    if (rssSignalsRunning) return
+    if (!rssSignalsConfirm) {
+      clearRssSignalsTimer()
+      setRssSignalsConfirm(true)
+      rssSignalsTimerRef.current = setTimeout(() => setRssSignalsConfirm(false), 4000)
+      return
+    }
+    clearRssSignalsTimer()
+    setRssSignalsRunning(true)
+    try {
+      const res = await fetch('/api/luxai/ingest-rss', { method: 'POST' })
+      const body = await res.json().catch(() => ({}))
+      if (res.ok && body?.success) {
+        setRssSignalsResult({
+          ok: true,
+          text: `Signals pulled — ${body.inserted ?? 0} new, ${body.auto_approved ?? 0} auto-published live, ${body.skipped ?? 0} skipped`,
+        })
+      } else {
+        setRssSignalsResult({ ok: false, text: body?.message || 'RSS pull failed' })
+      }
+    } catch {
+      setRssSignalsResult({ ok: false, text: 'RSS pull failed' })
+    } finally {
+      setRssSignalsRunning(false)
+      setRssSignalsConfirm(false)
+    }
+  }
+
   useEffect(() => {
     let cancelled = false
     fetch('/api/admin/luxai/inventory')
@@ -710,7 +754,24 @@ export default function CommandCenterV17() {
           Fetches real, verified items from external feeds into the review queue. Not AI-written.
         </div>
         <div className="v17-action-row">
-          <button type="button" className="v17-btn-secondary" disabled>↻ Pull RSS signals</button>
+          <button
+            type="button"
+            className="v17-btn-secondary"
+            onClick={handlePullRssSignals}
+            disabled={rssSignalsRunning}
+            style={rssSignalsConfirm ? { color: '#b45309', borderColor: '#b45309' } : undefined}
+          >
+            {rssSignalsRunning
+              ? 'Pulling…'
+              : rssSignalsConfirm
+                ? '⚠ Publishes live — click again'
+                : '↻ Pull RSS signals'}
+          </button>
+          {rssSignalsResult && (
+            <span style={{ fontSize: 11, color: rssSignalsResult.ok ? '#16a34a' : '#b91c1c' }}>
+              {rssSignalsResult.text}
+            </span>
+          )}
           <button
             type="button"
             className="v17-btn-secondary"
