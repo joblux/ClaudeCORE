@@ -66,6 +66,16 @@ type EventRow = {
   created_at: string | null
 }
 
+type ArticleRow = {
+  id: string
+  title: string | null
+  category: string | null
+  author_name: string | null
+  status: string | null
+  published_at: string | null
+  created_at: string | null
+}
+
 // Types where an editorial queue does not structurally apply (presentation only)
 const NO_QUEUE_TYPES = new Set(['brands', 'salary', 'interviews'])
 
@@ -471,6 +481,11 @@ export default function CommandCenterV17() {
   const [eventsListError, setEventsListError] = useState(false)
   const [eventsListLoaded, setEventsListLoaded] = useState(false)
 
+  const [articlesList, setArticlesList] = useState<ArticleRow[]>([])
+  const [articlesListLoading, setArticlesListLoading] = useState(false)
+  const [articlesListError, setArticlesListError] = useState(false)
+  const [articlesListLoaded, setArticlesListLoaded] = useState(false)
+
   // Operations — only the "Generate article" action is wired
   const [articleTopic, setArticleTopic] = useState('career-trends')
   const [articleRunning, setArticleRunning] = useState(false)
@@ -779,6 +794,32 @@ export default function CommandCenterV17() {
     }
   }, [activeTab, eventsListLoaded])
 
+  useEffect(() => {
+    if (activeTab !== 'articles' || articlesListLoaded) return
+    let cancelled = false
+    setArticlesListLoading(true)
+    fetch('/api/articles')
+      .then((r) => {
+        if (!r.ok) throw new Error(`status ${r.status}`)
+        return r.json()
+      })
+      .then((data) => {
+        if (cancelled) return
+        setArticlesList(Array.isArray(data?.articles) ? data.articles : [])
+        setArticlesListLoading(false)
+        setArticlesListLoaded(true)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setArticlesListError(true)
+        setArticlesListLoading(false)
+        setArticlesListLoaded(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [activeTab, articlesListLoaded])
+
   const activeLabel = TABS.find((t) => t.id === activeTab)?.label ?? ''
 
   const totals = inventory.reduce(
@@ -937,6 +978,39 @@ export default function CommandCenterV17() {
                 <td>{row.sector ?? '—'}</td>
                 <td>{[row.location_city, row.location_country].filter(Boolean).join(', ') || '—'}</td>
                 <td>{formatDate(row.start_date)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
+  const renderArticles = () => {
+    if (articlesListLoading) return <div className="v17-state">Loading…</div>
+    if (articlesListError) return <div className="v17-state error">Failed to load articles.</div>
+    if (articlesList.length === 0) return <div className="v17-state">No articles.</div>
+
+    return (
+      <div className="v17-table-wrap">
+        <table className="v17-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Category</th>
+              <th>Author</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {articlesList.map((row) => (
+              <tr key={row.id}>
+                <td>{row.title ?? '—'}</td>
+                <td>{row.status === 'published' ? 'Live' : 'Draft'}</td>
+                <td>{row.category ?? '—'}</td>
+                <td>{row.author_name ?? '—'}</td>
+                <td>{formatDate(row.created_at)}</td>
               </tr>
             ))}
           </tbody>
@@ -1262,6 +1336,8 @@ export default function CommandCenterV17() {
             renderSignals()
           ) : activeTab === 'events' ? (
             renderEvents()
+          ) : activeTab === 'articles' ? (
+            renderArticles()
           ) : (
             <h1 className="v17-pane-heading">{activeLabel}</h1>
           )}
