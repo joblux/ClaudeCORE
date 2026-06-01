@@ -420,6 +420,10 @@ export default function CommandCenterV17() {
   const [articleRunning, setArticleRunning] = useState(false)
   const [articleResult, setArticleResult] = useState<{ ok: boolean; text: string } | null>(null)
 
+  const [reportType, setReportType] = useState('salary')
+  const [reportRunning, setReportRunning] = useState(false)
+  const [reportResult, setReportResult] = useState<{ ok: boolean; text: string } | null>(null)
+
   const handleGenerateArticle = async () => {
     if (articleRunning) return
     setArticleRunning(true)
@@ -441,6 +445,30 @@ export default function CommandCenterV17() {
       setArticleResult({ ok: false, text: 'Generation failed' })
     } finally {
       setArticleRunning(false)
+    }
+  }
+
+  const handleGenerateReport = async () => {
+    if (reportRunning) return
+    setReportRunning(true)
+    try {
+      const res = await fetch('/api/luxai/generate-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ report_type: reportType }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (body?.skipped) {
+        setReportResult({ ok: true, text: 'Skipped — duplicate already in queue' })
+      } else if (res.ok && body?.success) {
+        setReportResult({ ok: true, text: body.message || 'Report queued for review' })
+      } else {
+        setReportResult({ ok: false, text: body?.message || 'Generation failed' })
+      }
+    } catch {
+      setReportResult({ ok: false, text: 'Generation failed' })
+    } finally {
+      setReportRunning(false)
     }
   }
 
@@ -635,14 +663,30 @@ export default function CommandCenterV17() {
           <span className="v17-not-connected">Not connected yet</span>
         </div>
         <div className="v17-action-row">
-          <select className="v17-select" disabled defaultValue="">
-            <option value="">Salary</option>
-            <option>Hiring</option>
-            <option>Market</option>
-            <option>Career report</option>
+          <select
+            className="v17-select"
+            value={reportType}
+            onChange={(e) => setReportType(e.target.value)}
+            disabled={reportRunning}
+          >
+            <option value="salary">Salary report</option>
+            <option value="hiring">Hiring report</option>
+            <option value="market">Market report</option>
+            <option value="career">Career report</option>
           </select>
-          <button type="button" className="v17-btn-secondary" disabled>Generate report</button>
-          <span className="v17-not-connected">Not connected yet</span>
+          <button
+            type="button"
+            className="v17-btn-secondary"
+            onClick={handleGenerateReport}
+            disabled={reportRunning}
+          >
+            {reportRunning ? 'Generating…' : 'Generate report'}
+          </button>
+          {reportResult && (
+            <span style={{ fontSize: 11, color: reportResult.ok ? '#16a34a' : '#b91c1c' }}>
+              {reportResult.text}
+            </span>
+          )}
         </div>
       </div>
 
