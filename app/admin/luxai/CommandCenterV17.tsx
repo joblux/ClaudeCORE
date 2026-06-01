@@ -93,6 +93,19 @@ type UsageHistoryRow = {
   created_at: string | null
 }
 
+type BrandRow = {
+  slug: string
+  brand_name: string | null
+  sector: string | null
+  status: string | null
+  is_published: boolean
+  salary_count: number
+  has_salary: boolean
+  interview_count: number
+  last_regenerated_at: string | null
+  regeneration_count: number
+}
+
 // Types where an editorial queue does not structurally apply (presentation only)
 const NO_QUEUE_TYPES = new Set(['brands', 'salary', 'interviews'])
 
@@ -503,6 +516,11 @@ export default function CommandCenterV17() {
   const [articlesListError, setArticlesListError] = useState(false)
   const [articlesListLoaded, setArticlesListLoaded] = useState(false)
 
+  const [brandsList, setBrandsList] = useState<BrandRow[]>([])
+  const [brandsListLoading, setBrandsListLoading] = useState(false)
+  const [brandsListError, setBrandsListError] = useState(false)
+  const [brandsListLoaded, setBrandsListLoaded] = useState(false)
+
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null)
   const [usageHistory, setUsageHistory] = useState<UsageHistoryRow[]>([])
   const [usageLoading, setUsageLoading] = useState(false)
@@ -870,6 +888,32 @@ export default function CommandCenterV17() {
     }
   }, [activeTab, usageLoaded])
 
+  useEffect(() => {
+    if (activeTab !== 'brands' || brandsListLoaded) return
+    let cancelled = false
+    setBrandsListLoading(true)
+    fetch('/api/admin/luxai/brands-enriched')
+      .then((r) => {
+        if (!r.ok) throw new Error(`status ${r.status}`)
+        return r.json()
+      })
+      .then((data) => {
+        if (cancelled) return
+        setBrandsList(Array.isArray(data?.brands) ? data.brands : [])
+        setBrandsListLoading(false)
+        setBrandsListLoaded(true)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setBrandsListError(true)
+        setBrandsListLoading(false)
+        setBrandsListLoaded(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [activeTab, brandsListLoaded])
+
   const activeLabel = TABS.find((t) => t.id === activeTab)?.label ?? ''
 
   const totals = inventory.reduce(
@@ -1126,6 +1170,39 @@ export default function CommandCenterV17() {
           </div>
         )}
       </>
+    )
+  }
+
+  const renderBrands = () => {
+    if (brandsListLoading) return <div className="v17-state">Loading…</div>
+    if (brandsListError) return <div className="v17-state error">Failed to load brands.</div>
+    if (brandsList.length === 0) return <div className="v17-state">No brands.</div>
+
+    return (
+      <div className="v17-table-wrap">
+        <table className="v17-table">
+          <thead>
+            <tr>
+              <th>Brand</th>
+              <th>Status</th>
+              <th>Sector</th>
+              <th>Salary</th>
+              <th>Regenerated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {brandsList.map((row) => (
+              <tr key={row.slug}>
+                <td>{row.brand_name ?? '—'}</td>
+                <td>{row.is_published ? 'Live' : 'Draft'}</td>
+                <td>{row.sector ?? '—'}</td>
+                <td>{row.has_salary ? row.salary_count : '—'}</td>
+                <td>{formatDate(row.last_regenerated_at)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     )
   }
 
@@ -1450,6 +1527,8 @@ export default function CommandCenterV17() {
             renderArticles()
           ) : activeTab === 'analytics' ? (
             renderAnalytics()
+          ) : activeTab === 'brands' ? (
+            renderBrands()
           ) : (
             <h1 className="v17-pane-heading">{activeLabel}</h1>
           )}
