@@ -583,6 +583,17 @@ export default function CommandCenterV17() {
   }
   useEffect(() => clearCardIntelTimer, [])
 
+  // Add new brand — LIVE WRITE (published brand page + paid AI), behind a 2-click inline confirmation
+  const [newBrandName, setNewBrandName] = useState('')
+  const [addBrandConfirm, setAddBrandConfirm] = useState(false)
+  const [addBrandRunning, setAddBrandRunning] = useState(false)
+  const [addBrandResult, setAddBrandResult] = useState<{ ok: boolean; text: string } | null>(null)
+  const addBrandTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const clearAddBrandTimer = () => {
+    if (addBrandTimerRef.current) { clearTimeout(addBrandTimerRef.current); addBrandTimerRef.current = null }
+  }
+  useEffect(() => clearAddBrandTimer, [])
+
   const handleSignalsClick = async (count: 5 | 10) => {
     if (signalsRunning) return
 
@@ -772,6 +783,39 @@ export default function CommandCenterV17() {
     } finally {
       setCardIntelRunning(false)
       setCardIntelConfirm(false)
+    }
+  }
+
+  const handleAddBrand = async () => {
+    if (addBrandRunning) return
+    const name = newBrandName.trim()
+    if (name.length < 2) return   // do not arm on empty/too-short
+    if (!addBrandConfirm) {
+      clearAddBrandTimer()
+      setAddBrandConfirm(true)
+      addBrandTimerRef.current = setTimeout(() => setAddBrandConfirm(false), 4000)
+      return
+    }
+    clearAddBrandTimer()
+    setAddBrandRunning(true)
+    try {
+      const res = await fetch('/api/admin/luxai/add-brand', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brand_name: name }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (res.ok && body?.success) {
+        setAddBrandResult({ ok: true, text: body.message || 'Brand created' })
+        setNewBrandName('')
+      } else {
+        setAddBrandResult({ ok: false, text: body?.message || 'Add brand failed' })
+      }
+    } catch {
+      setAddBrandResult({ ok: false, text: 'Add brand failed' })
+    } finally {
+      setAddBrandRunning(false)
+      setAddBrandConfirm(false)
     }
   }
 
@@ -1471,6 +1515,47 @@ export default function CommandCenterV17() {
           {cardIntelResult && (
             <span style={{ fontSize: 11, color: cardIntelResult.ok ? '#16a34a' : '#b91c1c' }}>
               {cardIntelResult.text}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Block — Add new brand (live publish + paid AI) */}
+      <div className="v17-block">
+        <div className="v17-block-head">
+          <span className="v17-dot purple" />
+          <span className="v17-block-title">Add new brand</span>
+          <span className="v17-tag">AI · live publish</span>
+        </div>
+        <div className="v17-block-desc">
+          Creates a published brand page and generates its content with AI. Goes live immediately — not a queue draft.
+        </div>
+        <div className="v17-action-row">
+          <input
+            type="text"
+            className="v17-select"
+            placeholder="New brand name…"
+            value={newBrandName}
+            onChange={(e) => { setNewBrandName(e.target.value); if (addBrandConfirm) { clearAddBrandTimer(); setAddBrandConfirm(false) } }}
+            disabled={addBrandRunning}
+            style={{ minWidth: 180 }}
+          />
+          <button
+            type="button"
+            className="v17-btn-secondary"
+            onClick={handleAddBrand}
+            disabled={addBrandRunning || newBrandName.trim().length < 2}
+            style={addBrandConfirm ? { color: '#b45309', borderColor: '#b45309' } : undefined}
+          >
+            {addBrandRunning
+              ? 'Creating…'
+              : addBrandConfirm
+                ? '⚠ Publishes a live brand page — click again'
+                : '+ Add new brand'}
+          </button>
+          {addBrandResult && (
+            <span style={{ fontSize: 11, color: addBrandResult.ok ? '#16a34a' : '#b91c1c' }}>
+              {addBrandResult.text}
             </span>
           )}
         </div>
