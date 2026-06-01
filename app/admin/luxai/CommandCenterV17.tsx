@@ -415,6 +415,35 @@ export default function CommandCenterV17() {
   const [invLoading, setInvLoading] = useState(true)
   const [invError, setInvError] = useState(false)
 
+  // Operations — only the "Generate article" action is wired
+  const [articleTopic, setArticleTopic] = useState('career-trends')
+  const [articleRunning, setArticleRunning] = useState(false)
+  const [articleResult, setArticleResult] = useState<{ ok: boolean; text: string } | null>(null)
+
+  const handleGenerateArticle = async () => {
+    if (articleRunning) return
+    setArticleRunning(true)
+    try {
+      const res = await fetch('/api/luxai/generate-article', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic: articleTopic }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (body?.skipped) {
+        setArticleResult({ ok: true, text: 'Skipped — duplicate already in queue' })
+      } else if (res.ok && body?.success) {
+        setArticleResult({ ok: true, text: body.message || 'Article queued for review' })
+      } else {
+        setArticleResult({ ok: false, text: body?.message || 'Generation failed' })
+      }
+    } catch {
+      setArticleResult({ ok: false, text: 'Generation failed' })
+    } finally {
+      setArticleRunning(false)
+    }
+  }
+
   useEffect(() => {
     let cancelled = false
     fetch('/api/admin/luxai/inventory')
@@ -569,14 +598,30 @@ export default function CommandCenterV17() {
           <span className="v17-not-connected">Not connected yet</span>
         </div>
         <div className="v17-action-row">
-          <select className="v17-select" disabled defaultValue="">
-            <option value="">Career trends</option>
-            <option>Brand analysis</option>
-            <option>Market insights</option>
-            <option>Hiring strategy</option>
+          <select
+            className="v17-select"
+            value={articleTopic}
+            onChange={(e) => setArticleTopic(e.target.value)}
+            disabled={articleRunning}
+          >
+            <option value="career-trends">Career trends</option>
+            <option value="brand-analysis">Brand analysis</option>
+            <option value="market-insights">Market insights</option>
+            <option value="hiring-strategy">Hiring strategy</option>
           </select>
-          <button type="button" className="v17-btn-secondary" disabled>Generate article</button>
-          <span className="v17-not-connected">Not connected yet</span>
+          <button
+            type="button"
+            className="v17-btn-secondary"
+            onClick={handleGenerateArticle}
+            disabled={articleRunning}
+          >
+            {articleRunning ? 'Generating…' : 'Generate article'}
+          </button>
+          {articleResult && (
+            <span style={{ fontSize: 11, color: articleResult.ok ? '#16a34a' : '#b91c1c' }}>
+              {articleResult.text}
+            </span>
+          )}
         </div>
         <div className="v17-action-row">
           <select className="v17-select" disabled defaultValue="">
