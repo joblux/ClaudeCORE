@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -8,6 +10,12 @@ const supabase = createClient(
 
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession(authOptions)
+    const role = (session?.user as { role?: string } | undefined)?.role
+    if (role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { brand_name } = await request.json()
     if (!brand_name || brand_name.trim().length < 2) {
       return NextResponse.json({ success: false, message: 'Brand name required (min 2 characters)' }, { status: 400 })
