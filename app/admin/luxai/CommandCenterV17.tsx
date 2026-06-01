@@ -424,6 +424,10 @@ export default function CommandCenterV17() {
   const [reportRunning, setReportRunning] = useState(false)
   const [reportResult, setReportResult] = useState<{ ok: boolean; text: string } | null>(null)
 
+  const [eventSector, setEventSector] = useState('')
+  const [eventsRunning, setEventsRunning] = useState(false)
+  const [eventsResult, setEventsResult] = useState<{ ok: boolean; text: string } | null>(null)
+
   const handleGenerateArticle = async () => {
     if (articleRunning) return
     setArticleRunning(true)
@@ -469,6 +473,30 @@ export default function CommandCenterV17() {
       setReportResult({ ok: false, text: 'Generation failed' })
     } finally {
       setReportRunning(false)
+    }
+  }
+
+  const handleGenerateEvents = async () => {
+    if (eventsRunning) return
+    setEventsRunning(true)
+    try {
+      const res = await fetch('/api/luxai/generate-events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count: 10, ...(eventSector ? { sector: eventSector } : {}) }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (body?.skipped) {
+        setEventsResult({ ok: true, text: 'Skipped — duplicate already in queue' })
+      } else if (res.ok && body?.success) {
+        setEventsResult({ ok: true, text: body.message || 'Events queued for review' })
+      } else {
+        setEventsResult({ ok: false, text: body?.message || 'Generation failed' })
+      }
+    } catch {
+      setEventsResult({ ok: false, text: 'Generation failed' })
+    } finally {
+      setEventsRunning(false)
     }
   }
 
@@ -652,15 +680,31 @@ export default function CommandCenterV17() {
           )}
         </div>
         <div className="v17-action-row">
-          <select className="v17-select" disabled defaultValue="">
+          <select
+            className="v17-select"
+            value={eventSector}
+            onChange={(e) => setEventSector(e.target.value)}
+            disabled={eventsRunning}
+          >
             <option value="">All sectors</option>
-            <option>Fashion</option>
-            <option>Watches &amp; Jewellery</option>
-            <option>Hospitality</option>
-            <option>Beauty</option>
+            <option value="Fashion">Fashion</option>
+            <option value="Watches &amp; Jewellery">Watches &amp; Jewellery</option>
+            <option value="Hospitality">Hospitality</option>
+            <option value="Beauty">Beauty</option>
           </select>
-          <button type="button" className="v17-btn-secondary" disabled>Generate events</button>
-          <span className="v17-not-connected">Not connected yet</span>
+          <button
+            type="button"
+            className="v17-btn-secondary"
+            onClick={handleGenerateEvents}
+            disabled={eventsRunning}
+          >
+            {eventsRunning ? 'Generating…' : 'Generate events'}
+          </button>
+          {eventsResult && (
+            <span style={{ fontSize: 11, color: eventsResult.ok ? '#16a34a' : '#b91c1c' }}>
+              {eventsResult.text}
+            </span>
+          )}
         </div>
         <div className="v17-action-row">
           <select
