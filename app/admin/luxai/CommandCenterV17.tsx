@@ -50,6 +50,22 @@ type SignalRow = {
   created_at: string | null
 }
 
+type EventRow = {
+  id: string
+  name: string | null
+  title: string | null
+  slug: string | null
+  sector: string | null
+  location_city: string | null
+  location_country: string | null
+  start_date: string | null
+  end_date: string | null
+  type: string | null
+  is_published: boolean
+  is_featured: boolean
+  created_at: string | null
+}
+
 // Types where an editorial queue does not structurally apply (presentation only)
 const NO_QUEUE_TYPES = new Set(['brands', 'salary', 'interviews'])
 
@@ -450,6 +466,11 @@ export default function CommandCenterV17() {
   const [signalsListError, setSignalsListError] = useState(false)
   const [signalsListLoaded, setSignalsListLoaded] = useState(false)
 
+  const [eventsList, setEventsList] = useState<EventRow[]>([])
+  const [eventsListLoading, setEventsListLoading] = useState(false)
+  const [eventsListError, setEventsListError] = useState(false)
+  const [eventsListLoaded, setEventsListLoaded] = useState(false)
+
   // Operations — only the "Generate article" action is wired
   const [articleTopic, setArticleTopic] = useState('career-trends')
   const [articleRunning, setArticleRunning] = useState(false)
@@ -732,6 +753,32 @@ export default function CommandCenterV17() {
     }
   }, [activeTab, signalsListLoaded])
 
+  useEffect(() => {
+    if (activeTab !== 'events' || eventsListLoaded) return
+    let cancelled = false
+    setEventsListLoading(true)
+    fetch('/api/admin/events')
+      .then((r) => {
+        if (!r.ok) throw new Error(`status ${r.status}`)
+        return r.json()
+      })
+      .then((data) => {
+        if (cancelled) return
+        setEventsList(Array.isArray(data?.events) ? data.events : [])
+        setEventsListLoading(false)
+        setEventsListLoaded(true)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setEventsListError(true)
+        setEventsListLoading(false)
+        setEventsListLoaded(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [activeTab, eventsListLoaded])
+
   const activeLabel = TABS.find((t) => t.id === activeTab)?.label ?? ''
 
   const totals = inventory.reduce(
@@ -857,6 +904,39 @@ export default function CommandCenterV17() {
                 <td>{row.category ?? '—'}</td>
                 <td>{row.source_name ?? '—'}</td>
                 <td>{formatDate(row.created_at)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
+  const renderEvents = () => {
+    if (eventsListLoading) return <div className="v17-state">Loading…</div>
+    if (eventsListError) return <div className="v17-state error">Failed to load events.</div>
+    if (eventsList.length === 0) return <div className="v17-state">No events.</div>
+
+    return (
+      <div className="v17-table-wrap">
+        <table className="v17-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Sector</th>
+              <th>Location</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {eventsList.map((row) => (
+              <tr key={row.id}>
+                <td>{row.name ?? row.title ?? '—'}</td>
+                <td>{row.is_published ? 'Live' : 'Draft'}</td>
+                <td>{row.sector ?? '—'}</td>
+                <td>{[row.location_city, row.location_country].filter(Boolean).join(', ') || '—'}</td>
+                <td>{formatDate(row.start_date)}</td>
               </tr>
             ))}
           </tbody>
@@ -1180,6 +1260,8 @@ export default function CommandCenterV17() {
             renderQueue()
           ) : activeTab === 'signals' ? (
             renderSignals()
+          ) : activeTab === 'events' ? (
+            renderEvents()
           ) : (
             <h1 className="v17-pane-heading">{activeLabel}</h1>
           )}
