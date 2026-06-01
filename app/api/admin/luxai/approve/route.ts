@@ -8,6 +8,15 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+// Tiny inline slugify — lowercase, trim, collapse non-alphanumeric runs to '-', strip edge '-'.
+function slugify(input: string): string {
+  return (input || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -141,8 +150,22 @@ export async function POST(req: NextRequest) {
       destinationTable = 'signals'
       destinationId = data?.id
     } else if (item.content_type === 'event') {
+      // events.slug is NOT-NULL. Use rc.slug as-is when present; otherwise slugify rc.name
+      // and ensure uniqueness with a single existence check (suffix once if taken — no loop).
+      let eventSlug: string
+      if (rc.slug) {
+        eventSlug = rc.slug
+      } else {
+        const base = slugify(rc.name)
+        const { data: existingEvent } = await supabase
+          .from('events')
+          .select('id')
+          .eq('slug', base)
+          .maybeSingle()
+        eventSlug = existingEvent ? `${base}-${Date.now().toString(36).slice(-4)}` : base
+      }
       // Pull each key from raw_content when present; omit keys absent from raw_content.
-      const eventRow: Record<string, any> = { is_published: true, slug: rc.slug ?? null }
+      const eventRow: Record<string, any> = { is_published: true, slug: eventSlug }
       for (const k of [
         'name', 'start_date', 'end_date', 'location_city', 'location_country',
         'sector', 'description', 'long_description', 'highlights', 'brands_present',
@@ -163,6 +186,16 @@ export async function POST(req: NextRequest) {
       destinationTable = 'events'
       destinationId = data?.id
     } else if (item.content_type === 'article') {
+      // Stale-twin guard: reject if an article with this slug is already published.
+      // No auto-suffix — rejection is intentional. No-orphan: queue row left untouched.
+      const { data: existingArticle } = await supabase
+        .from('bloglux_articles')
+        .select('id')
+        .eq('slug', pc.slug)
+        .maybeSingle()
+      if (existingArticle) {
+        return NextResponse.json({ error: 'Article already published (slug exists)' }, { status: 409 })
+      }
       const { data, error } = await supabase
         .from('bloglux_articles')
         .insert({
