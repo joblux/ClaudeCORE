@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const TABS = [
   { id: 'overview', label: 'Overview' },
@@ -431,6 +431,61 @@ export default function CommandCenterV17() {
   const [rssEventsRunning, setRssEventsRunning] = useState(false)
   const [rssEventsResult, setRssEventsResult] = useState<{ ok: boolean; text: string } | null>(null)
 
+  // Generate signals — AUTO-PUBLISHES live, behind a 2-click inline confirmation
+  const [signalsConfirm, setSignalsConfirm] = useState<null | 5 | 10>(null)
+  const [signalsRunning, setSignalsRunning] = useState(false)
+  const [signalsResult, setSignalsResult] = useState<{ ok: boolean; text: string } | null>(null)
+  const signalsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const clearSignalsTimer = () => {
+    if (signalsTimerRef.current) {
+      clearTimeout(signalsTimerRef.current)
+      signalsTimerRef.current = null
+    }
+  }
+
+  useEffect(() => clearSignalsTimer, [])
+
+  const handleSignalsClick = async (count: 5 | 10) => {
+    if (signalsRunning) return
+
+    // First click (or re-arm to the other count): arm, no API call.
+    if (signalsConfirm !== count) {
+      clearSignalsTimer()
+      setSignalsConfirm(count)
+      signalsTimerRef.current = setTimeout(() => setSignalsConfirm(null), 4000)
+      return
+    }
+
+    // Second click on the same armed button within the window: fire.
+    // Keep signalsConfirm set through the run so the armed button shows "Generating…".
+    clearSignalsTimer()
+    setSignalsRunning(true)
+    try {
+      const res = await fetch('/api/luxai/generate-signals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (res.ok && body?.success) {
+        setSignalsResult({
+          ok: true,
+          text:
+            body.message ||
+            `${body.data?.count ?? 0} signals generated, ${body.data?.auto_approved ?? 0} auto-published live`,
+        })
+      } else {
+        setSignalsResult({ ok: false, text: body?.message || 'Generation failed' })
+      }
+    } catch {
+      setSignalsResult({ ok: false, text: 'Generation failed' })
+    } finally {
+      setSignalsRunning(false)
+      setSignalsConfirm(null)
+    }
+  }
+
   const handleGenerateArticle = async () => {
     if (articleRunning) return
     setArticleRunning(true)
@@ -685,10 +740,33 @@ export default function CommandCenterV17() {
           Creates AI-generated drafts into the review queue. Review before publishing.
         </div>
         <div className="v17-action-row">
-          <button type="button" className="v17-btn-secondary" disabled>Generate 5</button>
-          <button type="button" className="v17-btn-secondary" disabled>Generate 10</button>
+          {([5, 10] as const).map((count) => {
+            const armed = signalsConfirm === count
+            return (
+              <button
+                key={count}
+                type="button"
+                className="v17-btn-secondary"
+                onClick={() => handleSignalsClick(count)}
+                disabled={signalsRunning}
+                style={armed ? { color: '#b45309', borderColor: '#b45309' } : undefined}
+              >
+                {signalsRunning && armed
+                  ? 'Generating…'
+                  : armed
+                    ? '⚠ Publishes live — click again'
+                    : `Generate ${count}`}
+              </button>
+            )
+          })}
           <span className="v17-hint">signals</span>
-          <span className="v17-not-connected">Not connected yet</span>
+          {signalsResult ? (
+            <span style={{ fontSize: 11, color: signalsResult.ok ? '#16a34a' : '#b91c1c' }}>
+              {signalsResult.text}
+            </span>
+          ) : (
+            <span className="v17-not-connected">Not connected yet</span>
+          )}
         </div>
         <div className="v17-action-row">
           <select
