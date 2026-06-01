@@ -295,6 +295,117 @@ const STYLE = `
   .v17-table tbody tr:last-child td { border-bottom: none; }
   .v17-table tbody tr:hover td { background: #fafafa; }
   .v17-num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Operations pane */
+  .v17-warn-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: #fffbe6;
+    border: 1px solid #f0e6a6;
+    color: #7a6818;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+  }
+  .v17-warn-icon { font-size: 13px; line-height: 1.4; }
+  .v17-warn-title { font-size: 12px; font-weight: 600; }
+  .v17-warn-body { font-size: 11px; margin-top: 2px; }
+  .v17-panel-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .v17-panel {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .v17-panel-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #aaa;
+    font-weight: 600;
+  }
+  .v17-panel-body { font-size: 12px; color: #999; margin-top: 8px; }
+  .v17-section-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #aaa;
+    font-weight: 600;
+    margin-top: 22px;
+    margin-bottom: 10px;
+  }
+  .v17-block {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .v17-block-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .v17-block-title { font-size: 13px; font-weight: 600; color: #111; }
+  .v17-tag {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #f5f5f5;
+    border: 1px solid #e8e8e8;
+    color: #888;
+  }
+  .v17-block-desc { font-size: 12px; color: #999; margin-bottom: 12px; }
+  .v17-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .v17-not-connected {
+    font-size: 10px;
+    font-style: italic;
+    color: #999;
+  }
+  .v17-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .v17-dot.green { background: #22c55e; }
+  .v17-dot.purple { background: #8b5cf6; }
+  .v17-dot.gray { background: #c4c4c4; }
+  .v17-dot.amber { background: #f59e0b; animation: v17-pulse 1.6s ease-in-out infinite; }
+  @keyframes v17-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .35; }
+  }
+  .v17-btn-secondary:disabled,
+  .v17-select:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+  }
+  .v17-select {
+    background: #fff;
+    color: #111;
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-family: inherit;
+  }
+  .v17-hint { font-size: 10px; color: #999; }
 `
 
 export default function CommandCenterV17() {
@@ -393,6 +504,121 @@ export default function CommandCenterV17() {
     )
   }
 
+  const renderOperations = () => (
+    <>
+      <div className="v17-warn-banner">
+        <span className="v17-warn-icon">⚠</span>
+        <div>
+          <div className="v17-warn-title">Autopilot cron not connected</div>
+          <div className="v17-warn-body">
+            Schedules are saved but nothing runs automatically. All imports are currently manual.
+          </div>
+        </div>
+      </div>
+
+      <div className="v17-panel-grid">
+        <div className="v17-panel">
+          <div className="v17-panel-head">
+            <span className="v17-dot amber" />
+            <span>Status</span>
+          </div>
+          <div className="v17-panel-body">Not connected yet</div>
+        </div>
+        <div className="v17-panel">
+          <div className="v17-panel-head">
+            <span className="v17-dot green" />
+            <span>RSS sources</span>
+          </div>
+          <div className="v17-panel-body">Not connected yet</div>
+        </div>
+      </div>
+
+      <div className="v17-section-label">Manual actions</div>
+
+      {/* Block A — Import real content */}
+      <div className="v17-block">
+        <div className="v17-block-head">
+          <span className="v17-dot green" />
+          <span className="v17-block-title">Import real content</span>
+          <span className="v17-tag">RSS · sourced</span>
+        </div>
+        <div className="v17-block-desc">
+          Fetches real, verified items from external feeds into the review queue. Not AI-written.
+        </div>
+        <div className="v17-action-row">
+          <button type="button" className="v17-btn-secondary" disabled>↻ Pull RSS signals</button>
+          <button type="button" className="v17-btn-secondary" disabled>↻ Pull RSS events</button>
+          <span className="v17-not-connected">Not connected yet</span>
+        </div>
+      </div>
+
+      {/* Block B — Manufacture with AI */}
+      <div className="v17-block">
+        <div className="v17-block-head">
+          <span className="v17-dot purple" />
+          <span className="v17-block-title">Manufacture with AI</span>
+          <span className="v17-tag">AI · generated</span>
+        </div>
+        <div className="v17-block-desc">
+          Creates AI-generated drafts into the review queue. Review before publishing.
+        </div>
+        <div className="v17-action-row">
+          <button type="button" className="v17-btn-secondary" disabled>Generate 5</button>
+          <button type="button" className="v17-btn-secondary" disabled>Generate 10</button>
+          <span className="v17-hint">signals</span>
+          <span className="v17-not-connected">Not connected yet</span>
+        </div>
+        <div className="v17-action-row">
+          <select className="v17-select" disabled defaultValue="">
+            <option value="">Career trends</option>
+            <option>Brand analysis</option>
+            <option>Market insights</option>
+            <option>Hiring strategy</option>
+          </select>
+          <button type="button" className="v17-btn-secondary" disabled>Generate article</button>
+          <span className="v17-not-connected">Not connected yet</span>
+        </div>
+        <div className="v17-action-row">
+          <select className="v17-select" disabled defaultValue="">
+            <option value="">All sectors</option>
+            <option>Fashion</option>
+            <option>Watches &amp; Jewellery</option>
+            <option>Hospitality</option>
+            <option>Beauty</option>
+          </select>
+          <button type="button" className="v17-btn-secondary" disabled>Generate events</button>
+          <span className="v17-not-connected">Not connected yet</span>
+        </div>
+        <div className="v17-action-row">
+          <select className="v17-select" disabled defaultValue="">
+            <option value="">Salary</option>
+            <option>Hiring</option>
+            <option>Market</option>
+            <option>Career report</option>
+          </select>
+          <button type="button" className="v17-btn-secondary" disabled>Generate report</button>
+          <span className="v17-not-connected">Not connected yet</span>
+        </div>
+      </div>
+
+      {/* Block C — Paused / blocked */}
+      <div className="v17-block">
+        <div className="v17-block-head">
+          <span className="v17-dot gray" />
+          <span className="v17-block-title">Paused / blocked</span>
+        </div>
+        <div className="v17-action-row">
+          <button type="button" className="v17-btn-secondary" disabled>Salary generation</button>
+          <span className="v17-hint">5,697 live benchmarks · generation paused</span>
+        </div>
+        <div className="v17-action-row">
+          <button type="button" className="v17-btn-secondary" disabled>Interview guides</button>
+          <span className="v17-hint">Hydration bug · fix required before use</span>
+        </div>
+      </div>
+    </>
+  )
+
   return (
     <div className="v17-root">
       <style>{STYLE}</style>
@@ -486,6 +712,8 @@ export default function CommandCenterV17() {
         <div className="v17-content">
           {activeTab === 'overview' ? (
             renderOverview()
+          ) : activeTab === 'operations' ? (
+            renderOperations()
           ) : (
             <h1 className="v17-pane-heading">{activeLabel}</h1>
           )}
