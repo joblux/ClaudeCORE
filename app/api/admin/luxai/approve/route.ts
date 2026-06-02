@@ -207,6 +207,9 @@ export async function POST(req: NextRequest) {
           tags: pc.tags,
           slug: pc.slug,
           read_time_minutes: pc.read_time_minutes,
+          cover_image_url: pc.cover_image_url ?? null,
+          photographer_name: pc.photographer_name ?? null,
+          photographer_url: pc.photographer_url ?? null,
           status: 'published',
           published_at: now,
         })
