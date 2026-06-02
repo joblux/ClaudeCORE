@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
+import { generateBrandContent } from '@/lib/luxai/regenerateBrand'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -49,16 +50,10 @@ export async function POST(request: Request) {
     if (error) throw error
 
     // Now trigger AI generation for this brand
-    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://joblux.com'
     let generated = false
     try {
-      const genRes = await fetch(`${baseUrl}/api/luxai/regenerate-wikilux`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: 'single', brand_slug: slug })
-      })
-      const genData = await genRes.json()
-      generated = genData.success === true
+      await generateBrandContent(slug, name, 'approved')
+      generated = true
     } catch (e) {
       console.log(`[LUXAI] Auto-generation failed for ${slug}, brand created as empty draft`)
     }
