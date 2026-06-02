@@ -598,6 +598,19 @@ export default function CommandCenterV17() {
   }
   useEffect(() => clearAddBrandTimer, [])
 
+  // Regenerate brand content — LIVE WRITE (rewrites WikiLux content via paid AI). Single: 2-click confirm. All: typed text gate.
+  const [regenBrand, setRegenBrand] = useState('')
+  const [regenSingleConfirm, setRegenSingleConfirm] = useState(false)
+  const [regenSingleRunning, setRegenSingleRunning] = useState(false)
+  const [regenSingleResult, setRegenSingleResult] = useState<{ ok: boolean; text: string } | null>(null)
+  const regenSingleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const clearRegenSingleTimer = () => { if (regenSingleTimerRef.current) { clearTimeout(regenSingleTimerRef.current); regenSingleTimerRef.current = null } }
+  useEffect(() => clearRegenSingleTimer, [])
+
+  const [regenAllText, setRegenAllText] = useState('')
+  const [regenAllRunning, setRegenAllRunning] = useState(false)
+  const [regenAllResult, setRegenAllResult] = useState<{ ok: boolean; text: string } | null>(null)
+
   const handleSignalsClick = async (count: 5 | 10) => {
     if (signalsRunning) return
 
@@ -850,6 +863,61 @@ export default function CommandCenterV17() {
     } finally {
       setAddBrandRunning(false)
       setAddBrandConfirm(false)
+    }
+  }
+
+  const handleRegenSingle = async () => {
+    if (regenSingleRunning) return
+    if (!regenBrand) return
+    if (!regenSingleConfirm) {
+      clearRegenSingleTimer()
+      setRegenSingleConfirm(true)
+      regenSingleTimerRef.current = setTimeout(() => setRegenSingleConfirm(false), 4000)
+      return
+    }
+    clearRegenSingleTimer()
+    setRegenSingleRunning(true)
+    try {
+      const res = await fetch('/api/luxai/regenerate-wikilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'single', brand_slug: regenBrand }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (res.ok && body?.success) {
+        setRegenSingleResult({ ok: true, text: body.message || 'Brand regenerated' })
+      } else {
+        setRegenSingleResult({ ok: false, text: body?.message || 'Regeneration failed' })
+      }
+    } catch {
+      setRegenSingleResult({ ok: false, text: 'Regeneration failed' })
+    } finally {
+      setRegenSingleRunning(false)
+      setRegenSingleConfirm(false)
+    }
+  }
+
+  const handleRegenAll = async () => {
+    if (regenAllRunning) return
+    if (regenAllText !== 'REGENERATE ALL') return
+    setRegenAllRunning(true)
+    try {
+      const res = await fetch('/api/luxai/regenerate-wikilux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'all' }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (res.ok && body?.success) {
+        setRegenAllResult({ ok: true, text: body.message || 'All brands regenerated' })
+        setRegenAllText('')
+      } else {
+        setRegenAllResult({ ok: false, text: body?.message || 'Regeneration failed' })
+      }
+    } catch {
+      setRegenAllResult({ ok: false, text: 'Regeneration failed' })
+    } finally {
+      setRegenAllRunning(false)
     }
   }
 
@@ -1619,6 +1687,75 @@ export default function CommandCenterV17() {
               {addBrandResult.text}
             </span>
           )}
+        </div>
+      </div>
+
+      {/* Block — Regenerate brand content (AI, live write, not a draft) */}
+      <div className="v17-block">
+        <div className="v17-block-head">
+          <span className="v17-dot purple" />
+          <span className="v17-block-title">Regenerate brand content</span>
+          <span className="v17-tag">AI · live write</span>
+        </div>
+        <div className="v17-block-desc">
+          Re-runs Haiku to rewrite a brand&apos;s WikiLux content. Writes live — not a queue draft. Salary is not affected.
+        </div>
+        <div className="v17-action-row">
+          <select
+            className="v17-select"
+            value={regenBrand}
+            onChange={(e) => { setRegenBrand(e.target.value); if (regenSingleConfirm) { clearRegenSingleTimer(); setRegenSingleConfirm(false) } }}
+            disabled={regenSingleRunning}
+            style={{ minWidth: 180 }}
+          >
+            <option value="">Select brand…</option>
+            {brandsList.map((b) => (
+              <option key={b.slug} value={b.slug}>{b.brand_name ?? b.slug}</option>
+            ))}
+          </select>
+          <button
+            type="button"
+            className="v17-btn-secondary"
+            onClick={handleRegenSingle}
+            disabled={regenSingleRunning || !regenBrand}
+            style={regenSingleConfirm ? { color: '#b45309', borderColor: '#b45309' } : undefined}
+          >
+            {regenSingleRunning
+              ? 'Regenerating…'
+              : regenSingleConfirm
+                ? '⚠ Regenerates this brand live — click again'
+                : 'Regenerate brand'}
+          </button>
+          {regenSingleResult && (
+            <span style={{ fontSize: 11, color: regenSingleResult.ok ? '#16a34a' : '#b91c1c' }}>
+              {regenSingleResult.text}
+            </span>
+          )}
+        </div>
+        <div className="v17-action-row">
+          <input
+            type="text"
+            className="v17-select"
+            placeholder="Type REGENERATE ALL to enable"
+            value={regenAllText}
+            onChange={(e) => setRegenAllText(e.target.value)}
+            disabled={regenAllRunning}
+            style={{ minWidth: 180 }}
+          />
+          <button
+            type="button"
+            className="v17-btn-secondary"
+            onClick={handleRegenAll}
+            disabled={regenAllRunning || regenAllText !== 'REGENERATE ALL'}
+          >
+            {regenAllRunning ? 'Regenerating all…' : 'Regenerate ALL brands'}
+          </button>
+          {regenAllResult && (
+            <span style={{ fontSize: 11, color: regenAllResult.ok ? '#16a34a' : '#b91c1c' }}>
+              {regenAllResult.text}
+            </span>
+          )}
+          <span className="v17-hint">~72 brands · live write · several minutes</span>
         </div>
       </div>
 
