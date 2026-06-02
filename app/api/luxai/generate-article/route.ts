@@ -7,6 +7,7 @@ import {
   queueValidationErrorResponse,
   type LuxaiQueuePayload,
 } from '@/lib/luxai-rules'
+import { fetchAndUpload } from '@/lib/luxai/imageHost'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -148,6 +149,50 @@ RULES:
 
     // Write to content_queue (canonical editorial gate) — not directly to bloglux_articles
     const slug = article.slug || article.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 80)
+
+    // --- Cover hunt (best-effort; never blocks article creation) ---
+    let coverImageUrl: string | null = null
+    let coverPhotographerName: string | null = null
+    let coverPhotographerUrl: string | null = null
+    try {
+      const unsplashKey = process.env.UNSPLASH_ACCESS_KEY
+      if (unsplashKey) {
+        // Query: brand mention → first tag → category/topic
+        const q =
+          (Array.isArray(article.brand_mentions) && article.brand_mentions[0]) ||
+          (Array.isArray(article.tags) && article.tags[0]) ||
+          article.category ||
+          topicDesc
+        const u = await fetch(
+          `https://api.unsplash.com/search/photos?query=${encodeURIComponent(String(q))}&per_page=5&orientation=landscape`,
+          { headers: { Authorization: `Client-ID ${unsplashKey}` } }
+        )
+        if (u.ok) {
+          const ud = await u.json()
+          const results = (ud.results || []) as any[]
+          // Prefer first image >= 1200px wide; fall back to first result
+          const photo = results.find(p => (p?.width || 0) >= 1200) || results[0]
+          if (photo?.urls) {
+            // Right-sized, crop-friendly source; fallbacks preserve durability
+            const src = photo.urls.raw
+              ? `${photo.urls.raw}&w=1600&q=80&fit=crop&fm=jpg`
+              : (photo.urls.full || photo.urls.regular)
+            if (src) {
+              const hosted = await fetchAndUpload(src, `articles/${slug}/cover-${Date.now()}`)
+              coverImageUrl = hosted
+              coverPhotographerName = photo.user?.name ?? null
+              coverPhotographerUrl = photo.user?.links?.html
+                ? `${photo.user.links.html}?utm_source=joblux&utm_medium=referral`
+                : null
+            }
+          }
+        }
+      }
+    } catch (e: any) {
+      console.warn('[cover-hunt] skipped:', e?.message)
+      // swallow — article must still queue without a cover
+    }
+
     const queuePayload: LuxaiQueuePayload = {
       content_type: 'article',
       source_type: 'joblux_generation',
@@ -165,6 +210,9 @@ RULES:
         category: article.category,
         read_time_minutes: article.read_time || 5,
         brand_mentions: article.brand_mentions || [],
+        cover_image_url: coverImageUrl,
+        photographer_name: coverPhotographerName,
+        photographer_url: coverPhotographerUrl,
       },
     }
     const _dupe = await checkLuxaiQueueDuplicate(supabase, queuePayload)
