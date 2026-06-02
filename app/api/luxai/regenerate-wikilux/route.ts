@@ -156,8 +156,7 @@ async function generateBrandContent(slug: string, brandName: string, previousSta
     cost_usd: content.cost,
     status: 'success'
   })
-  
-  try { await fetch(new URL("/api/luxai/regenerate-salary", process.env.NEXT_PUBLIC_SUPABASE_URL ? "https://joblux.com" : "http://localhost:3000").toString(), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug }) }) } catch(e) { console.log("[LUXAI] Salary gen skipped for " + slug) }
+
   return { tokens: content.tokens, cost: content.cost }
 }
 
