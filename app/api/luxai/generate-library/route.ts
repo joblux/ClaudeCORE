@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,6 +10,12 @@ const supabase = createClient(
 
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession(authOptions)
+    const role = (session?.user as { role?: string } | undefined)?.role
+    if (role !== 'admin') {
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+    }
+
     const { slug } = await request.json()
     if (!slug) return NextResponse.json({ success: false, message: 'slug required' }, { status: 400 })
 
