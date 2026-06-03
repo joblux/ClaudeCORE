@@ -1,5 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import {
+  insertLuxaiQueueItem,
+  QueueValidationError,
+  queueValidationErrorResponse,
+  type LuxaiQueuePayload,
+} from '@/lib/luxai-rules'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,6 +16,11 @@ const supabase = createClient(
 
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user || (session.user as any).role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { slug } = await request.json()
     if (!slug) return NextResponse.json({ success: false, message: 'slug required' }, { status: 400 })
     if (!process.env.ANTHROPIC_API_KEY) return NextResponse.json({ success: false, message: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })
@@ -90,32 +103,15 @@ RULES:
       throw new Error(`JSON parse failed: ${e.message}`)
     }
 
-    // 1. Store in wikilux_content.content.salaries (for brand page Salaries tab)
-    const { data: current } = await supabase
-      .from('wikilux_content')
-      .select('content')
-      .eq('slug', slug)
-      .maybeSingle()
-
-    const updatedContent = { ...(current?.content || {}), salaries: salaryData }
-    await supabase.from('wikilux_content')
-      .update({ content: updatedContent, updated_at: new Date().toISOString() })
-      .eq('slug', slug)
-
-    // 2. NORMALIZE: Write to salary_benchmarks table (for standalone Salaries page)
-    // First clear old AI-generated salary data for this brand
-    await supabase.from('salary_benchmarks')
-      .delete()
-      .eq('brand_slug', slug)
-      .eq('source', 'JOBLUX Intelligence')
-
-    // Insert normalized rows
-    let benchmarkCount = 0
+    // QUEUE-ONLY conformance: NO live write at generation. Flatten roles[].cities[]
+    // into records[] (one row per role × city) for the salary_benchmarks insert that
+    // happens ONLY at approval (see approve mapper salary_benchmark branch). The full
+    // salaryData blob is carried VERBATIM as `salaries` so the brand-page Salaries tab
+    // (content.salaries, roles[].cities[]) gets functional parity at approval.
+    const records: any[] = []
     for (const role of (salaryData.roles || [])) {
       for (const city of (role.cities || [])) {
-        const { error: bErr } = await supabase.from('salary_benchmarks').insert({
-          brand_name: brandName,
-          brand_slug: slug,
+        records.push({
           job_title: role.title,
           department: role.department,
           seniority: role.seniority,
@@ -125,26 +121,34 @@ RULES:
           salary_min: city.min,
           salary_max: city.max,
           salary_median: city.median,
-          bonus_min: city.bonus_min,
-          bonus_max: city.bonus_max,
-          total_comp_min: city.min + (city.bonus_min || 0),
-          total_comp_max: city.max + (city.bonus_max || 0),
-          source: 'JOBLUX Intelligence',
-          content_origin: 'ai',
-          confidence: 'ai_estimated',
-          year_of_data: new Date().getFullYear(),
-          notes: `AI-generated salary estimate for ${brandName}`
         })
-        if (!bErr) benchmarkCount++
       }
     }
 
-    // Log to history
+    const queuePayload: LuxaiQueuePayload = {
+      content_type: 'salary_benchmark',
+      source_type: 'joblux_generation',
+      source_name: 'luxai',
+      title: `Salary Intelligence: ${brandName}`,
+      raw_content: { slug, brand_name: brandName, result: salaryData },
+      processed_content: { brand_name: brandName, brand_slug: slug, records, salaries: salaryData },
+      destination_table: 'salary_benchmarks',
+    }
+
+    try {
+      const { error: queueError } = await insertLuxaiQueueItem(supabase, queuePayload)
+      if (queueError) throw queueError
+    } catch (e: any) {
+      if (e instanceof QueueValidationError) return queueValidationErrorResponse(e)
+      throw e
+    }
+
+    // Log to history — now QUEUED for review, not published live.
     await supabase.from('luxai_history').insert({
       type: 'salary_generation',
       model: 'claude-haiku-4-5-20251001',
       prompt: `Generate salary for ${brandName}`,
-      response: { slug, brand_name: brandName, roles: salaryData.roles?.length || 0, benchmarks_written: benchmarkCount },
+      response: { slug, brand_name: brandName, roles: salaryData.roles?.length || 0, records: records.length, queued: true },
       tokens_used: inputTokens + outputTokens,
       cost_usd: cost,
       status: 'success'
@@ -152,8 +156,9 @@ RULES:
 
     return NextResponse.json({
       success: true,
-      message: `Salary data generated for ${brandName}: ${salaryData.roles?.length || 0} roles, ${benchmarkCount} benchmarks written`,
-      data: { roles: salaryData.roles?.length || 0, benchmarks: benchmarkCount, cost, tokens: inputTokens + outputTokens }
+      queued: true,
+      message: `Queued salary draft for ${brandName}: ${salaryData.roles?.length || 0} roles`,
+      data: { roles: salaryData.roles?.length || 0, records: records.length, cost, tokens: inputTokens + outputTokens }
     })
   } catch (error: any) {
     console.error('Salary generation error:', error)
