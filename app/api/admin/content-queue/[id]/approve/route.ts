@@ -171,6 +171,38 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
       return NextResponse.json({ success: false, error: insertError.message }, { status: 500 })
     }
 
+    // Functional parity: the brand-page Salaries tab reads content.salaries (blob,
+    // roles[].cities[]) from wikilux_content. Write the verbatim WikiLux blob here,
+    // AFTER the salary_benchmarks insert and BEFORE marking the queue item published.
+    // Absent pc.salaries (legacy records-only queue items) → skip, do not fail.
+    const salariesBlob = pc.salaries
+    if (salariesBlob && typeof salariesBlob === 'object' && !Array.isArray(salariesBlob)) {
+      const { data: brandRow } = await supabaseAdmin
+        .from('wikilux_content')
+        .select('content')
+        .eq('slug', brand_slug)
+        .maybeSingle()
+
+      const updatedContent = { ...((brandRow?.content as Record<string, any>) || {}), salaries: salariesBlob }
+
+      const { error: wikiError } = await supabaseAdmin
+        .from('wikilux_content')
+        .update({ content: updatedContent, updated_at: now })
+        .eq('slug', brand_slug)
+
+      if (wikiError) {
+        // salary_benchmarks already inserted; queue item NOT yet published → partial write.
+        return NextResponse.json(
+          {
+            success: false,
+            error: wikiError.message,
+            partial_write: `salary_benchmarks inserted (${rows.length}) but wikilux_content.salaries blob failed; queue item left unpublished.`,
+          },
+          { status: 500 }
+        )
+      }
+    }
+
     await supabaseAdmin
       .from('content_queue')
       .update({
