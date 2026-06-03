@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import {
   insertLuxaiQueueItem,
-  checkLuxaiQueueDuplicate,
+  checkLuxaiInterviewDuplicate,
   QueueValidationError,
   queueValidationErrorResponse,
   type LuxaiQueuePayload,
@@ -31,7 +31,7 @@ Return ONLY a JSON array (no markdown, no backticks):
   {
     "job_title": "Boutique Manager",
     "department": "Retail",
-    "seniority": "mid" | "senior" | "executive" | "junior",
+    "seniority": "intern" | "junior" | "mid-level" | "senior" | "director" | "vp" | "c-suite",
     "location": "Paris, France",
     "interview_year": 2025,
     "process_duration": "3 weeks",
@@ -40,8 +40,8 @@ Return ONLY a JSON array (no markdown, no backticks):
     "process_description": "Detailed description of the interview process, 2-3 sentences [max 300 chars]",
     "questions_asked": "Key questions that were asked, separated by semicolons [max 300 chars]",
     "tips": "Advice for candidates, 1-2 sentences [max 200 chars]",
-    "outcome": "accepted" | "rejected" | "withdrew" | "pending",
-    "difficulty": "easy" | "medium" | "hard" | "very_hard",
+    "outcome": "offered" | "rejected" | "withdrew" | "pending" | "prefer_not_to_say",
+    "difficulty": "easy" | "moderate" | "challenging" | "very_challenging",
     "overall_experience": "positive" | "neutral" | "negative"
   }
 ]
@@ -49,7 +49,10 @@ Return ONLY a JSON array (no markdown, no backticks):
 RULES:
 - 5 experience drafts covering different departments and seniority levels
 - Grounded in general luxury industry interview patterns — do not invent brand-specific internal details not publicly known
-- Mix of outcomes: 3 accepted, 1 rejected, 1 withdrew
+- seniority MUST be exactly one of: intern, junior, mid-level, senior, director, vp, c-suite
+- outcome MUST be exactly one of: offered, rejected, withdrew, pending, prefer_not_to_say
+- difficulty MUST be exactly one of: easy, moderate, challenging, very_challenging
+- Mix of outcomes: 3 offered, 1 rejected, 1 withdrew
 - Locations: mix of cities where ${brandName} is known to operate
 - These are AI-generated drafts, not verified candidate testimonials
 - Do not invent specific internal company details, names, or proprietary processes
@@ -57,6 +60,18 @@ RULES:
 - Questions and processes should reflect general luxury industry patterns, not fabricated brand specifics
 - Do not present outcomes, difficulty, or number of rounds as verified facts for the brand unless clearly framed as illustrative draft patterns
 - Output valid JSON array only`
+
+    // Dedup runs once, pre-generation, at the brand level — never per row.
+    // A duplicate short-circuits before the Claude call and before any insert.
+    const dupe = await checkLuxaiInterviewDuplicate(supabase, slug)
+    if (dupe.isDuplicate) {
+      return NextResponse.json({
+        success: false,
+        skipped: true,
+        reason: 'duplicate',
+        match: dupe.match,
+      })
+    }
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -91,51 +106,96 @@ RULES:
       throw new Error(`JSON parse failed: ${e.message}`)
     }
 
-    // Route to content_queue (canonical editorial gate) — one record per brand, containing all draft interviews
-    const queuePayload: LuxaiQueuePayload = {
-      content_type: 'interview',
-      source_type: 'joblux_generation',
-      source_name: 'JOBLUX Intelligence',
-      title: `Interview Experience Drafts — ${brandName}`,
-      category: 'Interview Experience',
-      destination_table: 'interview_experiences',
-      processed_content: {
-        brand_slug: slug,
-        brand_name: brandName,
-        interviews,
-      },
-    }
+    // Local canonical enum guard — reject (skip), never auto-correct. Defensive
+    // normalization belongs in the mapper (Step 4), not here.
+    const DIFFICULTY = ['easy', 'moderate', 'challenging', 'very_challenging']
+    const OUTCOME = ['offered', 'rejected', 'withdrew', 'pending', 'prefer_not_to_say']
+    const SENIORITY = ['intern', 'junior', 'mid-level', 'senior', 'director', 'vp', 'c-suite']
 
-    // Interview dedup is a temporary brand_slug-broad safeguard — see
-    // checkLuxaiInterviewDuplicate in lib/luxai-rules.ts.
-    const dupe = await checkLuxaiQueueDuplicate(supabase, queuePayload)
-    if (dupe.isDuplicate) {
-      return NextResponse.json({
-        success: false,
-        skipped: true,
-        reason: 'duplicate',
-        match: dupe.match,
-      })
-    }
+    const errors: string[] = []
+    let insertedCount = 0
 
-    const { error: queueError } = await insertLuxaiQueueItem(supabase, queuePayload)
-    if (queueError) throw queueError
+    // Option B: one queue row per interview. Each row is independently guarded,
+    // titled from its own job_title, and inserted; failures are recorded and the
+    // loop continues.
+    for (let i = 0; i < interviews.length; i++) {
+      const interview = interviews[i]
+      const rowNum = i + 1
+
+      if (interview.difficulty && !DIFFICULTY.includes(interview.difficulty)) {
+        errors.push(`row ${rowNum}: non-canonical difficulty "${interview.difficulty}"`)
+        continue
+      }
+      if (interview.outcome && !OUTCOME.includes(interview.outcome)) {
+        errors.push(`row ${rowNum}: non-canonical outcome "${interview.outcome}"`)
+        continue
+      }
+      if (interview.seniority && !SENIORITY.includes(interview.seniority)) {
+        errors.push(`row ${rowNum}: non-canonical seniority "${interview.seniority}"`)
+        continue
+      }
+
+      const jobTitle = interview.job_title
+      const payload: LuxaiQueuePayload = {
+        content_type: 'interview',
+        source_type: 'joblux_generation',
+        source_name: 'JOBLUX Intelligence',
+        title: jobTitle
+          ? `${jobTitle} interview — ${brandName}`
+          : `Interview experience — ${brandName}`,
+        category: 'Interview Experience',
+        destination_table: 'interview_experiences',
+        processed_content: {
+          brand_slug: slug,
+          brand_name: brandName,
+          interview,
+        },
+      }
+
+      try {
+        const { error: queueError } = await insertLuxaiQueueItem(supabase, payload)
+        if (queueError) {
+          errors.push(`row ${rowNum}: insert failed — ${queueError.message}`)
+          continue
+        }
+        insertedCount++
+      } catch (e: any) {
+        errors.push(`row ${rowNum}: insert failed — ${e.message}`)
+        continue
+      }
+    }
 
     await supabase.from('luxai_history').insert({
       type: 'interview_generation',
       model: 'claude-haiku-4-5-20251001',
       prompt: `Generate interviews for ${brandName}`,
-      response: { slug, brand_name: brandName, count: interviews.length },
+      response: { slug, brand_name: brandName, count: insertedCount },
       tokens_used: inputTokens + outputTokens,
       cost_usd: cost,
       status: 'success'
     })
 
+    const resultData = { count: insertedCount, errors: errors.length, cost, tokens: inputTokens + outputTokens }
+
+    if (insertedCount === 5) {
+      return NextResponse.json({
+        success: true,
+        message: `5 interview drafts queued for ${brandName}`,
+        data: resultData,
+      })
+    }
+    if (insertedCount > 0) {
+      return NextResponse.json({
+        success: true,
+        message: `PARTIAL: ${insertedCount}/5 interview drafts queued for ${brandName}`,
+        data: resultData,
+      })
+    }
     return NextResponse.json({
-      success: true,
-      message: `${interviews.length} interview experience drafts queued for ${brandName}`,
-      data: { count: interviews.length, cost, tokens: inputTokens + outputTokens }
-    })
+      success: false,
+      message: `No interview drafts queued for ${brandName}`,
+      data: resultData,
+    }, { status: 500 })
   } catch (error: any) {
     if (error instanceof QueueValidationError) {
       return queueValidationErrorResponse(error)
