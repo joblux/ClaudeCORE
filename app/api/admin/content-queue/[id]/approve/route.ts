@@ -183,6 +183,140 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ success: true, inserted: rows.length })
   }
 
+  if (record.content_type === 'interview') {
+    // Generator emits a single processed_content.interview object (since a2f5dd3).
+    // Legacy batch shape (processed_content.interviews[]) is not supported here.
+    const iv = (pc.interview || null) as Record<string, any> | null
+    if (!iv || typeof iv !== 'object' || Array.isArray(iv)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Cannot publish interview: processed_content.interview missing (legacy batch shape not supported).',
+        },
+        { status: 400 }
+      )
+    }
+
+    // NOT-NULL pre-checks — fail before any insert or status mutation.
+    if (!iv.job_title) {
+      return NextResponse.json(
+        { success: false, error: 'Cannot publish interview: job_title required.' },
+        { status: 400 }
+      )
+    }
+    if (!iv.process_description) {
+      return NextResponse.json(
+        { success: false, error: 'Cannot publish interview: process_description required.' },
+        { status: 400 }
+      )
+    }
+
+    // Strict enum normalize — null passes (nullable cols), canonical passes,
+    // known aliases map, anything else throws. No silent default.
+    const normEnum = (
+      field: string,
+      value: any,
+      aliasMap: Record<string, string>,
+      canonical: string[]
+    ): string | null => {
+      if (value == null) return null
+      if (canonical.includes(value)) return value
+      if (aliasMap[value]) return aliasMap[value]
+      throw { field, value }
+    }
+
+    let normDifficulty: string | null
+    let normOutcome: string | null
+    let normSeniority: string | null
+    let normOverall: string | null
+    try {
+      normDifficulty = normEnum(
+        'difficulty',
+        iv.difficulty,
+        { medium: 'moderate', hard: 'challenging', very_hard: 'very_challenging' },
+        ['easy', 'moderate', 'challenging', 'very_challenging']
+      )
+      normOutcome = normEnum(
+        'outcome',
+        iv.outcome,
+        { accepted: 'offered' },
+        ['offered', 'rejected', 'withdrew', 'pending', 'prefer_not_to_say']
+      )
+      normSeniority = normEnum(
+        'seniority',
+        iv.seniority,
+        { mid: 'mid-level', executive: 'c-suite' },
+        ['intern', 'junior', 'mid-level', 'senior', 'director', 'vp', 'c-suite']
+      )
+      normOverall = normEnum(
+        'overall_experience',
+        iv.overall_experience,
+        {},
+        ['positive', 'neutral', 'negative']
+      )
+    } catch (e: any) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Cannot publish interview: unmappable ${e.field}="${e.value}". Edit queue item first.`,
+        },
+        { status: 400 }
+      )
+    }
+
+    // brand_slug/brand_name are nullable — warn, do not block.
+    const warnings: string[] = []
+    if (!pc.brand_slug) warnings.push('missing brand_slug')
+    if (!pc.brand_name) warnings.push('missing brand_name')
+    if (warnings.length) console.warn(`Interview publish warnings (${params.id}):`, warnings.join(', '))
+
+    const { data: newRow, error: insertError } = await supabaseAdmin
+      .from('interview_experiences')
+      .insert({
+        contribution_id: null,
+        job_title: iv.job_title,
+        process_description: iv.process_description,
+        department: iv.department ?? null,
+        seniority: normSeniority,
+        location: iv.location ?? null,
+        interview_year: iv.interview_year ?? null,
+        process_duration: iv.process_duration ?? null,
+        number_of_rounds: iv.number_of_rounds ?? null,
+        interview_format: iv.interview_format ?? null,
+        questions_asked: iv.questions_asked ?? null,
+        tips: iv.tips ?? null,
+        outcome: normOutcome,
+        difficulty: normDifficulty,
+        overall_experience: normOverall,
+        brand_slug: pc.brand_slug ?? null,
+        brand_name: pc.brand_name ?? null,
+        content_origin: 'luxai',
+      })
+      .select('id')
+      .maybeSingle()
+
+    if (insertError) {
+      return NextResponse.json({ success: false, error: insertError.message }, { status: 500 })
+    }
+
+    await supabaseAdmin
+      .from('content_queue')
+      .update({
+        status: 'published',
+        reviewed_at: now,
+        destination_table: 'interview_experiences',
+        destination_id: newRow?.id || null,
+      })
+      .eq('id', params.id)
+
+    return NextResponse.json({
+      success: true,
+      published: true,
+      destination_id: newRow?.id || null,
+      ...(warnings.length ? { warnings } : {}),
+    })
+  }
+
   if (record.content_type !== 'signal' && record.content_type !== 'event') {
     const { error } = await supabaseAdmin
       .from('content_queue')
