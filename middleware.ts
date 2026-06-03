@@ -122,6 +122,14 @@ export default withAuth(
       }
     }
 
+    // API admin gate — /api/admin/* is NOT covered by PROTECTED_SURFACES (page redirects).
+    // API calls must get 401 JSON, never a redirect.
+    if (pathname.startsWith('/api/admin/')) {
+      if (!token || (token.role as string | undefined) !== 'admin') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+    }
+
     // Check maintenance bypass paths
     if (!MAINTENANCE_BYPASS.some((p) => pathname.startsWith(p))) {
       const isMaintenanceOn = await getMaintenanceMode();

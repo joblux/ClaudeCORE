@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -21,6 +23,11 @@ async function ensureBucket() {
 
 // GET | list photos for a hotel
 export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if ((session?.user as { role?: string } | undefined)?.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const hotelId = req.nextUrl.searchParams.get('hotel_id')
   if (!hotelId) return NextResponse.json({ error: 'hotel_id required' }, { status: 400 })
 
@@ -36,6 +43,11 @@ export async function GET(req: NextRequest) {
 
 // POST | upload photos (multipart form)
 export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if ((session?.user as { role?: string } | undefined)?.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   await ensureBucket()
 
   const formData = await req.formData()
@@ -118,6 +130,11 @@ export async function POST(req: NextRequest) {
 
 // PATCH | update a photo (caption, credit, is_cover)
 export async function PATCH(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if ((session?.user as { role?: string } | undefined)?.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const body = await req.json()
   const { id, caption, credit, alt, is_cover } = body
 
@@ -158,6 +175,11 @@ export async function PATCH(req: NextRequest) {
 
 // DELETE | remove a photo
 export async function DELETE(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if ((session?.user as { role?: string } | undefined)?.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { id } = await req.json()
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
 

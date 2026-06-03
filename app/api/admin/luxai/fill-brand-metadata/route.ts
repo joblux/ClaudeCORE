@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 
@@ -137,6 +139,11 @@ Return only the JSON object.`
 }
 
 export async function GET() {
+  const session = await getServerSession(authOptions)
+  if ((session?.user as { role?: string } | undefined)?.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { count, error } = await supabase
       .from('wikilux_content')
@@ -153,6 +160,11 @@ export async function GET() {
 }
 
 export async function POST() {
+  const session = await getServerSession(authOptions)
+  if ((session?.user as { role?: string } | undefined)?.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { data: rows, error } = await supabase
       .from('wikilux_content')

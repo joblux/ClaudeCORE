@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -9,6 +11,11 @@ const supabase = createClient(
 )
 
 export async function GET() {
+  const session = await getServerSession(authOptions)
+  if ((session?.user as { role?: string } | undefined)?.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { data } = await supabase
       .from('luxai_settings')
@@ -26,6 +33,11 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if ((session?.user as { role?: string } | undefined)?.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const body = await req.json()
     

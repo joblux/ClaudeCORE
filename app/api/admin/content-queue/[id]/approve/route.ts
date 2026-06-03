@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
 import { checkDuplicate, DuplicateCheckPayload } from '@/lib/duplicate-check'
 
@@ -8,6 +10,11 @@ const supabaseAdmin = createClient(
 )
 
 export async function POST(_req: Request, { params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions)
+  if ((session?.user as { role?: string } | undefined)?.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const now = new Date().toISOString()
 
   const { data: record, error: fetchError } = await supabaseAdmin

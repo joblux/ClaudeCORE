@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 
@@ -120,6 +122,11 @@ async function findNextTargetSlug(): Promise<string | null> {
 }
 
 export async function GET() {
+  const session = await getServerSession(authOptions)
+  if ((session?.user as { role?: string } | undefined)?.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     let remaining = 0
     for (const slug of TARGET_BRANDS) {
@@ -132,6 +139,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const session = await getServerSession(authOptions)
+  if ((session?.user as { role?: string } | undefined)?.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     let body: any = {}
     try { body = await request.json() } catch { /* no body */ }
