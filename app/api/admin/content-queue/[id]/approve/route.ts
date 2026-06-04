@@ -27,6 +27,22 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ success: false, error: fetchError?.message || 'Record not found' }, { status: 500 })
   }
 
+  // Doctrine enforcement: UI flag alone is not enough; forbidden AI families must not publish.
+  if (
+    record.source_type === 'joblux_generation' &&
+    ['article', 'event', 'salary_benchmark', 'interview'].includes(record.content_type)
+  ) {
+    return NextResponse.json(
+      {
+        success: false,
+        blocked: true,
+        reason: 'Approval blocked: forbidden AI family (doctrine §218 — content_origin ai/luxai not allowed for article/event/salary_benchmark/interview).',
+        content_type: record.content_type,
+      },
+      { status: 403 }
+    )
+  }
+
   const pc = (record.processed_content || {}) as Record<string, any>
 
   let dupePayload: DuplicateCheckPayload | null = null
