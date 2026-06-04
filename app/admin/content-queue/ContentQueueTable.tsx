@@ -132,6 +132,11 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
     if (counts[r.status] !== undefined) counts[r.status]++
   }
 
+  // Status column only carries signal when status varies. In the Draft
+  // view every row is a draft, so the column is pure noise — drop it and
+  // give the width back to Item. Non-draft filters keep it.
+  const showStatus = statusFilter !== 'draft'
+
   // Filter, then sort flagged-first then newest-first
   const filteredRows = rows.filter(r => r.status === statusFilter)
   const sortedRows = [...filteredRows].sort((a, b) => {
@@ -234,14 +239,16 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
         </p>
       ) : (
       <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, tableLayout: 'fixed' }}>
         <thead>
           <tr style={{ borderBottom: '2px solid #111' }}>
-            {['Family', 'Type', 'Title', 'Source', 'Source Name', 'Status', 'Created', 'Actions'].map(h => (
-              <th key={h} style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888' }}>
-                {h}
-              </th>
-            ))}
+            <th style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888' }}>Item</th>
+            <th style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', width: 130 }}>Source</th>
+            <th style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', width: 90 }}>Created</th>
+            {showStatus && (
+              <th style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', width: 110 }}>Status</th>
+            )}
+            <th style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', width: 150 }}>Decision</th>
           </tr>
         </thead>
         <tbody>
@@ -268,18 +275,11 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                   onClick={() => { if (!isEditing) setExpandedId(isExpanded ? null : item.id) }}
                   style={{ borderBottom: isExpanded ? 'none' : '1px solid #e8e8e8', cursor: 'pointer' }}
                 >
-                  <td style={{ padding: '12px', borderLeft: `3px solid ${stripeColor}` }}>
-                    <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 3, background: '#e8e8e8', color: '#888' }}>
-                      {item.content_type}
-                    </span>
-                  </td>
-                  <td style={{ padding: '12px' }}>
+                  <td style={{ padding: '12px', borderLeft: `3px solid ${stripeColor}`, verticalAlign: 'top' }} onClick={e => { if (isEditing) e.stopPropagation() }}>
                     {(() => {
-                      // Type = meaningful subtype within the family.
-                      // NEVER falls back to content_type (the Family
-                      // column already shows that). Different content
-                      // families store their subtype in different
-                      // fields, so derive per family.
+                      // Merged Family · Subtype pill (single inline chip above
+                      // the title). Subtype reuses the per-family derivation;
+                      // when absent, show the family alone — never "· —".
                       const pc = (item.processed_content || {}) as Record<string, unknown>
                       const cat = typeof pc.category === 'string' ? pc.category.trim() : ''
                       let subtype: string = cat
@@ -298,17 +298,13 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                         const brand = typeof pc.brand_slug === 'string' ? pc.brand_slug.trim() : ''
                         if (brand) subtype = brand
                       }
-                      if (!subtype) {
-                        return <span style={{ fontSize: 11, color: '#bbb' }}>—</span>
-                      }
+                      const pill = subtype ? `${item.content_type} · ${subtype}` : item.content_type
                       return (
-                        <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 3, background: '#e8e8e8', color: '#555' }}>
-                          {subtype}
+                        <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 3, background: '#e8e8e8', color: '#555', marginBottom: 6 }}>
+                          {pill}
                         </span>
                       )
                     })()}
-                  </td>
-                  <td style={{ padding: '12px', color: '#111', fontWeight: 500, maxWidth: 300 }} onClick={e => { if (isEditing) e.stopPropagation() }}>
                     {isEditing ? (
                       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                         <input
@@ -334,7 +330,7 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                       </div>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+                        <span style={{ display: 'block', color: '#111', fontWeight: 500, lineHeight: 1.4, wordBreak: 'break-word' }}>
                           {item.title || '\u2014'}
                         </span>
                         {(needsReview || doctrineFlags.length > 0) && (
@@ -372,11 +368,13 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                       </div>
                     )}
                   </td>
-                  <td style={{ padding: '12px', color: '#aaa', fontSize: 11 }}>{item.source_type || '\u2014'}</td>
-                  <td style={{ padding: '12px', color: '#aaa', fontSize: 11 }}>
+                  <td style={{ padding: '12px', color: '#aaa', fontSize: 11, verticalAlign: 'top' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <span style={{ color: '#555', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {item.source_name || '\u2014'}
+                      </span>
+                      <span style={{ fontSize: 10, color: '#aaa', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {item.source_type || '\u2014'}
                       </span>
                       {item.source_url && (
                         <a
@@ -395,18 +393,20 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                       )}
                     </div>
                   </td>
-                  <td style={{ padding: '12px' }}>
-                    <span style={{
-                      display: 'inline-block', fontSize: 11, fontWeight: 700,
-                      letterSpacing: '0.08em', textTransform: 'uppercase',
-                      padding: '4px 12px', borderRadius: 4,
-                      background: badge.bg, color: badge.text,
-                    }}>
-                      {item.status.replace('_', ' ')}
-                    </span>
-                  </td>
-                  <td style={{ padding: '12px', color: '#aaa', fontSize: 11 }}>{formatDate(item.created_at)}</td>
-                  <td style={{ padding: '12px' }} onClick={e => e.stopPropagation()}>
+                  <td style={{ padding: '12px', color: '#aaa', fontSize: 11, verticalAlign: 'top' }}>{formatDate(item.created_at)}</td>
+                  {showStatus && (
+                    <td style={{ padding: '12px', verticalAlign: 'top' }}>
+                      <span style={{
+                        display: 'inline-block', fontSize: 11, fontWeight: 700,
+                        letterSpacing: '0.08em', textTransform: 'uppercase',
+                        padding: '4px 12px', borderRadius: 4,
+                        background: badge.bg, color: badge.text,
+                      }}>
+                        {item.status.replace('_', ' ')}
+                      </span>
+                    </td>
+                  )}
+                  <td style={{ padding: '12px', verticalAlign: 'top' }} onClick={e => e.stopPropagation()}>
                     <ContentQueueActions
                       id={item.id}
                       status={item.status}
@@ -418,7 +418,7 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                 </tr>
                 {isExpanded && (
                   <tr key={`${item.id}-preview`} style={{ borderBottom: '1px solid #e8e8e8' }}>
-                    <td colSpan={8} style={{ padding: '0 12px 16px' }}>
+                    <td colSpan={showStatus ? 5 : 4} style={{ padding: '0 12px 16px' }}>
                       <PreviewPanel content={item.processed_content} />
                     </td>
                   </tr>
