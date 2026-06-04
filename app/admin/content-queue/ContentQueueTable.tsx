@@ -302,7 +302,7 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                   onClick={() => { if (!isEditing) setExpandedId(isExpanded ? null : item.id) }}
                   style={{ borderBottom: isExpanded ? 'none' : '1px solid #e8e8e8', cursor: 'pointer' }}
                 >
-                  <td style={{ padding: '12px', borderLeft: `3px solid ${stripeColor}`, verticalAlign: 'top' }} onClick={e => { if (isEditing) e.stopPropagation() }}>
+                  <td style={{ padding: '12px', borderLeft: `${needsReview ? '4px' : '3px'} solid ${stripeColor}`, verticalAlign: 'top' }} onClick={e => { if (isEditing) e.stopPropagation() }}>
                     <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 3, background: '#e8e8e8', color: '#555', marginBottom: 6 }}>
                       {pillLabel}
                     </span>
@@ -340,10 +340,10 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                               <span
                                 title="Doctrine flag(s) active — review required before approve"
                                 style={{
-                                  fontSize: 9, fontWeight: 700, letterSpacing: '0.08em',
-                                  padding: '2px 6px', borderRadius: 3,
-                                  background: '#fef2f2', color: '#dc2626',
-                                  border: '1px solid #fecaca',
+                                  fontSize: 10, fontWeight: 700, letterSpacing: '0.08em',
+                                  padding: '3px 8px', borderRadius: 3,
+                                  background: '#fee2e2', color: '#dc2626',
+                                  border: '1px solid #dc2626',
                                 }}
                               >
                                 REVIEW
@@ -429,6 +429,7 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                           display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
                           gap: 16, flexWrap: 'wrap',
                           background: '#fff', border: '1px solid #e8e8e8', borderRadius: '6px 6px 0 0',
+                          borderLeft: needsReview ? '4px solid #dc2626' : '1px solid #e8e8e8',
                           padding: '16px 20px',
                         }}
                       >
