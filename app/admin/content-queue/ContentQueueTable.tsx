@@ -258,6 +258,33 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
             const isEditing = editingId === item.id
             const doctrineFlags = computeDoctrineFlags(item)
             const needsReview = doctrineFlags.length > 0
+            // Merged Family · Subtype pill label. Subtype derives per
+            // family; when absent, show the family alone — never "· —".
+            // Computed once so the collapsed-row pill and the expanded
+            // header pill stay identical without duplicating the logic.
+            const pc = (item.processed_content || {}) as Record<string, unknown>
+            const cat = typeof pc.category === 'string' ? pc.category.trim() : ''
+            let subtype: string = cat
+            if (!subtype && item.content_type === 'event') {
+              const sector = typeof pc.sector === 'string' ? pc.sector.trim() : ''
+              if (sector) subtype = sector
+              else {
+                const t = typeof pc.type === 'string' ? pc.type.trim() : ''
+                if (t) subtype = t.replace(/_/g, ' ')
+              }
+            }
+            if (
+              !subtype &&
+              (item.content_type === 'salary_benchmark' || item.content_type === 'interview')
+            ) {
+              const brand = typeof pc.brand_slug === 'string' ? pc.brand_slug.trim() : ''
+              if (brand) subtype = brand
+            }
+            const pillLabel = subtype ? `${item.content_type} · ${subtype}` : item.content_type
+            // Provenance: source_type · source_name · date (present parts only)
+            const provenance = [item.source_type, item.source_name, formatDate(item.created_at)]
+              .filter(p => p && String(p).trim())
+              .join('  ·  ')
             // Row decision-state: red = doctrine flag, amber = draft
             // needing decision, none = read-only (published/rejected/
             // approved). Rendered as a left-edge stripe on the first td.
@@ -276,35 +303,9 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                   style={{ borderBottom: isExpanded ? 'none' : '1px solid #e8e8e8', cursor: 'pointer' }}
                 >
                   <td style={{ padding: '12px', borderLeft: `3px solid ${stripeColor}`, verticalAlign: 'top' }} onClick={e => { if (isEditing) e.stopPropagation() }}>
-                    {(() => {
-                      // Merged Family · Subtype pill (single inline chip above
-                      // the title). Subtype reuses the per-family derivation;
-                      // when absent, show the family alone — never "· —".
-                      const pc = (item.processed_content || {}) as Record<string, unknown>
-                      const cat = typeof pc.category === 'string' ? pc.category.trim() : ''
-                      let subtype: string = cat
-                      if (!subtype && item.content_type === 'event') {
-                        const sector = typeof pc.sector === 'string' ? pc.sector.trim() : ''
-                        if (sector) subtype = sector
-                        else {
-                          const t = typeof pc.type === 'string' ? pc.type.trim() : ''
-                          if (t) subtype = t.replace(/_/g, ' ')
-                        }
-                      }
-                      if (
-                        !subtype &&
-                        (item.content_type === 'salary_benchmark' || item.content_type === 'interview')
-                      ) {
-                        const brand = typeof pc.brand_slug === 'string' ? pc.brand_slug.trim() : ''
-                        if (brand) subtype = brand
-                      }
-                      const pill = subtype ? `${item.content_type} · ${subtype}` : item.content_type
-                      return (
-                        <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 3, background: '#e8e8e8', color: '#555', marginBottom: 6 }}>
-                          {pill}
-                        </span>
-                      )
-                    })()}
+                    <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 3, background: '#e8e8e8', color: '#555', marginBottom: 6 }}>
+                      {pillLabel}
+                    </span>
                     {isEditing ? (
                       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                         <input
@@ -419,7 +420,55 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                 {isExpanded && (
                   <tr key={`${item.id}-preview`} style={{ borderBottom: '1px solid #e8e8e8' }}>
                     <td colSpan={showStatus ? 5 : 4} style={{ padding: '0 12px 16px' }}>
+                      {/* Review header — pill, full title, provenance, and
+                          the primary decision actions kept right-aligned and
+                          always in view (no horizontal scroll to act). */}
+                      <div
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                          display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+                          gap: 16, flexWrap: 'wrap',
+                          background: '#fff', border: '1px solid #e8e8e8', borderRadius: '6px 6px 0 0',
+                          padding: '16px 20px',
+                        }}
+                      >
+                        <div style={{ minWidth: 0, flex: '1 1 320px' }}>
+                          <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 3, background: '#e8e8e8', color: '#555', marginBottom: 8 }}>
+                            {pillLabel}
+                          </span>
+                          <div style={{ fontSize: 17, fontWeight: 600, color: '#111', lineHeight: 1.35, wordBreak: 'break-word' }}>
+                            {item.title || '—'}
+                          </div>
+                          <div style={{ fontSize: 11, color: '#888', marginTop: 6 }}>
+                            {provenance}
+                          </div>
+                        </div>
+                        <ContentQueueActions
+                          id={item.id}
+                          status={item.status}
+                          onDelete={() => handleDelete(item.id)}
+                          onStatusChange={(newStatus) => handleStatusChange(item.id, newStatus)}
+                        />
+                      </div>
+                      {/* Existing preview, rendered as-is (no new fields) */}
                       <PreviewPanel content={item.processed_content} />
+                      {/* Repeat decision actions at the bottom so long
+                          content (articles/events) needs no scroll back up. */}
+                      <div
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                          display: 'flex', justifyContent: 'flex-end',
+                          background: '#fff', border: '1px solid #e8e8e8', borderRadius: '0 0 6px 6px',
+                          padding: '16px 20px', marginTop: 4,
+                        }}
+                      >
+                        <ContentQueueActions
+                          id={item.id}
+                          status={item.status}
+                          onDelete={() => handleDelete(item.id)}
+                          onStatusChange={(newStatus) => handleStatusChange(item.id, newStatus)}
+                        />
+                      </div>
                     </td>
                   </tr>
                 )}
