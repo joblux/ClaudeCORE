@@ -24,7 +24,7 @@ export default async function AdminContentQueuePage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
-      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 24px' }}>
+      <div style={{ maxWidth: 1600, margin: '0 auto', padding: '32px 24px' }}>
 
         <div style={{ marginBottom: 24 }}>
           <h1 style={{ fontSize: 20, fontWeight: 600, color: '#111', margin: 0 }}>Content Queue</h1>

@@ -45,7 +45,7 @@ export default function ContentQueueActions({ id, status, onDelete, onEdit, onSt
   // Edit is a secondary outlined button. Read-only states fall through
   // to a muted status label.
   return (
-    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', gap: 5, flexWrap: 'nowrap' }}>
       {showApproveReject && (
         <>
           <button
@@ -53,8 +53,8 @@ export default function ContentQueueActions({ id, status, onDelete, onEdit, onSt
             disabled={loading}
             style={{
               fontSize: 12, fontWeight: 600, padding: '6px 14px',
-              background: '#2e7d32', color: '#fff',
-              border: '1px solid #2e7d32', borderRadius: 4,
+              background: '#4a8c50', color: '#fff',
+              border: '1px solid #4a8c50', borderRadius: 4,
               cursor: 'pointer', opacity: loading ? 0.5 : 1,
             }}
           >

@@ -243,12 +243,12 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
         <thead>
           <tr style={{ borderBottom: '2px solid #111' }}>
             <th style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888' }}>Item</th>
-            <th style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', width: 130 }}>Source</th>
+            <th style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', width: 180 }}>Source</th>
             <th style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', width: 90 }}>Created</th>
             {showStatus && (
               <th style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', width: 110 }}>Status</th>
             )}
-            <th style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', width: 150 }}>Decision</th>
+            <th style={{ textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', width: 300 }}>Decision</th>
           </tr>
         </thead>
         <tbody>
