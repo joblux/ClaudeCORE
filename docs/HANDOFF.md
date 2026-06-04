@@ -1,61 +1,40 @@
-# JOBLUX — HANDOFF V3
-Session close: 2026-06-01 ~01:30
-Repo HEAD at close: e9c854f  |  Branch: main  |  Prod-only, Coolify auto-deploy
+# JOBLUX HANDOFF — 2026-06-04
 
-────────────────────────────────────────
-## 1. SHIPPED THIS SESSION (all live / committed)
-────────────────────────────────────────
-- Escape module DISABLED — made invisible/inert. PASS, live.
-- Insights rendered at ROOT — app/page.tsx re-exports Insights; public nav reordered
-  (Insights · Careers · Brands · Signals · Events). Sampler homepage retired.
-  Commit 5e47cf2. PASS, live.
-- Public HEADER resized/reordered — bar 84→105, logo 28→35 (w112→140), nav 13.5→16 / 600.
-  Mobile + pill + container untouched. Commit 81c2a45. PASS, live.
-- LuxAI v17 Part 1 cockpit prototype LOCKED as TSX target — standalone upgraded cockpit,
-  8 tabs (Overview · Operations · Brands · Signals · Events · Articles · Analytics · Queue),
-  production capabilities preserved, no admin absorption. HTML-only, never shipped to TSX.
-  File: COCKPIT-v17-part1-target.html (design target for Phase 2).
-- LuxAI inventory endpoint — app/api/admin/luxai/inventory/route.ts, read-only, admin-only.
-  Verified vs live DB (7 rows: brands 73/73, signals 133/35, events 18/10, articles 28/25,
-  reports 10/2, salary 5697/2, interviews 0/0). 12-week trend deferred. Commit 3646517. PASS, live.
-- LuxAI brands-enriched endpoint — app/api/admin/luxai/brands-enriched/route.ts, read-only,
-  admin-only. Per-brand: sector, salary_count/has_salary, interview_count(0), last_regenerated_at,
-  regeneration_count. Verified vs live DB (73 brands, 73 sectors, 72 has_salary, 68 last_regen).
-  page_completeness intentionally excluded (comment in file). Commit e9c854f. PASS, live.
+Repo HEAD (code): **757b6b1** | Branch: main | Prod-only, Coolify auto-deploy
+STATE rotated this close: LAST SHIPPED 3c3cc56 → 757b6b1 (04da9a1 was a cosmetic docs-rotation commit, not an unrecorded feature).
 
-Commit lineage: 81c2a45 → 5e47cf2 (earlier) … → 3646517 → e9c854f (HEAD).
+## 🔥 SNAPSHOT
+- Active blockers: none. Market-Salary Queue V1 shipped clean (COOLIFY-GREEN + PROD-QA PASS, net DB delta 0).
+- Next 3 steps:
+  1. Commit + push this STATE/HANDOFF rotation (after Mo review).
+  2. Execute proposed ledger ops: ADD MS-V1-harden + MS-V1.1-curate; add resolution-candidate note to db8e07d1 (stays OPEN).
+  3. Mo picks next salary scope: V1.1 curate UI vs V1 hardening slice vs provenance tail (WikiLux retrieval / AI-generator retirement).
 
-────────────────────────────────────────
-## 2. UNRESOLVED / PARKED
-────────────────────────────────────────
-- Slice 2b — page-completeness column: BLOCKED on canonical WikiLux subpart definition.
-  Generator (lib/wikilux-prompt.ts) defines 16 keys incl. signature_products + current_strategy
-  (present on only 5/73). Live data carries quote(68)/salaries(69)/founder_name(68), NOT in the
-  generator's 16. Code-canonical → ~5/73 complete; prototype quote-based → 68/73. Stored data has
-  DRIFTED from current generator. Mo-only decision. No completeness logic until decided.
-- Phase 3 (parked): WikiLux View/Edit/Delete + admin management absorption into cockpit.
-- Admin sidebar / IA reorg + removal of standalone admin pages — parked.
-- Overview 12-week trend sparkline — deferred (no pre-aggregated time-series).
-- Approval-rate field on /usage + import-health composer — minor follow-ups, not started.
+## 1. WHAT WAS COMPLETED TODAY
+- **757b6b1** — Market-Salary Queue V1: NEW `app/api/admin/luxai/market-salary` (source-backed ingestion → content_queue, `external_feed`, `source_url` required); approve mapper market sub-path (`content_origin='market'`, `confidence='verified'`, source_url carried, source year preserved; AI path byte-identical); `salaries/admin` POST → 410 (bypass closed); luxai-rules comment cleanup. No migration, no UI. Build GREEN + PROD-QA PASS.
+- **Hermès orphan unpublish** — `salary_benchmarks` c9cbc294 (`is_published=false`, DB-only, no delete): unsourced contributed orphan, no lineage; fails provenance standard. Hublot traceable row retained.
+- **Option B provenance LOCKED** (Mo+GPT): `salary_benchmarks` = market lane, `salary_contributions` = contribution lane, NO `source_origin` column; blended public estimate OK while internal provenance stays traceable.
 
-────────────────────────────────────────
-## 3. BACKEND READINESS — NEXT STEP (no completion obligation)
-────────────────────────────────────────
-Backend readiness check COMPLETED. Existing LuxAI backend is much more complete than initially
-assumed; we caught ourselves building backend infra ahead of demonstrated need. Both shipped
-endpoints were justified by the v17 cockpit:
-  - inventory endpoint shipped (3646517)
-  - brands-enriched endpoint shipped (e9c854f)
+## 2. STILL OPEN — ACTIVE ONLY
+- `378f9c4b` — Hunter vs Generator strategic finding (high, parked-strategic).
+- `6c502fbf` — Salary + Interview autonomous-families doctrine anchor (high).
+- `0e2a2240` — LuxAI v17 TSX shell tail (high).
+- `db8e07d1` — salary-doctrine blocker, **remains OPEN**; resolution candidate identified via Option B provenance doctrine + Market-Salary Queue V1 (review vs original definition before any status change).
+- `MS-V1-harden`, `MS-V1.1-curate` — market-salary follow-ups (parked, proposed ledger ADD).
 
-Further backend work is OPTIONAL — only if the TSX shell hits a real data gap. Slice 3 is NOT a
-mandatory prerequisite to TSX. Do NOT auto-queue it.
+## 3. NEXT 3 STEPS
+1. Commit + push STATE/HANDOFF rotation (Mo review first).
+2. Execute proposed ledger ops (ADD 2 parked rows; note on db8e07d1 — stays OPEN).
+3. Mo picks next salary scope (V1.1 curate UI / V1 hardening / provenance tail).
 
-DECISION FOR MO AT SESSION OPEN — pick one:
-  A) Start the v17 TSX shell now, using existing endpoints + the two new endpoints.
-     (Build order: tab shell → Overview → Operations → Queue → domain tabs → cutover replacing
-      the old 708-line LUXAICommandCenter.tsx. Built against v17 prototype as target.)
-  B) Build Slice 3 first (domain KPI/list endpoint for Signals/Events/Articles) because we know
-     we want those endpoints regardless of shell discovery.
+## 4. NEXT SESSION START
+- **Focus:** Mo-selected salary scope OR provenance tail (NEXT STEP items 2-5).
+- **IN:** market-salary V1.1 curate UI; V1 hardening slice; WikiLux retrieval layer; AI signals/events/interviews retirement execution; enforcement-rule table → code.
+- **OUT:** no `source_origin` column (Option B locked); no direct salary_benchmarks writes (queue-only); no STATE reconciliation outside /joblux-close.
 
-Rule in force: NO TSX until Mo confirms. One slice at a time, propose → GPT → Code → verify.
-Claude AI = read/audit/QA (GitHub read-only); Claude Code = all writes/commits/pushes.
+## Part 2 — Ledger operations (PROPOSED — await Mo, not yet executed)
+- ADD — Market-salary V1 hardening (per-record + URL-format validation) — System / low / parked
+- ADD — Market-salary V1.1 curate UI + optional audit columns — Admin / normal / parked
+- UPDATE (note only, status stays OPEN) — `db8e07d1` — add note: "Resolution candidate identified via Option B provenance doctrine and Market-Salary Queue V1."
+
+— Claude AI
