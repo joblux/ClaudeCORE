@@ -166,9 +166,9 @@ export function validateLuxaiQueuePayload(
       message: 'source_url is required when source_type=external_feed',
     }
   }
-  // NOTE: salary_benchmark is a documented temporary exception in this patch.
-  // It is internally generated and has no citable source URL, so source_url
-  // is not enforced here. Revisit once a real source attribution model exists.
+  // salary_benchmark items may be AI-generated (source_type='joblux_generation', no citable
+  // URL) or market source-backed (source_type='external_feed', for which the check above
+  // already requires source_url). No salary-specific exception is needed.
   return null
 }
 

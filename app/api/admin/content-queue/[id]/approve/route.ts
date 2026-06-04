@@ -155,6 +155,16 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
       }
     }
 
+    // Market (source-backed) items arrive with source_type='external_feed' + a citable
+    // source_url; AI items arrive with 'joblux_generation'. No source → no market publish.
+    const isMarket = record.source_type === 'external_feed'
+    if (isMarket && !record.source_url) {
+      return NextResponse.json(
+        { success: false, error: 'Market salary publish requires a source_url.' },
+        { status: 400 }
+      )
+    }
+
     const rows = records.map((r) => ({
       brand_name,
       brand_slug,
@@ -167,10 +177,13 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
       salary_min: r.salary_min,
       salary_max: r.salary_max,
       salary_median: r.salary_median,
-      year_of_data: 2026,
-      source: 'JOBLUX Intelligence',
-      content_origin: 'luxai',
+      // Market rows preserve the source year when provided (per-record → queue-level → 2026
+      // fallback). AI/joblux_generation path is unchanged: always 2026.
+      year_of_data: isMarket ? (r.year_of_data ?? pc.year_of_data ?? 2026) : 2026,
+      source: isMarket ? (record.source_name || 'Market source') : 'JOBLUX Intelligence',
+      content_origin: isMarket ? 'market' : 'luxai',
       is_published: true,
+      ...(isMarket ? { source_url: record.source_url, confidence: 'verified' } : {}),
     }))
 
     const { error: insertError } = await supabaseAdmin.from('salary_benchmarks').insert(rows)

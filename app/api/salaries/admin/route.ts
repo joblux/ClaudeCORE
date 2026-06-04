@@ -33,54 +33,13 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions)
-    if (session?.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-    }
-
-    const body = await req.json()
-    const db = supabaseAdmin() as any
-
-    // Support bulk import (array) or single entry
-    const entries = Array.isArray(body) ? body : [body]
-
-    const insertData = entries.map((e: any) => ({
-      brand_name: e.brand_name,
-      brand_slug: e.brand_slug || null,
-      job_title: e.job_title,
-      department: e.department || null,
-      seniority: e.seniority || null,
-      city: e.city,
-      country: e.country,
-      currency: e.currency || 'EUR',
-      salary_min: e.salary_min,
-      salary_max: e.salary_max,
-      salary_median: e.salary_median || null,
-      bonus_min: e.bonus_min || null,
-      bonus_max: e.bonus_max || null,
-      total_comp_min: e.total_comp_min || null,
-      total_comp_max: e.total_comp_max || null,
-      source: e.source || 'admin_curated',
-      source_url: e.source_url || null,
-      confidence: e.confidence || 'verified',
-      year_of_data: e.year_of_data || new Date().getFullYear(),
-      notes: e.notes || null,
-    }))
-
-    const { data, error } = await db
-      .from('salary_benchmarks')
-      .insert(insertData)
-      .select()
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    return NextResponse.json({ created: data?.length || 0, benchmarks: data }, { status: 201 })
-  } catch (err) {
-    console.error('Admin salary POST error:', err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
+// Direct writes into salary_benchmarks are disabled. Market salaries must flow through the
+// source-backed content_queue (POST /api/admin/luxai/market-salary → source_type='external_feed',
+// source_url required) and be published only via the content-queue approve mapper after review.
+// No direct publish/write bypass. GET (above) is unaffected.
+export async function POST() {
+  return NextResponse.json(
+    { error: 'Direct salary writes are disabled. Use the source-backed market-salary queue.' },
+    { status: 410 }
+  )
 }
