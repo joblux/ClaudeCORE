@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
-import { generateBrandContent } from '@/lib/luxai/regenerateBrand'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -36,34 +35,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: `Brand "${name}" already exists (slug: ${slug})` }, { status: 409 })
     }
 
-    // Create the brand row with empty content
+    // Create the brand row as an UNPUBLISHED draft.
+    // Provenance doctrine (DER-001): no AI generation of brand facts from the
+    // name alone, and nothing publishes empty/unsourced. A manually added
+    // brand stays draft until sourced/manual content is added and reviewed.
     const { error } = await supabase.from('wikilux_content').insert({
       slug,
       brand_name: name,
       content: {},
-      status: 'approved',
-      is_published: true,
+      status: 'pending',
+      is_published: false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     })
 
     if (error) throw error
 
-    // Now trigger AI generation for this brand
-    let generated = false
-    try {
-      await generateBrandContent(slug, name, 'approved')
-      generated = true
-    } catch (e) {
-      console.log(`[LUXAI] Auto-generation failed for ${slug}, brand created as empty draft`)
-    }
-
     return NextResponse.json({
       success: true,
-      message: generated
-        ? `Brand "${name}" created and content generated | check approval queue`
-        : `Brand "${name}" created as empty draft | generate content manually`,
-      data: { slug, brand_name: name, generated }
+      message: `Brand "${name}" created as unpublished draft. Add sourced content, then publish.`,
+      data: { slug, brand_name: name, generated: false }
     })
   } catch (error: any) {
     console.error('Add brand error:', error)
