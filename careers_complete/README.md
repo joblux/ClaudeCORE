@@ -1,3 +1,13 @@
+> =====================================================================
+> NON-AUTHORITATIVE LEGACY SCAFFOLD — banner added 2026-06-05 (DER-001)
+> This directory is NOT current architecture and NOT a spec. It
+> contains a duplicate LuxAI route tree (incl. salary-benchmark /
+> generate-interview) whose generation model is SUPERSEDED by
+> docs/JOBLUX_STATE.md § PROVENANCE DOCTRINE. AI may never originate
+> proprietary salary or interview data; approval does not legitimize
+> it. Do not treat this as truth. Deletion is parked (not DER-001).
+> =====================================================================
+
 # JOBLUX Careers Module — FIXED BUILD
 
 **Built:** March 31, 2026

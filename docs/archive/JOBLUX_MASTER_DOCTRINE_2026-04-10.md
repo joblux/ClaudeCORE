@@ -1,7 +1,15 @@
+> =====================================================================
+> HISTORICAL / SUPERSEDED — banner added 2026-06-05 (DER-001)
+> This document is HISTORICAL. Its "supersedes all docs" authority
+> claim below is VOID. Current authority = docs/JOBLUX_STATE.md
+> (Constitution) and its § PROVENANCE DOCTRINE. Retained for history
+> only. Do not treat as current doctrine.
+> =====================================================================
+
 # JOBLUX MASTER DOCTRINE
 **Version:** 2026-04-10
-**Status:** Locked
-**Authority:** This document supersedes all previous doctrine, rulebook, and system docs.
+**Status:** SUPERSEDED 2026-06-05 (was: Locked)
+**Authority:** VOID — superseded by docs/JOBLUX_STATE.md. (Original claim, retained as audit trail: "This document supersedes all previous doctrine, rulebook, and system docs.")
 
 ---
 

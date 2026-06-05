@@ -1,4 +1,14 @@
 
+=====================================================================
+SUPERSEDED / SUBORDINATE — banner added 2026-06-05 (DER-001)
+This rulebook is SUBORDINATE to docs/JOBLUX_STATE.md § PROVENANCE
+DOCTRINE (constitutional, locked 2026-06-05). Where this rulebook
+permits generation that ORIGINATES proprietary salary or interview
+data, STATE wins: that generation is FORBIDDEN. This file governs
+transformation discipline only — it does NOT authorize LuxAI to
+originate proprietary truth. No source → no output.
+=====================================================================
+
 LUXAI GENERATION RULEBOOK v1
 JOBLUX Intelligence Engine
 Effective: April 2026
@@ -75,6 +85,11 @@ Queue review: Mandatory
 ---
 
 DATA FAMILY 2 — Salary Benchmarks (salary_benchmarks table)
+
+PROVENANCE LOCK (2026-06-05, DER-001): FORBIDDEN to originate salary
+figures from model memory. Transform sourced/contributed salary data
+only — no source → no output. AI-invented salary data is forbidden by
+STATE § PROVENANCE DOCTRINE; approval does not legitimize it.
 
 Trust level: High — structured and numeric, but still
 sample-based rather than universal market truth
@@ -278,6 +293,12 @@ Queue review: Mandatory
 ---
 
 DATA FAMILY 9 — Interview Experiences (interview_experiences table)
+
+PROVENANCE LOCK (2026-06-05, DER-001): FORBIDDEN to originate
+interview questions, processes, or testimony from model memory.
+Summarize/transform real contributed experiences only — no source →
+no output. AI-invented interview data is forbidden by STATE
+§ PROVENANCE DOCTRINE; approval does not legitimize it.
 
 Trust level: Medium-high — structured but user-reported
 experiential data

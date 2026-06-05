@@ -1,3 +1,12 @@
+> =====================================================================
+> LEGACY — banner added 2026-06-05 (DER-001)
+> This document is LEGACY/historical. Current authority =
+> docs/JOBLUX_STATE.md (Constitution) § PROVENANCE DOCTRINE. Where
+> any phrasing here implies LuxAI "generates" salary or other
+> proprietary data, read it as transform-from-source only: AI may
+> never originate proprietary salary or interview data.
+> =====================================================================
+
 ---
 
 # JOBLUX DATA DOCTRINE — V1

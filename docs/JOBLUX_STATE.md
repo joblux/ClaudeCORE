@@ -31,6 +31,22 @@ schema → enums → constraints → routes → UX.
 - LuxAI = sourced transformation layer (never source of truth)
 - content_queue = moderation gate (no content type bypasses it)
 
+## PROVENANCE DOCTRINE (LOCKED 2026-06-05, Mo+GPT — constitutional)
+
+Promoted from emerging observation to locked constitutional doctrine via DER-001. This clause is supreme: it overrides every operating rulebook, archived doctrine, scaffold, and handoff. Where any lower document permits otherwise, this clause wins.
+
+- Sourced data is allowed.
+- Real user contribution (ProfiLux) is allowed.
+- AI-invented proprietary salary data is FORBIDDEN.
+- AI-invented proprietary interview data is FORBIDDEN.
+- Approval does NOT legitimize invented proprietary data. A moderation/queue gate is not a provenance source.
+- LuxAI transforms sourced information; it does NOT originate proprietary truth.
+- ProfiLux and contributions are the human truth layer; the only accepted origins are sourced intelligence and real user contributions.
+
+Legitimacy test: provenance, not authorship. AI-assisted + sourced/attributed content is legitimate; a generated factual claim or human testimony about a real entity with no source is not.
+
+Enforced: §218 AI-forbidden-family approve guard (@fa2d8bc); provenance lock 378f9c4b. §218 is not to be narrowed.
+
 ## Session start command
 "Read docs/JOBLUX_STATE.md. Ignore conflicting stale sources."
 
@@ -582,7 +598,7 @@ Internal/admin-only (DB-resident, no candidate Edit surface):
 
 ### TRUTH RESET — emerging doctrine + parked candidates (NOT constitutional yet)
 
-EMERGING DOCTRINE OBSERVATION (not a locked rule): "Provenance, not authorship, is the legitimacy test." AI-assisted + sourced/attributed content is legitimate; a generated factual claim about a real entity with no source is not. To be confirmed at Truth Reset completion + launch review before any constitutional status.
+PROMOTED TO CONSTITUTIONAL DOCTRINE 2026-06-05 (DER-001) — see `## PROVENANCE DOCTRINE` near the top of this file. This observation is now LOCKED, not emerging. Retained here as audit trail only. Original text: "Provenance, not authorship, is the legitimacy test." AI-assisted + sourced/attributed content is legitimate; a generated factual claim about a real entity with no source is not.
 
 DOCTRINE CANDIDATE — 9-family sourcing model (PENDING Truth Reset completion and launch review; do NOT move into Matrix/Constitution/Modus Operandi): 1 Signals/News=source now; 2 Events=source now; 3 WikiLux facts=source now (Wikidata CC0); 4 Salary=contribution + cited/paid benchmarks later; 5 Interviews=contribution-only; 6 Market reports=cite+synthesize never reproduce; 7 Blog/editorial (incl. Insider Voices as excerpt/display format)=owned authored / attributed excerpts; 8 Images=licensed/generic now, Getty later; 9 Store/map=filings+OSM now, paid POI later. Three-truth-systems framing: Retrievable / Contributed / Editorial-Intelligence. "Sourceable ≠ worth sourcing" (Glassdoor interviews: scrapable but ToS-barred + strategically inferior to a contribution engine). Full memo lives in session artifact.
 
@@ -782,6 +798,7 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 - All content through `content_queue` before any publish
 - Mo approves everything — nothing auto-publishes
 - `content_origin: 'ai'` on all LuxAI-generated inserts
+- AI may transform sourced data; it may NEVER originate salary or interview data. Approval does not legitimize invented proprietary data. See `## PROVENANCE DOCTRINE` (constitutional, locked 2026-06-05).
 
 ---
 

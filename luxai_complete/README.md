@@ -1,3 +1,13 @@
+> =====================================================================
+> NON-AUTHORITATIVE LEGACY SCAFFOLD — banner added 2026-06-05 (DER-001)
+> This directory is NOT current architecture and NOT a spec. It
+> describes an AI-generation model (incl. AI salary/interview/signal
+> generation gated only by approval) that is SUPERSEDED by
+> docs/JOBLUX_STATE.md § PROVENANCE DOCTRINE. Approval does not
+> legitimize invented proprietary data. Do not treat this as truth.
+> Deletion is parked as future cleanup (not part of DER-001).
+> =====================================================================
+
 # LUXAI Complete System — Ready to Deploy
 
 **Built:** March 31, 2026
