@@ -32,39 +32,6 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const FILTERS = ['All', 'Market', 'Talent', 'Brand', 'Finance', 'Fashion', 'Watches', 'Hospitality', 'Beauty', 'Real Estate']
 
-const placeholderSignals = [
-  {
-    id: '1', slug: 'kering-appoints-blazy-chanel', category: 'leadership',
-    headline: 'Kering appoints Matthieu Blazy as creative director of Chanel | leaves Bottega Veneta after 3 years',
-    summary: "The third creative director change at Bottega in five years. Blazy's departure to Chanel marks a rare cross-group move at this level.",
-    brand: 'Kering', region: 'Europe', published_at: new Date(Date.now() - 5 * 3600000).toISOString(),
-  },
-  {
-    id: '2', slug: 'burberry-400-role-reductions', category: 'contraction',
-    headline: 'Burberry confirms 400 role reductions across UK corporate offices',
-    summary: "Part of CEO Joshua Schulman's turnaround strategy. Retail and manufacturing roles are not affected.",
-    brand: 'Burberry', region: 'UK', published_at: new Date(Date.now() - 6 * 3600000).toISOString(),
-  },
-  {
-    id: '3', slug: 'hermes-asia-expansion', category: 'expansion',
-    headline: 'Hermès opens 4 stores in Asia Pacific | Seoul flagship is largest in the region',
-    summary: 'Hermès now operates 340+ stores globally. New stores mean 200+ retail and support roles across four markets.',
-    brand: 'Hermès', region: 'Asia Pacific', published_at: new Date(Date.now() - 24 * 3600000).toISOString(),
-  },
-  {
-    id: '4', slug: 'richemont-ynap-sale', category: 'merger_acquisition',
-    headline: 'Richemont reportedly exploring sale of YNAP online platform | focus returns to hard luxury',
-    summary: 'After years of losses, Richemont may finally exit e-commerce distribution. Digital roles at YNAP are at risk.',
-    brand: 'Richemont', region: 'Global', published_at: new Date(Date.now() - 48 * 3600000).toISOString(),
-  },
-  {
-    id: '5', slug: 'miu-miu-revenue-growth', category: 'growth',
-    headline: 'Miu Miu posts +56% revenue growth | best performing luxury brand of 2025',
-    summary: 'Unprecedented growth driven by Gen Z appeal and strategic pricing below Prada mainline.',
-    brand: 'Prada Group', region: 'Global', published_at: new Date(Date.now() - 72 * 3600000).toISOString(),
-  },
-]
-
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime()
   const hours = Math.floor(diff / 3600000)
@@ -86,7 +53,7 @@ function formatEventDate(dateStr: string) {
 
 export default function SignalsPage() {
   const [activeFilter, setActiveFilter] = useState('All')
-  const [signals, setSignals] = useState(placeholderSignals)
+  const [signals, setSignals] = useState<any[]>([])
   const [talentSignals, setTalentSignals] = useState<any[]>([])
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -204,9 +171,14 @@ export default function SignalsPage() {
           <div className="min-w-0">
             <p className="text-[10px] text-[#999] uppercase tracking-[0.14em] mb-4">Today&apos;s signals</p>
 
-            {filtered.length === 0 && (
-              <p className="text-[13px] text-[#999] py-8">No signals match this filter.</p>
-            )}
+            {signals.length === 0 ? (
+              <div className="py-16 text-center">
+                <p className="text-[15px] text-[#ccc] mb-2">No signals yet</p>
+                <p className="text-[13px] text-[#999]">Verified intelligence will appear here as it&apos;s published.</p>
+              </div>
+            ) : filtered.length === 0 ? (
+              <p className="text-sm text-[#999] py-10 text-center">No signals match this filter.</p>
+            ) : null}
 
             {pageSignals.map((signal: any, localIdx: number) => {
               const idx = pageStart + localIdx
