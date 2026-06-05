@@ -27,6 +27,24 @@ If any rule here conflicts with a skill, this file wins.
 
 ---
 
+## DOCTRINE EXECUTION REPORT (DER) — mandatory (locked 2026-06-05)
+
+A locked doctrine is NOT closed when it is decided. Deciding a doctrine without propagating it leaves competing truths in the repo (the DER-001 root cause). Therefore:
+
+**Any newly locked doctrine triggers a mandatory Doctrine Execution Report (DER) before it is considered closed.**
+
+A DER is closed only when all five steps pass:
+
+1. Doctrine is written into the authoritative file (Constitution / STATE).
+2. Conflicting documents are found (read-only precedence/drift audit).
+3. Conflicting documents are updated or superseded (banner / rewrite / supersede / quarantine).
+4. Precedence is recorded (explicit hierarchy: Constitution > Doctrine > Rulebooks > Archive > Scaffolding).
+5. A fresh audit passes (a new agent reaches exactly one conclusion; no competing truth remains).
+
+No exceptions. A doctrine decision with no DER is an OPEN item, not a closed one. Reference: DER-001 (@0475d39).
+
+---
+
 ## PROFILUX CONVERGENCE MODE (locked 2026-05-11)
 
 For all visual work on ProfiLux surfaces (View / Edit / Manage / CV Merge):
