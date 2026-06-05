@@ -112,9 +112,18 @@ type WikiluxDraft = {
   created_at: string | null
   content: {
     key_facts?: { label: string; value: any }[] | null
+    brand_dna?: string | null
+    history?: { year?: string; event?: string }[] | null
+    founder_name?: string | null
+    founder?: string | null
+    founder_facts?: string[] | null
+    quote?: { text?: string; author?: string } | null
+    key_executives?: { name?: string; role?: string; since?: string }[] | null
+    signature_products?: { name?: string; year?: string; note?: string }[] | null
+    creative_directors?: { name?: string; role?: string; period?: string }[] | null
     _raw_facts?: {
       founded?: number | null
-      hq?: string | null
+      hq_display?: string | null
       country?: string | null
       parent_group?: string | null
       sector?: string | null
@@ -125,6 +134,7 @@ type WikiluxDraft = {
       wikidata_url?: string | null
       acquired_at?: string | null
       source?: string | null
+      sections?: Record<string, { name?: string; url?: string }[]> | null
     } | null
   } | null
 }
@@ -538,6 +548,17 @@ const STYLE = `
   .v17-draft-fs { width: 130px; text-align: right; }
   .v17-draft-fs a { font-size: 11px; color: #2563eb; text-decoration: none; }
   .v17-draft-fs a:hover { text-decoration: underline; }
+  .v17-draft-prose { font-size: 12px; color: #333; line-height: 1.55; margin: 0 0 8px; }
+  .v17-draft-quote { font-size: 12px; color: #555; font-style: italic; margin: 6px 0; }
+  .v17-draft-empty { font-size: 11px; color: #bbb; font-style: italic; }
+  .v17-draft-list { margin: 0; padding-left: 0; list-style: none; }
+  .v17-draft-list li { font-size: 12px; color: #333; line-height: 1.5; padding: 3px 0; border-bottom: 1px solid #f5f5f5; }
+  .v17-draft-list li:last-child { border-bottom: none; }
+  .v17-draft-year { display: inline-block; min-width: 88px; color: #8a6d1f; font-weight: 600; }
+  .v17-draft-prov { font-size: 10px; color: #999; margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+  .v17-draft-prov-label { color: #aaa; text-transform: uppercase; letter-spacing: .06em; }
+  .v17-draft-prov a { color: #2563eb; text-decoration: none; }
+  .v17-draft-prov a:hover { text-decoration: underline; }
 `
 
 export default function CommandCenterV17() {
@@ -1471,18 +1492,33 @@ export default function CommandCenterV17() {
           wikiluxDrafts.map((d) => {
             const kf = d.content?._raw_facts ?? {}
             const src = d.content?._sources ?? {}
-            const sourceUrl = src.wikidata_url ?? null
             const deciding = wikiluxDecisionSlug === d.slug
             const dash = (v: unknown) =>
               v === null || v === undefined || v === '' ? '—' : String(v)
-            const facts: { label: string; value: unknown }[] = [
-              { label: 'Founded', value: kf.founded },
-              { label: 'HQ', value: kf.hq },
-              { label: 'Country', value: kf.country },
-              { label: 'Parent Group', value: kf.parent_group },
-              { label: 'Sector', value: kf.sector },
-              { label: 'Website', value: kf.website },
-            ]
+            const c = d.content ?? {}
+            const sec = src.sections ?? {}
+            const keyFacts = Array.isArray(c.key_facts) ? c.key_facts : []
+            const history = Array.isArray(c.history) ? c.history : []
+            const products = Array.isArray(c.signature_products) ? c.signature_products : []
+            const creatives = Array.isArray(c.creative_directors) ? c.creative_directors : []
+            const founderFacts = Array.isArray(c.founder_facts) ? c.founder_facts : []
+            const renderSources = (k: string) => {
+              const list = Array.isArray(sec?.[k]) ? sec![k] : []
+              if (!list || list.length === 0)
+                return <div className="v17-draft-prov">No source recorded</div>
+              return (
+                <div className="v17-draft-prov">
+                  <span className="v17-draft-prov-label">Sources:</span>
+                  {list.map((s, i) =>
+                    s?.url ? (
+                      <a key={i} href={s.url} target="_blank" rel="noopener noreferrer">{s.name || s.url}</a>
+                    ) : (
+                      <span key={i}>{s?.name}</span>
+                    )
+                  )}
+                </div>
+              )
+            }
             return (
               <div className="v17-draft-card" key={d.slug}>
                 {/* Section 1 — Input */}
@@ -1496,28 +1532,89 @@ export default function CommandCenterV17() {
                   </div>
                 </div>
 
-                {/* Section 2 — Output + Section 3 — Provenance (per field) */}
+                {/* About */}
                 <div className="v17-draft-sec">
-                  <div className="v17-draft-sec-label">Output · with provenance</div>
-                  <table className="v17-draft-facts">
-                    <tbody>
-                      {facts.map((f) => (
-                        <tr key={f.label}>
-                          <td className="v17-draft-fk">{f.label}</td>
-                          <td className="v17-draft-fv">{dash(f.value)}</td>
-                          <td className="v17-draft-fs">
-                            {sourceUrl ? (
-                              <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
-                                Wikidata source
-                              </a>
-                            ) : (
-                              '—'
-                            )}
-                          </td>
-                        </tr>
+                  <div className="v17-draft-sec-label">About</div>
+                  {c.brand_dna ? <p className="v17-draft-prose">{c.brand_dna}</p> : <p className="v17-draft-empty">— empty —</p>}
+                  {renderSources('about')}
+                </div>
+
+                {/* History */}
+                <div className="v17-draft-sec">
+                  <div className="v17-draft-sec-label">History</div>
+                  {history.length > 0 ? (
+                    <ul className="v17-draft-list">
+                      {history.map((h, i) => (
+                        <li key={i}><span className="v17-draft-year">{h.year}</span> {h.event}</li>
                       ))}
-                    </tbody>
-                  </table>
+                    </ul>
+                  ) : <p className="v17-draft-empty">— empty —</p>}
+                  {renderSources('history')}
+                </div>
+
+                {/* Key Facts */}
+                <div className="v17-draft-sec">
+                  <div className="v17-draft-sec-label">Key Facts</div>
+                  {keyFacts.length > 0 ? (
+                    <table className="v17-draft-facts">
+                      <tbody>
+                        {keyFacts.map((f, i) => (
+                          <tr key={i}>
+                            <td className="v17-draft-fk">{f.label}</td>
+                            <td className="v17-draft-fv">{dash(f.value)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : <p className="v17-draft-empty">— empty —</p>}
+                  {kf.hq_display && (
+                    <p className="v17-draft-meta">Normalised HQ: {kf.hq_display} · raw retained in _raw_facts</p>
+                  )}
+                  {renderSources('key_facts')}
+                </div>
+
+                {/* Founder */}
+                <div className="v17-draft-sec">
+                  <div className="v17-draft-sec-label">Founder</div>
+                  {c.founder_name && <p className="v17-draft-brand">{c.founder_name}</p>}
+                  {c.founder ? (
+                    c.founder.split('\n\n').map((p, i) => <p key={i} className="v17-draft-prose">{p}</p>)
+                  ) : <p className="v17-draft-empty">— empty —</p>}
+                  {founderFacts.length > 0 && (
+                    <ul className="v17-draft-list">
+                      {founderFacts.map((f, i) => <li key={i}>{f}</li>)}
+                    </ul>
+                  )}
+                  {c.quote?.text && (
+                    <p className="v17-draft-quote">“{c.quote.text}” — {c.quote.author}</p>
+                  )}
+                  {renderSources('founder')}
+                </div>
+
+                {/* Signature Products */}
+                <div className="v17-draft-sec">
+                  <div className="v17-draft-sec-label">Signature Products</div>
+                  {products.length > 0 ? (
+                    <ul className="v17-draft-list">
+                      {products.map((p, i) => (
+                        <li key={i}><span className="v17-draft-year">{p.year}</span> <strong>{p.name}</strong>{p.note ? ` — ${p.note}` : ''}</li>
+                      ))}
+                    </ul>
+                  ) : <p className="v17-draft-empty">— empty —</p>}
+                  {renderSources('signature_products')}
+                </div>
+
+                {/* Creative Directors */}
+                <div className="v17-draft-sec">
+                  <div className="v17-draft-sec-label">Creative Directors</div>
+                  {creatives.length > 0 ? (
+                    <ul className="v17-draft-list">
+                      {creatives.map((cd, i) => (
+                        <li key={i}><span className="v17-draft-year">{cd.period}</span> <strong>{cd.name}</strong>{cd.role ? ` — ${cd.role}` : ''}</li>
+                      ))}
+                    </ul>
+                  ) : <p className="v17-draft-empty">— empty —</p>}
+                  {renderSources('creative_directors')}
                 </div>
 
                 {/* Section 4 — Review */}

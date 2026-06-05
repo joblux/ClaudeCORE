@@ -180,6 +180,8 @@ function buildBrandData(brandName: string, slug: string, content: any) {
     founder_facts: content?.founder_facts || [],
     quote,
     timeline,
+    signature_products: Array.isArray(content?.signature_products) ? content.signature_products : [],
+    creative_directors: Array.isArray(content?.creative_directors) ? content.creative_directors : [],
     values,
     workCulture,
     careers_prose: content?.careers?.prose || (typeof content?.careers === 'string' ? content.careers : null),
@@ -556,6 +558,44 @@ export default function BrandDetailPage() {
                         <div className="pb-3">
                           <span className="text-xs font-medium text-[#a58e28]">{t.year}</span>
                           <p className="text-sm text-[#777] mt-0.5">{t.event}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {brand.signature_products && brand.signature_products.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-4">SIGNATURE PRODUCTS</p>
+                  <div className="space-y-3">
+                    {brand.signature_products.map((p: any, i: number) => (
+                      <div key={i} className="bg-[#222] rounded-lg p-3 border border-[#2a2a2a]">
+                        <div className="flex items-baseline justify-between gap-3">
+                          <p className="text-sm font-medium text-white">{p.name}</p>
+                          {p.year && <span className="text-xs font-medium text-[#a58e28] flex-shrink-0">{p.year}</span>}
+                        </div>
+                        {p.note && <p className="text-xs text-[#777] leading-relaxed mt-1">{p.note}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {brand.creative_directors && brand.creative_directors.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-semibold tracking-[2px] text-[#a58e28] mb-4">CREATIVE DIRECTORS</p>
+                  <div className="space-y-4">
+                    {brand.creative_directors.map((cd: any, i: number) => (
+                      <div key={i} className="flex gap-4">
+                        <div className="flex flex-col items-center">
+                          <span className="w-[7px] h-[7px] rounded-full bg-[#a58e28] flex-shrink-0 mt-1" />
+                          {i < brand.creative_directors.length - 1 && <span className="w-px flex-1 bg-[#2a2a2a] mt-1" />}
+                        </div>
+                        <div className="pb-3">
+                          {cd.period && <span className="text-xs font-medium text-[#a58e28]">{cd.period}</span>}
+                          <p className="text-sm text-white mt-0.5">{cd.name}</p>
+                          {cd.role && <p className="text-xs text-[#777] mt-0.5">{cd.role}</p>}
                         </div>
                       </div>
                     ))}
