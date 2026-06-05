@@ -45,6 +45,18 @@ Promoted from emerging observation to locked constitutional doctrine via DER-001
 
 Legitimacy test: provenance, not authorship. AI-assisted + sourced/attributed content is legitimate; a generated factual claim or human testimony about a real entity with no source is not.
 
+### SOURCE-GROUNDED REASONING (LOCKED 2026-06-05, Mo+GPT — constitutional clarification)
+
+The reset correctly killed FREE HALLUCINATION. It must NOT kill USEFUL REASONING. These are not the same thing. A JOBLUX analyst does not invent — but he THINKS. LuxAI must behave like a JOBLUX analyst, NOT a sophisticated ETL. Extraction-only (copy field → store field) needs no intelligence engine; a crawler + SQL mappings would do. The value of LuxAI is to understand the mission, find the right sources, cross-reference, SELECT what is relevant, prioritise, NORMALISE, and synthesise — with provenance attached.
+
+- FORBIDDEN: asserting a fact that NO source supports (free hallucination).
+- REQUIRED: reasoning, normalising, summarising, and selecting the correct value WHEN sources support it.
+- "extraction-only / any transformation = invention" is RETIRED. It was an over-correction that turned the brain into a photocopier.
+
+Worked example: Wikidata P159 = "cité du Retiro"; LuxAI displays "Paris, France". This is factual NORMALISATION (Retiro is a quarter of Paris), not invention. Raw value + source_url are retained as provenance; the user-useful value is displayed.
+
+Engine flow: Sources → extraction → CONSTRAINED REASONING → user-readable value → source_url kept → Mo review. Use IQ as a brain, not a photocopier: no hallucination, no dumb copy — sourced reasoning.
+
 Enforced: §218 AI-forbidden-family approve guard (@fa2d8bc); provenance lock 378f9c4b. §218 is not to be narrowed.
 
 ## Session start command
