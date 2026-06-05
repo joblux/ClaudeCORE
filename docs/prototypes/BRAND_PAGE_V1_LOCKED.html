@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cartier — JOBLUX Brand Page</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#1a1a1a;font-family:'Inter',system-ui,sans-serif;color:#888;line-height:1.6}
+  .pf{font-family:'Playfair Display',Georgia,serif}
+  .shell{max-width:1200px;margin:0 auto;padding:32px 32px 64px}
+  a{text-decoration:none;color:inherit;cursor:pointer}
+  .sitenav{display:flex;justify-content:center;gap:28px;padding:18px 0;font-size:14px;color:#ccc}.sitenav b{color:#fff}
+  .crumb{font-size:12px;color:#999;margin-bottom:16px}.crumb .sep{margin:0 8px}
+  .lang{display:flex;gap:8px;margin-bottom:24px}
+  .lang a{font-size:12px;padding:4px 12px;border-radius:5px;border:1px solid #2a2a2a;color:#555}.lang a.on{border-color:#a58e28;color:#a58e28;background:rgba(165,142,40,.1)}
+  .head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  .head-l{display:flex;align-items:center;gap:16px}
+  .crest{width:64px;height:64px;border-radius:50%;background:#2a2a2a;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;color:#999}
+  .h1{font-size:38px;font-weight:400;color:#fff;line-height:1.1;margin-bottom:4px}
+  .hmeta{font-size:14px;color:#999}
+  /* hero metrics — scale, not repetition */
+  .hmetrics{display:flex;gap:34px;padding-top:6px}
+  .hm{text-align:right}.hm .v{font-size:22px;font-weight:600;color:#fff;line-height:1}.hm .l{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#777;margin-top:5px}
+  .tagline{font-size:17px;font-style:italic;color:#a58e28;margin-bottom:20px;max-width:48rem}
+  .schips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+  .schip{font-size:12px;padding:6px 12px;border:1px solid #2a2a2a;border-radius:9999px;color:#999}
+  .tabs{display:flex;gap:24px;border-bottom:1px solid #2a2a2a;margin-bottom:36px}
+  .tab{padding:0 0 12px;font-size:14px;color:#555;position:relative}.tab.on{color:#fff}.tab.on::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:#a58e28}
+  .panel{display:none}.panel.on{display:block}
+  .eb{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#a58e28;margin-bottom:16px;display:flex;align-items:center;gap:14px}
+  .eb.line::after{content:"";flex:1;height:1px;background:#2a2a2a}
+  .g3{display:grid;grid-template-columns:2fr 1fr;gap:40px}@media(max-width:880px){.g3{grid-template-columns:1fr}}
+  .stack{display:flex;flex-direction:column;gap:40px}
+  .body{font-size:14.5px;color:#ccc;line-height:1.75}.body p{margin-bottom:13px}
+  .lead{font-size:17px;color:#fff;line-height:1.55;margin-bottom:15px}
+  .box{background:#222;border:1px solid #2a2a2a;border-radius:12px;padding:20px}
+  .bh{font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:#999;margin-bottom:15px}
+  .kv{display:flex;justify-content:space-between;gap:12px;padding:8px 0;font-size:13px;border-bottom:1px solid #262626}.kv:last-child{border-bottom:none}.kv .k{color:#999}.kv .v{color:#fff;font-weight:500;text-align:right}
+  .lr{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #262626}.lr:last-child{border-bottom:none}
+  .lav{width:34px;height:34px;border-radius:50%;background:#2a2a2a;display:flex;align-items:center;justify-content:center;font-size:10px;color:#999;flex-shrink:0}
+  .lnm{color:#fff;font-size:13px;font-weight:500}.lrl{color:#999;font-size:11px;line-height:1.3}.lsn{margin-left:auto;color:#777;font-size:10.5px;white-space:nowrap}
+  .subhead{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:#777;margin:16px 0 4px}
+  .chips{display:flex;flex-wrap:wrap;gap:9px}
+  .chip{font-size:12.5px;padding:7px 15px;border:1px solid #2a2a2a;border-radius:9999px;color:#bbb}
+  /* ── CULTURE COMPOSITION ── */
+  .section{margin-bottom:52px}
+  /* founder banner — full width opener */
+  .founder-banner{display:grid;grid-template-columns:120px 1fr;gap:30px;align-items:start;background:#202020;border:1px solid #2a2a2a;border-radius:16px;padding:30px}
+  @media(max-width:760px){.founder-banner{grid-template-columns:1fr}}
+  .fp{width:120px;height:150px;background:#2a2a2a;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:34px;color:#a58e28}
+  .fn{color:#fff;font-weight:500;font-size:20px;margin-bottom:3px}
+  .fyears{color:#a58e28;font-size:12px;margin-bottom:12px}
+  .quote{border-left:2px solid #a58e28;padding-left:18px;margin-top:18px;font-style:italic;color:#ddd;font-size:16px}.quote .by{display:block;font-style:normal;font-size:12px;color:#999;margin-top:6px}
+  /* values — 4 across */
+  .vgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}@media(max-width:880px){.vgrid{grid-template-columns:1fr 1fr}}
+  .vc{background:#222;border:1px solid #2a2a2a;border-radius:12px;padding:18px}
+  .vct{color:#fff;font-weight:500;font-size:14px;margin-bottom:7px}.vcd{font-size:12px;color:#999;line-height:1.5}
+  /* heritage + work split */
+  .split{display:grid;grid-template-columns:1.4fr 1fr;gap:40px}@media(max-width:880px){.split{grid-template-columns:1fr}}
+  .tl{display:flex;gap:20px;padding:11px 0;border-bottom:1px solid #242424}.tl:last-child{border-bottom:none}
+  .tly{min-width:50px;color:#a58e28;font-weight:600;font-size:13px}.tle{font-size:14px;color:#ccc;line-height:1.55}
+  .acc{background:#222;border:1px solid #2a2a2a;border-radius:10px;margin-bottom:9px;overflow:hidden}
+  .acch{padding:13px 18px;display:flex;justify-content:space-between;color:#a58e28;font-size:14px;cursor:pointer;user-select:none}
+  .accb{max-height:0;overflow:hidden;transition:max-height .3s;padding:0 18px;color:#bbb;font-size:13px;line-height:1.6}
+  .acc.open .accb{max-height:240px;padding:0 18px 15px}.acc.open .acci{transform:rotate(45deg)}.acci{transition:transform .25s;display:inline-block}
+  /* signature creations — full width feature grid */
+  .cg{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}@media(max-width:880px){.cg{grid-template-columns:repeat(2,1fr)}}
+  .crea{background:#202020;border:1px solid #2a2a2a;border-radius:12px;padding:20px;display:flex;flex-direction:column;min-height:170px}
+  .crea .cy{color:#a58e28;font-size:12px;font-weight:600;margin-bottom:10px}
+  .crea .cn{color:#fff;font-size:19px;margin-bottom:10px}
+  .crea .cd{font-size:12px;color:#999;line-height:1.55;margin-top:auto}
+  .empty{padding:50px 0;text-align:center}.empty .e1{color:#ccc;font-size:15px;margin-bottom:6px}.empty .e2{color:#777;font-size:13px}
+  .empty.left{text-align:left;padding:26px 0}
+</style>
+</head>
+<body>
+  <div class="sitenav"><a>Insights</a><a>Careers</a><a><b>Brands</b></a><a>Signals</a><a>Events</a></div>
+  <div class="shell">
+    <div class="crumb"><a>Home</a><span class="sep">/</span><a>Brands</a><span class="sep">/</span><span style="color:#888">Cartier</span></div>
+    <div class="lang"><a class="on">EN</a><a>ع</a><a>中</a><a>日</a></div>
+
+    <div class="head">
+      <div class="head-l">
+        <div class="crest">Ca</div>
+        <div>
+          <h1 class="h1 pf">Cartier</h1>
+          <p class="hmeta">Richemont (Compagnie Financière Richemont) · Founded 1847, Paris · ~7,500 employees</p>
+        </div>
+      </div>
+      <div class="hmetrics">
+        <div class="hm"><div class="v">200+</div><div class="l">Boutiques</div></div>
+        <div class="hm"><div class="v">5</div><div class="l">Icons</div></div>
+        <div class="hm"><div class="v">177</div><div class="l">Years</div></div>
+      </div>
+    </div>
+    <p class="tagline pf">The jeweller of kings and the king of jewellers.</p>
+    <div class="schips"><span class="schip">Jewellery</span><span class="schip">Watchmaking</span><span class="schip">High Jewellery</span><span class="schip">Métiers d'art</span></div>
+
+    <div class="tabs">
+      <div class="tab on" data-t="overview">Overview</div>
+      <div class="tab" data-t="culture">Culture</div>
+      <div class="tab" data-t="careers">Career paths</div>
+      <div class="tab" data-t="salaries">Salaries</div>
+      <div class="tab" data-t="signals">Signals</div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="panel on" id="overview">
+      <div class="g3">
+        <div class="stack">
+          <div>
+            <div class="eb">Company Profile</div>
+            <div class="body">
+              <p class="lead">Cartier is a French luxury jeweller and watchmaker, founded in Paris in 1847.</p>
+              <p>The house rose to prominence supplying European royal and imperial courts in the late nineteenth and early twentieth centuries — an era that earned it the description of the jeweller of kings and the king of jewellers. It is known both for fine jewellery and for some of the earliest purpose-built wristwatches, the Santos and the Tank among them.</p>
+              <p>Run by the Cartier family until 1964, the Maison has been part of the Swiss group Compagnie Financière Richemont since 1988. Today it operates more than two hundred boutiques worldwide and remains one of the defining names in high jewellery and watchmaking.</p>
+            </div>
+          </div>
+          <div>
+            <div class="eb">Career paths at Cartier</div>
+            <div class="chips">
+              <span class="chip">High Jewellery</span><span class="chip">Watchmaking</span><span class="chip">Métiers d'art</span>
+              <span class="chip">Retail &amp; boutique</span><span class="chip">Clienteling</span><span class="chip">Marketing &amp; image</span>
+              <span class="chip">Supply chain</span><span class="chip">Finance &amp; strategy</span>
+            </div>
+          </div>
+          <div>
+            <div class="eb">Recent Signals</div>
+            <div class="empty left"><div class="e2">Signals mentioning Cartier will appear here as they are published.</div></div>
+          </div>
+        </div>
+        <div class="stack" style="gap:18px">
+          <div class="box">
+            <div class="bh">Who shapes it today</div>
+            <div class="subhead">Executive</div>
+            <div class="lr"><div class="lav">CV</div><div><div class="lnm">Cyrille Vigneron</div><div class="lrl">President &amp; CEO</div></div><span class="lsn">Since 2016</span></div>
+            <div class="subhead">Creative direction</div>
+            <div class="lr"><div class="lav">PR</div><div><div class="lnm">Pierre Rainero</div><div class="lrl">Image, Style &amp; Heritage Director</div></div><span class="lsn">Since 2003</span></div>
+            <div class="lr"><div class="lav">JK</div><div><div class="lnm">Jacqueline Karachi</div><div class="lrl">Creative Director, Prestige</div></div><span class="lsn">Since 2009</span></div>
+          </div>
+          <div class="box">
+            <div class="bh">Key Facts</div>
+            <div class="kv"><span class="k">Founded</span><span class="v">1847</span></div>
+            <div class="kv"><span class="k">Headquarters</span><span class="v">Paris, France</span></div>
+            <div class="kv"><span class="k">Founder</span><span class="v">Louis-François Cartier</span></div>
+            <div class="kv"><span class="k">Group</span><span class="v">Richemont</span></div>
+            <div class="kv"><span class="k">Website</span><span class="v" style="color:#a58e28">cartier.com</span></div>
+          </div>
+          <div class="box">
+            <div class="bh">Financial Health</div>
+            <div class="kv"><span class="k">Status</span><span class="v">Privately Held</span></div>
+            <div class="kv"><span class="k">Parent Group</span><span class="v">Richemont</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CULTURE — composed with rhythm -->
+    <div class="panel" id="culture">
+
+      <!-- 1. FOUNDER — full-width opening banner -->
+      <div class="section">
+        <div class="eb line">The origin</div>
+        <div class="founder-banner">
+          <div class="fp">LC</div>
+          <div>
+            <div class="fn pf">Louis-François Cartier</div>
+            <div class="fyears">1819 – 1904 · Founder</div>
+            <div class="body" style="max-width:70ch">
+              <p>He founded the Maison in Paris in 1847, taking over the jewellery workshop of his master, Adolphe Picard. Born in Paris to a family of modest means, he trained as a jeweller before establishing the business that would carry his name. Under the Second Empire the firm drew court patronage, with Princess Mathilde among its earliest clients from 1856. In 1874 he passed the house to his son Alfred — whose sons Louis, Pierre and Jacques would later establish Cartier across Paris, London and New York.</p>
+            </div>
+            <div class="quote">"The jeweller of kings and the king of jewellers."<span class="by">— Attributed to King Edward VII</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. CORE VALUES — 4 across, full width -->
+      <div class="section">
+        <div class="eb line">What the maison stands for</div>
+        <div class="vgrid">
+          <div class="vc"><div class="vct">Métiers d'art</div><div class="vcd">Mastery of jewellery, watchmaking and rare savoir-faire at the heart of every creation.</div></div>
+          <div class="vc"><div class="vct">Heritage</div><div class="vcd">A design vocabulary — Tank, Love, Panthère — carried forward rather than reinvented.</div></div>
+          <div class="vc"><div class="vct">Discretion</div><div class="vcd">Restraint and timelessness over trend; the creation speaks before the logo.</div></div>
+          <div class="vc"><div class="vct">Excellence</div><div class="vcd">Exacting standards across high jewellery and fine watchmaking.</div></div>
+        </div>
+      </div>
+
+      <!-- 3. HERITAGE + WORK — split -->
+      <div class="section">
+        <div class="split">
+          <div>
+            <div class="eb line">Why it matters — heritage</div>
+            <div class="tl"><span class="tly">1847</span><span class="tle">Louis-François Cartier founds the Maison in Paris.</span></div>
+            <div class="tl"><span class="tly">1904</span><span class="tle">The Santos, one of the first purpose-built wristwatches, is created for aviator Santos-Dumont.</span></div>
+            <div class="tl"><span class="tly">1919</span><span class="tle">The Tank watch, designed by Louis Cartier, is introduced.</span></div>
+            <div class="tl"><span class="tly">1933</span><span class="tle">Jeanne Toussaint is appointed Director of Fine Jewellery.</span></div>
+            <div class="tl"><span class="tly">1969</span><span class="tle">Aldo Cipullo designs the Love bracelet in New York.</span></div>
+            <div class="tl"><span class="tly">1983</span><span class="tle">The Panthère de Cartier line is introduced.</span></div>
+            <div class="tl"><span class="tly">1988</span><span class="tle">Cartier is consolidated under Compagnie Financière Richemont.</span></div>
+          </div>
+          <div>
+            <div class="eb line">Working there</div>
+            <div class="acc"><div class="acch">Culture <span class="acci">+</span></div><div class="accb"><p>A heritage-driven house where craft and métiers d'art set the tone. Discretion and long-term thinking over visibility.</p></div></div>
+            <div class="acc"><div class="acch">Growth <span class="acci">+</span></div><div class="accb"><p>Progression spans craft mastery, boutique leadership and international postings across Richemont's network.</p></div></div>
+            <div class="acc"><div class="acch">Pace <span class="acci">+</span></div><div class="accb"><p>Measured and quality-first; the maison prizes precision and finish over speed.</p></div></div>
+            <div class="acc"><div class="acch">Access <span class="acci">+</span></div><div class="accb"><p>Selective hiring with strong emphasis on savoir-faire, client culture and brand fit.</p></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. SIGNATURE CREATIONS — full-width feature grid (part of the culture) -->
+      <div class="section">
+        <div class="eb line">What makes it iconic — signature creations</div>
+        <div class="cg">
+          <div class="crea"><div class="cy">1904</div><div class="cn pf">Santos</div><div class="cd">Among the first purpose-built wristwatches, for aviator Santos-Dumont.</div></div>
+          <div class="crea"><div class="cy">1919</div><div class="cn pf">Tank</div><div class="cd">Rectangular watch by Louis Cartier; geometry linked to WWI tanks.</div></div>
+          <div class="crea"><div class="cy">1924</div><div class="cn pf">Trinity</div><div class="cd">Three interlaced bands of rose, yellow and white gold.</div></div>
+          <div class="crea"><div class="cy">1969</div><div class="cn pf">Love</div><div class="cd">Screw-fastened bangle by Aldo Cipullo, New York.</div></div>
+          <div class="crea"><div class="cy">1983</div><div class="cn pf">Panthère</div><div class="cd">Supple panther-link jewellery and watch line.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAREER PATHS -->
+    <div class="panel" id="careers">
+      <div class="eb">Career paths at Cartier</div>
+      <div class="body" style="max-width:66ch;margin-bottom:30px"><p>Careers at Cartier span the maison's craft heritage and its global retail and corporate footprint — from the workshop bench and the watchmaker's loupe to flagship boutique leadership and group functions within Richemont.</p></div>
+      <div class="chips" style="max-width:760px">
+        <span class="chip">High Jewellery &amp; Métiers d'art</span><span class="chip">Watchmaking</span>
+        <span class="chip">Retail &amp; boutique management</span><span class="chip">Clienteling &amp; CRM</span>
+        <span class="chip">Marketing &amp; image</span><span class="chip">Supply chain &amp; operations</span>
+        <span class="chip">Finance &amp; strategy</span><span class="chip">Digital &amp; e-commerce</span>
+      </div>
+    </div>
+    <div class="panel" id="salaries"><div class="eb">Salary Intelligence</div><div class="empty"><div class="e1">No salary observations yet.</div><div class="e2">Salary intelligence will appear here as it is contributed or sourced.</div></div></div>
+    <div class="panel" id="signals"><div class="eb">Signals</div><div class="empty"><div class="e1">No signals yet.</div><div class="e2">Verified intelligence mentioning Cartier will appear here as it is published.</div></div></div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+      document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));
+      t.classList.add('on');document.getElementById(t.dataset.t).classList.add('on');window.scrollTo({top:0,behavior:'smooth'});
+    }));
+    document.querySelectorAll('.acch').forEach(h=>h.addEventListener('click',()=>h.parentElement.classList.toggle('open')));
+  </script>
+</body>
+</html>
