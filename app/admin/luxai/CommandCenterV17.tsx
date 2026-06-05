@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 const TABS = [
   { id: 'overview', label: 'Overview' },
@@ -104,6 +104,28 @@ type BrandRow = {
   interview_count: number
   last_regenerated_at: string | null
   regeneration_count: number
+}
+
+type WikiluxDraft = {
+  slug: string
+  brand_name: string | null
+  created_at: string | null
+  content: {
+    key_facts?: {
+      founded?: number | null
+      hq?: string | null
+      country?: string | null
+      parent_group?: string | null
+      sector?: string | null
+      website?: string | null
+    } | null
+    _sources?: {
+      wikidata_qid?: string | null
+      wikidata_url?: string | null
+      acquired_at?: string | null
+      source?: string | null
+    } | null
+  } | null
 }
 
 // Types where an editorial queue does not structurally apply (presentation only)
@@ -487,6 +509,34 @@ const STYLE = `
     font-family: inherit;
   }
   .v17-hint { font-size: 10px; color: #999; }
+  .v17-draft-card {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .v17-draft-sec { padding: 10px 0; border-top: 1px solid #f0f0f0; }
+  .v17-draft-sec:first-child { padding-top: 0; border-top: none; }
+  .v17-draft-sec-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #aaa;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .v17-draft-input { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .v17-draft-brand { font-size: 14px; font-weight: 600; color: #111; }
+  .v17-draft-meta { font-size: 11px; color: #999; }
+  .v17-draft-facts { width: 100%; border-collapse: collapse; }
+  .v17-draft-facts td { padding: 5px 8px; font-size: 12px; border-bottom: 1px solid #f5f5f5; vertical-align: top; }
+  .v17-draft-facts tr:last-child td { border-bottom: none; }
+  .v17-draft-fk { color: #888; width: 140px; }
+  .v17-draft-fv { color: #111; }
+  .v17-draft-fs { width: 130px; text-align: right; }
+  .v17-draft-fs a { font-size: 11px; color: #2563eb; text-decoration: none; }
+  .v17-draft-fs a:hover { text-decoration: underline; }
 `
 
 export default function CommandCenterV17() {
@@ -520,6 +570,12 @@ export default function CommandCenterV17() {
   const [brandsListLoading, setBrandsListLoading] = useState(false)
   const [brandsListError, setBrandsListError] = useState(false)
   const [brandsListLoaded, setBrandsListLoaded] = useState(false)
+
+  // WikiLux drafts awaiting review (IQ engine output surface)
+  const [wikiluxDrafts, setWikiluxDrafts] = useState<WikiluxDraft[]>([])
+  const [wikiluxDraftsLoading, setWikiluxDraftsLoading] = useState(false)
+  const [wikiluxDraftsError, setWikiluxDraftsError] = useState(false)
+  const [wikiluxDecisionSlug, setWikiluxDecisionSlug] = useState<string | null>(null)
 
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null)
   const [usageHistory, setUsageHistory] = useState<UsageHistoryRow[]>([])
@@ -1100,6 +1156,47 @@ export default function CommandCenterV17() {
     }
   }, [activeTab, brandsListLoaded])
 
+  const loadWikiluxDrafts = useCallback(() => {
+    setWikiluxDraftsLoading(true)
+    setWikiluxDraftsError(false)
+    fetch('/api/admin/luxai/wikilux-drafts')
+      .then((r) => {
+        if (!r.ok) throw new Error(`status ${r.status}`)
+        return r.json()
+      })
+      .then((data) => {
+        setWikiluxDrafts(Array.isArray(data?.drafts) ? data.drafts : [])
+        setWikiluxDraftsLoading(false)
+      })
+      .catch(() => {
+        setWikiluxDraftsError(true)
+        setWikiluxDraftsLoading(false)
+      })
+  }, [])
+
+  useEffect(() => {
+    if (activeTab !== 'brands') return
+    loadWikiluxDrafts()
+  }, [activeTab, loadWikiluxDrafts])
+
+  const handleWikiluxDecision = async (slug: string, action: 'approve' | 'reject') => {
+    if (wikiluxDecisionSlug) return
+    setWikiluxDecisionSlug(slug)
+    try {
+      const res = await fetch(`/api/admin/luxai/wikilux-drafts/${encodeURIComponent(slug)}/decision`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      })
+      // Refresh the drafts list regardless — the decided row leaves the pending set.
+      if (res.ok) loadWikiluxDrafts()
+    } catch {
+      /* surfaced via the refreshed list / error state */
+    } finally {
+      setWikiluxDecisionSlug(null)
+    }
+  }
+
   const activeLabel = TABS.find((t) => t.id === activeTab)?.label ?? ''
 
   const totals = inventory.reduce(
@@ -1359,13 +1456,112 @@ export default function CommandCenterV17() {
     )
   }
 
-  const renderBrands = () => {
-    if (brandsListLoading) return <div className="v17-state">Loading…</div>
-    if (brandsListError) return <div className="v17-state error">Failed to load brands.</div>
-    if (brandsList.length === 0) return <div className="v17-state">No brands.</div>
-
+  const renderWikiluxDrafts = () => {
     return (
-      <div className="v17-table-wrap">
+      <>
+        <div className="v17-section-label">Drafts in review · IQ engine output</div>
+        {wikiluxDraftsLoading ? (
+          <div className="v17-state">Loading drafts…</div>
+        ) : wikiluxDraftsError ? (
+          <div className="v17-state error">Failed to load drafts.</div>
+        ) : wikiluxDrafts.length === 0 ? (
+          <div className="v17-state">No drafts awaiting review.</div>
+        ) : (
+          wikiluxDrafts.map((d) => {
+            const kf = d.content?.key_facts ?? {}
+            const src = d.content?._sources ?? {}
+            const sourceUrl = src.wikidata_url ?? null
+            const deciding = wikiluxDecisionSlug === d.slug
+            const dash = (v: unknown) =>
+              v === null || v === undefined || v === '' ? '—' : String(v)
+            const facts: { label: string; value: unknown }[] = [
+              { label: 'Founded', value: kf.founded },
+              { label: 'HQ', value: kf.hq },
+              { label: 'Country', value: kf.country },
+              { label: 'Parent Group', value: kf.parent_group },
+              { label: 'Sector', value: kf.sector },
+              { label: 'Website', value: kf.website },
+            ]
+            return (
+              <div className="v17-draft-card" key={d.slug}>
+                {/* Section 1 — Input */}
+                <div className="v17-draft-sec">
+                  <div className="v17-draft-sec-label">Input</div>
+                  <div className="v17-draft-input">
+                    <span className="v17-draft-brand">{d.brand_name ?? d.slug}</span>
+                    <span className="v17-tag">{(src.source ?? 'wikidata').toString().toUpperCase()}</span>
+                    {src.wikidata_qid && <span className="v17-draft-meta">QID {src.wikidata_qid}</span>}
+                    <span className="v17-draft-meta">Generated {formatDate(src.acquired_at ?? d.created_at)}</span>
+                  </div>
+                </div>
+
+                {/* Section 2 — Output + Section 3 — Provenance (per field) */}
+                <div className="v17-draft-sec">
+                  <div className="v17-draft-sec-label">Output · with provenance</div>
+                  <table className="v17-draft-facts">
+                    <tbody>
+                      {facts.map((f) => (
+                        <tr key={f.label}>
+                          <td className="v17-draft-fk">{f.label}</td>
+                          <td className="v17-draft-fv">{dash(f.value)}</td>
+                          <td className="v17-draft-fs">
+                            {sourceUrl ? (
+                              <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
+                                Wikidata source
+                              </a>
+                            ) : (
+                              '—'
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Section 4 — Review */}
+                <div className="v17-draft-sec">
+                  <div className="v17-draft-sec-label">Review</div>
+                  <div className="v17-action-row">
+                    <button
+                      type="button"
+                      className="v17-btn-secondary"
+                      onClick={() => handleWikiluxDecision(d.slug, 'approve')}
+                      disabled={deciding}
+                    >
+                      {deciding ? 'Working…' : 'Approve'}
+                    </button>
+                    <button
+                      type="button"
+                      className="v17-btn-secondary"
+                      onClick={() => handleWikiluxDecision(d.slug, 'reject')}
+                      disabled={deciding}
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )
+          })
+        )}
+      </>
+    )
+  }
+
+  const renderBrands = () => {
+    return (
+      <>
+        {renderWikiluxDrafts()}
+        <div className="v17-section-label">Published brands</div>
+        {brandsListLoading ? (
+          <div className="v17-state">Loading…</div>
+        ) : brandsListError ? (
+          <div className="v17-state error">Failed to load brands.</div>
+        ) : brandsList.length === 0 ? (
+          <div className="v17-state">No brands.</div>
+        ) : (
+          <div className="v17-table-wrap">
         <table className="v17-table">
           <thead>
             <tr>
@@ -1389,6 +1585,8 @@ export default function CommandCenterV17() {
           </tbody>
         </table>
       </div>
+        )}
+      </>
     )
   }
 
