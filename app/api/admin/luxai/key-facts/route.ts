@@ -199,27 +199,41 @@ export async function POST(request: Request) {
     const parentGroup = parentId ? labelOf(refEntities[parentId]) : null
     const sector = industryId ? labelOf(refEntities[industryId]) : null
 
-    const key_facts = {
-      founded: foundedYear,        // P571
-      hq,                          // P159 (+ place P17 for country)
-      country,                     // P17
-      parent_group: parentGroup,   // P749
-      sector,                      // P452
-      website: websiteUrl,         // P856
-    }
-
     const wikidata_url = `https://www.wikidata.org/wiki/${qid}`
 
-    // 4. Write a DRAFT. NEVER publish. NEVER auto-approve.
+    // 4. Shape content in the EXACT format buildBrandData() in
+    //    app/brands/[slug]/page.tsx reads. key_facts is a [{label,value}]
+    //    array matched case-insensitively by getKeyFact(). The labels are
+    //    locked: "Founded", "Headquarters", "Ownership". A null Wikidata
+    //    value omits that row entirely — never a fabricated/blank fact.
+    const key_facts: { label: string; value: any }[] = []
+    if (foundedYear !== null) key_facts.push({ label: 'Founded', value: foundedYear })
+    if (hq) key_facts.push({ label: 'Headquarters', value: hq })
+    if (parentGroup) key_facts.push({ label: 'Ownership', value: parentGroup })
+
+    // 5. Write a DRAFT. NEVER publish. NEVER auto-approve.
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
     const content = {
       key_facts,
+      // The page reads stock.parent_group FIRST for Ownership. Phase 1 has no
+      // market data, so is_public is false (no fabricated ticker/price).
+      stock: { parent_group: parentGroup, is_public: false },
       _sources: {
         wikidata_qid: qid,
         wikidata_url,
         acquired_at: new Date().toISOString(),
         source: 'wikidata',
         phase: 1,
+      },
+      // Full extracted set kept for provenance. The page has no getKeyFact
+      // display slot for country/sector/website — that's a page limit, not ours.
+      _raw_facts: {
+        founded: foundedYear,        // P571
+        hq,                          // P159 (+ place P17 for country)
+        country,                     // P17
+        parent_group: parentGroup,   // P749
+        sector,                      // P452
+        website: websiteUrl,         // P856
       },
     }
 

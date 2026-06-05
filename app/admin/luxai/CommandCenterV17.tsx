@@ -111,7 +111,8 @@ type WikiluxDraft = {
   brand_name: string | null
   created_at: string | null
   content: {
-    key_facts?: {
+    key_facts?: { label: string; value: any }[] | null
+    _raw_facts?: {
       founded?: number | null
       hq?: string | null
       country?: string | null
@@ -1468,7 +1469,7 @@ export default function CommandCenterV17() {
           <div className="v17-state">No drafts awaiting review.</div>
         ) : (
           wikiluxDrafts.map((d) => {
-            const kf = d.content?.key_facts ?? {}
+            const kf = d.content?._raw_facts ?? {}
             const src = d.content?._sources ?? {}
             const sourceUrl = src.wikidata_url ?? null
             const deciding = wikiluxDecisionSlug === d.slug
