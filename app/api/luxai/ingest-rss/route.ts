@@ -14,6 +14,8 @@ const supabase = createClient(
 
 const MAX_ITEMS_PER_SOURCE = 5
 
+const AUTO_PUBLISH_SIGNALS: boolean = false // Phase 1 kill-switch (P0-2). Future: promote to admin-controlled DB setting.
+
 function isBrandRelevant(title: string, description: string, brandNames: Set<string>): boolean {
   const text = `${title} ${description}`.toLowerCase()
   for (const brand of brandNames) {
@@ -210,6 +212,7 @@ export async function POST() {
           totalInserted++
 
           // Step 6b — Auto-approve high-confidence sourced signals
+          if (AUTO_PUBLISH_SIGNALS === true) {
           const canAutoApprove =
             structured.confidence === 'high' &&
             Array.isArray(structured.brand_tags) && structured.brand_tags.length > 0 &&
@@ -269,6 +272,7 @@ export async function POST() {
               console.error(`[RSS ingest] Auto-approve failed for "${structured.headline}":`, publishError.message)
             }
           }
+          } // end AUTO_PUBLISH_SIGNALS guard (P0-2)
         }
 
         // Step 7 — Update last_fetched_at
