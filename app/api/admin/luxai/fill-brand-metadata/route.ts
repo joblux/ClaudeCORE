@@ -1,14 +1,10 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import Anthropic from '@anthropic-ai/sdk'
+import { callClaude } from '@/lib/anthropic/client'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-})
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -89,16 +85,7 @@ Rules:
 Return only the JSON object.`
 
   try {
-    const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 400,
-      messages: [{ role: 'user', content: prompt }],
-    })
-
-    const text = message.content
-      .filter((b: any) => b.type === 'text')
-      .map((b: any) => b.text)
-      .join('')
+    const text = await callClaude({ prompt, maxTokens: 400 })
 
     const parsed = extractJson(text)
     if (!parsed || typeof parsed !== 'object') {
