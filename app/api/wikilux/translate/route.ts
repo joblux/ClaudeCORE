@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
-import Anthropic from "@anthropic-ai/sdk"
+import { callClaude } from "@/lib/anthropic/client"
 import { buildTranslationPrompt, SUPPORTED_LANGUAGES } from "@/lib/wikilux-prompt"
 
 export const maxDuration = 60
@@ -9,10 +9,6 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
-
-const anthropic = new Anthropic({
-  apiKey: process.env.WIKILUX_API_KEY!,
-})
 
 export async function POST(req: Request) {
   const { slug, language_code } = await req.json()
@@ -48,13 +44,7 @@ export async function POST(req: Request) {
   }
 
   // Generate translation with Claude
-  const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 5000,
-    messages: [{ role: "user", content: buildTranslationPrompt(lang.name, row.content as Record<string, unknown>) }],
-  })
-
-  const text = message.content[0].type === "text" ? message.content[0].text : ""
+  const text = await callClaude({ prompt: buildTranslationPrompt(lang.name, row.content as Record<string, unknown>), maxTokens: 5000 })
 
   let translation
   try {
