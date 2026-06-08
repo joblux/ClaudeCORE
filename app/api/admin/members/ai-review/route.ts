@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { callClaude } from '@/lib/anthropic/client'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -90,28 +91,7 @@ Rules:
 - Be generous but not naive`
 
     // Call Claude API
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.WIKILUX_API_KEY!,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        messages: [{ role: 'user', content: systemPrompt }],
-      }),
-    })
-
-    if (!response.ok) {
-      const errText = await response.text()
-      console.error('Claude API error:', errText)
-      return NextResponse.json({ error: 'AI review failed' }, { status: 500 })
-    }
-
-    const aiResponse = await response.json()
-    const text = aiResponse.content?.[0]?.text || ''
+    const text = await callClaude({ prompt: systemPrompt, maxTokens: 300 })
 
     // Parse JSON from response
     let review: { confidence: string; reasoning: string; recommendation: string }
@@ -138,7 +118,7 @@ Rules:
       reasoning: review.reasoning,
       recommendation: review.recommendation,
       auto_approved: shouldAutoApprove,
-      model_used: 'claude-sonnet-4-20250514',
+      model_used: 'claude-haiku-4-5-20251001',
       created_at: new Date().toISOString(),
     }, { onConflict: 'member_id' })
 
