@@ -18,60 +18,21 @@ export const dynamic = 'force-dynamic'
 
 import { callClaude } from '@/lib/anthropic/client'
 
-// --- Wikidata plumbing (adapted from key-facts/route.ts) -------------------
-
-const WD_API = 'https://www.wikidata.org/w/api.php'
-const WD_HEADERS = { 'User-Agent': 'JOBLUX-WikiLux/1.0 (wikilux-build prototype)' }
-
-const P = {
-  INSTANCE_OF: 'P31',
-  INDUSTRY: 'P452',
-  WEBSITE: 'P856',
-}
-
-// instance-of labels that confirm the entity is a brand / organization
-// rather than a homonym (a person, a place, a song, etc).
-const ORG_LABEL_RE =
-  /\b(compan|business|brand|enterprise|corporation|manufactur|conglomerate|retailer|maison|firm|group|holding|marque|producer)\b/i
-
-type Claim = any
-
-function firstClaim(claims: Record<string, Claim[]> | undefined, prop: string): Claim | null {
-  const arr = claims?.[prop]
-  if (!Array.isArray(arr) || arr.length === 0) return null
-  const preferred = arr.find(c => c?.rank === 'preferred')
-  const candidate = preferred || arr.find(c => c?.rank !== 'deprecated') || arr[0]
-  return candidate?.mainsnak?.snaktype === 'value' ? candidate : null
-}
-
-function claimItemId(claim: Claim | null): string | null {
-  return claim?.mainsnak?.datavalue?.value?.id ?? null
-}
-
-function claimString(claim: Claim | null): string | null {
-  const v = claim?.mainsnak?.datavalue?.value
-  return typeof v === 'string' ? v : null
-}
-
-async function wdFetch(url: string): Promise<any> {
-  const res = await fetch(url, { headers: WD_HEADERS, cache: 'no-store' })
-  if (!res.ok) throw new Error(`Wikidata fetch failed (${res.status})`)
-  return res.json()
-}
-
-async function getEntities(ids: string[]): Promise<Record<string, any>> {
-  const unique = Array.from(new Set(ids.filter(Boolean)))
-  if (unique.length === 0) return {}
-  const url =
-    `${WD_API}?action=wbgetentities&ids=${unique.join('|')}` +
-    `&props=labels&languages=en&format=json&origin=*`
-  const data = await wdFetch(url)
-  return data?.entities ?? {}
-}
-
-function labelOf(entity: any): string | null {
-  return entity?.labels?.en?.value ?? null
-}
+// --- Wikidata plumbing (shared Source-Discovery module) ---------------------
+// Resilient Wikidata helpers (B2a-hardened: wdFetch retries + returns WdResult,
+// never throws). Previously a per-route copy here; now the single shared source.
+import {
+  WD_API,
+  P,
+  ORG_LABEL_RE,
+  firstClaim,
+  claimItemId,
+  claimString,
+  wdFetch,
+  getEntities,
+  labelOf,
+} from '@/lib/luxai/wikidata'
+import type { Claim } from '@/lib/luxai/wikidata'
 
 // --- Corpus builder (fetch pattern adapted from import/url/route.ts) --------
 
@@ -248,7 +209,7 @@ export async function POST(request: Request) {
       `${WD_API}?action=wbsearchentities&search=${encodeURIComponent(name)}` +
       `&language=en&format=json&limit=5&origin=*`
     const search = await wdFetch(searchUrl)
-    const candidates: any[] = Array.isArray(search?.search) ? search.search : []
+    const candidates: any[] = Array.isArray(search.data?.search) ? search.data.search : []
     if (candidates.length === 0) {
       return NextResponse.json({
         matched: false,
@@ -266,7 +227,7 @@ export async function POST(request: Request) {
       const entityData = await wdFetch(
         `https://www.wikidata.org/wiki/Special:EntityData/${cid}.json`
       )
-      const ent = entityData?.entities?.[cid] ?? {}
+      const ent = entityData.data?.entities?.[cid] ?? {}
       const candClaims: Record<string, Claim[]> = ent?.claims ?? {}
       const instanceIds = (candClaims[P.INSTANCE_OF] ?? [])
         .map((c: Claim) => claimItemId(c))
