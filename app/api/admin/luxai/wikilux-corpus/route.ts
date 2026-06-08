@@ -63,10 +63,73 @@ function claimString(claim: Claim | null): string | null {
   return typeof v === 'string' ? v : null
 }
 
-async function wdFetch(url: string): Promise<any> {
-  const res = await fetch(url, { headers: WD_HEADERS, cache: 'no-store' })
-  if (!res.ok) throw new Error(`Wikidata fetch failed (${res.status})`)
-  return res.json()
+// Wikidata resilience (B2a-hardening). wdFetch NO LONGER THROWS: it retries
+// transient failures with bounded backoff, then returns a typed failure the
+// caller records — so a Wikidata 429/5xx can never crash the request into a 500.
+const WD_MAX_ATTEMPTS = 3 // total tries (initial + 2 retries)
+const WD_BACKOFF_MS = [500, 1000, 2000] // wait BEFORE the next attempt
+const WD_MAX_BACKOFF_MS = 2000 // cap any single wait (incl. Retry-After) well under 10s
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+// Backoff for the wait before attempt n+1. Honors Retry-After (seconds form),
+// capped; otherwise the fixed 500/1000/2000ms schedule. Total wait across the
+// 2 possible retries stays <= 4s — well under the 10s per-fetch ceiling.
+function wdBackoffMs(attempt: number, retryAfter: string | null): number {
+  if (retryAfter) {
+    const secs = Number(retryAfter)
+    if (Number.isFinite(secs) && secs > 0) {
+      return Math.min(secs * 1000, WD_MAX_BACKOFF_MS)
+    }
+    // HTTP-date form is ignored — fall through to the fixed schedule.
+  }
+  return Math.min(WD_BACKOFF_MS[attempt - 1] ?? WD_MAX_BACKOFF_MS, WD_MAX_BACKOFF_MS)
+}
+
+interface WdResult {
+  data: any | null
+  ok: boolean
+  status: number | null
+  error: string | null
+}
+
+async function wdFetch(url: string): Promise<WdResult> {
+  let lastStatus: number | null = null
+  let lastError = 'Wikidata fetch failed'
+  for (let attempt = 1; attempt <= WD_MAX_ATTEMPTS; attempt++) {
+    try {
+      const res = await fetch(url, { headers: WD_HEADERS, cache: 'no-store' })
+      if (res.ok) {
+        const data = await res.json()
+        return { data, ok: true, status: res.status, error: null }
+      }
+      lastStatus = res.status
+      lastError = `Wikidata fetch failed (${res.status})`
+      // Non-retryable 4xx (except 429): retrying won't help — surface immediately.
+      if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+        return { data: null, ok: false, status: res.status, error: lastError }
+      }
+      // Retryable (429 or 5xx): back off before the next attempt, if any remain.
+      if (attempt < WD_MAX_ATTEMPTS) {
+        await sleep(wdBackoffMs(attempt, res.headers.get('retry-after')))
+      }
+    } catch (e: any) {
+      // Network/abort/JSON-parse error — treat as transient and retry.
+      lastStatus = null
+      lastError = e?.message || 'Wikidata fetch error'
+      if (attempt < WD_MAX_ATTEMPTS) {
+        await sleep(wdBackoffMs(attempt, null))
+      }
+    }
+  }
+  return {
+    data: null,
+    ok: false,
+    status: lastStatus,
+    error: `${lastError} after ${WD_MAX_ATTEMPTS} attempts`,
+  }
 }
 
 async function getEntities(ids: string[]): Promise<Record<string, any>> {
@@ -75,8 +138,8 @@ async function getEntities(ids: string[]): Promise<Record<string, any>> {
   const url =
     `${WD_API}?action=wbgetentities&ids=${unique.join('|')}` +
     `&props=labels&languages=en&format=json&origin=*`
-  const data = await wdFetch(url)
-  return data?.entities ?? {}
+  const r = await wdFetch(url)
+  return r.data?.entities ?? {}
 }
 
 function labelOf(entity: any): string | null {
@@ -193,8 +256,16 @@ export async function POST(request: Request) {
     const searchUrl =
       `${WD_API}?action=wbsearchentities&search=${encodeURIComponent(name)}` +
       `&language=en&format=json&limit=5&origin=*`
-    const search = await wdFetch(searchUrl)
-    const candidates: any[] = Array.isArray(search?.search) ? search.search : []
+    // discoveryError records WHY Wikidata discovery failed (429/5xx after retries,
+    // network) so the acquisition_report can distinguish "transient failure" from
+    // "genuinely not found". Stays null on a clean not-found.
+    let discoveryError: string | null = null
+
+    const searchRes = await wdFetch(searchUrl)
+    if (!searchRes.ok) discoveryError = `Wikidata search: ${searchRes.error}`
+    const candidates: any[] = Array.isArray(searchRes.data?.search)
+      ? searchRes.data.search
+      : []
 
     let qid: string | null = null
     let claims: Record<string, Claim[]> = {}
@@ -202,10 +273,13 @@ export async function POST(request: Request) {
 
     for (const cand of candidates) {
       const cid: string = cand.id
-      const entityData = await wdFetch(
+      const entityRes = await wdFetch(
         `https://www.wikidata.org/wiki/Special:EntityData/${cid}.json`
       )
-      const ent = entityData?.entities?.[cid] ?? {}
+      if (!entityRes.ok && !discoveryError) {
+        discoveryError = `Wikidata entity ${cid}: ${entityRes.error}`
+      }
+      const ent = entityRes.data?.entities?.[cid] ?? {}
       const candClaims: Record<string, Claim[]> = ent?.claims ?? {}
       const instanceIds = (candClaims[P.INSTANCE_OF] ?? [])
         .map((c: Claim) => claimItemId(c))
@@ -261,13 +335,14 @@ export async function POST(request: Request) {
 
     for (const a of attempts) {
       if (!a.source_url) {
-        // Could not resolve a URL — record the attempt, no fetch.
+        // Could not resolve a URL — record the attempt, no fetch. When discovery
+        // failed transiently (429/5xx after retries), surface that instead of a
+        // bare "not resolved", so a rate-limit isn't mistaken for a missing brand.
+        const unresolved = discoveryError ?? 'brand not resolved on Wikidata'
         const reason =
-          a.family === 'official'
-            ? qid
-              ? 'no P856 official-site claim'
-              : 'brand not resolved on Wikidata'
-            : 'brand not resolved on Wikidata'
+          a.family === 'official' && qid
+            ? 'no P856 official-site claim'
+            : unresolved
         acquisition_report.push({
           family: a.family,
           source_url: null,
