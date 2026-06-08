@@ -2,14 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import Anthropic from '@anthropic-ai/sdk'
+import { callClaude } from '@/lib/anthropic/client'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
-
-const anthropic = new Anthropic({ apiKey: process.env.WIKILUX_API_KEY! })
 
 /**
  * POST /api/assignments/import/paste
@@ -35,21 +33,14 @@ export async function POST(request: NextRequest) {
     // Truncate to ~15000 chars to stay within reasonable token limits
     const truncatedText = text.trim().slice(0, 15000)
 
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2000,
+    const aiText = await callClaude({
       system: 'You are a job posting parser for a luxury recruitment platform. Extract structured job data from the following text. Return ONLY a valid JSON object with these fields: title, company, city, country, description, responsibilities, requirements, qualifications, salary_min, salary_max, salary_currency, department, seniority, contract_type, remote_policy, benefits, languages_required, nice_to_haves. For array fields (benefits, languages_required), return arrays. For missing fields, use null. Return valid JSON only.',
-      messages: [{ role: 'user', content: truncatedText }],
+      prompt: truncatedText,
+      maxTokens: 2000,
     })
 
-    // Extract text from the response
-    const textBlock = response.content.find((block) => block.type === 'text')
-    if (!textBlock || textBlock.type !== 'text') {
-      return NextResponse.json({ error: 'No response from AI' }, { status: 500 })
-    }
-
     // Parse the JSON response, handling potential markdown code blocks
-    let jsonText = textBlock.text.trim()
+    let jsonText = aiText.trim()
     if (jsonText.startsWith('```json')) {
       jsonText = jsonText.slice(7)
     } else if (jsonText.startsWith('```')) {
@@ -65,7 +56,7 @@ export async function POST(request: NextRequest) {
       assignment = JSON.parse(jsonText)
     } catch {
       return NextResponse.json(
-        { error: 'Failed to parse AI response as JSON', raw: textBlock.text },
+        { error: 'Failed to parse AI response as JSON', raw: aiText },
         { status: 500 }
       )
     }
