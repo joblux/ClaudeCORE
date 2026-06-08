@@ -2,14 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import Anthropic from '@anthropic-ai/sdk'
+import { callClaude } from '@/lib/anthropic/client'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
-
-const anthropic = new Anthropic({ apiKey: process.env.WIKILUX_API_KEY! })
 
 // Maximum number of assignments to enrich in one request (to manage AI costs)
 const MAX_ENRICHMENT_BATCH = 5
@@ -29,21 +27,14 @@ Return JSON with the enriched/standardized fields only.`
  * Enrich a single assignment using Claude AI.
  */
 async function enrichAssignment(assignment: Record<string, any>): Promise<Record<string, any>> {
-  const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 2000,
+  const aiText = await callClaude({
     system: ENRICHMENT_SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: JSON.stringify(assignment) }],
+    prompt: JSON.stringify(assignment),
+    maxTokens: 2000,
   })
 
-  // Extract text from the response
-  const textBlock = response.content.find((block) => block.type === 'text')
-  if (!textBlock || textBlock.type !== 'text') {
-    throw new Error('No text response from AI')
-  }
-
   // Parse the JSON response, handling potential markdown code blocks
-  let jsonText = textBlock.text.trim()
+  let jsonText = aiText.trim()
   if (jsonText.startsWith('```json')) {
     jsonText = jsonText.slice(7)
   } else if (jsonText.startsWith('```')) {
