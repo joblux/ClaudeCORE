@@ -11,8 +11,8 @@ export const dynamic = 'force-dynamic'
 // POST { brands? } → for each brand, measure TWO families and return an
 // acquisition_report (one row per brand × family) + aggregate metrics:
 //   - OFFICIAL: real resolution via Wikidata P856 + measured fetch.
-//   - REUTERS:  declared family with NO resolver yet → reported as
-//     unresolved-by-design (resolver_exists:false). DO NOT guess/search a URL.
+//   - REUTERS:  Slice 1A resolver (Method A) — deterministic site-search URL
+//     (resolver_exists:true) + measured fetch. No external API / Arc XP / RIC.
 //
 // This slice proves resolution + acquisition mechanics BEFORE any family is
 // wired into the engine. It is deliberately isolated:
@@ -53,6 +53,10 @@ const MAX_BRANDS = 10
 
 // Coarse paywall markers (heuristic — flag, do not over-engineer).
 const PAYWALL_MARKERS = ['paywall', 'subscribe']
+
+// Reuters Slice 1A resolver base — deterministic site-search (Method A, Mo+GPT).
+// brand -> `${REUTERS_SEARCH}?query=<brand>`. No external API, no Arc XP, no RIC.
+const REUTERS_SEARCH = 'https://www.reuters.com/site-search/'
 
 /**
  * fetchMeasured — RETURNS the http status instead of throwing (so the report can
@@ -246,27 +250,53 @@ async function measureOfficial(
   return base
 }
 
-// REUTERS: declared family with NO resolver yet — unresolved-by-design.
-// DO NOT guess a URL, DO NOT build a search URL, DO NOT fetch.
-function measureReuters(brand: string): ProbeRow {
-  return {
+// REUTERS — Slice 1A resolver (Method A): deterministic site-search URL. The URL
+// always constructs (resolver_exists:true, url_resolved:true); the probe then
+// MEASURES the real Reuters wall (bot-block vs JS-shell) with the SAME
+// fetch/strip/heuristics as OFFICIAL. No external API, no Arc XP JSON, no RIC.
+async function measureReuters(brand: string): Promise<ProbeRow> {
+  const searchUrl = `${REUTERS_SEARCH}?query=${encodeURIComponent(brand)}`
+
+  const base: ProbeRow = {
     brand,
     family: 'reuters',
-    source_url: null,
+    source_url: searchUrl,
     source_ref: 'Reuters',
-    resolved_via: null,
-    resolver_exists: false,
-    url_resolved: false,
-    fetch_attempted: false,
+    resolved_via: 'site-search',
+    resolver_exists: true,
+    url_resolved: true,
+    fetch_attempted: true,
     fetch_ok: false,
     http_status: null,
     text_size: 0,
     duration_ms: 0,
     paywall: false,
     js_failure: false,
-    reason: 'no_reuters_resolver_yet',
+    reason: null,
     error: null,
   }
+
+  const started = Date.now()
+  const res = await fetchMeasured(searchUrl)
+  base.duration_ms = Date.now() - started
+  base.fetch_ok = res.ok
+  base.http_status = res.status
+  base.error = res.error
+
+  const stripped = res.text ? htmlToText(res.text) : ''
+  base.text_size = stripped.length
+
+  // Paywall heuristic: 401/403, OR a 200 whose body carries paywall markers.
+  const bodyLower = res.text ? res.text.toLowerCase() : ''
+  base.paywall =
+    res.status === 401 ||
+    res.status === 403 ||
+    (res.ok && PAYWALL_MARKERS.some(m => bodyLower.includes(m)))
+
+  // JS-failure heuristic: 200 OK but almost no text after strip.
+  base.js_failure = res.ok && res.status === 200 && base.text_size < JS_FAILURE_MIN_CHARS
+
+  return base
 }
 
 // --- Aggregate metrics (per family, denominator = number of brands) ---------
@@ -331,7 +361,7 @@ export async function POST(request: Request) {
     for (const brand of brands) {
       const resolved = await resolveBrand(brand)
       rows.push(await measureOfficial(brand, resolved))
-      rows.push(measureReuters(brand))
+      rows.push(await measureReuters(brand))
     }
 
     // 4. RETURN — WRITE NOTHING. acquisition_report + aggregate metrics only.
