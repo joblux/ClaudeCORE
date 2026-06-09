@@ -18,7 +18,6 @@
 
 import {
   SOURCE_REGISTRY,
-  QUERY_PATTERN,
   SIGNAL_INTENTS,
   NEWSROOM_SCOPED,
   type SourceType,
@@ -61,30 +60,37 @@ export type Discovery = {
 
 // --- Helpers ----------------------------------------------------------------
 
-// Source types whose query gets the newsroom-scoped variant (spec §4).
-const NEWSROOM_SCOPED_TYPES: SourceType[] = ['parent_newsroom', 'brand_official'];
-
 // The SIGNAL_INTENTS values embed the '{brand} {year} ' prefix; the abstract
-// QUERY_PATTERN / NEWSROOM_SCOPED substitute {signal_intent} with only the
-// intent fragment. Strip the prefix so substitution stays mechanical and
-// produces exactly the spec §4 strings.
+// NEWSROOM_SCOPED template substitutes {signal_intent} with only the intent
+// fragment. Strip the prefix so substitution stays mechanical and produces
+// exactly the spec §4 strings.
 function intentFragment(intent: SignalIntent): string {
   return SIGNAL_INTENTS[intent].replace('{brand} {year} ', '');
 }
 
 // --- buildQueries -----------------------------------------------------------
 // Pure. For each brand x eligible registry source x signal_intent, build one
-// query string. No network, no side effects.
+// DOMAIN-SCOPED query string. No network, no side effects.
+// Variante B (Mo+GPT, first read-run learning): the generic QUERY_PATTERN
+// leaked off-domain results (ft.com hits on a FashionNetwork query), so every
+// discovery query is now site:{entry}-scoped via NEWSROOM_SCOPED. `year` is
+// kept in the signature for caller stability; scoped queries do not embed it
+// (freshness is enforced on the RESULT date in runDiscovery, not the query).
 export function buildQueries(brands: string[], year: number): PlannedQuery[] {
   const intents = Object.keys(SIGNAL_INTENTS) as SignalIntent[];
 
   // DISCOVERY-SOURCE FILTER: only sources that can serve a discovery feed
   // (signals / events / market_reports). Brands-only backbone sources
   // (Wikipedia/Wikidata) exist for enrichment, not discovery acquisition.
-  const eligible = SOURCE_REGISTRY.filter((s) =>
-    s.feeds.some(
-      (f) => f === 'signals' || f === 'events' || f === 'market_reports',
-    ),
+  // PLACEHOLDER RULE: an entry containing '{' (e.g. '{brand_domain}' of
+  // Brand official sites / Annual reports) is not a resolvable domain — the
+  // source is EXCLUDED from discovery. Brand-domain resolution is a later slice.
+  const eligible = SOURCE_REGISTRY.filter(
+    (s) =>
+      !s.entry.includes('{') &&
+      s.feeds.some(
+        (f) => f === 'signals' || f === 'events' || f === 'market_reports',
+      ),
   );
 
   const planned: PlannedQuery[] = [];
@@ -93,13 +99,9 @@ export function buildQueries(brands: string[], year: number): PlannedQuery[] {
     for (const source of eligible) {
       for (const intent of intents) {
         const fragment = intentFragment(intent);
-        const query = NEWSROOM_SCOPED_TYPES.includes(source.type)
-          ? NEWSROOM_SCOPED.replace('{newsroom_domain}', source.entry)
-              .replace('{brand}', brand)
-              .replace('{signal_intent}', fragment)
-          : QUERY_PATTERN.replace('{brand}', brand)
-              .replace('{year}', String(year))
-              .replace('{signal_intent}', fragment);
+        const query = NEWSROOM_SCOPED.replace('{newsroom_domain}', source.entry)
+          .replace('{brand}', brand)
+          .replace('{signal_intent}', fragment);
 
         planned.push({
           brand,
