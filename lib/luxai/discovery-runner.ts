@@ -197,12 +197,26 @@ export async function runDiscovery(
   brands: string[],
   year: number,
   provider: DiscoveryProvider,
-  opts?: { freshnessDays?: number },
+  opts?: { freshnessDays?: number; sources?: string[] },
 ): Promise<Discovery[]> {
   const freshnessDays = opts?.freshnessDays ?? 90;
   const now = Date.now();
-  const planned = buildQueries(brands, year);
+  let planned = buildQueries(brands, year);
   const sourceByName = new Map(SOURCE_REGISTRY.map((s) => [s.name, s]));
+
+  // SCOPE CONTROL: opts.sources restricts the run to the named registry
+  // sources (exact match on registry name). Unknown names throw BEFORE any
+  // provider call — a typo must never silently produce an empty/partial run.
+  if (opts?.sources) {
+    const unknown = opts.sources.filter((n) => !sourceByName.has(n));
+    if (unknown.length > 0) {
+      throw new Error(
+        `runDiscovery: unknown source name(s) in opts.sources: ${unknown.join(', ')}`,
+      );
+    }
+    const wanted = new Set(opts.sources);
+    planned = planned.filter((p) => wanted.has(p.source));
+  }
 
   const seen = new Set<string>();
   const discoveries: Discovery[] = [];
