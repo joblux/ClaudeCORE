@@ -24,7 +24,9 @@ import {
   type SourceType,
   type Trust,
   type Cadence,
+  type Access,
 } from './source-registry';
+import type { DiscoveryProvider } from './discovery-provider';
 
 // --- Types ------------------------------------------------------------------
 
@@ -52,6 +54,9 @@ export type Discovery = {
   category: SignalIntent;
   confidence: Trust;
   reason: string;
+  // access carried mechanically from the registry source (proof-run learning b:
+  // premium/walled is a flag the triage step reads, not a runner-side failure).
+  access?: Access;
 };
 
 // --- Helpers ----------------------------------------------------------------
@@ -128,4 +133,108 @@ export function runDiscoveryDryRun(brands: string[], year: number): Discovery[] 
     confidence: trustBySource.get(p.source) as Trust,
     reason: `registry:${p.source} intent:${p.signal_intent}`,
   }));
+}
+
+// --- Mechanical validation helpers (zero AI) --------------------------------
+
+// Social platforms are noise on brand queries (proof-run learning a). Hosts and
+// any subdomain thereof are dropped before mapping.
+const SOCIAL_NOISE_HOSTS = [
+  'instagram.com',
+  'facebook.com',
+  'tiktok.com',
+  'pinterest.com',
+  'youtube.com',
+  'x.com',
+  'twitter.com',
+];
+
+function hostnameOf(url: string): string | null {
+  try {
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+function isSocialNoise(host: string): boolean {
+  return SOCIAL_NOISE_HOSTS.some((h) => host === h || host.endsWith('.' + h));
+}
+
+// Freshness on the RESULT's own date (proof-run learning c), not the query
+// {year}. null or unparseable date = KEPT — the triage step decides, not here.
+function isFresh(date: string | null, freshnessDays: number, now: number): boolean {
+  if (date === null) return true;
+  const t = Date.parse(date);
+  if (Number.isNaN(t)) return true;
+  return now - t <= freshnessDays * 24 * 60 * 60 * 1000;
+}
+
+// Dedup key: lowercase host, drop trailing slash, strip utm_* params, drop hash.
+function normalizeUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    u.hostname = u.hostname.toLowerCase();
+    for (const k of [...u.searchParams.keys()]) {
+      if (k.toLowerCase().startsWith('utm_')) u.searchParams.delete(k);
+    }
+    let path = u.pathname;
+    if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
+    const qs = u.searchParams.toString();
+    return `${u.protocol}//${u.host}${path}${qs ? '?' + qs : ''}`;
+  } catch {
+    return url;
+  }
+}
+
+// --- runDiscovery -----------------------------------------------------------
+// LIVE retrieval against an injected provider. buildQueries() (shared with the
+// dry-run) -> provider.search() per query, SEQUENTIAL (Apify FREE = no parallel
+// run, learning e). Mechanical validation (social-noise -> freshness -> dedup),
+// then maps survivors to Discovery with the SAME rules as the dry-run plus the
+// registry access flag. NO DB write, NO route, NO Apify import in this file.
+export async function runDiscovery(
+  brands: string[],
+  year: number,
+  provider: DiscoveryProvider,
+  opts?: { freshnessDays?: number },
+): Promise<Discovery[]> {
+  const freshnessDays = opts?.freshnessDays ?? 90;
+  const now = Date.now();
+  const planned = buildQueries(brands, year);
+  const sourceByName = new Map(SOURCE_REGISTRY.map((s) => [s.name, s]));
+
+  const seen = new Set<string>();
+  const discoveries: Discovery[] = [];
+
+  // SEQUENTIAL — await each query before the next; no parallel Apify runs.
+  for (const p of planned) {
+    const hits = await provider.search(p);
+    const src = sourceByName.get(p.source)!;
+
+    for (const hit of hits) {
+      const host = hostnameOf(hit.url);
+      if (host === null) continue; // unparseable URL — drop
+      if (isSocialNoise(host)) continue; // (a) social-noise filter
+      if (!isFresh(hit.date, freshnessDays, now)) continue; // (b) freshness on result date
+
+      const key = normalizeUrl(hit.url); // (c) dedup by normalized URL
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      discoveries.push({
+        brand: p.brand,
+        source: p.source,
+        title: hit.title,
+        url: hit.url,
+        date: hit.date,
+        category: p.signal_intent,
+        confidence: src.trust,
+        reason: `registry:${p.source} intent:${p.signal_intent} provider:${provider.name}`,
+        access: src.access,
+      });
+    }
+  }
+
+  return discoveries;
 }

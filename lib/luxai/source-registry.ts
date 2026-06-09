@@ -90,7 +90,7 @@ export const SOURCE_REGISTRY: SourceRecord[] = [
   {
     name: 'Four Seasons Newsroom',
     type: 'parent_newsroom',
-    entry: 'press.fourseasons.com',
+    entry: 'fourseasons.com',
     extraction_path: 'direct_html',
     access: 'direct_open',
     trust: 'primary',

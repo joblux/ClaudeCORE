@@ -30,6 +30,7 @@
     "@tiptap/starter-kit": "^3.20.4",
     "@types/marked": "^5.0.2",
     "adm-zip": "^0.5.16",
+    "apify-client": "^2.23.4",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "exceljs": "^4.4.0",
