@@ -56,6 +56,8 @@ export type Discovery = {
   // access carried mechanically from the registry source (proof-run learning b:
   // premium/walled is a flag the triage step reads, not a runner-side failure).
   access?: Access;
+  // snippet carried mechanically from the provider hit (triage date-rung 3 input).
+  snippet?: string;
 };
 
 // --- Helpers ----------------------------------------------------------------
@@ -248,6 +250,7 @@ export async function runDiscovery(
         confidence: src.trust,
         reason: `registry:${p.source} intent:${p.signal_intent} provider:${provider.name}`,
         access: src.access,
+        snippet: hit.snippet,
       });
     }
   }
