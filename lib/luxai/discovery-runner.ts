@@ -71,14 +71,26 @@ function intentFragment(intent: SignalIntent): string {
 }
 
 // --- buildQueries -----------------------------------------------------------
-// Pure. For each brand x eligible registry source x signal_intent, build one
+// For each brand x eligible registry source x signal_intent, build one
 // DOMAIN-SCOPED query string. No network, no side effects.
 // Variante B (Mo+GPT, first read-run learning): the generic QUERY_PATTERN
 // leaked off-domain results (ft.com hits on a FashionNetwork query), so every
 // discovery query is now site:{entry}-scoped via NEWSROOM_SCOPED. `year` is
 // kept in the signature for caller stability; scoped queries do not embed it
 // (freshness is enforced on the RESULT date in runDiscovery, not the query).
-export function buildQueries(brands: string[], year: number): PlannedQuery[] {
+// RECENT-FIRST (Mo+GPT, freshness diagnosis): default ranking favors
+// historically important pages (median result age 426d), so every query also
+// carries a rolling ` after:{now − window}` date operator. The window default
+// (30) is the single point of alignment with the queue-writer admission rule.
+export function buildQueries(
+  brands: string[],
+  year: number,
+  opts?: { recencyWindowDays?: number },
+): PlannedQuery[] {
+  const recencyWindowDays = opts?.recencyWindowDays ?? 30;
+  const afterDate = new Date(Date.now() - recencyWindowDays * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
   const intents = Object.keys(SIGNAL_INTENTS) as SignalIntent[];
 
   // DISCOVERY-SOURCE FILTER: only sources that can serve a discovery feed
@@ -101,9 +113,10 @@ export function buildQueries(brands: string[], year: number): PlannedQuery[] {
     for (const source of eligible) {
       for (const intent of intents) {
         const fragment = intentFragment(intent);
-        const query = NEWSROOM_SCOPED.replace('{newsroom_domain}', source.entry)
-          .replace('{brand}', brand)
-          .replace('{signal_intent}', fragment);
+        const query =
+          NEWSROOM_SCOPED.replace('{newsroom_domain}', source.entry)
+            .replace('{brand}', brand)
+            .replace('{signal_intent}', fragment) + ` after:${afterDate}`;
 
         planned.push({
           brand,
