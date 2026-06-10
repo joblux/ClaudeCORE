@@ -16,6 +16,7 @@ type QueueItem = {
   status: string
   created_at: string
   processed_content: Record<string, any> | null
+  raw_content?: Record<string, any> | null
   duplicate_state?: string | null
   duplicate_match?: { id: string; title: string; content_type: string; status: string; source: string } | null
 }
@@ -451,8 +452,21 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                           onStatusChange={(newStatus) => handleStatusChange(item.id, newStatus)}
                         />
                       </div>
-                      {/* Existing preview, rendered as-is (no new fields) */}
-                      <PreviewPanel content={item.processed_content} />
+                      {/* Sourced signal (THIN slice): processed_content is null
+                          by design until synthesis — preview from the triage
+                          audit in raw_content instead of "Preview unavailable". */}
+                      {item.content_type === 'signal' &&
+                      !item.processed_content &&
+                      item.raw_content?.triage_result ? (
+                        <SourcedSignalCard
+                          raw={item.raw_content}
+                          title={item.title}
+                          sourceName={item.source_name}
+                          sourceUrl={item.source_url}
+                        />
+                      ) : (
+                        <PreviewPanel content={item.processed_content} />
+                      )}
                       {/* Repeat decision actions at the bottom so long
                           content (articles/events) needs no scroll back up. */}
                       <div
@@ -487,6 +501,144 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
       />
       </div>
       )}
+    </div>
+  )
+}
+
+// ── Sourced signal card (LuxAI acquisition lane) ────────────────────────────
+// Signal dots reuse the site-wide category colors (HomepageSignals.tsx);
+// triage emits 'ma' where the signals table says 'merger_acquisition'.
+const TRIAGE_DOT_COLORS: Record<string, string> = {
+  growth: '#4CAF50',
+  leadership: '#FF9800',
+  contraction: '#f44336',
+  expansion: '#2196F3',
+  ma: '#9C27B0',
+}
+
+const TRIAGE_TYPE_LABELS: Record<string, string> = {
+  growth: 'Growth',
+  leadership: 'Leadership',
+  contraction: 'Contraction',
+  expansion: 'Expansion',
+  ma: 'M&A',
+  other: 'Other',
+}
+
+const IMPORTANCE_BADGE: Record<string, { bg: string; text: string }> = {
+  high:   { bg: '#111',    text: '#fff' },
+  medium: { bg: '#e8e8e8', text: '#555' },
+  low:    { bg: '#f5f5f5', text: '#888' },
+}
+
+function relativeAge(iso: string): string {
+  const t = Date.parse(iso)
+  if (Number.isNaN(t)) return ''
+  const days = Math.floor((Date.now() - t) / 86400000)
+  if (days < 0) return 'future-dated'
+  if (days === 0) return 'today'
+  if (days < 30) return `${days}d ago`
+  if (days < 365) return `${Math.floor(days / 30)}mo ago`
+  return `${Math.floor(days / 365)}y ago`
+}
+
+function SourcedSignalCard({
+  raw,
+  title,
+  sourceName,
+  sourceUrl,
+}: {
+  raw: Record<string, any>
+  title: string | null
+  sourceName: string | null
+  sourceUrl: string | null
+}) {
+  const t = (raw.triage_result || {}) as Record<string, any>
+  const d = (raw.discovery || {}) as Record<string, any>
+
+  const dot = TRIAGE_DOT_COLORS[t.signal_type] || '#888'
+  const typeLabel = TRIAGE_TYPE_LABELS[t.signal_type] || String(t.signal_type || '—')
+  const imp = IMPORTANCE_BADGE[t.importance] || IMPORTANCE_BADGE.low
+  const isWalled = d.access === 'premium_or_blocked' || d.access === 'snippet_first'
+  const rel = (v: unknown) => (typeof v === 'number' ? v.toFixed(2) : '—')
+
+  const metaChip: React.CSSProperties = {
+    fontSize: 10, fontWeight: 600, letterSpacing: '0.06em',
+    padding: '2px 8px', borderRadius: 3,
+    background: '#f5f5f5', color: '#555', border: '1px solid #e8e8e8',
+  }
+
+  return (
+    <div style={{ background: '#fff', border: '1px solid #e8e8e8', borderRadius: 6, padding: '16px 20px', marginTop: 4 }}>
+      {/* L1 — type · importance · date · date rung */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: dot, display: 'inline-block' }} />
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#111' }}>
+            {typeLabel}
+          </span>
+        </span>
+        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 3, background: imp.bg, color: imp.text }}>
+          {String(t.importance || '—')}
+        </span>
+        {t.published_date ? (
+          <span style={{ fontSize: 11, color: '#555' }}>
+            {t.published_date}
+            <span style={{ color: '#888' }}> · {relativeAge(t.published_date)}</span>
+          </span>
+        ) : (
+          <span style={{ fontSize: 11, fontWeight: 600, color: '#888', fontStyle: 'italic' }}>undated</span>
+        )}
+        {t.date_source && (
+          <span style={metaChip} title="Which rung of the date ladder produced the date">
+            date: {t.date_source}
+          </span>
+        )}
+      </div>
+
+      {/* L2 — title → source_url, source_name */}
+      <div style={{ marginBottom: 12 }}>
+        {sourceUrl ? (
+          <a
+            href={sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontSize: 15, fontWeight: 600, color: '#111', lineHeight: 1.4, textDecoration: 'none', borderBottom: '1px solid #e8e8e8', wordBreak: 'break-word' }}
+          >
+            {title || sourceUrl} ↗
+          </a>
+        ) : (
+          <span style={{ fontSize: 15, fontWeight: 600, color: '#111', lineHeight: 1.4 }}>{title || '—'}</span>
+        )}
+        <div style={{ fontSize: 11, color: '#888', marginTop: 4 }}>{sourceName || '—'}</div>
+      </div>
+
+      {/* L3 — analyst reasoning, verbatim */}
+      {t.reasoning && (
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#888', marginBottom: 3 }}>
+            Analyst reasoning
+          </div>
+          <div style={{ fontSize: 13, color: '#555', lineHeight: 1.6 }}>{t.reasoning}</div>
+        </div>
+      )}
+
+      {/* L4 — scores · duplicate group · access */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <span style={metaChip} title="brand_relevance / luxury_relevance (triage scores, 0–1)">
+          brand {rel(t.brand_relevance)} · luxury {rel(t.luxury_relevance)}
+        </span>
+        {t.duplicate_group && (
+          <span style={metaChip} title="Other queue rows may carry the same underlying story">
+            dup: {t.duplicate_group}
+          </span>
+        )}
+        {isWalled && (
+          <span style={{ ...metaChip, color: '#c62828', borderColor: '#fecaca', background: '#fef2f2' }} title="Walled/premium source — triage judged on snippet context">
+            walled · {d.access}
+          </span>
+        )}
+      </div>
     </div>
   )
 }
