@@ -561,6 +561,8 @@ function SourcedSignalCard({
   const imp = IMPORTANCE_BADGE[t.importance] || IMPORTANCE_BADGE.low
   const isWalled = d.access === 'premium_or_blocked' || d.access === 'snippet_first'
   const rel = (v: unknown) => (typeof v === 'number' ? v.toFixed(2) : '—')
+  const ageDays = t.published_date ? Math.floor((Date.now() - Date.parse(t.published_date)) / 86400000) : null
+  const isStale = ageDays !== null && Number.isFinite(ageDays) && ageDays > 30
 
   const metaChip: React.CSSProperties = {
     fontSize: 10, fontWeight: 600, letterSpacing: '0.06em',
@@ -570,8 +572,21 @@ function SourcedSignalCard({
 
   return (
     <div style={{ background: '#fff', border: '1px solid #e8e8e8', borderRadius: 6, padding: '16px 20px', marginTop: 4 }}>
-      {/* L1 — type · importance · date · date rung */}
+      {/* L1 — freshness FIRST (age · date, STALE chip beyond 30d), then type · importance · date rung */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+        {isStale && (
+          <span style={{ ...metaChip, fontWeight: 700, color: '#c62828', borderColor: '#fecaca', background: '#fef2f2' }} title={`Older than ${30} days — outside the queue admission window`}>
+            STALE
+          </span>
+        )}
+        {t.published_date ? (
+          <span style={{ fontSize: 11, color: '#555' }}>
+            <span style={{ fontWeight: 600 }}>{relativeAge(t.published_date)}</span>
+            <span style={{ color: '#888' }}> · {t.published_date}</span>
+          </span>
+        ) : (
+          <span style={{ fontSize: 11, fontWeight: 600, color: '#c62828', fontStyle: 'italic' }}>undated</span>
+        )}
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: dot, display: 'inline-block' }} />
           <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#111' }}>
@@ -581,14 +596,6 @@ function SourcedSignalCard({
         <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 3, background: imp.bg, color: imp.text }}>
           {String(t.importance || '—')}
         </span>
-        {t.published_date ? (
-          <span style={{ fontSize: 11, color: '#555' }}>
-            {t.published_date}
-            <span style={{ color: '#888' }}> · {relativeAge(t.published_date)}</span>
-          </span>
-        ) : (
-          <span style={{ fontSize: 11, fontWeight: 600, color: '#888', fontStyle: 'italic' }}>undated</span>
-        )}
         {t.date_source && (
           <span style={metaChip} title="Which rung of the date ladder produced the date">
             date: {t.date_source}
