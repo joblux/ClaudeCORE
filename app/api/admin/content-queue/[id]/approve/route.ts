@@ -479,6 +479,16 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ success: true, published: true, destination_id: destinationId })
   }
 
+  if (!pc.category || (!pc.context_paragraph && !pc.what_happened)) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Cannot publish signal: processed_content incomplete (synthesis required). Edit the queue item first.',
+      },
+      { status: 400 }
+    )
+  }
+
   const { data: newSignal, error: insertError } = await supabaseAdmin
     .from('signals')
     .insert({
