@@ -17,6 +17,7 @@ type QueueItem = {
   created_at: string
   processed_content: Record<string, any> | null
   raw_content?: Record<string, any> | null
+  brand_tags?: string[] | null
   duplicate_state?: string | null
   duplicate_match?: { id: string; title: string; content_type: string; status: string; source: string } | null
 }
@@ -470,6 +471,7 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                           pc={item.processed_content}
                           raw={item.raw_content}
                           sourceUrl={item.source_url}
+                          brandTags={item.brand_tags ?? null}
                         />
                       ) : item.content_type === 'signal' &&
                       !item.processed_content &&
@@ -483,6 +485,7 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                           sourceName={item.source_name}
                           sourceUrl={item.source_url}
                           queueId={item.id}
+                          brandTags={item.brand_tags ?? null}
                           onSynthesized={pc => handleSynthesized(item.id, pc)}
                         />
                       ) : (
@@ -569,6 +572,7 @@ function SourcedSignalCard({
   sourceName,
   sourceUrl,
   queueId,
+  brandTags,
   onSynthesized,
 }: {
   raw: Record<string, any>
@@ -576,6 +580,7 @@ function SourcedSignalCard({
   sourceName: string | null
   sourceUrl: string | null
   queueId: string
+  brandTags: string[] | null
   onSynthesized: (pc: Record<string, any>) => void
 }) {
   const t = (raw.triage_result || {}) as Record<string, any>
@@ -706,6 +711,16 @@ function SourcedSignalCard({
         <span style={metaChip} title="brand_relevance / luxury_relevance (triage scores, 0–1)">
           brand {rel(t.brand_relevance)} · luxury {rel(t.luxury_relevance)}
         </span>
+        <span
+          style={
+            typeof t.brand_relevance === 'number' && t.brand_relevance < 0.7
+              ? { ...metaChip, fontWeight: 700, color: '#c62828', border: '1px solid #c62828', background: '#fef2f2' }
+              : metaChip
+          }
+          title="brand_tags on the queue row — what the approve mapper would publish to the brand page"
+        >
+          → {brandTags && brandTags.length > 0 ? brandTags.join(', ') : 'no brand tag'}
+        </span>
         {t.duplicate_group && (
           <span style={metaChip} title="Other queue rows may carry the same underlying story">
             dup: {t.duplicate_group}
@@ -729,10 +744,12 @@ function SynthesizedSignalCard({
   pc,
   raw,
   sourceUrl,
+  brandTags,
 }: {
   pc: Record<string, any>
   raw: Record<string, any>
   sourceUrl: string | null
+  brandTags: string[] | null
 }) {
   const t = (raw.triage_result || {}) as Record<string, any>
 
@@ -812,6 +829,17 @@ function SynthesizedSignalCard({
             THIN SOURCE
           </span>
         )}
+        <span
+          style={
+            typeof t.brand_relevance === 'number' && t.brand_relevance < 0.7
+              ? { ...metaChip, fontWeight: 700, color: '#c62828', border: '1px solid #c62828', background: '#fef2f2' }
+              : metaChip
+          }
+          title="brand_tags on the queue row + triage brand_relevance — the publish destination and its confidence"
+        >
+          → {brandTags && brandTags.length > 0 ? brandTags.join(', ') : 'no brand tag'}
+          {typeof t.brand_relevance === 'number' ? ` · brand ${t.brand_relevance.toFixed(2)}` : ''}
+        </span>
       </div>
 
       {/* Editorial fields — V2 order, null fields omitted */}
