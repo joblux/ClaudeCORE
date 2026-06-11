@@ -81,9 +81,9 @@ function computeDoctrineFlags(row: QueueItem): DoctrineFlag[] {
   if (typeof conf === 'string' && conf.toLowerCase() !== 'high' && conf.trim() !== '') {
     flags.push({
       key: 'low-confidence',
-      label: `CONFIDENCE: ${conf.toUpperCase()}`,
+      label: `IMPORTANCE: ${conf.toUpperCase()}`,
       tone: 'amber',
-      title: 'Confidence is not high — needs explicit review before approve',
+      title: 'Importance is not high — needs explicit review before approve',
     })
   }
 
@@ -812,7 +812,7 @@ function SynthesizedSignalCard({
     },
     { label: 'Meta title', value: pc.meta_title },
     { label: 'Meta description', value: pc.meta_description },
-    { label: 'Confidence', value: pc.confidence },
+    { label: 'Importance', value: pc.confidence },
     { label: 'Word count', value: pc.word_count },
     { label: 'Synthesized at', value: pc.synthesized_at },
   ]
@@ -882,7 +882,7 @@ function SynthesizedSignalCard({
               ? { ...metaChip, fontWeight: 700, color: '#c62828', border: '1px solid #c62828', background: '#fef2f2' }
               : metaChip
           }
-          title="brand_tags on the queue row + triage brand_relevance — the publish destination and its confidence"
+          title="brand_tags on the queue row + triage brand_relevance — the publish destination and its relevance score"
         >
           → {brandTags && brandTags.length > 0 ? brandTags.join(', ') : 'no brand tag'}
           {typeof t.brand_relevance === 'number' ? ` · brand ${t.brand_relevance.toFixed(2)}` : ''}
