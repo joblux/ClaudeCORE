@@ -22,6 +22,7 @@ import type { Discovery } from './discovery-runner'
 import type { TriageResult } from './queue-writer'
 
 export type SynthesisResult = {
+  headline: string | null
   what_happened: string | null
   why_it_matters: string | null
   career_implications: string | null
@@ -34,6 +35,7 @@ export type SynthesisResult = {
 }
 
 const MODEL_FIELDS = [
+  'headline',
   'what_happened',
   'why_it_matters',
   'career_implications',
@@ -53,6 +55,7 @@ HARD RULES — SOURCED-OR-EMPTY:
 - NEVER state a specific (job titles, role names, numbers, locations, dates) that does not appear verbatim or near-verbatim in the input. Grounded analyst reasoning is allowed — invented specifics are not. Example of a violation: the source says a store reopened, and you name role types like "bilingual client advisors" that appear nowhere in the input.
 ${sourceRead ? '' : '- IMPORTANT: only the title and snippet are available (the page itself could not be read). Stay descriptive and cautious — synthesize only what the title and snippet directly state, keep analysis general rather than specific, and null any field they cannot support.\n'}
 EDITORIAL SHAPE (this is a signal, not an article — 120–200 words TOTAL across what_happened + why_it_matters + career_implications):
+- headline: a JOBLUX-written signal headline — factual, short (max ~12 words), neutral, signal-first, American English. NEVER copy or lightly rephrase the source headline. Never a question, never clickbait or marketing tone. State the verified move plainly (e.g. 'LVMH agrees sale of Marc Jacobs to WHP Global and G-III').
 - what_happened: the verified fact, 2-3 sentences. What the source reports, nothing more.
 - why_it_matters: the market read — what this means for the luxury industry, grounded in the source.
 - career_implications: what the fact MEANS for professionals — expertise profile, skills exposure, weight/significance of the posting or function. NEVER predict hiring, staffing needs, or job openings ('roles likely needed', 'creates staffing opportunities' are violations). Describe significance, never recruitment.
@@ -65,7 +68,7 @@ LANGUAGE: AMERICAN ENGLISH spelling and usage in ALL output, even when the sourc
 
 STYLE: Precise, sober, intelligence-brief tone. No hype, no marketing language. Prefer plain professional language over consulting, agency, MBA, or corporate-jargon phrasing. Clarity beats sophistication.
 
-OUTPUT: a single JSON object with EXACTLY these keys: what_happened, why_it_matters, career_implications, context_paragraph, brand_impact, meta_title, meta_description. String or null for each except brand_impact (array of strings or null). Do NOT output category, brand_tags, confidence, source name/url, or any other key. JSON only.`
+OUTPUT: a single JSON object with EXACTLY these keys: headline, what_happened, why_it_matters, career_implications, context_paragraph, brand_impact, meta_title, meta_description. String or null for each except brand_impact (array of strings or null). Do NOT output category, brand_tags, confidence, source name/url, or any other key. JSON only.`
 }
 
 function buildUserPrompt(discovery: Discovery, triage: TriageResult, pageText: string | null): string {
@@ -134,6 +137,7 @@ export async function synthesizeSignal(
   }
 
   const result: SynthesisResult = {
+    headline: asStringOrNull(parsed.headline),
     what_happened: asStringOrNull(parsed.what_happened),
     why_it_matters: asStringOrNull(parsed.why_it_matters),
     career_implications: asStringOrNull(parsed.career_implications),

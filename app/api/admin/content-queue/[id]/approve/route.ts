@@ -512,10 +512,23 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     )
   }
 
+  // JOBLUX headline (Mo+GPT): a sourced signal publishes its own synthesized
+  // headline, never the source's title. AI/historical path keeps record.title
+  // and the title-derived slug byte-identical.
+  const useJobluxHeadline = isSourced && typeof pc.headline === 'string' && pc.headline.trim().length > 0
+  const signalHeadline = useJobluxHeadline ? pc.headline : record.title
+  const signalSlug = useJobluxHeadline
+    ? pc.headline
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .substring(0, 80)
+    : slug
+
   const { data: newSignal, error: insertError } = await supabaseAdmin
     .from('signals')
     .insert({
-      headline: record.title,
+      headline: signalHeadline,
       category: pc.category,
       context_paragraph: pc.context_paragraph || null,
       career_implications: pc.career_implications || null,
@@ -534,7 +547,7 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
       is_published: true,
       is_pinned: false,
       published_at: now,
-      slug,
+      slug: signalSlug,
     })
     .select('id')
     .maybeSingle()

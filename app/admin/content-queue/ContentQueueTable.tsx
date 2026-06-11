@@ -472,6 +472,9 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                           raw={item.raw_content}
                           sourceUrl={item.source_url}
                           brandTags={item.brand_tags ?? null}
+                          sourceTitle={item.title}
+                          queueId={item.id}
+                          onSynthesized={pc => handleSynthesized(item.id, pc)}
                         />
                       ) : item.content_type === 'signal' &&
                       !item.processed_content &&
@@ -566,29 +569,14 @@ function relativeAge(iso: string): string {
   return `${Math.floor(days / 365)}y ago`
 }
 
-function SourcedSignalCard({
-  raw,
-  title,
-  sourceName,
-  sourceUrl,
-  queueId,
-  brandTags,
-  onSynthesized,
-}: {
-  raw: Record<string, any>
-  title: string | null
-  sourceName: string | null
-  sourceUrl: string | null
-  queueId: string
-  brandTags: string[] | null
+// Shared synthesize action (triage card's Synthesize, synthesized card's
+// Re-synthesize) — same pattern as ContentQueueActions: double-click guard
+// via the running flag, inline red feedback on failure. Success feedback is
+// the parent updating the row's processed_content via onSynthesized.
+function useSynthesizeAction(
+  queueId: string,
   onSynthesized: (pc: Record<string, any>) => void
-}) {
-  const t = (raw.triage_result || {}) as Record<string, any>
-  const d = (raw.discovery || {}) as Record<string, any>
-
-  // Synthesize action — same pattern as ContentQueueActions: double-click
-  // guard via the running flag, inline red feedback on failure. Success
-  // feedback is the card itself flipping to the synthesized view.
+) {
   const [synthesizing, setSynthesizing] = useState(false)
   const [synthError, setSynthError] = useState<string | null>(null)
 
@@ -613,6 +601,31 @@ function SourcedSignalCard({
     }
     setSynthesizing(false)
   }
+
+  return { synthesizing, synthError, handleSynthesize }
+}
+
+function SourcedSignalCard({
+  raw,
+  title,
+  sourceName,
+  sourceUrl,
+  queueId,
+  brandTags,
+  onSynthesized,
+}: {
+  raw: Record<string, any>
+  title: string | null
+  sourceName: string | null
+  sourceUrl: string | null
+  queueId: string
+  brandTags: string[] | null
+  onSynthesized: (pc: Record<string, any>) => void
+}) {
+  const t = (raw.triage_result || {}) as Record<string, any>
+  const d = (raw.discovery || {}) as Record<string, any>
+
+  const { synthesizing, synthError, handleSynthesize } = useSynthesizeAction(queueId, onSynthesized)
 
   const dot = TRIAGE_DOT_COLORS[t.signal_type] || '#888'
   const typeLabel = TRIAGE_TYPE_LABELS[t.signal_type] || String(t.signal_type || '—')
@@ -745,13 +758,21 @@ function SynthesizedSignalCard({
   raw,
   sourceUrl,
   brandTags,
+  sourceTitle,
+  queueId,
+  onSynthesized,
 }: {
   pc: Record<string, any>
   raw: Record<string, any>
   sourceUrl: string | null
   brandTags: string[] | null
+  sourceTitle: string | null
+  queueId: string
+  onSynthesized: (pc: Record<string, any>) => void
 }) {
   const t = (raw.triage_result || {}) as Record<string, any>
+
+  const { synthesizing, synthError, handleSynthesize } = useSynthesizeAction(queueId, onSynthesized)
 
   const dot = TRIAGE_DOT_COLORS[t.signal_type] || '#888'
   const typeLabel = TRIAGE_TYPE_LABELS[t.signal_type] || String(t.signal_type || '—')
@@ -786,6 +807,20 @@ function SynthesizedSignalCard({
 
   return (
     <div style={{ background: '#fff', border: '1px solid #e8e8e8', borderRadius: 6, padding: '16px 20px', marginTop: 4 }}>
+      {/* JOBLUX headline — the signal's own title; source title kept beneath
+          for traceability (the published row never carries the source's). */}
+      {typeof pc.headline === 'string' && pc.headline.trim() && (
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 16, fontWeight: 600, color: '#111', lineHeight: 1.35, wordBreak: 'break-word' }}>
+            {pc.headline}
+          </div>
+          {sourceTitle && (
+            <div style={{ fontSize: 11, color: '#aaa', marginTop: 4 }}>
+              source title: {sourceTitle}
+            </div>
+          )}
+        </div>
+      )}
       {/* Header — triage chrome (type dot · importance · date+age · source) + read badge */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
@@ -839,6 +874,25 @@ function SynthesizedSignalCard({
         >
           → {brandTags && brandTags.length > 0 ? brandTags.join(', ') : 'no brand tag'}
           {typeof t.brand_relevance === 'number' ? ` · brand ${t.brand_relevance.toFixed(2)}` : ''}
+        </span>
+        <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          {synthError && (
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#c62828' }}>{synthError}</span>
+          )}
+          {/* Secondary, not a decision action — outline style, never green/red */}
+          <button
+            onClick={handleSynthesize}
+            disabled={synthesizing}
+            title="Re-read the source and regenerate the synthesis (overwrites this draft's processed_content; draft stays draft)"
+            style={{
+              fontSize: 12, fontWeight: 500, padding: '6px 14px',
+              background: '#fff', color: '#555',
+              border: '1px solid #d0d0d0', borderRadius: 4,
+              cursor: 'pointer', opacity: synthesizing ? 0.5 : 1,
+            }}
+          >
+            {synthesizing ? 'Synthesizing…' : 'Re-synthesize'}
+          </button>
         </span>
       </div>
 
