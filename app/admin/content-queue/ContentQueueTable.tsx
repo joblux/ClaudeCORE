@@ -169,6 +169,13 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
     if (expandedId === id) setExpandedId(null)
   }
 
+  // When the synthesize route returns the written processed_content, update
+  // local row state so the expanded card flips from triage view to the
+  // synthesized editorial view without a page reload.
+  const handleSynthesized = (id: string, pc: Record<string, any>) => {
+    setRows(prev => prev.map(r => (r.id === id ? { ...r, processed_content: pc } : r)))
+  }
+
   const startEdit = (item: QueueItem) => {
     setEditingId(item.id)
     setEditTitle(item.title || '')
@@ -452,17 +459,31 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                           onStatusChange={(newStatus) => handleStatusChange(item.id, newStatus)}
                         />
                       </div>
-                      {/* Sourced signal (THIN slice): processed_content is null
-                          by design until synthesis — preview from the triage
-                          audit in raw_content instead of "Preview unavailable". */}
+                      {/* Sourced signal, synthesized: processed_content present
+                          → render the editorial review card (V2 field order +
+                          read-provenance badge). */}
                       {item.content_type === 'signal' &&
+                      item.source_type === 'external_feed' &&
+                      item.processed_content &&
+                      item.raw_content?.triage_result ? (
+                        <SynthesizedSignalCard
+                          pc={item.processed_content}
+                          raw={item.raw_content}
+                          sourceUrl={item.source_url}
+                        />
+                      ) : item.content_type === 'signal' &&
                       !item.processed_content &&
                       item.raw_content?.triage_result ? (
+                        /* Sourced signal (THIN slice): processed_content is null
+                           by design until synthesis — preview from the triage
+                           audit in raw_content instead of "Preview unavailable". */
                         <SourcedSignalCard
                           raw={item.raw_content}
                           title={item.title}
                           sourceName={item.source_name}
                           sourceUrl={item.source_url}
+                          queueId={item.id}
+                          onSynthesized={pc => handleSynthesized(item.id, pc)}
                         />
                       ) : (
                         <PreviewPanel content={item.processed_content} />
@@ -547,14 +568,46 @@ function SourcedSignalCard({
   title,
   sourceName,
   sourceUrl,
+  queueId,
+  onSynthesized,
 }: {
   raw: Record<string, any>
   title: string | null
   sourceName: string | null
   sourceUrl: string | null
+  queueId: string
+  onSynthesized: (pc: Record<string, any>) => void
 }) {
   const t = (raw.triage_result || {}) as Record<string, any>
   const d = (raw.discovery || {}) as Record<string, any>
+
+  // Synthesize action — same pattern as ContentQueueActions: double-click
+  // guard via the running flag, inline red feedback on failure. Success
+  // feedback is the card itself flipping to the synthesized view.
+  const [synthesizing, setSynthesizing] = useState(false)
+  const [synthError, setSynthError] = useState<string | null>(null)
+
+  const handleSynthesize = async () => {
+    if (synthesizing) return
+    setSynthesizing(true)
+    setSynthError(null)
+    try {
+      const res = await fetch('/api/admin/luxai/synthesize-signal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ queue_id: queueId }),
+      })
+      const data = await res.json().catch(() => null)
+      if (res.ok && data?.processed_content) {
+        onSynthesized(data.processed_content)
+      } else {
+        setSynthError(data?.error || `Synthesis failed (HTTP ${res.status})`)
+      }
+    } catch {
+      setSynthError('Synthesis failed (network error)')
+    }
+    setSynthesizing(false)
+  }
 
   const dot = TRIAGE_DOT_COLORS[t.signal_type] || '#888'
   const typeLabel = TRIAGE_TYPE_LABELS[t.signal_type] || String(t.signal_type || '—')
@@ -601,6 +654,24 @@ function SourcedSignalCard({
             date: {t.date_source}
           </span>
         )}
+        <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          {synthError && (
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#c62828' }}>{synthError}</span>
+          )}
+          <button
+            onClick={handleSynthesize}
+            disabled={synthesizing}
+            title="Read the source page and synthesize publishable signal fields (draft stays draft)"
+            style={{
+              fontSize: 12, fontWeight: 600, padding: '6px 14px',
+              background: '#111', color: '#fff',
+              border: '1px solid #111', borderRadius: 4,
+              cursor: 'pointer', opacity: synthesizing ? 0.5 : 1,
+            }}
+          >
+            {synthesizing ? 'Synthesizing…' : 'Synthesize'}
+          </button>
+        </span>
       </div>
 
       {/* L2 — title → source_url, source_name */}
@@ -644,6 +715,130 @@ function SourcedSignalCard({
           <span style={{ ...metaChip, color: '#c62828', borderColor: '#fecaca', background: '#fef2f2' }} title="Walled/premium source — triage judged on snippet context">
             walled · {d.access}
           </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── Synthesized signal card (633d6f8c Slice B3) ─────────────────────────────
+// Renders the post-synthesis editorial review state: triage-card header
+// chrome + read-provenance badge, then the V2 field order, then a muted
+// mechanical block. Null fields omitted — sourced-or-empty made visible.
+function SynthesizedSignalCard({
+  pc,
+  raw,
+  sourceUrl,
+}: {
+  pc: Record<string, any>
+  raw: Record<string, any>
+  sourceUrl: string | null
+}) {
+  const t = (raw.triage_result || {}) as Record<string, any>
+
+  const dot = TRIAGE_DOT_COLORS[t.signal_type] || '#888'
+  const typeLabel = TRIAGE_TYPE_LABELS[t.signal_type] || String(t.signal_type || '—')
+  const imp = IMPORTANCE_BADGE[t.importance] || IMPORTANCE_BADGE.low
+  const sourceRead = pc.source_read === true
+
+  const metaChip: React.CSSProperties = {
+    fontSize: 10, fontWeight: 600, letterSpacing: '0.06em',
+    padding: '2px 8px', borderRadius: 3,
+    background: '#f5f5f5', color: '#555', border: '1px solid #e8e8e8',
+  }
+
+  // V2 editorial order (locked): fact → market read → context → career angle.
+  const editorialFields: { label: string; value: unknown }[] = [
+    { label: 'What happened', value: pc.what_happened },
+    { label: 'Why it matters', value: pc.why_it_matters },
+    { label: 'Context', value: pc.context_paragraph },
+    { label: 'Career implications', value: pc.career_implications },
+  ]
+
+  const secondaryFields: { label: string; value: unknown }[] = [
+    {
+      label: 'Brand impact',
+      value: Array.isArray(pc.brand_impact) ? pc.brand_impact.join(' · ') : pc.brand_impact,
+    },
+    { label: 'Meta title', value: pc.meta_title },
+    { label: 'Meta description', value: pc.meta_description },
+    { label: 'Confidence', value: pc.confidence },
+    { label: 'Word count', value: pc.word_count },
+    { label: 'Synthesized at', value: pc.synthesized_at },
+  ]
+
+  return (
+    <div style={{ background: '#fff', border: '1px solid #e8e8e8', borderRadius: 6, padding: '16px 20px', marginTop: 4 }}>
+      {/* Header — triage chrome (type dot · importance · date+age · source) + read badge */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: dot, display: 'inline-block' }} />
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#111' }}>
+            {typeLabel}
+          </span>
+        </span>
+        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 3, background: imp.bg, color: imp.text }}>
+          {String(t.importance || '—')}
+        </span>
+        {t.published_date && (
+          <span style={{ fontSize: 11, color: '#555' }}>
+            <span style={{ fontWeight: 600 }}>{relativeAge(t.published_date)}</span>
+            <span style={{ color: '#888' }}> · {t.published_date}</span>
+          </span>
+        )}
+        {sourceUrl && (
+          <a
+            href={sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontSize: 11, color: '#5a8bc4', textDecoration: 'none' }}
+          >
+            source ↗
+          </a>
+        )}
+        {sourceRead ? (
+          <span style={metaChip} title="The source page was read in full before synthesis">
+            SOURCE READ{pc.read_method ? ` · ${pc.read_method}` : ''}
+          </span>
+        ) : (
+          <span
+            style={{
+              fontSize: 10, fontWeight: 700, letterSpacing: '0.08em',
+              padding: '3px 8px', borderRadius: 3,
+              background: '#c62828', color: '#fff',
+            }}
+            title="Synthesized from title+snippet only — not approvable (publish gate blocks thin sources)"
+          >
+            THIN SOURCE
+          </span>
+        )}
+      </div>
+
+      {/* Editorial fields — V2 order, null fields omitted */}
+      {editorialFields.map(f =>
+        typeof f.value === 'string' && f.value.trim() ? (
+          <div key={f.label} style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#888', marginBottom: 3 }}>
+              {f.label}
+            </div>
+            <div style={{ fontSize: 13, color: '#111', lineHeight: 1.6 }}>{f.value}</div>
+          </div>
+        ) : null
+      )}
+
+      {/* Muted mechanical block */}
+      <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: 10, marginTop: 4 }}>
+        {secondaryFields.map(f =>
+          f.value !== null && f.value !== undefined && String(f.value).trim() !== '' ? (
+            <div key={f.label} style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
+              <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#aaa', minWidth: 110 }}>
+                {f.label}
+              </span>
+              <span style={{ fontSize: 11, color: '#888', lineHeight: 1.5, wordBreak: 'break-word' }}>
+                {String(f.value)}
+              </span>
+            </div>
+          ) : null
         )}
       </div>
     </div>

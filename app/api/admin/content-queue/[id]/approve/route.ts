@@ -499,6 +499,19 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     )
   }
 
+  // GPT condition (633d6f8c): no publication from an unread/paywalled source.
+  // source_read is set mechanically by the synthesize route, never by the model.
+  if (isSourced && pc.source_read !== true) {
+    return NextResponse.json(
+      {
+        success: false,
+        blocked: true,
+        reason: 'Thin source — signal synthesized without a read source is not approvable.',
+      },
+      { status: 403 }
+    )
+  }
+
   const { data: newSignal, error: insertError } = await supabaseAdmin
     .from('signals')
     .insert({

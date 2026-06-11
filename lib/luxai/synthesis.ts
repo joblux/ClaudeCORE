@@ -63,7 +63,7 @@ EDITORIAL SHAPE (this is a signal, not an article — 120–200 words TOTAL acro
 
 LANGUAGE: AMERICAN ENGLISH spelling and usage in ALL output, even when the source is UK/French/European (jewelry not jewellery, modernizes not modernises, etc.). Normalize source spellings.
 
-STYLE: Precise, sober, intelligence-brief tone. No hype, no marketing language.
+STYLE: Precise, sober, intelligence-brief tone. No hype, no marketing language. Prefer plain professional language over consulting, agency, MBA, or corporate-jargon phrasing. Clarity beats sophistication.
 
 OUTPUT: a single JSON object with EXACTLY these keys: what_happened, why_it_matters, career_implications, context_paragraph, brand_impact, meta_title, meta_description. String or null for each except brand_impact (array of strings or null). Do NOT output category, brand_tags, confidence, source name/url, or any other key. JSON only.`
 }
