@@ -46,6 +46,7 @@ export type QueueWriteReport = {
   skipped_existing: number
   skipped_stale: number
   skipped_undated: number
+  skipped_low_relevance: number
   not_recommended: number
   category_mapping: Record<string, string>
 }
@@ -54,6 +55,11 @@ export type QueueWriteReport = {
 // rolling window enter the queue. This is mechanical and code-side — it gates
 // what is ADMITTED, it does not rewrite the Signals freshness doctrine.
 const FRESHNESS_WINDOW_DAYS = 30
+
+// Queue ADMISSION rule: recommended results must also carry a numeric
+// brand_relevance at or above this threshold — below (or missing/non-numeric)
+// is counted as skipped_low_relevance, never as not_recommended.
+const MIN_BRAND_RELEVANCE = 0.7
 
 const SIGNAL_TYPES: Exclude<TriageSignalType, 'other'>[] = [
   'growth',
@@ -116,7 +122,13 @@ export async function writeTriageToQueue(
   const discoveryByUrl = new Map(discoveries.map((d) => [d.url, d]))
   const triage = normalizeSingletonGroups(triageResults)
 
-  const recommendedSet = triage.filter((t) => t.recommended && t.signal_type !== 'other')
+  const modelRecommended = triage.filter((t) => t.recommended && t.signal_type !== 'other')
+  let skippedLowRelevance = 0
+  const recommendedSet = modelRecommended.filter((t) => {
+    if (typeof t.brand_relevance === 'number' && t.brand_relevance >= MIN_BRAND_RELEVANCE) return true
+    skippedLowRelevance++
+    return false
+  })
 
   // Freshness admission (STRICT): null/unparseable published_date never enters.
   const now = Date.now()
@@ -136,8 +148,13 @@ export async function writeTriageToQueue(
     skipped_existing: 0,
     skipped_stale: skippedStale,
     skipped_undated: skippedUndated,
-    not_recommended: triage.length - recommendedSet.length,
+    skipped_low_relevance: skippedLowRelevance,
+    not_recommended: triage.length - modelRecommended.length,
     category_mapping: await buildCategoryMapping(), // throws before any insert if unmappable
+  }
+
+  if (report.skipped_low_relevance > 0) {
+    console.log(`queue-writer: skipped_low_relevance=${report.skipped_low_relevance} (brand_relevance < ${MIN_BRAND_RELEVANCE})`)
   }
 
   for (const t of eligible) {
