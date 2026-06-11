@@ -58,6 +58,33 @@ export class ApifyProvider implements DiscoveryProvider {
   }
 }
 
+// --- Single-URL scrape (633d6f8c Slice B2 read ladder, rung 2) ---------------
+// Runs rag-web-browser on ONE url (query=url, maxResults 1) and returns the
+// scraped markdown text, or null on ANY error (token absent, run failure,
+// empty/non-text result). Sequential single run — same FREE-plan constraint
+// as search(). CONFINEMENT: apify-client/APIFY_TOKEN stay inside this file;
+// callers receive plain text only.
+export async function scrapeUrl(url: string): Promise<string | null> {
+  try {
+    const token = process.env.APIFY_TOKEN;
+    if (!token) return null;
+    const client = new ApifyClient({ token });
+
+    const run = await client.actor(ACTOR_ID).call({
+      query: url,
+      maxResults: 1,
+      outputFormats: ['markdown'],
+    });
+
+    const { items } = await client.dataset(run.defaultDatasetId).listItems();
+    const it = (items[0] ?? {}) as Record<string, any>;
+    const md: unknown = it.markdown ?? it.text;
+    return typeof md === 'string' && md.length > 0 ? md : null;
+  } catch {
+    return null;
+  }
+}
+
 // --- Internal mapping (vendor shape -> neutral ProviderHit) -----------------
 // Typed loosely on purpose: the Apify dataset item shape stays INSIDE this file.
 
