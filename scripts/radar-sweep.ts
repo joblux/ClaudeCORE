@@ -22,6 +22,7 @@ import { SOURCE_REGISTRY, SIGNAL_INTENTS } from '../lib/luxai/source-registry'
 import { runDiscovery } from '../lib/luxai/discovery-runner'
 import { ApifyProvider } from '../lib/luxai/providers/apify-provider'
 import { triageDiscoveries } from '../lib/luxai/triage'
+import { extractSubjects } from '../lib/luxai/subject-extraction'
 
 // --- Operational cost-cap config per ledger b5c3f03c ------------------------
 // Re-evaluate frequency / coverage / noise / cost / yield after 3-4 real
@@ -152,8 +153,27 @@ async function main(): Promise<void> {
         step = 'triage'
         const triage = await triageDiscoveries(brand, discoveries)
 
+        // Subject extraction (ADM-3b): ONE brand-NEUTRAL call per brand — the
+        // PROMPT carries no brand framing (lab-proven anchoring fix); batching
+        // by brand only preserves sweep failure isolation. Failure is
+        // NON-BLOCKING: the map stays empty and queue-writer admits the
+        // brand's items with brand_tags=[] + tag_state='extraction_failed'.
+        step = 'subject_extraction'
+        const subjectsByUrl = new Map<string, string[]>()
+        const discoveryByUrl = new Map(discoveries.map((d) => [d.url, d]))
+        const recommendedDiscoveries = triage
+          .filter((t) => t.recommended && t.signal_type !== 'other')
+          .map((t) => discoveryByUrl.get(t.url))
+          .filter((d): d is NonNullable<typeof d> => Boolean(d))
+        try {
+          const subjects = await extractSubjects(recommendedDiscoveries)
+          recommendedDiscoveries.forEach((d, i) => subjectsByUrl.set(d.url, subjects[i].subject_brands))
+        } catch (e: any) {
+          console.log(`[sweep] ${brand}: subject extraction FAILED — admitting untagged (extraction_failed): ${e?.message ?? e}`)
+        }
+
         step = 'queue_write'
-        const report = await writeTriageToQueue(discoveries, triage)
+        const report = await writeTriageToQueue(discoveries, triage, subjectsByUrl)
         totals.admitted += report.inserted
         totals.skipped_stale += report.skipped_stale
         totals.skipped_undated += report.skipped_undated

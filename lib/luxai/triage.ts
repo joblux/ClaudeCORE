@@ -26,6 +26,13 @@
 //      the `brand` argument. All other prompt wording is byte-identical,
 //      including the Richemont / Van Cleef & Arpels group-and-sibling
 //      examples from the accepted Cartier run.
+//   5. content_nature field spec appended to the TriageResult list — wording
+//      lifted VERBATIM from /tmp/adm3a-v3.ts Experiment A (ADM-3a v3 ACCEPTED
+//      Jun 11 2026, ledger 1003c355). Observation-only: stored, never routed
+//      on. Missing/invalid in a response is normalized to null. Nothing else
+//      in the prompt changed. (subject_brands deliberately NOT added here —
+//      the lab proved brand-scoped extraction is anchored; see
+//      ./subject-extraction.ts.)
 // ---------------------------------------------------------------------------
 
 import Anthropic from '@anthropic-ai/sdk'
@@ -91,6 +98,7 @@ TriageResult fields:
 - duplicate_group: you see the ENTIRE corpus in this one prompt. Items covering the SAME underlying story share ONE short kebab-case key (e.g. "ferla-ceo-appointment") — the same story reported by different outlets or under different titles is still ONE group. Items not duplicating anything -> null.
 - recommended (boolean): true ONLY if brand_relevance >= 0.7 AND importance is medium or high. Within each duplicate_group EXACTLY ONE item — the best (most primary source, most complete) — may be recommended; all other members of that group are recommended=false. Additionally, signal_type "other" -> recommended=false unless importance is high.
 - reasoning: 1-2 short sentences.
+- content_nature ("signal" | "event"): "event" ONLY when the primary news value is a dated public happening that people attend, visit, watch, or experience (exhibition, show, race, gala). Business moves — acquisitions, store openings, leadership changes, results, investments, market recoveries — stay "signal" even when announced at such a happening. Store/boutique openings are signal.
 
 Hard rules:
 - access "premium_or_blocked" or "snippet_first" (walled) is CONTEXT, not a reason to reject or lower relevance — judge on what the title/snippet shows.
@@ -176,6 +184,8 @@ export async function triageDiscoveries(
   for (let i = 0; i < preDated.length; i++) {
     const r = results![i]
     r.url = preDated[i].d.url // url is positional truth — never trust echo drift
+    // content_nature is observation-only — defensive normalize, never throw
+    if (r.content_nature !== 'signal' && r.content_nature !== 'event') r.content_nature = null
     // rungs 1-2 are code-side truth; Haiku only fills the snippet rung
     if (preDated[i].published_date) {
       r.published_date = preDated[i].published_date

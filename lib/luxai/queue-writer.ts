@@ -39,6 +39,8 @@ export type TriageResult = {
   duplicate_group: string | null
   recommended: boolean
   reasoning: string
+  // Observation-only (ADM-3b, ledger 1003c355): stored, never routed on.
+  content_nature?: 'signal' | 'event' | null
 }
 
 export type QueueWriteReport = {
@@ -48,6 +50,7 @@ export type QueueWriteReport = {
   skipped_undated: number
   skipped_low_relevance: number
   not_recommended: number
+  untagged: number
   category_mapping: Record<string, string>
 }
 
@@ -60,6 +63,29 @@ const FRESHNESS_WINDOW_DAYS = 30
 // brand_relevance at or above this threshold — below (or missing/non-numeric)
 // is counted as skipped_low_relevance, never as not_recommended.
 const MIN_BRAND_RELEVANCE = 0.7
+
+// Maison tag rule (ADM-3b, lab-validated /tmp/adm3a-v3.ts Experiment B,
+// ledger 1003c355): brand_tags is the case-insensitive intersection of the
+// brand-NEUTRAL subject extraction with the pilot perimeter. Named V1
+// limitation: pilot perimeter only — a legitimate subject maison off this
+// list (Burberry, Lanvin, Prada, ...) yields untagged, never a wrong tag.
+const KNOWN_MAISONS = ['Cartier', 'Rolex', 'Louis Vuitton', 'Gucci', 'Hermès']
+// Groups are never maison tags — DB brand pages are maisons.
+const GROUP_BLOCKLIST = ['LVMH', 'Richemont', 'Kering', 'Prada Group']
+
+const MAISON_BY_LOWER = new Map(KNOWN_MAISONS.map((m) => [m.toLowerCase(), m]))
+const GROUP_LOWER = new Set(GROUP_BLOCKLIST.map((g) => g.toLowerCase()))
+
+function computeMaisonTags(subjectBrands: string[]): string[] {
+  const out: string[] = []
+  for (const s of subjectBrands) {
+    const lower = String(s).toLowerCase().trim()
+    if (GROUP_LOWER.has(lower)) continue
+    const hit = MAISON_BY_LOWER.get(lower)
+    if (hit && !out.includes(hit)) out.push(hit)
+  }
+  return out
+}
 
 const SIGNAL_TYPES: Exclude<TriageSignalType, 'other'>[] = [
   'growth',
@@ -117,7 +143,11 @@ function normalizeSingletonGroups(triage: TriageResult[]): TriageResult[] {
 
 export async function writeTriageToQueue(
   discoveries: Discovery[],
-  triageResults: TriageResult[]
+  triageResults: TriageResult[],
+  // url -> subject_brands from the brand-neutral extraction pass. A url
+  // ABSENT from the map means extraction failed for that batch — the row is
+  // still admitted (non-blocking), visibly tag_state='extraction_failed'.
+  subjectsByUrl: Map<string, string[]>
 ): Promise<QueueWriteReport> {
   const discoveryByUrl = new Map(discoveries.map((d) => [d.url, d]))
   const triage = normalizeSingletonGroups(triageResults)
@@ -150,6 +180,7 @@ export async function writeTriageToQueue(
     skipped_undated: skippedUndated,
     skipped_low_relevance: skippedLowRelevance,
     not_recommended: triage.length - modelRecommended.length,
+    untagged: 0,
     category_mapping: await buildCategoryMapping(), // throws before any insert if unmappable
   }
 
@@ -192,21 +223,37 @@ export async function writeTriageToQueue(
       }
     }
 
+    // Maison tag rule — mechanical, from the brand-neutral extraction. The
+    // swept brand is NEVER a fallback tag: empty intersection -> brand_tags=[].
+    const subject_brands = subjectsByUrl.get(t.url)
+    const computed_tags = subject_brands ? computeMaisonTags(subject_brands) : []
+    const tag_state: 'tagged' | 'untagged' | 'extraction_failed' =
+      subject_brands === undefined ? 'extraction_failed' : computed_tags.length > 0 ? 'tagged' : 'untagged'
+    if (tag_state !== 'tagged') report.untagged++
+
     const { error: insErr } = await supabaseAdmin.from('content_queue').insert({
       content_type: 'signal',
       source_type: 'external_feed',
       title: d.title,
       source_name: d.source,
       source_url: d.url,
-      brand_tags: [d.brand],
+      brand_tags: computed_tags,
       category: report.category_mapping[t.signal_type],
-      raw_content: { discovery: d, triage_result: t },
+      raw_content: {
+        discovery: d,
+        triage_result: t,
+        tagging: { subject_brands: subject_brands ?? [], computed_tags, tag_state },
+      },
       processed_content: null, // THIN — synthesis is a later slice
       status: 'draft',
       ...(duplicate_state ? { duplicate_state, duplicate_match } : {}),
     })
     if (insErr) throw new Error(`queue-writer: insert failed for ${d.url}: ${insErr.message}`)
     report.inserted++
+  }
+
+  if (report.untagged > 0) {
+    console.log(`queue-writer: untagged=${report.untagged} (no maison tag — admitted with brand_tags=[])`)
   }
 
   return report

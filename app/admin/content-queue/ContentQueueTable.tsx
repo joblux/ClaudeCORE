@@ -746,6 +746,15 @@ function SourcedSignalCard({
         >
           → {brandTags && brandTags.length > 0 ? brandTags.join(', ') : 'no brand tag'}
         </span>
+        {raw.tagging?.tag_state === 'extraction_failed' ? (
+          <span style={{ ...metaChip, fontWeight: 700, color: '#c62828', borderColor: '#fecaca', background: '#fef2f2' }} title="Subject extraction failed for this sweep batch — admitted with brand_tags=[], never auto-tagged">
+            EXTRACTION FAILED
+          </span>
+        ) : (!brandTags || brandTags.length === 0) ? (
+          <span style={{ ...metaChip, fontWeight: 700, color: '#c62828', borderColor: '#fecaca', background: '#fef2f2' }} title="No maison tag — subject extraction found no pilot-perimeter maison as a substantive subject">
+            UNTAGGED
+          </span>
+        ) : null}
         {t.duplicate_group && (
           <span style={metaChip} title="Other queue rows may carry the same underlying story">
             dup: {t.duplicate_group}
