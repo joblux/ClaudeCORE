@@ -272,6 +272,13 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
             // Computed once so the collapsed-row pill and the expanded
             // header pill stay identical without duplicating the logic.
             const pc = (item.processed_content || {}) as Record<string, unknown>
+            // Operator header rule (Mo+GPT): a synthesized signal leads with
+            // its JOBLUX headline everywhere in admin; the source title drops
+            // to muted metadata ("source: …"). Other rows untouched.
+            const jobluxHeadline =
+              item.content_type === 'signal' && typeof pc.headline === 'string' && pc.headline.trim()
+                ? pc.headline.trim()
+                : null
             const cat = typeof pc.category === 'string' ? pc.category.trim() : ''
             let subtype: string = cat
             if (!subtype && item.content_type === 'event') {
@@ -341,8 +348,13 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
                         <span style={{ display: 'block', color: '#111', fontWeight: 500, lineHeight: 1.4, wordBreak: 'break-word' }}>
-                          {item.title || '\u2014'}
+                          {(jobluxHeadline ?? item.title) || '\u2014'}
                         </span>
+                        {jobluxHeadline && item.title && (
+                          <span style={{ fontSize: 11, color: '#aaa', lineHeight: 1.4, wordBreak: 'break-word' }}>
+                            source: {item.title}
+                          </span>
+                        )}
                         {(needsReview || doctrineFlags.length > 0) && (
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                             {needsReview && (
@@ -447,10 +459,10 @@ export default function ContentQueueTable({ rows: initialRows }: { rows: QueueIt
                             {pillLabel}
                           </span>
                           <div style={{ fontSize: 17, fontWeight: 600, color: '#111', lineHeight: 1.35, wordBreak: 'break-word' }}>
-                            {item.title || '—'}
+                            {(jobluxHeadline ?? item.title) || '—'}
                           </div>
                           <div style={{ fontSize: 11, color: '#888', marginTop: 6 }}>
-                            {provenance}
+                            {jobluxHeadline && item.title ? `source: ${item.title}  ·  ` : ''}{provenance}
                           </div>
                         </div>
                         <ContentQueueActions
