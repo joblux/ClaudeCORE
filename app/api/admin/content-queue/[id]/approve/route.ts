@@ -19,7 +19,7 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
 
   const { data: record, error: fetchError } = await supabaseAdmin
     .from('content_queue')
-    .select('id, content_type, title, processed_content, source_type, source_name, source_url')
+    .select('id, content_type, title, processed_content, source_type, source_name, source_url, brand_tags')
     .eq('id', params.id)
     .maybeSingle()
 
@@ -489,6 +489,16 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     )
   }
 
+  // Sourced signals (external_feed) publish with their real provenance; AI signals
+  // keep the JOBLUX Intelligence attribution. No source → no sourced publish.
+  const isSourced = record.source_type === 'external_feed'
+  if (isSourced && !record.source_url) {
+    return NextResponse.json(
+      { success: false, error: 'Sourced signal publish requires a source_url.' },
+      { status: 400 }
+    )
+  }
+
   const { data: newSignal, error: insertError } = await supabaseAdmin
     .from('signals')
     .insert({
@@ -501,13 +511,13 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
       why_it_matters: pc.why_it_matters || null,
       career_detail: pc.career_detail || null,
       brand_impact: pc.brand_impact || null,
-      brand_tags: pc.brand_tags || null,
+      brand_tags: isSourced ? (pc.brand_tags || record.brand_tags || null) : (pc.brand_tags || null),
       meta_title: pc.meta_title || null,
       meta_description: pc.meta_description || null,
       confidence: pc.confidence || 'high',
-      source_name: 'JOBLUX Intelligence',
-      source_url: null,
-      content_origin: 'ai',
+      source_name: isSourced ? (record.source_name || null) : 'JOBLUX Intelligence',
+      source_url: isSourced ? record.source_url : null,
+      content_origin: isSourced ? 'sourced' : 'ai',
       is_published: true,
       is_pinned: false,
       published_at: now,
