@@ -11,9 +11,12 @@ export const dynamic = 'force-dynamic'
 // Pipeline: Source Discovery (Wikidata) -> Corpus Builder (fetch+extract) ->
 // Reasoning Layer (analyst over corpus, sourced-or-empty) -> RETURN draft.
 //
-// THIS SLICE WRITES NOTHING. No supabase, no insert/update, no publish.
-// Persisting the draft is the NEXT slice. regenerateBrand.ts is the engine
-// reference the original 16-section schema was adapted from — NOT edited here.
+// S2 slice 1: optional persist=true writes ONE content_queue DRAFT row
+// (brand_profile, external_feed, Wikidata source_url). NEVER writes
+// wikilux_content — publish stays behind the queue approval gate.
+// Default (persist absent/false) writes nothing, byte-identical to before.
+// regenerateBrand.ts is the engine reference the original 16-section
+// schema was adapted from — NOT edited here.
 //
 // S1b (V2): schema realigned to the actual page contract in
 // app/brands/[slug]/page.tsx (the page is the contract):
@@ -30,7 +33,14 @@ export const dynamic = 'force-dynamic'
 // - market_position, presence, facts CUT — no UI consumer (audit verified).
 // ---------------------------------------------------------------------------
 
+import { createClient } from '@supabase/supabase-js'
 import { callClaude } from '@/lib/anthropic/client'
+import { slugifyBrand } from '@/lib/slugify'
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 // --- Wikidata plumbing (shared Source-Discovery module) ---------------------
 // Resilient Wikidata helpers (B2a-hardened: wdFetch retries + returns WdResult,
@@ -173,6 +183,7 @@ PROVENANCE (required): add ONE extra top-level key "_provenance": an object mapp
 RULES:
 - Character limits are hard constraints. Shorter is better.
 - Omit any section the corpus does not support. Do NOT fabricate to satisfy the schema.
+- DATES ARE LITERAL-ONLY: any date — a year, a range, a tenure ("since", "period") — must be literally present in the corpus text. If the corpus does not state it, omit it or set it to null. No estimation, no "circa", no inferring a decade, no completing an open range to the current year.
 - quote and facts must be literally supported by the corpus, or omitted.
 - Encyclopedic, factual tone. No marketing language.
 - Output valid JSON only. No markdown. No backticks. No explanation.`
@@ -216,7 +227,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { brand } = await request.json()
+    const body = await request.json()
+    const { brand } = body
+    const persist = body?.persist === true
     if (!brand || typeof brand !== 'string' || brand.trim().length < 2) {
       return NextResponse.json(
         { success: false, message: 'brand required (min 2 characters)' },
@@ -224,7 +237,7 @@ export async function POST(request: Request) {
       )
     }
     const name = brand.trim()
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    const slug = slugifyBrand(name)
 
     // 2. SOURCE DISCOVERY — resolve + anti-homonym verify on Wikidata.
     const searchUrl =
@@ -350,17 +363,50 @@ export async function POST(request: Request) {
       else sectionsEmpty.push(key)
     }
 
-    // 5. RETURN — WRITE NOTHING. No DB, no publish. Draft payload only.
+    // 5. PERSIST (opt-in) — ONE content_queue DRAFT row, never wikilux_content.
+    // Publication still requires the queue approval gate.
+    let queueId: string | null = null
+    if (persist) {
+      const { data: queueRow, error: queueError } = await supabaseAdmin
+        .from('content_queue')
+        .insert({
+          content_type: 'brand_profile',
+          status: 'draft',
+          source_type: 'external_feed',
+          source_url: wikidataUrl,
+          source_name: 'WikiLux Engine',
+          title: `${name} — brand profile draft`,
+          brand_tags: [name],
+          processed_content: {
+            ...content,
+            slug,
+            derived_sources: corpus.map(c => c.source_url),
+          },
+        })
+        .select('id')
+        .maybeSingle()
+
+      if (queueError) {
+        return NextResponse.json(
+          { success: false, message: `Queue persist failed: ${queueError.message}` },
+          { status: 500 }
+        )
+      }
+      queueId = queueRow?.id ?? null
+    }
+
+    // 6. RETURN — draft payload (response unchanged when persist is absent/false).
     return NextResponse.json({
       matched: true,
       brand: name,
       slug,
       derived_sources: corpus.map(c => c.source_url),
       corpus_sources: corpus.length,
-      content_origin: 'wikilux_sourced',
+      content_origin: 'sourced',
       content,
       sections_filled: sectionsFilled,
       sections_empty: sectionsEmpty,
+      ...(persist ? { persisted: true, queue_id: queueId } : {}),
     })
   } catch (error: any) {
     console.error('WikiLux build error:', error)
