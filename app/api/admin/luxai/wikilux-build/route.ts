@@ -13,7 +13,21 @@ export const dynamic = 'force-dynamic'
 //
 // THIS SLICE WRITES NOTHING. No supabase, no insert/update, no publish.
 // Persisting the draft is the NEXT slice. regenerateBrand.ts is the engine
-// reference whose 16-section schema is adapted here — NOT edited in this slice.
+// reference the original 16-section schema was adapted from — NOT edited here.
+//
+// S1b (V2): schema realigned to the actual page contract in
+// app/brands/[slug]/page.tsx (the page is the contract):
+// - signature_products ADDED (page renders {name, year, note} cards)
+// - values SPLIT OUT of hiring_intelligence as a top-level section
+//   (maison identity / house DNA); hiring_intelligence keeps only the
+//   employee-experience keys culture/growth/pace/access.
+//   S2 PAGE-SIDE FOLLOW-UP (do not fix here): buildBrandData in
+//   app/brands/[slug]/page.tsx still reads values from
+//   content.hiring_intelligence.values — it must switch to top-level
+//   content.values (with hi.values as legacy fallback).
+// - creative_directors is now an ARRAY of {period, name, role} (the page
+//   only renders arrays; the v1 prose string could never display).
+// - market_position, presence, facts CUT — no UI consumer (audit verified).
 // ---------------------------------------------------------------------------
 
 import { callClaude } from '@/lib/anthropic/client'
@@ -75,7 +89,8 @@ function htmlToText(html: string): string {
 
 // --- Reasoning layer (analyst over corpus; adapted from regenerateBrand) ----
 
-// The 16 sections of the BRAND-PAGE-V1 contract (regenerateBrand.ts schema).
+// The 15 sections of the BRAND-PAGE-V2 contract (app/brands/[slug]/page.tsx
+// is the contract — every key here has a verified UI consumer).
 const SECTION_KEYS = [
   'tagline',
   'brand_dna',
@@ -85,13 +100,12 @@ const SECTION_KEYS = [
   'founder_facts',
   'key_facts',
   'key_executives',
+  'signature_products',
   'creative_directors',
+  'values',
   'careers',
   'hiring_intelligence',
   'quote',
-  'market_position',
-  'presence',
-  'facts',
   'stock',
 ] as const
 
@@ -104,7 +118,7 @@ NON-NEGOTIABLE DOCTRINE:
 - Output VALID JSON ONLY. No markdown, no backticks, no commentary.`
 
 /**
- * Build the analyst prompt: inject the corpus + the 16-section schema + rules.
+ * Build the analyst prompt: inject the corpus + the 15-section schema + rules.
  */
 function buildAnalystPrompt(
   brand: string,
@@ -124,9 +138,9 @@ function buildAnalystPrompt(
 CORPUS (the ONLY information you may use):
 ${corpusBlock}
 
-TASK: Produce a brand dossier as a single JSON object using the 16-section schema below. Reason ONLY over the corpus above.
+TASK: Produce a brand dossier as a single JSON object using the 15-section schema below. Reason ONLY over the corpus above.
 
-16-SECTION SCHEMA (shape per regenerateBrand; ALL OPTIONAL here — include a key ONLY if the corpus supports it, else omit the key):
+15-SECTION SCHEMA (brand-page contract; ALL OPTIONAL here — include a key ONLY if the corpus supports it, else omit the key):
 {
   "tagline": "One sentence capturing the brand's essence [max 80 chars]",
   "brand_dna": "Brand identity: codes, position, what makes it unique [max 500 chars]",
@@ -136,15 +150,21 @@ TASK: Produce a brand dossier as a single JSON object using the 16-section schem
   "founder_facts": ["Short fact [max 80 chars]"],
   "key_facts": [{"label": "Founded", "value": "1837"}, {"label": "Headquarters", "value": "Paris"}, {"label": "Ownership", "value": "..."}],
   "key_executives": [{"name": "Full Name", "role": "CEO", "since": "2013"}],
-  "creative_directors": "History of creative leadership [max 400 chars]",
+  "signature_products": [{"name": "Product name", "year": "1984", "note": "One-sentence description of the product and its significance [max 120 chars]"}],
+  "creative_directors": [{"period": "2014–present", "name": "Full Name", "role": "Artistic director, womenswear"}],
+  "values": [{"title": "...", "desc": "One sentence [max 80 chars]"}],
   "careers": {"prose": "What it's like to work here [max 300 chars]", "paths": ["..."]},
-  "hiring_intelligence": {"values": [{"title": "...", "desc": "One sentence [max 80 chars]"}], "culture": "[max 250 chars]", "growth": "[max 250 chars]", "pace": "[max 250 chars]", "access": "[max 250 chars]"},
+  "hiring_intelligence": {"culture": "[max 250 chars]", "growth": "[max 250 chars]", "pace": "[max 250 chars]", "access": "[max 250 chars]"},
   "quote": {"text": "A real quote PRESENT IN THE CORPUS [max 120 chars]", "author": "Full Name, Title"},
-  "market_position": "Competitive positioning [max 400 chars]",
-  "presence": [{"region": "Europe", "detail": "..."}],
-  "facts": ["Brand trivia present in the corpus [max 80 chars]"],
   "stock": {"is_public": true, "exchange": "EPA", "ticker": "RMS", "parent_group": "...", "market_cap": "..."}
 }
+
+SECTION GUIDANCE:
+- signature_products: the brand's emblematic products/objects named in the corpus, each with its introduction year when stated.
+- creative_directors: the history of the brand's ARTISTIC/CREATIVE leadership over time — designers, artistic directors, creative directors — INCLUDING the current artistic/creative director(s) when the corpus supports it. Chronological array. Do NOT put CEOs or business executives here (those belong in key_executives).
+- values: 4 cards expressing the maison's identity — house DNA: craftsmanship codes, heritage, savoir-faire, what the house stands for. NOT the employee experience.
+- careers.paths: typical roles/pathways structuring the maison (retail, métiers d'art, ateliers, corporate, supply chain), derived from corpus; NEVER live job listings.
+- hiring_intelligence: the EMPLOYEE experience only — culture, growth, pace, access.
 
 PROVENANCE (required): add ONE extra top-level key "_provenance": an object mapping EACH section key you filled to { "source_url": "<one of the corpus source_urls>", "source_ref": "<that source's ref>" }. Only cite a source_url from this allowed list: ${JSON.stringify(allowedUrls)}.
 
@@ -320,7 +340,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Section fill audit over the 16 known keys.
+    // Section fill audit over the 15 known keys.
     const sectionsFilled: string[] = []
     const sectionsEmpty: string[] = []
     for (const key of SECTION_KEYS) {
