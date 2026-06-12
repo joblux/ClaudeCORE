@@ -53,7 +53,9 @@ import type { Claim } from '@/lib/luxai/wikidata'
 const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
-const CORPUS_CHAR_CAP = 12000
+// S1c experiment — measure corpus-depth effect before any source
+// diversification; 60K covers ~80% of the Hermès Wikipedia text.
+const CORPUS_CHAR_CAP = 60000
 
 /**
  * Fetch a URL with a ~10-second timeout and browser User-Agent.
