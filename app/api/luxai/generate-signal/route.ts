@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import {
   insertLuxaiQueueItem,
   checkLuxaiQueueDuplicate,
@@ -20,6 +22,11 @@ const supabase = createClient(
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user || (session.user as any).role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { data: settings } = await supabase
       .from('luxai_settings')
       .select('value')

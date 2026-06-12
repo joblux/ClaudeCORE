@@ -16,16 +16,35 @@ interface Props {
 
 export default function ContentQueueActions({ id, status, onDelete, onEdit, onStatusChange }: Props) {
   const [loading, setLoading] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   const handleAction = async (action: 'approve' | 'reject') => {
     setLoading(true)
+    setActionError(null)
     try {
       const res = await fetch(`/api/admin/content-queue/${id}/${action}`, { method: 'POST' })
-      if (res.ok && onStatusChange) {
-        onStatusChange(action === 'approve' ? 'published' : 'rejected')
+      const result = await res.json().catch(() => null)
+
+      if (!res.ok) {
+        // Doctrine blocks (403) and duplicate blocks (409) carry a reason —
+        // surface it instead of failing silently.
+        setActionError(result?.reason || result?.error || `Request failed (${res.status})`)
+        return
       }
-    } catch {}
-    setLoading(false)
+
+      if (onStatusChange) {
+        // The approve route reports `published: true` only when the item was
+        // written to its destination table; otherwise it was approved without
+        // a publish mapping.
+        const newStatus =
+          action === 'reject' ? 'rejected' : result?.published ? 'published' : 'approved'
+        onStatusChange(newStatus)
+      }
+    } catch {
+      setActionError('Network error — action not confirmed')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleDelete = async () => {
@@ -45,7 +64,18 @@ export default function ContentQueueActions({ id, status, onDelete, onEdit, onSt
   // Edit is a secondary outlined button. Read-only states fall through
   // to a muted status label.
   return (
-    <div style={{ display: 'flex', gap: 5, flexWrap: 'nowrap' }}>
+    <div style={{ display: 'flex', gap: 5, flexWrap: 'nowrap', alignItems: 'center' }}>
+      {actionError && (
+        <span
+          title={actionError}
+          style={{
+            fontSize: 11, fontWeight: 600, color: '#c62828',
+            maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}
+        >
+          ✕ {actionError}
+        </span>
+      )}
       {showApproveReject && (
         <>
           <button

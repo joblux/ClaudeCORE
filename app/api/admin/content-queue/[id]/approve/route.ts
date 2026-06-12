@@ -90,6 +90,18 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
   }
 
   if (record.content_type === 'article') {
+    // Articles reach here only source-backed (§218 blocks joblux_generation).
+    // Same provenance gate as market salaries and sourced signals:
+    // no source → no publish. The source_url stays on the queue row
+    // (bloglux_articles has no source_url column — see content_queue
+    // destination_table/destination_id for the provenance link).
+    if (!record.source_url) {
+      return NextResponse.json(
+        { success: false, error: 'Sourced article publish requires a source_url.' },
+        { status: 400 }
+      )
+    }
+
     const slug =
       pc.slug ||
       (record.title || '')
@@ -110,7 +122,9 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
         category: pc.category || null,
         read_time_minutes: pc.read_time_minutes || 5,
         author_name: 'JOBLUX Intelligence',
-        content_origin: 'ai',
+        // §218 + the source_url gate above guarantee a source-backed item;
+        // 'ai'/'luxai' are forbidden in bloglux_articles (doctrine).
+        content_origin: 'sourced',
         status: 'published',
         published_at: now,
       })

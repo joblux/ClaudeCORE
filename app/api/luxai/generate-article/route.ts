@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import {
   insertLuxaiQueueItem,
   checkLuxaiQueueDuplicate,
@@ -16,6 +18,18 @@ const supabase = createClient(
 
 export async function POST(request: Request) {
   try {
+    // Admin session, or the autopilot cron calling server-side with the
+    // CRON_SECRET bearer (a cron request carries no NextAuth cookie).
+    const authHeader = request.headers.get('authorization')
+    const cronOk =
+      !!process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`
+    if (!cronOk) {
+      const session = await getServerSession(authOptions)
+      if (!session?.user || (session.user as any).role !== 'admin') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+    }
+
     const { topic = 'career-trends' } = await request.json()
 
     if (!process.env.ANTHROPIC_API_KEY) {

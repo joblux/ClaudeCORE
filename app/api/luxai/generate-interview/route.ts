@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import {
   insertLuxaiQueueItem,
   checkLuxaiInterviewDuplicate,
@@ -15,6 +17,11 @@ const supabase = createClient(
 
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user || (session.user as any).role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { slug } = await request.json()
     if (!slug) return NextResponse.json({ success: false, message: 'slug required' }, { status: 400 })
     if (!process.env.ANTHROPIC_API_KEY) return NextResponse.json({ success: false, message: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })

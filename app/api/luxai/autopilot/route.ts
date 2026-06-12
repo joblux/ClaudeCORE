@@ -1,5 +1,7 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,9 +11,20 @@ const supabase = createClient(
 // This endpoint is called by a cron job (external service or Coolify cron)
 // It checks which autopilot tasks are due and triggers them
 // Recommended: call this every hour, it will only run tasks when due
+// Cron must send Authorization: Bearer ${CRON_SECRET} (same contract as
+// /api/internships/expire); an admin session also works for manual runs.
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const authHeader = req.headers.get('authorization')
+    const cronOk =
+      !!process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`
+    if (!cronOk) {
+      const session = await getServerSession(authOptions)
+      if (!session?.user || (session.user as any).role !== 'admin') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+    }
     const { data: settings } = await supabase
       .from('luxai_settings')
       .select('*')
@@ -76,7 +89,14 @@ export async function GET() {
 
         const res = await fetch(`${baseUrl}${endpoint}`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            // Forward the cron credential — the generation endpoints are
+            // admin-gated and this server-to-server call has no session.
+            ...(process.env.CRON_SECRET
+              ? { Authorization: `Bearer ${process.env.CRON_SECRET}` }
+              : {}),
+          },
           body: JSON.stringify(body)
         })
         const result = await res.json()

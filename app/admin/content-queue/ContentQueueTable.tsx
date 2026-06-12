@@ -108,6 +108,7 @@ function formatDate(dateStr: string | null): string {
 const STATUS_TABS: { key: string; label: string }[] = [
   { key: 'draft',        label: 'Draft' },
   { key: 'under_review', label: 'Under review' },
+  { key: 'approved',     label: 'Approved' },
   { key: 'rejected',     label: 'Rejected' },
   { key: 'published',    label: 'Published' },
 ]
