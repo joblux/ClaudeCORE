@@ -116,7 +116,8 @@ function buildBrandData(brandName: string, slug: string, content: any) {
   if (hi.pace) workCulture.push({ label: 'Pace', text: hi.pace })
   if (hi.access) workCulture.push({ label: 'Access', text: hi.access })
 
-  const values = hi.values || []
+  // S1b schema: values is top-level; hi.values is the legacy pre-V2 location.
+  const values = content?.values || hi.values || []
   const timeline = Array.isArray(content?.history) ? content.history : []
 
   let founderName = 'Founder'

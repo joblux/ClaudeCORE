@@ -399,6 +399,129 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     })
   }
 
+  if (record.content_type === 'brand_profile') {
+    // APPROVE ≠ PUBLISH: this branch writes an approved wikilux_content row
+    // and never sets is_published. Publication is a separate, later decision.
+    if (record.source_type !== 'external_feed' || !record.source_url) {
+      return NextResponse.json(
+        { success: false, error: 'Brand profile approve requires source_type=external_feed and a source_url.' },
+        { status: 400 }
+      )
+    }
+
+    const profileSlug = typeof pc.slug === 'string' && pc.slug.trim() ? pc.slug.trim() : null
+    const provenance =
+      pc._provenance && typeof pc._provenance === 'object' && !Array.isArray(pc._provenance)
+        ? (pc._provenance as Record<string, any>)
+        : null
+    if (!profileSlug || !provenance) {
+      return NextResponse.json(
+        { success: false, error: 'Brand profile approve requires processed_content.slug and processed_content._provenance.' },
+        { status: 400 }
+      )
+    }
+
+    // Sourced-or-empty audit: every FILLED section must carry a _provenance
+    // entry. The mapper never repairs or fills provenance — it only rejects.
+    const NON_SECTION_KEYS = new Set(['_provenance', 'slug', 'derived_sources'])
+    const isSectionFilled = (v: any): boolean => {
+      if (v === null || v === undefined) return false
+      if (typeof v === 'string') return v.trim().length > 0
+      if (Array.isArray(v)) return v.length > 0
+      if (typeof v === 'object') return Object.keys(v).length > 0
+      return true
+    }
+    const unproven = Object.keys(pc).filter(
+      (k) => !NON_SECTION_KEYS.has(k) && isSectionFilled(pc[k]) && !provenance[k]
+    )
+    if (unproven.length > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Brand profile approve blocked: filled sections missing _provenance: ${unproven.join(', ')}`,
+        },
+        { status: 400 }
+      )
+    }
+
+    const brandName =
+      (Array.isArray(record.brand_tags) && record.brand_tags[0]) ||
+      (record.title || '').replace(/\s*—\s*brand profile draft$/, '').trim()
+    if (!brandName) {
+      return NextResponse.json(
+        { success: false, error: 'Brand profile approve requires a brand name (brand_tags or title).' },
+        { status: 400 }
+      )
+    }
+
+    const { data: existing, error: lookupError } = await supabaseAdmin
+      .from('wikilux_content')
+      .select('id, status')
+      .eq('slug', profileSlug)
+      .maybeSingle()
+
+    if (lookupError) {
+      return NextResponse.json({ success: false, error: lookupError.message }, { status: 500 })
+    }
+
+    let destinationId: string | null = null
+
+    if (existing && existing.status === 'rejected') {
+      return NextResponse.json(
+        {
+          success: false,
+          blocked: true,
+          reason:
+            'Approval blocked: existing wikilux_content row for this slug is rejected (archive-dead). Manual decision required.',
+        },
+        { status: 409 }
+      )
+    } else if (existing) {
+      // Regeneration path: content + origin only. is_published is deliberately
+      // NOT touched — regeneration must never auto-publish.
+      const { error: updateError } = await supabaseAdmin
+        .from('wikilux_content')
+        .update({ content: pc, content_origin: 'sourced', updated_at: now })
+        .eq('id', existing.id)
+      if (updateError) {
+        return NextResponse.json({ success: false, error: updateError.message }, { status: 500 })
+      }
+      destinationId = existing.id
+    } else {
+      const { data: newRow, error: insertError } = await supabaseAdmin
+        .from('wikilux_content')
+        .insert({
+          slug: profileSlug,
+          brand_name: brandName,
+          content: pc, // VERBATIM payload, incl. _provenance
+          content_origin: 'sourced',
+          status: 'approved',
+          is_published: false,
+        })
+        .select('id')
+        .maybeSingle()
+      if (insertError) {
+        return NextResponse.json({ success: false, error: insertError.message }, { status: 500 })
+      }
+      destinationId = newRow?.id || null
+    }
+
+    const { error: queueError } = await supabaseAdmin
+      .from('content_queue')
+      .update({
+        status: 'approved', // approve ≠ publish — nothing went live
+        reviewed_at: now,
+        destination_table: 'wikilux_content',
+        destination_id: destinationId,
+      })
+      .eq('id', params.id)
+    if (queueError) {
+      return NextResponse.json({ success: false, error: queueError.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true, approved: true, published: false, destination_id: destinationId })
+  }
+
   if (record.content_type !== 'signal' && record.content_type !== 'event') {
     const { error } = await supabaseAdmin
       .from('content_queue')
