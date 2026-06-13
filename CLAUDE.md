@@ -61,7 +61,7 @@ No test framework configured. Coolify auto-deploys on push to main (~3 min).
 - `content_origin: 'ai'` required on all LuxAI-generated inserts
 - All content flows through `content_queue` before publish — nothing auto-publishes
 - `generate-insider-voice` route is retired permanently
-- LuxAI generation: Claude Haiku 3.5 only — never Sonnet or Opus
+- LuxAI generation: Claude Haiku 4.5 (claude-haiku-4-5-20251001) only — never Sonnet or Opus (Haiku 3.5 retired Feb 2026)
 - Haiku wraps JSON in markdown backticks — always strip by finding first `{` and last `}`
 - Signals must be based on current-month information only — no outdated content.
 
