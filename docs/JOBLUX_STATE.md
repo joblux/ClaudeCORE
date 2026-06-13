@@ -674,6 +674,12 @@ Internal/admin-only (DB-resident, no candidate Edit surface):
 
 - Do not add cross-surface taxonomy equality-matching (candidate axis vs search_assignments axis) without first introducing the boundary-map (lib/profilux/taxonomy-bridge.ts, planned, not built). THREE representations coexist by design: canonical snake_case (vocabulary.ts), Title-Case UI labels (assignment-options.ts), persisted recruiting shorthand (DB: senior/permanent etc). The map normalizes all three to canonical at READ time only; first axes seniority/department/contract_type; pure functions, explicit tables, null on unmapped, no fuzzy. Build it WITH the auto-matching (computed_by=auto_v1) consumer. No file rename, no DB value migration. Governance f0e9be64; doctrine MATRIX §29.
 
+### LIFTED GOVERNANCE LOCKS (pre-archival)
+
+- Department axis: `department` is a parasitic axis from the old recruiting core, NOT a live ProfiLux primitive — redundant with Business Functions, taxonomically divergent vs assignment Title-Case departments. DB column + resolver/projectFor/types kept INERT (no drop), removed from candidate UI.
+- Availability canonical set (5 values, locked): not_specified / actively_looking / quietly_considering / passively_exploring / not_available. Legacy vocabularies retired; legacy code fallbacks are temporary debt for a later cleanup.
+- URL guard (Pack D canonical, forward): lowercase `http://` or `https://` prefix only, row rejected if invalid, NO normalization.
+
 ### PARKED (admin_tasks status=parked)
 
 - `MS-V1-harden` (ledger ADD proposed 2026-06-04) — Market-salary V1 hardening: per-record required-field validation (salary_min/max/job_title/city/country NOT NULL → 400 at ingestion instead of 500 at approve) + `source_url` format validation. Deferred from V1 (GPT-approved scope cut). Low.
@@ -1069,6 +1075,7 @@ Overview, Members, Intelligence (WikiLux + Insights + Comments + Brief), LuxAI (
 - **Logo** = `joblux-header.png` — never typed as text
 - **Headings:** Playfair Display 400. **Body:** Inter
 - **Signal dots:** green=Growth, amber=Leadership, red=Contraction, blue=Expansion, purple=M&A
+- **Tap-target rule:** NO global 44×44 tap-target selector (it inflated editorial density platform-wide). 44×44 is opt-in only via the `.touch-target` class; default UI keeps declared V12 dimensions.
 
 ### Text contrast rule (hard):
 On dark backgrounds: Headings = `#fff`. Body = `#ccc` minimum. Secondary = `#999` minimum. Hints = `#777` minimum. Banned: `#666` and below on dark bg.
