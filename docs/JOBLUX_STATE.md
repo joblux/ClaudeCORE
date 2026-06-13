@@ -794,6 +794,8 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 
 ## 6. DATABASE STATE (verified Apr 13, 2026; deltas live)
 
+> HISTORICAL SNAPSHOT (Apr 13, 2026) — NOT active operational truth. Counts below predate the corpus reset (wikilux purge, salary unpublish, RSS signals). For live counts, query Supabase. Superseded operationally by the ACTIVE CHAIN ship-records.
+
 | Table | Count | Status |
 |---|---|---|
 | wikilux_content (brands) | 176 live | 175 seeded, Tiffany & Co empty shell |
@@ -1002,12 +1004,12 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 
 ## 13. LUXAI SYSTEM
 
-- Always Claude Haiku 3.5 — never Sonnet or Opus for generation
+- Always Claude Haiku 4.5 (claude-haiku-4-5-20251001) — never Sonnet or Opus for generation. (Haiku 3.5 retired Feb 2026.)
 - Haiku wraps JSON in markdown backticks — always strip by finding first `{` and last `}`
 - All generation endpoints write `content_origin: 'ai'`
 - Command Center at `/admin/luxai`
 - Content Queue at `/admin/content-queue` (single editorial gate)
-- RSS pipeline: RSS ingest → brand-list filter → LuxAI structures → confidence gate → auto-approve
+- RSS pipeline: RSS ingest → brand-list filter → LuxAI structures → confidence gate → content_queue (status='approved', NOT published). Approve != publish — no public publish without explicit Mo gate.
 - Known issue: headline-similarity dedup needed on RSS route
 
 ---
@@ -1087,6 +1089,8 @@ All tabbed pages use `?tab=` query params. Brands: 5 tabs (~760 sitemap URLs).
 
 ## 19. LAUNCH BLOCKERS (as of Apr 10 audit)
 
+> HISTORICAL SNAPSHOT (Apr 10, 2026) — pre-reset launch state. NOT active truth. Reflects 176-brand / 5,609-salary / 11-signal era. Retained as audit trail only.
+
 | Priority | Issue | Impact |
 |---|---|---|
 | 🔴 1 | Article detail pages all 404 | /insights broken |
@@ -1102,6 +1106,8 @@ All tabbed pages use `?tab=` query params. Brands: 5 tabs (~760 sitemap URLs).
 ---
 
 ## 20. WHAT IS LAUNCHABLE TODAY
+
+> HISTORICAL SNAPSHOT (Apr 2026) — mirrors stale §6 counts. NOT active truth. Retained as audit trail only.
 
 ✅ Browse 176 brand dossiers
 ✅ Read 11 real market signals + detail pages
