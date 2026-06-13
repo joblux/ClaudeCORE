@@ -59,6 +59,42 @@ Engine flow: Sources → extraction → CONSTRAINED REASONING → user-readable 
 
 Enforced: §218 AI-forbidden-family approve guard (@fa2d8bc); provenance lock 378f9c4b. §218 is not to be narrowed.
 
+## LUXAI / SIGNALS / WIKILUX — LOCKED DOCTRINE (lifted from ship-log, Mo+GPT)
+
+Operational doctrine for the LuxAI / Signals / WikiLux lane. The living counterpart to the ProfiLux DO NOT block. Lifted from ship-log records so it survives ship-log archival. Subordinate to the Provenance Doctrine and Source-Grounded Reasoning clauses above; where those conflict, they win.
+
+### Source pyramid (locked)
+- L1 Wikidata / Wikipedia = baseline, NOT product.
+- L2 institutional (annual reports, heritage pages).
+- L3 sector press (Signals V1 approved list).
+- L4 JOBLUX proprietary (careers / hiring_intelligence / salary) = the differentiation Wikipedia will never have; the still-empty sections are the goal, not a gap.
+- A mono-source (L1-only) fiche is technical proof, not a publishable JOBLUX-grade fiche.
+
+### Signals — two-call architecture (locked, lab-validated)
+- Pipeline: Triage (brand-scoped) -> Subject Extraction (brand-NEUTRAL call) -> mechanical tag rule -> content_queue.
+- Subject extraction MUST be a separate brand-neutral call; brand-scoped wording structurally anchors and cannot be fixed from inside the triage prompt.
+- subject_brands (who the story is about) is stored DISTINCTLY from computed_tags (what is inside the pilot perimeter).
+- UNTAGGED is a normal, explicable state (industry-level / group-level / off-pilot maison), NOT an error.
+- Extraction failure is NON-BLOCKING: admit untagged + extraction_failed. No `brand_tags:[d.brand]` fallback (that path is dead repo-wide).
+
+### Signals — publication doctrine (locked Mo+GPT)
+- Signal headline = JOBLUX-written, NEVER the source title.
+- NO public source attribution: JOBLUX signs the intelligence; provenance stays internal. Source-link display = decided NO.
+- Thin-source content is reviewable but NEVER publishable.
+- Tags = the truth of the story (maison-only doctrine); never the discovery query's brand.
+
+### Triage / admission gates (locked)
+- Triage shape = single-call full-corpus, LOCKED.
+- Admission window = 30 days.
+- MIN_BRAND_RELEVANCE = 0.7 mechanical gate between model filter and freshness window; missing/non-numeric score is rejected (precision over recall). skipped_low_relevance counter stays separate from model not_recommended.
+
+### Safety posture (locked)
+- luxai_sweep_runs is reporting-only (no FK guard); never a write/coupling surface.
+- AUTO_PUBLISH_SIGNALS flag is OFF by default (kill-switch); nothing in this lane auto-publishes.
+
+### Workflow rule
+- Use Code as a REASONER proactively on doubts / obstacles / repeated failures. Closed problem = recipe prompt; open problem = mission prompt (context + candidate hypotheses + success criteria + guardrails).
+
 ## Session start command
 "Read docs/JOBLUX_STATE.md. Ignore conflicting stale sources."
 
