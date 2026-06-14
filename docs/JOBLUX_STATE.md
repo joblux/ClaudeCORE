@@ -498,6 +498,8 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 
 > HISTORICAL SNAPSHOT (Apr 13, 2026) — NOT active operational truth. Counts below predate the corpus reset (wikilux purge, salary unpublish, RSS signals). For live counts, query Supabase. Superseded operationally by the ACTIVE CHAIN ship-records.
 
+> LIVE COUNTS (verified 2026-06-14 via Supabase read-only): WikiLux 74 total / 1 published; Signals 150 total / 10 published; Events 19 total / 0 published; Salary 5,697 total / 0 published; Articles 38 total; Queue 239; Members 12; Interviews 0; Assignments 26. Counts change over time; query Supabase for current truth.
+
 | Table | Count | Status |
 |---|---|---|
 | wikilux_content (brands) | 176 live | 175 seeded, Tiffany & Co empty shell |
