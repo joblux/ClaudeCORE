@@ -551,6 +551,9 @@ Confidential careers intelligence gateway for the luxury industry. Not a job boa
 ## 7. CONTENT DOCTRINE
 
 ### What's clean:
+
+> HISTORICAL SNAPSHOT (Apr 2026) — the "What's clean" and "What's NOT clean" counts below (signals 11, brands 176, salary 5,609, etc.) predate the corpus reset and are NOT active operational truth. For live counts, query Supabase. The "Hard rules" subsection below this block IS active doctrine.
+
 - **Signals** ✅ — 11 real RSS-sourced, all with source_url
 - **Articles** ✅ — 25 seed articles (7 AI unpublished)
 - **Events** ✅ — 9 live (18 AI unpublished)
